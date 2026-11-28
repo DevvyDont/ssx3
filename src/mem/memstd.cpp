@@ -3097,9 +3097,9 @@ INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_delete1);
 /**
  * Frees @p self through the movie free hook (RCMP_rcmp_sys.FreeMemFunc); the video driver's operator delete.
  */
-extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_delete1(void* self)
+void SSX_VD_PS2_SINGLE_BUFFERD::operator_delete1()
 {
-    RCMP_rcmp_sys.FreeMemFunc(self);
+    RCMP_rcmp_sys.FreeMemFunc(this);
 }
 #endif
 //100%
@@ -3108,9 +3108,9 @@ INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_delete_array1);
 /**
  * Frees @p self through the movie free hook (RCMP_rcmp_sys.FreeMemFunc); the video driver's array operator delete.
  */
-extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_operator_delete_array1(void* self)
+void SSX_VD_PS2_SINGLE_BUFFERD::operator_delete_array1()
 {
-    RCMP_rcmp_sys.FreeMemFunc(self);
+    RCMP_rcmp_sys.FreeMemFunc(this);
 }
 #endif
 //100%
@@ -3122,7 +3122,8 @@ INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_new);
  * @param value  the place to construct at
  * @return @p value
  */
-extern "C" int SSX_VD_PS2_SINGLE_BUFFERD_operator_new(void* self, int value) {
+int SSX_VD_PS2_SINGLE_BUFFERD::operator_new(int value)
+{
     return value;
 }
 #endif
@@ -3145,7 +3146,8 @@ INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array);
  * @param value  the place to construct at
  * @return @p value
  */
-extern "C" int SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array(void* self, int value) {
+int SSX_VD_PS2_SINGLE_BUFFERD::operator_new_array(int value)
+{
     return value;
 }
 #endif

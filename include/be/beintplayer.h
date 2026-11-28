@@ -98,6 +98,15 @@ struct cBENewPlayerInterface : public cBEInterface {
     // keeps the vtable out of the units defining the other overrides
     virtual void submit() __asm__("cBENewPlayerInterface_submit");
     virtual void discard() __asm__("cBENewPlayerInterface_discard");
+    void setRiderName(int index, const char* name) __asm__("cBENewPlayerInterface_setRiderName");
+    char* getRiderName(int idx) __asm__("cBENewPlayerInterface_getRiderName");
+    void* getRiderMessages(int index) __asm__("cBENewPlayerInterface_getRiderMessages");
+    bool getMessageGroupFlag(int index, int bit) __asm__("cBENewPlayerInterface_getMessageGroupFlag");
+    void setMessageGroupFlag(int index, int bit, int on) __asm__("cBENewPlayerInterface_setMessageGroupFlag");
+    int getNumPeakRaceMedals(int index, int slot) __asm__("cBENewPlayerInterface_getNumPeakRaceMedals");
+    int getNumPeakFreestyleMedals(int index, int slot) __asm__("cBENewPlayerInterface_getNumPeakFreestyleMedals");
+    void recordDifficultyWin(int which) __asm__("cBENewPlayerInterface_recordDifficultyWin");
+    void recordDifficultyLoss(int which) __asm__("cBENewPlayerInterface_recordDifficultyLoss");
 };
 
 extern cBENewPlayerInterface* cBENewPlayerInterface_instance;

@@ -96,6 +96,7 @@ struct cScriptPlayerEntity {
     int GetDataSize() __asm__("cScriptPlayerEntity_GetDataSize");
     unsigned char GetType() __asm__("cScriptPlayerEntity_GetType__FPv");
     int DoFrameUpdate(float currFrameNum, float dt) __asm__("cScriptPlayerEntity_DoFrameUpdate");
+    int getVariationLength() __asm__("cScriptPlayerEntity_getVariationLength");
 };
 
 CHECK_OFFSET(tInSeqScriptEntityBlockHeader, blockSize, 0x0);

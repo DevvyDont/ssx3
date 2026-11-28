@@ -346,11 +346,11 @@ extern "C" void cBECharProfileDB_resetRelations(void* p, int i);
  * cBECharProfileDB_resetRelations is the part of cBECharProfileDB_init that sets a character kind's defaults. The network interface calls
  * this when it resets a player's profile.
  */
-extern "C" void cBEProfileLib_resetAllRelations(cBEProfileLib* self)
+void cBEProfileLib::resetAllRelations()
 {
     int i;
     for (i = 0; i < 10; i++) {
-        cBECharProfileDB_resetRelations(&self->charProfile[i], i);
+        cBECharProfileDB_resetRelations(&charProfile[i], i);
     }
 }
 #endif

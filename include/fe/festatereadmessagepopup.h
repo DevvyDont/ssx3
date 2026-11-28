@@ -47,6 +47,9 @@ struct tFEPrivateMessageVector {
                                     //     the destructor pops and deletes from it
     cPrivateMessage** mpEndOfStorage; // 0xC [R] 0; [U] cFEStateReadMessagePopup_addMessage compares mpFinish with it; the dtor frees
                                     //     [mpStart, mpEndOfStorage)
+
+    // Methods bound to their retail symbols by asm labels.
+    void insertAux(cPrivateMessage** pos, cPrivateMessage* const& x) __asm__("tFEPrivateMessageVector_insertAux");
 };
 
 CHECK_OFFSET(tFEPrivateMessageVector, unk_00, 0x0);
@@ -100,6 +103,11 @@ struct cFEStateReadMessagePopup : public cFEStateNet {
     virtual void onUpdate() __asm__("cFEStateReadMessagePopup_onUpdate__FPv");
     virtual void onWidgetCreate(cUIThing*) __asm__("cFEStateReadMessagePopup_onWidgetCreate__FPv");
     virtual bool onGainTransition(int) __asm__("cFEStateReadMessagePopup_onGainTransition");
+    void* onNetEvent(int msg) __asm__("cFEStateReadMessagePopup_onNetEvent");
+    void addMessage(void* item) __asm__("cFEStateReadMessagePopup_addMessage");
+    void addOwnReply(const char* name) __asm__("cFEStateReadMessagePopup_addOwnReply");
+    void collectSenderMessages() __asm__("cFEStateReadMessagePopup_collectSenderMessages");
+    void redrawConversation() __asm__("cFEStateReadMessagePopup_redrawConversation");
 };
 
 CHECK_OFFSET(cFEStateReadMessagePopup, mszSender, 0x6D0);

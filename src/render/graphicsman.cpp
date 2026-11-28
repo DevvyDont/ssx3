@@ -654,7 +654,7 @@ INCLUDE_ASM("render/graphicsman", cPS2GraphicsMan_writeImageUpload16x16);
  * @param pp  in/out: the packet write pointer
  */
 // PORT: ulong is 64-bit here (GIF/DMA packet words); cQuad128 is a 128-bit GPR quadword.
-extern "C" void cPS2GraphicsMan_writeImageUpload16x16(void* self, int x, int y, char** pp)
+void cPS2GraphicsMan::writeImageUpload16x16(int x, int y, char** pp)
 {
     *(cQuad128*)(*pp + 0x00) = 0x10000006;
     *(ulong*)(*pp + 0x10) = ((ulong)0x10000000 << 32) | 4;
@@ -714,9 +714,9 @@ struct sGmOwner_ABA0 {
  *
  * @param idx  the view index
  */
-extern "C" void cPS2GraphicsMan_copyDepthFog(void* self, int idx)
+void cPS2GraphicsMan::copyDepthFog(int idx)
 {
-    char* entry = (char*)&((sGmOwner_ABA0*)self)->entries[idx];
+    char* entry = (char*)&((sGmOwner_ABA0*)this)->entries[idx];
     *(float*)(entry + 0x0) = cDepthFog_m_NearPlane;
     *(float*)(entry + 0x4) = cDepthFog_m_FarPlane;
     *(int*)(entry + 0x8) = cDepthFog_m_Exponent;
@@ -774,38 +774,38 @@ struct sGmOwner_AC00 {
  * @param pkt2  passed to cTextureMan_appendFixedPacketRef
  * @param handle  in/out: the DMA ring's current main-memory address
  */
-extern "C" void cPS2GraphicsMan_queueDepthFogPass(cPS2GraphicsMan* self, int idx, void* pkt2, int* handle)
+void cPS2GraphicsMan::queueDepthFogPass(int idx, void* pkt2, int* handle)
 {
     if (cDepthFog_m_Enable == 0) {
         return;
     }
     if (cDepthFog_m_OverrideWP != 0) {
-        cPS2GraphicsMan_copyDepthFog(((char*)self), idx);
+        cPS2GraphicsMan_copyDepthFog(((char*)this), idx);
     }
-    sGmEntry_AC00* fogEntry = &((sGmOwner_AC00*)self)->entries[idx];
+    sGmEntry_AC00* fogEntry = &((sGmOwner_AC00*)this)->entries[idx];
     if (fogEntry->w == 0.0f && fogEntry->z != 0) {
         return;
     }
     char* mat = D_00507B80 + (idx << 10);
-    func_0036A428(((char*)self), mat, idx);
+    func_0036A428(((char*)this), mat, idx);
     void* dma = D_004A4474;
     char* pkt = cPS2ScratchPad_claimBuffer(dma, *handle, -1, 0);
-    int slot = vramHeap_allocBlock(self->mTexMan->mMainHeap, 0x400, 0x7FFFFFFF, 0, 0, 1);
-    int* rec = (int*)(*(char**)((char*)self->mTexMan + 0x3F50) + slot * 0x1C);
+    int slot = vramHeap_allocBlock(mTexMan->mMainHeap, 0x400, 0x7FFFFFFF, 0, 0, 1);
+    int* rec = (int*)(*(char**)((char*)mTexMan + 0x3F50) + slot * 0x1C);
     // PORT: the packet builder takes the matrix block's address as an int.
-    cPS2GraphicsMan_writeImageUpload16x16(((char*)self), (int)mat, *rec >> 8, &pkt);
+    cPS2GraphicsMan_writeImageUpload16x16(((char*)this), (int)mat, *rec >> 8, &pkt);
     *handle = cPS2ScratchPad_flushBufferTo(dma, pkt, 4);
     pkt = cPS2ScratchPad_claimBuffer(dma, *handle, -1, 0);
-    int zBufPage = self->mCurrentZBufferPage;
-    int frameBufPage = self->mCurrentFrameBufferPage;
-    int n = self->GetScreenHeight();
-    cPS2GraphicsMan_writeZToFrameCopy(self, idx, zBufPage, frameBufPage, n * 2, &pkt);
+    int zBufPage = mCurrentZBufferPage;
+    int frameBufPage = mCurrentFrameBufferPage;
+    int n = GetScreenHeight();
+    writeZToFrameCopy(idx, zBufPage, frameBufPage, n * 2, &pkt);
     *handle = cPS2ScratchPad_flushBufferTo(dma, pkt, 4);
     pkt = cPS2ScratchPad_claimBuffer(dma, *handle, -1, 0);
-    func_0036B158(((char*)self), idx, *rec >> 8, &pkt);
+    func_0036B158(((char*)this), idx, *rec >> 8, &pkt);
     *handle = cPS2ScratchPad_flushBufferTo(dma, pkt, 4);
-    vramHeap_freeBlock(self->mTexMan->mMainHeap, slot);
-    cTextureMan_appendFixedPacketRef((char*)self->mTexMan, pkt2);
+    vramHeap_freeBlock(mTexMan->mMainHeap, slot);
+    cTextureMan_appendFixedPacketRef((char*)mTexMan, pkt2);
 }
 #endif
 
@@ -838,27 +838,26 @@ static inline unsigned int gmCall_AE20(char* vvself, int slot)
  * it draws one sprite per 16 pixels: texels [16k, 16k + 8) to x [16k + 8, 16k + 16), @p n rows tall. @p idx is unused.
  * Caller: cPS2GraphicsMan_queueDepthFogPass.
  *
- * @param vself  the graphics manager (cPS2GraphicsMan)
  * @param idx  the view index (unused)
  * @param texBase  the Z buffer page read as the texture
  * @param frameBase  the frame buffer page drawn into
  * @param n  the strip height in rows
  * @param pp  in/out: the packet write pointer
  */
-extern "C" void cPS2GraphicsMan_writeZToFrameCopy(cPS2GraphicsMan* vself, int idx, int texBase, int frameBase, int n, char** pp)
+void cPS2GraphicsMan::writeZToFrameCopy(int idx, int texBase, int frameBase, int n, char** pp)
 {
     unsigned int full = 0x1000;
-    int w = vself->mFBWidth;
-    int height = vself->mFBHeight;
-    int offX = ((full - gmCall_AE20(((char*)vself), 10)) >> 1) << 4;
-    int offY = ((full - gmCall_AE20(((char*)vself), 11)) >> 1) << 4;
+    int w = mFBWidth;
+    int height = mFBHeight;
+    int offX = ((full - gmCall_AE20(((char*)this), 10)) >> 1) << 4;
+    int offY = ((full - gmCall_AE20(((char*)this), 11)) >> 1) << 4;
     int cols = w / 8;
-    int zbp = vself->mCurrentZBufferPage;
+    int zbp = mCurrentZBufferPage;
     ulong* packet = (ulong*)*pp;
     packet += 2;
     packet[0] = (cols * 2 + 11) | ((ulong)0x8000 << 45);
     packet[1] = 0xE;
-    unsigned int fbw = gmCall_AE20(((char*)vself), 10) >> 6;
+    unsigned int fbw = gmCall_AE20(((char*)this), 10) >> 6;
     packet[2] = frameBase | ((ulong)fbw << 16) | ((ulong)0x3FFF0200 << 16);
     packet[3] = 76;
     packet[4] = (ulong)(unsigned int)(zbp | 0x1000000) | ((ulong)0x8000 << 17);
@@ -875,7 +874,7 @@ extern "C" void cPS2GraphicsMan_writeZToFrameCopy(cPS2GraphicsMan* vself, int id
     packet[15] = 59;
     packet[16] = 0;
     packet[17] = 20;
-    unsigned int tbw = gmCall_AE20(((char*)vself), 10) >> 6;
+    unsigned int tbw = gmCall_AE20(((char*)this), 10) >> 6;
     packet[18] = (texBase << 5) | ((ulong)tbw << 14) | ((ulong)60082 << 20);
     packet[19] = 6;
     packet[20] = 278;
@@ -1060,8 +1059,8 @@ INCLUDE_ASM("render/graphicsman", cPS2GraphicsMan_queueOffsetBlur);
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
 // Multi-pass offset blur: draws the source region `passes` times as column sprites, each pass
 // shifted diagonally by +-off texels, with the vertex colour scaled by intensity / passes.
-extern "C" void cPS2GraphicsMan_queueOffsetBlur(cPS2GraphicsMan* vself, int tbp, int tw, int srcU, int srcV, int uw, int vh, int fbp,
-                              float intensity, int w, int height, int off, int passes, int* handle)
+void cPS2GraphicsMan::queueOffsetBlur(int tbp, int tw, int srcU, int srcV, int uw, int vh, int fbp, float intensity,
+                                      int w, int height, int off, int passes, int* handle)
 {
     int uStart = (srcU << 4) + 8 + off;
     int du = ((srcU + uw) << 4) + 8 - off - uStart;
@@ -1069,7 +1068,7 @@ extern "C" void cPS2GraphicsMan_queueOffsetBlur(cPS2GraphicsMan* vself, int tbp,
     int vEnd = ((srcV + vh) << 4) + 8 - off;
     int cols = w / 32;
     void* dma = D_004A4474;
-    int zbp = vself->mCurrentZBufferPage;
+    int zbp = mCurrentZBufferPage;
     int w16 = w << 4;
     int x0;
     int x1;
@@ -1209,6 +1208,8 @@ extern "C" void cPS2GraphicsMan_queueOffsetBlur(cPS2GraphicsMan* vself, int tbp,
 //100%
 INCLUDE_ASM("render/graphicsman", cPS2GraphicsMan_queueGreySubtract);
 #ifdef SKIP_ASM
+extern "C" void cPS2GraphicsMan_queueGreySubtract(void* self, int x, int w, int y, int grey, int alpha, int* handle);
+
 /**
  * Queues a GS pass that subtracts a grey level from a frame-buffer area and scales the rest: (Cd - grey) * @p alpha /
  * 128.
@@ -1227,7 +1228,7 @@ INCLUDE_ASM("render/graphicsman", cPS2GraphicsMan_queueGreySubtract);
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
-extern "C" void cPS2GraphicsMan_queueGreySubtract(void* self, int x, int w, int y, int grey, int alpha, int* handle)
+void cPS2GraphicsMan::queueGreySubtract(int x, int w, int y, int grey, int alpha, int* handle)
 {
     int cols = w / 32;
     int step = (w / cols) << 4;
@@ -1295,13 +1296,13 @@ INCLUDE_ASM("render/graphicsman", cPS2GraphicsMan_queueTextureAdd);
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
-extern "C" void cPS2GraphicsMan_queueTextureAdd(cPS2GraphicsMan* vself, int tbp, int tw, int th, int fbp, int x, int y, int w, int height,
-                              int grey, int alpha, int* handle)
+void cPS2GraphicsMan::queueTextureAdd(int tbp, int tw, int th, int fbp, int x, int y, int w, int height, int grey,
+                                      int alpha, int* handle)
 {
     int cols = w / 32;
     int step = (tw / cols) << 4;
     void* dma = D_004A4474;
-    int zbp = vself->mCurrentZBufferPage;
+    int zbp = mCurrentZBufferPage;
     ulong* gsPacket = (ulong*)cPS2ScratchPad_claimBuffer(dma, *handle, -1, 0);
     gsPacket[0] = (cols * 4 + 13) | 0x10000000;
     gsPacket[1] = 0;
@@ -1310,8 +1311,8 @@ extern "C" void cPS2GraphicsMan_queueTextureAdd(cPS2GraphicsMan* vself, int tbp,
     gsPacket[1] = 0xE;
     ulong fr = fbp >> 5;
     ulong* frameWord = gsPacket + 2;
-    if (gmCall_AE20(((char*)vself), 10) >> 6) {
-        fr = fr | ((ulong)(gmCall_AE20(((char*)vself), 10) >> 6) << 16) | 0xFF00000001000000;
+    if (gmCall_AE20(((char*)this), 10) >> 6) {
+        fr = fr | ((ulong)(gmCall_AE20(((char*)this), 10) >> 6) << 16) | 0xFF00000001000000;
     } else {
         fr = fr | 0xFF00000001010000;
     }
@@ -1379,6 +1380,8 @@ struct sGmEntry_C740 {
 };
 
 
+extern "C" void cPS2GraphicsMan_copyLightGlow(void* self, int idx);
+
 /**
  * Copies the seven cLightGlow PS2 tweak values into the graphics manager's glow entry for view @p idx.
  *
@@ -1388,9 +1391,9 @@ struct sGmEntry_C740 {
  *
  * @param idx  the view index
  */
-extern "C" void cPS2GraphicsMan_copyLightGlow(void* self, int idx)
+void cPS2GraphicsMan::copyLightGlow(int idx)
 {
-    char* entry = (char*)&((sGmEntry_C740*)&((cPS2GraphicsMan*)self)->unk_6CD4[0][0])[idx];
+    char* entry = (char*)&((sGmEntry_C740*)&((cPS2GraphicsMan*)this)->unk_6CD4[0][0])[idx];
     *(float*)(entry + 0x0) = cLightGlow_m_PS2MinIntensity;
     *(float*)(entry + 0x4) = cLightGlow_m_PS2ModIntensity;
     *(float*)(entry + 0x8) = cLightGlow_m_PS2CopyIntensity;
@@ -1452,15 +1455,15 @@ struct sGmViews_C790 {
  * @param handle  in/out: the DMA ring's current main-memory address
  */
 // PORT: ulong is 64-bit here (GIF packet words); the packet is written through the uncached mirror.
-extern "C" void cPS2GraphicsMan_queueLightGlowPass(cPS2GraphicsMan* vself, int idx, void* pkt2, int* handle)
+void cPS2GraphicsMan::queueLightGlowPass(int idx, void* pkt2, int* handle)
 {
     if (cLightGlow_m_Enable == 0) {
         return;
     }
     if (cLightGlow_m_OverrideWP != 0) {
-        cPS2GraphicsMan_copyLightGlow(((char*)vself), idx);
+        cPS2GraphicsMan_copyLightGlow(((char*)this), idx);
     }
-    sGmBloom_C790* glowParams = (sGmBloom_C790*)(&vself->unk_6CD4[0]) + idx;
+    sGmBloom_C790* glowParams = (sGmBloom_C790*)(&unk_6CD4[0]) + idx;
     int alpha[4] = {
         (int)(cLightGlow_m_PS2IntensityTex0 * 127.5f),
         (int)(cLightGlow_m_PS2IntensityTex1 * 127.5f),
@@ -1470,7 +1473,7 @@ extern "C" void cPS2GraphicsMan_queueLightGlowPass(cPS2GraphicsMan* vself, int i
     if (alpha[3] == 0 && alpha[2] == 0 && alpha[1] == 0 && alpha[0] == 0) {
         return;
     }
-    int buf0 = vself->mCurrentZBufferPage << 5;
+    int buf0 = mCurrentZBufferPage << 5;
     int bufs[2];
     bufs[0] = buf0;
     bufs[1] = buf0 + 0x400;
@@ -1478,18 +1481,20 @@ extern "C" void cPS2GraphicsMan_queueLightGlowPass(cPS2GraphicsMan* vself, int i
     int src = buf0;
     int th = 1 << cLightGlow_m_PS2CaptureSize;
     int tw = th;
-    int x0 = ((sGmViews_C790*)vself)->views[idx].x;
-    int y0 = ((sGmViews_C790*)vself)->views[idx].y;
-    int w = ((sGmViews_C790*)vself)->views[idx].w;
-    int drawFbp = vself->mCurrentFrameBufferPage;
-    int viewHeight = ((sGmViews_C790*)vself)->views[idx].h;
-    int width = gmCall_AE20(((char*)vself), 10);
+    int x0 = ((sGmViews_C790*)this)->views[idx].x;
+    int y0 = ((sGmViews_C790*)this)->views[idx].y;
+    int w = ((sGmViews_C790*)this)->views[idx].w;
+    int drawFbp = mCurrentFrameBufferPage;
+    int viewHeight = ((sGmViews_C790*)this)->views[idx].h;
+    int width = gmCall_AE20(((char*)this), 10);
     int fbp32 = drawFbp << 5;
-    cPS2GraphicsMan_queueOffsetBlur(vself, fbp32, width, x0, y0, w, viewHeight, src, glowParams->v[3] * 127.5f, tw, th, 0, 1, handle);
-    cPS2GraphicsMan_queueGreySubtract(((char*)vself), src, tw, th, (int)(glowParams->v[0] * 127.5f), (int)(cLightGlow_m_PS2ModIntensity * 127.5f), handle);
+    queueOffsetBlur(fbp32, width, x0, y0, w, viewHeight, src, glowParams->v[3] * 127.5f, tw, th, 0, 1, handle);
+    cPS2GraphicsMan_queueGreySubtract(((char*)this), src, tw, th, (int)(glowParams->v[0] * 127.5f),
+                                      (int)(cLightGlow_m_PS2ModIntensity * 127.5f), handle);
     for (int i = 0; i < 3; i++) {
         if (alpha[i] != 0) {
-            cPS2GraphicsMan_queueTextureAdd(vself, src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[i], (int)(glowParams->v[4] * 127.5f), handle);
+            queueTextureAdd(src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[i], (int)(glowParams->v[4] * 127.5f),
+                            handle);
         }
         int psrc = src;
         int pw = tw;
@@ -1497,26 +1502,26 @@ extern "C" void cPS2GraphicsMan_queueLightGlowPass(cPS2GraphicsMan* vself, int i
         src = bufs[(i + 1) & 1];
         tw >>= 1;
         th >>= 1;
-        cPS2GraphicsMan_queueOffsetBlur(vself, psrc, pw, 0, 0, pw, ph, src, glowParams->v[2] * 127.5f, tw, th, offset, 4, handle);
+        queueOffsetBlur(psrc, pw, 0, 0, pw, ph, src, glowParams->v[2] * 127.5f, tw, th, offset, 4, handle);
     }
     if (alpha[3] != 0) {
-        cPS2GraphicsMan_queueTextureAdd(vself, src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[3], (int)(glowParams->v[4] * 127.5f), handle);
+        queueTextureAdd(src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[3], (int)(glowParams->v[4] * 127.5f), handle);
     }
     ulong* gsPacket = (ulong*)(*handle | 0x30000000);
     unsigned int full = 0x1000;
-    int offX = ((full - gmCall_AE20(((char*)vself), 10)) >> 1) << 4;
-    int offY = ((full - gmCall_AE20(((char*)vself), 11)) >> 1) << 4;
+    int offX = ((full - gmCall_AE20(((char*)this), 10)) >> 1) << 4;
+    int offY = ((full - gmCall_AE20(((char*)this), 11)) >> 1) << 4;
     gsPacket[0] = 0x10000003;
     gsPacket[1] = 0;
     gsPacket[2] = 0x1000000000008002;
     gsPacket[3] = 0xE;
-    gsPacket[4] = drawFbp | ((ulong)(gmCall_AE20(((char*)vself), 10) >> 6) << 16);
+    gsPacket[4] = drawFbp | ((ulong)(gmCall_AE20(((char*)this), 10) >> 6) << 16);
     gsPacket[5] = 76;
     gsPacket[6] = offX | ((ulong)offY << 32);
     gsPacket[7] = 0x18;
     gsPacket += 8;
     *handle = (int)gsPacket & 0x0FFFFFFF;
-    cTextureMan_appendFixedPacketRef((char*)vself->mTexMan, pkt2);
+    cTextureMan_appendFixedPacketRef((char*)mTexMan, pkt2);
 }
 #endif
 

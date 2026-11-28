@@ -1451,7 +1451,7 @@ extern "C" void* cCrowdMan2d_cCrowdMan2d(cCrowdMan2d* self)
     D_00536690_229180[0].f4 = -1;
     D_00536690_229180[0].f8 = 0;
     D_00536690_229180[0].f6 = -1;
-    cCrowdMan2d_resetSlots(self);
+    self->resetSlots();
     return (self);
 }
 #endif
@@ -1474,7 +1474,7 @@ void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
  */
 extern "C" void cCrowdMan2d__cCrowdMan2d(cCrowdMan2d* self, int flags)
 {
-    cCrowdMan2d_releaseAllQuads(self);
+    self->releaseAllQuads();
     int* crowdAnim = (int*)self->mpAnim;
     TheCrowdMan2d = 0;
     operator_delete(crowdAnim);
@@ -1503,9 +1503,9 @@ unsigned int BXrand();
  * 0xFFFFFFFF and every slot's delay (+0x30) to 300 + BXrand() % 300; clears the marker ring index (+0x2214) and its 40
  * entries (+0x2220, 1280 bytes).
  */
-extern "C" void cCrowdMan2d_resetSlots(cCrowdMan2d* self)
+void cCrowdMan2d::resetSlots()
 {
-    cCrowdMan2d* crowd = self;
+    cCrowdMan2d* crowd = this;
     int i;
     crowd->mCheerLevel = 0;
     MEM_fill(((&crowd->mQuad[0])), 0, 0x2000);
@@ -1528,13 +1528,13 @@ extern "C" void cCrowdMan2d_freeQuad(cCrowdMan2d* self, int a1);
  * Releases every used quad slot of the 2D crowd manager (each resource id at +0x8 other than 0xFFFFFFFF) with
  * cCrowdMan2d_freeQuad.
  */
-extern "C" void cCrowdMan2d_releaseAllQuads(cCrowdMan2d* self)
+void cCrowdMan2d::releaseAllQuads()
 {
     int i;
     for (i = 0; i < 0x80; i++) {
-        unsigned* slotId = (unsigned*)(&self->mQuadId[0]) + i;
+        unsigned* slotId = (unsigned*)(&mQuadId[0]) + i;
         if (*slotId != cCrowdMan2d::kFreeQuad) {
-            cCrowdMan2d_freeQuad(self, i);
+            freeQuad(i);
         }
     }
 }
@@ -1553,13 +1553,13 @@ extern "C" void cCrowdMan2d_freeQuad(cCrowdMan2d* self, int a1);
  *
  * @param id  the world section id
  */
-extern "C" void cCrowdMan2d_releaseSectionQuads(cCrowdMan2d* self, int id)
+void cCrowdMan2d::releaseSectionQuads(int id)
 {
     int i;
     for (i = 0; i < 0x80; i++) {
-        unsigned* slotId = (unsigned*)(&self->mQuadId[0]) + i;
+        unsigned* slotId = (unsigned*)(&mQuadId[0]) + i;
         if (*slotId != cCrowdMan2d::kFreeQuad && *(unsigned char*)slotId == id) {
-            cCrowdMan2d_freeQuad(self, i);
+            freeQuad(i);
         }
     }
 }
@@ -1576,10 +1576,10 @@ extern "C" void cCrowdMan2d_resetSlots(cCrowdMan2d* self);
  *
  * cGame_partialRestart calls it.
  */
-extern "C" void cCrowdMan2d_restart(cCrowdMan2d* self)
+void cCrowdMan2d::restart()
 {
-    cCrowdMan2d_releaseAllQuads(self);
-    cCrowdMan2d_resetSlots(self);
+    releaseAllQuads();
+    resetSlots();
 }
 #endif
 
@@ -1598,22 +1598,22 @@ extern short D_00536690[];
  * short of D_00536690; counts down each live marker of the 40-entry ring (+0x2230 in each 0x20-byte entry); then calls
  * cCrowdMan2d_spawnMarkers. cGame_update calls it.
  */
-extern "C" void cCrowdMan2d_update(cCrowdMan2d* self)
+void cCrowdMan2d::update()
 {
     int i;
     char* marker;
     int frameTexId;
-    cCrowdAnim2D_update(self->mpAnim);
-    frameTexId = *(int*)((char*)self->mpAnim + 0x10);
+    cCrowdAnim2D_update(mpAnim);
+    frameTexId = *(int*)((char*)mpAnim + 0x10);
     D_00536690[0] = frameTexId;
-    marker = (char*)self;
+    marker = (char*)this;
     for (i = 39; i >= 0; i--) {
         if (*(int*)(marker + 0x2230) > 0) {
             *(int*)(marker + 0x2230) = *(int*)(marker + 0x2230) - 1;
         }
         marker += 0x20;
     }
-    cCrowdMan2d_spawnMarkers(self);
+    spawnMarkers();
 }
 #endif
 
@@ -1697,11 +1697,10 @@ static inline float rands_229530(float lo, float hi)
  * slot's centre (+0x0) plus its two half-axes (+0x10, +0x20) each scaled by a random value in [-1, 1), and the delay
  * restarts at 300 + BXrand() % 300.
  *
- * @param selfp  the 2D crowd manager
  */
-extern "C" void cCrowdMan2d_spawnMarkers(cCrowdMan2d* selfp)
+void cCrowdMan2d::spawnMarkers()
 {
-    sCrowd_229530* self = (sCrowd_229530*)selfp;
+    sCrowd_229530* self = (sCrowd_229530*)this;
     int n = cCrowdSys_GetCurrentCheer(gSSXAudio, 0);
     n = n > -1 ? n : -n;
     if (n != self->count) {
@@ -1776,12 +1775,12 @@ extern "C" void cCrowdMan2d_placeQuad(void* self, int slot, int a1);
  *
  * @param resourceId  the world resource id of the crowd model
  */
-extern "C" void cCrowdMan2d_addQuad(cCrowdMan2d* self, int resourceId)
+void cCrowdMan2d::addQuad(int resourceId)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
-        if (((unsigned int*)(&self->mQuadId[0]))[i] == cCrowdMan2d::kFreeQuad) {
-            cCrowdMan2d_placeQuad(self, i, resourceId);
+        if (((unsigned int*)(&mQuadId[0]))[i] == cCrowdMan2d::kFreeQuad) {
+            cCrowdMan2d_placeQuad(this, i, resourceId);
             break;
         }
     }
@@ -1800,12 +1799,12 @@ extern "C" void cCrowdMan2d_freeQuad(cCrowdMan2d* self, int a1);
  *
  * @param val  the world resource id
  */
-extern "C" void cCrowdMan2d_removeQuad(cCrowdMan2d* self, int val)
+void cCrowdMan2d::removeQuad(int val)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
-        if (((int*)self)[i + 2] == val) {
-            cCrowdMan2d_freeQuad(self, i);
+        if (((int*)this)[i + 2] == val) {
+            freeQuad(i);
             break;
         }
     }
@@ -1878,7 +1877,7 @@ static inline sModel_229820* HandleToModel_229820(unsigned int h)
  * @param boneIndex  the bone index within the part
  */
 // Points bone b of part a of the model behind handle at the shared crowd pose.
-extern "C" void cCrowdMan2d_attachBoneToCrowdPose(cCrowdMan2d* self, unsigned int handle, int partIndex, int boneIndex)
+void cCrowdMan2d::attachBoneToCrowdPose(unsigned int handle, int partIndex, int boneIndex)
 {
     sModel_229820* model = HandleToModel_229820(handle);
     if (model != 0) {
@@ -2111,9 +2110,9 @@ INCLUDE_ASM("main/ssxapp", cCrowdMan2d_freeQuad);
  *
  * @param slotIndex  the slot (0-127)
  */
-extern "C" void cCrowdMan2d_freeQuad(cCrowdMan2d* self, int slotIndex)
+void cCrowdMan2d::freeQuad(int slotIndex)
 {
-    ((unsigned int*)self)[slotIndex + 2] = 0xFFFFFFFFU;
+    ((unsigned int*)this)[slotIndex + 2] = 0xFFFFFFFFU;
 }
 #endif
 
@@ -2202,11 +2201,10 @@ static inline void set2_229BA8(cGfx_229BA8* g, int mask, int shift, int v)
  * Each live marker is drawn with GrMan's DrawSprite (slot 78) at its position, texture coordinates (0, 0)-(1, 1) and
  * colour (1, 1, 1, 1); the state is popped at the end. cGame_render calls it for CrowdMan2d.
  *
- * @param crowdMan  the 2D crowd manager
  */
-extern "C" void cCrowdMan2d_renderMarkers(cCrowdMan2d* crowdMan)
+void cCrowdMan2d::renderMarkers()
 {
-    cCrowdMan2d* self = crowdMan;
+    cCrowdMan2d* self = this;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     int pushed = 0;
     sV2_229BA8 uv0;
@@ -2253,9 +2251,9 @@ INCLUDE_ASM("main/ssxapp", cCrowdMan2d_writeToReplayFrame);
  *
  * @param stream  the replay stream
  */
-extern "C" void cCrowdMan2d_writeToReplayFrame(cCrowdMan2d* self, cBxReplayFrame* stream)
+void cCrowdMan2d::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    stream->write((const char*)&self->mQuadId[0], 0x200);
+    stream->write((const char*)&mQuadId[0], 0x200);
 }
 #endif
 
@@ -2280,16 +2278,16 @@ struct sCrowdId_229E58 {
  *
  * @param stream  the replay stream
  */
-extern "C" void cCrowdMan2d_readFromReplayFrame(cCrowdMan2d* self, cBxReplayFrame* stream)
+void cCrowdMan2d::readFromReplayFrame(cBxReplayFrame* stream)
 {
-    cCrowdMan2d_releaseAllQuads(self);
-    cCrowdMan2d_resetSlots(self);
+    releaseAllQuads();
+    resetSlots();
     sCrowdId_229E58 ids[128];
     stream->read((char*)ids, 0x200);
     int i;
     for (i = 0; i < 128; i++) {
         if (ids[i].id != cCrowdMan2d::kFreeQuad) {
-            cCrowdMan2d_placeQuad(self, i, ids[i].id);
+            cCrowdMan2d_placeQuad(this, i, ids[i].id);
         }
     }
 }
@@ -3708,7 +3706,7 @@ bool cGame::render()
         FrustumIntersector_FrustumIntersector((FrustumIntersector*)world, BXNash, OcclusionMan,
                                               (const tBoundBox*)&box, World);
         cGame_renderBuckets(this);
-        cCrowdMan2d_renderMarkers((cCrowdMan2d*)((void*)CrowdMan2d));
+        CrowdMan2d->renderMarkers();
         cCrowdMan3d_render(((void*)CrowdMan3d));
         cMultiParticleMan_render(((void*)MultiParticleMan));
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;

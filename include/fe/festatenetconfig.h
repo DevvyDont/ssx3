@@ -43,6 +43,9 @@ struct cUIThing;
 struct cUIMenu;
 struct cUIListBox;
 
+struct cFEStateNetHelpPopup;
+struct cUIState;
+
 struct cFEStateNetConfig : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateNetConfig_vtbl (32 slots), stored by cFEStateNetConfig_cFEStateNetConfig /
@@ -107,6 +110,28 @@ struct cFEStateNetConfig : public cFEStateNet {
     virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateNetConfig_onPopupEvent");
     virtual int onWidgetPair(cUIPair*, unsigned int) __asm__("cFEStateNetConfig_onWidgetPair__FPv");
     virtual int onWidgetListBox(cUIListBox* pListBox, unsigned int key) __asm__("cFEStateNetConfig_onWidgetListBox");
+    void startConnect() __asm__("cFEStateNetConfig_startConnect__FPv");
+    void checkCardAndLoadConfigs() __asm__("cFEStateNetConfig_checkCardAndLoadConfigs");
+    void checkCardSlot() __asm__("cFEStateNetConfig_checkCardSlot");
+    void connectWithSelectedConfig() __asm__("cFEStateNetConfig_connectWithSelectedConfig");
+    void showCardErrorPopup(int popupId, int cardError, int cardSlot) __asm__("cFEStateNetConfig_showCardErrorPopup");
+    int onNoConfigPopupEvent(cUIState* popup, int event) __asm__("cFEStateNetConfig_onNoConfigPopupEvent");
+    void onCardErrorPopupEvent(cUIState* popup, unsigned int event) __asm__("cFEStateNetConfig_onCardErrorPopupEvent");
+    void loadConfigs() __asm__("cFEStateNetConfig_loadConfigs");
+    void reportLoadResult(int err) __asm__("cFEStateNetConfig_reportLoadResult");
+    void showConfigLists(int configCount) __asm__("cFEStateNetConfig_showConfigLists");
+    void rescanConfigs(int ignored) __asm__("cFEStateNetConfig_rescanConfigs");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateNetConfig_fillHelpPopup");
+    void onConnectingPopupEvent(cUIState* popup, unsigned int kind) __asm__("cFEStateNetConfig_onConnectingPopupEvent");
+    void onDNASErrorPopupEvent(cUIState* popup, int event) __asm__("cFEStateNetConfig_onDNASErrorPopupEvent");
+    void onDNASAuthPopupEvent(cUIState* popup, unsigned int kind) __asm__("cFEStateNetConfig_onDNASAuthPopupEvent");
+    void onAccountMemPopupEvent(cUIState* popup, int event) __asm__("cFEStateNetConfig_onAccountMemPopupEvent");
+    void onCreateConfigPopupEvent(cUIState* popup, unsigned int kind)
+        __asm__("cFEStateNetConfig_onCreateConfigPopupEvent");
+    void onConnectionWarningPopupEvent(cUIState* popup, int event)
+        __asm__("cFEStateNetConfig_onConnectionWarningPopupEvent");
+    int onNetEvent(int id, void* msgPtr) __asm__("cFEStateNetConfig_onNetEvent");
+    int isOnlineState() __asm__("cFEStateNetConfig_isOnlineState__FPv");
 };
 
 CHECK_OFFSET(cFEStateNetConfig, miSelectedSetting, 0x6D0);
@@ -179,6 +204,24 @@ struct cFEStateNetAccountMem : public cFEStateNet {
     virtual void onUpdate() __asm__("cFEStateNetAccountMem_onUpdate");
     virtual void onPopupEvent(cUIState* w, unsigned int msg) __asm__("cFEStateNetAccountMem_onPopupEvent");
     virtual bool onLoseTransition() __asm__("cFEStateNetAccountMem_onLoseTransition__FPv");
+    void* clearAccount() __asm__("cFEStateNetAccountMem_clearAccount__FPv");
+    void setStep(int state) __asm__("cFEStateNetAccountMem_setStep");
+    void* copyToAccountData() __asm__("cFEStateNetAccountMem_copyToAccountData");
+    void* updateCheckCardStep() __asm__("cFEStateNetAccountMem_updateCheckCardStep__FPv");
+    void updateLoadReadStep() __asm__("cFEStateNetAccountMem_updateLoadReadStep");
+    void updateSaveReadStep() __asm__("cFEStateNetAccountMem_updateSaveReadStep");
+    void updateSaveStep() __asm__("cFEStateNetAccountMem_updateSaveStep");
+    void updateMode2ReadStep() __asm__("cFEStateNetAccountMem_updateMode2ReadStep");
+    void updateFormatStep() __asm__("cFEStateNetAccountMem_updateFormatStep");
+    void updateCreateSaveStep() __asm__("cFEStateNetAccountMem_updateCreateSaveStep");
+    void updateDeleteReadStep() __asm__("cFEStateNetAccountMem_updateDeleteReadStep");
+    void updateDeleteStep() __asm__("cFEStateNetAccountMem_updateDeleteStep");
+    void updateRemoveDamagedStep() __asm__("cFEStateNetAccountMem_updateRemoveDamagedStep");
+    void updateRecreateSaveStep() __asm__("cFEStateNetAccountMem_updateRecreateSaveStep");
+    void showErrorPopup(unsigned int mode) __asm__("cFEStateNetAccountMem_showErrorPopup");
+    void formatNotDetectedText() __asm__("cFEStateNetAccountMem_formatNotDetectedText");
+    void formatFailedText() __asm__("cFEStateNetAccountMem_formatFailedText");
+    int getErrorStep(int id) __asm__("cFEStateNetAccountMem_getErrorStep");
 };
 
 CHECK_OFFSET(cFEStateNetAccountMem, miResult, 0x6D0);

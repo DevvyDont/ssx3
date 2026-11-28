@@ -1531,7 +1531,7 @@ extern "C" void* cPS2MemCard_enterState(cPS2MemCard*, int);
 void cPS2MemCard::GetDir(const char* name)
 {
     strcpy(mDirPattern, name);
-    cPS2MemCard_enterState(this, 5);
+    this->enterState(5);
 }
 #endif
 
@@ -1549,16 +1549,16 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 6, where
  * cPS2MemCard_Update waits for the listing. cPS2MemCard_Update calls it in state 5.
  */
-extern "C" void cPS2MemCard_issueGetDir(cPS2MemCard* self)
+void cPS2MemCard::issueGetDir()
 {
-    char* buf = (char*)&self->mDirTable[0];
+    char* buf = (char*)&mDirTable[0];
     MEM_fill(buf, 0, 0x1000);
-    int mcResult = sceMcGetDir(self->mDevice, 0, self->mDirPattern, 0, 6, buf);
+    int mcResult = sceMcGetDir(mDevice, 0, mDirPattern, 0, 6, buf);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 6);
+        enterState(6);
     }
 }
 #endif
@@ -1575,11 +1575,10 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startReadFileInfo__FPvi);
  * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
  * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* cPS2MemCard_startReadFileInfo(void* vself, int fileSlot)
+void* cPS2MemCard::startReadFileInfo(int fileSlot)
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mCurrentFileSlot = fileSlot;
-    return cPS2MemCard_enterState((cPS2MemCard*)self, 34);
+    mCurrentFileSlot = fileSlot;
+    return enterState(34);
 }
 #endif
 
@@ -1600,19 +1599,19 @@ extern char str_pct_s_pct_s_h[];
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 35.
  * cPS2MemCard_Update calls it in state 34; cPS2MemCard_GetDataSize__FPv later reads the entry's m_fileSizeByte.
  */
-extern "C" void cPS2MemCard_issueGetFileInfo(cPS2MemCard* self)
+void cPS2MemCard::issueGetFileInfo()
 {
-    char* name = self->mFileName;
-    self->mFileInfoValid = 0;
-    char* path = self->mFilePath;
-    strcpy(name, self->mFileSlots[self->mCurrentFileSlot].mFileName);
+    char* name = mFileName;
+    mFileInfoValid = 0;
+    char* path = mFilePath;
+    strcpy(name, mFileSlots[mCurrentFileSlot].mFileName);
     sprintf(path, str_pct_s_pct_s_h, name, name);
-    int mcResult = sceMcGetDir(self->mDevice, 0, path, 0, 1, &self->mFileDirEntry);
+    int mcResult = sceMcGetDir(mDevice, 0, path, 0, 1, &mFileDirEntry);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 35);
+        enterState(35);
     }
 }
 #endif
@@ -1630,7 +1629,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_Format__FPv);
  */
 void* cPS2MemCard::Format()
 {
-    return cPS2MemCard_enterState((cPS2MemCard*)this, 17);
+    return this->enterState(17);
 }
 #endif
 
@@ -1646,14 +1645,14 @@ extern int D_004A3940;
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 18.
  * cPS2MemCard_Update calls it in state 17.
  */
-extern "C" void cPS2MemCard_issueFormat(cPS2MemCard* self)
+void cPS2MemCard::issueFormat()
 {
-    int mcResult = sceMcFormat(self->mDevice, 0);
+    int mcResult = sceMcFormat(mDevice, 0);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 18);
+        enterState(18);
     }
 }
 #endif
@@ -1673,7 +1672,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_DeleteFileSlot__FPvi);
 void* cPS2MemCard::DeleteFileSlot(int fileSlot)
 {
     mCurrentFileSlot = fileSlot;
-    return cPS2MemCard_enterState((cPS2MemCard*)this, 19);
+    return this->enterState(19);
 }
 #endif
 
@@ -1727,13 +1726,13 @@ extern char str_pct_s_pct_s_h[];
  * States 54-59 then delete the data file, the icon files, icon.sys and finally the directory (sceMcDelete each).
  * cPS2MemCard_Update calls it in state 19, which cPS2MemCard_DeleteFileSlot__FPvi requests.
  */
-extern "C" void cPS2MemCard_startDeleteSave(cPS2MemCard* self)
+void cPS2MemCard::startDeleteSave()
 {
-    char* name = self->mFileName;
-    self->mFileInfoValid = 0;
-    strcpy(name, self->mFileSlots[self->mCurrentFileSlot].mFileName);
-    sprintf(self->mFilePath, str_pct_s_pct_s_h, name, name);
-    cPS2MemCard_enterState(self, 54);
+    char* name = mFileName;
+    mFileInfoValid = 0;
+    strcpy(name, mFileSlots[mCurrentFileSlot].mFileName);
+    sprintf(mFilePath, str_pct_s_pct_s_h, name, name);
+    enterState(54);
 }
 #endif
 
@@ -1754,7 +1753,7 @@ void cPS2MemCard::CheckDevice(int device)
     mDevice = device;
     if (((cMemCard*)this)->IsBusy() == 0) {
         mGetInfoDevice = device;
-        cPS2MemCard_enterState(this, 3);
+        this->enterState(3);
     }
 }
 #endif
@@ -1798,7 +1797,7 @@ void cPS2MemCard::CreateFileSlot(const char* name)
     char* fileName = mFileName;
     strcpy(fileName, name);
     sprintf(mFilePath, str_slash_pct_s, fileName);
-    cPS2MemCard_enterState(this, 20);
+    this->enterState(20);
 }
 #endif
 
@@ -1822,7 +1821,7 @@ void cPS2MemCard::CreateFileSlot1(unsigned short* name)
     char* fileName = mFileName;
     strcpy2_impl(fileName, name);
     sprintf(mFilePath, str_slash_pct_s, fileName);
-    cPS2MemCard_enterState(this, 20);
+    this->enterState(20);
 }
 #endif
 
@@ -1850,7 +1849,7 @@ void cPS2MemCard::StartFileSlotWrite1(unsigned short* wname, int writeBuffer, in
     sprintf(mFilePath, str_pct_s_pct_s_h, name, name);
     mBuffer = writeBuffer;
     mTransferSize = writeSize;
-    cPS2MemCard_enterState(this, 21);
+    this->enterState(21);
 }
 #endif
 
@@ -1880,7 +1879,7 @@ void cPS2MemCard::StartFileSlotWrite(const char* src, int writeBuffer, int write
     sprintf(mFilePath, str_pct_s_pct_s_h, name, name);
     mBuffer = writeBuffer;
     mTransferSize = writeSize;
-    cPS2MemCard_enterState(this, 21);
+    this->enterState(21);
 }
 #endif
 
@@ -1900,7 +1899,7 @@ extern "C" void cPS2MemCard_getFileSlotName(cPS2MemCard* self, int a1, char* dst
 void cPS2MemCard::StartFileSlotWrite2(int fileSlot, int writeBuffer, int writeSize)
 {
     char name[64];
-    cPS2MemCard_getFileSlotName(this, fileSlot, name);
+    this->getFileSlotName(fileSlot, name);
     ((cMemCard*)this)->StartFileSlotWrite(name, writeBuffer, writeSize);
 }
 #endif
@@ -1920,7 +1919,7 @@ void* cPS2MemCard::WriteData(int buffer, int transferSize)
 {
     mBuffer = buffer;
     mTransferSize = transferSize;
-    return cPS2MemCard_enterState((cPS2MemCard*)this, 23);
+    return this->enterState(23);
 }
 #endif
 
@@ -1962,7 +1961,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetWriteClose__FPv);
  */
 void* cPS2MemCard::SetWriteClose()
 {
-    return cPS2MemCard_enterState((cPS2MemCard*)this, 0x18);
+    return this->enterState(0x18);
 }
 #endif
 
@@ -1986,14 +1985,14 @@ extern char str_pct_s_pct_s_h[];
  * @param readBuffer  the buffer to read into
  * @param readSize  the number of bytes to read
  */
-extern "C" void cPS2MemCard_startLoadFile(cPS2MemCard* self, char* src, int readBuffer, int readSize)
+void cPS2MemCard::startLoadFile(char* src, int readBuffer, int readSize)
 {
-    char* name = self->mFileName;
+    char* name = mFileName;
     strcpy(name, src);
-    sprintf(self->mFilePath, str_pct_s_pct_s_h, name, name);
-    self->mBuffer = readBuffer;
-    self->mTransferSize = readSize;
-    cPS2MemCard_enterState(self, 27);
+    sprintf(mFilePath, str_pct_s_pct_s_h, name, name);
+    mBuffer = readBuffer;
+    mTransferSize = readSize;
+    enterState(27);
 }
 #endif
 
@@ -2016,8 +2015,8 @@ extern "C" void cPS2MemCard_startLoadFile(cPS2MemCard* self, char* name, int a2,
 void cPS2MemCard::StartFileSlotRead(int fileSlot, int buffer, int transferSize)
 {
     char name[64];
-    cPS2MemCard_getFileSlotName(this, fileSlot, name);
-    cPS2MemCard_startLoadFile(this, name, buffer, transferSize);
+    this->getFileSlotName(fileSlot, name);
+    this->startLoadFile(name, buffer, transferSize);
 }
 #endif
 
@@ -2036,7 +2035,7 @@ void* cPS2MemCard::ReadData(int buffer, int transferSize)
 {
     mBuffer = buffer;
     mTransferSize = transferSize;
-    return cPS2MemCard_enterState((cPS2MemCard*)this, 29);
+    return this->enterState(29);
 }
 #endif
 
@@ -2078,7 +2077,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetReadClose__FPv);
  */
 void* cPS2MemCard::SetReadClose()
 {
-    return cPS2MemCard_enterState((cPS2MemCard*)this, 0x1e);
+    return this->enterState(0x1e);
 }
 #endif
 
@@ -2154,61 +2153,60 @@ static inline int slotOf_48C0(int state, int a, int b)
  * starts sceMcGetInfo when none is pending (mGetInfoPending clear). cPS2MemCard_Update polls sceMcSync and picks the
  * next state.
  *
- * @param self  the memory card
  * @param state  the new state
  * @return nothing; the return register holds whatever the last call left there
  */
-extern "C" void* cPS2MemCard_enterState(cPS2MemCard* self, int state)
+void* cPS2MemCard::enterState(int state)
 {
-    self->mState = state;
+    mState = state;
     switch (state) {
     case 1: {
-        self->mDevices[self->mDevice].mLastError = D_004A3940;
-        if (self->mIconFileData != 0) {
-            MEM_free(self->mIconFileData);
-            self->mIconFileData = 0;
+        mDevices[mDevice].mLastError = D_004A3940;
+        if (mIconFileData != 0) {
+            MEM_free(mIconFileData);
+            mIconFileData = 0;
         }
-        if (self->mFileDescriptor >= 0) {
-            int mcResult = sceMcClose(self->mFileDescriptor);
+        if (mFileDescriptor >= 0) {
+            int mcResult = sceMcClose(mFileDescriptor);
             D_004A3940 = mcResult;
             if (mcResult >= 0) {
-                cPS2MemCard_enterState(self, 2);
+                enterState(2);
             }
-            self->mFileDescriptor = -1;
+            mFileDescriptor = -1;
         }
-        self->mBuffer = 0;
-        self->mCurrentFileSlot = -1;
-        self->mTransferSize = 0;
+        mBuffer = 0;
+        mCurrentFileSlot = -1;
+        mTransferSize = 0;
         break;
     }
     case 3:
-        cPS2MemCard_startGetInfo(self);
+        startGetInfo();
         break;
     case 36: {
-        self->mWriteFailed = 0;
-        int mcResult = sceMcMkdir(self->mDevice, 0, self->mFilePath);
+        mWriteFailed = 0;
+        int mcResult = sceMcMkdir(mDevice, 0, mFilePath);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 37: {
-        char* path = self->mIconFilePath;
-        sprintf(path, str_pct_s_pct_s_i, self->mFilePath, str_icon_sys);
-        int mcResult = sceMcOpen(self->mDevice, 0, path, 515);
+        char* path = mIconFilePath;
+        sprintf(path, str_pct_s_pct_s_i, mFilePath, str_icon_sys);
+        int mcResult = sceMcOpen(mDevice, 0, path, 515);
         D_004A3940 = mcResult;
-        self->mFileDescriptor = -1;
+        mFileDescriptor = -1;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 38: {
-        char* title = self->mTitle;
+        char* title = mTitle;
         MEM_fill(&D_005376F8, 0, 964);
         memcpy(&D_005376F8, str_PS2D, 5);
-        ((cMemCard*)self)->AsciiToShiftJIS(D_005376F8.title, title);
-        if (self->mTitleOffsLF > 0)
-            D_005376F8.offsLF = self->mTitleOffsLF;
+        ((cMemCard*)this)->AsciiToShiftJIS(D_005376F8.title, title);
+        if (mTitleOffsLF > 0)
+            D_005376F8.offsLF = mTitleOffsLF;
         else
             D_005376F8.offsLF = strlen(title) * 2;
         D_005376F8.transRate = 0x60;
@@ -2219,242 +2217,242 @@ extern "C" void* cPS2MemCard_enterState(cPS2MemCard* self, int state)
         strcpy(D_005376F8.fnameView, D_004459F0[0]);
         strcpy(D_005376F8.fnameCopy, D_004459F0[1]);
         strcpy(D_005376F8.fnameDel, D_004459F0[2]);
-        int mcResult = sceMcWrite(self->mFileDescriptor, (int)&D_005376F8, 964);
+        int mcResult = sceMcWrite(mFileDescriptor, (int)&D_005376F8, 964);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 39: {
-        int mcResult = sceMcClose(self->mFileDescriptor);
+        int mcResult = sceMcClose(mFileDescriptor);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            self->mFileDescriptor = -1;
-            cPS2MemCard_enterState(self, 1);
+            mFileDescriptor = -1;
+            enterState(1);
         } else {
-            self->mFileDescriptor = -1;
+            mFileDescriptor = -1;
         }
         break;
     }
     case 40: case 44: case 0x30: {
         char path[64];
-        if (self->mIconFileData != 0) {
-            MEM_free(self->mIconFileData);
-            self->mIconFileData = 0;
+        if (mIconFileData != 0) {
+            MEM_free(mIconFileData);
+            mIconFileData = 0;
         }
-        int slot = slotOf_48C0(self->mState, 44, 0x30);
-        sprintf(path, str_pct_s_pct_s_i, self->mSourceIconPath, D_004459F0[slot]);
-        self->mIconFileHandle = ASYNCFILE_load(path, 0x100);
+        int slot = slotOf_48C0(mState, 44, 0x30);
+        sprintf(path, str_pct_s_pct_s_i, mSourceIconPath, D_004459F0[slot]);
+        mIconFileHandle = ASYNCFILE_load(path, 0x100);
         break;
     }
     case 41: case 45: case 49: {
-        int slot = slotOf_48C0(self->mState, 45, 49);
-        char* path = self->mIconFilePath;
-        sprintf(path, str_pct_s_pct_s_h, self->mFileName, D_004459F0[slot]);
-        int mcResult = sceMcOpen(self->mDevice, 0, path, 515);
+        int slot = slotOf_48C0(mState, 45, 49);
+        char* path = mIconFilePath;
+        sprintf(path, str_pct_s_pct_s_h, mFileName, D_004459F0[slot]);
+        int mcResult = sceMcOpen(mDevice, 0, path, 515);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            self->mFileDescriptor = -1;
-            cPS2MemCard_enterState(self, 1);
+            mFileDescriptor = -1;
+            enterState(1);
         } else {
-            self->mFileDescriptor = -1;
+            mFileDescriptor = -1;
         }
         break;
     }
     case 42: case 46: case 50: {
-        int mcResult = sceMcWrite(self->mFileDescriptor, (int)self->mIconFileData, self->mIconFileSize);
+        int mcResult = sceMcWrite(mFileDescriptor, (int)mIconFileData, mIconFileSize);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 43: case 47: case 51: {
-        if (self->mIconFileData != 0) {
-            MEM_free(self->mIconFileData);
-            self->mIconFileData = 0;
+        if (mIconFileData != 0) {
+            MEM_free(mIconFileData);
+            mIconFileData = 0;
         }
-        int mcResult = sceMcClose(self->mFileDescriptor);
+        int mcResult = sceMcClose(mFileDescriptor);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            self->mFileDescriptor = -1;
-            cPS2MemCard_enterState(self, 1);
+            mFileDescriptor = -1;
+            enterState(1);
         } else {
-            self->mFileDescriptor = -1;
+            mFileDescriptor = -1;
         }
         break;
     }
     case 22: {
-        int mcResult = sceMcOpen(self->mDevice, 0, self->mFilePath, 515);
+        int mcResult = sceMcOpen(mDevice, 0, mFilePath, 515);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            self->mFileDescriptor = -1;
-            cPS2MemCard_enterState(self, 1);
+            mFileDescriptor = -1;
+            enterState(1);
         } else {
-            self->mFileDescriptor = -1;
+            mFileDescriptor = -1;
         }
         break;
     }
     case 23: {
-        int mcResult = sceMcWrite(self->mFileDescriptor, self->mBuffer, self->mTransferSize);
+        int mcResult = sceMcWrite(mFileDescriptor, mBuffer, mTransferSize);
         D_004A3940 = mcResult;
-        self->mBuffer = 0;
-        self->mTransferSize = 0;
+        mBuffer = 0;
+        mTransferSize = 0;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 0x18:
-        if (self->mFileDescriptor >= 0) {
-            int mcResult = sceMcClose(self->mFileDescriptor);
+        if (mFileDescriptor >= 0) {
+            int mcResult = sceMcClose(mFileDescriptor);
             D_004A3940 = mcResult;
             if (mcResult < 0) {
-                self->mFileDescriptor = -1;
-                cPS2MemCard_enterState(self, 1);
+                mFileDescriptor = -1;
+                enterState(1);
             } else {
-                self->mFileDescriptor = -1;
+                mFileDescriptor = -1;
             }
         } else {
-            cPS2MemCard_enterState(self, 25);
+            enterState(25);
         }
         break;
     case 0x1C: {
-        self->mReadFailed = 0;
-        int mcResult = sceMcOpen(self->mDevice, 0, self->mFilePath, 1);
+        mReadFailed = 0;
+        int mcResult = sceMcOpen(mDevice, 0, mFilePath, 1);
         D_004A3940 = mcResult;
-        self->mFileDescriptor = -1;
+        mFileDescriptor = -1;
         if (mcResult != 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 29: {
-        int mcResult = sceMcRead(self->mFileDescriptor, self->mBuffer, self->mTransferSize);
+        int mcResult = sceMcRead(mFileDescriptor, mBuffer, mTransferSize);
         D_004A3940 = mcResult;
         if (mcResult != 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 0x1E:
-        if (self->mFileDescriptor >= 0) {
-            int mcResult = sceMcClose(self->mFileDescriptor);
+        if (mFileDescriptor >= 0) {
+            int mcResult = sceMcClose(mFileDescriptor);
             D_004A3940 = mcResult;
             if (mcResult < 0) {
-                self->mFileDescriptor = -1;
-                cPS2MemCard_enterState(self, 1);
+                mFileDescriptor = -1;
+                enterState(1);
             } else {
-                self->mFileDescriptor = -1;
+                mFileDescriptor = -1;
             }
         } else {
-            cPS2MemCard_enterState(self, 0x1F);
+            enterState(0x1F);
         }
         break;
     case 54: {
-        self->mDevices[self->mDevice].mLastError = 0;
-        int mcResult = sceMcDelete(self->mDevice, 0, self->mFilePath);
+        mDevices[mDevice].mLastError = 0;
+        int mcResult = sceMcDelete(mDevice, 0, mFilePath);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 55: case 0x38: case 57: {
-        int slot = slotOf_48C0(self->mState, 0x38, 57);
-        char* path = self->mIconFilePath;
-        sprintf(path, str_pct_s_pct_s_h, self->mFileName, D_004459F0[slot]);
-        int mcResult = sceMcDelete(self->mDevice, 0, path);
+        int slot = slotOf_48C0(mState, 0x38, 57);
+        char* path = mIconFilePath;
+        sprintf(path, str_pct_s_pct_s_h, mFileName, D_004459F0[slot]);
+        int mcResult = sceMcDelete(mDevice, 0, path);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 58: {
-        char* path = self->mIconFilePath;
-        sprintf(path, str_pct_s_pct_s_h, self->mFileName, str_icon_sys);
-        int mcResult = sceMcDelete(self->mDevice, 0, path);
+        char* path = mIconFilePath;
+        sprintf(path, str_pct_s_pct_s_h, mFileName, str_icon_sys);
+        int mcResult = sceMcDelete(mDevice, 0, path);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 59: {
-        int mcResult = sceMcDelete(self->mDevice, 0, self->mFileName);
+        int mcResult = sceMcDelete(mDevice, 0, mFileName);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 1);
+            enterState(1);
         break;
     }
     case 7:
-        for (self->mScanFileSlot = 0; self->mScanFileSlot < self->mMaxFiles; self->mScanFileSlot++) {
-            if (((cMemCard*)self)->HasFileName(self->mScanFileSlot)) {
-                sprintf(self->mIconFilePath, str_pct_s_pct_s_h, self->mFileSlots[self->mScanFileSlot].mFileName,
+        for (mScanFileSlot = 0; mScanFileSlot < mMaxFiles; mScanFileSlot++) {
+            if (((cMemCard*)this)->HasFileName(mScanFileSlot)) {
+                sprintf(mIconFilePath, str_pct_s_pct_s_h, mFileSlots[mScanFileSlot].mFileName,
                         str_icon_sys);
-                cPS2MemCard_enterState(self, 8);
+                enterState(8);
                 break;
             }
         }
         break;
     case 8: {
-        int mcResult = sceMcOpen(self->mDevice, 0, self->mIconFilePath, 1);
+        int mcResult = sceMcOpen(mDevice, 0, mIconFilePath, 1);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            self->mFileDescriptor = -1;
-            cPS2MemCard_markIconSysUnreadable(self, self->mScanFileSlot);
-            cPS2MemCard_enterState(self, 0x10);
+            mFileDescriptor = -1;
+            markIconSysUnreadable(mScanFileSlot);
+            enterState(0x10);
         } else {
-            self->mFileDescriptor = -1;
+            mFileDescriptor = -1;
         }
         break;
     }
     case 10: {
-        int mcResult = sceMcRead(self->mFileDescriptor, (int)&D_005376F8, 964);
+        int mcResult = sceMcRead(mFileDescriptor, (int)&D_005376F8, 964);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            cPS2MemCard_markIconSysUnreadable(self, self->mScanFileSlot);
-            cPS2MemCard_enterState(self, 0xF);
+            markIconSysUnreadable(mScanFileSlot);
+            enterState(0xF);
         }
         break;
     }
     case 9: {
-        int mcResult = sceMcClose(self->mFileDescriptor);
+        int mcResult = sceMcClose(mFileDescriptor);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            cPS2MemCard_enterState(self, 0x10);
+            enterState(0x10);
         } else {
-            self->mFileDescriptor = -1;
+            mFileDescriptor = -1;
         }
         break;
     }
     case 11: {
-        char* path = self->mFilePath;
-        self->mFileInfoValid = 0;
-        tPS2MemCardDirEntry* entry = &self->mFileDirEntry;
-        char* name = self->mFileSlots[self->mScanFileSlot].mFileName;
+        char* path = mFilePath;
+        mFileInfoValid = 0;
+        tPS2MemCardDirEntry* entry = &mFileDirEntry;
+        char* name = mFileSlots[mScanFileSlot].mFileName;
         sprintf(path, str_pct_s_pct_s_h, name, name);
         MEM_fill(entry, 0, 0x40);
-        int mcResult = sceMcGetDir(self->mDevice, 0, path, 0, 1, entry);
+        int mcResult = sceMcGetDir(mDevice, 0, path, 0, 1, entry);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 0x10);
+            enterState(0x10);
         break;
     }
     case 0xC: case 13: case 0xE: {
-        int slot = slotOf_48C0(self->mState, 13, 0xE);
-        char* path = self->mIconFilePath;
-        tPS2MemCardDirEntry* entry = &self->mFileDirEntry;
-        sprintf(path, str_pct_s_pct_s_h, self->mFileSlots[self->mScanFileSlot].mFileName, D_004459F0[slot]);
+        int slot = slotOf_48C0(mState, 13, 0xE);
+        char* path = mIconFilePath;
+        tPS2MemCardDirEntry* entry = &mFileDirEntry;
+        sprintf(path, str_pct_s_pct_s_h, mFileSlots[mScanFileSlot].mFileName, D_004459F0[slot]);
         MEM_fill(entry, 0, 0x40);
-        int mcResult = sceMcGetDir(self->mDevice, 0, path, 0, 1, entry);
+        int mcResult = sceMcGetDir(mDevice, 0, path, 0, 1, entry);
         D_004A3940 = mcResult;
         if (mcResult < 0)
-            cPS2MemCard_enterState(self, 0x10);
+            enterState(0x10);
         break;
     }
     case 0xF: {
-        int mcResult = sceMcClose(self->mFileDescriptor);
+        int mcResult = sceMcClose(mFileDescriptor);
         D_004A3940 = mcResult;
         if (mcResult < 0) {
-            self->mFileDescriptor = -1;
-            cPS2MemCard_enterState(self, 0x10);
+            mFileDescriptor = -1;
+            enterState(0x10);
         } else {
-            self->mFileDescriptor = -1;
+            mFileDescriptor = -1;
         }
         break;
     }
@@ -2463,8 +2461,8 @@ extern "C" void* cPS2MemCard_enterState(cPS2MemCard* self, int state)
     case 72: case 74: case 76: case 78:
         break;
     default:
-        if (self->mGetInfoPending == 0)
-            cPS2MemCard_startGetInfo(self);
+        if (mGetInfoPending == 0)
+            startGetInfo();
         break;
     }
 }
@@ -2485,16 +2483,16 @@ extern int D_004A3944;
  *
  * @return 1 when the request was issued, else 0
  */
-extern "C" int cPS2MemCard_startGetInfo(cPS2MemCard* self)
+int cPS2MemCard::startGetInfo()
 {
     D_004A3938 = 0;
-    self->mTransferSize = 0;
-    int devicePort = self->mDevice;
+    mTransferSize = 0;
+    int devicePort = mDevice;
     D_004A3944 = 0;
     D_004A393C = 0;
     int syncPending = sceMcGetInfo(devicePort, 0, &D_004A3938, &D_004A393C, &D_004A3944) == 0;
-    self->mGetInfoPending = syncPending;
-    self->unk_04C = 5;
+    mGetInfoPending = syncPending;
+    unk_04C = 5;
     return syncPending;
 }
 #endif
@@ -2606,10 +2604,10 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_clearDeviceInfo);
 /**
  * Clears the current port's card type (mType) and free-cluster count (mFreeClusters) in mDevices[mDevice].
  */
-extern "C" void cPS2MemCard_clearDeviceInfo(cPS2MemCard* self)
+void cPS2MemCard::clearDeviceInfo()
 {
-    self->mDevices[self->mDevice].mType = 0;
-    self->mDevices[self->mDevice].mFreeClusters = 0;
+    mDevices[mDevice].mType = 0;
+    mDevices[mDevice].mFreeClusters = 0;
 }
 #endif
 
@@ -2624,14 +2622,14 @@ extern "C" void cPS2MemCard_clearFileDirEntry(cPS2MemCard* self);
  * the six file slots mFileSlots (720 bytes) and the directory table mDirTable (0x1000 bytes), then calls cPS2MemCard_clearFileDirEntry
  * (which clears mFileDirEntry again).
  */
-extern "C" void cPS2MemCard_clearDirData(cPS2MemCard* self)
+void cPS2MemCard::clearDirData()
 {
-    self->unk_050 = 0;
-    self->mNumDirTable = 0;
-    MEM_fill(&self->mFileDirEntry, 0, 0x40);
-    MEM_fill(&self->mFileSlots[0], 0, 720);
-    MEM_fill(&self->mDirTable[0], 0, 0x1000);
-    cPS2MemCard_clearFileDirEntry(self);
+    unk_050 = 0;
+    mNumDirTable = 0;
+    MEM_fill(&mFileDirEntry, 0, 0x40);
+    MEM_fill(&mFileSlots[0], 0, 720);
+    MEM_fill(&mDirTable[0], 0, 0x1000);
+    clearFileDirEntry();
 }
 #endif
 
@@ -2643,9 +2641,9 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
 /**
  * Clears the single directory entry mFileDirEntry (0x40 bytes).
  */
-extern "C" void cPS2MemCard_clearFileDirEntry(cPS2MemCard* self)
+void cPS2MemCard::clearFileDirEntry()
 {
-    MEM_fill(&self->mFileDirEntry, 0, 0x40);
+    MEM_fill(&mFileDirEntry, 0, 0x40);
 }
 #endif
 
@@ -2820,9 +2818,9 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
  * @param dst  the output buffer (64 bytes is enough)
  */
-extern "C" void cPS2MemCard_getFileSlotName(cPS2MemCard* self, int fileSlot, char* dst)
+void cPS2MemCard::getFileSlotName(int fileSlot, char* dst)
 {
-    strcpy(dst, self->mFileSlots[fileSlot].mFileName);
+    strcpy(dst, mFileSlots[fileSlot].mFileName);
 }
 #endif
 
@@ -2849,7 +2847,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetTitleString1__FPv);
 /**
  * Does nothing (card vtable slot 46).
  */
-void cPS2MemCard_SetTitleString1(void* self)
+void cPS2MemCard::SetTitleString1()
 {
 }
 #endif
@@ -2897,9 +2895,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_markIconSysUnreadable);
  *
  * @param fileSlot  the file slot index
  */
-extern "C" void cPS2MemCard_markIconSysUnreadable(cPS2MemCard* self, int fileSlot)
+void cPS2MemCard::markIconSysUnreadable(int fileSlot)
 {
-    self->mFileSlots[fileSlot].mIconSysUnreadable = 1;
+    mFileSlots[fileSlot].mIconSysUnreadable = 1;
 }
 #endif
 
@@ -3011,7 +3009,7 @@ void cPS2MemCard::Update()
             || (unsigned)(syncResult + 79) < 10) {
             D_004A3940 = -10;
         }
-        if (cPS2MemCard_isResultInErrorRange(this, D_004A3940) == 0) {
+        if (this->isResultInErrorRange(D_004A3940) == 0) {
             if (D_004A3938 != 2) {
                 D_004A3940 = -10002;
             } else if (D_004A3944 == 0) {
@@ -3044,9 +3042,9 @@ void cPS2MemCard::Update()
             if (syncResult < 0) {
                 int st = mState;
                 if (st != 36 && (unsigned)(st - 54) >= 6) {
-                    if ((unsigned)(st - 8) < 8 && syncResult != -1 && cPS2MemCard_isResultInErrorRange(this, syncResult) == 0) {
+                    if ((unsigned)(st - 8) < 8 && syncResult != -1 && this->isResultInErrorRange(syncResult) == 0) {
                         ((cMemCard*)this)->SetBrokenFile(mScanFileSlot);
-                        cPS2MemCard_enterState(this, 0x10);
+                        this->enterState(0x10);
                         return;
                     }
                 } else {
@@ -3056,12 +3054,12 @@ void cPS2MemCard::Update()
                 }
                 if (D_004A3940 < 0) {
                     if (mState == 35 || mState == 7) {
-                        cPS2MemCard_clearFileDirEntry(this);
+                        this->clearFileDirEntry();
                     }
                     if (mState == 19) {
                         mCurrentFileSlot = -1;
                     }
-                    cPS2MemCard_enterState(this, 1);
+                    this->enterState(1);
                     return;
                 }
             }
@@ -3071,12 +3069,12 @@ void cPS2MemCard::Update()
     }
     if (mReadFailed != 0) {
         mReadFailed = 0;
-        cPS2MemCard_enterState(this, 0x1E);
+        this->enterState(0x1E);
         return;
     }
     if (mWriteFailed != 0) {
         mWriteFailed = 0;
-        cPS2MemCard_enterState(this, 0x18);
+        this->enterState(0x18);
         return;
     }
     switch (mState) {
@@ -3094,17 +3092,17 @@ void cPS2MemCard::Update()
         }
         break;
     case 3:
-        cPS2MemCard_enterState(this, 4);
+        this->enterState(4);
         break;
     case 5:
         if (((cMemCard*)this)->DidErrorOccur() == 0) {
-            cPS2MemCard_issueGetDir(this);
+            this->issueGetDir();
             return;
         }
         break;
     case 34:
         if (((cMemCard*)this)->DidErrorOccur() == 0) {
-            cPS2MemCard_issueGetFileInfo(this);
+            this->issueGetFileInfo();
             return;
         }
         break;
@@ -3125,27 +3123,27 @@ void cPS2MemCard::Update()
                 }
             }
             D_004A3940 = 0;
-            cPS2MemCard_enterState(this, 7);
+            this->enterState(7);
             return;
         }
     case 8:
         mFileDescriptor = D_004A3940;
-        cPS2MemCard_enterState(this, 10);
+        this->enterState(10);
         return;
     case 10:
         ((cMemCard*)this)->ShiftJISToAscii(mFileSlots[mScanFileSlot].mTitle, D_005377B8);
-        cPS2MemCard_enterState(this, 9);
+        this->enterState(9);
         return;
     case 9:
-        cPS2MemCard_enterState(this, 11);
+        this->enterState(11);
         return;
     case 11:
         if (mFileDirEntry.m_fileSizeByte != mDataSize) {
             ((cMemCard*)this)->SetBrokenFile(mScanFileSlot);
-            cPS2MemCard_enterState(this, 0x10);
+            this->enterState(0x10);
         }
         __builtin_memcpy(&mFileSlots[mScanFileSlot].mModifyTime, &mFileDirEntry.m_modify, 8);
-        cPS2MemCard_enterState(this, 12);
+        this->enterState(12);
         return;
     case 12:
     case 13:
@@ -3158,8 +3156,8 @@ void cPS2MemCard::Update()
                 k = 1;
             }
             if (mFileDirEntry.m_fileSizeByte != D_00487450[k]) {
-                cPS2MemCard_markIconSysUnreadable(this, mScanFileSlot);
-                cPS2MemCard_enterState(this, 0x10);
+                this->markIconSysUnreadable(mScanFileSlot);
+                this->enterState(0x10);
                 return;
             }
         }
@@ -3177,7 +3175,7 @@ void cPS2MemCard::Update()
         break;
     case 35:
         if (D_004A3940 != 1) {
-            cPS2MemCard_clearFileDirEntry(this);
+            this->clearFileDirEntry();
         }
         D_004A3940 = 0;
         break;
@@ -3185,13 +3183,13 @@ void cPS2MemCard::Update()
         if (mDevices[mDevice].mFormat != 0) {
             break;
         }
-        cPS2MemCard_issueFormat(this);
+        this->issueFormat();
         return;
     case 19:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        cPS2MemCard_startDeleteSave(this);
+        this->startDeleteSave();
         return;
     case 40:
     case 44:
@@ -3202,7 +3200,7 @@ void cPS2MemCard::Update()
         mIconFileData = 0;
         mIconFileSize = 0;
         ASYNCFILE_release(mIconFileHandle, &mIconFileData, &mIconFileSize);
-        cPS2MemCard_enterState(this, mState + 1);
+        this->enterState(mState + 1);
         return;
     case 22:
     case 28:
@@ -3211,23 +3209,23 @@ void cPS2MemCard::Update()
     case 45:
     case 49:
         mFileDescriptor = D_004A3940;
-        cPS2MemCard_enterState(this, mState + 1);
+        this->enterState(mState + 1);
         return;
     case 20:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        cPS2MemCard_enterState(this, 36);
+        this->enterState(36);
         return;
     case 27:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        cPS2MemCard_enterState(this, 0x1C);
+        this->enterState(0x1C);
         return;
     case 55:
     case 56:
-        cPS2MemCard_enterState(this, 58);
+        this->enterState(58);
         return;
     case 36:
     case 38:
@@ -3238,24 +3236,24 @@ void cPS2MemCard::Update()
     case 54:
     case 57:
     case 58:
-        cPS2MemCard_enterState(this, mState + 1);
+        this->enterState(mState + 1);
         return;
     case 21:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        cPS2MemCard_enterState(this, 22);
+        this->enterState(22);
         return;
     case 23:
-        cPS2MemCard_enterState(this, 52);
+        this->enterState(52);
         return;
     case 29:
         if (D_004A3940 != mTransferSize) {
             D_004A3940 = -10001;
-            cPS2MemCard_enterState(this, 1);
+            this->enterState(1);
             return;
         }
-        cPS2MemCard_enterState(this, 53);
+        this->enterState(53);
         return;
     case 25:
         mFileInfoValid = 0;
@@ -3269,7 +3267,7 @@ void cPS2MemCard::Update()
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        cPS2MemCard_issueListDir(this);
+        this->issueListDir();
         return;
     case 61:
         mNumDirTable = D_004A3940;
@@ -3278,49 +3276,49 @@ void cPS2MemCard::Update()
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        cPS2MemCard_issueOpenFile(this);
+        this->issueOpenFile();
         return;
     case 73:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        cPS2MemCard_issueCloseFile(this);
+        this->issueCloseFile();
         return;
     case 65:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        cPS2MemCard_issueSeekFile(this);
+        this->issueSeekFile();
         return;
     case 71:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        cPS2MemCard_issueFlushFile(this);
+        this->issueFlushFile();
         return;
     case 67:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        cPS2MemCard_issueReadFile(this);
+        this->issueReadFile();
         return;
     case 69:
         if (((cMemCard*)this)->DidErrorOccur() != 0 || mFileDescriptor < 0) {
             break;
         }
-        cPS2MemCard_issueWriteFile(this);
+        this->issueWriteFile();
         return;
     case 75:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        cPS2MemCard_issueMakeDir(this);
+        this->issueMakeDir();
         return;
     case 77:
         if (((cMemCard*)this)->DidErrorOccur() != 0) {
             break;
         }
-        cPS2MemCard_issueDeletePath(this);
+        this->issueDeletePath();
         return;
     case 64:
         {
@@ -3335,7 +3333,7 @@ void cPS2MemCard::Update()
         break;
     found:
         sprintf(mIconFilePath, str_pct_s_pct_s_h, mFileSlots[mScanFileSlot].mFileName, str_icon_sys);
-        cPS2MemCard_enterState(this, 8);
+        this->enterState(8);
         return;
     case 52:
     case 53:
@@ -3349,14 +3347,14 @@ void cPS2MemCard::Update()
     }
     if (cPS2MemCard_GetLastError_i(this, mDevice) == -10
         || cPS2MemCard_GetLastError_i(this, mDevice) == -1) {
-        cPS2MemCard_clearDeviceInfo(this);
+        this->clearDeviceInfo();
     }
     if (cPS2MemCard_GetLastError_i(this, mDevice) == -10
         || cPS2MemCard_GetLastError_i(this, mDevice) == -2) {
-        cPS2MemCard_clearDirData(this);
+        this->clearDirData();
     }
     if (mState != 0) {
-        cPS2MemCard_enterState(this, 0);
+        this->enterState(0);
     }
 }
 #endif
@@ -3421,18 +3419,18 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_updateDisabledSlots);
  * name (slot 67, cPS2MemCard_HasFileName, returns 0) it subtracts the needed space while enough is left and otherwise
  * sets mDisabled to 1, the flag cPS2MemCard_IsFileSlotDisabled reads. cPS2MemCard_Update calls it in state 7.
  */
-extern "C" void cPS2MemCard_updateDisabledSlots(cPS2MemCard* self)
+void cPS2MemCard::updateDisabledSlots()
 {
     int i = 0;
-    int remain = ((cMemCard*)self)->GetFreeSpace();
-    int unit = ((cMemCard*)self)->SpaceRequired(self->mDataSize);
-    for (; i < self->mMaxFiles; i++) {
-        self->mFileSlots[i].mDisabled = 0;
-        if (((cMemCard*)self)->HasFileName(i) == 0) {
+    int remain = ((cMemCard*)this)->GetFreeSpace();
+    int unit = ((cMemCard*)this)->SpaceRequired(mDataSize);
+    for (; i < mMaxFiles; i++) {
+        mFileSlots[i].mDisabled = 0;
+        if (((cMemCard*)this)->HasFileName(i) == 0) {
             if (remain >= unit) {
                 remain -= unit;
             } else {
-                self->mFileSlots[i].mDisabled = 1;
+                mFileSlots[i].mDisabled = 1;
             }
         }
     }
@@ -3472,7 +3470,7 @@ void cPS2MemCard::CleanUp()
     self->mDevices[0].mLastError = 0;
     self->mDevices[0].mFormat = 0;
     self->mFileInfoValid = 0;
-    cPS2MemCard_clearDirData((cPS2MemCard*)self);
+    self->clearDirData();
 }
 #endif
 
@@ -3487,7 +3485,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_isResultInErrorRange);
  * @param status  the result code
  * @return true for -9999 .. -10
  */
-extern "C" bool cPS2MemCard_isResultInErrorRange(cPS2MemCard* self, unsigned int status)
+bool cPS2MemCard::isResultInErrorRange(unsigned int status)
 {
     return status + 9999 < 9990;
 }
@@ -3678,7 +3676,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsEncodingCorrect__FPv);
  *
  * @return 1
  */
-int cPS2MemCard_IsEncodingCorrect(void* self)
+int cPS2MemCard::IsEncodingCorrect()
 {
     return 0x1;
 }
@@ -3692,7 +3690,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsEncodingCorrect1__FPv);
  *
  * @return 1
  */
-int cPS2MemCard_IsEncodingCorrect1(void* self)
+int cPS2MemCard::IsEncodingCorrect1()
 {
     return 0x1;
 }
@@ -3706,7 +3704,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsRemovable1__FPv);
  *
  * @return 1
  */
-int cPS2MemCard_IsRemovable1(void* self)
+int cPS2MemCard::IsRemovable1()
 {
     return 0x1;
 }
@@ -3813,7 +3811,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_IsDamaged1__FPv);
  *
  * @return 0
  */
-int cPS2MemCard_IsDamaged1(void* self)
+int cPS2MemCard::IsDamaged1()
 {
     return 0;
 }
@@ -3862,12 +3860,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_selectDevice__FPvi);
  * @param device  the memory-card port (0 or 1)
  * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* cPS2MemCard_selectDevice(void* vself, int device)
+void* cPS2MemCard::selectDevice(int device)
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mDevice = device;
-    self->mGetInfoDevice = device;
-    return cPS2MemCard_enterState((cPS2MemCard*)self, 3);
+    mDevice = device;
+    mGetInfoDevice = device;
+    return enterState(3);
 }
 #endif
 
@@ -3880,11 +3877,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startListDir);
  *
  * @param name  the sceMcGetDir pattern (ASCII; no length check)
  */
-extern "C" void cPS2MemCard_startListDir(cPS2MemCard* self, const char* name)
+void cPS2MemCard::startListDir(const char* name)
 {
-    self->mNumDirTable = 0;
-    strcpy(self->mDirPattern, name);
-    cPS2MemCard_enterState(self, 0x3C);
+    mNumDirTable = 0;
+    strcpy(mDirPattern, name);
+    enterState(0x3C);
 }
 #endif
 
@@ -3902,16 +3899,16 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 61.
  * cPS2MemCard_Update calls it in state 60.
  */
-extern "C" void cPS2MemCard_issueListDir(cPS2MemCard* self)
+void cPS2MemCard::issueListDir()
 {
-    char* buf = (char*)&self->mDirTable[0];
+    char* buf = (char*)&mDirTable[0];
     MEM_fill(buf, 0, 0x1000);
-    int mcResult = sceMcGetDir(self->mDevice, 0, self->mDirPattern, 0, 0x40, buf);
+    int mcResult = sceMcGetDir(mDevice, 0, mDirPattern, 0, 0x40, buf);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 61);
+        enterState(61);
     }
 }
 #endif
@@ -3927,10 +3924,10 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param i  the entry index (0 .. mNumDirTable - 1; not checked)
  * @param dst  the output buffer (32 bytes is enough)
  */
-extern "C" void cPS2MemCard_getDirEntryName(cPS2MemCard* self, int i, char* dst)
+void cPS2MemCard::getDirEntryName(int i, char* dst)
 {
 
-    strcpy(dst, (char*)self->mDirTable[i].m_entryName);
+    strcpy(dst, (char*)mDirTable[i].m_entryName);
 }
 #endif
 
@@ -3981,11 +3978,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startOpenFile);
  * @param name  the file path (ASCII; no length check)
  * @param openMode  the sceMcOpen mode flags
  */
-extern "C" void cPS2MemCard_startOpenFile(cPS2MemCard* self, const char* name, int openMode)
+void cPS2MemCard::startOpenFile(const char* name, int openMode)
 {
-    self->mOpenMode = openMode;
-    strcpy(self->mFilePath, name);
-    cPS2MemCard_enterState(self, 0x3F);
+    mOpenMode = openMode;
+    strcpy(mFilePath, name);
+    enterState(0x3F);
 }
 #endif
 
@@ -4002,15 +3999,15 @@ extern int D_004A3940;
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 64.
  * cPS2MemCard_Update calls it in state 63.
  */
-extern "C" void cPS2MemCard_issueOpenFile(cPS2MemCard* self)
+void cPS2MemCard::issueOpenFile()
 {
-    self->mFileDescriptor = -1;
-    int mcResult = sceMcOpen(self->mDevice, 0, self->mFilePath, self->mOpenMode);
+    mFileDescriptor = -1;
+    int mcResult = sceMcOpen(mDevice, 0, mFilePath, mOpenMode);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 0x40);
+        enterState(0x40);
     }
 }
 #endif
@@ -4023,9 +4020,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startCloseFile__FPv);
  *
  * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* cPS2MemCard_startCloseFile(void* self)
+void* cPS2MemCard::startCloseFile()
 {
-    return cPS2MemCard_enterState((cPS2MemCard*)self, 73);
+    return ((cPS2MemCard*)this)->enterState(73);
 }
 #endif
 
@@ -4042,10 +4039,10 @@ extern int D_004A3940;
  * Issues the close of cPS2MemCard_startCloseFile: stores sceMcClose(mFileDescriptor) (sceMcClose) in D_004A3940 and calls
  * cPS2MemCard_enterState with state 74, without checking the result. cPS2MemCard_Update calls it in state 73.
  */
-extern "C" void cPS2MemCard_issueCloseFile(cPS2MemCard* self)
+void cPS2MemCard::issueCloseFile()
 {
-    D_004A3940 = sceMcClose(self->mFileDescriptor);
-    cPS2MemCard_enterState_v(self, 74);
+    D_004A3940 = sceMcClose(mFileDescriptor);
+    cPS2MemCard_enterState_v(this, 74);
 }
 #endif
 
@@ -4060,12 +4057,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startSeekFile__FPvii);
  * @param seekOrigin  the sceMcSeek origin
  * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* cPS2MemCard_startSeekFile(void* vself, int seekOffset, int seekOrigin)
+void* cPS2MemCard::startSeekFile(int seekOffset, int seekOrigin)
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mSeekOffset = seekOffset;
-    self->mSeekOrigin = seekOrigin;
-    return cPS2MemCard_enterState((cPS2MemCard*)self, 65);
+    mSeekOffset = seekOffset;
+    mSeekOrigin = seekOrigin;
+    return enterState(65);
 }
 #endif
 
@@ -4082,14 +4078,14 @@ extern int D_004A3940;
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 66.
  * cPS2MemCard_Update calls it in state 65.
  */
-extern "C" void cPS2MemCard_issueSeekFile(cPS2MemCard* self)
+void cPS2MemCard::issueSeekFile()
 {
-    int mcResult = sceMcSeek(self->mFileDescriptor, self->mSeekOffset, self->mSeekOrigin);
+    int mcResult = sceMcSeek(mFileDescriptor, mSeekOffset, mSeekOrigin);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 66);
+        enterState(66);
     }
 }
 #endif
@@ -4102,9 +4098,9 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startFlushFile__FPv);
  *
  * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* cPS2MemCard_startFlushFile(void* self)
+void* cPS2MemCard::startFlushFile()
 {
-    return cPS2MemCard_enterState((cPS2MemCard*)self, 71);
+    return ((cPS2MemCard*)this)->enterState(71);
 }
 #endif
 
@@ -4120,14 +4116,14 @@ extern int D_004A3940;
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 72.
  * cPS2MemCard_Update calls it in state 71.
  */
-extern "C" void cPS2MemCard_issueFlushFile(cPS2MemCard* self)
+void cPS2MemCard::issueFlushFile()
 {
-    int mcResult = sceMcFlush(self->mFileDescriptor);
+    int mcResult = sceMcFlush(mFileDescriptor);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 72);
+        enterState(72);
     }
 }
 #endif
@@ -4143,12 +4139,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startReadFile__FPvii);
  * @param ioSize  the number of bytes to read
  * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* cPS2MemCard_startReadFile(void* vself, int buffer, int ioSize)
+void* cPS2MemCard::startReadFile(int buffer, int ioSize)
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mBuffer = buffer;
-    self->mDataSize = ioSize;
-    return cPS2MemCard_enterState((cPS2MemCard*)self, 67);
+    mBuffer = buffer;
+    mDataSize = ioSize;
+    return enterState(67);
 }
 #endif
 
@@ -4165,14 +4160,14 @@ extern int D_004A3940;
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 68.
  * cPS2MemCard_Update calls it in state 67.
  */
-extern "C" void cPS2MemCard_issueReadFile(cPS2MemCard* self)
+void cPS2MemCard::issueReadFile()
 {
-    int mcResult = sceMcRead(self->mFileDescriptor, self->mBuffer, self->mDataSize);
+    int mcResult = sceMcRead(mFileDescriptor, mBuffer, mDataSize);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 68);
+        enterState(68);
     }
 }
 #endif
@@ -4188,12 +4183,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startWriteFile__FPvii);
  * @param ioSize  the number of bytes to write
  * @return cPS2MemCard_enterState's return register (it returns nothing)
  */
-void* cPS2MemCard_startWriteFile(void* vself, int buffer, int ioSize)
+void* cPS2MemCard::startWriteFile(int buffer, int ioSize)
 {
-    cPS2MemCard* self = (cPS2MemCard*)vself;
-    self->mBuffer = buffer;
-    self->mDataSize = ioSize;
-    return cPS2MemCard_enterState((cPS2MemCard*)self, 69);
+    mBuffer = buffer;
+    mDataSize = ioSize;
+    return enterState(69);
 }
 #endif
 
@@ -4210,14 +4204,14 @@ extern int D_004A3940;
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 70.
  * cPS2MemCard_Update calls it in state 69.
  */
-extern "C" void cPS2MemCard_issueWriteFile(cPS2MemCard* self)
+void cPS2MemCard::issueWriteFile()
 {
-    int mcResult = sceMcWrite(self->mFileDescriptor, self->mBuffer, self->mDataSize);
+    int mcResult = sceMcWrite(mFileDescriptor, mBuffer, mDataSize);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 70);
+        enterState(70);
     }
 }
 #endif
@@ -4233,11 +4227,11 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startMakeDir);
  * @param name  the directory path (ASCII; no length check)
  * @param requestValue  the value stored in mTransferSize
  */
-extern "C" void cPS2MemCard_startMakeDir(cPS2MemCard* self, const char* name, int requestValue)
+void cPS2MemCard::startMakeDir(const char* name, int requestValue)
 {
-    self->mTransferSize = requestValue;
-    strcpy(self->mFilePath, name);
-    cPS2MemCard_enterState(self, 75);
+    mTransferSize = requestValue;
+    strcpy(mFilePath, name);
+    enterState(75);
 }
 #endif
 
@@ -4253,14 +4247,14 @@ extern int D_004A3940;
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 76.
  * cPS2MemCard_Update calls it in state 75.
  */
-extern "C" void cPS2MemCard_issueMakeDir(cPS2MemCard* self)
+void cPS2MemCard::issueMakeDir()
 {
-    int mcResult = sceMcMkdir(self->mDevice, 0, self->mFilePath);
+    int mcResult = sceMcMkdir(mDevice, 0, mFilePath);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 76);
+        enterState(76);
     }
 }
 #endif
@@ -4274,10 +4268,10 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_startDeletePath);
  *
  * @param name  the path (ASCII; no length check)
  */
-extern "C" void cPS2MemCard_startDeletePath(cPS2MemCard* self, const char* name)
+void cPS2MemCard::startDeletePath(const char* name)
 {
-    strcpy(self->mFilePath, name);
-    cPS2MemCard_enterState(self, 77);
+    strcpy(mFilePath, name);
+    enterState(77);
 }
 #endif
 
@@ -4293,14 +4287,14 @@ extern int D_004A3940;
  * The result goes to D_004A3940; a negative one moves to the error state 1 (cPS2MemCard_enterState), otherwise to state 78.
  * cPS2MemCard_Update calls it in state 77.
  */
-extern "C" void cPS2MemCard_issueDeletePath(cPS2MemCard* self)
+void cPS2MemCard::issueDeletePath()
 {
-    int mcResult = sceMcDelete(self->mDevice, 0, self->mFilePath);
+    int mcResult = sceMcDelete(mDevice, 0, mFilePath);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
-        cPS2MemCard_enterState(self, 1);
+        enterState(1);
     } else {
-        cPS2MemCard_enterState(self, 78);
+        enterState(78);
     }
 }
 #endif

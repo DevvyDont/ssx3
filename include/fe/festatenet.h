@@ -57,6 +57,10 @@ CHECK_OFFSET(tFEStateNetMsgList, unk_00, 0x0);
 CHECK_OFFSET(tFEStateNetMsgList, mpNode, 0x4);
 CHECK_SIZE(tFEStateNetMsgList, 0x8);
 
+struct cUIListBox;
+struct online_ErrorEvent;
+struct online_NetErrorEvent;
+
 struct cFEStateNet : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] _vt$11cFEStateNet cFEStateNet_vtbl, stored by cFEStateNet_cFEStateNet/cFEStateNet_cFEStateNet1; subclasses
@@ -144,6 +148,60 @@ struct cFEStateNet : public cUIState {
     virtual bool onGainTransition(int) __asm__("cFEStateNet_onGainTransition__FPv");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNet_onWidgetEvent");
     virtual void onPopupEvent(cUIState* popup, unsigned int event) __asm__("cFEStateNet_onPopupEvent");
+    void showBuddyPresence(const char* name, int mode) __asm__("cFEStateNet_showBuddyPresence");
+    void publishPresence() __asm__("cFEStateNet_publishPresence");
+    void* validatePushState(cUIState* msg) __asm__("cFEStateNet_validatePushState");
+    int onNetEvent(int msg, void* data) __asm__("cFEStateNet_onNetEvent");
+    void showNetInterruptedAndLogOut() __asm__("cFEStateNet_showNetInterruptedAndLogOut");
+    void openKeyboardWithAsciiLabel(void* textObj, const char* staticLabel, char* inputText, int password, int popupId,
+                                    int maxChars)
+        __asm__("cFEStateNet_openKeyboardWithAsciiLabel");
+    void openKeyboardWithUnicodeLabel(void* textObj, int staticText, char* inputText, int password, int popupId,
+                                      int maxChars)
+        __asm__("cFEStateNet_openKeyboardWithUnicodeLabel");
+    void openKeyboardWithLabelID(void* textObj, int staticText, char* inputText, int password, int popupId,
+                                 int maxChars)
+        __asm__("cFEStateNet_openKeyboardWithLabelID");
+    void createKeyboard(void* textObj, int password, int popupId, int maxChars) __asm__("cFEStateNet_createKeyboard");
+    void onMessengerPopupEvent(cUIState* popup, int event) __asm__("cFEStateNet_onMessengerPopupEvent");
+    void onNestedChallengePopupEvent(cUIState* popup, unsigned int kind)
+        __asm__("cFEStateNet_onNestedChallengePopupEvent");
+    void handleDefaultPopupEvent(int id, int event) __asm__("cFEStateNet_handleDefaultPopupEvent");
+    void onAccountMemPopupEvent(cUIState* popup, int event) __asm__("cFEStateNet_onAccountMemPopupEvent");
+    void onKeyboardPopupEvent(cUIState* popup, int event) __asm__("cFEStateNet_onKeyboardPopupEvent");
+    void onChallengeLostPopupEvent(cUIState* popup, int event) __asm__("cFEStateNet_onChallengeLostPopupEvent");
+    void onWaitPlayerPopupEvent(int popup, int event, int extra) __asm__("cFEStateNet_onWaitPlayerPopupEvent");
+    void onDisconnectedPopupEvent(cUIState* popup, int event) __asm__("cFEStateNet_onDisconnectedPopupEvent");
+    void onNetInterruptedPopupEvent(cUIState* popup, int event) __asm__("cFEStateNet_onNetInterruptedPopupEvent");
+    void setTargetUser(const char* str) __asm__("cFEStateNet_setTargetUser");
+    char* getTargetUser() __asm__("cFEStateNet_getTargetUser__FPv");
+    void setMaskedText(const char* str) __asm__("cFEStateNet_setMaskedText");
+    void showDisconnectPopup() __asm__("cFEStateNet_showDisconnectPopup");
+    void fillYesNoListBox(cUIListBox* box, int value) __asm__("cFEStateNet_fillYesNoListBox");
+    void fillOnOffListBox(cUIListBox* box, int value) __asm__("cFEStateNet_fillOnOffListBox");
+    void openMessenger() __asm__("cFEStateNet_openMessenger");
+    void showPopup(cScreenPopup* popup) __asm__("cFEStateNet_showPopup");
+    void* createPopup() __asm__("cFEStateNet_createPopup");
+    void buildErrorPopup(void** popup, void* owner, online_ErrorEvent* data) __asm__("cFEStateNet_buildErrorPopup");
+    void blinkPendingHints() __asm__("cFEStateNet_blinkPendingHints");
+    void pollPendingMessages() __asm__("cFEStateNet_pollPendingMessages");
+    int getNetErrorText(online_NetErrorEvent* msg) __asm__("cFEStateNet_getNetErrorText");
+    void showWaitPlayerPopup() __asm__("cFEStateNet_showWaitPlayerPopup");
+    void showChallengeErrorPopup(int err) __asm__("cFEStateNet_showChallengeErrorPopup");
+    void showChallengeLostPopup(int err) __asm__("cFEStateNet_showChallengeLostPopup");
+    void openUserPopup(const char* playerName, int fiveOptions) __asm__("cFEStateNet_openUserPopup");
+    void refreshUserPopup(const char* playerName, int fiveOptions) __asm__("cFEStateNet_refreshUserPopup");
+    void fillUserPopup(cScreenPopup* popup, const char* namePtr, int fiveOptions, int selectedOption)
+        __asm__("cFEStateNet_fillUserPopup");
+    void openPlayerMessages(const char* playerName, void* popup, int event) __asm__("cFEStateNet_openPlayerMessages");
+    void toggleBlockPlayer(const char* playerName, int* outError) __asm__("cFEStateNet_toggleBlockPlayer");
+    void challengePlayer(const char* playerName, void* popup, int event, int fromPopup)
+        __asm__("cFEStateNet_challengePlayer");
+    void toggleBuddy(const char* playerName, int* outError) __asm__("cFEStateNet_toggleBuddy");
+    void showMaxBuddiesPopup() __asm__("cFEStateNet_showMaxBuddiesPopup");
+    void swallowFirstOptionPopupEvent(void* popup, int kind) __asm__("cFEStateNet_swallowFirstOptionPopupEvent");
+    void setLeavingOnline() __asm__("cFEStateNet_setLeavingOnline");
+    void setUserPopupOpen(int value) __asm__("cFEStateNet_setUserPopupOpen");
 };
 
 CHECK_OFFSET(cFEStateNet, mHasFocus, 0x048);

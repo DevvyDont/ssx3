@@ -152,10 +152,9 @@ INCLUDE_ASM("render/ps2graphicsman", cTextureMan_initTempHeap__FPvii);
  * @param size  the heap size, in 32-bit words
  * @return nothing meaningful: vramHeap_init returns nothing, though the definition is declared void*
  */
-void* cTextureMan_initTempHeap(void* vself, int start, int size)
+void* cTextureMan::initTempHeap(int start, int size)
 {
-    cTextureMan* self = (cTextureMan*)vself;
-    return vramHeap_init(self->mTempHeap, start, size, &self->m_pTexInfo[0]);
+    return vramHeap_init(mTempHeap, start, size, &m_pTexInfo[0]);
 }
 #endif
 
@@ -173,17 +172,17 @@ void cPSPGraphicsMan_PurgeBindTexIDs_1(void* self) __asm__("cTextureMan_PurgeBin
  * +0x4350, vramHeap_freeUnlockedBlocks), and sets the per-context bound texture ids (+0x1F4C, two words) and the loaded-CLUT texture
  * (+0x1F54) to -1. cPS2GraphicsMan_Purge calls it on mTexMan.
  */
-extern "C" void cTextureMan_purgeAll(cTextureMan* self)
+void cTextureMan::purgeAll()
 {
     int i;
     cTextureMan_PurgeNonBindTexIDs();
-    cPSPGraphicsMan_PurgeBindTexIDs_1(self);
-    vramHeap_freeUnlockedBlocks(self->mMainHeap);
-    vramHeap_freeUnlockedBlocks(self->mTempHeap);
+    cPSPGraphicsMan_PurgeBindTexIDs_1(this);
+    vramHeap_freeUnlockedBlocks(mMainHeap);
+    vramHeap_freeUnlockedBlocks(mTempHeap);
     for (i = 1; i >= 0; i--) {
-        ((int*)(&self->mBoundTex[0]))[i] = -1;
+        ((int*)(&mBoundTex[0]))[i] = -1;
     }
-    self->mCLUTTex = -1;
+    mCLUTTex = -1;
 }
 #endif
 
@@ -214,10 +213,10 @@ extern "C" int vramHeap_allocBlock(void* heap, int size, int idx, int other, int
  * @param size  the number of bytes wanted
  * @return the block's first GS page
  */
-extern "C" int cTextureMan_allocLockedPages(cTextureMan* self, int size)
+int cTextureMan::allocLockedPages(int size)
 {
-    int idx = vramHeap_allocBlock(self->mMainHeap, size, -1, -1, -1, 1);
-    char* node = *(char**)(((char*)self) + 0x3F50) + idx * 0x1C;
+    int idx = vramHeap_allocBlock(mMainHeap, size, -1, -1, -1, 1);
+    char* node = *(char**)(((char*)this) + 0x3F50) + idx * 0x1C;
     *(int*)node |= 0x22;
     *(int*)(node + 8) = 0x7FFFFFFF;
     return *(int*)node >> 13;
@@ -525,11 +524,11 @@ INCLUDE_ASM("render/ps2graphicsman", cTextureMan_unlockTexture);
  *
  * @param i  the texture id
  */
-extern "C" void cTextureMan_unlockTexture(cTextureMan* self, int i)
+void cTextureMan::unlockTexture(int i)
 {
-    tTexInfo* obj = self->m_pTexInfo[i].pTexInfo;
+    tTexInfo* obj = m_pTexInfo[i].pTexInfo;
     if (obj->mTexAddr != tTexInfo::kNoVRAM) {
-        char* sub = obj->mFormat != GM_TEXEL_INDEX8 ? self->mMainHeap : self->mTempHeap;
+        char* sub = obj->mFormat != GM_TEXEL_INDEX8 ? mMainHeap : mTempHeap;
         char* node = *(char**)(sub + 0x1FF0) + obj->mTexBlock * 0x1C;
         *(int*)node &= ~2;
     }
@@ -645,7 +644,7 @@ void cTextureMan::SetNewTextureData(int idx, void* data, int width, int height, 
             MEM_copy(tex->mCLUTData, clut, 4 << tex->mBPP);
         }
     }
-    cTextureMan_dropVramCopy(this, idx);
+    this->dropVramCopy(idx);
 }
 #endif
 
@@ -806,7 +805,7 @@ extern char D_0044B200[];
  * @param pkt  the DMA packet cursor
  */
 // PORT: 64-bit `ulong` DMA tag, pointer packed into the upper word
-extern "C" void cTextureMan_appendFixedPacketRef(cTextureMan* self, ulong** pkt)
+void cTextureMan::appendFixedPacketRef(ulong** pkt)
 {
     (*pkt)[0] = ((ulong)(int)D_0044B200 << 32) | 0x30000022;
     (*pkt)[1] = 0;
@@ -864,9 +863,9 @@ template <class T> static inline T Max_8170(T a, T b)
  * @param gif  the upload chain cursor
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void cTextureMan_buildPixelUpload(cTextureMan* self_, int idx, ulong** dma, ulong** gif)
+void cTextureMan::buildPixelUpload(int idx, ulong** dma, ulong** gif)
 {
-    sTexMgr_8170* self = (sTexMgr_8170*)self_;
+    sTexMgr_8170* self = (sTexMgr_8170*)this;
     sBXTex_8170* texture = self->texs[idx];
     int psm = texture->psm;
     ulong* dmaCursor = *dma;
@@ -953,7 +952,7 @@ extern "C" void cTextureMan_buildPixelUpload(cTextureMan* self_, int idx, ulong*
         height >>= 1;
         gifCursor += 22;
     }
-    cTextureMan_appendFixedPacketRef((cTextureMan*)self, &dmaCursor);
+    ((cTextureMan*)self)->appendFixedPacketRef(&dmaCursor);
     *dma = dmaCursor;
     *gif = gifCursor;
 }
@@ -1027,7 +1026,7 @@ extern "C" void cTextureMan_buildClutUpload(sPs2UpMgr* self, int idx, ulong** dm
     gifCursor[19] = 0xE;
     gifCursor[20] = 0;
     gifCursor[21] = 0x3F;
-    cTextureMan_appendFixedPacketRef((cTextureMan*)self, &dmaCursor);
+    ((cTextureMan*)self)->appendFixedPacketRef(&dmaCursor);
     gifCursor += 22;
     *dma = dmaCursor;
     *gif = gifCursor;
@@ -1079,14 +1078,14 @@ struct sUpMgr_8660 {
  * @param gifOut  the upload buffer cursor, updated when an upload chain was built
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void cTextureMan_ensureContextTextures(cTextureMan* self, int context1Tex, int context2Tex, int evictLevel, ulong** pp, void** gifOut)
+void cTextureMan::ensureContextTextures(int context1Tex, int context2Tex, int evictLevel, ulong** pp, void** gifOut)
 {
     ulong* cur = *pp;
     tTexInfo* objs[2];
     if (context1Tex < 0 && context2Tex < 0)
         return;
-    objs[0] = context1Tex >= 0 ? ((sUpMgr_8660*)self)->texs[context1Tex] : 0;
-    objs[1] = context2Tex >= 0 ? ((sUpMgr_8660*)self)->texs[context2Tex] : 0;
+    objs[0] = context1Tex >= 0 ? ((sUpMgr_8660*)this)->texs[context1Tex] : 0;
+    objs[1] = context2Tex >= 0 ? ((sUpMgr_8660*)this)->texs[context2Tex] : 0;
     int sent = 0;
     ulong* gif = 0;
     for (int k = 0; k < 2; k++) {
@@ -1098,18 +1097,18 @@ extern "C" void cTextureMan_ensureContextTextures(cTextureMan* self, int context
         int other = context1Tex;
         if (k == 0)
             other = context2Tex;
-        tTexInfo* texRecord = ((sUpMgr_8660*)self)->texs[idx];
+        tTexInfo* texRecord = ((sUpMgr_8660*)this)->texs[idx];
         sUpHeap_8660* heap;
         int shift;
         if (((unsigned int)texRecord->mFormat) == GM_TEXEL_INDEX8) {
-            heap = (sUpHeap_8660*)(((char*)self) + 0x4350);
+            heap = (sUpHeap_8660*)(((char*)this) + 0x4350);
             shift = 2;
         } else {
-            heap = (sUpHeap_8660*)(((char*)self) + 0x1F60);
+            heap = (sUpHeap_8660*)(((char*)this) + 0x1F60);
             shift = 0;
         }
         if (texRecord->mTexAddr < 0) {
-            ((sUpMgr_8660*)self)->state[k] = -1;
+            ((sUpMgr_8660*)this)->state[k] = -1;
             int n = vramHeap_allocBlock(heap, texRecord->mVRAMSize, idx, other, evictLevel, 1);
             sUpNode_8660* nd = &heap->nodes[n];
             int fl = nd->flags;
@@ -1117,20 +1116,20 @@ extern "C" void cTextureMan_ensureContextTextures(cTextureMan* self, int context
             texRecord->mTexAddr = (fl >> 8) << shift;
             if (gif == 0)
                 gif = cPS2ScratchPad_claimBuffer(D_004A4474, *(unsigned int*)gifOut, -1, 0);
-            cTextureMan_buildPixelUpload(self, idx, &cur, &gif);
+            buildPixelUpload(idx, &cur, &gif);
             sent = 1;
         }
         if (((int)texRecord->mCLUTData) != 0 && texRecord->mCLUTAddr < 0) {
-            self->mCLUTTex = -1;
-            int n = vramHeap_allocBlock(self->mMainHeap, ((unsigned int)texRecord->mFormat) - 11 < 2 ? 0x100 : 0x400, idx, other, evictLevel, 0);
-            int* nodeFlags = &((sUpHeap_8660*)(((char*)self) + 0x1F60))->nodes[n].flags;
+            mCLUTTex = -1;
+            int n = vramHeap_allocBlock(mMainHeap, ((unsigned int)texRecord->mFormat) - 11 < 2 ? 0x100 : 0x400, idx, other, evictLevel, 0);
+            int* nodeFlags = &((sUpHeap_8660*)(((char*)this) + 0x1F60))->nodes[n].flags;
             int fl = *nodeFlags | 4;
             *nodeFlags = fl;
             texRecord->mCLUTBlock = n;
             texRecord->mCLUTAddr = fl >> 8;
             if (gif == 0)
                 gif = cPS2ScratchPad_claimBuffer(D_004A4474, *(unsigned int*)gifOut, -1, 0);
-            cTextureMan_buildClutUpload((sPs2UpMgr*)self, idx, &cur, &gif);
+            cTextureMan_buildClutUpload((sPs2UpMgr*)this, idx, &cur, &gif);
             sent = 1;
         }
     }
@@ -1144,9 +1143,9 @@ extern "C" void cTextureMan_ensureContextTextures(cTextureMan* self, int context
         cur += 4;
     }
     if (context1Tex >= 0)
-        cTextureMan_selectContextTexture(self, context1Tex, 0, &cur);
+        selectContextTexture(context1Tex, 0, &cur);
     if (context2Tex >= 0)
-        cTextureMan_selectContextTexture(self, context2Tex, 1, &cur);
+        selectContextTexture(context2Tex, 1, &cur);
     *pp = cur;
 }
 #endif
@@ -1223,15 +1222,15 @@ static inline int levelBlocks_8970(char* vt, int lv, int shift)
  * @param dma  the DMA chain cursor
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void cTextureMan_selectContextTexture(cTextureMan* self, int idx, int slot, ulong** dma)
+void cTextureMan::selectContextTexture(int idx, int slot, ulong** dma)
 {
     ulong* packet = *dma;
     int off = slot << 2;
-    cTextureMan* bound = (cTextureMan*)((char*)&self->mBoundTex[0]);
+    cTextureMan* bound = (cTextureMan*)((char*)&mBoundTex[0]);
     int* cur = (int*)(((char*)bound) + off);
     if (*cur != idx) {
         *cur = idx;
-        tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
+        tTexInfo* tex = m_pTexInfo[idx].pTexInfo;
         int rTex0, rTex1, rMip1, rMip2;
         if (slot == 0) {
             rTex0 = 6;
@@ -1282,16 +1281,16 @@ extern "C" void cTextureMan_selectContextTexture(cTextureMan* self, int idx, int
         int caddr = tex->mCLUTAddr;
         int cbp = 0;
         if (caddr >= 0) {
-            self->mCLUTTex = idx;
+            mCLUTTex = idx;
             cbp = caddr;
         }
         packet[2] = tex->mTEX0 | ((ulong)tex->mTexAddr | ((ulong)cbp << 37));
         packet[3] = rTex0;
         packet += 4;
-    } else if (self->mCLUTTex != idx) {
-        tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
+    } else if (mCLUTTex != idx) {
+        tTexInfo* tex = m_pTexInfo[idx].pTexInfo;
         if (tex->mCLUTAddr >= 0) {
-            self->mCLUTTex = idx;
+            mCLUTTex = idx;
             packet[0] = 0x10000003;
             packet[1] = 0;
             packet[2] = 0;
@@ -1321,22 +1320,22 @@ extern "C" void vramHeap_freeTextureBlocks(void* list, int i);
  *
  * @param idx  the texture id
  */
-extern "C" void cTextureMan_dropVramCopy(cTextureMan* self, int idx)
+void cTextureMan::dropVramCopy(int idx)
 {
-    tTexInfo* tex = self->m_pTexInfo[idx].pTexInfo;
+    tTexInfo* tex = m_pTexInfo[idx].pTexInfo;
     if (tex->mTexAddr != tTexInfo::kNoVRAM) {
         if (tex->mFormat != GM_TEXEL_INDEX8) {
-            vramHeap_freeTextureBlocks(self->mMainHeap, idx);
+            vramHeap_freeTextureBlocks(mMainHeap, idx);
         } else {
-            vramHeap_freeTextureBlocks(self->mTempHeap, idx);
+            vramHeap_freeTextureBlocks(mTempHeap, idx);
         }
     }
     int unbound = -1;
-    int* bound = (int*)(&self->mBoundTex[0]);
+    int* bound = (int*)(&mBoundTex[0]);
     for (int i = 1; i >= 0; i--) {
         bound[i] = unbound;
     }
-    self->mCLUTTex = -1;
+    mCLUTTex = -1;
 }
 #endif
 

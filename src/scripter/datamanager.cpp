@@ -2417,27 +2417,27 @@ extern char* kpScriptMasterTableDebugFilename;
  * SetupBXEngine() is called with the script count, 10 and 0x4000.
  */
 // PORT: the file's 32-bit name offsets are rebased in place into pointers (tSSXHiveScriptNameDebug).
-extern "C" void cSSXScriptEngine_InitOnce(cSSXScriptEngine* self)
+void cSSXScriptEngine::InitOnce()
 {
     tSSXHiveScriptMasterTableHeader* hdr =
         (tSSXHiveScriptMasterTableHeader*)FILE_loadz(kpScriptMasterTableFilename, 0);
-    self->mpMasterTableHeader = hdr;
-    self->mpMasterTable = &hdr->masterTableStart;
+    mpMasterTableHeader = hdr;
+    mpMasterTable = &hdr->masterTableStart;
     char* base = (char*)FILE_loadz(kpScriptMasterTableDebugFilename, 0);
-    self->mpMasterTableDebug = base;
+    mpMasterTableDebug = base;
     if (base != 0) {
-        for (int i = 0; i < self->mpMasterTableHeader->numScripts; i++) {
-            self->mpMasterTable[i].debugNamePtr.pScriptName =
-                self->mpMasterTableDebug + self->mpMasterTable[i].debugNamePtr.scriptNameOffset;
+        for (int i = 0; i < mpMasterTableHeader->numScripts; i++) {
+            mpMasterTable[i].debugNamePtr.pScriptName =
+                mpMasterTableDebug + mpMasterTable[i].debugNamePtr.scriptNameOffset;
         }
     } else {
-        for (int i = 0; i < self->mpMasterTableHeader->numScripts; i++) {
-            self->mpMasterTable[i].debugNamePtr.pScriptName = 0;
+        for (int i = 0; i < mpMasterTableHeader->numScripts; i++) {
+            mpMasterTable[i].debugNamePtr.pScriptName = 0;
         }
     }
-    self->mNumFramesNoSkip = 0;
-    self->mNumAsyncs = 0;
-    cBXScriptEngine_SetupBXEngine(self, self->mpMasterTableHeader->numScripts, 10, 0x4000);
+    mNumFramesNoSkip = 0;
+    mNumAsyncs = 0;
+    cBXScriptEngine_SetupBXEngine(this, mpMasterTableHeader->numScripts, 10, 0x4000);
 }
 #endif
 

@@ -150,6 +150,9 @@ CHECK_SIZE(cAirMotion, 0x10);
 
 // cWipeoutMotion (cRiderHandler + 0x030, 0x70 bytes): motion state 2 (MS_Wipeout). Base cWipeoutMotionState
 // (0x00-0x40, [O] size 0x40).
+struct t4Vector;
+struct tPose;
+
 struct cWipeoutMotion {
     // [O] On Tour's enum cWipeoutMotionState::eWMotionState, names and values. [U] an airborne wipeout motion (1) sends
     // the wipeout control to its air state (cWipeoutControl_updateGround), a grounded one to the ground state.
@@ -184,6 +187,9 @@ struct cWipeoutMotion {
     void gainFocus(int prev) __asm__("cWipeoutMotion_gainFocus");
     void resolveAirMotion() __asm__("cWipeoutMotion_resolveAirMotion");
     void resolveGroundMotion() __asm__("cWipeoutMotion_resolveGroundMotion");
+    void throwItem(t4Vector* initVel, t4Vector* initAngVel, tPose* itemBoneID) __asm__("cWipeoutMotion_throwItem");
+    void stepThrownBoard() __asm__("cWipeoutMotion_stepThrownBoard");
+    void resolveThrownBoard() __asm__("cWipeoutMotion_resolveThrownBoard");
 };
 
 CHECK_OFFSET(cWipeoutMotion, WipeoutMotionState, 0x00);
@@ -1242,6 +1248,9 @@ CHECK_SIZE(cAirStreamerFX, 0x20);
 struct cAngerFX {
     cRider* mRider;    // 0x00 [R] virtual-base pointer to the shared cRider; [R] cAngerFX_cAngerFX
     char unk_004[0xC]; // 0x04 not laid out yet (see the unit's local view)
+
+    // Methods bound to their retail symbols by asm labels.
+    void clearViewState() __asm__("cAngerFX_clearViewState");
 };
 
 CHECK_OFFSET(cAngerFX, mRider, 0x00);
@@ -1370,6 +1379,13 @@ struct cDynamicSprayFX {
     float mLeanSide;                    // 0x12C (name ours) [U] cDynamicSprayFX_update: +-1 from PressMode, the anim and
                                         //       IsRidingFakie, else 0; cDynamicSprayFX_reset clears it; cDynamicSprayFX_scatterEmitPosition biases
                                         //       the emission point with it
+
+    // Methods bound to their retail symbols by asm labels.
+    void scatterEmitPosition(t4Vector* out) __asm__("cDynamicSprayFX_scatterEmitPosition");
+    void reset() __asm__("cDynamicSprayFX_reset");
+    void lookUpBones() __asm__("cDynamicSprayFX_lookUpBones");
+    void selectEmittersForLOD() __asm__("cDynamicSprayFX_selectEmittersForLOD");
+    void tuneBurstEmitters() __asm__("cDynamicSprayFX_tuneBurstEmitters");
 };
 
 CHECK_OFFSET(cDynamicSprayFX, mRider, 0x000);
@@ -1526,6 +1542,8 @@ struct cRiderHandler {
     void updateControl(tControlCmd* cmd) __asm__("cRiderHandler_updateControl");
     void updateRiderFX() __asm__("cRiderHandler_updateRiderFX");
     void writeToReplayFrame(cBxReplayFrame* data) __asm__("cRiderHandler_writeToReplayFrame");
+    void recordSprayBurst(void* pos, void* dir, int surfaceType, float x)
+        __asm__("cRiderHandler_recordSprayBurst__FPv");
 };
 
 // Virtual slots of _vt$13cRiderHandler (cRiderHandler_vtbl; [O] cRiderHandler's virtual order).

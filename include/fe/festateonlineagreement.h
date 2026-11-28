@@ -30,6 +30,8 @@
 #include "ui/uistate.h"
 #include "fe/festatenet.h"
 
+struct cFEStateNetHelpPopup;
+
 struct cFEStateOnlineAgreement : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateOnlineAgreement_vtbl (vtables.tsv; 32 slots), stored by
@@ -71,6 +73,9 @@ struct cFEStateOnlineAgreement : public cFEStateNet {
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
         __asm__("cFEStateOnlineAgreement_onWidgetMenu");
     virtual bool onGainTransition(int) __asm__("cFEStateOnlineAgreement_onGainTransition");
+    void buildTOSLines() __asm__("cFEStateOnlineAgreement_buildTOSLines");
+    void* onNetEvent() __asm__("cFEStateOnlineAgreement_onNetEvent__FPv");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateOnlineAgreement_fillHelpPopup");
 };
 
 CHECK_OFFSET(cFEStateOnlineAgreement, mpTOSLines, 0x6D0);

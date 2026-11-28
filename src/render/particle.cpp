@@ -3384,15 +3384,14 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_setClippedScissor);
  * clamped to width - 1 / height - 1, and [2] and [3] the size clamped to what is left of the screen (0 when negative).
  * cPS2GraphicsMan_SetViewportWindow and cPS2GraphicsMan_SetViewportPerspective call it.
  *
- * @param pS2GraphicsMan  the renderer (this)
  * @param x  the left edge in pixels
  * @param y  the top edge in pixels
  * @param w  the width in pixels
  * @param rectHeight  the height in pixels
  */
-extern "C" void cPS2GraphicsMan_setClippedScissor(cPS2GraphicsMan* pS2GraphicsMan, float x, float y, float w, float rectHeight)
+void cPS2GraphicsMan::setClippedScissor(float x, float y, float w, float rectHeight)
 {
-    cPS2GraphicsMan* self = pS2GraphicsMan;
+    cPS2GraphicsMan* self = this;
     int width = self->GetScreenWidth();
     int height = self->GetScreenHeight();
     if (x < 0.0f) {
@@ -3471,7 +3470,7 @@ void cPS2GraphicsMan::SetViewportWindow(float x, float y, float w, float rectHei
     ((&mViewportStack[0]))[mViewportDepth].mWindow[1] = y;
     ((&mViewportStack[0]))[mViewportDepth].mWindow[2] = w;
     ((&mViewportStack[0]))[mViewportDepth].mWindow[3] = rectHeight;
-    cPS2GraphicsMan_setClippedScissor((cPS2GraphicsMan*)this, x, y, w, rectHeight);
+    this->setClippedScissor(x, y, w, rectHeight);
     cPS2DeferManager_findOrAddScissor(((void*)mpDeferMan), mScissor);
 }
 #endif
@@ -3845,7 +3844,7 @@ extern "C" void cPS2GraphicsMan_SetViewportZBias(cPS2GraphicsMan* self, t4Vector
 {
     sViewportStack* view = &((&self->mViewportStack[0]))[self->mViewportDepth];
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        self->computeMatrices();
     }
     float depthOffset = DepthOffset7278(self, pos, dist);
     if (depthOffset != view->mZBias) {
@@ -4027,7 +4026,7 @@ void cPS2GraphicsMan::SetViewportOrthographic(float cx, float cy, float fx, floa
     ((float*)&(*(&mGuardOffset)).x)[1] = ty;
     ((float*)&(*(&mGuardOffset)).x)[2] = zhi;
     ((float*)&(*(&mGuardOffset)).x)[3] = 0.0f;
-    cPS2GraphicsMan_setClippedScissor((cPS2GraphicsMan*)this, x, y, w, viewHeight);
+    this->setClippedScissor(x, y, w, viewHeight);
     mSortZFar = 40000.0f;
     ((float*)&(*(&mSortZScale)).x)[0] = 1023.0f;
     ((float*)&(*(&mSortZScale)).x)[1] = 0.0f;
@@ -4343,7 +4342,7 @@ extern "C" void cPS2GraphicsMan_DrawSprite(cPS2GraphicsMan* self, t4Vector* pos,
     float* col)
 {
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices(self);
+        self->computeMatrices();
     }
     t4Vector clipPos = mtxApply_7CF0(&self->mScreenWorld, *pos);
     float sw = size[0];
@@ -4498,7 +4497,7 @@ extern "C" void cPS2GraphicsMan_DrawRotatedSprite(cPS2GraphicsMan* self, const t
     int* uv1, float* col, int count, float angle)
 {
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        self->computeMatrices();
     }
     float gsQ = 1.0f;
     t4VectorInit center = Project_81A0(self, pos);
@@ -4702,7 +4701,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
                               float x, float y, float sx, float sy, float su, float sv, float z)
 {
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        self->computeMatrices();
     }
     unsigned int buf = self->mVifCursor;
     // ORIGINAL-PTR: the GIF packet and the defer record are written through the EE's uncached-accelerated alias
@@ -4902,7 +4901,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font
                               float x, float y, float sx, float sy, float su, float sv, float z)
 {
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        self->computeMatrices();
     }
     unsigned int buf = self->mVifCursor;
     unsigned long* packetHead = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
@@ -5061,7 +5060,7 @@ void cPS2GraphicsMan::RenderTriStrip(int numVerts, tBxVertex* src, int)
     m_pCurrentDrawState->m_bitGroups[0] = (((int)(m_pCurrentDrawState)->m_bitGroups[0]) & ~0x3C0) | 0xC0;
     (*(int*)&m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
     if (mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)this);
+        this->computeMatrices();
     }
     int prim;
     unsigned long regs;
@@ -5166,42 +5165,42 @@ static inline unsigned long gsPrim_A260(int prim)
  * @return the vertex area: @p n entries of three quadwords (ST or unused, RGBAQ, XYZ2)
  */
 // PORT: PS2-only GS packet build (DMA tag + GIF tag + PRIM/TEX registers).
-extern "C" unsigned long* cPS2GraphicsMan_beginTriStripPacket(cPS2GraphicsMan* self, int n)
+unsigned long* cPS2GraphicsMan::beginTriStripPacket(int n)
 {
     unsigned int addr = (D_004A4380 ? (unsigned int)D_12B0 : (unsigned int)D_12B8) >> 3;
     int primType;
     long regList;
     D_004A4380 = 0;
-    ((sPtRenderState*)self->m_pCurrentDrawState)->m_bitGroups[0]
-            = (((sPtRenderState*)self->m_pCurrentDrawState)->m_bitGroups[0] & ~0x3C0) | 0xC0;
-    ((sPtRenderState*)self->m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
-    if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+    ((sPtRenderState*)m_pCurrentDrawState)->m_bitGroups[0]
+            = (((sPtRenderState*)m_pCurrentDrawState)->m_bitGroups[0] & ~0x3C0) | 0xC0;
+    ((sPtRenderState*)m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
+    if (mMatricesValid == 0) {
+        computeMatrices();
     }
-    if (((sPtRenderState*)self->m_pCurrentDrawState)->tex >= 0) {
+    if (((sPtRenderState*)m_pCurrentDrawState)->tex >= 0) {
         primType = 92;
         regList = 1042;
     } else {
         primType = 76;
         regList = 1055;
     }
-    unsigned int buf = self->mVifCursor;
-    self->mStripPacketStart = buf;
-    (*(unsigned long**)&self->mStripCursor) = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
-    ((unsigned long*)self->mStripCursor)[0] = (n * 3 + 4) | 0x10000000;
-    ((unsigned long*)self->mStripCursor)[1] = 0;
-    ((unsigned long*)self->mStripCursor)[2] = 0;
-    ((unsigned long*)self->mStripCursor)[3] = (unsigned long)((n * 3 + 2) << 16 | 0x6C008000U) << 32;
-    ((unsigned long*)self->mStripCursor)[4] = (unsigned long)(n | 0x8000) | gsPrim_A260(primType)
+    unsigned int buf = mVifCursor;
+    mStripPacketStart = buf;
+    (*(unsigned long**)&mStripCursor) = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
+    ((unsigned long*)mStripCursor)[0] = (n * 3 + 4) | 0x10000000;
+    ((unsigned long*)mStripCursor)[1] = 0;
+    ((unsigned long*)mStripCursor)[2] = 0;
+    ((unsigned long*)mStripCursor)[3] = (unsigned long)((n * 3 + 2) << 16 | 0x6C008000U) << 32;
+    ((unsigned long*)mStripCursor)[4] = (unsigned long)(n | 0x8000) | gsPrim_A260(primType)
             | ((unsigned long)0xC000 << 46);
-    ((unsigned long*)self->mStripCursor)[5] = regList;
-    ((unsigned long*)self->mStripCursor)[6] = (long)n * 3;
-    ((unsigned long*)self->mStripCursor)[7] = 0;
-    unsigned long* verts = ((unsigned long*)self->mStripCursor) + 8;
-    (*(unsigned long**)&self->mStripCursor) = verts + n * 6;
-    ((unsigned long*)self->mStripCursor)[0] = 0;
-    ((unsigned long*)self->mStripCursor)[1] = (unsigned long)(addr | 0x14000000) << 32;
-    (*(unsigned long**)&self->mStripCursor) += 2;
+    ((unsigned long*)mStripCursor)[5] = regList;
+    ((unsigned long*)mStripCursor)[6] = (long)n * 3;
+    ((unsigned long*)mStripCursor)[7] = 0;
+    unsigned long* verts = ((unsigned long*)mStripCursor) + 8;
+    (*(unsigned long**)&mStripCursor) = verts + n * 6;
+    ((unsigned long*)mStripCursor)[0] = 0;
+    ((unsigned long*)mStripCursor)[1] = (unsigned long)(addr | 0x14000000) << 32;
+    (*(unsigned long**)&mStripCursor) += 2;
     return verts;
 }
 #endif
@@ -5235,13 +5234,13 @@ extern "C" unsigned int cPS2ScratchPad_flushBufferTo(int dma, unsigned long* p, 
  * filling the vertices.
  */
 // PORT: uncached (0x30000000) pointers held in int.
-extern "C" void cPS2GraphicsMan_endTriStripPacket(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::endTriStripPacket()
 {
-    unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, ((unsigned long*)self->mStripCursor), 4);
-    self->mVifCursor = next;
-    unsigned int buf = self->mStripPacketStart;
-    cPS2DeferManager* ring = self->mpDeferMan;
-    sDrawState* rs = self->m_pCurrentDrawState;
+    unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, ((unsigned long*)mStripCursor), 4);
+    mVifCursor = next;
+    unsigned int buf = mStripPacketStart;
+    cPS2DeferManager* ring = mpDeferMan;
+    sDrawState* rs = m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
@@ -5252,11 +5251,11 @@ extern "C" void cPS2GraphicsMan_endTriStripPacket(cPS2GraphicsMan* self)
         deferEntry->key = key;
         deferEntry->flag = 0;
     }
-    self->mVifCursor += 0x10;
-    (*(int*)&self->m_pCurrentDrawState->m_bitGroups[0]) &= ~0x3C0;
-    (*(int*)&self->m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
-    self->mStripPacketStart = 0;
-    self->mStripCursor = 0;
+    mVifCursor += 0x10;
+    (*(int*)&m_pCurrentDrawState->m_bitGroups[0]) &= ~0x3C0;
+    (*(int*)&m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
+    mStripPacketStart = 0;
+    mStripCursor = 0;
 }
 #endif
 
@@ -5366,7 +5365,7 @@ static inline int Depth_A610(cPS2GraphicsMan* self, t4Vector v)
 {
     long r;
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        self->computeMatrices();
     }
     __asm__ __volatile__(
         "lqc2      $vf5, %1\n"
@@ -5477,7 +5476,7 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
         (self->m_pCurrentDrawState)++;
         ((sVEntry<void(void*, float)>*)VPTR_OF(cGraphicsMan, self))[124].fn(vthis(self, ((sVEntry<void(void*, float)>*)VPTR_OF(cGraphicsMan, self))[124]), 1.0f);
         if (self->mMatricesValid == 0) {
-            cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+            self->computeMatrices();
         }
         int matIdx = 0;
         sChunk_A610* chunk = (sChunk_A610*)(base + mdl->chunkOfs);
@@ -6054,110 +6053,111 @@ extern "C" void sceGsResetGraph(int a, int b, int c, int d);
  * @param flag  nonzero for output mode 80 (0x50) instead of 2 and TIMER_setHblankRate(3) instead of 1; kept in mDTV
  * @return true when the mode was set, false when the draw and z formats do not go together
  */
-extern "C" bool cPS2GraphicsMan_applyDisplayMode(cPS2GraphicsMan* self, unsigned int displayWidth, unsigned int displayHeight,
-                              unsigned int w, unsigned int bufferHeight, unsigned int psm, unsigned int psm2,
-                              unsigned int zpsm, short resetMode, short interlaceMode, short fieldMode, int flag)
+bool cPS2GraphicsMan::applyDisplayMode(unsigned int displayWidth, unsigned int displayHeight, unsigned int w,
+                                       unsigned int bufferHeight, unsigned int psm, unsigned int psm2,
+                                       unsigned int zpsm, short resetMode, short interlaceMode, short fieldMode,
+                                       int flag)
 {
-    if (!gs_isZFormatCompatible((self), psm2, zpsm))
+    if (!gs_isZFormatCompatible((this), psm2, zpsm))
         return false;
 
-    self->mDisplayHeight = (int)displayHeight;
-    self->mFBWidth = (int)w;
-    self->mFBHeight = (int)bufferHeight;
-    self->mCurrentFBFormat = (int)psm2;
-    self->mDisplayFormat = (int)psm;
-    self->mCurrentZBFormat = (int)zpsm;
-    self->mInterlace = interlaceMode;
-    self->mFieldMode = fieldMode;
-    self->mCurrentFrameCount = 0;
-    self->mDisplayWidth = (int)displayWidth;
-    self->mOutputMode = 2;
-    self->mDTV = flag;
-    self->mMagV = 0;
+    mDisplayHeight = (int)displayHeight;
+    mFBWidth = (int)w;
+    mFBHeight = (int)bufferHeight;
+    mCurrentFBFormat = (int)psm2;
+    mDisplayFormat = (int)psm;
+    mCurrentZBFormat = (int)zpsm;
+    mInterlace = interlaceMode;
+    mFieldMode = fieldMode;
+    mCurrentFrameCount = 0;
+    mDisplayWidth = (int)displayWidth;
+    mOutputMode = 2;
+    mDTV = flag;
+    mMagV = 0;
 
     switch (displayWidth) {
     case 256:
-        self->mMagH = 9;
+        mMagH = 9;
         break;
     case 320:
-        self->mMagH = 7;
+        mMagH = 7;
         break;
     case 384:
-        self->mMagH = 6;
+        mMagH = 6;
         break;
     case 512:
-        self->mMagH = 4;
+        mMagH = 4;
         break;
     case 640:
-        self->mMagH = 3;
+        mMagH = 3;
         break;
     }
 
-    self->mFrameBufferWidth = (int)(((unsigned int)self->mFBWidth + 0x3F) >> 6);
-    self->mDisplayBufferWidth = (int)(((unsigned int)self->mDisplayWidth + 0x3F) >> 6);
+    mFrameBufferWidth = (int)(((unsigned int)mFBWidth + 0x3F) >> 6);
+    mDisplayBufferWidth = (int)(((unsigned int)mDisplayWidth + 0x3F) >> 6);
 
-    switch ((unsigned int)self->mDisplayFormat) {
+    switch ((unsigned int)mDisplayFormat) {
     case kGS_PSMCT32:
     case kGS_PSMCT24:
     case kGS_PSMZ32:
     case kGS_PSMZ24:
-        self->mDither = 0;
-        self->mDisplayPages = (unsigned int)self->mDisplayBufferWidth * (((unsigned int)self->mDisplayHeight
+        mDither = 0;
+        mDisplayPages = (unsigned int)mDisplayBufferWidth * (((unsigned int)mDisplayHeight
                 + 0x1F) >> 5);
         break;
     case kGS_PSMCT16:
     case kGS_PSMCT16S:
     case kGS_PSMZ16:
     case kGS_PSMZ16S:
-        self->mDither = 1;
-        self->mDisplayPages = (unsigned int)self->mDisplayBufferWidth * (((unsigned int)self->mDisplayHeight
+        mDither = 1;
+        mDisplayPages = (unsigned int)mDisplayBufferWidth * (((unsigned int)mDisplayHeight
                 + 0x3F) >> 6);
         break;
     }
 
-    switch ((unsigned int)self->mCurrentFBFormat) {
+    switch ((unsigned int)mCurrentFBFormat) {
     case kGS_PSMCT32:
     case kGS_PSMCT24:
     case kGS_PSMZ32:
     case kGS_PSMZ24:
-        self->mDrawPages = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
+        mDrawPages = (unsigned int)mFrameBufferWidth * (((unsigned int)mFBHeight + 0x1F) >> 5);
         break;
     case kGS_PSMCT16:
     case kGS_PSMCT16S:
     case kGS_PSMZ16:
     case kGS_PSMZ16S:
-        self->mDrawPages = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
+        mDrawPages = (unsigned int)mFrameBufferWidth * (((unsigned int)mFBHeight + 0x3F) >> 6);
         break;
     }
 
-    switch ((unsigned int)self->mCurrentZBFormat) {
+    switch ((unsigned int)mCurrentZBFormat) {
     case kGS_PSMZ32:
     case kGS_PSMZ24:
-        self->mZBufferPages = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
+        mZBufferPages = (unsigned int)mFrameBufferWidth * (((unsigned int)mFBHeight + 0x1F) >> 5);
         break;
     case kGS_PSMZ16:
     case kGS_PSMZ16S:
-        self->mZBufferPages = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
+        mZBufferPages = (unsigned int)mFrameBufferWidth * (((unsigned int)mFBHeight + 0x3F) >> 6);
         break;
     }
 
-    int gs = (int)self->mTexMan;
+    int gs = (int)mTexMan;
     cTextureMan_freeAllHeapBlocks(gs);
-    self->mDrawBufferPage = cTextureMan_allocLockedPages(gs, self->mDrawPages << 13);
-    self->mDisplayBufferPage = cTextureMan_allocLockedPages(gs, self->mDisplayPages << 13);
-    self->mCurrentZBufferPage = cTextureMan_allocLockedPages(gs, self->mZBufferPages << 13);
+    mDrawBufferPage = cTextureMan_allocLockedPages(gs, mDrawPages << 13);
+    mDisplayBufferPage = cTextureMan_allocLockedPages(gs, mDisplayPages << 13);
+    mCurrentZBufferPage = cTextureMan_allocLockedPages(gs, mZBufferPages << 13);
 
     // PORT: reads psm and psm2 as one 64-bit word.
-    if (*(long*)(unsigned int*)&self->mDisplayFormat == ((long)kGS_PSMCT24 << 32 | kGS_PSMCT24))
-        cTextureMan_initTempHeap((void*)(int)self->mTexMan, self->mDrawBufferPage << 11,
-                (unsigned int)self->mDisplayWidth * (unsigned int)self->mDisplayHeight
-                        + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight * 2);
-    else if ((unsigned int)self->mDisplayFormat == kGS_PSMCT24)
-        cTextureMan_initTempHeap((void*)(int)self->mTexMan, self->mDisplayBufferPage << 11,
-                (unsigned int)self->mDisplayWidth * (unsigned int)self->mDisplayHeight
-                        + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
+    if (*(long*)(unsigned int*)&mDisplayFormat == ((long)kGS_PSMCT24 << 32 | kGS_PSMCT24))
+        cTextureMan_initTempHeap((void*)(int)mTexMan, mDrawBufferPage << 11,
+                (unsigned int)mDisplayWidth * (unsigned int)mDisplayHeight
+                        + (unsigned int)mFBWidth * (unsigned int)mFBHeight * 2);
+    else if ((unsigned int)mDisplayFormat == kGS_PSMCT24)
+        cTextureMan_initTempHeap((void*)(int)mTexMan, mDisplayBufferPage << 11,
+                (unsigned int)mDisplayWidth * (unsigned int)mDisplayHeight
+                        + (unsigned int)mFBWidth * (unsigned int)mFBHeight);
     else
-        cTextureMan_initTempHeap((void*)(int)self->mTexMan, self->mCurrentZBufferPage << 11, (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
+        cTextureMan_initTempHeap((void*)(int)mTexMan, mCurrentZBufferPage << 11, (unsigned int)mFBWidth * (unsigned int)mFBHeight);
 
     FlushCache(0);
     *(volatile long*)0x12001000 = 8;
@@ -6165,9 +6165,9 @@ extern "C" bool cPS2GraphicsMan_applyDisplayMode(cPS2GraphicsMan* self, unsigned
     }
     *(volatile long*)0x12001000;
 
-    sceGsResetGraph(resetMode, self->mInterlace, flag ? 80 : self->mOutputMode, self->mFieldMode);
+    sceGsResetGraph(resetMode, mInterlace, flag ? 80 : mOutputMode, mFieldMode);
     TIMER_setHblankRate(flag ? 3 : 1);
-    cPS2GraphicsMan_flipDisplayBuffers(self, 0, 1);
+    flipDisplayBuffers(0, 1);
     return true;
 }
 #endif
@@ -6225,40 +6225,40 @@ struct sPtGfx_C198 {
  * @param src  the 16 dither values, row by row (only the low 3 bits are kept)
  */
 // PORT: 64-bit `long` bitfields (the GS-style register word).
-extern "C" void cPS2GraphicsMan_setDitherMatrix(cPS2GraphicsMan* self, int* src)
+void cPS2GraphicsMan::setDitherMatrix(int* src)
 {
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM00 = src[0];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM01 = src[1];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM02 = src[2];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM03 = src[3];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM10 = src[4];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM11 = src[5];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM12 = src[6];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM13 = src[7];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM20 = src[8];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM21 = src[9];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM22 = src[10];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM23 = src[11];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM30 = src[12];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM31 = src[13];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM32 = src[14];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM33 = src[15];
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM00Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM01Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM02Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM03Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM10Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM11Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM12Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM13Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM20Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM21Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM22Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM23Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM30Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM31Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM32Reserved = 0;
-    (*(sPtBits_C198*)&self->mDitherMatrix).DM33Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM00 = src[0];
+    (*(sPtBits_C198*)&mDitherMatrix).DM01 = src[1];
+    (*(sPtBits_C198*)&mDitherMatrix).DM02 = src[2];
+    (*(sPtBits_C198*)&mDitherMatrix).DM03 = src[3];
+    (*(sPtBits_C198*)&mDitherMatrix).DM10 = src[4];
+    (*(sPtBits_C198*)&mDitherMatrix).DM11 = src[5];
+    (*(sPtBits_C198*)&mDitherMatrix).DM12 = src[6];
+    (*(sPtBits_C198*)&mDitherMatrix).DM13 = src[7];
+    (*(sPtBits_C198*)&mDitherMatrix).DM20 = src[8];
+    (*(sPtBits_C198*)&mDitherMatrix).DM21 = src[9];
+    (*(sPtBits_C198*)&mDitherMatrix).DM22 = src[10];
+    (*(sPtBits_C198*)&mDitherMatrix).DM23 = src[11];
+    (*(sPtBits_C198*)&mDitherMatrix).DM30 = src[12];
+    (*(sPtBits_C198*)&mDitherMatrix).DM31 = src[13];
+    (*(sPtBits_C198*)&mDitherMatrix).DM32 = src[14];
+    (*(sPtBits_C198*)&mDitherMatrix).DM33 = src[15];
+    (*(sPtBits_C198*)&mDitherMatrix).DM00Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM01Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM02Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM03Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM10Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM11Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM12Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM13Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM20Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM21Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM22Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM23Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM30Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM31Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM32Reserved = 0;
+    (*(sPtBits_C198*)&mDitherMatrix).DM33Reserved = 0;
 }
 #endif
 
@@ -6283,12 +6283,12 @@ static inline float clamp_C570(float x, float hi)
  *
  * @param colour  the brightness per channel (1.0 = full)
  */
-extern "C" void cPS2GraphicsMan_setBrightnessColour(cPS2GraphicsMan* self, tRGB* colour)
+void cPS2GraphicsMan::setBrightnessColour(tRGB* colour)
 {
     float one = 1.0f;
-    self->mBrightnessColour[0] = fptoui(clamp_C570(colour->R, one) * 128.0f);
-    self->mBrightnessColour[1] = fptoui(clamp_C570(colour->G, one) * 128.0f);
-    self->mBrightnessColour[2] = fptoui(clamp_C570(colour->B, one) * 128.0f);
+    mBrightnessColour[0] = fptoui(clamp_C570(colour->R, one) * 128.0f);
+    mBrightnessColour[1] = fptoui(clamp_C570(colour->G, one) * 128.0f);
+    mBrightnessColour[2] = fptoui(clamp_C570(colour->B, one) * 128.0f);
 }
 #endif
 
@@ -6333,9 +6333,9 @@ static inline float clamp_C720(float x, float hi)
  *
  * @param alpha  the amount to fade the screen (0 = none, 1 = full)
  */
-extern "C" void cPS2GraphicsMan_setScreenFade(cPS2GraphicsMan* self, float alpha)
+void cPS2GraphicsMan::setScreenFade(float alpha)
 {
-    self->mScreenAlpha = fptoui((1.0f - clamp_C720(alpha, 1.0f)) * 128.0f);
+    mScreenAlpha = fptoui((1.0f - clamp_C720(alpha, 1.0f)) * 128.0f);
 }
 #endif
 
@@ -6347,9 +6347,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_getScreenFade);
  *
  * @return the fade amount (0 = none)
  */
-extern "C" float cPS2GraphicsMan_getScreenFade(cPS2GraphicsMan* self)
+float cPS2GraphicsMan::getScreenFade()
 {
-    unsigned int rawAlpha = (unsigned int)self->mScreenAlpha;
+    unsigned int rawAlpha = (unsigned int)mScreenAlpha;
     return 1.0f - (float)rawAlpha * 0.0078125f;
 }
 #endif
@@ -6661,10 +6661,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_setTextureFunction__FPv);
  *
  * @return nothing meaningful (cTextureMan_setTextureFunction returns nothing; the definition is declared void*)
  */
-void* cPS2GraphicsMan_setTextureFunction(void* vself)
+void* cPS2GraphicsMan::setTextureFunction()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return cTextureMan_setTextureFunction((int)self->mTexMan);
+    return cTextureMan_setTextureFunction((int)mTexMan);
 }
 #endif
 
@@ -6867,10 +6866,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_setTextureFilter__FPv);
  *
  * @return nothing meaningful (cTextureMan_setTextureFilter returns nothing; the definition is declared void*)
  */
-void* cPS2GraphicsMan_setTextureFilter(void* vself)
+void* cPS2GraphicsMan::setTextureFilter()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return cTextureMan_setTextureFilter((int)self->mTexMan);
+    return cTextureMan_setTextureFilter((int)mTexMan);
 }
 #endif
 
@@ -7405,24 +7403,23 @@ extern "C" void cPS2DeferManager_findOrAddViewState(void* ring, t4Matrix* m);
  * copy). Then hands mWorld to the defer manager with cPS2DeferManager_findOrAddViewState on mpDeferMan. cPS2GraphicsMan_updateNetMat calls it
  * when mMatricesValid is 0, and many draw paths in render/particle and render/bezierman call it directly.
  *
- * @param selfp  the cPS2GraphicsMan
  */
-extern "C" void cPS2GraphicsMan_computeMatrices(cPS2GraphicsMan* selfp)
+void cPS2GraphicsMan::computeMatrices()
 {
-    selfp->mMatricesValid = 1;
+    mMatricesValid = 1;
     t4Matrix copy;
     t4Matrix product;
-    vu0MulMat_D968(&product, ((&selfp->mScreenMatrix)), selfp->mCurrentView);
+    vu0MulMat_D968(&product, ((&mScreenMatrix)), mCurrentView);
     vu0CopyMat_D968(&copy, &product);
-    vu0CopyMat_D968(((&selfp->mScreenWorld)), &copy);
-    vu0CopyMat_D968(((&selfp->mWorld)), selfp->mCurrentView);
-    vu0MulMat_D968(&product, ((&selfp->mView)), ((&selfp->mWorld)));
+    vu0CopyMat_D968(((&mScreenWorld)), &copy);
+    vu0CopyMat_D968(((&mWorld)), mCurrentView);
+    vu0MulMat_D968(&product, ((&mView)), ((&mWorld)));
     vu0CopyMat_D968(&copy, &product);
-    vu0CopyMat_D968(((&selfp->mGuardBandMatrix)), &copy);
-    vu0MulMat_D968(&product, ((&selfp->mViewProj)), ((&selfp->mWorld)));
+    vu0CopyMat_D968(((&mGuardBandMatrix)), &copy);
+    vu0MulMat_D968(&product, ((&mViewProj)), ((&mWorld)));
     vu0CopyMat_D968(&copy, &product);
-    vu0CopyMat_D968(((&selfp->mNetMatrix)), &copy);
-    cPS2DeferManager_findOrAddViewState(selfp->mpDeferMan, ((&selfp->mWorld)));
+    vu0CopyMat_D968(((&mNetMatrix)), &copy);
+    cPS2DeferManager_findOrAddViewState(mpDeferMan, ((&mWorld)));
 }
 #endif
 
@@ -7485,7 +7482,7 @@ static inline t4Vector mtxApplyDBE8(t4Matrix* m, const t4Vector& v)
 int cPS2GraphicsMan::GetOutCode(const t4Vector& point)
 {
     if (mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices(this);
+        this->computeMatrices();
     }
     t4Vector screenPos = mtxApplyDBE8(&(*(&mScreenWorld)), point);
     int code = 0;
@@ -7562,7 +7559,7 @@ static inline int clampDD20(int n)
 extern "C" sPtVecDD20 cPS2GraphicsMan_GetScreenCoord(cPS2GraphicsMan* self, const sPtVecDD20* point)
 {
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        self->computeMatrices();
     }
     sPtVecDD20 screen = cPS2GraphicsMan_projectToScreen_DD20(self, point);
     screen.X() = (float)(int)(screen.X() - (2048.0f - (float)(((unsigned int)self->mFBWidth) >> 1)));
@@ -8036,7 +8033,7 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, t4Vecto
     packet += 2;
     self->bufAddr = cPS2ScratchPad_flushBufferTo(D_004A4474, packet, 4);
     if (self->texReady == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        ((cPS2GraphicsMan*)self)->computeMatrices();
     }
     cPS2DeferManager* ring = self->ring;
     unsigned int next = self->bufAddr;
@@ -8133,7 +8130,7 @@ void cPS2GraphicsMan::RenderDynamicParticleEmitter(const cDynamicEmitter* obj)
     m_pCurrentDrawState->m_bitGroups[0] = (((int)(m_pCurrentDrawState)->m_bitGroups[0]) & ~0x3C0) | 0x100;
     (*(int*)&m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
     if (mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)this);
+        this->computeMatrices();
     }
     int n = obj->m_numSubEmitters;
     sHdr_07A0 hdr;
@@ -8375,7 +8372,7 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
     self->top->m_bitGroups[0] = (self->top->m_bitGroups[0] & ~0x3C0) | 0x100;
     self->top->m_bitGroups[3] &= 0xC0000000;
     if (self->texReady == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        ((cPS2GraphicsMan*)self)->computeMatrices();
     }
     int n = obj->count;
     sPtSegHdr hdr;
@@ -8582,7 +8579,7 @@ void cPS2GraphicsMan::RenderSnowBoxFlakes(const tSnowBoxData& obj)
     m_pCurrentDrawState->m_bitGroups[1] = (((int)(m_pCurrentDrawState)->m_bitGroups[1]) & ~3) | 2;
     (*(int*)&m_pCurrentDrawState->m_bitGroups[2]) &= 0xE00003FF;
     if (mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)this);
+        this->computeMatrices();
     }
     sMat_1310 xform = MulMat_1310(*(sMat_1310*)&mViewProj, (*(sMat_1310*)&obj.mSnowBoxToWorldMatrix));
     unsigned int buf = mVifCursor;
@@ -8745,7 +8742,7 @@ void cPS2GraphicsMan::RenderSnowBoxFluffs(const tSnowBoxData& obj)
     m_pCurrentDrawState->m_bitGroups[1] = (((int)(m_pCurrentDrawState)->m_bitGroups[1]) & ~3) | 2;
     (*(int*)&m_pCurrentDrawState->m_bitGroups[2]) &= 0xE00003FF;
     if (mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)this);
+        this->computeMatrices();
     }
     sMat_16F0 xform = MulMat_16F0(*(sMat_16F0*)&mViewProj, (*(sMat_16F0*)&obj.mSnowBoxToWorldMatrix));
     unsigned int buf = mVifCursor;
@@ -8871,7 +8868,7 @@ extern "C" void cPS2GraphicsMan_RenderLineStrip(cPS2GraphicsMan* self, int n, sV
     int prevCode;
 
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices(self);
+        self->computeMatrices();
     }
     prevCode = -1;
     lineStripPacket_open(&ctx, (unsigned int*)(&self->mVifCursor));
@@ -8987,7 +8984,7 @@ extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, t4Matrix* Be
     self->m_pCurrentDrawState->m_bitGroups[0] = (((int)(self->m_pCurrentDrawState)->m_bitGroups[0]) & ~0x3C0) | 0xC0;
     (*(int*)&self->m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        self->computeMatrices();
     }
     unsigned int buf = self->mVifCursor;
     unsigned long* packet = (unsigned long*)(buf | 0x30000000);
@@ -9261,7 +9258,7 @@ extern "C" int intc_handleVblankStart(int cause, void* graphicsMan)
         // PORT: PS2-only debug trap (assert).
         __asm__ __volatile__("break 0");
     }
-    cPS2GraphicsMan_handleVblank((cPS2GraphicsMan*)graphicsMan);
+    ((cPS2GraphicsMan*)graphicsMan)->handleVblank();
     // PORT: PS2-only: re-enable interrupts (EI).
     __asm__ __volatile__("sync.l\n\tei");
     return 1;
@@ -9280,14 +9277,14 @@ extern "C" void iSignalSema(int sema);
  * mKickState to 5, clears the counter and signals mKickSema (iSignalSema). Called from the VBlank handler
  * intc_handleVblankStart.
  */
-extern "C" void cPS2GraphicsMan_handleVblank(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::handleVblank()
 {
-    int vblanks = ++self->mVblankCounter;
-    if (self->mKickState == cPS2GraphicsMan::kKick_Phase2Done) {
-        if (vblanks >= self->mMinFlipWait) {
-            self->mKickState = cPS2GraphicsMan::kKick_FlipDue;
-            self->mVblankCounter = 0;
-            iSignalSema(self->mKickSema);
+    int vblanks = ++mVblankCounter;
+    if (mKickState == cPS2GraphicsMan::kKick_Phase2Done) {
+        if (vblanks >= mMinFlipWait) {
+            mKickState = cPS2GraphicsMan::kKick_FlipDue;
+            mVblankCounter = 0;
+            iSignalSema(mKickSema);
         }
     }
 }
@@ -9315,7 +9312,7 @@ extern "C" int dmac_handleVif1End(int cause, void* graphicsMan)
         // PORT: PS2-only debug trap (assert).
         __asm__ __volatile__("break 0");
     }
-    cPS2GraphicsMan_handleVif1DmaEnd((cPS2GraphicsMan*)graphicsMan);
+    ((cPS2GraphicsMan*)graphicsMan)->handleVif1DmaEnd();
     // PORT: PS2-only: re-enable interrupts (EI).
     __asm__ __volatile__("sync.l\n\tei");
     return 1;
@@ -9334,13 +9331,13 @@ extern "C" void iSignalSema(int sema);
  * second phase; 3 (second phase sent) becomes 4, after which cPS2GraphicsMan_handleVblank waits for the flip. Called from the VIF1 DMA
  * handler dmac_handleVif1End.
  */
-extern "C" void cPS2GraphicsMan_handleVif1DmaEnd(cPS2GraphicsMan* self)
+void cPS2GraphicsMan::handleVif1DmaEnd()
 {
-    if (self->mKickState == cPS2GraphicsMan::kKick_Phase1Sent) {
-        self->mKickState = cPS2GraphicsMan::kKick_Phase1Done;
-        iSignalSema(self->mKickSema);
-    } else if (self->mKickState == cPS2GraphicsMan::kKick_Phase2Sent) {
-        self->mKickState = cPS2GraphicsMan::kKick_Phase2Done;
+    if (mKickState == cPS2GraphicsMan::kKick_Phase1Sent) {
+        mKickState = cPS2GraphicsMan::kKick_Phase1Done;
+        iSignalSema(mKickSema);
+    } else if (mKickState == cPS2GraphicsMan::kKick_Phase2Sent) {
+        mKickState = cPS2GraphicsMan::kKick_Phase2Done;
     }
 }
 #endif
@@ -9356,10 +9353,10 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_claimBuildBuffer);
  *
  * @return true when rendering into the buffer may start
  */
-extern "C" bool cPS2GraphicsMan_claimBuildBuffer(cPS2GraphicsMan* self)
+bool cPS2GraphicsMan::claimBuildBuffer()
 {
-    volatile int* arr = (volatile int*)(&self->mBufState[0]);
-    volatile int* bufState = &arr[self->mBuildIndex];
+    volatile int* arr = (volatile int*)(&mBufState[0]);
+    volatile int* bufState = &arr[mBuildIndex];
     if (*bufState == cPS2GraphicsMan::kBuf_Free || *bufState == cPS2GraphicsMan::kBuf_Building) {
         if (*bufState == cPS2GraphicsMan::kBuf_Free) {
             *bufState = cPS2GraphicsMan::kBuf_Building;
@@ -9380,9 +9377,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_isKickIdle);
  *
  * @return true when the DMA kick state is idle
  */
-extern "C" bool cPS2GraphicsMan_isKickIdle(cPS2GraphicsMan* self)
+bool cPS2GraphicsMan::isKickIdle()
 {
-    return (volatile unsigned int)self->mKickState == cPS2GraphicsMan::kKick_Idle;
+    return (volatile unsigned int)mKickState == cPS2GraphicsMan::kKick_Idle;
 }
 #endif
 
@@ -9401,7 +9398,7 @@ INCLUDE_ASM("render/particle", dma_runKickThread__FPv);
  */
 void* dma_runKickThread(void* self)
 {
-    return cPS2GraphicsMan_runDmaKickThread((cPS2GraphicsMan*)self);
+    return ((cPS2GraphicsMan*)self)->runDmaKickThread();
 }
 #endif
 
@@ -9435,16 +9432,16 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* self, int a,
  */
 // Renderer_DmaKickThread in REF structs/render.md.
 // PORT: PS2 hardware registers (D1/D2/D8 CHCR+TADR, VIF1 FIFO/STAT, GIF_MODE, GS CSR).
-extern "C" void* cPS2GraphicsMan_runDmaKickThread(cPS2GraphicsMan* selfp)
+void* cPS2GraphicsMan::runDmaKickThread()
 {
-    cPS2GraphicsMan* self = selfp;
+    cPS2GraphicsMan* self = this;
     for (;;) {
         WaitSema(self->mKickSema);
         WaitSema(self->mQueueMutex);
         if (self->mKickState == cPS2GraphicsMan::kKick_FlipDue) {
             self->mBufState[self->mInFlightIndex] = cPS2GraphicsMan::kBuf_Free;
             self->mKickState = cPS2GraphicsMan::kKick_Idle;
-            cPS2GraphicsMan_flipDisplayBuffers((cPS2GraphicsMan*)self, 1, 0);
+            self->flipDisplayBuffers(1, 0);
         }
         if (self->mKickState == cPS2GraphicsMan::kKick_Idle
             && self->mBufState[self->mQueuedIndex] == cPS2GraphicsMan::kBuf_Queued) {
@@ -9547,21 +9544,21 @@ static inline int gsCoord_382AF0(int v)
  * @param waitVsync  nonzero to wait for a vertical sync before writing the registers
  */
 // Renderer_SetDisplayRegs in REF structs/render.md.
-extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int en1, int waitVsync)
+void cPS2GraphicsMan::flipDisplayBuffers(int en1, int waitVsync)
 {
     ulong* gsPacket;
     int count;
 
-    count = ++vself->mCurrentFrameCount;
-    if (vself->mSkipNextPageFlip != 0) {
-        vself->mSkipNextPageFlip = 0;
+    count = ++mCurrentFrameCount;
+    if (mSkipNextPageFlip != 0) {
+        mSkipNextPageFlip = 0;
     } else {
-        if (vself->mFilterEnabled == 0 && (count & 1) == 0) {
-            vself->mCurrentFrameBufferPage = (int)((unsigned int)vself->mDisplayBufferPage);
-            vself->mDisplayBufferAddress = (int)((unsigned int)vself->mDrawBufferPage);
+        if (mFilterEnabled == 0 && (count & 1) == 0) {
+            mCurrentFrameBufferPage = (int)((unsigned int)mDisplayBufferPage);
+            mDisplayBufferAddress = (int)((unsigned int)mDrawBufferPage);
         } else {
-            vself->mCurrentFrameBufferPage = (int)((unsigned int)vself->mDrawBufferPage);
-            vself->mDisplayBufferAddress = (int)((unsigned int)vself->mDisplayBufferPage);
+            mCurrentFrameBufferPage = (int)((unsigned int)mDrawBufferPage);
+            mDisplayBufferAddress = (int)((unsigned int)mDisplayBufferPage);
         }
     }
 
@@ -9588,97 +9585,97 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int e
         *(volatile ulong*)0x12000000 = pmode | ((ulong)1 << 5) | ((ulong)0xFF << 8);
     }
     // SMODE2: INT, FFMD
-    *(volatile ulong*)0x12000020 = (ulong)vself->mInterlace | ((ulong)vself->mFieldMode << 1);
+    *(volatile ulong*)0x12000020 = (ulong)mInterlace | ((ulong)mFieldMode << 1);
     // DISPFB1: FBP, FBW, PSM
-    *(volatile ulong*)0x12000070 = (ulong)(unsigned int)vself->mDisplayBufferAddress
-                                 | ((ulong)(unsigned int)vself->mDisplayBufferWidth << 9)
-                                 | ((ulong)(unsigned int)vself->mDisplayFormat << 15);
+    *(volatile ulong*)0x12000070 = (ulong)(unsigned int)mDisplayBufferAddress
+                                 | ((ulong)(unsigned int)mDisplayBufferWidth << 9)
+                                 | ((ulong)(unsigned int)mDisplayFormat << 15);
     // DISPLAY1: DX, DY, MAGH, MAGV, DW, DH
-    if (vself->mDTV != 0) {
-        int w = (unsigned int)vself->mDisplayWidth;
-        int displayHeight = (unsigned int)vself->mDisplayHeight;
-        *(volatile ulong*)0x12000080 = (ulong)((int)(vself->m_screenOffset[0] * 4.0f + -43.0f) + 344)
-                                     | ((ulong)((int)(12.0f - vself->m_screenOffset[1] * 2.0f) + 35) << 12)
+    if (mDTV != 0) {
+        int w = (unsigned int)mDisplayWidth;
+        int displayHeight = (unsigned int)mDisplayHeight;
+        *(volatile ulong*)0x12000080 = (ulong)((int)(m_screenOffset[0] * 4.0f + -43.0f) + 344)
+                                     | ((ulong)((int)(12.0f - m_screenOffset[1] * 2.0f) + 35) << 12)
                                      | ((ulong)(1550 / w - 1) << 23)
                                      | ((ulong)(w * (1550 / w) - 1) << 32)
                                      | ((ulong)(displayHeight - 1) << 44);
     } else {
         int fieldMul = 1;
-        if (vself->mInterlace != 0) {
-            fieldMul = vself->mFieldMode == kGS_FFMD_FRAME ? 2 : 1;
+        if (mInterlace != 0) {
+            fieldMul = mFieldMode == kGS_FFMD_FRAME ? 2 : 1;
         }
-        *(volatile ulong*)0x12000080 = (ulong)(vself->m_screenOffset[0] * 8.0f + 5.0f + 636.0f)
-                                     | ((ulong)(50.0f - vself->m_screenOffset[1] * 2.0f) << 12)
-                                     | ((ulong)(unsigned int)vself->mMagH << 23)
-                                     | ((ulong)(unsigned int)vself->mMagV << 27)
+        *(volatile ulong*)0x12000080 = (ulong)(m_screenOffset[0] * 8.0f + 5.0f + 636.0f)
+                                     | ((ulong)(50.0f - m_screenOffset[1] * 2.0f) << 12)
+                                     | ((ulong)(unsigned int)mMagH << 23)
+                                     | ((ulong)(unsigned int)mMagV << 27)
                                      | ((ulong)2560 << 32)
-                                     | ((ulong)(((unsigned int)vself->mFBHeight - 1) * fieldMul) << 44);
+                                     | ((ulong)(((unsigned int)mFBHeight - 1) * fieldMul) << 44);
     }
     // BGCOLOR
     *(volatile ulong*)0x120000E0 = 0;
 
     gsPacket = (ulong*)((unsigned int)D_004FFCC0 | 0x30000000);
 
-    if (vself->mFilterEnabled != 0) {
+    if (mFilterEnabled != 0) {
         // Copy the draw buffer into the display buffer: GIFtag (11 x A+D)
         gsPacket[0] = ((ulong)1 << 60) | 11;
         gsPacket[1] = 0xE;
-        gsPacket[2] = (ulong)(unsigned int)vself->mDisplayBufferAddress
-                | ((ulong)(unsigned int)vself->mDisplayBufferWidth << 16)
-             | ((ulong)(unsigned int)vself->mDisplayFormat << 24) | ((ulong)0xFF000000 << 32);
+        gsPacket[2] = (ulong)(unsigned int)mDisplayBufferAddress
+                | ((ulong)(unsigned int)mDisplayBufferWidth << 16)
+             | ((ulong)(unsigned int)mDisplayFormat << 24) | ((ulong)0xFF000000 << 32);
         gsPacket[3] = 76; // FRAME_1 (display buffer)
         gsPacket[4] = 97;
         gsPacket[5] = 20; // TEX1_1
-        gsPacket[6] = (ulong)((unsigned int)vself->mCurrentFrameBufferPage << 5) | ((ulong)(unsigned int)vself->mFrameBufferWidth << 14)
-             | ((ulong)(unsigned int)vself->mCurrentFBFormat << 20) | ((ulong)10 << 26) | ((ulong)9 << 30);
+        gsPacket[6] = (ulong)((unsigned int)mCurrentFrameBufferPage << 5) | ((ulong)(unsigned int)mFrameBufferWidth << 14)
+             | ((ulong)(unsigned int)mCurrentFBFormat << 20) | ((ulong)10 << 26) | ((ulong)9 << 30);
         gsPacket[7] = 6; // TEX0_1 (draw buffer)
         gsPacket[8] = ((ulong)0x80 << 32) | 0x64;
         gsPacket[9] = 66; // ALPHA_1
         gsPacket[10] = 5;
         gsPacket[11] = 8; // CLAMP_1
-        gsPacket[12] = ((ulong)((unsigned int)vself->mDisplayWidth - 1) << 16)
-                | ((ulong)((unsigned int)vself->mDisplayHeight - 1) << 48);
+        gsPacket[12] = ((ulong)((unsigned int)mDisplayWidth - 1) << 16)
+                | ((ulong)((unsigned int)mDisplayHeight - 1) << 48);
         gsPacket[13] = 0x40; // SCISSOR_1
-        gsPacket[14] = ((ulong)((unsigned int)vself->mDisplayWidth - 1) << 16)
-                | ((ulong)((unsigned int)vself->mDisplayHeight - 1) << 48);
+        gsPacket[14] = ((ulong)((unsigned int)mDisplayWidth - 1) << 16)
+                | ((ulong)((unsigned int)mDisplayHeight - 1) << 48);
         gsPacket[15] = 65; // SCISSOR_2
-        gsPacket[16] = (ulong)((0x800 - ((unsigned int)vself->mDisplayWidth >> 1)) << 4)
-              | ((ulong)((0x800 - ((unsigned int)vself->mDisplayHeight >> 1)) << 4) << 32);
+        gsPacket[16] = (ulong)((0x800 - ((unsigned int)mDisplayWidth >> 1)) << 4)
+              | ((ulong)((0x800 - ((unsigned int)mDisplayHeight >> 1)) << 4) << 32);
         gsPacket[17] = 0x18; // XYOFFSET_1
-        gsPacket[18] = (ulong)(unsigned int)vself->mCurrentZBufferPage | ((ulong)((unsigned int)vself->mCurrentZBFormat - 0x30) << 24) | ((ulong)1 << 32);
+        gsPacket[18] = (ulong)(unsigned int)mCurrentZBufferPage | ((ulong)((unsigned int)mCurrentZBFormat - 0x30) << 24) | ((ulong)1 << 32);
         gsPacket[19] = 78; // ZBUF_1
         gsPacket[20] = 0x30000;
         gsPacket[21] = 71; // TEST_1
         gsPacket[22] = 0;
         gsPacket[23] = 0x3F; // TEXFLUSH
         {
-            int abe = (unsigned int)vself->mScreenAlpha != kGSAlphaOne;
+            int abe = (unsigned int)mScreenAlpha != kGSAlphaOne;
             // GIFtag: 1 loop, REGLIST {PRIM, RGBAQ}
             gsPacket[24] = ((ulong)2 << 60) | ((ulong)1 << 58) | 1;
             gsPacket[25] = 0x10;
             gsPacket[26] = ((ulong)abe << 6) | 0x11E; // sprite, IIP, TME, FST
         }
         {
-            int scaledRed = clamp_382AF0((int)((float)(unsigned int)vself->mBrightnessColour[0]
-                    * vself->mScreenBrightness), 0, 255);
-            int scaledGreen = clamp_382AF0((int)((float)(unsigned int)vself->mBrightnessColour[1]
-                    * vself->mScreenBrightness), 0, 255);
-            int scaledBlue = clamp_382AF0((int)((float)(unsigned int)vself->mBrightnessColour[2]
-                    * vself->mScreenBrightness), 0, 255);
+            int scaledRed = clamp_382AF0((int)((float)(unsigned int)mBrightnessColour[0]
+                    * mScreenBrightness), 0, 255);
+            int scaledGreen = clamp_382AF0((int)((float)(unsigned int)mBrightnessColour[1]
+                    * mScreenBrightness), 0, 255);
+            int scaledBlue = clamp_382AF0((int)((float)(unsigned int)mBrightnessColour[2]
+                    * mScreenBrightness), 0, 255);
             union { float f; int i; } unitQ;
             unitQ.f = 1.0f;
             gsPacket[27] = (ulong)scaledRed | ((ulong)scaledGreen << 8) | ((ulong)scaledBlue << 16)
-                    | ((ulong)(unsigned int)vself->mScreenAlpha << 24)
+                    | ((ulong)(unsigned int)mScreenAlpha << 24)
                   | ((ulong)unitQ.i << 32);
         }
         {
             // Vertical sprite strips, 32 pixels wide.
-            unsigned int w = (unsigned int)vself->mDisplayWidth;
+            unsigned int w = (unsigned int)mDisplayWidth;
             int stripW = 32;
             int n = w / stripW;
-            int du = ((unsigned int)vself->mFBWidth / n) << 4;
+            int du = ((unsigned int)mFBWidth / n) << 4;
             int x0 = gsCoord_382AF0(-(w >> 1));
-            int ybase = 0x8000 - (((unsigned int)vself->mDisplayHeight >> 1) << 4);
+            int ybase = 0x8000 - (((unsigned int)mDisplayHeight >> 1) << 4);
             int y0;
             int uoff;
             int xoff;
@@ -9689,7 +9686,7 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int e
             int stripV1;
             int y1;
             int i;
-            if (vself->mDTV != 0) {
+            if (mDTV != 0) {
                 uoff = 8;
                 xoff = 0;
                 yoff = 0;
@@ -9700,8 +9697,8 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int e
             }
             y0 = yoff + ybase;
             x = xoff + x0;
-            stripV1 = (((unsigned int)vself->mFBHeight - 1) << 4) + 8;
-            y1 = y0 + (((unsigned int)vself->mDisplayHeight - 1) << 4);
+            stripV1 = (((unsigned int)mFBHeight - 1) << 4) + 8;
+            y1 = y0 + (((unsigned int)mDisplayHeight - 1) << 4);
             stripU0 = uoff;
             stripU1 = stripU0 + du;
             // GIFtag: n + 1 loops, REGLIST {UV, XYZ2, UV, XYZ2}
@@ -9718,12 +9715,12 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int e
                 stripU1 += du;
                 gsPacket += 4;
             }
-            gsPacket[0] = (ulong)uoff | ((ulong)(((unsigned int)vself->mFBHeight << 4) - 8) << 16);
-            gsPacket[1] = (ulong)(unsigned int)gsCoord_382AF0(-((unsigned int)vself->mDisplayWidth >> 1))
-                 | ((ulong)((((unsigned int)vself->mDisplayHeight >> 1) << 4) + 32744) << 16) | ((ulong)0x8000 << 32);
-            gsPacket[2] = (ulong)((unsigned int)vself->mFBWidth << 4) | ((ulong)(((unsigned int)vself->mFBHeight << 4) - 8) << 16);
-            gsPacket[3] = (ulong)((((unsigned int)vself->mDisplayWidth >> 1) << 4) + 0x8000)
-                 | ((ulong)((((unsigned int)vself->mDisplayHeight >> 1) << 4) + 0x7FF8) << 16) | ((ulong)0x8000 << 32);
+            gsPacket[0] = (ulong)uoff | ((ulong)(((unsigned int)mFBHeight << 4) - 8) << 16);
+            gsPacket[1] = (ulong)(unsigned int)gsCoord_382AF0(-((unsigned int)mDisplayWidth >> 1))
+                 | ((ulong)((((unsigned int)mDisplayHeight >> 1) << 4) + 32744) << 16) | ((ulong)0x8000 << 32);
+            gsPacket[2] = (ulong)((unsigned int)mFBWidth << 4) | ((ulong)(((unsigned int)mFBHeight << 4) - 8) << 16);
+            gsPacket[3] = (ulong)((((unsigned int)mDisplayWidth >> 1) << 4) + 0x8000)
+                 | ((ulong)((((unsigned int)mDisplayHeight >> 1) << 4) + 0x7FF8) << 16) | ((ulong)0x8000 << 32);
             gsPacket += 4;
         }
     }
@@ -9731,21 +9728,21 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int e
     // Draw context: GIFtag (16 x A+D, EOP)
     gsPacket[0] = ((ulong)1 << 60) | 0x8000 | 16;
     gsPacket[1] = 0xE;
-    gsPacket[2] = (ulong)(unsigned int)vself->mCurrentFrameBufferPage | ((ulong)(unsigned int)vself->mFrameBufferWidth << 16)
-         | ((ulong)(unsigned int)vself->mCurrentFBFormat << 24);
+    gsPacket[2] = (ulong)(unsigned int)mCurrentFrameBufferPage | ((ulong)(unsigned int)mFrameBufferWidth << 16)
+         | ((ulong)(unsigned int)mCurrentFBFormat << 24);
     gsPacket[3] = 76; // FRAME_1
-    gsPacket[4] = (ulong)(unsigned int)vself->mCurrentFrameBufferPage | ((ulong)(unsigned int)vself->mFrameBufferWidth << 16)
-         | ((ulong)(unsigned int)vself->mCurrentFBFormat << 24) | ((ulong)0xFF000000 << 32);
+    gsPacket[4] = (ulong)(unsigned int)mCurrentFrameBufferPage | ((ulong)(unsigned int)mFrameBufferWidth << 16)
+         | ((ulong)(unsigned int)mCurrentFBFormat << 24) | ((ulong)0xFF000000 << 32);
     gsPacket[5] = 77; // FRAME_2
-    gsPacket[6] = (ulong)(unsigned int)vself->mCurrentZBufferPage | ((ulong)((unsigned int)vself->mCurrentZBFormat - 0x30) << 24);
+    gsPacket[6] = (ulong)(unsigned int)mCurrentZBufferPage | ((ulong)((unsigned int)mCurrentZBFormat - 0x30) << 24);
     gsPacket[7] = 78; // ZBUF_1
-    gsPacket[8] = (ulong)(unsigned int)vself->mCurrentZBufferPage | ((ulong)((unsigned int)vself->mCurrentZBFormat - 0x30) << 24);
+    gsPacket[8] = (ulong)(unsigned int)mCurrentZBufferPage | ((ulong)((unsigned int)mCurrentZBFormat - 0x30) << 24);
     gsPacket[9] = 79; // ZBUF_2
-    gsPacket[10] = (ulong)((0x800 - ((unsigned int)vself->mFBWidth >> 1)) << 4)
-          | ((ulong)((0x800 - ((unsigned int)vself->mFBHeight >> 1)) << 4) << 32);
+    gsPacket[10] = (ulong)((0x800 - ((unsigned int)mFBWidth >> 1)) << 4)
+          | ((ulong)((0x800 - ((unsigned int)mFBHeight >> 1)) << 4) << 32);
     gsPacket[11] = 0x18; // XYOFFSET_1
-    gsPacket[12] = (ulong)((0x800 - ((unsigned int)vself->mFBWidth >> 1)) << 4)
-          | ((ulong)((0x800 - ((unsigned int)vself->mFBHeight >> 1)) << 4) << 32);
+    gsPacket[12] = (ulong)((0x800 - ((unsigned int)mFBWidth >> 1)) << 4)
+          | ((ulong)((0x800 - ((unsigned int)mFBHeight >> 1)) << 4) << 32);
     gsPacket[13] = 25; // XYOFFSET_2
     gsPacket[14] = 0;
     gsPacket[15] = 74; // FBA_1
@@ -9757,9 +9754,9 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int e
     gsPacket[21] = 26; // PRMODECONT
     gsPacket[22] = 1;
     gsPacket[23] = 70; // COLCLAMP
-    gsPacket[24] = (unsigned int)vself->mDither;
+    gsPacket[24] = (unsigned int)mDither;
     gsPacket[25] = 69; // DTHE
-    gsPacket[26] = vself->mDitherMatrix;
+    gsPacket[26] = mDitherMatrix;
     gsPacket[27] = 68; // DIMX
     gsPacket[28] = 0;
     gsPacket[29] = 73; // PABE
@@ -9770,8 +9767,8 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int e
     gsPacket += 34;
     {
         // Brightness pass: sprite strips over the frame, 32 pixels wide.
-        unsigned int tw = (unsigned int)vself->mFBWidth;
-        unsigned int th = (unsigned int)vself->mFBHeight;
+        unsigned int tw = (unsigned int)mFBWidth;
+        unsigned int th = (unsigned int)mFBHeight;
         int n = tw >> 5;
         int oy = 0x800 - (th >> 1);
         int x = (0x800 - (tw >> 1)) << 4;
@@ -9784,7 +9781,7 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int e
         gsPacket[3] = 71; // TEST_1
         gsPacket[4] = 6;
         gsPacket[5] = 0; // PRIM: sprite
-        gsPacket[6] = (ulong)(vself->mClearColour | 0x80000000) | ((ulong)0x3F800000 << 32);
+        gsPacket[6] = (ulong)(mClearColour | 0x80000000) | ((ulong)0x3F800000 << 32);
         gsPacket[7] = 1; // RGBAQ
         gsPacket += 8;
         for (; n != 0; n--) {
@@ -9802,15 +9799,15 @@ extern "C" void cPS2GraphicsMan_flipDisplayBuffers(cPS2GraphicsMan* vself, int e
     // GIFtag (2 x A+D, EOP): SCISSOR_1/2 from the scissor rect
     gsPacket[0] = ((ulong)1 << 60) | 0x8000 | 2;
     gsPacket[1] = 0xE;
-    gsPacket[2] = (ulong)vself->mScissor[0]
-         | ((ulong)(vself->mScissor[0] + (vself->mScissor[2] - 1)) << 16)
-         | ((ulong)vself->mScissor[1] << 32)
-         | ((ulong)(vself->mScissor[1] + (vself->mScissor[3] - 1)) << 48);
+    gsPacket[2] = (ulong)mScissor[0]
+         | ((ulong)(mScissor[0] + (mScissor[2] - 1)) << 16)
+         | ((ulong)mScissor[1] << 32)
+         | ((ulong)(mScissor[1] + (mScissor[3] - 1)) << 48);
     gsPacket[3] = 0x40;
-    gsPacket[4] = (ulong)vself->mScissor[0]
-         | ((ulong)(vself->mScissor[0] + (vself->mScissor[2] - 1)) << 16)
-         | ((ulong)vself->mScissor[1] << 32)
-         | ((ulong)(vself->mScissor[1] + (vself->mScissor[3] - 1)) << 48);
+    gsPacket[4] = (ulong)mScissor[0]
+         | ((ulong)(mScissor[0] + (mScissor[2] - 1)) << 16)
+         | ((ulong)mScissor[1] << 32)
+         | ((ulong)(mScissor[1] + (mScissor[3] - 1)) << 48);
     gsPacket[5] = 65;
     gsPacket += 6;
     {
@@ -9833,7 +9830,6 @@ extern "C" void FlushCache(int);
  * Flushes the data cache and calls gs_uploadImage with the draw buffer (mCurrentFrameBufferPage << 5 blocks), mFBWidth
  * and mCurrentFBFormat. Nothing in the retail code references it.
  *
- * @param graphicsMan  the cPS2GraphicsMan
  * @param destX  destination x in pixels
  * @param destY  destination y in pixels
  * @param width  image width in pixels
@@ -9841,9 +9837,10 @@ extern "C" void FlushCache(int);
  * @param src  address of the pixels
  * @return 1
  */
-extern "C" int cPS2GraphicsMan_uploadImageToDrawBuffer(cPS2GraphicsMan* graphicsMan, int destX, int destY, int width, int height, int src) {
+int cPS2GraphicsMan::uploadImageToDrawBuffer(int destX, int destY, int width, int height, int src)
+{
     FlushCache(0);
-    gs_uploadImage(graphicsMan, src, graphicsMan->mCurrentFrameBufferPage << 5, width, height, graphicsMan->mFBWidth, graphicsMan->mCurrentFBFormat, destX, destY);
+    gs_uploadImage(this, src, mCurrentFrameBufferPage << 5, width, height, mFBWidth, mCurrentFBFormat, destX, destY);
     return 1;
 }
 #endif
@@ -9966,13 +9963,13 @@ extern "C" bool cPS2GraphicsMan_clipLineSegment_impl(cPS2GraphicsMan* self, tBxV
  * @param codes  the two clip codes, updated in place
  * @return true when part of the segment is inside, false when it is all outside
  */
-extern "C" bool cPS2GraphicsMan_clipLineSegment_impl(cPS2GraphicsMan* self, tBxVertex* verts, t4Vector* points, int* codes)
+bool cPS2GraphicsMan::clipLineSegment(tBxVertex* verts, t4Vector* points, int* codes)
 {
     int unionCodes = codes[0] | codes[1];
 
     if (unionCodes & 0x20) {
         float w0 = points[0].w;
-        float plane = self->mClipMin.w;
+        float plane = mClipMin.w;
         float frac = (w0 - plane) / (w0 - points[1].w);
         int k = (codes[0] & 0x20) == 0;
         float dx = frac * (points[0].x - points[1].x);
@@ -9980,8 +9977,8 @@ extern "C" bool cPS2GraphicsMan_clipLineSegment_impl(cPS2GraphicsMan* self, tBxV
         float tv = frac * points[1].w / plane;
         points[k].x = points[0].x - dx;
         points[k].y = points[0].y - dy;
-        points[k].z = self->mClipMin.z;
-        points[k].w = self->mClipMin.w;
+        points[k].z = mClipMin.z;
+        points[k].w = mClipMin.w;
         verts[k].u = verts[0].u + tv * (verts[1].u - verts[0].u);
         verts[k].v = verts[0].v + tv * (verts[1].v - verts[0].v);
         *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + tv * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
@@ -9989,16 +9986,16 @@ extern "C" bool cPS2GraphicsMan_clipLineSegment_impl(cPS2GraphicsMan* self, tBxV
         *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + tv * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
         *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + tv * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->mClipMin.x) codes[k] |= 2;
-        if (points[k].x > self->mClipMax.x) codes[k] |= 1;
-        if (points[k].y < self->mClipMin.y) codes[k] |= 8;
-        if (points[k].y > self->mClipMax.y) codes[k] |= 4;
+        if (points[k].x < mClipMin.x) codes[k] |= 2;
+        if (points[k].x > mClipMax.x) codes[k] |= 1;
+        if (points[k].y < mClipMin.y) codes[k] |= 8;
+        if (points[k].y > mClipMax.y) codes[k] |= 4;
         if (codes[0] & codes[1]) return false;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 0x10) {
         float w0 = points[0].w;
-        float plane = self->mClipMax.w;
+        float plane = mClipMax.w;
         float frac = (w0 - plane) / (w0 - points[1].w);
         int k = (codes[0] & 0x10) == 0;
         float dx = frac * (points[0].x - points[1].x);
@@ -10006,8 +10003,8 @@ extern "C" bool cPS2GraphicsMan_clipLineSegment_impl(cPS2GraphicsMan* self, tBxV
         float tv = frac * points[1].w / plane;
         points[k].x = points[0].x - dx;
         points[k].y = points[0].y - dy;
-        points[k].z = self->mClipMax.z;
-        points[k].w = self->mClipMax.w;
+        points[k].z = mClipMax.z;
+        points[k].w = mClipMax.w;
         verts[k].u = verts[0].u + tv * (verts[1].u - verts[0].u);
         verts[k].v = verts[0].v + tv * (verts[1].v - verts[0].v);
         *(int*)&((unsigned int*)&verts[k].r)[0] = (int)((float)((unsigned int*)&verts[0].r)[0] + tv * (float)(((unsigned int*)&verts[1].r)[0] - ((unsigned int*)&verts[0].r)[0]));
@@ -10015,21 +10012,21 @@ extern "C" bool cPS2GraphicsMan_clipLineSegment_impl(cPS2GraphicsMan* self, tBxV
         *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + tv * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
         *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + tv * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->mClipMin.x) codes[k] |= 2;
-        if (points[k].x > self->mClipMax.x) codes[k] |= 1;
-        if (points[k].y < self->mClipMin.y) codes[k] |= 8;
-        if (points[k].y > self->mClipMax.y) codes[k] |= 4;
+        if (points[k].x < mClipMin.x) codes[k] |= 2;
+        if (points[k].x > mClipMax.x) codes[k] |= 1;
+        if (points[k].y < mClipMin.y) codes[k] |= 8;
+        if (points[k].y > mClipMax.y) codes[k] |= 4;
         if (codes[0] & codes[1]) return false;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 8) {
-        float frac = (points[0].y - self->mClipMin.y) / (points[0].y - points[1].y);
+        float frac = (points[0].y - mClipMin.y) / (points[0].y - points[1].y);
         int k = (codes[0] & 8) == 0;
         float dx = frac * (points[0].x - points[1].x);
         float dz = frac * (points[0].z - points[1].z);
         float dw = frac * (points[0].w - points[1].w);
         points[k].x = points[0].x - dx;
-        points[k].y = self->mClipMin.y;
+        points[k].y = mClipMin.y;
         points[k].z = points[0].z - dz;
         points[k].w = points[0].w - dw;
         verts[k].u = verts[0].u + frac * (verts[1].u - verts[0].u);
@@ -10039,19 +10036,19 @@ extern "C" bool cPS2GraphicsMan_clipLineSegment_impl(cPS2GraphicsMan* self, tBxV
         *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + frac * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
         *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + frac * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->mClipMin.x) codes[k] |= 2;
-        if (points[k].x > self->mClipMax.x) codes[k] |= 1;
+        if (points[k].x < mClipMin.x) codes[k] |= 2;
+        if (points[k].x > mClipMax.x) codes[k] |= 1;
         if (codes[0] & codes[1]) return false;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 4) {
-        float frac = (points[0].y - self->mClipMax.y) / (points[0].y - points[1].y);
+        float frac = (points[0].y - mClipMax.y) / (points[0].y - points[1].y);
         int k = (codes[0] & 4) == 0;
         float dx = frac * (points[0].x - points[1].x);
         float dz = frac * (points[0].z - points[1].z);
         float dw = frac * (points[0].w - points[1].w);
         points[k].x = points[0].x - dx;
-        points[k].y = self->mClipMax.y;
+        points[k].y = mClipMax.y;
         points[k].z = points[0].z - dz;
         points[k].w = points[0].w - dw;
         verts[k].u = verts[0].u + frac * (verts[1].u - verts[0].u);
@@ -10061,13 +10058,13 @@ extern "C" bool cPS2GraphicsMan_clipLineSegment_impl(cPS2GraphicsMan* self, tBxV
         *(int*)&((unsigned int*)&verts[k].r)[2] = (int)((float)((unsigned int*)&verts[0].r)[2] + frac * (float)(((unsigned int*)&verts[1].r)[2] - ((unsigned int*)&verts[0].r)[2]));
         *(int*)&((unsigned int*)&verts[k].r)[3] = (int)((float)((unsigned int*)&verts[0].r)[3] + frac * (float)(((unsigned int*)&verts[1].r)[3] - ((unsigned int*)&verts[0].r)[3]));
         codes[k] = 0;
-        if (points[k].x < self->mClipMin.x) codes[k] |= 2;
-        if (points[k].x > self->mClipMax.x) codes[k] |= 1;
+        if (points[k].x < mClipMin.x) codes[k] |= 2;
+        if (points[k].x > mClipMax.x) codes[k] |= 1;
         if (codes[0] & codes[1]) return false;
         unionCodes = codes[0] | codes[1];
     }
     if (unionCodes & 2) {
-        float plane = self->mClipMin.x;
+        float plane = mClipMin.x;
         float frac = (points[0].x - plane) / (points[0].x - points[1].x);
         int k = (codes[0] & 2) == 0;
         float dy = frac * (points[0].y - points[1].y);
@@ -10086,7 +10083,7 @@ extern "C" bool cPS2GraphicsMan_clipLineSegment_impl(cPS2GraphicsMan* self, tBxV
         codes[k] = 0;
     }
     if (unionCodes & 1) {
-        float plane = self->mClipMax.x;
+        float plane = mClipMax.x;
         float frac = (points[0].x - plane) / (points[0].x - points[1].x);
         int k = (codes[0] & 1) == 0;
         float dy = frac * (points[0].y - points[1].y);
@@ -10477,8 +10474,8 @@ void cPS2GridMesh::Update(t3Vector* verts)
             t3Vector* lowerVert = &verts[next];
             t3Vector* upperVert = &verts[base];
             do {
-                cPS2GridMesh_storePosition(this, row->mPositions, k, upperVert);
-                cPS2GridMesh_storePosition(this, row->mPositions, k + 1, lowerVert);
+                this->storePosition(row->mPositions, k, upperVert);
+                this->storePosition(row->mPositions, k + 1, lowerVert);
                 k += 2;
                 upperVert++;
                 lowerVert++;
@@ -10587,10 +10584,10 @@ extern "C" void cPS2GridMesh_Update2(sPartGrid5530* self, t3Vector* pos, tARGB* 
             tARGB* nextCol = (tARGB*)((nextRowStart << 4) + (int)col);  // PORT: pointer in int
             tARGB* curCol = (tARGB*)((rowStart << 4) + (int)col);  // PORT: pointer in int
             do {
-                cPS2GridMesh_storeColour((cPS2GridMesh*)self, strip->col, k, ((float*)&curCol->A));
-                cPS2GridMesh_storePosition((cPS2GridMesh*)self, strip->pos, k, (t3Vector*)curPos);
-                cPS2GridMesh_storeColour((cPS2GridMesh*)self, strip->col, k + 1, ((float*)&nextCol->A));
-                cPS2GridMesh_storePosition((cPS2GridMesh*)self, strip->pos, k + 1, (t3Vector*)nextPos);
+                ((cPS2GridMesh*)self)->storeColour(strip->col, k, ((float*)&curCol->A));
+                ((cPS2GridMesh*)self)->storePosition(strip->pos, k, (t3Vector*)curPos);
+                ((cPS2GridMesh*)self)->storeColour(strip->col, k + 1, ((float*)&nextCol->A));
+                ((cPS2GridMesh*)self)->storePosition(strip->pos, k + 1, (t3Vector*)nextPos);
                 k += 2;
                 curPos++;
                 curCol++;
@@ -10693,9 +10690,9 @@ INCLUDE_ASM("render/particle", cPS2GridMesh_storePosition);
  * @param i  the vertex index within the strip
  * @param src  the position
  */
-extern "C" void cPS2GridMesh_storePosition(cPS2GridMesh* self, short* out, int i, t3Vector* src)
+void cPS2GridMesh::storePosition(short* out, int i, t3Vector* src)
 {
-    float scale = self->mPosToShort;
+    float scale = mPosToShort;
     t3Vector scaled;
     scaled.x = src->x * scale;
     scaled.y = src->y * scale;
@@ -10729,7 +10726,7 @@ static inline float partClampf(float x, float lo, float hi)
  * @param idx  the vertex index within the strip
  * @param colour  the colour as a, r, g, b floats
  */
-extern "C" void cPS2GridMesh_storeColour(cPS2GridMesh* self, unsigned short* buf, int idx, const float* colour)
+void cPS2GridMesh::storeColour(unsigned short* buf, int idx, const float* colour)
 {
     unsigned char red = (int)(partClampf(colour[1], 0.0f, 1.0f) * 32.0f);
     unsigned char green = (int)(partClampf(colour[2], 0.0f, 1.0f) * 32.0f);
@@ -10917,7 +10914,7 @@ extern "C" void cPS2GridMesh_Render1(sBez_5C10* self, sMat_5C10* mat, int tex, i
         self->buf = (self->buf + 1) & 1;
     }
     if (self->gfx->texReady == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self->gfx);
+        ((cPS2GraphicsMan*)self->gfx)->computeMatrices();
     }
     self->gfx->top->m_bitGroups[0] = (self->gfx->top->m_bitGroups[0] & ~0x3C0) | 0xC0;
     self->gfx->top->m_bitGroups[3] &= 0xC0000000;
@@ -11477,11 +11474,12 @@ extern "C" void cPS2GraphicsMan_sendTrailRibbon(void* self, void* verts, void* c
  * @param alphaScale  alpha multiplier passed for every trail
  * @param alphaStep  alpha step per vertex passed for every trail
  */
-extern "C" void cPS2GraphicsMan_drawTrailRibbons(void* self, BoardTrailInfoT* strips, int n, void* firstRing, void* secondRing, void* textured, float alphaScale, float alphaStep)
+void cPS2GraphicsMan::drawTrailRibbons(BoardTrailInfoT* strips, int n, void* firstRing, void* secondRing,
+                                       void* textured, float alphaScale, float alphaStep)
 {
     for (; n > 0; n--, strips++) {
         if (strips->stripLength >= 2) {
-            cPS2GraphicsMan_sendTrailRibbon(self, ((void*)strips->verts), ((void*)strips->startIndex), strips->stripLength, firstRing, secondRing, textured, alphaScale, alphaStep);
+            cPS2GraphicsMan_sendTrailRibbon(this, ((void*)strips->verts), ((void*)strips->startIndex), strips->stripLength, firstRing, secondRing, textured, alphaScale, alphaStep);
         }
     }
 }
@@ -11691,7 +11689,7 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
             | 0xC0;
     ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
     if (mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)this);
+        this->computeMatrices();
     }
     ((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1]
             = (((sRS_6E78*)m_pCurrentDrawState)->m_bitGroups[1] & ~0x400000) | 0x400000;
@@ -11732,7 +11730,7 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     AddQuad_6E78(pkt, mGuardOffset);
     UnpackEnd_6E78(pkt);
     DmaEnd_6E78(pkt, this);
-    cPS2GraphicsMan_drawTrailRibbons(this, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
+    this->drawTrailRibbons(strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
 
     // pass 2: TEST ztst gequal, FBA on
     DmaBegin_6E78(pkt, mVifCursor);
@@ -11743,7 +11741,7 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     GifEnd_6E78(pkt);
     DirectEnd_6E78(pkt);
     DmaEnd_6E78(pkt, this);
-    cPS2GraphicsMan_drawTrailRibbons(this, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
+    this->drawTrailRibbons(strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
 
     // pass 3: ZBUF unmasked, destination-alpha test, FBA off; guard band without depth
     DmaBegin_6E78(pkt, mVifCursor);
@@ -11771,7 +11769,7 @@ void cPS2GraphicsMan::RenderMultipleBoardTrails(BoardTrailInfoT* strips, int n)
     }
     UnpackEnd_6E78(pkt);
     DmaEnd_6E78(pkt, this);
-    cPS2GraphicsMan_drawTrailRibbons(this, strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
+    this->drawTrailRibbons(strips, n, 0, (void*)1, 0, 0.0f, 0.0f);
 
     // pass 4: full FRAME, TEST ztst gequal, FBA if enabled; then the edges
     DmaBegin_6E78(pkt, mVifCursor);
@@ -12053,7 +12051,7 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* ver
     self->m_pCurrentDrawState->m_bitGroups[0] = (((int)(self->m_pCurrentDrawState)->m_bitGroups[0]) & ~0x3C0) | 0xC0;
     (*(int*)&self->m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
     if (self->mMatricesValid == 0) {
-        cPS2GraphicsMan_computeMatrices((cPS2GraphicsMan*)self);
+        self->computeMatrices();
     }
     unsigned int buf = self->mVifCursor;
     MEM_fill((void*)D_004A5B84, 0, 0x30);
@@ -12123,14 +12121,14 @@ extern "C" void cPS2GraphicsMan_sendWakeRibbon_impl(cPS2GraphicsMan* self, tBxVe
  * @param dt  alpha step per vertex
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit VIF/GIF words are `ulong`.
-void cPS2GraphicsMan_sendWakeRibbon_impl(cPS2GraphicsMan* self, tBxVertex** strips, int start, int ring, int count, int firstRow, int secondRow, float alphaStart,
-                        float dt)
+void cPS2GraphicsMan::sendWakeRibbon(tBxVertex** strips, int start, int ring, int count, int firstRow, int secondRow,
+                                     float alphaStart, float dt)
 {
     unsigned int prog = (unsigned int)(D_004A43B0 ? D_3A00 : D_3A08) >> 3;
     int prim = 92;
     unsigned long regs = 1042;
     int first = 1;
-    unsigned long* packetCursor = (unsigned long*)(self->mVifCursor | 0x30000000);
+    unsigned long* packetCursor = (unsigned long*)(mVifCursor | 0x30000000);
     D_004A43B0 = 0;
     while (count != 0) {
         int n = count < 37 ? count : 36;
@@ -12237,7 +12235,7 @@ void cPS2GraphicsMan_sendWakeRibbon_impl(cPS2GraphicsMan* self, tBxVertex** stri
             first = 0;
         }
     }
-    self->mVifCursor = (unsigned int)packetCursor & 0x0FFFFFFF;
+    mVifCursor = (unsigned int)packetCursor & 0x0FFFFFFF;
 }
 #endif
 
@@ -12443,6 +12441,8 @@ INCLUDE_ASM("render/particle", cIrradiance_addLightFromDirection);
 #ifdef SKIP_ASM
 extern "C" void func_00389308(void* self, void* dst, float w, float x, float y, float z);
 
+extern "C" void cIrradiance_addLightFromDirection(void* self, const float* normal, void* dst);
+
 /**
  * Adds a light of colour @p dst arriving from direction @p normal to irradiance set @p self: calls func_00389308(self,
  * dst, 1.0, normal x, y, z).
@@ -12452,9 +12452,9 @@ extern "C" void func_00389308(void* self, void* dst, float w, float x, float y, 
  * @param normal  the direction the light comes from (x, y, z)
  * @param dst  the light colour (r, g, b)
  */
-extern "C" void cIrradiance_addLightFromDirection(void* self, const float* normal, void* dst)
+void cIrradiance::addLightFromDirection(const float* normal, void* dst)
 {
-    func_00389308(self, dst, 1.0f, normal[0], normal[1], normal[2]);
+    func_00389308(this, dst, 1.0f, normal[0], normal[1], normal[2]);
 }
 #endif
 
@@ -12517,14 +12517,13 @@ INCLUDE_ASM("render/particle", cIrradiance_addScaledW);
  *
  * cIrradiance_addSunTerm adds its sun term with it.
  *
- * @param dst  the set to add to
  * @param src  the set whose w components are added
  * @param dt  the factor
  */
-extern "C" void cIrradiance_addScaledW(cIrradiance* dst, cIrradiance* src, float dt)
+void cIrradiance::addScaledW(cIrradiance* src, float dt)
 {
     float* srcW = &src->mVectors[0].w;
-    float* dstW = &dst->mVectors[0].w;
+    float* dstW = &mVectors[0].w;
     for (int i = 0; i < 10; i++) {
         *dstW += *srcW * dt;
         dstW += 4;
@@ -13370,7 +13369,7 @@ static inline float clamp_38A6A8(float x, float hi)
  * @param point  the lit point
  * @param forceSrc  the world light
  */
-extern "C" void cIrradiance_addWorldLight(void* self, float* point, tLightRecord* forceSrc)
+void cIrradiance::addWorldLight(float* point, tLightRecord* forceSrc)
 {
     t4Vector n;
     t3Vector out;
@@ -13405,7 +13404,7 @@ extern "C" void cIrradiance_addWorldLight(void* self, float* point, tLightRecord
             out.y = y;
             out.z = z;
         }
-        cIrradiance_addLightFromDirection(self, (float*)&n, &out);
+        cIrradiance_addLightFromDirection(this, (float*)&n, &out);
         break;
     case eNEWLight_Point:
         if (!testPointLightReach(point, (float*)&n, (tLightRecord*)forceSrc, &dist, &inv))
@@ -13416,7 +13415,7 @@ extern "C" void cIrradiance_addWorldLight(void* self, float* point, tLightRecord
         out.x = forceSrc->m_fvColor[0] * k;
         out.y = forceSrc->m_fvColor[1] * k;
         out.z = forceSrc->m_fvColor[2] * k;
-        cIrradiance_addLightFromDirection(self, (float*)&n, &out);
+        cIrradiance_addLightFromDirection(this, (float*)&n, &out);
         break;
     }
 }

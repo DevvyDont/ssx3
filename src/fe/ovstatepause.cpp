@@ -1384,21 +1384,21 @@ static inline void* getObj_1FBD20(cUIState* self, char* name)
  * heat-1 score in career heat 2 ("- - -" otherwise); "p1rider" gets the second player online, else it and "p1dashes"
  * are hidden. "topScore" shows the event's record (cBEScoreInterface_getCurrentHighScore on BE interface 8) with "%d".
  */
-extern "C" void cOVState_FREESTYLE_PREEVENT_onCreateScreen(void* self)
+void cOVState::FREESTYLE_PREEVENT_onCreateScreen()
 {
     unsigned short title[0x38];
     unsigned short line[104];
-    cOVState* overlay = (cOVState*)self;
+    cOVState* overlay = (cOVState*)this;
     void* eng = overlay->mpEngine;
-    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_41freestyle_pre), 0);
+    void* scr = cUIEngine_addScreenByHashName(eng, this, GetHashValue32(str_41freestyle_pre), 0);
     overlay->mpScreen = (cUIScreen*)scr;
     if (scr != 0)
         cUIScreen_playFrame_BD20(scr, 0, 0);
     eng = (void*)overlay->mpEngine;
-    scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_OV_darkblue), 0);
+    scr = cUIEngine_addScreenByHashName(eng, this, GetHashValue32(str_OV_darkblue), 0);
     if (scr != 0)
         cUIScreen_playFrame_BD20(scr, 0, 0);
-    cOVTemplate_Simple_onCreateScreen(self);
+    cOVTemplate_Simple_onCreateScreen(this);
     void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
@@ -1439,7 +1439,7 @@ extern "C" void cOVState_FREESTYLE_PREEVENT_onCreateScreen(void* self)
                 cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(str_kT_CMNHELPEarnedEnoughPoints));
             }
             sub->setVisible(0);
-            cUIState_hideObjSafe(self, str_bullet1);
+            cUIState_hideObjSafe(this, str_bullet1);
         } else {
             cUIText_setUnicodeStringByID((cUIText*)text, GetHashValue32(str_kT_FSOBJFinalSolo));
             cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_OVRCMNPlaceTop3Medal));
@@ -1453,23 +1453,23 @@ extern "C" void cOVState_FREESTYLE_PREEVENT_onCreateScreen(void* self)
         else
             cUIText_setUnicodeStringByID((cUIText*)sub, GetHashValue32(str_kT_OVRCMNCollPointIcons));
     }
-    cUIState_hideObjSafe(self, str_heat1_tab);
-    cUIState_hideObjSafe(self, str_heat2_tab);
-    cUIState_hideObjSafe(self, str_finalheat_tab);
+    cUIState_hideObjSafe(this, str_heat1_tab);
+    cUIState_hideObjSafe(this, str_heat2_tab);
+    cUIState_hideObjSafe(this, str_finalheat_tab);
     if (cBENewRaceInterface_newRace.cGamePath == 0) {
         switch (mode) {
         case 0:
         case cGameModeMan::kHeat1:
-            cUIState_showObjSafe(self, str_heat1_tab);
+            cUIState_showObjSafe(this, str_heat1_tab);
             break;
         case cGameModeMan::kHeat2:
-            cUIState_showObjSafe(self, str_heat2_tab);
+            cUIState_showObjSafe(this, str_heat2_tab);
             break;
         case cGameModeMan::kFinalHeat:
-            cUIState_showObjSafe(self, str_finalheat_tab);
+            cUIState_showObjSafe(this, str_finalheat_tab);
             break;
         }
-        cUIState_hideObjSafe(self, str_title_b);
+        cUIState_hideObjSafe(this, str_title_b);
     } else {
         textObj = getObj_1FBD20(overlay, str_title_b);
         if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER)
@@ -1484,13 +1484,13 @@ extern "C" void cOVState_FREESTYLE_PREEVENT_onCreateScreen(void* self)
         else
             cUIText_setUnicodeStringByID((cUIText*)textObj, GetHashValue32(str_kT_OVRCMNHeat1));
         if (mode == cGameModeMan::kHeat1 || mode == cGameModeMan::kFinalHeat) {
-            cUIState_hideObjSafe(self, str_column_secondrun);
-            cUIState_hideObjSafe(self, str_column_total);
+            cUIState_hideObjSafe(this, str_column_secondrun);
+            cUIState_hideObjSafe(this, str_column_total);
         }
     } else {
         cUIText_setUnicodeStringByID((cUIText*)textObj, GetHashValue32(str_kT_OVRCMNScoreColon));
-        cUIState_hideObjSafe(self, str_column_secondrun);
-        cUIState_hideObjSafe(self, str_column_total);
+        cUIState_hideObjSafe(this, str_column_secondrun);
+        cUIState_hideObjSafe(this, str_column_total);
     }
     {
         int k = 0;
@@ -1549,7 +1549,7 @@ extern "C" void cOVState_FREESTYLE_PREEVENT_onCreateScreen(void* self)
         cUIText_setAsciiString((cUIText*)textObj, cBECharacterInterface_getShortNameByCharacter(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), cBENewPlayerInterface_getRiderCheatCharID(iface1, idx)));
     } else {
         ((cUIThing*)textObj)->setVisible(0);
-        cUIState_hideObjSafe(self, str_p1dashes);
+        cUIState_hideObjSafe(this, str_p1dashes);
     }
     textObj = getObj_1FBD20(overlay, str_topScore);
     {
@@ -1588,20 +1588,20 @@ extern char str_p1dashes[];
  * sound 0xE (cSSXAudio_MenuSound) and calls cSSXAudio_SpeakPAEventStart on the sound system (cAudioInterface_bxAudio()). BE interface
  * 0 is fetched and unused.
  */
-extern "C" void cOVState_FREESTYLE_PREEVENT_onGainFocus(void* self)
+void cOVState::FREESTYLE_PREEVENT_onGainFocus()
 {
-    cUIState_onGainFocus(self);
+    cUIState_onGainFocus(this);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int* mode = (int*)SSXApp->GameModeMan;
-    cOVState_triggerTextFade(self, str_p0rider, str_at_TextPulseWhiteOrange);
+    cOVState_triggerTextFade(this, str_p0rider, str_at_TextPulseWhiteOrange);
     if (*mode == cGameModeMan::kHeat2) {
-        cOVState_triggerTextFade(self, str_p0dashes, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(this, str_p0dashes, str_at_TextPulseWhiteOrange);
     } else {
-        cOVState_triggerTextFade(self, str_p0run1, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(this, str_p0run1, str_at_TextPulseWhiteOrange);
     }
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
-        cOVState_triggerTextFade(self, str_p1rider, str_at_TextPulseWhiteOrange);
-        cOVState_triggerTextFade(self, str_p1dashes, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(this, str_p1rider, str_at_TextPulseWhiteOrange);
+        cOVState_triggerTextFade(this, str_p1dashes, str_at_TextPulseWhiteOrange);
     }
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
     cSSXAudio_SpeakPAEventStart(cAudioInterface_bxAudio());
@@ -1711,24 +1711,24 @@ static inline void* getObj_1FC878(cUIState* self, char* name)
  * 0 "topScoreLabel" reads kT_OVRCMNRecordTime and "topScore" the record as a time (formatMinutesSeconds); otherwise
  * kT_OVRCMNRecordScore and the record with "%d". The record is cBEScoreInterface_getCurrentHighScore on BE interface 8.
  */
-extern "C" void cOVState_MULTI_PREEVENT_onCreateScreen(void* self)
+void cOVState::MULTI_PREEVENT_onCreateScreen()
 {
     unsigned short title[0x38];
     unsigned short line[104];
     char rider[0x20];
     unsigned short label[304];
     char num[0x20];
-    cOVState* overlay = (cOVState*)self;
+    cOVState* overlay = (cOVState*)this;
     void* eng = overlay->mpEngine;
-    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_50multifs_pre), 0);
+    void* scr = cUIEngine_addScreenByHashName(eng, this, GetHashValue32(str_50multifs_pre), 0);
     overlay->mpScreen = (cUIScreen*)scr;
     if (scr != 0)
         cUIScreen_playFrame(scr, 0, 0);
     eng = (void*)overlay->mpEngine;
-    scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_OV_darkblue), 0);
+    scr = cUIEngine_addScreenByHashName(eng, this, GetHashValue32(str_OV_darkblue), 0);
     if (scr != 0)
         cUIScreen_playFrame(scr, 0, 0);
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
     signed char* gs = (signed char*)&cBENewRaceInterface_newRace;
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1770,8 +1770,8 @@ extern "C" void cOVState_MULTI_PREEVENT_onCreateScreen(void* self)
     cUIText* status = (cUIText*)getObj_1FC878(overlay, str_obj1);
     if (mode48 >= 1 && mode48 <= 3)
     {
-        cUIState_showObjSafe(self, str_obj2);
-        cUIState_showObjSafe(self, str_bullet2);
+        cUIState_showObjSafe(this, str_obj2);
+        cUIState_showObjSafe(this, str_bullet2);
         widget = getObj_1FC878(overlay, str_obj2);
         if (mode48 == kGAMEMODE_SLOPESTYLE)
             cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNCollPointAndMulti));
@@ -1780,8 +1780,8 @@ extern "C" void cOVState_MULTI_PREEVENT_onCreateScreen(void* self)
     }
     else
     {
-        cUIState_hideObjSafe(self, str_obj2);
-        cUIState_hideObjSafe(self, str_bullet2);
+        cUIState_hideObjSafe(this, str_obj2);
+        cUIState_hideObjSafe(this, str_bullet2);
     }
     widget = getObj_1FC878(overlay, str_title1);
     cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_CMNStateMultiPlay));
@@ -1794,12 +1794,12 @@ extern "C" void cOVState_MULTI_PREEVENT_onCreateScreen(void* self)
     cUIText_setUnicodeString(getObj_1FC878(overlay, str_vs), label);
     if (mode48 >= 2 && mode48 <= 3)
     {
-        cUIState_hideObjSafe(self, str_screendata1);
+        cUIState_hideObjSafe(this, str_screendata1);
     }
     else if (mode48 >= 5 && mode48 <= 6)
     {
-        cUIState_hideObjSafe(self, str_screendata);
-        cUIState_hideObjSafe(self, str_screendata1);
+        cUIState_hideObjSafe(this, str_screendata);
+        cUIState_hideObjSafe(this, str_screendata1);
     }
     if (mode4A == kGAMEEVENT_RIVALTIME)
         cUIText_setUnicodeStringByID(status, GetHashValue32(str_kT_HELPFirstToBottom));
@@ -1856,7 +1856,7 @@ struct sVec3_1FCEC0
  * @param msg  nonzero on the transition the layout is applied for (the first-time flag)
  * @return always 0
  */
-extern "C" int cOVState_MULTI_PREEVENT_onGainTransition(cOVState* self, void* msg)
+int cOVState::MULTI_PREEVENT_onGainTransition(void* msg)
 {
     if (msg != 0)
     {
@@ -1864,19 +1864,19 @@ extern "C" int cOVState_MULTI_PREEVENT_onGainTransition(cOVState* self, void* ms
     int mode = cBENewRaceInterface_newRace.cGameMode;
     if (mode == kGAMEMODE_BIGAIR || mode == kGAMEMODE_HALFPIPE)
     {
-        cUIThing* group = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_screendata));
+        cUIThing* group = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_screendata));
         sVec3_1FCEC0 position = *(sVec3_1FCEC0*)&group->mPosition;
         *(sVec3_1FCEC0*)&group->mPosition = sVec3_1FCEC0(position.x + 130.0f, position.y, position.z);
     }
     else if (mode == kGAMEMODE_TIMECHALLENGE || mode == kGAMEMODE_PNTSCHALLENGE)
     {
-        cUIThing* group = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_vsGroup));
+        cUIThing* group = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_vsGroup));
         sVec3_1FCEC0 position = *(sVec3_1FCEC0*)&group->mPosition;
         *(sVec3_1FCEC0*)&group->mPosition = sVec3_1FCEC0(position.x, position.y + 40.0f, position.z);
-        group = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_objectives));
+        group = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_objectives));
         position = *(sVec3_1FCEC0*)&group->mPosition;
         *(sVec3_1FCEC0*)&group->mPosition = sVec3_1FCEC0(position.x, position.y + 67.0f, position.z);
-        group = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_topScoreGroup));
+        group = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_topScoreGroup));
         position = *(sVec3_1FCEC0*)&group->mPosition;
         *(sVec3_1FCEC0*)&group->mPosition = sVec3_1FCEC0(position.x, position.y - 48.0f, position.z);
     }
@@ -1898,9 +1898,9 @@ extern "C" void cUIState_onGainFocus(void* self);
  * Runs cUIState_onGainFocus, sets cGameComm_mGameComm's mOverlayTimeout to 1200 frames when there is a link
  * (cOVState_MULTI_PREEVENT_onUpdate closes the overlay when it runs out) and plays menu sound 0xE (cSSXAudio_MenuSound).
  */
-extern "C" void cOVState_MULTI_PREEVENT_onGainFocus(void* self)
+void cOVState::MULTI_PREEVENT_onGainFocus()
 {
-    cUIState_onGainFocus(self);
+    cUIState_onGainFocus(this);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
         gameComm->mOverlayTimeout = 1200;
@@ -1943,9 +1943,9 @@ extern "C" void* cOVState_onUpdate(void* self);
  * Runs cOVState_onUpdate; when cGameComm_mGameComm exists and its mOverlayTimeout has counted down to 0, sets it to -1
  * and cOVStateManager_mStatus to 1 (go to the next overlay).
  */
-extern "C" void cOVState_MULTI_PREEVENT_onUpdate(void* self)
+void cOVState::MULTI_PREEVENT_onUpdate()
 {
-    cOVState_onUpdate(self);
+    cOVState_onUpdate(this);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0 && gameComm->mOverlayTimeout == 0) {
         gameComm->mOverlayTimeout = -1;
@@ -2016,20 +2016,20 @@ extern char str_OV_darkblue[];
  * Adds the "68rival_pre" screen (kept in mpScreen) and the "OV_darkblue" backdrop, plays frame 0 of each, runs
  * cOVState_onCreateScreen and plays menu sound 0xE (cSSXAudio_MenuSound). The texts are filled in by cOVState_CHALLENGE_PREEVENT_onGainTransition.
  */
-extern "C" void cOVState_CHALLENGE_PREEVENT_onCreateScreen(cOVState* self)
+void cOVState::CHALLENGE_PREEVENT_onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_68rival_pre), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_68rival_pre), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = (void*)self->mpEngine;
-    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_OV_darkblue), 0);
+    engine = (void*)mpEngine;
+    screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif
@@ -2252,7 +2252,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_CHALLENGE_PREEVENT_onWidgetMenu);
  * @param event  the menu event (tUIMenuEvent)
  * @return 0x101 for kONNEXT, 0 otherwise
  */
-extern "C" int cOVState_CHALLENGE_PREEVENT_onWidgetMenu(void* self, int menu, int event)
+int cOVState::CHALLENGE_PREEVENT_onWidgetMenu(int menu, int event)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }

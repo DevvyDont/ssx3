@@ -1861,11 +1861,11 @@ INCLUDE_ASM("replay/replaycache", cReplayFramePtr_setBlockPointer);
  *
  * One of the small out-of-line copies kept after the cReplayFramePtr accessors; no retail caller was found.
  *
- * @param framePtr  the object to write
  * @param block  the value to store
  */
-extern "C" void cReplayFramePtr_setBlockPointer(cReplayFramePtr* framePtr, int block) {
-    framePtr->Block = (char*)block;
+void cReplayFramePtr::setBlockPointer(int block)
+{
+    Block = (char*)block;
 }
 #endif
 
@@ -4162,11 +4162,11 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_getVariationLength);
  *
  * @return the length in frames
  */
-extern "C" int cScriptPlayerEntity_getVariationLength(cScriptPlayerEntity* self)
+int cScriptPlayerEntity::getVariationLength()
 {
-    const char* base = self->mpData;
-    int* tab = (int*)self->mpVariationTable;
-    int i = self->mCurrVariation;
+    const char* base = mpData;
+    int* tab = (int*)mpVariationTable;
+    int i = mCurrVariation;
     const char* entityData = base + tab[i];  // the table holds byte offsets into the entity data
     return ((tInSeqEntityHeader*)entityData)->numFrames;
 }

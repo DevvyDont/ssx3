@@ -124,6 +124,7 @@ struct cOVState_RACE_FINISHOV : public cOVState {
     virtual void onWidgetEvent(cUIThing* popup, unsigned int event) __asm__("cOVState_RACE_FINISHOV_onWidgetEvent");
     virtual int onWidgetMenu(cUIMenu* widget, unsigned int key, unsigned int)
         __asm__("cOVState_RACE_FINISHOV_onWidgetMenu");
+    virtual int handleEvent(int message, void*) __asm__("cOVState_RACE_FINISHOV_handleEvent");
 };
 
 CHECK_OFFSET(cOVState_RACE_FINISHOV, mElapsedTime, 0x09C);
@@ -160,6 +161,7 @@ struct cOVState_BASSSP_QUAL_FINISHOV : public cOVState {
         __asm__("cOVState_BASSSP_QUAL_FINISHOV_onWidgetEvent");
     virtual int onWidgetMenu(cUIMenu* widget, unsigned int key, unsigned int)
         __asm__("cOVState_BASSSP_QUAL_FINISHOV_onWidgetMenu");
+    virtual int handleEvent(int message, void*) __asm__("cOVState_BASSSP_QUAL_FINISHOV_handleEvent");
 };
 
 CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, mElapsedTime, 0x09C);

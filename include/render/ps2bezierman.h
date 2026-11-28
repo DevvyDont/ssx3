@@ -66,6 +66,8 @@ CHECK_OFFSET(tBezierMixedPatchEntry, mpPatch, 0x00);
 CHECK_OFFSET(tBezierMixedPatchEntry, mEdgeLods, 0x10);
 CHECK_SIZE(tBezierMixedPatchEntry, 0x14);
 
+struct tPatchRecord;
+
 struct cPS2BezierMan {
     // --- cBezierMan
     float m_currPatchDist;           // 0x0000 [O]; [U] cBezierMan_SetPatchDist SetPatchDist (swc1), cBezierMan_GetPatchDist GetPatchDist (lwc1)
@@ -120,6 +122,15 @@ struct cPS2BezierMan {
     int GetVifCache(int shift, int idx) __asm__("cPS2BezierMan_GetVifCache");
     int GetBezST() __asm__("cPS2BezierMan_GetBezST");
     int GetBezdST() __asm__("cPS2BezierMan_GetBezdST");
+    void queuePatch(tPatchRecord* patchRec, unsigned char* edgeLods, int ignoredArg, int extra)
+        __asm__("cPS2BezierMan_queuePatch");
+    void buildVifCachePacket(int type, int idx) __asm__("cPS2BezierMan_buildVifCachePacket");
+    void testProjectiveTextureHits(void* obj) __asm__("cPS2BezierMan_testProjectiveTextureHits");
+    void addProjectorPasses(int kind, void* tbl, void* patch, int mask, unsigned int* handle)
+        __asm__("cPS2BezierMan_addProjectorPasses");
+    void addSnowSparklePass(void* obj, tBezierPatchEntry* patch, unsigned int* handle)
+        __asm__("cPS2BezierMan_addSnowSparklePass");
+    void drawSnowSparkles(unsigned int* packetHandle) __asm__("cPS2BezierMan_drawSnowSparkles");
 };
 
 CHECK_OFFSET(cPS2BezierMan, m_currPatchDist, 0x0000);

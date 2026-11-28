@@ -203,7 +203,7 @@ INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onroomlistupdate_invoke);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onroomlistupdate_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onroomlistupdate_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onroomlistupdate(lobbyMan + D_004A2FB0.v);
 }
@@ -225,7 +225,7 @@ INCLUDE_ASM("bx/bxstringctor", LobbyMan_LobbyFunctor_onuserlistupdate_invoke);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onuserlistupdate_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onuserlistupdate_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onuserlistupdate(lobbyMan + D_004A2FB8.v);
 }
@@ -247,7 +247,7 @@ extern "C" void LobbyMan_onranklistupdate(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onranklistupdate_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onranklistupdate_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onranklistupdate(lobbyMan + D_004A2FC0.v);
 }
@@ -269,7 +269,7 @@ void* LobbyMan_onincomingmsg(void* self);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onincomingmsg_invoke(void* self, void* message, LobbyMan* lobbyMan)
+void LobbyMan::LobbyFunctor_onincomingmsg_invoke(void* message, LobbyMan* lobbyMan)
 {
     LobbyMan_onincomingmsg(((char*)lobbyMan) + D_004A2FF0.v);
 }
@@ -291,7 +291,7 @@ extern "C" void LobbyMan_onchatmsg(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onchatmsg_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onchatmsg_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onchatmsg(lobbyMan + D_004A2FF8.v);
 }
@@ -313,7 +313,7 @@ extern "C" void LobbyMan_onconnectionmsg(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onconnectionmsg_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onconnectionmsg_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onconnectionmsg(lobbyMan + D_004A3000.v);
 }
@@ -335,7 +335,7 @@ extern "C" void LobbyMan_onplaymsg(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onplaymsg_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onplaymsg_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onplaymsg(lobbyMan + D_004A3008.v);
 }
@@ -358,7 +358,7 @@ extern "C" void LobbyMan_onlobbyconnect(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onlobbyconnect_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onlobbyconnect_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onlobbyconnect(lobbyMan + D_004A3020.v);
 }
@@ -380,7 +380,7 @@ extern "C" void LobbyMan_onaccountcreated(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onaccountcreated_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onaccountcreated_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onaccountcreated(lobbyMan + D_004A3088.v);
 }
@@ -402,7 +402,7 @@ extern "C" void LobbyMan_onaccountedited(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onaccountedited_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onaccountedited_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onaccountedited(lobbyMan + D_004A30A8.v);
 }
@@ -424,7 +424,7 @@ extern "C" void LobbyMan_onlostaccountrequestsent(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onlostaccountrequestsent_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onlostaccountrequestsent_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onlostaccountrequestsent(lobbyMan + D_004A30B0.v);
 }
@@ -446,7 +446,7 @@ extern "C" void LobbyMan_onlostpasswordrequestsent(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onlostpasswordrequestsent_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onlostpasswordrequestsent_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onlostpasswordrequestsent(lobbyMan + D_004A30B8.v);
 }
@@ -468,7 +468,7 @@ extern "C" void LobbyMan_onauthentication(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onauthentication_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onauthentication_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onauthentication(lobbyMan + D_004A30E8.v);
 }
@@ -490,7 +490,7 @@ extern "C" void LobbyMan_onpersonaselected(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onpersonaselected_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onpersonaselected_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onpersonaselected(lobbyMan + D_004A3118.v);
 }
@@ -534,7 +534,7 @@ extern "C" void LobbyMan_onpersonacreated(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onpersonacreated_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onpersonacreated_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onpersonacreated(lobbyMan + D_004A3138.v);
 }
@@ -556,7 +556,7 @@ extern "C" void LobbyMan_onpersonadeleted(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onpersonadeleted_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onpersonadeleted_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onpersonadeleted(lobbyMan + D_004A3140.v);
 }
@@ -578,7 +578,7 @@ extern "C" void LobbyMan_onroomselected(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onroomselected_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onroomselected_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onroomselected(lobbyMan + D_004A3148.v);
 }
@@ -600,7 +600,7 @@ extern "C" void LobbyMan_onRoomCreated(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onRoomCreated_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onRoomCreated_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onRoomCreated(lobbyMan + D_004A3158.v);
 }
@@ -622,7 +622,7 @@ extern "C" void LobbyMan_onPingReceived(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onPingReceived_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onPingReceived_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onPingReceived(lobbyMan + D_004A3160.v);
 }
@@ -644,7 +644,7 @@ extern "C" void LobbyMan_onAbuseReportReceived(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onAbuseReportReceived_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onAbuseReportReceived_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onAbuseReportReceived(lobbyMan + D_004A3170.v);
 }
@@ -666,7 +666,7 @@ extern "C" void LobbyMan_onNewsRetrieved(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onNewsRetrieved_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onNewsRetrieved_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onNewsRetrieved(lobbyMan + D_004A3178.v);
 }
@@ -688,7 +688,7 @@ extern "C" void LobbyMan_onRanklistRetrieved(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onRanklistRetrieved_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onRanklistRetrieved(lobbyMan + D_004A31B0.v);
 }
@@ -710,7 +710,7 @@ extern "C" void LobbyMan_onPlayerFound(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onPlayerFound_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onPlayerFound_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onPlayerFound(lobbyMan + D_004A31B8.v);
 }
@@ -754,7 +754,7 @@ extern "C" void LobbyMan_onQuickMatchResponse(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onQuickMatchResponse_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onQuickMatchResponse(lobbyMan + D_004A3210.v);
 }
@@ -776,7 +776,7 @@ extern "C" void LobbyMan_onchallengeresponse(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onchallengeresponse_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onchallengeresponse_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onchallengeresponse(lobbyMan + D_004A3248.v);
 }
@@ -821,7 +821,7 @@ extern "C" void LobbyMan_onresultsreportresponse(int);
  * @param message  the callback's message, passed through to the handler
  * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void LobbyMan_LobbyFunctor_onresultsreportresponse_invoke(void* self, void* message, int lobbyMan)
+void LobbyMan::LobbyFunctor_onresultsreportresponse_invoke(void* message, int lobbyMan)
 {
     LobbyMan_onresultsreportresponse(lobbyMan + D_004A3318.v);
 }
@@ -843,7 +843,7 @@ extern "C" void BuddyMan_onconnect(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void BuddyMan_BuddyFunctor_onconnect_invoke(void* self, void* message, int buddyMan)
+void BuddyMan::BuddyFunctor_onconnect_invoke(void* message, int buddyMan)
 {
     BuddyMan_onconnect(buddyMan + D_004A3340.v);
 }
@@ -865,7 +865,7 @@ extern "C" void BuddyMan_onReceiveMessage(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void BuddyMan_BuddyFunctor_onReceiveMessage_invoke(void* self, void* message, int buddyMan)
+void BuddyMan::BuddyFunctor_onReceiveMessage_invoke(void* message, int buddyMan)
 {
     BuddyMan_onReceiveMessage(buddyMan + D_004A3348.v);
 }
@@ -887,7 +887,7 @@ extern "C" void BuddyMan_onrosterupdate(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void BuddyMan_BuddyFunctor_onrosterupdate_invoke(void* self, void* message, int buddyMan)
+void BuddyMan::BuddyFunctor_onrosterupdate_invoke(void* message, int buddyMan)
 {
     BuddyMan_onrosterupdate(buddyMan + D_004A3350.v);
 }
@@ -909,7 +909,7 @@ extern "C" void BuddyMan_onBuddyDelete(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void BuddyMan_BuddyFunctor_onBuddyDelete_invoke(void* self, void* message, int buddyMan)
+void BuddyMan::BuddyFunctor_onBuddyDelete_invoke(void* message, int buddyMan)
 {
     BuddyMan_onBuddyDelete(buddyMan + D_004A3380.v);
 }
@@ -931,7 +931,7 @@ extern "C" void BuddyMan_onBuddyAdd(int);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void BuddyMan_BuddyFunctor_onBuddyAdd_invoke(void* self, void* message, int buddyMan)
+void BuddyMan::BuddyFunctor_onBuddyAdd_invoke(void* message, int buddyMan)
 {
     BuddyMan_onBuddyAdd(buddyMan + D_004A3388.v);
 }
@@ -953,7 +953,7 @@ void BuddyMan_onBuddySend(void* self);
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void BuddyMan_BuddyFunctor_onBuddySend_invoke(void* self, void* message, BuddyMan* buddyMan)
+void BuddyMan::BuddyFunctor_onBuddySend_invoke(void* message, BuddyMan* buddyMan)
 {
     BuddyMan_onBuddySend(((char*)buddyMan) + D_004A33A0.v);
 }
@@ -1003,11 +1003,11 @@ static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_002690
  * @param riderId  the character id from the message
  * @param hostState  the host's setup state from the message
  */
-extern "C" void cSetupMan_handleCharPickEcho(cSetupMan* self, int riderId, int hostState)
+void cSetupMan::handleCharPickEcho(int riderId, int hostState)
 {
     int kind = 243;
-    self->mState = hostState;
-    cSetupMan_applyMyCharacter(self, riderId);
+    mState = hostState;
+    cSetupMan_applyMyCharacter(this, riderId);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1061,11 +1061,11 @@ static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690
  * @param riderId  the character id from the message
  * @param hostState  the host's setup state from the message
  */
-extern "C" void cSetupMan_handleCharConfirmEcho(cSetupMan* self, int riderId, int hostState)
+void cSetupMan::handleCharConfirmEcho(int riderId, int hostState)
 {
     int kind = 244;
-    self->mState = hostState;
-    cSetupMan_applyMyCharacter(self, riderId);
+    mState = hostState;
+    cSetupMan_applyMyCharacter(this, riderId);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1118,10 +1118,10 @@ static inline sMsgListIter_00269188 sMsgList_00269188_insert(sMsgListIter_002691
  *
  * @param hostState  the host's setup state (the message's second word)
  */
-extern "C" void cSetupMan_handleWithdrawEcho(cSetupMan* self, int hostState)
+void cSetupMan::handleWithdrawEcho(int hostState)
 {
     int kind = 247;
-    (self)->mState = hostState;
+    mState = hostState;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1177,11 +1177,11 @@ static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_002692
  * @param hostState  the host's setup state
  * @param riderStats  the host rider's 7 attribute bytes from the message
  */
-extern "C" void cSetupMan_handleHostCharPick(cSetupMan* self, int riderId, int hostState, void* riderStats)
+void cSetupMan::handleHostCharPick(int riderId, int hostState, void* riderStats)
 {
     int kind = 243;
-    self->mState = hostState;
-    cSetupMan_applyOpponentCharacter(self, riderId, riderStats);
+    mState = hostState;
+    cSetupMan_applyOpponentCharacter(this, riderId, riderStats);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1236,11 +1236,11 @@ static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_002693
  * @param riderId  the host's character id
  * @param hostState  the host's setup state
  */
-extern "C" void cSetupMan_handleHostCharConfirm(cSetupMan* self, int riderId, int hostState)
+void cSetupMan::handleHostCharConfirm(int riderId, int hostState)
 {
     int kind = 245;
-    self->mState = hostState;
-    cSetupMan_applyOpponentCharacter(self, riderId, 0);
+    mState = hostState;
+    cSetupMan_applyOpponentCharacter(this, riderId, 0);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1293,10 +1293,10 @@ static inline sMsgListIter_002693C0 sMsgList_002693C0_insert(sMsgListIter_002693
  *
  * @param hostState  the host's setup state (the message's second word)
  */
-extern "C" void cSetupMan_handleHostWithdraw(cSetupMan* self, int hostState)
+void cSetupMan::handleHostWithdraw(int hostState)
 {
     int kind = 247;
-    (self)->mState = hostState;
+    mState = hostState;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     online_Event* netEvent = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = kind;
@@ -1348,7 +1348,7 @@ static inline sMsgListIter_00269478 sMsgList_00269478_insert(sMsgListIter_002694
  *
  * @param rowIndex  the highlighted row from the message
  */
-extern "C" void cSetupMan_handleClientBragRow(cSetupMan* self, int rowIndex)
+void cSetupMan::handleClientBragRow(int rowIndex)
 {
     online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 251;
@@ -1403,7 +1403,7 @@ static inline sMsgListIter_00269538 sMsgList_00269538_insert(sMsgListIter_002695
  * @param ruleSlot  the rule slot
  * @param ruleValue  the new value
  */
-extern "C" void cSetupMan_handleClientBragRule(cSetupMan* self, int ruleSlot, int ruleValue)
+void cSetupMan::handleClientBragRule(int ruleSlot, int ruleValue)
 {
     online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFC;
@@ -1457,19 +1457,19 @@ static inline sMsgListIter_00269608 sMsgList_00269608_insert(sMsgListIter_002696
  * 1 onto LobbyMan's mEventList. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-11 message
  * in the bragging-rights phase (state 7 or more).
  */
-extern "C" void cSetupMan_handleClientBragLock(cSetupMan* self)
+void cSetupMan::handleClientBragLock()
 {
-    switch (self->mState)
+    switch (mState)
     {
     case 6:
     case 7:
-        self->mState = 8;
+        mState = 8;
         break;
     case 9:
-        self->mState = 10;
+        mState = 10;
         break;
     }
-    cSetupMan_sendCharacterMessage(self, 11, self->mState, 0);
+    cSetupMan_sendCharacterMessage(this, 11, mState, 0);
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 253;
     netEvent->mVtbl = D_004813E0;
@@ -1520,11 +1520,11 @@ static inline sMsgListIter_002696F8 sMsgList_002696F8_insert(sMsgListIter_002696
  * mEventList. cSetupMan_update calls it on the host's setup manager (cSetupMan_mSetupMan) for a type-13 message in the
  * bragging-rights phase (state 7 or more).
  */
-extern "C" void cSetupMan_handleClientBragUnlock(cSetupMan* self)
+void cSetupMan::handleClientBragUnlock()
 {
-    if (self->mState == 8)
-        self->mState = 7;
-    cSetupMan_sendCharacterMessage(self, 0xC, self->mState, 0);
+    if (mState == 8)
+        mState = 7;
+    cSetupMan_sendCharacterMessage(this, 0xC, mState, 0);
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFE;
     netEvent->mVtbl = D_004813C0;
@@ -1576,7 +1576,7 @@ static inline sMsgListIter_002697D0 sMsgList_002697D0_insert(sMsgListIter_002697
  *
  * @param rowIndex  the highlighted row from the message
  */
-extern "C" void cSetupMan_handleHostBragRow(cSetupMan* self, int rowIndex)
+void cSetupMan::handleHostBragRow(int rowIndex)
 {
     online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 251;
@@ -1629,7 +1629,7 @@ static inline sMsgListIter_00269890 sMsgList_00269890_insert(sMsgListIter_002698
  *
  * @param rowIndex  the highlighted row from the message
  */
-extern "C" void cSetupMan_handleBragRowMessage(cSetupMan* self, int rowIndex)
+void cSetupMan::handleBragRowMessage(int rowIndex)
 {
     online_SetupRowEvent* netEvent = (online_SetupRowEvent*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 251;
@@ -1684,7 +1684,7 @@ static inline sMsgListIter_00269948 sMsgList_00269948_insert(sMsgListIter_002699
  * @param ruleSlot  the rule slot
  * @param ruleValue  the new value
  */
-extern "C" void cSetupMan_handleHostBragRule(cSetupMan* self, int ruleSlot, int ruleValue)
+void cSetupMan::handleHostBragRule(int ruleSlot, int ruleValue)
 {
     online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFC;
@@ -1740,7 +1740,7 @@ static inline sMsgListIter_00269A18 sMsgList_00269A18_insert(sMsgListIter_00269A
  * @param ruleSlot  the rule slot
  * @param ruleValue  the new value
  */
-extern "C" void cSetupMan_handleBragRuleMessage(cSetupMan* self, int ruleSlot, int ruleValue)
+void cSetupMan::handleBragRuleMessage(int ruleSlot, int ruleValue)
 {
     online_SetupRuleEvent* netEvent = (online_SetupRuleEvent*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFC;
@@ -1794,9 +1794,9 @@ static inline sMsgListIter_00269AE0 sMsgList_00269AE0_insert(sMsgListIter_00269A
  *
  * @param hostState  the host's setup state from the message
  */
-extern "C" void cSetupMan_handleHostBragLock(cSetupMan* self, int hostState)
+void cSetupMan::handleHostBragLock(int hostState)
 {
-    self->mState = hostState;
+    mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 253;
     netEvent->mVtbl = D_004813E0;
@@ -1848,9 +1848,9 @@ static inline sMsgListIter_00269B90 sMsgList_00269B90_insert(sMsgListIter_00269B
  *
  * @param hostState  the host's setup state from the message
  */
-extern "C" void cSetupMan_handleBragLockAnswer(cSetupMan* self, int hostState)
+void cSetupMan::handleBragLockAnswer(int hostState)
 {
-    self->mState = hostState;
+    mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 253;
     netEvent->mVtbl = D_004813E0;
@@ -1902,9 +1902,9 @@ static inline sMsgListIter_00269C40 sMsgList_00269C40_insert(sMsgListIter_00269C
  *
  * @param hostState  the host's setup state from the message
  */
-extern "C" void cSetupMan_handleHostBragUnlock(cSetupMan* self, int hostState)
+void cSetupMan::handleHostBragUnlock(int hostState)
 {
-    self->mState = hostState;
+    mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFE;
     netEvent->mVtbl = D_004813C0;
@@ -1955,9 +1955,9 @@ static inline sMsgListIter_00269CF0 sMsgList_00269CF0_insert(sMsgListIter_00269C
  *
  * @param hostState  the setup state from the message
  */
-extern "C" void cSetupMan_handleBragUnlockMessage(cSetupMan* self, int hostState)
+void cSetupMan::handleBragUnlockMessage(int hostState)
 {
-    self->mState = hostState;
+    mState = hostState;
     online_SetupEvent* netEvent = (online_SetupEvent*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
     netEvent->mType = 0xFE;
     netEvent->mVtbl = D_004813C0;

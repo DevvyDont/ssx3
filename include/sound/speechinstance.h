@@ -26,6 +26,9 @@ struct cSpeechBank {
     char* mShortName;  // 0x40 (our name) [R] cSpeechBank_Create: the part of mName after the last '\\'; [U] cSpeechInstance_PlayEvent passes it to cSpeechSys's vtable slot 2
     void* mpData;      // 0x44 (our name) [R] ctor 0; cSpeechBank_Create: the .hdr data (passed in, or FILE_load()ed); dtor MEM_free()s it when mOwnsData
     int mOwnsData;     // 0x48 (our name) [R] ctor 0; cSpeechBank_Create 1 when it loaded mpData itself
+
+    // Methods bound to their retail symbols by asm labels.
+    bool HasBankId(int bankId) __asm__("cSpeechBank_HasBankId");
 };
 
 // One speech event file of a cSpeechInstance (8 bytes; our names).
@@ -78,6 +81,17 @@ struct cSpeechInstance {
     int mReadyForSpeech;               // 0x900 (our name) [R] ctor 1; [U] set while the stream can take the next
                                        //       speech: cSpeechInstance_Update / cSpeechInstance_StartNextSpeech clear it once SPCH_startNextRequest
                                        //       starts one, cSpeechInstance_Update sets it again (SPCH_updateChannel) or while busy
+
+    // Methods bound to their retail symbols by asm labels.
+    void Update(int i) __asm__("cSpeechInstance_Update");
+    int StartNextSpeech(int channel) __asm__("cSpeechInstance_StartNextSpeech");
+    bool LoadEventFile(int isHeaders, char* name, int instIndex, int section) __asm__("cSpeechInstance_LoadEventFile");
+    void ReadConfig(int instanceIndex, int section, int loadLangHead) __asm__("cSpeechInstance_ReadConfig");
+    int CanTakeSpeech() __asm__("cSpeechInstance_CanTakeSpeech");
+    void Purge() __asm__("cSpeechInstance_Purge");
+    void AddBank(const char* bankPath, const char* shortName, void* headerData) __asm__("cSpeechInstance_AddBank");
+    void IsPlaying() __asm__("cSpeechInstance_IsPlaying");
+    void SetHoldTime(int holdValue) __asm__("cSpeechInstance_SetHoldTime");
 };
 
 CHECK_OFFSET(cSpeechBank, mBankId, 0x00);

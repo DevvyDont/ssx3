@@ -50,6 +50,40 @@ struct cSetupMan {
     int mRanked;                    // 0x128 [R] ctor argument 3 (cBENetworkInterface_networkOpt.bIsRankedGame);
                                     //       [U] cSetupMan_sendCharacterMessage sends flat attributes (40) when set; cSetupMan_update skips
                                     //       the bragging-rights phase
+
+    // Methods bound to their retail symbols by asm labels.
+    void handleCharPickEcho(int riderId, int hostState) __asm__("cSetupMan_handleCharPickEcho");
+    void handleCharConfirmEcho(int riderId, int hostState) __asm__("cSetupMan_handleCharConfirmEcho");
+    void handleWithdrawEcho(int hostState) __asm__("cSetupMan_handleWithdrawEcho");
+    void handleHostCharPick(int riderId, int hostState, void* riderStats) __asm__("cSetupMan_handleHostCharPick");
+    void handleHostCharConfirm(int riderId, int hostState) __asm__("cSetupMan_handleHostCharConfirm");
+    void handleHostWithdraw(int hostState) __asm__("cSetupMan_handleHostWithdraw");
+    void handleClientBragRow(int rowIndex) __asm__("cSetupMan_handleClientBragRow");
+    void handleClientBragRule(int ruleSlot, int ruleValue) __asm__("cSetupMan_handleClientBragRule");
+    void handleClientBragLock() __asm__("cSetupMan_handleClientBragLock");
+    void handleClientBragUnlock() __asm__("cSetupMan_handleClientBragUnlock");
+    void handleHostBragRow(int rowIndex) __asm__("cSetupMan_handleHostBragRow");
+    void handleBragRowMessage(int rowIndex) __asm__("cSetupMan_handleBragRowMessage");
+    void handleHostBragRule(int ruleSlot, int ruleValue) __asm__("cSetupMan_handleHostBragRule");
+    void handleBragRuleMessage(int ruleSlot, int ruleValue) __asm__("cSetupMan_handleBragRuleMessage");
+    void handleHostBragLock(int hostState) __asm__("cSetupMan_handleHostBragLock");
+    void handleBragLockAnswer(int hostState) __asm__("cSetupMan_handleBragLockAnswer");
+    void handleHostBragUnlock(int hostState) __asm__("cSetupMan_handleHostBragUnlock");
+    void handleBragUnlockMessage(int hostState) __asm__("cSetupMan_handleBragUnlockMessage");
+    void update() __asm__("cSetupMan_update");
+    void freePacket(int* packet) __asm__("cSetupMan_freePacket");
+    void receivePackets() __asm__("cSetupMan_receivePackets");
+    void flushSendQueue() __asm__("cSetupMan_flushSendQueue");
+    void sendRank() __asm__("cSetupMan_sendRank");
+    void applyMyCharacter(int charID) __asm__("cSetupMan_applyMyCharacter");
+    void sendCharacterMessage(int type, int rider, int state) __asm__("cSetupMan_sendCharacterMessage");
+    void highlightCharacter(int rider) __asm__("cSetupMan_highlightCharacter");
+    void confirmCharacter(int rider) __asm__("cSetupMan_confirmCharacter");
+    void unconfirmCharacter() __asm__("cSetupMan_unconfirmCharacter");
+    void handleOpponentConfirm(int rider) __asm__("cSetupMan_handleOpponentConfirm");
+    void sendBraggingSelection(int id) __asm__("cSetupMan_sendBraggingSelection");
+    void sendBraggingRule(int ruleSlot, int newValue) __asm__("cSetupMan_sendBraggingRule");
+    void unlockBragging() __asm__("cSetupMan_unlockBragging");
 };
 
 CHECK_OFFSET(cSetupMan, mState, 0x000);

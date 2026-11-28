@@ -276,6 +276,8 @@ struct cOVStateHUD1P : public cUIState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cOVStateHUD1P();
     virtual void onCreateScreen() __asm__("cOVStateHUD1P_onCreateScreen");
+    void renderCollectibles(char* obj, cRider* rider, int x, float animFrame)
+        __asm__("cOVStateHUD1P_renderCollectibles");
 };
 
 CHECK_OFFSET(cTextureElement, mSourceShape, 0x00);

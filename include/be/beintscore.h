@@ -117,6 +117,10 @@ struct cBEScoreInterface : public cBEInterface {
     virtual void discard() __asm__("cBEScoreInterface_discard");
     virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cBEScoreInterface_writeToReplayFrame__FPv");
     virtual void readFromReplayFrame(cBxReplayFrame*) __asm__("cBEScoreInterface_readFromReplayFrame__FPv");
+    int getHighScore(int i, int event, int mode) __asm__("cBEScoreInterface_getHighScore");
+    int getCurrentHighScore(int i) __asm__("cBEScoreInterface_getCurrentHighScore");
+    void* getCurrentHighScoreCharacter(int i) __asm__("cBEScoreInterface_getCurrentHighScoreCharacter");
+    void* getCurrentHighScoreName(int i) __asm__("cBEScoreInterface_getCurrentHighScoreName");
 };
 
 CHECK_OFFSET(cBEScoreInterface, bNewHighScore, 0x10);

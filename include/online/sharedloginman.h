@@ -26,6 +26,24 @@ struct cSharedLoginMan {
                                     //     cFEStateNetAccountMem tests it (*SharedLoginMan == state)
     int mError;                     // 0x4 [R] init 0; [U] each request step clears it, cSharedLoginMan_update stores the
                                     //     library poll's error (func_003F80E0)
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cSharedLoginMan_init");
+    void shutdown() __asm__("cSharedLoginMan_shutdown");
+    void recheckCard() __asm__("cSharedLoginMan_recheckCard");
+    int getCardFreeSpace() __asm__("cSharedLoginMan_getCardFreeSpace");
+    bool isCardUnformatted() __asm__("cSharedLoginMan_isCardUnformatted");
+    void clearCardChanged() __asm__("cSharedLoginMan_clearCardChanged");
+    int hasCardChanged() __asm__("cSharedLoginMan_hasCardChanged");
+    bool isCardMissing() __asm__("cSharedLoginMan_isCardMissing");
+    void startReadAccount() __asm__("cSharedLoginMan_startReadAccount");
+    void requestReadAccount() __asm__("cSharedLoginMan_requestReadAccount__FPv");
+    void requestSaveAccount() __asm__("cSharedLoginMan_requestSaveAccount__FPv");
+    void requestCreateAccount() __asm__("cSharedLoginMan_requestCreateAccount__FPv");
+    void requestFormat() __asm__("cSharedLoginMan_requestFormat__FPv");
+    void startSaveAccount() __asm__("cSharedLoginMan_startSaveAccount");
+    void startCreateAccount() __asm__("cSharedLoginMan_startCreateAccount");
+    void startFormat() __asm__("cSharedLoginMan_startFormat");
 };
 
 CHECK_OFFSET(cSharedLoginMan, mState, 0x0);

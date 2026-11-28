@@ -32,6 +32,9 @@
 #include "ui/uistate.h"
 #include "fe/festatenet.h"
 
+struct cFEStateNetHelpPopup;
+struct cUIState;
+
 struct cFEStateLogin : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateLogin_vtbl (33 slots), stored by cFEStateLogin_cFEStateLogin / cFEStateLogin_cFEStateLogin1 after
@@ -62,6 +65,12 @@ struct cFEStateLogin : public cFEStateNet {
     virtual void onWidgetEvent(cUIThing* popup, unsigned int kind) __asm__("cFEStateLogin_onWidgetEvent");
     virtual void onUpdate() __asm__("cFEStateLogin_onUpdate__FPv");
     virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateLogin_onPopupEvent");
+    int onNetEvent(int id, void* eventData) __asm__("cFEStateLogin_onNetEvent");
+    void onVerifyPopupEvent(void* popup, int event) __asm__("cFEStateLogin_onVerifyPopupEvent");
+    void onAccountMemPopupEvent(cUIState* popup, int kind) __asm__("cFEStateLogin_onAccountMemPopupEvent");
+    void onNetConfigPopupEvent(cUIState* popup, int kind) __asm__("cFEStateLogin_onNetConfigPopupEvent");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateLogin_fillHelpPopup");
+    int isOnlineState() __asm__("cFEStateLogin_isOnlineState__FPv");
 };
 
 CHECK_OFFSET(cFEStateLogin, mpustrDisconnect, 0x6D0);

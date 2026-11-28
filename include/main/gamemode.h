@@ -96,6 +96,7 @@ struct cGameModeMan {
     void readFromReplayFrame(cBxReplayFrame* data) __asm__("cGameModeMan_readFromReplayFrame");
     void sortScores(int n) __asm__("cGameModeMan_sortScores");
     void sortTimes(int n) __asm__("cGameModeMan_sortTimes");
+    void clearRanking(int i) __asm__("cGameModeMan_clearRanking");
 };
 
 CHECK_OFFSET(cGameModeMan, iHeatNum, 0x00);

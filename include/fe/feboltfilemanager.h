@@ -99,6 +99,29 @@ struct cFEBoltFileManager {
     int mNumLoadThreads;            // 0xB4004 [P] mNumLoadThreads < kMaxLoadThreads; [R] init 0; [U] cFEBoltFileManager_loadFile counts
                                     //       an async load up, cFEBoltFileManager_update / cFEBoltFileManager_releaseFile down; queued loads start at 0
     int unk_B4008[10];              // 0xB4008 [R] init 1 per bank; [U] each bank's next stamp (tBoltFile::stamp)
+
+    // Methods bound to their retail symbols by asm labels.
+    void init() __asm__("cFEBoltFileManager_init");
+    void purge() __asm__("cFEBoltFileManager_purge");
+    void unpackFile(int bank, tBoltFile* rawSlot) __asm__("cFEBoltFileManager_unpackFile");
+    void startNextQueuedLoad(int bank) __asm__("cFEBoltFileManager_startNextQueuedLoad");
+    void update() __asm__("cFEBoltFileManager_update");
+    int findFreeSlot(int bank) __asm__("cFEBoltFileManager_findFreeSlot");
+    int findFile(int bank, const char* name) __asm__("cFEBoltFileManager_findFile");
+    void freeFile(int bank, int i) __asm__("cFEBoltFileManager_freeFile");
+    void makeRoom(int bank, int size) __asm__("cFEBoltFileManager_makeRoom");
+    void evictBytes(int bank, int size) __asm__("cFEBoltFileManager_evictBytes");
+    void loadFile(int bank, int i) __asm__("cFEBoltFileManager_loadFile");
+    void releaseFile(int bank, int i) __asm__("cFEBoltFileManager_releaseFile");
+    bool isBankIdle(int bank) __asm__("cFEBoltFileManager_isBankIdle");
+    bool isFileLoading(int bank, int i) __asm__("cFEBoltFileManager_isFileLoading");
+    bool isFileLoaded(int bank, int slotIndex) __asm__("cFEBoltFileManager_isFileLoaded");
+    char* getFileName(int bank, int i) __asm__("cFEBoltFileManager_getFileName");
+    void* getFileDataValue(int bank, int slotIndex) __asm__("cFEBoltFileManager_getFileDataValue");
+    void* getFileData(int bank, int i) __asm__("cFEBoltFileManager_getFileData");
+    void* detachFileData(int bank, int slotIndex) __asm__("cFEBoltFileManager_detachFileData");
+    int getFileType(int bank, int i) __asm__("cFEBoltFileManager_getFileType");
+    int getUseCount(int bank, int i) __asm__("cFEBoltFileManager_getUseCount");
 };
 
 CHECK_OFFSET(cFEBoltFileManager, mFiles, 0x00000);
@@ -135,6 +158,19 @@ struct cBoltFileIndexManager {
     tBoltFileIndexNode mNodes[400];     // 0x0000 [R] cBoltFileIndexManager_reset fills 6400 bytes with 0xFF and chains them
     tBoltFileIndexNode* mBuckets[400];  // 0x1900 [R] cBoltFileIndexManager_reset clears 1600 bytes; [U] chain heads by key % 400
     tBoltFileIndexNode* mpFreeList;     // 0x1F40 [R] cBoltFileIndexManager_reset points it at node 0; [U] cBoltFileIndexManager_allocNode pops it
+
+    // Methods bound to their retail symbols by asm labels.
+    tBoltFileIndexNode* allocNode() __asm__("cBoltFileIndexManager_allocNode");
+    tBoltFileIndexNode* getPrevNode(tBoltFileIndexNode* item) __asm__("cBoltFileIndexManager_getPrevNode");
+    tBoltFileIndexNode* getNextNode(tBoltFileIndexNode* item) __asm__("cBoltFileIndexManager_getNextNode");
+    int getNodeIndex(tBoltFileIndexNode* node) __asm__("cBoltFileIndexManager_getNodeIndex");
+    tBoltFileIndexNode* findNode(int hi, int lo, int create) __asm__("cBoltFileIndexManager_findNode");
+    void freeNode(tBoltFileIndexNode* node) __asm__("cBoltFileIndexManager_freeNode");
+    void reset() __asm__("cBoltFileIndexManager_reset");
+    int getModelPartFile(int bit, int lowKey) __asm__("cBoltFileIndexManager_getModelPartFile");
+    void setModelPartFile(int bit, int lowKey, int val) __asm__("cBoltFileIndexManager_setModelPartFile");
+    int getPartTextureFile(int bit, int lowKey) __asm__("cBoltFileIndexManager_getPartTextureFile");
+    void setPartTextureFile(int bit, int lowKey, int val) __asm__("cBoltFileIndexManager_setPartTextureFile");
 };
 
 CHECK_OFFSET(cBoltFileIndexManager, mNodes, 0x0000);

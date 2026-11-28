@@ -193,6 +193,10 @@ struct sViewportStack {
 
 struct t4Vector;
 
+struct BoardTrailInfoT;
+struct tBxVertex;
+struct tRGB;
+
 class cPS2GraphicsMan : public cGraphicsMan {
 public:
     // 0x0000-0x10DB: cGraphicsMan (render/graphicsman.h), the vptr at 0x10D8
@@ -459,6 +463,52 @@ public:
                                          const tMdfBlendedMatrix* blendedMatrixTranslationTable, int n,
                                          t4Matrix* blendedmatlist)
         __asm__("cPS2GraphicsMan_GenerateBlendedMatrices");
+    void writeImageUpload16x16(int x, int y, char** pp) __asm__("cPS2GraphicsMan_writeImageUpload16x16");
+    void copyDepthFog(int idx) __asm__("cPS2GraphicsMan_copyDepthFog");
+    void queueDepthFogPass(int idx, void* pkt2, int* handle) __asm__("cPS2GraphicsMan_queueDepthFogPass");
+    void writeZToFrameCopy(int idx, int texBase, int frameBase, int n, char** pp)
+        __asm__("cPS2GraphicsMan_writeZToFrameCopy");
+    void queueOffsetBlur(int tbp, int tw, int srcU, int srcV, int uw, int vh, int fbp, float intensity, int w,
+                         int height, int off, int passes, int* handle)
+        __asm__("cPS2GraphicsMan_queueOffsetBlur");
+    void queueGreySubtract(int x, int w, int y, int grey, int alpha, int* handle)
+        __asm__("cPS2GraphicsMan_queueGreySubtract");
+    void queueTextureAdd(int tbp, int tw, int th, int fbp, int x, int y, int w, int height, int grey, int alpha,
+                         int* handle)
+        __asm__("cPS2GraphicsMan_queueTextureAdd");
+    void copyLightGlow(int idx) __asm__("cPS2GraphicsMan_copyLightGlow");
+    void queueLightGlowPass(int idx, void* pkt2, int* handle) __asm__("cPS2GraphicsMan_queueLightGlowPass");
+    void copyScreenTint(int idx) __asm__("cPS2GraphicsMan_copyScreenTint");
+    void queueScreenTintPass(int idx, void* pkt, int* addr) __asm__("cPS2GraphicsMan_queueScreenTintPass");
+    void setClippedScissor(float x, float y, float w, float rectHeight) __asm__("cPS2GraphicsMan_setClippedScissor");
+    unsigned long* beginTriStripPacket(int n) __asm__("cPS2GraphicsMan_beginTriStripPacket");
+    void endTriStripPacket() __asm__("cPS2GraphicsMan_endTriStripPacket");
+    bool applyDisplayMode(unsigned int displayWidth, unsigned int displayHeight, unsigned int w,
+                          unsigned int bufferHeight, unsigned int psm, unsigned int psm2, unsigned int zpsm,
+                          short resetMode, short interlaceMode, short fieldMode, int flag)
+        __asm__("cPS2GraphicsMan_applyDisplayMode");
+    void setDitherMatrix(int* src) __asm__("cPS2GraphicsMan_setDitherMatrix");
+    void setBrightnessColour(tRGB* colour) __asm__("cPS2GraphicsMan_setBrightnessColour");
+    void setScreenFade(float alpha) __asm__("cPS2GraphicsMan_setScreenFade");
+    float getScreenFade() __asm__("cPS2GraphicsMan_getScreenFade");
+    void* setTextureFunction() __asm__("cPS2GraphicsMan_setTextureFunction__FPv");
+    void* setTextureFilter() __asm__("cPS2GraphicsMan_setTextureFilter__FPv");
+    void computeMatrices() __asm__("cPS2GraphicsMan_computeMatrices");
+    void handleVblank() __asm__("cPS2GraphicsMan_handleVblank");
+    void handleVif1DmaEnd() __asm__("cPS2GraphicsMan_handleVif1DmaEnd");
+    bool claimBuildBuffer() __asm__("cPS2GraphicsMan_claimBuildBuffer");
+    bool isKickIdle() __asm__("cPS2GraphicsMan_isKickIdle");
+    void* runDmaKickThread() __asm__("cPS2GraphicsMan_runDmaKickThread");
+    void flipDisplayBuffers(int en1, int waitVsync) __asm__("cPS2GraphicsMan_flipDisplayBuffers");
+    int uploadImageToDrawBuffer(int destX, int destY, int width, int height, int src)
+        __asm__("cPS2GraphicsMan_uploadImageToDrawBuffer");
+    bool clipLineSegment(tBxVertex* verts, t4Vector* points, int* codes) __asm__("cPS2GraphicsMan_clipLineSegment");
+    void drawTrailRibbons(BoardTrailInfoT* strips, int n, void* firstRing, void* secondRing, void* textured,
+                          float alphaScale, float alphaStep)
+        __asm__("cPS2GraphicsMan_drawTrailRibbons");
+    void sendWakeRibbon(tBxVertex** strips, int start, int ring, int count, int firstRow, int secondRow,
+                        float alphaStart, float dt)
+        __asm__("cPS2GraphicsMan_sendWakeRibbon");
 };
 
 // --- layout checks

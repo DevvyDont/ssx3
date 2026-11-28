@@ -527,6 +527,8 @@ enum eMissionQuery {
 
 struct tSSXFrameActor;
 
+struct tBEBoltDef;
+
 struct cRider : public cRiderState, public cBeing {
     // 0x6C0: cBeing's vptr (cRider vtable _vt$6cRider, retail cRider_vtbl; object/being.h has the slots)
     // 0x6C4-0x6CF: alignment padding; the compiler starts the derived part on a 16-byte boundary (cScriptObjRider,
@@ -891,6 +893,14 @@ struct cRider : public cRiderState, public cBeing {
     void applyJumpPop(float speedFactor) __asm__("cRider_applyJumpPop");
     void moveFromCollision(const t4Vector* offset) __asm__("cRider_moveFromCollision");
     bool isRailBoardIntersect(t4Vector* tgt, t4Vector* dir) __asm__("cRider_isRailBoardIntersect");
+    float getSmoothedHeading() __asm__("cRider_getSmoothedHeading");
+    int collectWornParts(tBEBoltDef** list) __asm__("cRider_collectWornParts");
+    void addPartModelsToLoadList(void** list, int n) __asm__("cRider_addPartModelsToLoadList");
+    void addPartTexturesToLoadList(void** list, int n) __asm__("cRider_addPartTexturesToLoadList");
+    void updateLookAnims() __asm__("cRider_updateLookAnims");
+    void updateHandlerFX() __asm__("cRider_updateHandlerFX");
+    void updateLOD() __asm__("cRider_updateLOD");
+    void* renderAttachedEmitterFX() __asm__("cRider_renderAttachedEmitterFX__FPv");
 };
 
 CHECK_OFFSET(cRiderState, CheckID, 0xD8);

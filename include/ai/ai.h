@@ -210,6 +210,12 @@ struct cAI {
     void* InitGroupAI() __asm__("cAI_InitGroupAI__FPv");
     void RefreshGroupAI() __asm__("cAI_RefreshGroupAI");
     void forceAIState(int state) __asm__("cAI_forceAIState");
+    int isRiderCharacterRanked(int idx) __asm__("cAI_isRiderCharacterRanked");
+    void reinitRiderPaths() __asm__("cAI_reinitRiderPaths");
+    void teleportRiderToEnd(int which) __asm__("cAI_teleportRiderToEnd");
+    void teleportRiderToEndInPosition(int n) __asm__("cAI_teleportRiderToEndInPosition");
+    void prepareToPurgeExpiredRiders() __asm__("cAI_prepareToPurgeExpiredRiders");
+    int isReadyToPurgeExpiredRiders() __asm__("cAI_isReadyToPurgeExpiredRiders");
 };
 
 // Virtual slots of _vt$3cAI (D_00458488), as `vt[k].fn(this + vt[k].delta)`. Names from On Tour (merged.tsv).

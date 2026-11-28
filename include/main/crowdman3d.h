@@ -27,6 +27,8 @@ CHECK_OFFSET(tCrowdMember3d, mValue, 0x4);
 CHECK_SIZE(tCrowdMember3d, 0x8);
 
 // One crowd block (0x1F4 bytes).
+struct cBxReplayFrame;
+
 struct tCrowdBlock3d {
     // A free id (name ours): [R] the ctor and tCrowdBlock3d_reset store it in mModelId, mKey and every member's mInstanceId;
     // [U] a block is in use while its mKey is not kFree.
@@ -40,6 +42,13 @@ struct tCrowdBlock3d {
     tCrowdMember3d mMembers[32];    // 0x00C [R] the ctor and tCrowdBlock3d_reset free all 32
     char unk_10C[0xE8];             // 0x10C the animation state ([R] tCrowdBlock3d_reset clears +0x110, +0x114, +0x1DC and
                                     //       +0x1E8..+0x1F0; [U] tCrowdBlock3d_setModel sets +0x1DC and +0x1E4)
+
+    // Methods bound to their retail symbols by asm labels.
+    void* destroy() __asm__("tCrowdBlock3d_destroy__FPv");
+    void setModel(int modelId) __asm__("tCrowdBlock3d_setModel");
+    void render() __asm__("tCrowdBlock3d_render");
+    void writeToReplayFrame(cBxReplayFrame* replayStream) __asm__("tCrowdBlock3d_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* replayStream) __asm__("tCrowdBlock3d_readFromReplayFrame");
 };
 
 CHECK_OFFSET(tCrowdBlock3d, mNumMembers, 0x000);
@@ -49,9 +58,18 @@ CHECK_OFFSET(tCrowdBlock3d, mMembers, 0x00C);
 CHECK_OFFSET(tCrowdBlock3d, unk_10C, 0x10C);
 CHECK_SIZE(tCrowdBlock3d, 0x1F4);
 
+struct cBxReplayFrame;
+
 struct cCrowdMan3d {
     tCrowdBlock3d mBlocks[5];       // 0x000 [R] the ctor resets all five (tCrowdBlock3d_reset); the dtor frees each block's
                                     //       animation data and destroys the five (tCrowdBlock3d_destroy)
+
+    // Methods bound to their retail symbols by asm labels.
+    void removeSectionMembers(void* sectionId) __asm__("cCrowdMan3d_removeSectionMembers");
+    void update() __asm__("cCrowdMan3d_update");
+    void render() __asm__("cCrowdMan3d_render");
+    void writeToReplayFrame(cBxReplayFrame* replayStream) __asm__("cCrowdMan3d_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* replayStream) __asm__("cCrowdMan3d_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cCrowdMan3d, mBlocks, 0x000);

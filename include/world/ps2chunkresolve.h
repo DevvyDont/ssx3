@@ -27,6 +27,8 @@ struct Nash;          // the world's nash cell tree / stream (On Tour Nash)
 struct tInstanceRecord;
 struct tModelRecord;
 
+struct cList;
+
 struct cPS2ChunkResolve {
     // --- cChunkResolve (world/chunkresolve.h, 0xC)
     cWorld* mp_World;                       // 0x000 [O] cChunkResolve::mp_World; [R] cPS2ChunkResolve_init stores its third
@@ -50,6 +52,12 @@ struct cPS2ChunkResolve {
     int resolveInstance(tInstanceRecord* pInstance) __asm__("cPS2ChunkResolve_resolveInstance");
     void purge() __asm__("cPS2ChunkResolve_purge__FPv");
     void init(Nash* pNash) __asm__("cPS2ChunkResolve_init");
+    int resolveModelDma(cList* list) __asm__("cPS2ChunkResolve_resolveModelDma");
+    int fixupModelMeshes(tModelRecord* list) __asm__("cPS2ChunkResolve_fixupModelMeshes");
+    int fixupMesh(void* vitem, void* list) __asm__("cPS2ChunkResolve_fixupMesh");
+    int resolveInstanceDma(tInstanceRecord* instance) __asm__("cPS2ChunkResolve_resolveInstanceDma");
+    void* patchInstanceChain(tInstanceRecord* instance, tModelRecord* list, void* cur)
+        __asm__("cPS2ChunkResolve_patchInstanceChain");
 };
 CHECK_OFFSET(cPS2ChunkResolve, mp_World, 0x0);
 CHECK_OFFSET(cPS2ChunkResolve, m_pDummyCollideRecord, 0x4);

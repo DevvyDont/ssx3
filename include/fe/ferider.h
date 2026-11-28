@@ -109,6 +109,7 @@ struct cFERider {
     int getBoneQuaternion(int index) __asm__("cFERider_getBoneQuaternion");
     void getAnimID() __asm__("cFERider_getAnimID");
     void getAnimPercent() __asm__("cFERider_getAnimPercent");
+    void releasePartTextures(cBECharProfileDB* list) __asm__("cFERider_releasePartTextures");
 };
 
 CHECK_OFFSET(cFERider, mCharID, 0x000);

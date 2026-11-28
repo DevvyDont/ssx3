@@ -35,6 +35,9 @@ struct cConnMan {
                                     //     it down by SSXApp->TimerPeriod and gives up (0x2D3F3F3F) below 0 (view
                                     //     sDsTimer_263828 timer)
     void** mVtbl;                   // 0x8 [R] cConnMan_vtbl (ctor, dtor); slot 1 = destructor
+
+    // Methods bound to their retail symbols by asm labels.
+    void connect() __asm__("cConnMan_connect");
 };
 
 CHECK_OFFSET(cConnMan, mState, 0x0);
@@ -55,6 +58,9 @@ struct cGameConnMan {
     float mTimeout;                 // 0x10 [U] cGameConnMan_connect: 60.0 (D_004A2F14); cGameConnMan_update counts it down by
                                     //      SSXApp->TimerPeriod and shuts down (reason 0) below 0
     void** mVtbl;                   // 0x14 [R] cGameConnMan_vtbl (ctor, dtor); slot 1 = destructor
+
+    // Methods bound to their retail symbols by asm labels.
+    void shutdown(int reason) __asm__("cGameConnMan_shutdown");
 };
 
 CHECK_OFFSET(cGameConnMan, mState, 0x00);

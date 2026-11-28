@@ -75,6 +75,10 @@ struct SSX_VD_PS2_SINGLE_BUFFERD {
     void CompleteDraw() __asm__("SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw");
     void SetScale(float scaleX, float scaleY) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_SetScale__FPvff");
     void* ReDraw() __asm__("SSX_VD_PS2_SINGLE_BUFFERD_ReDraw__FPv");
+    void operator_delete1() __asm__("SSX_VD_PS2_SINGLE_BUFFERD_operator_delete1");
+    void operator_delete_array1() __asm__("SSX_VD_PS2_SINGLE_BUFFERD_operator_delete_array1");
+    int operator_new(int value) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_operator_new");
+    int operator_new_array(int value) __asm__("SSX_VD_PS2_SINGLE_BUFFERD_operator_new_array");
 };
 
 CHECK_OFFSET(RCMP_VIDEO_DRIVER, m_pdecoder, 0x0);

@@ -344,13 +344,12 @@ extern "C" void* cBEBoltInterface_getRiderCharProfile(void* iface, int rider);
  * flags have bit 0x10. Likely bug (retail too): an entry whose map value is negative gets a null slot whose flags are
  * still read (address 2). Called by cRider_parsePartsFromBuf with a 52-entry list.
  *
- * @param vself  the cRider
  * @param list  receives the entry pointers
  * @return the number of entries written
  */
-extern "C" int cRider_collectWornParts(cRider* vself, tBEBoltDef** list)
+int cRider::collectWornParts(tBEBoltDef** list)
 {
-    cRider* self = (cRider*)vself;
+    cRider* self = (cRider*)this;
     int n = 0;
     void* iface = cBE_getInterface(cBE_getBE(), 9);
     int ch = cBELibrary_getCharacterID(self->mAIIndex);
@@ -412,12 +411,12 @@ extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
  * @param list  the part entries
  * @param n  how many there are
  */
-extern "C" void cRider_addPartModelsToLoadList(cRider* self, void** list, int n)
+void cRider::addPartModelsToLoadList(void** list, int n)
 {
     for (int i = 0; i < n; i++, list++)
     {
         char* name = *(char**)((char*)*list + 0x28);
-        tRiderLoadList* nameTable = ((tRiderLoadList*)self->mLoadList);
+        tRiderLoadList* nameTable = ((tRiderLoadList*)mLoadList);
         if (name == 0) continue;
         if (*name == 0) continue;
         int j;
@@ -434,7 +433,7 @@ extern "C" void cRider_addPartModelsToLoadList(cRider* self, void** list, int n)
         }
     next:;
     }
-    tRiderLoadList* sortTable = ((tRiderLoadList*)self->mLoadList);
+    tRiderLoadList* sortTable = ((tRiderLoadList*)mLoadList);
     qsort(sortTable, sortTable->MdlLoadNum, 264, compareLoadListNames);
 }
 #endif
@@ -467,14 +466,14 @@ extern "C" int cBEBoltInterface_buildBoltModelFileName(void* iface, int b, int a
  * @param list  the part entries
  * @param n  how many there are
  */
-extern "C" void cRider_addPartTexturesToLoadList(cRider* self, void** list, int n)
+void cRider::addPartTexturesToLoadList(void** list, int n)
 {
     void* iface = cBE_getInterface(cBE_getBE(), 9);
-    int characterId = cBEBoltInterface_getCharacterID(self->mAIIndex);
-    if (cBELibrary_getCheatCharacterID(self->mAIIndex)) {
+    int characterId = cBEBoltInterface_getCharacterID(mAIIndex);
+    if (cBELibrary_getCheatCharacterID(mAIIndex)) {
         for (int i = 0; i < n; i++) {
             char* name = *(char**)((char*)list[i] + 0x2C);
-            tRiderLoadList* nameTable = ((tRiderLoadList*)self->mLoadList);
+            tRiderLoadList* nameTable = ((tRiderLoadList*)mLoadList);
             if (name == 0) continue;
             if (*name == 0) continue;
             int j;
@@ -492,12 +491,12 @@ extern "C" void cRider_addPartTexturesToLoadList(cRider* self, void** list, int 
         next:;
         }
     } else {
-        int profileIndex = cBEBoltInterface_getProfileIndex(self->mAIIndex);
+        int profileIndex = cBEBoltInterface_getProfileIndex(mAIIndex);
         for (int i = 0; i < n; i++) {
             char buf[0x100];
             if (cBEBoltInterface_buildBoltModelFileName(iface, profileIndex, characterId, list[i], buf) == 0) continue;
             char* name = buf;
-            tRiderLoadList* nameTable = ((tRiderLoadList*)self->mLoadList);
+            tRiderLoadList* nameTable = ((tRiderLoadList*)mLoadList);
             if (*name == 0) continue;
             int j;
             int end = nameTable->TexLoadNum + nameTable->MdlLoadNum;
@@ -514,7 +513,7 @@ extern "C" void cRider_addPartTexturesToLoadList(cRider* self, void** list, int 
         next2:;
         }
     }
-    tRiderLoadList* sortTable = ((tRiderLoadList*)self->mLoadList);
+    tRiderLoadList* sortTable = ((tRiderLoadList*)mLoadList);
     qsort(&((&sortTable->LoadList[0]))[sortTable->MdlLoadNum], sortTable->TexLoadNum, 264, compareLoadListNames);
 }
 #endif
@@ -569,7 +568,7 @@ void cRider::parsePartsFromBuf(int pData)
     tBEBoltDef* list[52];
     cMdfArchive_cMdfArchive(&arc);
     cMdfArchive_attachArchive(&arc, pData);
-    int n = cRider_collectWornParts(this, list);
+    int n = this->collectWornParts(list);
     for (int i = 0; i < n; i++)
     {
         tBEBoltDef* item = list[i];
@@ -2889,9 +2888,9 @@ static inline float Clamp_120378(float v, float lo, float hi)
  * @param vself  the cRider
  */
 // Sets the look-layer anim speed from the rider's speed and (on its frame) picks the head/body look anims.
-extern "C" void cRider_updateLookAnims(cRider* vself)
+void cRider::updateLookAnims()
 {
-    cRider* self = (cRider*)vself;
+    cRider* self = (cRider*)this;
     float sideLimit = 416.66668701171875f;
     float upLimit = 888.888916015625f;
     sV_120378 v = Sub_120378(*(sV_120378*)&self->mVelocity, *(sV_120378*)&self->GroundVelocity);
@@ -3029,10 +3028,10 @@ extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* handler);
 /**
  * Updates the rider's handler FX: cRiderHandler_updateRiderFX on mRiderHandler. Nothing in the source calls it.
  *
- * @param rider  the cRider
  */
-extern "C" void cRider_updateHandlerFX(cRider* rider) {
-    cRiderHandler_updateRiderFX(rider->mRiderHandler);
+void cRider::updateHandlerFX()
+{
+    cRiderHandler_updateRiderFX(mRiderHandler);
 }
 #endif
 
@@ -3233,7 +3232,7 @@ static inline void approach_11F8(sRiderChannel* riderChannel)
  */
 void cRider::updateSplit4()
 {
-    cRider_updateLookAnims(this);
+    this->updateLookAnims();
     approach_11F8(&mSlewed[0]);
     approach_11F8(&mSlewed[1]);
     approach_11F8(&mSlewed[2]);
@@ -3739,11 +3738,11 @@ static inline t4Vector mtxMulVec_121F30(t4Vector* m, t4Vector* v)
  * Transforms the rider's position (virtual slot 5) by GrMan's view matrix (slot 35), scales the depth by tan(fov) (slot
  * 29) and 0.01: below 6 gives LOD 0, below 10 LOD 1, else 2. Called by cRider_renderBody.
  */
-extern "C" void cRider_updateLOD(cRider* self)
+void cRider::updateLOD()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     t4Vector* viewMtx = (t4Vector*)ps2GraphicsMan->GetView();
-    t4Vector* pos = self->getPosition();
+    t4Vector* pos = getPosition();
     t4Vector viewPos = mtxMulVec_121F30(viewMtx, pos);
     float z = viewPos.z;
     cPS2GraphicsMan* graphicsMan = GrMan;
@@ -3754,13 +3753,13 @@ extern "C" void cRider_updateLOD(cRider* self)
     z = z * 0.009999999776482582f;
     if (z < 6.0f)
     {
-        self->mLOD = 0;
+        mLOD = 0;
     }
     else
     {
         int lod = 2;
         if (z < 10.0f) lod = 1;
-        self->mLOD = lod;
+        mLOD = lod;
     }
 }
 #endif
@@ -3993,7 +3992,7 @@ void cRider::renderBody()
         int additiveBoard = 0;
         if (playerLights->mBoardIsAdditive || mUberLevel >= 11)
             additiveBoard = 1;
-        cRider_updateLOD(this);
+        this->updateLOD();
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)VPTR_OF(cGraphicsMan, ps2GraphicsMan);
         vt[69].fn(vthis(ps2GraphicsMan, vt[69]), &PlayerIrradiance, 1);
@@ -4079,13 +4078,11 @@ INCLUDE_ASM("ai/rider", cRider_renderAttachedEmitterFX__FPv);
  *
  * cAI_render calls it for every rider last.
  *
- * @param vself  the cRider
  * @return func_002F2088's result
  */
-void* cRider_renderAttachedEmitterFX(void* vself)
+void* cRider::renderAttachedEmitterFX()
 {
-    cRider* self = (cRider*)vself;
-    return func_002F2088(self->mAttachedEmitterFX);
+    return func_002F2088(mAttachedEmitterFX);
 }
 #endif
 

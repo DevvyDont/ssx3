@@ -419,14 +419,14 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @return @p self
  */
 // cBXString(a + b).
-extern "C" cBXString* cBXString_operatorPlus(cBXString* self, cBXString* left, cBXString* right)
+cBXString* cBXString::operatorPlus(cBXString* left, cBXString* right)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
     joined.concatCopy(left->getData()->DataLength, left->Str, right->getData()->DataLength, right->Str);
-    self->cBXString1(&joined);
+    cBXString1(&joined);
     cBXString__cBXString(&joined, 2);
-    return self;
+    return this;
 }
 #endif
 
@@ -451,7 +451,7 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @return @p self
  */
 // cBXString(a + str).
-extern "C" cBXString* cBXString_operatorPlus1(cBXString* self, cBXString* bxString, const char* str)
+cBXString* cBXString::operatorPlus1(cBXString* bxString, const char* str)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
@@ -463,9 +463,9 @@ extern "C" cBXString* cBXString_operatorPlus1(cBXString* self, cBXString* bxStri
     else
         len = 0;
     joined.concatCopy(*lenp, bxString->Str, len, str);
-    self->cBXString1(&joined);
+    cBXString1(&joined);
     cBXString__cBXString(&joined, 2);
-    return self;
+    return this;
 }
 #endif
 
@@ -490,7 +490,7 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * @return @p self
  */
 // cBXString(str + b).
-extern "C" cBXString* cBXString_operatorPlus2(cBXString* self, const char* str, cBXString* bxString)
+cBXString* cBXString::operatorPlus2(const char* str, cBXString* bxString)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
@@ -500,9 +500,9 @@ extern "C" cBXString* cBXString_operatorPlus2(cBXString* self, const char* str, 
     else
         len = 0;
     joined.concatCopy(len, str, bxString->getData()->DataLength, bxString->Str);
-    self->cBXString1(&joined);
+    cBXString1(&joined);
     cBXString__cBXString(&joined, 2);
-    return self;
+    return this;
 }
 #endif
 
@@ -521,15 +521,15 @@ INCLUDE_ASM("bx/bxstring", cBXString_operatorPlus3);
  * @return @p self
  */
 // cBXString(a + ch).
-extern "C" cBXString* cBXString_operatorPlus3(cBXString* self, cBXString* bxString, char ch)
+cBXString* cBXString::operatorPlus3(cBXString* bxString, char ch)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
     char charBuf = ch;
     joined.concatCopy(bxString->getData()->DataLength, bxString->Str, 1, &charBuf);
-    self->cBXString1(&joined);
+    cBXString1(&joined);
     cBXString__cBXString(&joined, 2);
-    return self;
+    return this;
 }
 #endif
 //100%
@@ -547,15 +547,15 @@ INCLUDE_ASM("bx/bxstring", cBXString_operatorPlus4);
  * @return @p self
  */
 // cBXString(ch + b).
-extern "C" cBXString* cBXString_operatorPlus4(cBXString* self, char ch, cBXString* bxString)
+cBXString* cBXString::operatorPlus4(char ch, cBXString* bxString)
 {
     cBXString joined;
     joined.Str = cBXString_EmptyString;
     char charBuf = ch;
     joined.concatCopy(1, &charBuf, bxString->getData()->DataLength, bxString->Str);
-    self->cBXString1(&joined);
+    cBXString1(&joined);
     cBXString__cBXString(&joined, 2);
-    return self;
+    return this;
 }
 #endif
 
@@ -639,11 +639,11 @@ INCLUDE_ASM("bx/bxstring", cBXString_operatorPlusE);
  * @param ch  the character to append
  * @return @p self
  */
-extern "C" cBXString* cBXString_operatorPlusE(cBXString* self, char ch)
+cBXString* cBXString::operatorPlusE(char ch)
 {
     char buf = ch;
-    self->ConcatImpl(1, &buf);
-    return self;
+    ConcatImpl(1, &buf);
+    return this;
 }
 #endif
 
@@ -660,10 +660,10 @@ extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str);
  * @param other  the string to append
  * @return @p self
  */
-extern "C" cBXString* cBXString_operatorPlusE1(cBXString* self, cBXString* other)
+cBXString* cBXString::operatorPlusE1(cBXString* other)
 {
-    self->ConcatImpl(other->getData()->DataLength, other->Str);
-    return self;
+    ConcatImpl(other->getData()->DataLength, other->Str);
+    return this;
 }
 #endif
 

@@ -366,6 +366,18 @@ struct cBECharProfileDB {
     void setLocationVisited(int bit, int on) __asm__("cBECharProfileDB_setLocationVisited");
     bool updateScoreStats(int locationId, int stat, unsigned int value) __asm__("cBECharProfileDB_updateScoreStats");
     void* getScoreStats(int locID, int event) __asm__("cBECharProfileDB_getScoreStats__FPvii");
+    void applyStartingBolts() __asm__("cBECharProfileDB_applyStartingBolts");
+    void restoreVisibleFlags() __asm__("cBECharProfileDB_restoreVisibleFlags");
+    void buildBoltList(int k) __asm__("cBECharProfileDB_buildBoltList");
+    void normalizeBoltFlags() __asm__("cBECharProfileDB_normalizeBoltFlags");
+    short getBoltIdAt(int i) __asm__("cBECharProfileDB_getBoltIdAt");
+    void setBoltBought(int id, int on) __asm__("cBECharProfileDB_setBoltBought");
+    bool setBoltVisible(int id, int on) __asm__("cBECharProfileDB_setBoltVisible");
+    bool applyBoltRules(int id, int on) __asm__("cBECharProfileDB_applyBoltRules");
+    bool reapplyBoltRules(int* changed) __asm__("cBECharProfileDB_reapplyBoltRules");
+    int showDefaultBolts() __asm__("cBECharProfileDB_showDefaultBolts");
+    bool isBoltVisible(int id) __asm__("cBECharProfileDB_isBoltVisible");
+    bool hasBoltFlags(int id, unsigned int mask) __asm__("cBECharProfileDB_hasBoltFlags");
 };
 CHECK_OFFSET(cBECharProfileDB, bFirstTimeWorldCircuit, 0x0);
 CHECK_OFFSET(cBECharProfileDB, mCollectibles, 0x4);

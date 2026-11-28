@@ -47,6 +47,12 @@ struct RCMP_AV_AUDIO {
                                     //      SNDSTRM call uses it
     int mRequest;                   // 0x10 [R] ctor the queued request (SNDSTRM_queueFileRequest), -1 until queued; [U]
                                     //      RCMP_AV_AUDIO_StartSound releases its hold
+
+    // Methods bound to their retail symbols by asm labels.
+    int SetSpeed(int speed) __asm__("RCMP_AV_AUDIO_SetSpeed");
+    int StartSound() __asm__("RCMP_AV_AUDIO_StartSound");
+    int SetVol(int volume) __asm__("RCMP_AV_AUDIO_SetVol");
+    bool IsAudioFinished() __asm__("RCMP_AV_AUDIO_IsAudioFinished");
 };
 
 CHECK_OFFSET(RCMP_AV_AUDIO, mVolume, 0x00);
@@ -54,6 +60,12 @@ CHECK_OFFSET(RCMP_AV_AUDIO, mpBuffer, 0x04);
 CHECK_OFFSET(RCMP_AV_AUDIO, mStream, 0x0C);
 CHECK_OFFSET(RCMP_AV_AUDIO, mRequest, 0x10);
 CHECK_SIZE(RCMP_AV_AUDIO, 0x14);
+
+struct RCMP_AV_PLAYER;
+struct RCMP_AV_SUBTITLE;
+struct RCMP_AV_SUBTITLE_ARRAY;
+struct RCMP_CHUNK;
+struct RCMP_DECODER;
 
 struct RCMP_AV_PLAYER {
     RCMP_AV_AUDIO* mpAudio;         // 0x00 [R] ctor 0; RCMP_AV_PLAYER_GetFirstFrame = the 20-byte audio object (RCMP_AV_AUDIO_AV_AUDIO) unless
@@ -100,6 +112,33 @@ struct RCMP_AV_PLAYER {
     RCMP_AV_SUBTITLE_ARRAY* mSubtitles; // 0x70 [R] ctor 0; [U] RCMP_AV_PLAYER_GetSubtitle searches it
                                     //      (RCMP_AV_SUBTITLE_ARRAY_FindSubtitle)
     int mCurrFrame;                 // 0x74 [R] ctor 0; [U] RCMP_AV_PLAYER_GetFirstFrame / RCMP_AV_PLAYER_GetFrame = RCMP_DECODER_GetFrame()
+
+    // Methods bound to their retail symbols by asm labels.
+    RCMP_AV_PLAYER* AV_PLAYER1(char* videoSource, int videoBufferSize, char* audioSource, int audioBufferSize,
+                               int sourceType, int noAudio)
+        __asm__("RCMP_AV_PLAYER_AV_PLAYER1");
+    RCMP_AV_PLAYER* AV_PLAYER2(char* videoSource, int videoDataSize, int videoBufferSize, char* audioSource,
+                               int audioDataSize, int audioBufferSize, int sourceType, int noAudio)
+        __asm__("RCMP_AV_PLAYER_AV_PLAYER2");
+    RCMP_AV_PLAYER* AV_PLAYER3(char* videoSource, int videoDataSize, int videoBufferSize, char* audioSource,
+                               int audioDataSize, int audioBufferSize, int noAudio)
+        __asm__("RCMP_AV_PLAYER_AV_PLAYER3");
+    void Init(char* videoSource, int videoDataSize, int videoBufferSize, char* audioSource, int audioDataSize,
+              int audioBufferSize, int sourceType, int noAudio)
+        __asm__("RCMP_AV_PLAYER_Init");
+    void SetSubtitle(RCMP_AV_SUBTITLE_ARRAY* table) __asm__("RCMP_AV_PLAYER_SetSubtitle");
+    int GetFirstFrame(int framesToBuffer, int timeOffsetMs) __asm__("RCMP_AV_PLAYER_GetFirstFrame");
+    int GetFrame(float position) __asm__("RCMP_AV_PLAYER_GetFrame");
+    RCMP_AV_SUBTITLE* GetSubtitle() __asm__("RCMP_AV_PLAYER_GetSubtitle");
+    bool IsTimeForDecode() __asm__("RCMP_AV_PLAYER_IsTimeForDecode");
+    int IsAudioFinished() __asm__("RCMP_AV_PLAYER_IsAudioFinished");
+    void* SetSpeed(int speed) __asm__("RCMP_AV_PLAYER_SetSpeed");
+    void* Pause() __asm__("RCMP_AV_PLAYER_Pause__FPv");
+    void* UnPause() __asm__("RCMP_AV_PLAYER_UnPause__FPv");
+    int SetVol(int volume) __asm__("RCMP_AV_PLAYER_SetVol");
+    unsigned int SyncedAudioTime() __asm__("RCMP_AV_PLAYER_SyncedAudioTime");
+    void getVideoChunk(RCMP_DECODER* decoder, RCMP_CHUNK** out) __asm__("RCMP_AV_PLAYER_getVideoChunk");
+    void* releaseVideoChunk(RCMP_CHUNK* chunk) __asm__("RCMP_AV_PLAYER_releaseVideoChunk");
 };
 
 CHECK_OFFSET(RCMP_AV_PLAYER, mpAudio, 0x00);

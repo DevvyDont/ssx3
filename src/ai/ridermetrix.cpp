@@ -1173,11 +1173,11 @@ extern void* cWScriptMan_TheWScriptMan;
  * @param id  the trick (On Tour tTrickNameDef *td)
  * @param repeat  On Tour isRepeat: the trick repeats a recent one
  */
-extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, tTrickNameDef* id, int repeat)
+void cRiderMetrix::addTrick(tTrickNameDef* id, int repeat)
 {
     char buf[0x100];
     gGenTrickName(buf, id, 0xFF);
-    cRiderMetrix_addHUDfx(self, 0, buf, 3.0f, repeat);
+    cRiderMetrix_addHUDfx(this, 0, buf, 3.0f, repeat);
     cWScriptMan_eventTrick(cWScriptMan_TheWScriptMan, id);
 }
 #endif
@@ -1243,9 +1243,9 @@ static inline int func_trickIdEqual(const void* a, const void* b, int size)
  * @return the number of earlier copies
  */
 // Don't copy id_ into a local: a separate local shifts every register by one.
-extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self_, tTrickNameDef* id_)
+int cRiderMetrix::addToHistory(tTrickNameDef* id_)
 {
-    cRiderMetrix* self = self_;
+    cRiderMetrix* self = this;
     int count;
 
     if (self->InitTrickIsLateSpin != 0 || self->CurTrickRailslideMode != 0 || self->CurTrickUberGrind != 0 || self->CurTrickHandplant != 0 || self->CurTrickPressMode != 0) {
@@ -2302,16 +2302,16 @@ void cRiderMetrix::earnName(int stance, int alternate, int style, int flag)
 {
     tTrickNameDef idv;
     tTrickNameDef* id = &idv;
-    if (cRiderMetrix_buildTrickName(this, id, stance, alternate, style, flag) != 0)
+    if (this->buildTrickName(id, stance, alternate, style, flag) != 0)
     {
-        int pts = cRiderMetrix_checkForMonsterTrick(this, id);
+        int pts = this->checkForMonsterTrick(id);
         if (pts > 0)
         {
             CurTrickPower += pts * 9.999999747378752e-05f;
             cRiderMetrix_addHUDfx1(this, 50, pts, 0, 1.5f);
             cSSXAudio_LandedMonsterCombo(cAudioInterface_bxAudio(), Rider);
         }
-        cRiderMetrix_addTrick(this, id, cRiderMetrix_addToHistory(this, id) > 0);
+        this->addTrick(id, this->addToHistory(id) > 0);
     }
 }
 #endif
@@ -2417,19 +2417,19 @@ float cRiderMetrix::earnNameAndPoints(int stance, int alternate, int style, int 
         return 0.0f;
     }
 
-    valid = cRiderMetrix_buildTrickName(this, &id, stance, alternate, style, flag);
+    valid = this->buildTrickName(&id, stance, alternate, style, flag);
     delta = 0.0f;
     if (this->getCurTrickPoints() > 0) {
         repeats = 0;
         if (valid) {
-            int bonus = cRiderMetrix_checkForMonsterTrick(this, &id);
+            int bonus = this->checkForMonsterTrick(&id);
             if (bonus > 0) {
                 CurTrickPower += (float)bonus * 0.0001f;
                 cRiderMetrix_addHUDfx1(this, 50, bonus, 0, 1.5f);
                 cSSXAudio_LandedMonsterCombo(cAudioInterface_bxAudio(), Rider);
             }
-            repeats = cRiderMetrix_addToHistory(this, &id);
-            cRiderMetrix_addTrick(this, &id, repeats > 0);
+            repeats = this->addToHistory(&id);
+            this->addTrick(&id, repeats > 0);
         }
         divisor = repeats + 1;
         pending = this->getCurTrickPoints();
@@ -2590,7 +2590,6 @@ struct sTrickBits_A8C8 {
  * mode, takeoff and landing stance and pipe flags, spin and flip counts rounded from the angles (+0x34, +0x38), up to 3
  * grabs (+0x60), handplant (+0x7C) and press, using the tables gKickerSpecial / gWallSpecial.
  *
- * @param vself  the score object (this)
  * @param vid  receives the trick name (On Tour tTrickNameDef &tn)
  * @param stance  On Tour isFakieLand: landed fakie
  * @param alternate  On Tour isPipeLand: landed in a pipe
@@ -2598,11 +2597,9 @@ struct sTrickBits_A8C8 {
  * @param flag  the press landed in (On Tour pressLand)
  * @return nonzero when the trick has a name
  */
-extern "C" bool cRiderMetrix_buildTrickName(cRiderMetrix* vself, tTrickNameDef* vid, int stance, int alternate,
-        int style,
-                                            int flag)
+bool cRiderMetrix::buildTrickName(tTrickNameDef* vid, int stance, int alternate, int style, int flag)
 {
-    cRiderMetrix* self = vself;
+    cRiderMetrix* self = this;
     sTrickBits_A8C8* id = (sTrickBits_A8C8*)vid;
     int spinDeg;
     int flipDeg;
@@ -2804,7 +2801,7 @@ extern tMonsterTrick gMonsterComboTable[];
  * @param id  the trick name (On Tour tTrickNameDef &tn); replaced on a match
  * @return the monster trick's bonus points, or 0
  */
-extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, tTrickNameDef* id)
+int cRiderMetrix::checkForMonsterTrick(tTrickNameDef* id)
 {
     tTrickNameDef* trick = id;
     tMonsterTrick* comboEntry = gMonsterComboTable;

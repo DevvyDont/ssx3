@@ -43,6 +43,8 @@
 
 struct tWorldPainterQuery;   // worldpainter/worldpainterquery.h (cWorldPainterQuery, 0x18; m_data at 0x0)
 
+struct tARGB;
+
 struct tRenderState {
     tWorldPainterQuery* m_query[9]; // 0x000 [O] m_query[9]; [R] cRenderStateMan_init stores cWorldPainterMan_getQuery for
                                     //       kWPR_Camera, Fog, LightGlow, ScreenTint, SkyBox, Sun, Surface, Lighting, Weather
@@ -63,6 +65,11 @@ struct tRenderState {
     char m_irradiance[0xA0];        // 0x050 [O] cIrradiance m_irradiance (retail 0xA0: cIrradianceDataBase_Get's stride);
                                     //       [U] getIrradiance(i) returns &m_state[i] + 0x50; update copies irradiance
                                     //       records into it (lq/sq 0x20 at a time)
+
+    // Methods bound to their retail symbols by asm labels.
+    void blendToColour(const tARGB* targetA, const tARGB* targetB, int full) __asm__("tRenderState_blendToColour");
+    void blendToColour1(const tARGB* targetA, const tARGB* targetB, float weight)
+        __asm__("tRenderState_blendToColour1");
 };
 
 CHECK_OFFSET(tRenderState, m_query, 0x000);

@@ -627,17 +627,16 @@ static inline int Price_1513B8(sEconDef_1513B8* d)
  * become owned. If any did, owned items get flags 6 and the others lose flag 4. cBECharProfileDB_init and cBECharProfileDB_buildBoltList
  * call it.
  *
- * @param vself  the character profile
  */
-extern "C" void cBECharProfileDB_applyStartingBolts(cBECharProfileDB* vself)
+void cBECharProfileDB::applyStartingBolts()
 {
-    cBECharProfileDB* self = vself;
+    cBECharProfileDB* self = this;
     void* db = D_004A6750;
     int n = cBEBoltDB_getNumCharGroups(db, self->mCharacterID);
     sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)cBEBoltDB_getCharGroups(db, self->mCharacterID);
     for (int i = 0; i < n; i++, prizeGroup++)
     {
-        cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, prizeGroup->prize, 1);
+        self->setBoltVisible(prizeGroup->prize, 1);
     }
     int j;
     for (j = 0; j < self->mNumBolts; j++)
@@ -658,7 +657,7 @@ extern "C" void cBECharProfileDB_applyStartingBolts(cBECharProfileDB* vself)
         else if (Price_1513B8(itemDef) == kBoltPriceBuiltIn)
         {
             (*(short*)&Find_1513B8(self, itemDef->id)->flags) |= 2;
-            cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, itemDef->id, 1);
+            self->setBoltVisible(itemDef->id, 1);
             changed = 1;
         }
     }
@@ -693,10 +692,10 @@ struct sEconItems_001515B8
  *
  * The save-file loader calls it for every loaded profile.
  */
-extern "C" void cBECharProfileDB_restoreVisibleFlags(cBECharProfileDB* self)
+void cBECharProfileDB::restoreVisibleFlags()
 {
-    int n = self->mNumBolts;
-    tBEProfileBolt* item = ((&self->mBolts[0]));
+    int n = mNumBolts;
+    tBEProfileBolt* item = ((&mBolts[0]));
     for (int i = 0; i < n; i++, item++)
     {
         if ((*(short*)&item->flags) & 4)
@@ -835,7 +834,7 @@ extern sEconColRec_1600 D_005308D9[];
 extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
 {
     if (reload) {
-        cBECharProfileDB_buildBoltList((cBECharProfileDB*)((sEconItems_151A88*)self), k);
+        ((cBECharProfileDB*)((sEconItems_151A88*)self))->buildBoltList(k);
     }
     self->bits.bPeak1RivalPtsChallengePlayed = 0;
     self->bits.bPeak2RivalPtsChallengePlayed = 0;
@@ -1005,33 +1004,33 @@ struct sEconItems_151A88
  *
  * @param k  the character
  */
-extern "C" void cBECharProfileDB_buildBoltList(cBECharProfileDB* self, int k)
+void cBECharProfileDB::buildBoltList(int k)
 {
     void* db = D_004A6750;
     sEconDef_151A88* itemDef = (sEconDef_151A88*)cBEBoltDB_getCharBolts(db, k);
     int n = cBEBoltDB_getNumCharBolts(db, k);
-    self->mCharacterID = k;
-    self->mNumBolts = n;
-    if (self->mpBoltsMap == 0)
-        self->mpBoltsMap = (short*)operator_new_tag(kBolt_Num * 2, str_Profile_Bolts_Map, 0, 0);
+    mCharacterID = k;
+    mNumBolts = n;
+    if (mpBoltsMap == 0)
+        mpBoltsMap = (short*)operator_new_tag(kBolt_Num * 2, str_Profile_Bolts_Map, 0, 0);
     int i;
     for (i = 0; i < kBolt_Num; i++)
-        self->mpBoltsMap[i] = -1;
+        mpBoltsMap[i] = -1;
     for (i = 0; i < n; i++, itemDef++)
     {
-        tBEProfileBolt* itemSlot = &((&self->mBolts[0]))[i];
+        tBEProfileBolt* itemSlot = &((&mBolts[0]))[i];
         itemSlot->flags = 0;
         int id = itemDef->id;
         itemSlot->id = id;
-        self->mpBoltsMap[itemDef->id] = i;
+        mpBoltsMap[itemDef->id] = i;
     }
     for (i = n; i < 525; i++)
     {
-        tBEProfileBolt* emptySlot = &((&self->mBolts[0]))[i];
+        tBEProfileBolt* emptySlot = &((&mBolts[0]))[i];
         emptySlot->id = -1;
         emptySlot->flags = 0;
     }
-    cBECharProfileDB_applyStartingBolts(self);
+    applyStartingBolts();
 }
 #endif
 
@@ -1055,10 +1054,10 @@ static inline unsigned int clearBits_151BD0(unsigned int f, unsigned int m)
 /**
  * Normalises a character profile's item flags: items with flag 0x20 get flags 0x16; the others lose flags 0x10 and 4.
  */
-extern "C" void cBECharProfileDB_normalizeBoltFlags(cBECharProfileDB* self)
+void cBECharProfileDB::normalizeBoltFlags()
 {
-    for (int i = 0; i < self->mNumBolts; i++) {
-        tBEProfileBolt* item = &((&self->mBolts[0]))[i];
+    for (int i = 0; i < mNumBolts; i++) {
+        tBEProfileBolt* item = &((&mBolts[0]))[i];
         unsigned int oldFlags = item->flags;
         item->flags = (oldFlags & 0x20) ? (oldFlags | 0x16) : clearBits_151BD0(clearBits_151BD0(oldFlags, 0x10), 4);
     }
@@ -1073,11 +1072,11 @@ INCLUDE_ASM("be/beintecon", cBECharProfileDB_getBoltIdAt);
  * @param i  the slot
  * @return the item id, or -1
  */
-extern "C" short cBECharProfileDB_getBoltIdAt(cBECharProfileDB* self, int i)
+short cBECharProfileDB::getBoltIdAt(int i)
 {
-    if (i >= self->mNumBolts)
+    if (i >= mNumBolts)
         return -1;
-    return *(short*)((i << 2) + (int)self + 0x290);
+    return *(short*)((i << 2) + (int)this + 0x290);
 }
 #endif
 
@@ -1101,12 +1100,12 @@ struct sEconItems_00151C48
  * @param id  the item id
  * @param on  nonzero to set the flag
  */
-extern "C" void cBECharProfileDB_setBoltBought(cBECharProfileDB* self, int id, int on)
+void cBECharProfileDB::setBoltBought(int id, int on)
 {
-    int idx = self->mpBoltsMap[id];
+    int idx = mpBoltsMap[id];
     tBEProfileBolt* item;
     if (idx >= 0)
-        item = &((&self->mBolts[0]))[idx];
+        item = &((&mBolts[0]))[idx];
     else
         item = 0;
     if (on)
@@ -1191,9 +1190,9 @@ static inline sEconDef_151C90* getDef_151C90(sEconDefs_151C90* db, int i)
  */
 // Sets item id owned/unowned; turning on cascades turn-offs to conflicting items (def flag 1), turning off
 // cascades to dependent items (owned before or def flag 8). Then applies the item's links; 0 on failure.
-extern "C" bool cBECharProfileDB_setBoltVisible(cBECharProfileDB* selfp, int id, int on)
+bool cBECharProfileDB::setBoltVisible(int id, int on)
 {
-    cBECharProfileDB* self = selfp;
+    cBECharProfileDB* self = this;
     sEconDefs_151C90* db = (sEconDefs_151C90*)cBEBoltInterface_getBoltDB_1C90();
     sEconDef_151C90* def = getDef_151C90(db, cBEBoltDB_findBoltIndex(db, self->mCharacterID, id));
     tBEProfileBolt* item = getItem_151C90(self, id);
@@ -1219,7 +1218,7 @@ extern "C" bool cBECharProfileDB_setBoltVisible(cBECharProfileDB* selfp, int id,
                 int j = self->mpBoltsMap[sid];
                 if (j >= 0 && (isOwned_151C90(&((&self->mBolts[0]))[j]) || (rel->flags & 8)))
                 {
-                    if (cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, sid, 0) == 0)
+                    if (self->setBoltVisible(sid, 0) == 0)
                         return false;
                 }
             }
@@ -1231,13 +1230,13 @@ extern "C" bool cBECharProfileDB_setBoltVisible(cBECharProfileDB* selfp, int id,
         int n = cBEBoltDB_countChildBolts(db, self->mCharacterID, id);
         for (int i = 0; i < n; i++, rel++)
         {
-            if (cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, rel->other, 0) == 0)
+            if (self->setBoltVisible(rel->other, 0) == 0)
                 return false;
         }
     }
     if ((on && !wasOn) || (!on && wasOn))
     {
-        if (cBECharProfileDB_applyBoltRules((cBECharProfileDB*)self, id, on) == 0)
+        if (self->applyBoltRules(id, on) == 0)
             return false;
     }
     return true;
@@ -1312,9 +1311,9 @@ static inline sEconDef_151EF0* getDef_151EF0(sEconDefs_151EF0* db, int i)
  * @return true on success, false if a nested change failed
  */
 // Sets item id owned/unowned and applies its dependency links (cascading through cBECharProfileDB_setBoltVisible); 0 on failure.
-extern "C" bool cBECharProfileDB_applyBoltRules(cBECharProfileDB* selfp, int id, int on)
+bool cBECharProfileDB::applyBoltRules(int id, int on)
 {
-    cBECharProfileDB* self = selfp;
+    cBECharProfileDB* self = this;
     sEconDefs_151EF0* db = (sEconDefs_151EF0*)cBEBoltInterface_getBoltDB_1EF0();
     int n = 0;
     sEconLink_151EF0* link = cBEBoltDB_getBoltRules(db, self->mCharacterID, id, on, &n);
@@ -1344,7 +1343,7 @@ extern "C" bool cBECharProfileDB_applyBoltRules(cBECharProfileDB* selfp, int id,
             else
                 item->flags &= ~0x10;
         }
-        else if (cBECharProfileDB_setBoltVisible((cBECharProfileDB*)self, targetItem->id, link->on != 0) == 0)
+        else if (self->setBoltVisible(targetItem->id, link->on != 0) == 0)
         {
             return false;
         }
@@ -1385,20 +1384,20 @@ static inline tBEProfileBolt* getItem_001520E8(cBECharProfileDB* self, int id)
  * @param changed  receives 1 when at least one such item was owned, else 0
  * @return true on success, false if applying links failed
  */
-extern "C" bool cBECharProfileDB_reapplyBoltRules(cBECharProfileDB* self, int* changed)
+bool cBECharProfileDB::reapplyBoltRules(int* changed)
 {
-    void* db = cBEBoltInterface_getBoltDB((self));
-    int n = cBEBoltDB_getNumCharBolts(db, self->mCharacterID);
-    sEconDef_001520E8* def = (sEconDef_001520E8*)cBEBoltDB_getCharBolts(db, self->mCharacterID);
+    void* db = cBEBoltInterface_getBoltDB((this));
+    int n = cBEBoltDB_getNumCharBolts(db, mCharacterID);
+    sEconDef_001520E8* def = (sEconDef_001520E8*)cBEBoltDB_getCharBolts(db, mCharacterID);
     *changed = 0;
     for (int i = 0; i < n; i++, def++)
     {
         if (def->flags & 0x1000)
         {
-            if (getItem_001520E8((self), def->id)->flags & 0x10)
+            if (getItem_001520E8((this), def->id)->flags & 0x10)
             {
                 *changed = 1;
-                if (cBECharProfileDB_applyBoltRules(self, def->id, 1) == 0)
+                if (applyBoltRules(def->id, 1) == 0)
                     return false;
             }
         }
@@ -1450,28 +1449,28 @@ static inline tBEProfileBolt* Find_1521F0(cBECharProfileDB* self, int id)
  *
  * @return 1, or 0 when a prize could not be owned
  */
-extern "C" int cBECharProfileDB_showDefaultBolts(cBECharProfileDB* self)
+int cBECharProfileDB::showDefaultBolts()
 {
     int i = 0;
     int ok = 1;
     void* db = cBEBoltInterface_getBoltDB_noarg();
-    sEconGroup_1521F0* group = (sEconGroup_1521F0*)cBEBoltDB_getCharGroups(db, self->mCharacterID);
-    int n = cBEBoltDB_getNumCharGroups(db, self->mCharacterID);
+    sEconGroup_1521F0* group = (sEconGroup_1521F0*)cBEBoltDB_getCharGroups(db, mCharacterID);
+    int n = cBEBoltDB_getNumCharGroups(db, mCharacterID);
     for (; i < n; i++, group++)
     {
         sEconDef_1521F0* list[528];
-        int cnt = cBEBoltDB_collectChildBolts(db, self->mCharacterID, group->id, (void**)list, -1, 1);
+        int cnt = cBEBoltDB_collectChildBolts(db, mCharacterID, group->id, (void**)list, -1, 1);
         int j;
         for (j = 0; j < cnt; j++)
         {
-            if (!(Find_1521F0((self), list[j]->id)->flags & 0x10))
+            if (!(Find_1521F0((this), list[j]->id)->flags & 0x10))
                 continue;
             if (list[j]->flags & 0x10)
                 break;
         }
         if (j == cnt)
         {
-            if (cBECharProfileDB_setBoltVisible(self, group->prize, 1) == 0)
+            if (setBoltVisible(group->prize, 1) == 0)
             {
                 ok = 0;
                 break;
@@ -1497,10 +1496,10 @@ static inline bool testFlag_152340(unsigned int flags, unsigned int mask)
  * @param id  the item id
  * @return true when owned
  */
-extern "C" bool cBECharProfileDB_isBoltVisible(cBECharProfileDB* self, int id)
+bool cBECharProfileDB::isBoltVisible(int id)
 {
-    int idx = (self->mpBoltsMap)[id];
-    unsigned int flags = *(unsigned short*)((idx << 2) + (int)self + 0x292);
+    int idx = mpBoltsMap[id];
+    unsigned int flags = *(unsigned short*)((idx << 2) + (int)this + 0x292);
     return testFlag_152340(flags, 0x10);
 }
 #endif
@@ -1515,10 +1514,10 @@ INCLUDE_ASM("be/beintecon", cBECharProfileDB_hasBoltFlags);
  * @param mask  the flags to test
  * @return true when all are set
  */
-extern "C" bool cBECharProfileDB_hasBoltFlags(cBECharProfileDB* self, int id, unsigned int mask)
+bool cBECharProfileDB::hasBoltFlags(int id, unsigned int mask)
 {
-    int idx = (self->mpBoltsMap)[id];
-    unsigned int flags = *(unsigned short*)((idx << 2) + (int)self + 0x292);
+    int idx = mpBoltsMap[id];
+    unsigned int flags = *(unsigned short*)((idx << 2) + (int)this + 0x292);
     return (~flags & mask) == 0;
 }
 #endif

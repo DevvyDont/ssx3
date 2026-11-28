@@ -815,11 +815,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages_isChanged);
  * An out-of-line inline accessor with no caller. It sits right after cFEStateNetQuickMessages' destructor; in that
  * class +0x6D0 is mbChanged.
  *
- * @param netState  the state
  * @return the int at +0x6D0
  */
-extern "C" int cFEStateNetQuickMessages_isChanged(cFEStateNetQuickMessages* netState) {
-    return (netState->mbChanged);
+int cFEStateNetQuickMessages::isChanged()
+{
+    return (mbChanged);
 }
 #endif
 //100%
@@ -3285,7 +3285,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEUseExistingAccount_isOnlineState__FPv);
  *
  * @return 0
  */
-int cFEUseExistingAccount_isOnlineState(void* self)
+int cFEUseExistingAccount::isOnlineState()
 {
     return 0;
 }
@@ -3343,7 +3343,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona_isOnlineState__FPv);
  *
  * @return 0
  */
-int cFEStateSelectPersona_isOnlineState(void* self)
+int cFEStateSelectPersona::isOnlineState()
 {
     return 0;
 }
@@ -3592,7 +3592,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetConfig_isOnlineState__FPv);
  *
  * @return 0
  */
-int cFEStateNetConfig_isOnlineState(void* self)
+int cFEStateNetConfig::isOnlineState()
 {
     return 0;
 }
@@ -3678,7 +3678,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_isOnlineState__FPv);
  *
  * @return 0
  */
-int cFEStateAuthDNAS_isOnlineState(void* self)
+int cFEStateAuthDNAS::isOnlineState()
 {
     return 0;
 }
@@ -3745,7 +3745,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_isOnlineState__FPv);
  *
  * @return 0
  */
-int cFEStateAuthDNASError_isOnlineState(void* self)
+int cFEStateAuthDNASError::isOnlineState()
 {
     return 0;
 }
@@ -3846,7 +3846,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep1_isOnlineState__FPv);
  *
  * @return 0
  */
-int cFEStateCreateStep1_isOnlineState(void* self)
+int cFEStateCreateStep1::isOnlineState()
 {
     return 0;
 }
@@ -3904,7 +3904,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2_isOnlineState__FPv);
  *
  * @return 0
  */
-int cFEStateCreateStep2_isOnlineState(void* self)
+int cFEStateCreateStep2::isOnlineState()
 {
     return 0;
 }
@@ -3961,7 +3961,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate_isOnlineState__FPv);
  *
  * @return 0
  */
-int cFEStateCreateDuplicate_isOnlineState(void* self)
+int cFEStateCreateDuplicate::isOnlineState()
 {
     return 0;
 }
@@ -4012,7 +4012,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateLogin_isOnlineState__FPv);
  *
  * @return 0
  */
-int cFEStateLogin_isOnlineState(void* self)
+int cFEStateLogin::isOnlineState()
 {
     return 0;
 }
@@ -7422,10 +7422,10 @@ void cOVState_MESSAGECENTER::onCreateScreen()
     int n = getMessageCount_noarg();
     n += countMessageRows(4, 1);
     cUIMenu_setScrollableMenu(mpMenu, (unsigned char)n);
-    cOVState_MESSAGECENTER_fillRows(this);
-    cOVState_MESSAGECENTER_showMessageCounts(this);
-    cOVState_MESSAGECENTER_updateButtons(this);
-    cOVState_MESSAGECENTER_updateScrollArrows(this);
+    this->fillRows();
+    this->showMessageCounts();
+    this->updateButtons();
+    this->updateScrollArrows();
     D_004A20C0 = 1;
 }
 #endif
@@ -7598,7 +7598,7 @@ void cOVState_MESSAGECENTER::onGainFocus(cUIState*)
         cUIMenu_setSelectedByIndex(mpMenu, getMessageRow(37));
         cUIMenu* menu = mpMenu;
         menu->setFocus(1);
-        cOVState_MESSAGECENTER_openViewPopup(this, 37, -1);
+        this->openViewPopup(37, -1);
     } else {
         cUIMenu* menu = mpMenu;
         menu->setFocus(1);
@@ -7677,18 +7677,18 @@ void cOVState_MESSAGECENTER::onWidgetEvent(cUIThing* widget, unsigned int event)
             if (idx >= 0) {
                 int id = getListMessageId(idx);
                 list->mask |= 1 << idx;
-                cOVState_MESSAGECENTER_openViewPopup(this, id, k + 1);
+                this->openViewPopup(id, k + 1);
             } else if (idx + faqRowCount >= 0) {
                 int w = widget->mMiscData;
                 sPopupEntry18_4200* messageEntry = &D_004C6C08_4200[w];
                 sPopupEntry14_4200* groupEntry = &D_00441630_4200[messageEntry->id];
                 if (groupEntry->enabled != 0 && w == groupEntry->start) {
                     setMessageFlag(messageEntry->id, !isMessageFlagSet_b(messageEntry->id));
-                    cOVState_MESSAGECENTER_fillRows(this);
-                    cOVState_MESSAGECENTER_updateScrollArrows(this);
-                    cOVState_MESSAGECENTER_updateButtons(this);
+                    this->fillRows();
+                    this->updateScrollArrows();
+                    this->updateButtons();
                 } else {
-                    cOVState_MESSAGECENTER_openViewPopup(this, w, k + 1);
+                    this->openViewPopup(w, k + 1);
                 }
             }
         }
@@ -7698,10 +7698,10 @@ void cOVState_MESSAGECENTER::onWidgetEvent(cUIThing* widget, unsigned int event)
         if (queuedCount > 0) {
             int idx = queuedCount - mpMenu->mScrollItemCurrent - 1;
             if (idx >= 0) {
-                cOVState_MESSAGECENTER_deleteMessage(this, idx);
+                this->deleteMessage(idx);
                 mbMessageDeleted = 1;
             }
-            cOVState_MESSAGECENTER_updateButtons(this);
+            this->updateButtons();
         }
         break;
     case cUIState::kONPREV: {
@@ -7762,30 +7762,30 @@ extern sEntry14_4458 D_00441630_4458[] __asm__("D_00441630");
  * and labels "btext1" kT_BTNCollapse or kT_BTNExpand on a folder's first message (by the folder's message flag), else
  * kT_BTNView.
  */
-extern "C" void cOVState_MESSAGECENTER_updateButtons(cOVState_MESSAGECENTER* self)
+void cOVState_MESSAGECENTER::updateButtons()
 {
-    int base = self->mpMenu->mScrollItemCurrent;
+    int base = mpMenu->mScrollItemCurrent;
     int diff = getMessageCount_noarg() - base;
     if (diff - 1 >= 0) {
-        cOVState_MESSAGECENTER_showWidget(self, self->mpButtonSquare);
-        cOVState_MESSAGECENTER_showWidget(self, self->mpButtonText3);
-        if (self->mpButtonText1 != 0)
-            cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNView));
+        showWidget(mpButtonSquare);
+        showWidget(mpButtonText3);
+        if (mpButtonText1 != 0)
+            cUIText_setUnicodeStringByID(mpButtonText1, GetHashValue32(str_kT_BTNView));
     } else {
-        cOVState_MESSAGECENTER_hideWidget(self, self->mpButtonSquare);
-        cOVState_MESSAGECENTER_hideWidget(self, self->mpButtonText3);
-        if (self->mpButtonText1 != 0) {
+        hideWidget(mpButtonSquare);
+        hideWidget(mpButtonText3);
+        if (mpButtonText1 != 0) {
             int id = getMessageForRow(4, -diff, 1);
             sEntry18_4458* messageEntry = &D_004C6C08_4458[id];
             int groupIndex = messageEntry->groupIndex;
             sEntry14_4458* groupEntry = &D_00441630_4458[groupIndex];
             if (id == groupEntry->start) {
                 if (isMessageFlagSet(groupIndex))
-                    cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNCollapse));
+                    cUIText_setUnicodeStringByID(mpButtonText1, GetHashValue32(str_kT_BTNCollapse));
                 else
-                    cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNExpand));
+                    cUIText_setUnicodeStringByID(mpButtonText1, GetHashValue32(str_kT_BTNExpand));
             } else {
-                cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNView));
+                cUIText_setUnicodeStringByID(mpButtonText1, GetHashValue32(str_kT_BTNView));
             }
         }
     }
@@ -7816,11 +7816,11 @@ int cOVState_MESSAGECENTER::onWidgetMenu(cUIMenu* widget, unsigned int event, un
     switch (event) {
     case cUIMenu::kSCROLLUPDATE:
         mScrollOffset = value;
-        cOVState_MESSAGECENTER_updateScrollArrows(this);
-        cOVState_MESSAGECENTER_fillRows(this);
+        this->updateScrollArrows();
+        this->fillRows();
         break;
     case cUIMenu::kSCROLLCHANGE:
-        cOVState_MESSAGECENTER_updateButtons(this);
+        this->updateButtons();
         return 257;
     case cUIMenu::kONMISC:
         return 0;
@@ -7853,8 +7853,8 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
 void cOVState_MESSAGECENTER::onPopupEvent(cUIState* popup, unsigned int event)
 {
     if (event == cUIState::kONSCREENPOPUPPREV) {
-        cOVState_MESSAGECENTER_fillRows(this);
-        cOVState_MESSAGECENTER_showMessageCounts(this);
+        this->fillRows();
+        this->showMessageCounts();
         cUIStateStack_pop(&mpEngine->mStateStack, 1);
     }
 }
@@ -7875,13 +7875,13 @@ extern int D_004A20C4;
  * mpArrowUp is shown while mScrollOffset is not 0; mpArrowDown while mScrollOffset + 8 is below the row count (the
  * queued messages plus the FAQ rows, every FAQ row when D_004A20C4 is set).
  */
-extern "C" void cOVState_MESSAGECENTER_updateScrollArrows(cOVState_MESSAGECENTER* self)
+void cOVState_MESSAGECENTER::updateScrollArrows()
 {
-    if (self->mScrollOffset == 0) {
-        cUIThing* arrowWidget = self->mpArrowUp;
+    if (mScrollOffset == 0) {
+        cUIThing* arrowWidget = mpArrowUp;
         arrowWidget->setVisible(0);
     } else {
-        cUIThing* arrowWidget = self->mpArrowUp;
+        cUIThing* arrowWidget = mpArrowUp;
         arrowWidget->setVisible(1);
     }
     int n;
@@ -7892,11 +7892,11 @@ extern "C" void cOVState_MESSAGECENTER_updateScrollArrows(cOVState_MESSAGECENTER
         n = getMessageCount_noarg();
         n += countMessageRows(4, 0);
     }
-    if (self->mScrollOffset + 8 >= n) {
-        cUIThing* arrowWidget = self->mpArrowDown;
+    if (mScrollOffset + 8 >= n) {
+        cUIThing* arrowWidget = mpArrowDown;
         arrowWidget->setVisible(0);
     } else {
-        cUIThing* arrowWidget = self->mpArrowDown;
+        cUIThing* arrowWidget = mpArrowDown;
         arrowWidget->setVisible(1);
     }
 }
@@ -7920,22 +7920,22 @@ extern char str_kT_OVRCMNUnread[];
  * each looked up through the front-end locale (vtable entry 4) and written with sprintf1 into mpTotalMessagesLabel and
  * mpUnreadMessagesLabel when present.
  */
-extern "C" void cOVState_MESSAGECENTER_showMessageCounts(cOVState_MESSAGECENTER* self)
+void cOVState_MESSAGECENTER::showMessageCounts()
 {
     unsigned short buf[0x38];
-    if (self->mpTotalMessagesLabel != 0) {
+    if (mpTotalMessagesLabel != 0) {
         cFELocale* locale = SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNTotalMsg));
         sprintf1(buf, fmt, getMessageCount_noarg());
-        cUIText_setUnicodeString(self->mpTotalMessagesLabel, buf);
+        cUIText_setUnicodeString(mpTotalMessagesLabel, buf);
     }
-    if (self->mpUnreadMessagesLabel != 0) {
+    if (mpUnreadMessagesLabel != 0) {
         cFELocale* locale = SSXApp->FELocale;
         sVEntry<unsigned short*(void*, int)>* vt = (sVEntry<unsigned short*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
         unsigned short* fmt = vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_OVRCMNUnread));
         sprintf1(buf, fmt, countUnreadMessages());
-        cUIText_setUnicodeString(self->mpUnreadMessagesLabel, buf);
+        cUIText_setUnicodeString(mpUnreadMessagesLabel, buf);
     }
 }
 #endif
@@ -7949,7 +7949,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_hideWidget);
  *
  * @param obj  the widget
  */
-extern "C" void cOVState_MESSAGECENTER_hideWidget(cOVState_MESSAGECENTER* self, cUIThing* obj)
+void cOVState_MESSAGECENTER::hideWidget(cUIThing* obj)
 {
     if (obj != 0) {
         obj->setVisible(0);
@@ -7966,7 +7966,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_showWidget);
  *
  * @param obj  the widget
  */
-extern "C" void cOVState_MESSAGECENTER_showWidget(cOVState_MESSAGECENTER* self, cUIThing* obj)
+void cOVState_MESSAGECENTER::showWidget(cUIThing* obj)
 {
     if (obj != 0) {
         obj->setVisible(1);
@@ -8026,11 +8026,10 @@ struct sList_48B0 {
  * menu's item count (cUIMenu_setScrollableMenu) while keeping its selected row (+0x95) and stores the scroll offset's
  * low byte in the menu's +0x98.
  *
- * @param selfp  the message center
  */
-extern "C" void cOVState_MESSAGECENTER_fillRows(cOVState_MESSAGECENTER* selfp)
+void cOVState_MESSAGECENTER::fillRows()
 {
-    sList_48B0* self = (sList_48B0*)selfp;
+    sList_48B0* self = (sList_48B0*)this;
     int online;
     if (D_004A20C4) {
         online = countMessageRows_48B0(4, 1);
@@ -8117,7 +8116,7 @@ extern sPopupEntry18_4B80 D_004C6C08_4B80[] __asm__("D_004C6C08");
  * @param idx  the message index
  * @return the variant, or 0xFF when D_004A20C4 is clear or the message is not of kind 1
  */
-extern "C" unsigned char cOVState_MESSAGECENTER_getFAQSubjectVariant(cOVState_MESSAGECENTER* self, int idx)
+unsigned char cOVState_MESSAGECENTER::getFAQSubjectVariant(int idx)
 {
     unsigned char variant = 0xFF;
     if (D_004A20C4 == 0) {
@@ -8237,15 +8236,14 @@ static inline void show_4C78(sObj_4C78* o)
  * the sender's name (getMessageSenderName) and keeps @p id at +0x18. The subject is cOVState_MESSAGECENTER_setRowSubject's variant text for messages
  * of kind 1, else the message's subject id (+0x10).
  *
- * @param self_  the message center
  * @param idx    the message-list position, or -1 for a FAQ row
  * @param slot   the row (0-7)
  * @param id     the message index (D_004C6C08)
  * @param sub    the subject variant
  */
-extern "C" void cOVState_MESSAGECENTER_fillRow(cOVState_MESSAGECENTER* self_, int idx, int slot, int id, unsigned char sub)
+void cOVState_MESSAGECENTER::fillRow(int idx, int slot, int id, unsigned char sub)
 {
-    sPopup_4C78* self = (sPopup_4C78*)self_;
+    sPopup_4C78* self = (sPopup_4C78*)this;
     char buf[16];
     sEnt18_4C78* messageEntry = &D_004C6C08_4C78[id];
     sEnt14_4C78* groupEntry = &D_00441630_4C78[messageEntry->groupIndex];
@@ -8261,16 +8259,16 @@ extern "C" void cOVState_MESSAGECENTER_fillRow(cOVState_MESSAGECENTER* self_, in
                 setTexture_4C78(self->mpFAQIcon[slot], self->miQuestionMarkTex, idx);
             }
         }
-        cOVState_MESSAGECENTER_hideWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
-        cOVState_MESSAGECENTER_showWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
+        ((cOVState_MESSAGECENTER*)self)->hideWidget((cUIThing*)self->mpUnreadMail[slot]);
+        ((cOVState_MESSAGECENTER*)self)->showWidget((cUIThing*)self->mpFAQIcon[slot]);
     } else {
         int mask = 1 << idx;
         if (*(int*)(messageList + 0xC8) & mask) {
-            cOVState_MESSAGECENTER_hideWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
-            cOVState_MESSAGECENTER_hideWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
+            ((cOVState_MESSAGECENTER*)self)->hideWidget((cUIThing*)self->mpUnreadMail[slot]);
+            ((cOVState_MESSAGECENTER*)self)->hideWidget((cUIThing*)self->mpFAQIcon[slot]);
         } else {
-            cOVState_MESSAGECENTER_showWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpUnreadMail[slot]);
-            cOVState_MESSAGECENTER_hideWidget((cOVState_MESSAGECENTER*)self, (cUIThing*)self->mpFAQIcon[slot]);
+            ((cOVState_MESSAGECENTER*)self)->showWidget((cUIThing*)self->mpUnreadMail[slot]);
+            ((cOVState_MESSAGECENTER*)self)->hideWidget((cUIThing*)self->mpFAQIcon[slot]);
         }
     }
     if (self->mpNumber[slot] != 0) {
@@ -8295,7 +8293,7 @@ extern "C" void cOVState_MESSAGECENTER_fillRow(cOVState_MESSAGECENTER* self_, in
         self->mpFrom[slot]->mMiscData = id;
     }
     if (messageEntry->kind == 1) {
-        cOVState_MESSAGECENTER_setRowSubject((cOVState_MESSAGECENTER*)self, slot, id, sub);
+        ((cOVState_MESSAGECENTER*)self)->setRowSubject(slot, id, sub);
     } else if (self->mpSubject[slot] != 0) {
         cUIText_setUnicodeStringByID((cUIText*)self->mpSubject[slot], messageEntry->subject);
         show_4C78(self->mpSubject[slot]);
@@ -8336,7 +8334,7 @@ extern char str_kT_MSGSubjectBeatThePeakpct_d[];
  * @param id    the message index
  * @param lvl   the variant number
  */
-extern "C" void cOVState_MESSAGECENTER_setRowSubject(cOVState_MESSAGECENTER* self, int slot, int id, unsigned char lvl)
+void cOVState_MESSAGECENTER::setRowSubject(int slot, int id, unsigned char lvl)
 {
     char buf[48];
     if (isMessageInCategory(3, id)) {
@@ -8355,7 +8353,7 @@ extern "C" void cOVState_MESSAGECENTER_setRowSubject(cOVState_MESSAGECENTER* sel
     } else if (isMessageInCategory(8, id)) {
         sprintf(buf, str_kT_MSGSubjectBeatThePeakpct_d, lvl);
     }
-    cOVState_MESSAGECENTER* view = self;
+    cOVState_MESSAGECENTER* view = this;
     if (view->mpSubject[slot] != 0) {
         cUIText_setUnicodeStringByID(view->mpSubject[slot], GetHashValue32(buf));
         cUIText* textObj = view->mpSubject[slot];
@@ -8382,10 +8380,10 @@ extern char str_cOVState_ViewPopup[];
  * @param messageIndex  the message index (the popup's miMessage)
  * @param messageNumber  the number to show (miNumber; -1 from onGainFocus)
  */
-extern "C" void cOVState_MESSAGECENTER_openViewPopup(cOVState_MESSAGECENTER* self, int messageIndex, int messageNumber)
+void cOVState_MESSAGECENTER::openViewPopup(int messageIndex, int messageNumber)
 {
-    void* item = cOVState_ViewPopup_cOVState_ViewPopup((cOVState_ViewPopup*)cMemMan_alloc(0x70, str_cOVState_ViewPopup, 0, 0), self->mpEngine, self, messageIndex, messageNumber);
-    void* screen = self->mpMessageScreen;
+    void* item = cOVState_ViewPopup_cOVState_ViewPopup((cOVState_ViewPopup*)cMemMan_alloc(0x70, str_cOVState_ViewPopup, 0, 0), mpEngine, this, messageIndex, messageNumber);
+    void* screen = mpMessageScreen;
     void* screenOwner = *(void**)((char*)screen + 0xD0);
     void* ownerEngine = *(void**)((char*)screenOwner + 0x10);
     cUIStateStack_pushPopup((char*)ownerEngine + 0x18, item);
@@ -8411,19 +8409,19 @@ extern "C" void cOVState_MESSAGECENTER_updateScrollArrows(cOVState_MESSAGECENTER
  *
  * @param idx  the message-list position
  */
-extern "C" void cOVState_MESSAGECENTER_deleteMessage(cOVState_MESSAGECENTER* self, int idx)
+void cOVState_MESSAGECENTER::deleteMessage(int idx)
 {
     removeMessageAt(idx);
-    int cur = self->mpMenu->mScrollItemCurrent;
+    int cur = mpMenu->mScrollItemCurrent;
     int n = countMessageRows(4, 1);
     n += getMessageCount_noarg();
     if (cur >= n) {
         cur--;
     }
-    self->mpMenu->mScrollItemCurrent = cur;
-    cOVState_MESSAGECENTER_fillRows(self);
-    cOVState_MESSAGECENTER_showMessageCounts(self);
-    cOVState_MESSAGECENTER_updateScrollArrows(self);
+    mpMenu->mScrollItemCurrent = cur;
+    fillRows();
+    showMessageCounts();
+    updateScrollArrows();
 }
 #endif
 
@@ -8515,7 +8513,7 @@ extern "C" void cOVState_ViewPopup_fillMessage(cOVState_ViewPopup* self);
 bool cOVState_ViewPopup::onGainTransition(int on)
 {
     if (on != 0) {
-        cOVState_ViewPopup_fillMessage(this);
+        this->fillMessage();
     }
     return false;
 }
@@ -8615,42 +8613,42 @@ extern "C" void cOVState_ViewPopup_setBody(cOVState_ViewPopup* self, int idx);
  * miNumber ("%d"). mpFrom gets the sender's name (getMessageSenderName); then the subject (cOVState_ViewPopup_setSubject) and the body
  * (cOVState_ViewPopup_setBody) are set.
  */
-extern "C" void cOVState_ViewPopup_fillMessage(cOVState_ViewPopup* self)
+void cOVState_ViewPopup::fillMessage()
 {
-    sPopupEntry18_5428* messageEntry = &D_004C6C08_5428[self->miMessage];
+    sPopupEntry18_5428* messageEntry = &D_004C6C08_5428[miMessage];
     sPopupEntry14_5428* groupEntry = &D_00441630_5428[messageEntry->groupIndex];
     if (groupEntry->type == kMessageGroupFAQ) {
-        cUIThing* buttonWidget = self->mpButtonSquare;
+        cUIThing* buttonWidget = mpButtonSquare;
         if (buttonWidget != 0) {
             buttonWidget->setVisible(0);
         }
-        buttonWidget = self->mpDeleteMessage;
+        buttonWidget = mpDeleteMessage;
         if (buttonWidget != 0) {
             buttonWidget->setVisible(0);
         }
-        if (self->mpKeepMessage != 0) {
-            cUIText_setUnicodeStringByID(self->mpKeepMessage, GetHashValue32(str_kT_BTNKeepMsg));
+        if (mpKeepMessage != 0) {
+            cUIText_setUnicodeStringByID(mpKeepMessage, GetHashValue32(str_kT_BTNKeepMsg));
         }
     }
-    if (self->mpNumber != 0) {
+    if (mpNumber != 0) {
         if (groupEntry->type == kMessageGroupFAQ) {
             unsigned short buf[0x18];
             cFELocale* mgr = SSXApp->FELocale;
             sVEntryS1E5428* vt = (sVEntryS1E5428*)VPTR_OF(cUILocaleInterface, mgr);
             unsigned short* fmt = vt[4].fn(vthis(mgr, vt[4]), GetHashValue32(str_kT_MSGFAQNumber));
-            sprintf1(buf, fmt, getMessagePositionInCategory(self->miMessage));
-            cUIText_setUnicodeString(self->mpNumber, buf);
+            sprintf1(buf, fmt, getMessagePositionInCategory(miMessage));
+            cUIText_setUnicodeString(mpNumber, buf);
         } else {
             char buf[0x30];
-            sprintf(buf, D_004A2138, self->miNumber);
-            cUIText_setAsciiString(self->mpNumber, buf);
+            sprintf(buf, D_004A2138, miNumber);
+            cUIText_setAsciiString(mpNumber, buf);
         }
     }
-    if (self->mpFrom != 0) {
-        cUIText_setUnicodeStringByID(self->mpFrom, getMessageSenderName(messageEntry->sender));
+    if (mpFrom != 0) {
+        cUIText_setUnicodeStringByID(mpFrom, getMessageSenderName(messageEntry->sender));
     }
-    cOVState_ViewPopup_setSubject(self, self->miMessage);
-    cOVState_ViewPopup_setBody(self, self->miMessage);
+    setSubject(miMessage);
+    setBody(miMessage);
 }
 #endif
 
@@ -8666,13 +8664,13 @@ extern "C" void cOVState_ViewPopup_setVariantSubject(cOVState_ViewPopup* self, i
  *
  * @param idx  the message index
  */
-extern "C" void cOVState_ViewPopup_setSubject(cOVState_ViewPopup* self, int idx)
+void cOVState_ViewPopup::setSubject(int idx)
 {
     char* messageEntry = (char*)&D_004C6C08[idx];
     if (*(int*)(messageEntry + 0x8) == 1) {
-        cOVState_ViewPopup_setVariantSubject(self, idx);
+        setVariantSubject(idx);
     } else {
-        cUIText* uiText = self->mpSubject;
+        cUIText* uiText = mpSubject;
         if (uiText != 0) {
             cUIText_setUnicodeStringByID(uiText, *(int*)(messageEntry + 0x10));
         }
@@ -8708,12 +8706,12 @@ extern char str_kT_MSGSubjectBeatThePeakpct_d[];
  *
  * @param id  the message index
  */
-extern "C" void cOVState_ViewPopup_setVariantSubject(cOVState_ViewPopup* self, int id)
+void cOVState_ViewPopup::setVariantSubject(int id)
 {
     char buf[32];
     unsigned char lvl;
     if (D_004A20C4 != 0) {
-        lvl = cOVState_ViewPopup_getSubjectVariant(self, id);
+        lvl = getSubjectVariant(id);
     } else {
         lvl = getListMessageVariant(findMessage(id));
     }
@@ -8733,8 +8731,8 @@ extern "C" void cOVState_ViewPopup_setVariantSubject(cOVState_ViewPopup* self, i
     } else if (isMessageInCategory(8, id)) {
         sprintf(buf, str_kT_MSGSubjectBeatThePeakpct_d, lvl);
     }
-    if (self->mpSubject != 0) {
-        cUIText_setUnicodeStringByID(self->mpSubject, GetHashValue32(buf));
+    if (mpSubject != 0) {
+        cUIText_setUnicodeStringByID(mpSubject, GetHashValue32(buf));
     }
 }
 #endif
@@ -8751,16 +8749,16 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_setBody);
  *
  * @param idx  the message index
  */
-extern "C" void cOVState_ViewPopup_setBody(cOVState_ViewPopup* self, int idx)
+void cOVState_ViewPopup::setBody(int idx)
 {
     char* messageEntry = (char*)&D_004C6C08[idx];
     int kind = *(int*)(messageEntry + 0x8);
     if (kind < 2) {
         if (kind >= 0) {
-            char* lineWidget = (char*)self->mpMessageLine0;
+            char* lineWidget = (char*)mpMessageLine0;
             *(int*)(lineWidget + 0x14) |= 0x80;
-            cUIText_setUnicodeStringByID(self->mpMessageLine0, *(int*)(messageEntry + 0x14));
-            cUIText* obj = self->mpMessageLine0;
+            cUIText_setUnicodeStringByID(mpMessageLine0, *(int*)(messageEntry + 0x14));
+            cUIText* obj = mpMessageLine0;
             obj->setVisible(1);
         }
     }
@@ -8839,31 +8837,31 @@ unsigned char getMessageCount_noarg() __asm__("getMessageCount__FPv");
  * miNumber to its row number (count minus position). When there is nothing more it sends mpParentState onPopupEvent
  * (vtable entry 17) with this popup and kONSCREENPOPUPPREV.
  */
-extern "C" void cOVState_ViewPopup_showNextMessage(cOVState_ViewPopup* self)
+void cOVState_ViewPopup::showNextMessage()
 {
-    int id = self->miMessage;
+    int id = miMessage;
     sPopupEntry18_5800* messageEntry = &D_004C6C08_5800[id];
     sEntry14_5800* groupEntry = &D_00441630_5800[messageEntry->groupIndex];
     if (groupEntry->type == kMessageGroupFAQ) {
         int n = getNextMessageInGroup(id);
         if (n == -1) {
-            cUIState* parentState = self->mpParentState;
-            parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
+            cUIState* parentState = mpParentState;
+            parentState->onPopupEvent((cUIState*)this, cUIState::kONSCREENPOPUPPREV);
             return;
         }
-        self->miMessage = n;
-        self->miNumber = self->miNumber + 1;
-        cOVState_ViewPopup_fillMessage(self);
+        miMessage = n;
+        miNumber = miNumber + 1;
+        fillMessage();
     } else if (countUnreadMessages() > 0) {
         sPopupList* messageList = getMessageList_list();
         int idx;
-        self->miMessage = findUnreadMessage(&idx);
+        miMessage = findUnreadMessage(&idx);
         messageList->mask |= 1 << idx;
-        self->miNumber = getMessageCount_noarg() - idx;
-        cOVState_ViewPopup_fillMessage(self);
+        miNumber = getMessageCount_noarg() - idx;
+        fillMessage();
     } else {
-        cUIState* parentState = self->mpParentState;
-        parentState->onPopupEvent((cUIState*)self, cUIState::kONSCREENPOPUPPREV);
+        cUIState* parentState = mpParentState;
+        parentState->onPopupEvent((cUIState*)this, cUIState::kONSCREENPOPUPPREV);
     }
 }
 #endif
@@ -8910,7 +8908,7 @@ extern int D_004A20C4;
  * @param idx  the message index
  * @return the variant, or 0xFF when D_004A20C4 is clear
  */
-extern "C" unsigned char cOVState_ViewPopup_getSubjectVariant(cOVState_ViewPopup* self, int idx)
+unsigned char cOVState_ViewPopup::getSubjectVariant(int idx)
 {
     if (D_004A20C4 == 0) {
         return 0xFF;
@@ -10247,14 +10245,14 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_handleEvent);
  * @param message  the message
  * @return 0
  */
-extern "C" int cOVState_RACE_FINISHOV_handleEvent(cOVState_RACE_FINISHOV* self, int message)
+int cOVState_RACE_FINISHOV::handleEvent(int message, void*)
 {
     switch (message) {
     case 0:
-        self->mCanContinue = 0;
+        mCanContinue = 0;
         break;
     case 1:
-        self->mCanContinue = 1;
+        mCanContinue = 1;
         break;
     }
     return 0;
@@ -10489,14 +10487,14 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_handleEvent);
  * @param message  the message
  * @return 0
  */
-extern "C" int cOVState_BASSSP_QUAL_FINISHOV_handleEvent(cOVState_BASSSP_QUAL_FINISHOV* self, int message)
+int cOVState_BASSSP_QUAL_FINISHOV::handleEvent(int message, void*)
 {
     switch (message) {
     case 0:
-        self->mCanContinue = 0;
+        mCanContinue = 0;
         break;
     case 1:
-        self->mCanContinue = 1;
+        mCanContinue = 1;
         break;
     }
     return 0;
@@ -10563,37 +10561,37 @@ extern char str_overlayOptpct_d[];
  * kT_HELPCongratWonChal for places 0-3, else kT_HELPSorryBeatTime or kT_HELPSorryBeatScore, hidden when the player gave
  * up; the first three overlayOpt buttons take option ids from D_0046E9B0 and the rest are hidden.
  */
-extern "C" void cOVState_PEAKCHAL_RESULTS_onCreateScreen(cOVState* self)
+void cOVState::PEAKCHAL_RESULTS_onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_70peakchal_results), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_70peakchal_results), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = (void*)self->mpEngine;
-    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_OV_darkblue), 0);
+    engine = (void*)mpEngine;
+    screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     cGameModeMan* modeData = SSXApp->GameModeMan;
     int trk = cBENewRaceInterface_newRace.cGameEvent;
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
-    cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title1));
+    cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title1));
     cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_TITLERivalChallenge));
-    uiText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title2));
+    uiText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title2));
     if (trk < 12) {
         if (trk >= 6) {
             cUIText_setUnicodeString(uiText, getPeakChallengeEventName(trk));
         }
     }
-    cUIText* targetLabel = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_label_target_timescore));
-    cUIText* targetValue = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_target_timescore));
-    cUIText* resultLabel = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_label_timescore));
-    cUIText* resultValue = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_timescore));
+    cUIText* targetLabel = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_label_target_timescore));
+    cUIText* targetValue = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_target_timescore));
+    cUIText* resultLabel = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_label_timescore));
+    cUIText* resultValue = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_timescore));
     if (trk >= 6 && trk <= 8) {
         cUIText_setUnicodeStringByID(targetLabel, GetHashValue32(str_kT_OVRCMNTimeToBeatColon));
         cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_OVRCMNYourTimeColon));
@@ -10616,7 +10614,7 @@ extern "C" void cOVState_PEAKCHAL_RESULTS_onCreateScreen(cOVState* self)
             cUIText_setAsciiString(resultValue, buf);
         }
     }
-    cUIThing* screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
+    cUIThing* screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext_b));
     int playerPlace = cGameModeMan_iRanking[pl];
     if (playerPlace == 0) goto yes;
     if (playerPlace == 1) goto yes;
@@ -10641,7 +10639,7 @@ done:
         int i;
         for (i = 0; i < 5; i++) {
             sprintf(name, str_overlayOptpct_d, i);
-            screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+            screenWidget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
             if (screenWidget != 0) {
                 if (i < 3) {
                     cUIText_setUnicodeStringByID((cUIText*)screenWidget, GetHashValue32(D_00441D10[ids.v[i]]));
@@ -10664,9 +10662,9 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_PEAKCHAL_RESULTS_onUpdate__FPv);
  *
  * @return cOVState_onUpdate's result
  */
-void* cOVState_PEAKCHAL_RESULTS_onUpdate(void* self)
+void* cOVState::PEAKCHAL_RESULTS_onUpdate()
 {
-    return cOVState_onUpdate(self);
+    return cOVState_onUpdate(this);
 }
 #endif
 
@@ -10678,7 +10676,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_PEAKCHAL_RESULTS_onInputBegin__FPv);
  *
  * @return 0
  */
-int cOVState_PEAKCHAL_RESULTS_onInputBegin(void* self)
+int cOVState::PEAKCHAL_RESULTS_onInputBegin()
 {
     return 0;
 }
@@ -10694,7 +10692,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_PEAKCHAL_RESULTS_onWidgetMenu);
  * @param event   the menu event
  * @return 257 or 0
  */
-extern "C" int cOVState_PEAKCHAL_RESULTS_onWidgetMenu(void* self, int widget, int event)
+int cOVState::PEAKCHAL_RESULTS_onWidgetMenu(int widget, int event)
 {
     return event == cUIMenu::kONNEXT ? 257 : 0;
 }
@@ -10714,7 +10712,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void cOVState_PEAKCHAL_RESULTS_onWidgetEvent(void* self, cUIThing* popup, int event)
+void cOVState::PEAKCHAL_RESULTS_onWidgetEvent(cUIThing* popup, int event)
 {
     if (popup != 0 && event == cUIState::kONNEXT) {
         int popupId = popup->mMiscData;
@@ -10735,9 +10733,9 @@ extern "C" void cSSXAudio_MenuSound(void*, int);
  * Plays menu sound 0xE when the peak challenge results overlay gains focus, after cUIState_onGainFocus (vtable entry
  * 6).
  */
-extern "C" void cOVState_PEAKCHAL_RESULTS_onGainFocus(void* self)
+void cOVState::PEAKCHAL_RESULTS_onGainFocus()
 {
-    cUIState_onGainFocus(self);
+    cUIState_onGainFocus(this);
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
 #endif

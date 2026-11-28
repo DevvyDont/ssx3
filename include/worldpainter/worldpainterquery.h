@@ -79,11 +79,16 @@ CHECK_SIZE(tWorldPainterRegionType, 0x4);
 
 // A painted name (irradiance map names of tWPInGameData_Lighting). On Tour: one member m_nameId of an 8-byte union
 // type (DWARF name lost); retail copies it with 8-byte moves and compares it as two words (tWPNameField_operatorNotEqual).
+struct tWPNameField;
+
 struct tWPNameField {
     // m_nameId[1] of a resolved field (name ours). [U] cRenderStateMan_resolveIrradianceName replaces the name in
     // m_nameId[0] with its id and stores this; cRenderStateMan_Irradiance resolves a field without it first.
     enum { kResolved = 0x123400 };
     int m_nameId[2];                // 0x0 [O] m_nameId (written as two words); [R] kNullNameField's ctor zeroes both
+
+    // Methods bound to their retail symbols by asm labels.
+    int operatorNotEqual(tWPNameField* rhs) __asm__("tWPNameField_operatorNotEqual");
 };
 
 CHECK_OFFSET(tWPNameField, m_nameId, 0x0);

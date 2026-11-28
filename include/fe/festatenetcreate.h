@@ -42,6 +42,9 @@
 struct tLobbyAccount;
 struct cUIText;
 
+struct cFEStateNetHelpPopup;
+struct cUIState;
+
 struct cFEStateCreateStep1 : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateCreateStep1_vtbl (32 slots), stored by cFEStateCreateStep1_cFEStateCreateStep1 /
@@ -88,6 +91,30 @@ struct cFEStateCreateStep1 : public cFEStateNet {
     virtual void onUpdate() __asm__("cFEStateCreateStep1_onUpdate__FPv");
     virtual void onWidgetEvent(cUIThing* w, unsigned int msg) __asm__("cFEStateCreateStep1_onWidgetEvent");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateCreateStep1_onWidgetCreate");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateCreateStep1_fillHelpPopup");
+    void onSaveAccountPopupEvent(cUIState* popup, int kind) __asm__("cFEStateCreateStep1_onSaveAccountPopupEvent");
+    void onAccountMemPopupEvent(cUIState* popup, int event) __asm__("cFEStateCreateStep1_onAccountMemPopupEvent");
+    int onNetEvent(int msgId, void* data) __asm__("cFEStateCreateStep1_onNetEvent");
+    bool isFormFilled() __asm__("cFEStateCreateStep1_isFormFilled");
+    void showAccountName() __asm__("cFEStateCreateStep1_showAccountName");
+    void showPassword() __asm__("cFEStateCreateStep1_showPassword");
+    void showConfirmPassword() __asm__("cFEStateCreateStep1_showConfirmPassword");
+    void showEmail() __asm__("cFEStateCreateStep1_showEmail");
+    void selectInformOption() __asm__("cFEStateCreateStep1_selectInformOption");
+    void selectShareInfoOption() __asm__("cFEStateCreateStep1_selectShareInfoOption");
+    void handleKeyboardText() __asm__("cFEStateCreateStep1_handleKeyboardText");
+    void setFittedText(cUIText* text, char* str) __asm__("cFEStateCreateStep1_setFittedText");
+    int checkEmail() __asm__("cFEStateCreateStep1_checkEmail");
+    bool isEmailAddress(const char* str) __asm__("cFEStateCreateStep1_isEmailAddress");
+    int checkAccountName() __asm__("cFEStateCreateStep1_checkAccountName");
+    bool isCharInRange(signed char val, signed char lo, signed char hi) __asm__("cFEStateCreateStep1_isCharInRange");
+    int checkPassword() __asm__("cFEStateCreateStep1_checkPassword");
+    int checkForm() __asm__("cFEStateCreateStep1_checkForm");
+    void saveAccountFields() __asm__("cFEStateCreateStep1_saveAccountFields");
+    void restoreAccountFields() __asm__("cFEStateCreateStep1_restoreAccountFields");
+    void submitAccountEdit() __asm__("cFEStateCreateStep1_submitAccountEdit");
+    void markChangedFields() __asm__("cFEStateCreateStep1_markChangedFields");
+    int isOnlineState() __asm__("cFEStateCreateStep1_isOnlineState__FPv");
 };
 
 CHECK_OFFSET(cFEStateCreateStep1, mpAccount, 0x6D0);
@@ -99,6 +126,12 @@ CHECK_OFFSET(cFEStateCreateStep1, mbSaveAccount, 0x6E8);
 CHECK_OFFSET(cFEStateCreateStep1, mbEditAccount, 0x6EC);
 CHECK_OFFSET(cFEStateCreateStep1, mpStaticContinue, 0x6F0);
 CHECK_SIZE(cFEStateCreateStep1, 0x6F4);
+
+struct cFEStateNetHelpPopup;
+struct cScreenPopup;
+struct cUIListBox;
+struct cUIState;
+struct online_ErrorEvent;
 
 struct cFEStateCreateStep2 : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
@@ -134,6 +167,33 @@ struct cFEStateCreateStep2 : public cFEStateNet {
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateCreateStep2_onWidgetEvent");
     virtual void onUpdate() __asm__("cFEStateCreateStep2_onUpdate__FPv");
     virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateCreateStep2_onPopupEvent");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateCreateStep2_fillHelpPopup");
+    void submitAccount(int connectFirst) __asm__("cFEStateCreateStep2_submitAccount");
+    int onNetEvent(int id, void* data) __asm__("cFEStateCreateStep2_onNetEvent");
+    void handleAccountError(online_ErrorEvent* msg) __asm__("cFEStateCreateStep2_handleAccountError");
+    void onVerifyPopupEvent(cUIState* popup, int event) __asm__("cFEStateCreateStep2_onVerifyPopupEvent");
+    void onAccountMemPopupEvent(cUIState* popup, int event) __asm__("cFEStateCreateStep2_onAccountMemPopupEvent");
+    void onInvalidParentEmailPopupEvent(cUIState* popup, int event)
+        __asm__("cFEStateCreateStep2_onInvalidParentEmailPopupEvent");
+    void onParentEmailPopupEvent(cScreenPopup* popup, int event) __asm__("cFEStateCreateStep2_onParentEmailPopupEvent");
+    void onSaveAccountPopupEvent(cUIState* popup, unsigned int kind)
+        __asm__("cFEStateCreateStep2_onSaveAccountPopupEvent");
+    void selectBornMonth() __asm__("cFEStateCreateStep2_selectBornMonth");
+    void selectBornDay() __asm__("cFEStateCreateStep2_selectBornDay");
+    void selectBornYear() __asm__("cFEStateCreateStep2_selectBornYear");
+    void selectGender() __asm__("cFEStateCreateStep2_selectGender");
+    void selectLegalAccepted() __asm__("cFEStateCreateStep2_selectLegalAccepted");
+    void fillGenderListBox(cUIListBox* box, int flag) __asm__("cFEStateCreateStep2_fillGenderListBox");
+    void fillMonthListBox(cUIListBox* box, int ignored) __asm__("cFEStateCreateStep2_fillMonthListBox");
+    void fillYearListBox(cUIListBox* box, int value) __asm__("cFEStateCreateStep2_fillYearListBox");
+    void fillDayListBox(cUIText* box, int month, int year, int sel) __asm__("cFEStateCreateStep2_fillDayListBox");
+    int isLeapYear(int year) __asm__("cFEStateCreateStep2_isLeapYear");
+    int getDaysInMonth(int month, int year) __asm__("cFEStateCreateStep2_getDaysInMonth");
+    bool isEmailAddress(const char* email) __asm__("cFEStateCreateStep2_isEmailAddress");
+    bool canSubmit() __asm__("cFEStateCreateStep2_canSubmit__FPv");
+    int checkAge(int code) __asm__("cFEStateCreateStep2_checkAge");
+    int checkLegalAccepted() __asm__("cFEStateCreateStep2_checkLegalAccepted");
+    int isOnlineState() __asm__("cFEStateCreateStep2_isOnlineState__FPv");
 };
 
 CHECK_OFFSET(cFEStateCreateStep2, mpAccount, 0x6D0);

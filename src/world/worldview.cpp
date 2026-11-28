@@ -1948,7 +1948,7 @@ int cPS2ChunkResolve::resolveModel(tModelRecord* pModel)
                                                                          (unsigned int)*entry);
     }
     ((cPS2ChunkResolve_resolveModel_cObj*)this)->resolveModelHeirarchy(pModel);
-    cPS2ChunkResolve_resolveModelDma(this, (cList*)pModel);
+    this->resolveModelDma((cList*)pModel);
     return 1;
 }
 #endif
@@ -1967,10 +1967,10 @@ extern "C" void cPS2ChunkResolve_fixupModelMeshes(void* self, void* a1);
  * @return 1
  */
 // PORT: adds a pointer to an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cPS2ChunkResolve_resolveModelDma(cPS2ChunkResolve* self, cList* list)
+int cPS2ChunkResolve::resolveModelDma(cList* list)
 {
     *(int*)((char*)list + 0x24) += (int)list;
-    cPS2ChunkResolve_fixupModelMeshes(self, list);
+    cPS2ChunkResolve_fixupModelMeshes(this, list);
     return 1;
 }
 #endif
@@ -1993,14 +1993,14 @@ int cPS2ChunkResolve_fixupModelMeshes_impl(void* self, tModelRecord* list) __asm
  * @param list  the tModelRecord
  * @return 1
  */
-int cPS2ChunkResolve_fixupModelMeshes_impl(void* self, tModelRecord* list)
+int cPS2ChunkResolve::fixupModelMeshes(tModelRecord* list)
 {
     int n = list->m_iNumMeshes;
     tMeshHeirarchyRecord* entry = list->m_MeshHeirarchy;
     int i;
     for (i = 0; i < n; i++, entry++) {
         if (((void*)entry->m_Mesh) != 0) {
-            cPS2ChunkResolve_fixupMesh(self, ((void*)entry->m_Mesh), list);
+            cPS2ChunkResolve_fixupMesh(this, ((void*)entry->m_Mesh), list);
         }
     }
     return 1;
@@ -2023,13 +2023,13 @@ int cPS2ChunkResolve_fixupMesh_impl(void* self, void* item, void* list) __asm__(
  * @param list  the tModelRecord
  * @return 1
  */
-int cPS2ChunkResolve_fixupMesh_impl(void* self, void* vitem, void* list)
+int cPS2ChunkResolve::fixupMesh(void* vitem, void* list)
 {
     tMeshRecord* item = (tMeshRecord*)vitem;
     void** childPtr = (void**)item->m_pContexts;
     int i;
     for (i = 0; i < item->m_iNumContexts; i++, childPtr++) {
-        cPS2ChunkResolve_patchSubMeshChain(self, *childPtr, list, i);
+        cPS2ChunkResolve_patchSubMeshChain(this, *childPtr, list, i);
     }
     return 1;
 }
@@ -2199,7 +2199,7 @@ int cPS2ChunkResolve::resolveInstance(tInstanceRecord* pInstance)
     pInstance->m_pCollideRecord = (tCollideRecord*)(m_pDummyCollideRecord);
     int x = m_pDummyCollideRecord->InitFlags & 0xFFFF0000;
     pInstance->m_iFlags = x | (x >> 16) | 2;
-    cPS2ChunkResolve_resolveInstanceDma((cPS2ChunkResolve*)this, pInstance);
+    this->resolveInstanceDma(pInstance);
     return 1;
 }
 #endif
@@ -2220,7 +2220,7 @@ extern "C" void* cPS2ChunkResolve_patchInstanceChain(cPS2ChunkResolve* self, tIn
  * @return 1
  */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cPS2ChunkResolve_resolveInstanceDma(cPS2ChunkResolve* self, tInstanceRecord* instance)
+int cPS2ChunkResolve::resolveInstanceDma(tInstanceRecord* instance)
 {
     int i;
     tModelRecord* list;
@@ -2235,7 +2235,7 @@ extern "C" int cPS2ChunkResolve_resolveInstanceDma(cPS2ChunkResolve* self, tInst
         if (object != 0) {
             int j;
             for (j = 0; j < object->m_iNumContexts; j++) {
-                cur = cPS2ChunkResolve_patchInstanceChain(self, instance, list, cur);
+                cur = patchInstanceChain(instance, list, cur);
             }
         }
     }
@@ -2320,7 +2320,7 @@ extern char D_00509400[];
  */
 // Walks one instance DMA chain: relocates the ref tags (+0x98 instance base for geometry, +0x24 for the
 // rest) and patches each packet's MSCAL (first one D_2270, later ones D_22C8).
-extern "C" void* cPS2ChunkResolve_patchInstanceChain(cPS2ChunkResolve* self, tInstanceRecord* instance, tModelRecord* list, void* cur)
+void* cPS2ChunkResolve::patchInstanceChain(tInstanceRecord* instance, tModelRecord* list, void* cur)
 {
     tModelRecord* ctx = (tModelRecord*)list;
     char* tagPtr = (char*)cur;

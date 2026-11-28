@@ -51,6 +51,11 @@ struct cBEBAGTInterface : public cBEInterface {
     int getUberName(int rider, int idx, int second) __asm__("cBEBAGTInterface_getUberName");
     int getGrabPoints(int grabEnum) __asm__("cBEBAGTInterface_getGrabPoints__FPvi");
     int getGrabPointsPerSec(int grabEnum) __asm__("cBEBAGTInterface_getGrabPointsPerSec__FPvi");
+    int setSuperUberVar(int rider, int idx, int value) __asm__("cBEBAGTInterface_setSuperUberVar");
+    int clearUberForSale(int rider, int idx, int bit) __asm__("cBEBAGTInterface_clearUberForSale");
+    int getUberVariants(int rider, int idx, int* count) __asm__("cBEBAGTInterface_getUberVariants");
+    int isUberForSale(int rider, int idx, int bit) __asm__("cBEBAGTInterface_isUberForSale");
+    int isUberOffered(int rider, int idx, int bit) __asm__("cBEBAGTInterface_isUberOffered");
 };
 
 extern cBEBAGTInterface* cBEBAGTInterface_instance;

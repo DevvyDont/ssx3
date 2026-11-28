@@ -148,7 +148,7 @@ extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(cBoltOnFXInterface* self,
     for (i = 14; i != -1; i--, entry++) {
         tBoltOnFXEntry_tBoltOnFXEntry(entry);
     }
-    cBoltOnFXInterface_clearEntries(self);
+    self->clearEntries();
     return ((void*)self);
 }
 #endif
@@ -182,7 +182,7 @@ void* cBoltOnFXInterface::cBoltOnFXInterface1(int* charIdPtr, cAttachedEmitterFX
     for (i = 14; i != -1; i--, entry++) {
         tBoltOnFXEntry_tBoltOnFXEntry(entry);
     }
-    cBoltOnFXInterface_clearEntries(this);
+    this->clearEntries();
     return ((void*)this);
 }
 #endif
@@ -195,11 +195,11 @@ INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_clearEntries);
  *
  * The two constructors cBoltOnFXInterface_cBoltOnFXInterface and cBoltOnFXInterface_cBoltOnFXInterface1 call it.
  */
-extern "C" void cBoltOnFXInterface_clearEntries(cBoltOnFXInterface* self)
+void cBoltOnFXInterface::clearEntries()
 {
     int i;
     for (i = 0; i < 15; i++) {
-        self->mEntries[i].mEmitter = tBoltOnFXEntry::kNoEmitter;
+        mEntries[i].mEmitter = tBoltOnFXEntry::kNoEmitter;
     }
 }
 #endif
@@ -252,16 +252,16 @@ extern "C" int cBoltOnFXInterface_createEntry(cBoltOnFXInterface* self, int a1, 
  * @param itemId  the item (attach point) id
  * @return the entry index
  */
-extern "C" int cBoltOnFXInterface_findOrCreateEntry(cBoltOnFXInterface* self, int kind, int itemId)
+int cBoltOnFXInterface::findOrCreateEntry(int kind, int itemId)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        if (self->mEntries[i].mEmitter != tBoltOnFXEntry::kNoEmitter && self->mEntries[i].mItem == itemId &&
-            self->mEntries[i].mKind == kind) {
+        if (mEntries[i].mEmitter != tBoltOnFXEntry::kNoEmitter && mEntries[i].mItem == itemId &&
+            mEntries[i].mKind == kind) {
             return i;
         }
     }
-    return cBoltOnFXInterface_createEntry(self, kind, itemId);
+    return createEntry(kind, itemId);
 }
 #endif
 
@@ -276,14 +276,13 @@ extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int b
  * The emitter comes from func_002F2130 on the owner (+0xC); the entry stores its index, @p y as the item (+0x4) and @p
  * x as the kind (+0x8). Returns 0 when all 15 entries are in use, so the caller then marks entry 0.
  *
- * @param lensMgr  the bolt-on effect set
  * @param x  the particle effect kind
  * @param y  the item (attach point) id
  * @return the entry index, or 0 when full
  */
-extern "C" int cBoltOnFXInterface_createEntry(cBoltOnFXInterface* lensMgr, int x, int y)
+int cBoltOnFXInterface::createEntry(int x, int y)
 {
-    cBoltOnFXInterface* self = lensMgr;
+    cBoltOnFXInterface* self = this;
     int i;
     for (i = 0; i < 15; i++) {
         if (self->mEntries[i].mEmitter == tBoltOnFXEntry::kNoEmitter) {
@@ -342,11 +341,10 @@ struct sLensItem_CCB8 {
  * (+0x12, +0x13) as used; kinds of 50 and up use kinds k-50 and k-49. Unused entries' emitters are released with
  * func_002F2218. Clears the dirty flag (+0x0).
  *
- * @param vself  the bolt-on effect set (this)
  */
-extern "C" void cBoltOnFXInterface_rebuild(cBoltOnFXInterface* vself)
+void cBoltOnFXInterface::rebuild()
 {
-    cBoltOnFXInterface* self = vself;
+    cBoltOnFXInterface* self = this;
     int used[15];
     for (int z = 14; z >= 0; z--) {
         used[z] = 0;
@@ -392,10 +390,10 @@ extern "C" void cBoltOnFXInterface_rebuild(cBoltOnFXInterface* vself)
                 continue;
             }
             if (k >= 50) {
-                used[cBoltOnFXInterface_findOrCreateEntry(self, k - 50, itemId)] = 1;
-                used[cBoltOnFXInterface_findOrCreateEntry(self, k - 49, itemId)] = 1;
+                used[self->findOrCreateEntry(k - 50, itemId)] = 1;
+                used[self->findOrCreateEntry(k - 49, itemId)] = 1;
             } else {
-                used[cBoltOnFXInterface_findOrCreateEntry(self, k, itemId)] = 1;
+                used[self->findOrCreateEntry(k, itemId)] = 1;
             }
         }
     }
@@ -419,10 +417,10 @@ extern "C" void cBoltOnFXInterface_rebuild(cBoltOnFXInterface* self);
  *
  * cRider_updateSplitMiscFX and cFERider_update call it each frame.
  */
-extern "C" void cBoltOnFXInterface_updateIfDirty(cBoltOnFXInterface* self)
+void cBoltOnFXInterface::updateIfDirty()
 {
-    if (self->mDirty != 0) {
-        cBoltOnFXInterface_rebuild(self);
+    if (mDirty != 0) {
+        rebuild();
     }
 }
 #endif
@@ -574,7 +572,7 @@ static inline sLerpARGB operator+(const tARGB& a, const tARGB& b)
  * @param targetB  the target for the colour at +0x38
  * @param full  nonzero to jump straight to the targets
  */
-extern "C" void tRenderState_blendToColour(tRenderState* self, const tARGB* targetA, const tARGB* targetB, int full)
+void tRenderState::blendToColour(const tARGB* targetA, const tARGB* targetB, int full)
 {
     float weight = 0.8999999761581421f;
     float keep;
@@ -582,10 +580,10 @@ extern "C" void tRenderState_blendToColour(tRenderState* self, const tARGB* targ
         weight = 1.0f;
     }
     keep = 1.0f - weight;
-    self->m_colour = sLerpARGB(self->m_colour.A * keep, self->m_colour.R * keep, self->m_colour.G * keep,
-                       self->m_colour.B * keep) + *targetA * weight;
-    self->m_lightMapColour = sLerpARGB(self->m_lightMapColour.A * keep, self->m_lightMapColour.R * keep,
-                               self->m_lightMapColour.G * keep, self->m_lightMapColour.B * keep) + *targetB * weight;
+    m_colour = sLerpARGB(m_colour.A * keep, m_colour.R * keep, m_colour.G * keep,
+                       m_colour.B * keep) + *targetA * weight;
+    m_lightMapColour = sLerpARGB(m_lightMapColour.A * keep, m_lightMapColour.R * keep,
+                               m_lightMapColour.G * keep, m_lightMapColour.B * keep) + *targetB * weight;
 }
 #endif
 
@@ -602,14 +600,13 @@ INCLUDE_ASM("visualfx/lensfx", tRenderState_blendToColour1);
  * @param targetB  the target for the colour at +0x38
  * @param weight  the blend weight, 0..1
  */
-extern "C" void tRenderState_blendToColour1(tRenderState* self, const tARGB* targetA, const tARGB* targetB,
-        float weight)
+void tRenderState::blendToColour1(const tARGB* targetA, const tARGB* targetB, float weight)
 {
     float keep = 1.0f - weight;
-    self->m_colour = sLerpARGB(self->m_colour.A * keep, self->m_colour.R * keep, self->m_colour.G * keep,
-                       self->m_colour.B * keep) + *targetA * weight;
-    self->m_lightMapColour = sLerpARGB(self->m_lightMapColour.A * keep, self->m_lightMapColour.R * keep,
-                               self->m_lightMapColour.G * keep, self->m_lightMapColour.B * keep) + *targetB * weight;
+    m_colour = sLerpARGB(m_colour.A * keep, m_colour.R * keep, m_colour.G * keep,
+                       m_colour.B * keep) + *targetA * weight;
+    m_lightMapColour = sLerpARGB(m_lightMapColour.A * keep, m_lightMapColour.R * keep,
+                               m_lightMapColour.G * keep, m_lightMapColour.B * keep) + *targetB * weight;
 }
 #endif
 

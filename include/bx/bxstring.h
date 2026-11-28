@@ -40,6 +40,8 @@ CHECK_OFFSET(tStringData, DataLength, 0x4);
 CHECK_OFFSET(tStringData, AllocLength, 0x8);
 CHECK_SIZE(tStringData, 0xC);
 
+struct cBXString;
+
 struct cBXString {
     char* Str;          // 0x000 [O] Str; [R] cBXString_Realloc stores the block + 0xC; [U] every method reads it as the
                         //       text (strchr / strrchr in cBXString_find / cBXString_reverseFind, the copies in cBXString_concatCopy)
@@ -95,6 +97,13 @@ struct cBXString {
     void vprintf(const char* fmt, char* args) __asm__("cBXString_vprintf");
     void trimRight() __asm__("cBXString_trimRight");
     void trimLeft() __asm__("cBXString_trimLeft");
+    cBXString* operatorPlus(cBXString* left, cBXString* right) __asm__("cBXString_operatorPlus");
+    cBXString* operatorPlus1(cBXString* bxString, const char* str) __asm__("cBXString_operatorPlus1");
+    cBXString* operatorPlus2(const char* str, cBXString* bxString) __asm__("cBXString_operatorPlus2");
+    cBXString* operatorPlus3(cBXString* bxString, char ch) __asm__("cBXString_operatorPlus3");
+    cBXString* operatorPlus4(char ch, cBXString* bxString) __asm__("cBXString_operatorPlus4");
+    cBXString* operatorPlusE(char ch) __asm__("cBXString_operatorPlusE");
+    cBXString* operatorPlusE1(cBXString* other) __asm__("cBXString_operatorPlusE1");
 };
 
 CHECK_OFFSET(cBXString, Str, 0x0);

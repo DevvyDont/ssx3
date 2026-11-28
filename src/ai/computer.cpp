@@ -1700,7 +1700,7 @@ void cRider::flagEventLand(int isPipe, int rsm, int pressMode, tIntersectInfo* e
                 mUberTimer = 60.0f;
         }
     }
-    cRiderHandler_recordSprayBurst_impl(mRiderHandler, evt, &evt->Inorm, evt->Stype, speed);
+    mRiderHandler->recordSprayBurst(evt, &evt->Inorm, evt->Stype, speed);
     if (isHuman())
     {
         if (prevNumCombo < curNumCombo)
@@ -1930,7 +1930,7 @@ void cRider::flagEventWipeout(int anim, int isPunch, int surf, tCollideInfo* evt
     cSSXAudio_WipeoutHit(cAudioInterface_bxAudio(), this);
     cSSXAudio_PlayGrunt(cAudioInterface_bxAudio(), this, 0, 0);
     cSSXAudio_Wipeout(cAudioInterface_bxAudio(), this, amt);
-    cRiderHandler_recordSprayBurst_impl(mRiderHandler, evt, &evt->Reflect, surf, evt->Vel);
+    mRiderHandler->recordSprayBurst(evt, &evt->Reflect, surf, evt->Vel);
     cRider_setControlState_EB30(this, CS_Void);
     if (RailslideMode == kRSM_FS) {
         float ang = 1.5707963705062866f;
@@ -3185,10 +3185,9 @@ void cRiderHandler_recordSprayBurst_impl(void* self, void* a, void* b, int c, fl
  * @param surfaceType  the surface type
  * @param x  the impact speed
  */
-void cRiderHandler_recordSprayBurst_impl(void* vself, void* pos, void* dir, int surfaceType, float x)
+void cRiderHandler::recordSprayBurst(void* pos, void* dir, int surfaceType, float x)
 {
-    cRiderHandler* self = (cRiderHandler*)vself;
-    cDynamicSprayFX_recordBurst_impl(&self->DynamicSprayFX, pos, dir, surfaceType, 0, x);
+    cDynamicSprayFX_recordBurst_impl(&DynamicSprayFX, pos, dir, surfaceType, 0, x);
 }
 #endif
 

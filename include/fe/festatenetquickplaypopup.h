@@ -37,6 +37,9 @@ struct cUIThing;
 struct cUIText;
 struct cUIListBox;
 
+struct cFEStateNetHelpPopup;
+struct cFEStateNetQuickPlayPopup;
+
 struct cFEStateNetQuickPlayPopup : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateNetQuickPlayPopup_vtbl (vtables.tsv; 32 slots), stored by
@@ -102,6 +105,12 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
     virtual int onWidgetPair(cUIPair*, unsigned int) __asm__("cFEStateNetQuickPlayPopup_onWidgetPair__FPv");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
         __asm__("cFEStateNetQuickPlayPopup_onWidgetMenu");
+    void showOptionsHint(int show) __asm__("cFEStateNetQuickPlayPopup_showOptionsHint");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateNetQuickPlayPopup_fillHelpPopup");
+    void setOptionsLocked(int on) __asm__("cFEStateNetQuickPlayPopup_setOptionsLocked");
+    void* onNetEvent(int netEvent, void* eventData) __asm__("cFEStateNetQuickPlayPopup_onNetEvent");
+    int onTimeoutPopupEvent(cFEStateNetQuickPlayPopup* popup, int event)
+        __asm__("cFEStateNetQuickPlayPopup_onTimeoutPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, miSearchOptions, 0x6D0);

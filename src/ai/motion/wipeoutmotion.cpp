@@ -177,19 +177,18 @@ static inline void vu0SubWM(t4Vector& dst, const t4Vector& a, const t4Vector& b)
  * @param initAngVel  the board's initial angular velocity (On Tour initAngVel)
  * @param itemBoneID  the board's starting pose, position then rotation (On Tour passes an item bone ID instead)
  */
-extern "C" void cWipeoutMotion_throwItem(cWipeoutMotion* self, t4Vector* initVel, t4Vector* initAngVel,
-        tPose* itemBoneID)
+void cWipeoutMotion::throwItem(t4Vector* initVel, t4Vector* initAngVel, tPose* itemBoneID)
 {
-    *(tPose*)&self->mRider->mRootPoseOverridePos = *itemBoneID;
-    self->mRider->mUseRootPoseOverride = 1;
-    self->BoardAngVelocity = *initAngVel;
-    self->BoardVelocity = *initVel;
-    if (*(int*)self == 0)
+    *(tPose*)&mRider->mRootPoseOverridePos = *itemBoneID;
+    mRider->mUseRootPoseOverride = 1;
+    BoardAngVelocity = *initAngVel;
+    BoardVelocity = *initVel;
+    if (*(int*)this == 0)
     {
-        t4Vector* n = (t4Vector*)(&self->mRider->mGroundNormal);
+        t4Vector* n = (t4Vector*)(&mRider->mGroundNormal);
         float normalSpeed = vu0DotWM(*n, *initVel);
         t4Vector normalPart = vu0ScaleWM(*n, normalSpeed);
-        vu0SubWM(self->BoardVelocity, self->BoardVelocity, normalPart);
+        vu0SubWM(BoardVelocity, BoardVelocity, normalPart);
     }
 }
 #endif
@@ -440,35 +439,35 @@ static inline void vu0NormalizeEq_6F30(t4Vector& v)
  * dt / 2, and integrates the quaternion mRootPoseOverrideRot by it (VU0 quaternion derivative), then renormalises it.
  * cWipeoutMotion_step calls it without arguments; self still arrives in a0.
  */
-extern "C" void cWipeoutMotion_stepThrownBoard(cWipeoutMotion* self)
+void cWipeoutMotion::stepThrownBoard()
 {
-    if (self->mRider->mUseRootPoseOverride == 0) {
+    if (mRider->mUseRootPoseOverride == 0) {
         return;
     }
-    float dt = self->mRider->mTimeScale * 0.01666666753590107f;
+    float dt = mRider->mTimeScale * 0.01666666753590107f;
     t4Vector tmp;
-    vu0Scale_6F30(tmp, self->BoardVelocity, dt);
-    vu0AddEq_6F30(self->mRider->mRootPoseOverridePos, tmp);
+    vu0Scale_6F30(tmp, BoardVelocity, dt);
+    vu0AddEq_6F30(mRider->mRootPoseOverridePos, tmp);
     t4Vector v2;
-    v2.x = self->BoardVelocity.x * -0.20000000298023224f;
-    v2.y = self->BoardVelocity.y * -0.20000000298023224f;
+    v2.x = BoardVelocity.x * -0.20000000298023224f;
+    v2.y = BoardVelocity.y * -0.20000000298023224f;
     v2.z = -1800.0f;
     v2.w = 0.0f;
     vu0Scale_6F30(tmp, v2, dt);
-    vu0AddEq_6F30(self->BoardVelocity, tmp);
-    float len = vu0Length_6F30(self->BoardVelocity);
+    vu0AddEq_6F30(BoardVelocity, tmp);
+    float len = vu0Length_6F30(BoardVelocity);
     if (3333.33349609375f < len) {
-        vu0ScaleEq_6F30(self->BoardVelocity, 3333.33349609375f / len);
+        vu0ScaleEq_6F30(BoardVelocity, 3333.33349609375f / len);
     }
-    vu0ScaleEq_6F30(self->BoardAngVelocity, 1.0f - dt * 0.5f);
-    vu0QuatDeriv_6F30(v2, self->mRider->mRootPoseOverrideRot, self->BoardAngVelocity);
+    vu0ScaleEq_6F30(BoardAngVelocity, 1.0f - dt * 0.5f);
+    vu0QuatDeriv_6F30(v2, mRider->mRootPoseOverrideRot, BoardAngVelocity);
     vu0Scale_6F30(tmp, v2, dt);
-    cRider* r = self->mRider;
+    cRider* r = mRider;
     r->mRootPoseOverrideRot.x += tmp.x;
     r->mRootPoseOverrideRot.y += tmp.y;
     r->mRootPoseOverrideRot.z += tmp.z;
     r->mRootPoseOverrideRot.w += tmp.w;
-    vu0NormalizeEq_6F30(self->mRider->mRootPoseOverrideRot);
+    vu0NormalizeEq_6F30(mRider->mRootPoseOverrideRot);
 }
 #endif
 
@@ -595,11 +594,10 @@ struct t4VectorCtor : public t4Vector {
  * velocities are zeroed. The probe is destroyed at the end. cWipeoutMotion_resolve calls it without arguments; self
  * still arrives in a0.
  *
- * @param vself  the cWipeoutMotion (this)
  */
-extern "C" void cWipeoutMotion_resolveThrownBoard(cWipeoutMotion* vself)
+void cWipeoutMotion::resolveThrownBoard()
 {
-    cWipeoutMotion* self = vself;
+    cWipeoutMotion* self = this;
     if (self->mRider->mUseRootPoseOverride == 0)
         return;
     self->updateBoardSphereTree();

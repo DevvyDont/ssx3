@@ -166,6 +166,7 @@ struct cMoveNode : public cInstanceNode {
     virtual void signal(int, float) __asm__("cMoveNode_signal");
     virtual int incFocusCount(tInstanceRecord* pInst) __asm__("cMoveNode_incFocusCount");
     virtual int decFocusCount(tInstanceRecord* pInst) __asm__("cMoveNode_decFocusCount");
+    virtual const tBoundBox* getBoundBox() const __asm__("cMoveNode_getBoundBox");
 };
 
 CHECK_OFFSET(cMoveNode, ModifierBlock, 0x1C);

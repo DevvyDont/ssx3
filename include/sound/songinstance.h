@@ -50,6 +50,8 @@ struct cSongConfiguration {
 };
 
 // cSongInstance (0xC4): the playing song (cMusicSys::mSongInstance). No vtable.
+struct cBankManager;
+
 struct cSongInstance {
     cSongConfiguration* mpConfig; // 0x00 (our name) [R] ctor arg 3; [U] every method reads the song's settings through it
     SNDPLAYOPTS mPlayOpts;        // 0x04 (our name) [R] ctor copies the current cSndPlayOpts level (mCurrent[mInst], sdl/sdr); [U] cSongInstance_Update passes &mPlayOpts to the stream opens
@@ -91,6 +93,29 @@ struct cSongInstance {
     int mHoldEvents;              // 0x5C (our name) [R] ctor 0; [U] cMusicSys_SetHoldEvents sets it; cSongInstance_SendMusicEvent: when set,
                                   //      only a forced call applies
     char mPath[0x64];             // 0x60 (our name) [R] ctor sprintf("%s%s%s", "data/", "audio/music.big" or "audio/music2.big", name); [U] cSongInstance_Update prefixes the stream file names with it
+
+    // Methods bound to their retail symbols by asm labels.
+    void Pause() __asm__("cSongInstance_Pause");
+    void Resume() __asm__("cSongInstance_Resume");
+    void SendMusicEvent(int musicEvent, int force) __asm__("cSongInstance_SendMusicEvent");
+    void SetLowPass(int lowPass) __asm__("cSongInstance_SetLowPass");
+    void Update(int force) __asm__("cSongInstance_Update");
+    void SetOverlayLevel(signed char levelPercent) __asm__("cSongInstance_SetOverlayLevel");
+    void FadeOut(float fadeSeconds) __asm__("cSongInstance_FadeOut");
+    int GetStreamHandle() __asm__("cSongInstance_GetStreamHandle");
+    int GetRandomLoopBank() __asm__("cSongInstance_GetRandomLoopBank");
+    int GetRandomPhraseStart() __asm__("cSongInstance_GetRandomPhraseStart");
+    int GetStreamStatus(void* out) __asm__("cSongInstance_GetStreamStatus");
+    void GetRequestStatus(void* requestStatus) __asm__("cSongInstance_GetRequestStatus");
+    float GetPlayPosition() __asm__("cSongInstance_GetPlayPosition");
+    float GetTimeToEnd() __asm__("cSongInstance_GetTimeToEnd");
+    float GetBeatLength() __asm__("cSongInstance_GetBeatLength");
+    float GetBarLength() __asm__("cSongInstance_GetBarLength");
+    float GetTimeToNextBeat() __asm__("cSongInstance_GetTimeToNextBeat");
+    int GetCurrentBeat() __asm__("cSongInstance_GetCurrentBeat");
+    bool IsLoopBankReady(cBankManager* other) __asm__("cSongInstance_IsLoopBankReady");
+    int GetDuckToLoops() __asm__("cSongInstance_GetDuckToLoops__FPv");
+    int GetSedValue() __asm__("cSongInstance_GetSedValue");
 };
 
 CHECK_OFFSET(cSongConfiguration, mPathData, 0x00);

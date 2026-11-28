@@ -294,7 +294,7 @@ extern "C" void cFEStateCharEquip__cFEStateCharEquip(cFEStateCharEquip* self, in
 {
     VPTR_OF(cListNode, self) = cFEStateCharEquip_vtbl;
     if (self->mIconsFileIndex >= 0) {
-        cFEBoltFileManager_releaseFile((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, self->mCharID,
+        ((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager)->releaseFile(self->mCharID,
                       self->mIconsFileIndex);
         self->mIconsFileIndex = -1;
     }
@@ -410,7 +410,7 @@ extern "C" void cFEStateCharEquip_onGainFocus(cFEStateCharEquip* self, int pPrev
     }
     self->updatePolyBar();
     self->updatePolyEquipPreviewBar(0);
-    cFEStateCharEquip_redrawRows(self, 1, 1);
+    self->redrawRows(1, 1);
     cFEState_onGainFocus(self, pPrevState);
 }
 #endif
@@ -670,10 +670,10 @@ void cFEStateCharEquip::onPopupEvent(cUIState* widget, unsigned int msg)
             mAttrState |= 8;
         }
         if (widget->mHashName == cUIStateBuyPopup::kStateID && ((cUIStateBuyPopup*)widget)->mbAccept != 0) {
-            cFEStateCharEquip_buySelectedItem(this);
+            this->buySelectedItem();
             updateBankWidget();
             if (cFEStateCharEquip_removeItem((sEquipDetail*)this, mpMenu->mScrollItemCurrent)) {
-                cFEStateCharEquip_redrawRows(this, 0, 1);
+                this->redrawRows(0, 1);
             }
         }
         break;
@@ -709,10 +709,10 @@ void cFEStateCharEquip::onUpdate()
 {
     cUIState_onUpdate(this);
     if (mIconsLoaded == 0
-        && cFEBoltFileManager_isFileLoaded((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, mCharID,
+        && ((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager)->isFileLoaded(mCharID,
                          mIconsFileIndex)) {
         mIconsLoaded = 1;
-        cFEStateCharEquip_updatePreview(this);
+        this->updatePreview();
     }
     void* screen = cList_first((cList*)(&mScreens));
     cUIThing* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
@@ -848,7 +848,7 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
             updateHeading(id);
             mCategoryStack[mCurrentStackPos] = id;
             cFEStateCharEquip_buildItemList(this, id);
-            cFEStateCharEquip_redrawRows(this, 1, 1);
+            this->redrawRows(1, 1);
             if (id == D_004A11E0)
                 mCameraState = kCameraToBoard;
             return;
@@ -861,16 +861,16 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
                 cost *= 10;
             if (mMoneyAvailable < cost)
                 return;
-            cFEStateCharEquip_openBuyPopup(this, item);
+            this->openBuyPopup(item);
             return;
         }
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         if (D_004A18D8 < mRowPoints[w->mMiscData] + mCurrentPolyCount)
             return;
-        if (!cFEStateCharEquip_toggleSelectedItem(this))
+        if (!this->toggleSelectedItem())
             return;
         mCurrentPolyCount = cBEBoltInterface_getUsedEquipPoints(iface, mUserNum, mCharID);
-        cFEStateCharEquip_redrawRows(this, 0, 1);
+        this->redrawRows(0, 1);
         updatePolyBar();
         updatePolyEquipPreviewBar(mRowPoints[w->mMiscData]);
         updateCharacterModel();
@@ -882,7 +882,7 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
                 mCameraState = kCameraToRider;
             updateHeading(mCategoryStack[mCurrentStackPos - 1]);
             cFEStateCharEquip_buildItemList(this, mCategoryStack[mCurrentStackPos - 1]);
-            cFEStateCharEquip_redrawRows(this, 1, 1);
+            this->redrawRows(1, 1);
         } else {
             cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
             feRider->mSelected = 0;
@@ -896,7 +896,7 @@ void cFEStateCharEquip::onWidgetEvent(cUIThing* w, unsigned int ev)
     case cUIState::kONGAINFOCUS:
         if (isMode1_9C28(this))
             startLargePreviewLoad(1);
-        cFEStateCharEquip_updatePreview(this);
+        this->updatePreview();
         break;
     }
 }
@@ -939,7 +939,7 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(cFEStateCharEquip* self, int pMenu
     switch (kind) {
     case cUIMenu::kSCROLLUP:
     case cUIMenu::kSCROLLDOWN:
-        cFEStateCharEquip_redrawRows(self, 0, 0);
+        self->redrawRows(0, 0);
         return 1;
     case cUIMenu::kISSELECTABLE:
         if (idx < self->mNumItems) {
@@ -1010,8 +1010,8 @@ int cFEStateCharEquip::getIconID(const char* name)
 {
     if (mIconsLoaded == 0)
         return -1;
-    SHAPEFILE* pkg = (SHAPEFILE*)cFEBoltFileManager_getFileDataValue((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager,
-                                                  mCharID, mIconsFileIndex);
+    SHAPEFILE* pkg = (SHAPEFILE*)((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager)->getFileDataValue(
+            mCharID, mIconsFileIndex);
     if (pkg == 0)
         return -1;
     int n = pkg->num;
@@ -1054,10 +1054,10 @@ extern "C" void cFEStateCharEquip_updatePreview(cFEStateCharEquip* self);
 void cFEStateCharEquip::updateIconTexturesLoad()
 {
     if (mIconsLoaded == 0
-        && cFEBoltFileManager_isFileLoaded((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, mCharID,
+        && ((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager)->isFileLoaded(mCharID,
                          mIconsFileIndex)) {
         mIconsLoaded = 1;
-        cFEStateCharEquip_updatePreview(this);
+        this->updatePreview();
     }
 }
 #endif
@@ -1182,7 +1182,7 @@ void cFEStateCharEquip::switchEquipMode()
     MEM_fill(&mCategoryStack[0], kBolt_None, 80);
     updateHeading(kBolt_None);
     cFEStateCharEquip_buildItemList(this, kBolt_None);
-    cFEStateCharEquip_redrawRows((cFEStateCharEquip*)this, 1, 1);
+    this->redrawRows(1, 1);
 }
 #endif
 
@@ -1201,7 +1201,7 @@ void cFEStateCharEquip::cancelLargePreviewLoad()
 {
     int idx = mPreviewTextureFileIndex;
     if (idx >= 0) {
-        cFEBoltFileManager_releaseFile((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager, mCharID, idx);
+        ((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager)->releaseFile(mCharID, idx);
     }
     mLargePreviewFileName[0] = 0;
     mPreviewTextureFileIndex = -1;
@@ -1304,8 +1304,8 @@ void cFEStateCharEquip::updatePreviewLoad()
         }
     } else if (mPreviewTextureFileIndex >= 0) {
         cFEBoltFileManager* tbl = (cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager;
-        if (cFEBoltFileManager_isFileLoaded(tbl, mCharID, mPreviewTextureFileIndex)) {
-            SHAPEFILE* file = (SHAPEFILE*)cFEBoltFileManager_getFileDataValue(tbl, mCharID, mPreviewTextureFileIndex);
+        if (tbl->isFileLoaded(mCharID, mPreviewTextureFileIndex)) {
+            SHAPEFILE* file = (SHAPEFILE*)tbl->getFileDataValue(mCharID, mPreviewTextureFileIndex);
             if (file != 0) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 // ORIGINAL-PTR: a shape file's table holds each shape's byte offset from the start of the file (a file
@@ -1315,9 +1315,9 @@ void cFEStateCharEquip::updatePreviewLoad()
             } else {
                 mPreviewTextureID = -1;
             }
-            cFEBoltFileManager_releaseFile(tbl, mCharID, mPreviewTextureFileIndex);
+            tbl->releaseFile(mCharID, mPreviewTextureFileIndex);
             mPreviewTextureFileIndex = -1;
-            cFEStateCharEquip_updatePreview(this);
+            this->updatePreview();
         }
     }
 }
@@ -1448,15 +1448,15 @@ extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self);
  * Refreshes the equip screen's item preview for the current mode (cFEStateCharEquip_updateStorePreview in the store, cFEStateCharEquip_updateInventoryPreview in the
  * inventory) and then its help text (cFEStateCharEquip_updateHelpText).
  */
-extern "C" void cFEStateCharEquip_updatePreview(cFEStateCharEquip* self)
+void cFEStateCharEquip::updatePreview()
 {
-    bool buyMode = self->mEquipMode == cFEStateCharEquip::kEquipModeStore;
+    bool buyMode = mEquipMode == cFEStateCharEquip::kEquipModeStore;
     if (buyMode) {
-        cFEStateCharEquip_updateStorePreview(self);
+        updateStorePreview();
     } else {
-        cFEStateCharEquip_updateInventoryPreview(self);
+        updateInventoryPreview();
     }
-    self->updateHelpText();
+    updateHelpText();
 }
 #endif
 
@@ -1474,41 +1474,41 @@ extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* s
  * name, shows the icon with its texture (cFEStateCharEquip_getIconID). Finally updates the points preview bar (cFEStateCharEquip_updatePolyEquipPreviewBar) with
  * the row's points, or 0.
  */
-extern "C" void cFEStateCharEquip_updateInventoryPreview(cFEStateCharEquip* self)
+void cFEStateCharEquip::updateInventoryPreview()
 {
-    if (self->mpMenu == 0)
+    if (mpMenu == 0)
         return;
-    cUIThing* widget = self->mpPointsGroup;
+    cUIThing* widget = mpPointsGroup;
     if (widget != 0)
         widget->setVisible(0);
-    widget = self->mpSmallBoltIcon;
+    widget = mpSmallBoltIcon;
     if (widget != 0)
         widget->setVisible(0);
-    widget = self->mpPointsCost;
+    widget = mpPointsCost;
     if (widget != 0)
         widget->setVisible(0);
-    int idx = self->mpMenu->mScrollItemCurrent;
+    int idx = mpMenu->mScrollItemCurrent;
     int rowValue = 0;
-    if (idx < self->mNumItems) {
-        tBEBoltDef* item = self->mpItems[idx];
+    if (idx < mNumItems) {
+        tBEBoltDef* item = mpItems[idx];
         unsigned int flags = item->flags;
         if (flags & 4) {
             if (!(flags & 0x20)) {
-                self->mpPointsGroup->setVisible(1);
-                int topIndex = self->mpMenu->mScrollItemOffset;
-                cUIThing* iconWidget = self->mpSmallBoltIcon;
-                rowValue = self->mRowPoints[idx - topIndex];
-                if (iconWidget != 0 && item->pictureName != 0 && self->mIconsLoaded != 0) {
+                mpPointsGroup->setVisible(1);
+                int topIndex = mpMenu->mScrollItemOffset;
+                cUIThing* iconWidget = mpSmallBoltIcon;
+                rowValue = mRowPoints[idx - topIndex];
+                if (iconWidget != 0 && item->pictureName != 0 && mIconsLoaded != 0) {
                     iconWidget->setVisible(1);
-                    int iconId = self->getIconID(item->pictureName);
-                    cUIIcon* iconWidget2 = self->mpSmallBoltIcon;
+                    int iconId = getIconID(item->pictureName);
+                    cUIIcon* iconWidget2 = mpSmallBoltIcon;
                     iconWidget2->mTextureID = iconId;
                     iconWidget2->mpTextureElem = 0;
                 }
             }
         }
     }
-    self->updatePolyEquipPreviewBar(rowValue);
+    updatePolyEquipPreviewBar(rowValue);
 }
 #endif
 
@@ -1527,32 +1527,32 @@ extern "C" const char* getDollarString(int dollars);
  * ready, and the cost (+0x68) as the item's price x 10 (getDollarString) for an item that is not a category; otherwise
  * hides them.
  */
-extern "C" void cFEStateCharEquip_updateStorePreview(cFEStateCharEquip* self)
+void cFEStateCharEquip::updateStorePreview()
 {
-    cUIMenu* menu = self->mpMenu;
+    cUIMenu* menu = mpMenu;
     if (menu == 0)
         return;
     int sel = menu->mScrollItemCurrent;
     tBEBoltDef* item = 0;
-    if (sel >= 0 && sel < self->mNumItems)
-        item = self->mpItems[sel];
-    if (self->mpLargePreview != 0) {
-        self->mpLargePreview->setVisible(0);
-        if (item != 0 && self->mPreviewTextureID >= 0) {
-            cUIIcon* widget = self->mpLargePreview;
-            widget->mTextureID = self->mPreviewTextureID;
+    if (sel >= 0 && sel < mNumItems)
+        item = mpItems[sel];
+    if (mpLargePreview != 0) {
+        mpLargePreview->setVisible(0);
+        if (item != 0 && mPreviewTextureID >= 0) {
+            cUIIcon* widget = mpLargePreview;
+            widget->mTextureID = mPreviewTextureID;
             widget->mpTextureElem = 0;
-            self->mpLargePreview->setVisible(1);
+            mpLargePreview->setVisible(1);
         }
     }
-    if (self->mpCost != 0) {
-        self->mpCost->setVisible(0);
+    if (mpCost != 0) {
+        mpCost->setVisible(0);
         if (item != 0 && !(item->flags & 0x20)) {
             int price = item->price;
             if (price > 0)
                 price *= 10;
-            cUIText_setAsciiString(self->mpCost, getDollarString(price));
-            self->mpCost->setVisible(1);
+            cUIText_setAsciiString(mpCost, getDollarString(price));
+            mpCost->setVisible(1);
         }
     }
 }
@@ -1614,49 +1614,49 @@ static inline void copyRow_19AD18(cFEStateCharEquip* self, int dst, int src)
  *
  * @param n  rows to scroll (negative moves the rows down)
  */
-extern "C" void cFEStateCharEquip_scrollRows(cFEStateCharEquip* self, int n)
+void cFEStateCharEquip::scrollRows(int n)
 {
-    if (self->mpMenu == 0) {
+    if (mpMenu == 0) {
         return;
     }
     if (n < -6 || n > 6) {
-        if (isMode1_19AD18(self)) {
-            cFEStateCharEquip_drawStoreRows((cFEStateCharEquip*)self);
+        if (isMode1_19AD18(this)) {
+            drawStoreRows();
         } else {
-            cFEStateCharEquip_drawInventoryRows((cFEStateCharEquip*)self);
+            drawInventoryRows();
         }
         return;
     }
     if (n < 0) {
         int i;
         for (i = 5; i >= -n; i--) {
-            copyRow_19AD18(self, i, i + n);
+            copyRow_19AD18(this, i, i + n);
         }
-        if (isMode1_19AD18(self)) {
+        if (isMode1_19AD18(this)) {
             int j;
             for (j = 0; j < -n; j++) {
-                cFEStateCharEquip_drawStoreRow((cFEStateCharEquip*)self, j);
+                drawStoreRow(j);
             }
         } else {
             int j;
             for (j = 0; j < -n; j++) {
-                cFEStateCharEquip_drawInventoryRow((cFEStateCharEquip*)self, j);
+                drawInventoryRow(j);
             }
         }
     } else if (n > 0) {
         int i;
         for (i = n; i < 6; i++) {
-            copyRow_19AD18(self, i - n, i);
+            copyRow_19AD18(this, i - n, i);
         }
-        if (isMode1_19AD18(self)) {
+        if (isMode1_19AD18(this)) {
             int j;
             for (j = 6 - n; j < 6; j++) {
-                cFEStateCharEquip_drawStoreRow((cFEStateCharEquip*)self, j);
+                drawStoreRow(j);
             }
         } else {
             int j;
             for (j = 6 - n; j < 6; j++) {
-                cFEStateCharEquip_drawInventoryRow((cFEStateCharEquip*)self, j);
+                drawInventoryRow(j);
             }
         }
     }
@@ -1687,6 +1687,9 @@ static inline sEquipEntry_AFD0* getEntry_AFD0(cBECharProfileDB* db, int id)
     return 0;
 }
 
+extern "C" bool cFEStateCharEquip_hasInventoryItemInCategory(cFEStateCharEquip* self, int library,
+                                                             cBECharProfileDB* db, int itemId);
+
 /**
  * Reports whether a category holds an item of the character that is in the inventory.
  *
@@ -1698,10 +1701,10 @@ static inline sEquipEntry_AFD0* getEntry_AFD0(cBECharProfileDB* db, int id)
  * @param itemId   the category
  * @return true when there is one, else false
  */
-extern "C" bool cFEStateCharEquip_hasInventoryItemInCategory(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
+bool cFEStateCharEquip::hasInventoryItemInCategory(int library, cBECharProfileDB* db, int itemId)
 {
     sEquipItem_AFD0* items[528];
-    int n = cBEBoltDB_collectCategoryBolts(library, self->mCharID, itemId, items, -1, 1);
+    int n = cBEBoltDB_collectCategoryBolts(library, mCharID, itemId, items, -1, 1);
     int i;
     for (i = 0; i < n; i++) {
         sEquipItem_AFD0* it = items[i];
@@ -1731,6 +1734,9 @@ static inline tBEProfileBolt* getEntry_B098(cBECharProfileDB* db, int id)
     return 0;
 }
 
+extern "C" bool cFEStateCharEquip_isStoreCategoryEmpty(
+        cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId);
+
 /**
  * Reports whether a category has nothing to buy in the current store.
  *
@@ -1742,16 +1748,16 @@ static inline tBEProfileBolt* getEntry_B098(cBECharProfileDB* db, int id)
  * @param itemId   the category
  * @return false when the store sells something in it, else true
  */
-extern "C" bool cFEStateCharEquip_isStoreCategoryEmpty(cFEStateCharEquip* self, int library, cBECharProfileDB* db, int itemId)
+bool cFEStateCharEquip::isStoreCategoryEmpty(int library, cBECharProfileDB* db, int itemId)
 {
     tBEBoltDef* items[528];
-    int n = cBEBoltDB_collectCategoryBolts(library, self->mCharID, itemId, items, -1, 1);
+    int n = cBEBoltDB_collectCategoryBolts(library, mCharID, itemId, items, -1, 1);
     int i;
     for (i = 0; i < n; i++) {
         tBEBoltDef* it = items[i];
         if (it->flags & 4) {
             if (!(getEntry_B098(db, it->id)->flags & 2)) {
-                if (it->storeNum == self->mStoreNum) {
+                if (it->storeNum == mStoreNum) {
                     if (!(it->flags & 0x20)) {
                         return false;
                     }
@@ -1948,12 +1954,12 @@ extern "C" void cFEStateCharEquip_drawInventoryRow(cFEStateCharEquip* self, int 
  *
  * @return the number of rows drawn
  */
-extern "C" int cFEStateCharEquip_drawInventoryRows(cFEStateCharEquip* self)
+int cFEStateCharEquip::drawInventoryRows()
 {
-    int j = self->mpMenu->mScrollItemOffset;
+    int j = mpMenu->mScrollItemOffset;
     int i = 0;
-    while (i < 6 && j < self->mNumItems) {
-        cFEStateCharEquip_drawInventoryRow(self, i);
+    while (i < 6 && j < mNumItems) {
+        drawInventoryRow(i);
         i++;
         j++;
     }
@@ -1971,12 +1977,12 @@ extern "C" void cFEStateCharEquip_drawStoreRow(cFEStateCharEquip* self, int idx)
  *
  * @return the number of rows drawn
  */
-extern "C" int cFEStateCharEquip_drawStoreRows(cFEStateCharEquip* self)
+int cFEStateCharEquip::drawStoreRows()
 {
-    int j = self->mpMenu->mScrollItemOffset;
+    int j = mpMenu->mScrollItemOffset;
     int i = 0;
-    while (i < 6 && j < self->mNumItems) {
-        cFEStateCharEquip_drawStoreRow(self, i);
+    while (i < 6 && j < mNumItems) {
+        drawStoreRow(i);
         i++;
         j++;
     }
@@ -2013,38 +2019,38 @@ static inline int isMode1_B618(cFEStateCharEquip* self)
  * @param reset   nonzero to reset the menu to the top of a new list
  * @param select  nonzero to select the visible row
  */
-extern "C" void cFEStateCharEquip_redrawRows(cFEStateCharEquip* self, int reset, int select)
+void cFEStateCharEquip::redrawRows(int reset, int select)
 {
-    if (self->mpMenu == 0)
+    if (mpMenu == 0)
         return;
-    cUIText** nameWidgets = self->mpBoltNameWidgets;
-    cUIIcon** checkWidgets = self->mpBoltCheckWidgets;
+    cUIText** nameWidgets = mpBoltNameWidgets;
+    cUIIcon** checkWidgets = mpBoltCheckWidgets;
     for (int i = 0; i < 6; i++) {
         nameWidgets[i]->setVisible(0);
         checkWidgets[i]->setVisible(0);
     }
     if (reset) {
-        if (self->mNumItems == 0)
-            cUIMenu_setScrollableMenu(self->mpMenu, 1);
+        if (mNumItems == 0)
+            cUIMenu_setScrollableMenu(mpMenu, 1);
         else
-            cUIMenu_setScrollableMenu(self->mpMenu, (unsigned char)self->mNumItems);
+            cUIMenu_setScrollableMenu(mpMenu, (unsigned char)mNumItems);
     }
     int n;
-    if (isMode1_B618(self))
-        n = cFEStateCharEquip_drawStoreRows(self);
+    if (isMode1_B618(this))
+        n = drawStoreRows();
     else
-        n = cFEStateCharEquip_drawInventoryRows(self);
+        n = drawInventoryRows();
     int visibleRow;
     if (n == 0) {
-        self->mpBoltNameWidgets[0]->setVisible(1);
-        self->mpBoltNameWidgets[0]->setColour((const tARGB*)kColourEnabled);
-        cUIText_setUnicodeStringByID(self->mpBoltNameWidgets[0], GetHashValue32(str_kT_FEEmpty));
-        self->mpMenu->mScrollItemNum = 1;
-        self->mpMenu->mScrollItemOffset = 0;
+        mpBoltNameWidgets[0]->setVisible(1);
+        mpBoltNameWidgets[0]->setColour((const tARGB*)kColourEnabled);
+        cUIText_setUnicodeStringByID(mpBoltNameWidgets[0], GetHashValue32(str_kT_FEEmpty));
+        mpMenu->mScrollItemNum = 1;
+        mpMenu->mScrollItemOffset = 0;
         visibleRow = 0;
         n = 1;
     } else {
-        cUIMenu* scrollList = self->mpMenu;
+        cUIMenu* scrollList = mpMenu;
         visibleRow = scrollList->mScrollItemCurrent - scrollList->mScrollItemOffset;
     }
     if (visibleRow >= n)
@@ -2054,7 +2060,7 @@ extern "C" void cFEStateCharEquip_redrawRows(cFEStateCharEquip* self, int reset,
     if (reset)
         visibleRow = 0;
     if (select) {
-        cUIMenu* scrollList = self->mpMenu;
+        cUIMenu* scrollList = mpMenu;
         cUIMenu_setSelectedByIndex(scrollList, scrollList->mScrollItemOffset + visibleRow);
     }
 }
@@ -2092,32 +2098,32 @@ static inline int IsSet_19B7E0(tBEProfileBolt* e)
  *
  * @param i  the row (0-5)
  */
-extern "C" void cFEStateCharEquip_drawInventoryRow(cFEStateCharEquip* self, int i)
+void cFEStateCharEquip::drawInventoryRow(int i)
 {
-    cUIMenu* scrollList = self->mpMenu;
+    cUIMenu* scrollList = mpMenu;
     int top = scrollList ? scrollList->mScrollItemOffset : 0;
-    tBEBoltDef* item = self->mpItems[top + i];
-    cUIText* text = self->mpBoltNameWidgets[i];
-    cUIIcon* icon = self->mpBoltCheckWidgets[i];
-    self->mRowPoints[i] = -99999;
+    tBEBoltDef* item = mpItems[top + i];
+    cUIText* text = mpBoltNameWidgets[i];
+    cUIIcon* icon = mpBoltCheckWidgets[i];
+    mRowPoints[i] = -99999;
     const cTextureElement* col = 0;
     if (item->flags & 0x20) {
-        col = self->mpPlusElem;
+        col = mpPlusElem;
     } else {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
-        cBECharProfileDB* prof = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, self->mUserNum, self->mCharID);
+        cBECharProfileDB* prof = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, mUserNum, mCharID);
         tBEProfileBolt* flagEntry = getEntry_19B7E0(prof, item->id);
         tBEProfileBolt save[525];
         MEM_copy(save, &prof->mBolts[0], 2100);
-        int before = cBEBoltInterface_getUsedEquipPoints(iface, self->mUserNum, self->mCharID);
-        if (cBEBoltInterface_trySetBoltVisible(iface, self->mUserNum, self->mCharID, item->id, !IsSet_19B7E0(flagEntry))) {
-            self->mRowPoints[i] = cBEBoltInterface_getUsedEquipPoints(iface, self->mUserNum, self->mCharID) - before;
+        int before = cBEBoltInterface_getUsedEquipPoints(iface, mUserNum, mCharID);
+        if (cBEBoltInterface_trySetBoltVisible(iface, mUserNum, mCharID, item->id, !IsSet_19B7E0(flagEntry))) {
+            mRowPoints[i] = cBEBoltInterface_getUsedEquipPoints(iface, mUserNum, mCharID) - before;
             if (IsSet_19B7E0(flagEntry))
-                col = self->mpCheckMarkElem;
+                col = mpCheckMarkElem;
             else
-                col = self->mpEmptyBoxElem;
+                col = mpEmptyBoxElem;
         }
-        cBEBoltInterface_restoreBolts(iface, self->mUserNum, self->mCharID, save);
+        cBEBoltInterface_restoreBolts(iface, mUserNum, mCharID, save);
     }
     if (text) {
         if (item->flags & 0x20)
@@ -2152,29 +2158,28 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
  *
  * A category shows its name as a string id and mpPlusElem (0, so no icon).
  *
- * @param equipState  the equip state
  * @param i  the row (0-5)
  */
-extern "C" void cFEStateCharEquip_drawStoreRow(cFEStateCharEquip* equipState, int i)
+void cFEStateCharEquip::drawStoreRow(int i)
 {
-    cUIMenu* menu = equipState->mpMenu;
+    cUIMenu* menu = mpMenu;
     int top = 0;
     if (menu != 0)
         top = menu->mScrollItemOffset;
-    tBEBoltDef* item = equipState->mpItems[top + i];
-    cUIText* text = equipState->mpBoltNameWidgets[i];
-    cUIIcon* icon = equipState->mpBoltCheckWidgets[i];
+    tBEBoltDef* item = mpItems[top + i];
+    cUIText* text = mpBoltNameWidgets[i];
+    cUIIcon* icon = mpBoltCheckWidgets[i];
     const cTextureElement* tex;
     if (item->flags & 0x20) {
-        tex = equipState->mpPlusElem;
+        tex = mpPlusElem;
     } else {
         int price = item->price;
         if (price > 0)
             price *= 10;
-        if (equipState->mMoneyAvailable < price)
-            tex = equipState->mpRedDollarSignElem;
+        if (mMoneyAvailable < price)
+            tex = mpRedDollarSignElem;
         else
-            tex = equipState->mpGreenDollarSignElem;
+            tex = mpGreenDollarSignElem;
     }
     if (text != 0) {
         if (item->flags & 0x20)
@@ -2355,12 +2360,12 @@ extern "C" int cBEBoltInterface_buyBolt(void* iface, int a1, int a2, int a3, int
  *
  * cFEStateCharEquip_onPopupEvent calls it when the buy popup closes with a yes.
  */
-extern "C" void cFEStateCharEquip_buySelectedItem(cFEStateCharEquip* self)
+void cFEStateCharEquip::buySelectedItem()
 {
-    int idx = self->mpMenu->mScrollItemCurrent;
-    tBEBoltDef* item = self->mpItems[idx];
-    self->mMoneyAvailable = cBEBoltInterface_buyBolt(cBE_getInterface_Fv(cBE_getBE(), 9),
-        self->mUserNum, self->mCharID, item->id, 1);
+    int idx = mpMenu->mScrollItemCurrent;
+    tBEBoltDef* item = mpItems[idx];
+    mMoneyAvailable = cBEBoltInterface_buyBolt(cBE_getInterface_Fv(cBE_getBE(), 9),
+        mUserNum, mCharID, item->id, 1);
 }
 #endif
 
@@ -2391,21 +2396,21 @@ static inline tBEProfileBolt* getItemK19BEE8(cBECharProfileDB* l, int id)
  *
  * @return true when the item changed, else false
  */
-extern "C" bool cFEStateCharEquip_toggleSelectedItem(cFEStateCharEquip* self)
+bool cFEStateCharEquip::toggleSelectedItem()
 {
-    if (self->mNumItems <= 0)
+    if (mNumItems <= 0)
         return false;
-    tBEBoltDef* item = self->mpItems[self->mpMenu->mScrollItemCurrent];
+    tBEBoltDef* item = mpItems[mpMenu->mScrollItemCurrent];
     if (!(item->flags & 4))
         return false;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, self->mUserNum,
-                                                              self->mCharID);
+    cBECharProfileDB* list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, mUserNum,
+                                                              mCharID);
     tBEProfileBolt* entry = getItemK19BEE8(list, item->id);
     int mask = 4;
-    if (cBEBoltInterface_trySetBoltVisible(iface, self->mUserNum, self->mCharID, item->id,
+    if (cBEBoltInterface_trySetBoltVisible(iface, mUserNum, mCharID, item->id,
                       (entry->flags & mask) == 0)) {
-        cBEBoltInterface_storeVisibleFlags(iface, self->mUserNum, self->mCharID);
+        cBEBoltInterface_storeVisibleFlags(iface, mUserNum, mCharID);
         return true;
     }
     return false;
@@ -2693,17 +2698,17 @@ extern char str_cUIStateBuyPopup[];
  *
  * @param item  the item
  */
-extern "C" void cFEStateCharEquip_openBuyPopup(cFEStateCharEquip* self, tBEBoltDef* item)
+void cFEStateCharEquip::openBuyPopup(tBEBoltDef* item)
 {
     cUIStateBuyPopup* popup = (cUIStateBuyPopup*)cUIStateBuyPopup_cUIStateBuyPopup(
-        cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), self->mpEngine, self, self->mUserNum);
+        cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), mpEngine, this, mUserNum);
     int price = item->price;
     const char* name = item->name;
     if (price > 0) {
         price *= 10;
     }
-    cBuyPopupInfo_initBuyBolt(&popup->mInfo, name, price, self->mMoneyAvailable);
-    cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
+    cBuyPopupInfo_initBuyBolt(&popup->mInfo, name, price, mMoneyAvailable);
+    cUIStateStack_pushPopup(&mpEngine->mStateStack, popup);
 }
 #endif
 
@@ -2720,12 +2725,12 @@ extern "C" tBoltFileIndexNode* cBoltFileIndexManager_getNextNode(cBoltFileIndexM
  *
  * @return the node
  */
-extern "C" tBoltFileIndexNode* cBoltFileIndexManager_allocNode(cBoltFileIndexManager* self)
+tBoltFileIndexNode* cBoltFileIndexManager::allocNode()
 {
-    tBoltFileIndexNode* item = self->mpFreeList;
-    self->mpFreeList = cBoltFileIndexManager_getNextNode(self, item);
+    tBoltFileIndexNode* item = mpFreeList;
+    mpFreeList = getNextNode(item);
     item->next = -1;
-    tBoltFileIndexNode* head = self->mpFreeList;
+    tBoltFileIndexNode* head = mpFreeList;
     if (head != 0) {
         head->prev = -1;
     }
@@ -2742,12 +2747,12 @@ INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_getPrevNode);
  * @param item  the node, or null
  * @return the previous node, or null when there is none
  */
-extern "C" tBoltFileIndexNode* cBoltFileIndexManager_getPrevNode(cBoltFileIndexManager* self, tBoltFileIndexNode* item)
+tBoltFileIndexNode* cBoltFileIndexManager::getPrevNode(tBoltFileIndexNode* item)
 {
     if (item != 0) {
         short idx = item->prev;
         if (idx >= 0) {
-            return &self->mNodes[idx];
+            return &mNodes[idx];
         }
     }
     return 0;
@@ -2763,12 +2768,12 @@ INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_getNextNode);
  * @param item  the node, or null
  * @return the next node, or null when there is none
  */
-extern "C" tBoltFileIndexNode* cBoltFileIndexManager_getNextNode(cBoltFileIndexManager* self, tBoltFileIndexNode* item)
+tBoltFileIndexNode* cBoltFileIndexManager::getNextNode(tBoltFileIndexNode* item)
 {
     if (item != 0) {
         short idx = item->next;
         if (idx >= 0) {
-            return &self->mNodes[idx];
+            return &mNodes[idx];
         }
     }
     return 0;
@@ -2784,9 +2789,9 @@ INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_getNodeIndex);
  * @param node  the node, or 0
  * @return the index, or -1 for 0
  */
-extern "C" int cBoltFileIndexManager_getNodeIndex(cBoltFileIndexManager* self, tBoltFileIndexNode* node)
+int cBoltFileIndexManager::getNodeIndex(tBoltFileIndexNode* node)
 {
-    if (node != 0) return node - self->mNodes;
+    if (node != 0) return node - mNodes;
     return -1;
 }
 #endif
@@ -2817,23 +2822,23 @@ extern "C" int cBoltFileIndexManager_getNodeIndex(cBoltFileIndexManager* self, t
  * @param create  nonzero to add a node when the key is missing
  * @return the node, or 0 when the key is missing and no node was created
  */
-extern "C" tBoltFileIndexNode* cBoltFileIndexManager_findNode(cBoltFileIndexManager* self, int hi, int lo, int create)
+tBoltFileIndexNode* cBoltFileIndexManager::findNode(int hi, int lo, int create)
 {
     int key = (hi << 16) | lo;
     int bucket = key % 400;
     tBoltFileIndexNode* prev = 0;
-    tBoltFileIndexNode* n = self->mBuckets[bucket];
-    while (self->mpFreeList != 0 || n != 0) {
+    tBoltFileIndexNode* n = mBuckets[bucket];
+    while (mpFreeList != 0 || n != 0) {
         if (n == 0) {
             if (create) {
-                n = cBoltFileIndexManager_allocNode(self);
-                n->prev = cBoltFileIndexManager_getNodeIndex(self, prev);
+                n = allocNode();
+                n->prev = getNodeIndex(prev);
                 if (prev != 0) {
-                    n->prev = cBoltFileIndexManager_getNodeIndex(self, prev);
-                    prev->next = cBoltFileIndexManager_getNodeIndex(self, n);
+                    n->prev = getNodeIndex(prev);
+                    prev->next = getNodeIndex(n);
                 } else {
                     n->prev = -1;
-                    self->mBuckets[bucket] = n;
+                    mBuckets[bucket] = n;
                 }
                 n->next = -1;
             }
@@ -2842,7 +2847,7 @@ extern "C" tBoltFileIndexNode* cBoltFileIndexManager_findNode(cBoltFileIndexMana
         if (n->key == key)
             break;
         prev = n;
-        n = cBoltFileIndexManager_getNextNode(self, prev);
+        n = getNextNode(prev);
     }
     if (n != 0)
         n->key = key;
@@ -2867,24 +2872,24 @@ extern "C" int cBoltFileIndexManager_getNodeIndex(cBoltFileIndexManager* self, t
  *
  * @param node  the node to release (from cBoltFileIndexManager_findNode), or 0
  */
-extern "C" void cBoltFileIndexManager_freeNode(cBoltFileIndexManager* self, tBoltFileIndexNode* node)
+void cBoltFileIndexManager::freeNode(tBoltFileIndexNode* node)
 {
     if (node != 0) {
         int bucketIndex = node->key % 400;
         if (node->prev < 0) {
-            self->mBuckets[bucketIndex] = cBoltFileIndexManager_getNextNode(self, node);
+            mBuckets[bucketIndex] = getNextNode(node);
         } else {
-            cBoltFileIndexManager_getPrevNode(self, node)->next = node->next;
+            getPrevNode(node)->next = node->next;
         }
         if (node->next >= 0) {
-            cBoltFileIndexManager_getNextNode(self, node)->prev = node->prev;
+            getNextNode(node)->prev = node->prev;
         }
         node->key = -1;
         node->modelPartFile = -1;
         node->partTextureFile = -1;
         node->prev = -1;
-        node->next = cBoltFileIndexManager_getNodeIndex(self, self->mpFreeList);
-        self->mpFreeList = node;
+        node->next = getNodeIndex(mpFreeList);
+        mpFreeList = node;
     }
 }
 #endif
@@ -2901,7 +2906,7 @@ extern "C" void cBoltFileIndexManager_reset(cBoltFileIndexManager* self);
  */
 extern "C" cBoltFileIndexManager* cBoltFileIndexManager_cBoltFileIndexManager(cBoltFileIndexManager* self)
 {
-    cBoltFileIndexManager_reset(self);
+    self->reset();
     return self;
 }
 #endif
@@ -2918,12 +2923,12 @@ extern "C" void MEM_fill(void* dst, unsigned int value, int size);
  * (+0x1F40) at node 0 and chains every node to its neighbours (prev i - 1, next i + 1, the last next -1) with both mask
  * words (+0x4, +0x6) cleared.
  */
-extern "C" void cBoltFileIndexManager_reset(cBoltFileIndexManager* self)
+void cBoltFileIndexManager::reset()
 {
-    MEM_fill(self->mNodes, 0xFFFFFFFF, sizeof(self->mNodes));
-    MEM_fill(self->mBuckets, 0, sizeof(self->mBuckets));
-    self->mpFreeList = self->mNodes;
-    tBoltFileIndexNode* n = self->mNodes;
+    MEM_fill(mNodes, 0xFFFFFFFF, sizeof(mNodes));
+    MEM_fill(mBuckets, 0, sizeof(mBuckets));
+    mpFreeList = mNodes;
+    tBoltFileIndexNode* n = mNodes;
     for (int i = 0; i < 400; i++) {
         n[i].next = i + 1;
         n[i].prev = i - 1;
@@ -2950,9 +2955,9 @@ extern "C" tBoltFileIndexNode* cBoltFileIndexManager_findNode(cBoltFileIndexMana
  * @param lowKey  low half of the key (an item id)
  * @return the stored value, or -1
  */
-extern "C" int cBoltFileIndexManager_getModelPartFile(cBoltFileIndexManager* self, int bit, int lowKey)
+int cBoltFileIndexManager::getModelPartFile(int bit, int lowKey)
 {
-    tBoltFileIndexNode* node = cBoltFileIndexManager_findNode(self, bit, lowKey, 0);
+    tBoltFileIndexNode* node = findNode(bit, lowKey, 0);
     if (node != 0) {
         if ((node->modelPartMask >> bit) & 1) {
             return node->modelPartFile;
@@ -2982,15 +2987,15 @@ extern "C" void cBoltFileIndexManager_freeNode(cBoltFileIndexManager* self, tBol
  * @param lowKey  low half of the key (an item id)
  * @param val  value to store, or a negative value to clear it
  */
-extern "C" void cBoltFileIndexManager_setModelPartFile(cBoltFileIndexManager* self, int bit, int lowKey, int val)
+void cBoltFileIndexManager::setModelPartFile(int bit, int lowKey, int val)
 {
-    tBoltFileIndexNode* node = cBoltFileIndexManager_findNode(self, bit, lowKey, val != kNoBoltFile);
+    tBoltFileIndexNode* node = findNode(bit, lowKey, val != kNoBoltFile);
     if (node != 0) {
         if (val < 0) {
             if ((node->modelPartMask >> bit) & 1) {
                 node->modelPartMask &= ~(1 << bit);
                 if (node->modelPartMask == 0 && node->partTextureFile < 0) {
-                    cBoltFileIndexManager_freeNode(self, node);
+                    freeNode(node);
                 }
             }
         } else {
@@ -3017,9 +3022,9 @@ extern "C" tBoltFileIndexNode* cBoltFileIndexManager_findNode(cBoltFileIndexMana
  * @param lowKey  low half of the key (an item id)
  * @return the stored value, or -1
  */
-extern "C" int cBoltFileIndexManager_getPartTextureFile(cBoltFileIndexManager* self, int bit, int lowKey)
+int cBoltFileIndexManager::getPartTextureFile(int bit, int lowKey)
 {
-    tBoltFileIndexNode* node = cBoltFileIndexManager_findNode(self, bit, lowKey, 0);
+    tBoltFileIndexNode* node = findNode(bit, lowKey, 0);
     if (node != 0) {
         if ((node->partTextureMask >> bit) & 1) {
             return node->partTextureFile;
@@ -3047,15 +3052,15 @@ extern "C" void cBoltFileIndexManager_freeNode(cBoltFileIndexManager* self, tBol
  * @param lowKey  low half of the key (an item id)
  * @param val  value to store, or a negative value to clear it
  */
-extern "C" void cBoltFileIndexManager_setPartTextureFile(cBoltFileIndexManager* self, int bit, int lowKey, int val)
+void cBoltFileIndexManager::setPartTextureFile(int bit, int lowKey, int val)
 {
-    tBoltFileIndexNode* node = cBoltFileIndexManager_findNode(self, bit, lowKey, val != kNoBoltFile);
+    tBoltFileIndexNode* node = findNode(bit, lowKey, val != kNoBoltFile);
     if (node != 0) {
         if (val < 0) {
             if ((node->partTextureMask >> bit) & 1) {
                 node->partTextureMask &= ~(1 << bit);
                 if (node->partTextureMask == 0 && node->modelPartFile < 0) {
-                    cBoltFileIndexManager_freeNode(self, node);
+                    freeNode(node);
                 }
             }
         } else {
@@ -3083,7 +3088,7 @@ extern "C" void cFEBoltFileManager_init(cFEBoltFileManager* self);
 extern "C" cFEBoltFileManager* cFEBoltFileManager_cFEBoltFileManager(cFEBoltFileManager* self)
 {
     D_004A196C = self;
-    cFEBoltFileManager_init(self);
+    self->init();
     return self;
 }
 #endif
@@ -3104,7 +3109,7 @@ void operator_delete(int* p);
 extern "C" void cFEBoltFileManager__cFEBoltFileManager(cFEBoltFileManager* self, int flags)
 {
     D_004A196C = 0;
-    cFEBoltFileManager_purge(self);
+    self->purge();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3125,13 +3130,13 @@ extern char str_BoltFileIndexManager[];
  * is allocated on first use (cMemMan_alloc, 8004 bytes, tag "BoltFileIndexManager", built by cBoltFileIndexManager_cBoltFileIndexManager), otherwise
  * reset with cBoltFileIndexManager_reset. cRealFE_load calls it on the front end's +0x1A70.
  */
-extern "C" void cFEBoltFileManager_init(cFEBoltFileManager* self)
+void cFEBoltFileManager::init()
 {
     int i;
     int j;
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 256; j++) {
-            tBoltFile* slot = &self->mFiles[i][j];
+            tBoltFile* slot = &mFiles[i][j];
             slot->flags = 0;
             slot->fileName[0] = 0;
             slot->dataPtr = 0;
@@ -3140,14 +3145,14 @@ extern "C" void cFEBoltFileManager_init(cFEBoltFileManager* self)
             slot->refCount = 0;
             slot->fileType = -1;
         }
-        self->unk_B4008[i] = 1;
+        unk_B4008[i] = 1;
     }
-    self->mNumLoadThreads = 0;
-    self->mMemUsed = 0;
+    mNumLoadThreads = 0;
+    mMemUsed = 0;
     if (D_004A1968 == 0) {
         D_004A1968 = cBoltFileIndexManager_cBoltFileIndexManager((cBoltFileIndexManager*)cMemMan_alloc(8004, str_BoltFileIndexManager, 0, 0));
     } else {
-        cBoltFileIndexManager_reset(D_004A1968);
+        D_004A1968->reset();
     }
 }
 #endif
@@ -3167,15 +3172,15 @@ extern cBoltFileIndexManager* D_004A1968;
  * D_004A1968 (operator_delete, no destructor call) and clears it. nPending is not reset here. Called by the cache's
  * destructor and by cRealFE_purge.
  */
-extern "C" void cFEBoltFileManager_purge(cFEBoltFileManager* self)
+void cFEBoltFileManager::purge()
 {
     int i;
     int j;
     for (i = 0; i < 10; i++) {
         for (j = 0; j < 256; j++) {
-            cFEBoltFileManager_freeFile(self, i, j);
+            freeFile(i, j);
         }
-        self->unk_B4008[i] = 1;
+        unk_B4008[i] = 1;
     }
     if (D_004A1968 != 0) {
         operator_delete((int*)D_004A1968);
@@ -3212,7 +3217,7 @@ extern char cMemMan_m_mutex[];
  * @param bank  the slot's bank (0-9), passed to the eviction helpers
  * @param rawSlot  the slot
  */
-extern "C" void cFEBoltFileManager_unpackFile(cFEBoltFileManager* self, int bank, tBoltFile* rawSlot)
+void cFEBoltFileManager::unpackFile(int bank, tBoltFile* rawSlot)
 {
     tBoltFile* slot = (tBoltFile*)rawSlot;
     if (slot == 0)
@@ -3222,19 +3227,19 @@ extern "C" void cFEBoltFileManager_unpackFile(cFEBoltFileManager* self, int bank
     int size = unpacksizez(slot->dataPtr);
     if (size <= 0)
         return;
-    cFEBoltFileManager_makeRoom(self, bank, size);
+    makeRoom(bank, size);
     void* buf = operator_new_tag(size, str_UncompressedData, 0x60000000, 0);
     while (buf == 0) {
         MUTEX_lock(cMemMan_m_mutex);
         MUTEX_unlock(cMemMan_m_mutex);
-        cFEBoltFileManager_evictBytes(self, bank, size);
+        evictBytes(bank, size);
         buf = operator_new_tag(size, str_UncompressedData, 0x60000000, 0);
     }
     unpack(slot->dataPtr, buf);
     if (slot->dataPtr != 0)
         cMemMan_free(slot->dataPtr);
     slot->dataPtr = buf;
-    self->mMemUsed += size - slot->fileSize;
+    mMemUsed += size - slot->fileSize;
     slot->fileSize = size;
 }
 #endif
@@ -3257,13 +3262,13 @@ extern "C" void cFEBoltFileManager_loadFile(cFEBoltFileManager* self, int bank, 
  *
  * @param bank  the bank to try first
  */
-extern "C" void cFEBoltFileManager_startNextQueuedLoad(cFEBoltFileManager* self, int bank)
+void cFEBoltFileManager::startNextQueuedLoad(int bank)
 {
     unsigned int best = 0;
     int bestIdx = kNoBoltFile;
     int found;
     int i;
-    tBoltFile* slot = self->mFiles[bank];
+    tBoltFile* slot = mFiles[bank];
     found = bank;
     for (i = 0; i < 256; i++, slot++) {
         if (slot->flags == kBoltFileFlag_Queued && (best == 0 || slot->stamp < best)) {
@@ -3277,7 +3282,7 @@ extern "C" void cFEBoltFileManager_startNextQueuedLoad(cFEBoltFileManager* self,
             if (otherBank == bank) {
                 continue;
             }
-            slot = self->mFiles[otherBank];
+            slot = mFiles[otherBank];
             for (i = 0; i < 256; i++, slot++) {
                 if (slot->flags == kBoltFileFlag_Queued && (best == 0 || slot->stamp < best)) {
                     best = slot->stamp;
@@ -3291,7 +3296,7 @@ extern "C" void cFEBoltFileManager_startNextQueuedLoad(cFEBoltFileManager* self,
         }
     }
     if (bestIdx >= 0) {
-        cFEBoltFileManager_loadFile(self, found, bestIdx);
+        loadFile(found, bestIdx);
     }
 }
 #endif
@@ -3316,29 +3321,29 @@ extern "C" void cFEBoltFileManager_loadFile(cFEBoltFileManager* self, int bank, 
  * whenever no loads are in flight.
  *
  */
-extern "C" void cFEBoltFileManager_update(cFEBoltFileManager* self)
+void cFEBoltFileManager::update()
 {
     int i;
     int j;
     for (i = 0; i < 10; i++) {
-        tBoltFile* slot = self->mFiles[i];
+        tBoltFile* slot = mFiles[i];
         for (j = 0; j < 256; j++, slot++) {
             if (slot->async != 0 && slot->flags == kBoltFileFlag_Loading) {
                 int asyncStatus = ASYNCFILE_getstatus(slot->asyncFileHandle);
                 if (asyncStatus == kASYNCFILE_Done) {
                     int status[4];
                     ASYNCFILE_release(slot->asyncFileHandle, 0, status);
-                    cFEBoltFileManager_unpackFile(self, i, slot);
+                    unpackFile(i, slot);
                     if (slot->refCount == 0)
                         slot->flags = 0;
                     else
                         slot->flags = asyncStatus;
                     slot->async = 0;
-                    if (--self->mNumLoadThreads <= 0)
-                        cFEBoltFileManager_startNextQueuedLoad(self, i);
+                    if (--mNumLoadThreads <= 0)
+                        startNextQueuedLoad(i);
                 }
-            } else if (self->mNumLoadThreads <= 0 && slot->flags == kBoltFileFlag_Queued) {
-                cFEBoltFileManager_loadFile(self, i, j);
+            } else if (mNumLoadThreads <= 0 && slot->flags == kBoltFileFlag_Queued) {
+                loadFile(i, j);
             }
         }
     }
@@ -3357,11 +3362,11 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_findFreeSlot);
  * @param bank  the bank (0-9)
  * @return the slot index, or -1 when no slot of the bank is idle
  */
-extern "C" int cFEBoltFileManager_findFreeSlot(cFEBoltFileManager* self, int bank)
+int cFEBoltFileManager::findFreeSlot(int bank)
 {
     unsigned int best = 0;
     int bestIdx = -1;
-    tBoltFile* slot = self->mFiles[bank];
+    tBoltFile* slot = mFiles[bank];
     for (int i = 0; i < 256; i++, slot++) {
         if (slot->flags == kBoltFileFlag_Idle) {
             if (slot->dataPtr == 0) {
@@ -3391,11 +3396,11 @@ extern "C" int strcmp(const void* a, const void* b);
  * @param name  the file name
  * @return the slot index, or -1 when the name is not cached
  */
-extern "C" int cFEBoltFileManager_findFile(cFEBoltFileManager* self, int bank, const char* name)
+int cFEBoltFileManager::findFile(int bank, const char* name)
 {
     for (int i = 0; i < 256; i++) {
-        tBoltFile* slot = &self->mFiles[bank][i];
-        if (slot->fileName[0] != 0 && strcmp(self->mFiles[bank][i].fileName, name) == 0) {
+        tBoltFile* slot = &mFiles[bank][i];
+        if (slot->fileName[0] != 0 && strcmp(mFiles[bank][i].fileName, name) == 0) {
             return i;
         }
     }
@@ -3418,16 +3423,16 @@ void cMemMan_free(void* ptr);
  * @param bank  the bank (0-9)
  * @param i  the slot index
  */
-extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, int i)
+void cFEBoltFileManager::freeFile(int bank, int i)
 {
     int status;
-    tBoltFile* slot = &self->mFiles[bank][i];
+    tBoltFile* slot = &mFiles[bank][i];
     if (slot->flags == kBoltFileFlag_Loading) {
         if (slot->async != 0) {
             ASYNCFILE_release(slot->asyncFileHandle, 0, &status);
         }
     }
-    self->mMemUsed -= slot->fileSize;
+    mMemUsed -= slot->fileSize;
     if (slot->dataPtr != 0) {
         cMemMan_free(slot->dataPtr);
     }
@@ -3457,9 +3462,9 @@ extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, 
  * @param bank  the bank being loaded into; its own files go last
  * @param size  bytes about to be added
  */
-extern "C" void cFEBoltFileManager_makeRoom(cFEBoltFileManager* self, int bank, int size)
+void cFEBoltFileManager::makeRoom(int bank, int size)
 {
-    if (self->mMemUsed + size <= 9999999)
+    if (mMemUsed + size <= 9999999)
         return;
     int otherBank;
     int j;
@@ -3467,10 +3472,10 @@ extern "C" void cFEBoltFileManager_makeRoom(cFEBoltFileManager* self, int bank, 
         if (otherBank == bank)
             continue;
         for (j = 0; j < 256; j++) {
-            tBoltFile* slot = &self->mFiles[otherBank][j];
+            tBoltFile* slot = &mFiles[otherBank][j];
             if (slot->dataPtr != 0 && slot->refCount == 0 && slot->flags == 0) {
-                cFEBoltFileManager_freeFile(self, otherBank, j);
-                if (self->mMemUsed + size <= 9999999)
+                freeFile(otherBank, j);
+                if (mMemUsed + size <= 9999999)
                     return;
             }
         }
@@ -3479,7 +3484,7 @@ extern "C" void cFEBoltFileManager_makeRoom(cFEBoltFileManager* self, int bank, 
         int best = -1;
         unsigned int stamp = 0;
         for (int k = 0; k < 256; k++) {
-            tBoltFile* slot = &self->mFiles[bank][k];
+            tBoltFile* slot = &mFiles[bank][k];
             if (slot->dataPtr != 0 && slot->flags == 0 && slot->refCount == 0) {
                 if (best < 0 || slot->stamp < stamp) {
                     stamp = slot->stamp;
@@ -3489,8 +3494,8 @@ extern "C" void cFEBoltFileManager_makeRoom(cFEBoltFileManager* self, int bank, 
         }
         if (best < 0)
             return;
-        cFEBoltFileManager_freeFile(self, bank, best);
-    } while (self->mMemUsed + size > 9999999);
+        freeFile(bank, best);
+    } while (mMemUsed + size > 9999999);
 }
 #endif
 
@@ -3509,7 +3514,7 @@ extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, 
  * @param bank  the bank being loaded into; its own files go last
  * @param size  bytes to free
  */
-extern "C" void cFEBoltFileManager_evictBytes(cFEBoltFileManager* self, int bank, int size)
+void cFEBoltFileManager::evictBytes(int bank, int size)
 {
     int otherBank;
     int j;
@@ -3517,10 +3522,10 @@ extern "C" void cFEBoltFileManager_evictBytes(cFEBoltFileManager* self, int bank
         if (otherBank == bank)
             continue;
         for (j = 0; j < 256; j++) {
-            tBoltFile* slot = &self->mFiles[otherBank][j];
+            tBoltFile* slot = &mFiles[otherBank][j];
             if (slot->dataPtr != 0 && slot->refCount == 0 && slot->flags == 0) {
                 size -= slot->fileSize;
-                cFEBoltFileManager_freeFile(self, otherBank, j);
+                freeFile(otherBank, j);
                 if (size <= 0)
                     return;
             }
@@ -3530,7 +3535,7 @@ extern "C" void cFEBoltFileManager_evictBytes(cFEBoltFileManager* self, int bank
         int best = -1;
         unsigned int stamp = 0;
         for (int k = 0; k < 256; k++) {
-            tBoltFile* slot = &self->mFiles[bank][k];
+            tBoltFile* slot = &mFiles[bank][k];
             if (slot->dataPtr != 0 && slot->flags == 0 && slot->refCount == 0) {
                 if (best < 0 || slot->stamp < stamp) {
                     stamp = slot->stamp;
@@ -3540,8 +3545,8 @@ extern "C" void cFEBoltFileManager_evictBytes(cFEBoltFileManager* self, int bank
         }
         if (best < 0)
             return;
-        size -= self->mFiles[bank][best].fileSize;
-        cFEBoltFileManager_freeFile(self, bank, best);
+        size -= mFiles[bank][best].fileSize;
+        freeFile(bank, best);
     } while (size > 0);
 }
 #endif
@@ -3576,24 +3581,24 @@ extern char cMemMan_m_mutex[];
  * @param bank  the bank (0-9)
  * @param i  the slot index
  */
-extern "C" void cFEBoltFileManager_loadFile(cFEBoltFileManager* self, int bank, int i)
+void cFEBoltFileManager::loadFile(int bank, int i)
 {
-    tBoltFile* slot = &self->mFiles[bank][i];
+    tBoltFile* slot = &mFiles[bank][i];
     int size = BXFILE_sizez(slot->fileName);
-    cFEBoltFileManager_makeRoom(self, bank, size);
+    makeRoom(bank, size);
     slot->dataPtr = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
     while (slot->dataPtr == 0) {
         MUTEX_lock(cMemMan_m_mutex);
         MUTEX_unlock(cMemMan_m_mutex);
-        cFEBoltFileManager_evictBytes(self, bank, size);
+        evictBytes(bank, size);
         slot->dataPtr = operator_new_tag(size, str_Bolt_FileData, 0x60000000, 0);
     }
-    self->mMemUsed += size;
+    mMemUsed += size;
     if (slot->async != 0) {
         slot->fileSize = size;
         slot->flags = 2;
         slot->asyncFileHandle = ASYNCFILE_loadat(slot->fileName, slot->dataPtr, size);
-        self->mNumLoadThreads += 1;
+        mNumLoadThreads += 1;
     } else {
         slot->fileSize = size;
         FILE_loadatz(slot->fileName, slot->dataPtr, size);
@@ -3638,7 +3643,7 @@ extern "C" int cFEBoltFileManager_requestFile(void* cache, int bank, void* namep
 {
     cFEBoltFileManager* self = (cFEBoltFileManager*)cache;
     const char* name = (const char*)namep;
-    int i = cFEBoltFileManager_findFile(self, bank, name);
+    int i = self->findFile(bank, name);
     if (i >= 0) {
         tBoltFile* slot = &self->mFiles[bank][i];
         if (deferred)
@@ -3654,16 +3659,16 @@ extern "C" int cFEBoltFileManager_requestFile(void* cache, int bank, void* namep
                 int status;
                 ASYNCFILE_release(slot->asyncFileHandle, 0, &status);
             } else if (slot->flags == kBoltFileFlag_Queued) {
-                cFEBoltFileManager_loadFile(self, bank, i);
+                self->loadFile(bank, i);
             }
             slot->flags = 1;
             slot->asyncFileHandle = -1;
         }
         slot->refCount++;
     } else {
-    i = cFEBoltFileManager_findFreeSlot(self, bank);
+    i = self->findFreeSlot(bank);
     tBoltFile* slot = &self->mFiles[bank][i];
-    cFEBoltFileManager_freeFile(self, bank, i);
+    self->freeFile(bank, i);
     if (deferred)
         slot->stamp = 0;
     else
@@ -3673,7 +3678,7 @@ extern "C" int cFEBoltFileManager_requestFile(void* cache, int bank, void* namep
     slot->fileType = fileType;
     slot->async = async;
     if (deferred == 0 && (async == 0 || self->mNumLoadThreads <= 0))
-        cFEBoltFileManager_loadFile(self, bank, i);
+        self->loadFile(bank, i);
     else
         slot->flags = 3;
     }
@@ -3700,10 +3705,10 @@ extern "C" void cFEBoltFileManager_freeFile(cFEBoltFileManager* self, int bank, 
  * @param bank  the bank (0-9)
  * @param i  the slot index (from cFEBoltFileManager_requestFile)
  */
-extern "C" void cFEBoltFileManager_releaseFile(cFEBoltFileManager* self, int bank, int i)
+void cFEBoltFileManager::releaseFile(int bank, int i)
 {
     int status;
-    tBoltFile* slot = &self->mFiles[bank][i];
+    tBoltFile* slot = &mFiles[bank][i];
     if (--slot->refCount > 0) {
         return;
     }
@@ -3712,13 +3717,13 @@ extern "C" void cFEBoltFileManager_releaseFile(cFEBoltFileManager* self, int ban
             return;
         }
         ASYNCFILE_release(slot->asyncFileHandle, 0, &status);
-        cFEBoltFileManager_unpackFile(self, bank, slot);
+        unpackFile(bank, slot);
         slot->async = 0;
         slot->flags = 0;
-        self->mNumLoadThreads -= 1;
+        mNumLoadThreads -= 1;
     }
     if (slot->dataPtr == 0) {
-        cFEBoltFileManager_freeFile(self, bank, i);
+        freeFile(bank, i);
     } else {
         slot->flags = 0;
     }
@@ -3917,9 +3922,10 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_isBankIdle);
  * @return false when any slot is loading or queued (state kBoltFileFlag_Loading / kBoltFileFlag_Queued, or a
  *         negative state), else true
  */
-extern "C" bool cFEBoltFileManager_isBankIdle(cFEBoltFileManager* self, int bank) {
+bool cFEBoltFileManager::isBankIdle(int bank)
+{
     for (int i = 0; i < 0x100; i++) {
-        if ((unsigned int)self->mFiles[bank][i].flags >= 2) return false;
+        if ((unsigned int)mFiles[bank][i].flags >= 2) return false;
     }
     return true;
 }
@@ -3934,8 +3940,9 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_isFileLoading);
  * @param i  the slot index
  * @return true while the load is in flight, else false
  */
-extern "C" bool cFEBoltFileManager_isFileLoading(cFEBoltFileManager* self, int bank, int i) {
-    return self->mFiles[bank][i].flags == kBoltFileFlag_Loading;
+bool cFEBoltFileManager::isFileLoading(int bank, int i)
+{
+    return mFiles[bank][i].flags == kBoltFileFlag_Loading;
 }
 #endif
 
@@ -3949,9 +3956,9 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_isFileLoaded);
  * @param slotIndex  the slot index
  * @return true when loaded, else false
  */
-extern "C" bool cFEBoltFileManager_isFileLoaded(cFEBoltFileManager* self, int bank, int slotIndex)
+bool cFEBoltFileManager::isFileLoaded(int bank, int slotIndex)
 {
-    return self->mFiles[bank][slotIndex].flags == kBoltFileFlag_Done;
+    return mFiles[bank][slotIndex].flags == kBoltFileFlag_Done;
 }
 #endif
 
@@ -3967,9 +3974,10 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getFileName);
  * @param i  the slot index
  * @return the name buffer, or 0
  */
-extern "C" char* cFEBoltFileManager_getFileName(cFEBoltFileManager* self, int bank, int i) {
-    if (self->mFiles[bank][i].flags == kBoltFileFlag_Invalid) return 0;
-    return self->mFiles[bank][i].fileName;
+char* cFEBoltFileManager::getFileName(int bank, int i)
+{
+    if (mFiles[bank][i].flags == kBoltFileFlag_Invalid) return 0;
+    return mFiles[bank][i].fileName;
 }
 #endif
 
@@ -3985,12 +3993,12 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getFileDataValue);
  * @param slotIndex  the slot index
  * @return the data pointer as an int when the state is kBoltFileFlag_Done, else 0
  */
-extern "C" void* cFEBoltFileManager_getFileDataValue(cFEBoltFileManager* self, int bank, int slotIndex)
+void* cFEBoltFileManager::getFileDataValue(int bank, int slotIndex)
 {
-    if (self->mFiles[bank][slotIndex].flags != kBoltFileFlag_Done) {
+    if (mFiles[bank][slotIndex].flags != kBoltFileFlag_Done) {
         return 0;
     }
-    return self->mFiles[bank][slotIndex].dataPtr;
+    return mFiles[bank][slotIndex].dataPtr;
 }
 #endif
 
@@ -4006,9 +4014,10 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getFileData);
  * @param i  the slot index
  * @return the data, or 0
  */
-extern "C" void* cFEBoltFileManager_getFileData(cFEBoltFileManager* self, int bank, int i) {
-    if (self->mFiles[bank][i].flags != kBoltFileFlag_Done) return 0;
-    return self->mFiles[bank][i].dataPtr;
+void* cFEBoltFileManager::getFileData(int bank, int i)
+{
+    if (mFiles[bank][i].flags != kBoltFileFlag_Done) return 0;
+    return mFiles[bank][i].dataPtr;
 }
 #endif
 //100%
@@ -4021,16 +4030,16 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_detachFileData);
  * reward database (cBERewardDB_update) takes the block this way and then drops its use with cFEBoltFileManager_releaseFile, which frees the
  * now empty slot.
  *
- * @param base  the FE file cache
  * @param bank  the bank (0-9)
  * @param slotIndex  the slot index
  * @return the data pointer as an int (the caller now owns it)
  */
-extern "C" void* cFEBoltFileManager_detachFileData(cFEBoltFileManager* base, int bank, int slotIndex) {
-    void* data = base->mFiles[bank][slotIndex].dataPtr;
-    base->mFiles[bank][slotIndex].dataPtr = 0;
-    base->mMemUsed -= base->mFiles[bank][slotIndex].fileSize;
-    base->mFiles[bank][slotIndex].fileSize = 0;
+void* cFEBoltFileManager::detachFileData(int bank, int slotIndex)
+{
+    void* data = mFiles[bank][slotIndex].dataPtr;
+    mFiles[bank][slotIndex].dataPtr = 0;
+    mMemUsed -= mFiles[bank][slotIndex].fileSize;
+    mFiles[bank][slotIndex].fileSize = 0;
     return data;
 }
 #endif
@@ -4044,8 +4053,9 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getFileType);
  * @param i  the slot index
  * @return the type
  */
-extern "C" int cFEBoltFileManager_getFileType(cFEBoltFileManager* self, int bank, int i) {
-    return self->mFiles[bank][i].fileType;
+int cFEBoltFileManager::getFileType(int bank, int i)
+{
+    return mFiles[bank][i].fileType;
 }
 #endif
 //100%
@@ -4058,8 +4068,9 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_getUseCount);
  * @param i  the slot index
  * @return the use count
  */
-extern "C" int cFEBoltFileManager_getUseCount(cFEBoltFileManager* self, int bank, int i) {
-    return self->mFiles[bank][i].refCount;
+int cFEBoltFileManager::getUseCount(int bank, int i)
+{
+    return mFiles[bank][i].refCount;
 }
 #endif
 

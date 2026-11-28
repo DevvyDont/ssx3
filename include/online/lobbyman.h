@@ -138,10 +138,15 @@ struct tLobbyEventList {
     int mAllocator;                 // 0x0 [R] BXAllocator (the ctor stores it before allocating the head node)
     void* mpHead;                   // 0x4 [R] the head node ("StlBlock", 0xC bytes); [U] new events are linked in
                                     //     before it (push_back)
+
+    // Methods bound to their retail symbols by asm labels.
+    void clear() __asm__("tLobbyEventList_clear");
 };
 CHECK_SIZE(tLobbyEventList, 0x8);
 
 struct LobbyApiMsgT;
+
+struct LobbyMan;
 
 struct LobbyMan {
     // A room-list index for no room (name ours): [U] LobbyMan_peekRoom ('peek') and LobbyMan_joinRoomAt (join) use an empty
@@ -260,6 +265,118 @@ struct LobbyMan {
     void onplaymsg(LobbyApiMsgT* msg) __asm__("LobbyMan_onplaymsg");
     void onroomselected(LobbyApiMsgT* msg) __asm__("LobbyMan_onroomselected");
     void onchallengeresponse(LobbyApiMsgT* msg) __asm__("LobbyMan_onchallengeresponse");
+    void LobbyFunctor_onroomlistupdate_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onroomlistupdate_invoke");
+    void LobbyFunctor_onuserlistupdate_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onuserlistupdate_invoke");
+    void LobbyFunctor_onranklistupdate_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onranklistupdate_invoke");
+    void LobbyFunctor_onincomingmsg_invoke(void* message, LobbyMan* lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onincomingmsg_invoke");
+    void LobbyFunctor_onchatmsg_invoke(void* message, int lobbyMan) __asm__("LobbyMan_LobbyFunctor_onchatmsg_invoke");
+    void LobbyFunctor_onconnectionmsg_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onconnectionmsg_invoke");
+    void LobbyFunctor_onplaymsg_invoke(void* message, int lobbyMan) __asm__("LobbyMan_LobbyFunctor_onplaymsg_invoke");
+    void LobbyFunctor_onlobbyconnect_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onlobbyconnect_invoke");
+    void LobbyFunctor_onaccountcreated_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onaccountcreated_invoke");
+    void LobbyFunctor_onaccountedited_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onaccountedited_invoke");
+    void LobbyFunctor_onlostaccountrequestsent_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onlostaccountrequestsent_invoke");
+    void LobbyFunctor_onlostpasswordrequestsent_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onlostpasswordrequestsent_invoke");
+    void LobbyFunctor_onauthentication_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onauthentication_invoke");
+    void LobbyFunctor_onpersonaselected_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onpersonaselected_invoke");
+    void LobbyFunctor_onpersonacreated_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onpersonacreated_invoke");
+    void LobbyFunctor_onpersonadeleted_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onpersonadeleted_invoke");
+    void LobbyFunctor_onroomselected_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onroomselected_invoke");
+    void LobbyFunctor_onRoomCreated_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onRoomCreated_invoke");
+    void LobbyFunctor_onPingReceived_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onPingReceived_invoke");
+    void LobbyFunctor_onAbuseReportReceived_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onAbuseReportReceived_invoke");
+    void LobbyFunctor_onNewsRetrieved_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onNewsRetrieved_invoke");
+    void LobbyFunctor_onRanklistRetrieved_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke");
+    void LobbyFunctor_onPlayerFound_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onPlayerFound_invoke");
+    void LobbyFunctor_onQuickMatchResponse_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke");
+    void LobbyFunctor_onchallengeresponse_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onchallengeresponse_invoke");
+    void LobbyFunctor_onresultsreportresponse_invoke(void* message, int lobbyMan)
+        __asm__("LobbyMan_LobbyFunctor_onresultsreportresponse_invoke");
+    void createConfig() __asm__("LobbyMan_createConfig");
+    void destroyConfig() __asm__("LobbyMan_destroyConfig");
+    int getConfigValue(const char* key, int def) __asm__("LobbyMan_getConfigValue");
+    void releaseRankSnapshots() __asm__("LobbyMan_releaseRankSnapshots");
+    void closeLists() __asm__("LobbyMan_closeLists");
+    void createLobbyApi() __asm__("LobbyMan_createLobbyApi");
+    void destroyLobbyApi() __asm__("LobbyMan_destroyLobbyApi");
+    void sendChatMessage(const char* value) __asm__("LobbyMan_sendChatMessage");
+    void postChatEvent(const char* sender, const char* text) __asm__("LobbyMan_postChatEvent");
+    void update() __asm__("LobbyMan_update");
+    void sendRequest(int newState, int tag, void* cb, int callback, float timeout) __asm__("LobbyMan_sendRequest");
+    void connect(int conn) __asm__("LobbyMan_connect");
+    void disconnect() __asm__("LobbyMan_disconnect");
+    void createAccount(tLobbyAccount* msg) __asm__("LobbyMan_createAccount");
+    void readNameOptions(LobbyApiMsgT* msg) __asm__("LobbyMan_readNameOptions");
+    void editAccount(tLobbyAccount* msg) __asm__("LobbyMan_editAccount");
+    void requestLostAccount(const char* value) __asm__("LobbyMan_requestLostAccount");
+    void requestLostPassword(const char* value) __asm__("LobbyMan_requestLostPassword");
+    void authenticate() __asm__("LobbyMan_authenticate");
+    void cancelAuthentication() __asm__("LobbyMan_cancelAuthentication");
+    void* selectPersonaAt(int personaIndex) __asm__("LobbyMan_selectPersonaAt__FPvi");
+    void selectPersona(const char* name) __asm__("LobbyMan_selectPersona");
+    void requestStats() __asm__("LobbyMan_requestStats");
+    void handleStatsReply(LobbyApiMsgT* msg) __asm__("LobbyMan_handleStatsReply");
+    void createPersona(const char* name) __asm__("LobbyMan_createPersona");
+    void deletePersona(int idx) __asm__("LobbyMan_deletePersona");
+    void peekRoom(int idx) __asm__("LobbyMan_peekRoom");
+    void joinRoomAt(int idx, int password) __asm__("LobbyMan_joinRoomAt");
+    void joinRoom(void* name, int password) __asm__("LobbyMan_joinRoom");
+    char* getRoomName() __asm__("LobbyMan_getRoomName");
+    void createRoom(int namePrefix, int nameSuffix, const char* password) __asm__("LobbyMan_createRoom");
+    void pingPlayer(const char* key, int def) __asm__("LobbyMan_pingPlayer");
+    void pingUser() __asm__("LobbyMan_pingUser");
+    void reportAbuse(const char* name) __asm__("LobbyMan_reportAbuse");
+    void requestNews(int value) __asm__("LobbyMan_requestNews");
+    void requestRankRows(int start, int range, int prevSlot) __asm__("LobbyMan_requestRankRows");
+    void findPlayer(const char* name) __asm__("LobbyMan_findPlayer");
+    void requestPlayerInfo(const char* name) __asm__("LobbyMan_requestPlayerInfo");
+    void handlePlayerInfoReply(LobbyApiMsgT* msg) __asm__("LobbyMan_handlePlayerInfoReply");
+    void startQuickMatch(const void* data, int matchType) __asm__("LobbyMan_startQuickMatch");
+    void cancelQuickMatch() __asm__("LobbyMan_cancelQuickMatch");
+    void* getRoomNameAt() __asm__("LobbyMan_getRoomNameAt");
+    int isRoomLocked() __asm__("LobbyMan_isRoomLocked");
+    int getNumUsers() __asm__("LobbyMan_getNumUsers");
+    char* getUserName(int idx, int* outFlag) __asm__("LobbyMan_getUserName");
+    int getUserFlag() __asm__("LobbyMan_getUserFlag");
+    unsigned int getNumRankRows() __asm__("LobbyMan_getNumRankRows");
+    void* getRankRow(int rowIndex, int* outA, int* outB) __asm__("LobbyMan_getRankRow");
+    bool isInRoom() __asm__("LobbyMan_isInRoom");
+    void challengeUser(int idx, int matchType) __asm__("LobbyMan_challengeUser");
+    void challengePlayer(const char* name, int matchType) __asm__("LobbyMan_challengePlayer");
+    void cancelChallenge(int notify, int flag) __asm__("LobbyMan_cancelChallenge");
+    void leaveGame(int type) __asm__("LobbyMan_leaveGame");
+    void clearChallenge() __asm__("LobbyMan_clearChallenge");
+    void sendHostChallenge(const char* name) __asm__("LobbyMan_sendHostChallenge");
+    void sendGuestChallenge(const char* name) __asm__("LobbyMan_sendGuestChallenge");
+    void lockChallenge(int recipient, int matchType) __asm__("LobbyMan_lockChallenge");
+    void* sendPrivateMessage(int recipient, void* text) __asm__("LobbyMan_sendPrivateMessage");
+    void* sendDecline(int playerName) __asm__("LobbyMan_sendDecline__FPvi");
+    void* sendAbortChallenge() __asm__("LobbyMan_sendAbortChallenge__FPv");
+    void sendLockChallenge(int playerName, int newState) __asm__("LobbyMan_sendLockChallenge");
+    void resetNewAccount() __asm__("LobbyMan_resetNewAccount");
 };
 
 CHECK_OFFSET(LobbyMan, mState, 0x000);

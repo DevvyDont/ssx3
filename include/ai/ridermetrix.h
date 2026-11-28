@@ -278,6 +278,11 @@ struct cRiderMetrix {
     int addHUDfx1(int type, int value, int data, float duration) __asm__("cRiderMetrix_addHUDfx1");
     float evSpin(float x) __asm__("cRiderMetrix_evSpin");
     float evAddCash(unsigned int kind, int amount) __asm__("cRiderMetrix_evAddCash");
+    void addTrick(tTrickNameDef* id, int repeat) __asm__("cRiderMetrix_addTrick");
+    int addToHistory(tTrickNameDef* id_) __asm__("cRiderMetrix_addToHistory");
+    bool buildTrickName(tTrickNameDef* vid, int stance, int alternate, int style, int flag)
+        __asm__("cRiderMetrix_buildTrickName");
+    int checkForMonsterTrick(tTrickNameDef* id) __asm__("cRiderMetrix_checkForMonsterTrick");
 };
 
 CHECK_OFFSET(cRiderMetrix, CurTrickPower, 0x014);

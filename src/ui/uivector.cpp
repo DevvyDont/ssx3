@@ -3442,9 +3442,8 @@ INCLUDE_ASM("ui/uivector", cUIState_handleEvent__FPv);
  *
  * @return always 0
  */
-int cUIState_handleEvent(void* vself)
+int cUIState::handleEvent(int, void*)
 {
-    cUIState* self = (cUIState*)vself;
     return 0;
 }
 #endif

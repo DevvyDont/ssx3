@@ -966,6 +966,8 @@ static inline void wakeAddE398(t4Vector& a, const t4Vector& b)
         : "memory");
 }
 
+extern "C" void cDynamicSprayFX_scatterEmitPosition(cDynamicSprayFX* self, t4Vector* out);
+
 /**
  * Scatters a spray emission position randomly around the board.
  *
@@ -976,17 +978,17 @@ static inline void wakeAddE398(t4Vector& a, const t4Vector& b)
  *
  * @param out  the position, changed in place
  */
-extern "C" void cDynamicSprayFX_scatterEmitPosition(cDynamicSprayFX* self, t4Vector* out)
+void cDynamicSprayFX::scatterEmitPosition(t4Vector* out)
 {
-    float bias = self->mLeanSide;
+    float bias = mLeanSide;
     float spread = (1.0f - wakeAbsE398(bias)) * 55.0f;
     float lo = -spread;
     t4Vector offset;
     t4Vector scaled;
-    wakeScaleE398(scaled, self->mBoardForward, bias * 55.0f + (lo + (spread - lo) * wakeRandE398()));
+    wakeScaleE398(scaled, mBoardForward, bias * 55.0f + (lo + (spread - lo) * wakeRandE398()));
     offset = scaled;
     wakeAddE398(*out, offset);
-    wakeScaleE398(scaled, self->mBoardSide, wakeRandE398() * 20.0f + -10.0f);
+    wakeScaleE398(scaled, mBoardSide, wakeRandE398() * 20.0f + -10.0f);
     offset = scaled;
     wakeAddE398(*out, offset);
 }
@@ -1784,27 +1786,27 @@ extern "C" void cDynamicSprayFX_selectEmittersForLOD(cDynamicSprayFX* self);
  * emitters for the rider's detail level (cDynamicSprayFX_selectEmittersForLOD). The cDynamicSprayFX constructor and cRiderHandler_resetRiderFX
  * (on cRiderHandler + 0xB40) call it.
  */
-extern "C" void cDynamicSprayFX_reset(cDynamicSprayFX* self)
+void cDynamicSprayFX::reset()
 {
     t4Vector white;
     white.x = 1.0f;
     white.y = 1.0f;
     white.z = 1.0f;
     white.w = 1.0f;
-    self->mBurstAlpha = 0.5f;
-    self->mPowderLevel = 0.0f;
-    self->mColour = white;
-    self->mLastSpeed = 0.0f;
-    self->mShedAmount = 0.0f;
-    self->mHeadPuffGlow = 0.0f;
-    self->mBoneIndiciesValid = 0;
-    self->mShedBone = 0;
-    self->mBurstStrength = 0.0f;
-    self->mLeanSide = 0.0f;
-    if (self->mIsPlayer != (self->mRider->mViewIndex >= 0)) {
-        cDynamicSprayFX_tuneBurstEmitters(self);
+    mBurstAlpha = 0.5f;
+    mPowderLevel = 0.0f;
+    mColour = white;
+    mLastSpeed = 0.0f;
+    mShedAmount = 0.0f;
+    mHeadPuffGlow = 0.0f;
+    mBoneIndiciesValid = 0;
+    mShedBone = 0;
+    mBurstStrength = 0.0f;
+    mLeanSide = 0.0f;
+    if (mIsPlayer != (mRider->mViewIndex >= 0)) {
+        tuneBurstEmitters();
     }
-    cDynamicSprayFX_selectEmittersForLOD(self);
+    selectEmittersForLOD();
 }
 #endif
 
@@ -1873,42 +1875,42 @@ extern "C" int cAnimModel_getBoneSkelIndex(void* self, int idx, const char* name
  * Entries 0-14 and 15-29 repeat the leg, hip and spine bones; entry 12 is "handright_b" between left-arm bones,
  * possibly a slip. cDynamicSprayFX_update calls it while mBoneIndiciesValid is 0.
  */
-extern "C" void cDynamicSprayFX_lookUpBones(cDynamicSprayFX* self)
+void cDynamicSprayFX::lookUpBones()
 {
-    self->mBoneIndicies[0] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_shinleft_b);
-    self->mBoneIndicies[1] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_footleft_b);
-    self->mBoneIndicies[2] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_shinright_b);
-    self->mBoneIndicies[3] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_footright_b);
-    self->mBoneIndicies[4] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_thighleft_b);
-    self->mBoneIndicies[5] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_thighright_b);
-    self->mBoneIndicies[6] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_hips_b);
-    self->mBoneIndicies[7] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_lowerspine);
-    self->mBoneIndicies[8] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_middlespine);
-    self->mBoneIndicies[9] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_upperspine);
-    self->mBoneIndicies[10] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_neck);
-    self->mBoneIndicies[11] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_clavicleleft);
-    self->mBoneIndicies[12] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_handright_b);
-    self->mBoneIndicies[13] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_bicepleft);
-    self->mBoneIndicies[14] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_biceptwistleft);
-    self->mBoneIndicies[15] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_shinleft_b);
-    self->mBoneIndicies[16] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_footleft_b);
-    self->mBoneIndicies[17] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_shinright_b);
-    self->mBoneIndicies[18] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_footright_b);
-    self->mBoneIndicies[19] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_thighleft_b);
-    self->mBoneIndicies[20] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_thighright_b);
-    self->mBoneIndicies[21] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_hips_b);
-    self->mBoneIndicies[22] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_lowerspine);
-    self->mBoneIndicies[23] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_middlespine);
-    self->mBoneIndicies[24] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_forearmleft_b);
-    self->mBoneIndicies[25] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_handleft_b);
-    self->mBoneIndicies[26] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_clavicleright);
-    self->mBoneIndicies[27] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_bicepright);
-    self->mBoneIndicies[28] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_biceptwistright);
-    self->mBoneIndicies[29] = cAnimModel_getBoneSkelIndex(self->mRider->mAnimModel, 0, str_forearmright_b);
+    mBoneIndicies[0] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_shinleft_b);
+    mBoneIndicies[1] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_footleft_b);
+    mBoneIndicies[2] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_shinright_b);
+    mBoneIndicies[3] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_footright_b);
+    mBoneIndicies[4] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_thighleft_b);
+    mBoneIndicies[5] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_thighright_b);
+    mBoneIndicies[6] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_hips_b);
+    mBoneIndicies[7] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_lowerspine);
+    mBoneIndicies[8] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_middlespine);
+    mBoneIndicies[9] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_upperspine);
+    mBoneIndicies[10] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_neck);
+    mBoneIndicies[11] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_clavicleleft);
+    mBoneIndicies[12] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_handright_b);
+    mBoneIndicies[13] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_bicepleft);
+    mBoneIndicies[14] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_biceptwistleft);
+    mBoneIndicies[15] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_shinleft_b);
+    mBoneIndicies[16] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_footleft_b);
+    mBoneIndicies[17] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_shinright_b);
+    mBoneIndicies[18] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_footright_b);
+    mBoneIndicies[19] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_thighleft_b);
+    mBoneIndicies[20] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_thighright_b);
+    mBoneIndicies[21] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_hips_b);
+    mBoneIndicies[22] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_lowerspine);
+    mBoneIndicies[23] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_middlespine);
+    mBoneIndicies[24] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_forearmleft_b);
+    mBoneIndicies[25] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_handleft_b);
+    mBoneIndicies[26] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_clavicleright);
+    mBoneIndicies[27] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_bicepright);
+    mBoneIndicies[28] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_biceptwistright);
+    mBoneIndicies[29] = cAnimModel_getBoneSkelIndex(mRider->mAnimModel, 0, str_forearmright_b);
     int i;
     for (i = 0; i < 30; i++) {
     }
-    self->mBoneIndiciesValid = 1;
+    mBoneIndiciesValid = 1;
 }
 #endif
 
@@ -2141,7 +2143,7 @@ extern "C" void cDynamicSprayFX_update(sWakeFxF920* self)
     }
     self->mLastSpeed = self->mSpeed;
     if (self->mLOD != self->obj->mLOD) {
-        cDynamicSprayFX_selectEmittersForLOD((cDynamicSprayFX*)self);
+        ((cDynamicSprayFX*)self)->selectEmittersForLOD();
     }
     char* sub2 = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
@@ -2422,7 +2424,7 @@ extern "C" void cDynamicSprayFX_updateBoardSpray(sWakeFx0EE8* self)
     if (self->mbSprayOn != 0 && wakeLimit0EE8() < self->mAbsSpeed && self->mpSurfData->ParticleSnowTrailActive != 0 &&
         flag == 0) {
         t4Vector pos = wakeAdd0EE8(self->pos, wakeScale0EE8(self->dir, 15.0f));
-        cDynamicSprayFX_scatterEmitPosition((cDynamicSprayFX*)self, &pos);
+        ((cDynamicSprayFX*)self)->scatterEmitPosition(&pos);
         char* sub = (char*)&VPTR_AT(self->obj, sizeof(cRiderState));
         sWakeVt0EE8* vt = *(sWakeVt0EE8**)sub;
         t4Vector* riderVel = vt[2].fn(sub + vt[2].delta);
@@ -3193,7 +3195,7 @@ extern "C" void cDynamicSprayFX_updatePowderTrail(sWakeFx1F70* self)
             wakeAdd0EE8(wakeScale0EE8(*riderVel, self->mSprayData[8].fD8),
                         wakeScale0EE8(self->dir, self->mSprayData[8].fDC)),
             wakeScale0EE8(wakeScale0EE8(self->dir, self->mSprayData[8].fE0), self->mAbsSpeed));
-        cDynamicSprayFX_scatterEmitPosition((cDynamicSprayFX*)self, &pos);
+        ((cDynamicSprayFX*)self)->scatterEmitPosition(&pos);
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, 0.01666666753590107f);
     } else {
         cDynamicColourEmitter_update(em, &self->pos, 0, 0, 0, 0.01666666753590107f);
@@ -3436,51 +3438,51 @@ INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_selectEmittersForLOD);
  * 9 off. Other levels: 5 on, 6 for a player, the rest off. cDynamicSprayFX_reset and cDynamicSprayFX_update (when mLOD
  * changes) call it.
  */
-extern "C" void cDynamicSprayFX_selectEmittersForLOD(cDynamicSprayFX* self)
+void cDynamicSprayFX::selectEmittersForLOD()
 {
-    int mode = self->mRider->mLOD;
-    self->mLOD = mode;
+    int mode = mRider->mLOD;
+    mLOD = mode;
     switch (mode) {
     case cRider::kLOD_Near:
-        self->mEmitters[5].m_enabled = 1;
-        self->mEmitters[6].m_enabled = 1;
-        self->mEmitters[0].m_enabled = 1;
+        mEmitters[5].m_enabled = 1;
+        mEmitters[6].m_enabled = 1;
+        mEmitters[0].m_enabled = 1;
         {
             int enabled = 0;
-            if (self->mIsPlayer != 0 || self->mRider->mIsInNIS != 0)
+            if (mIsPlayer != 0 || mRider->mIsInNIS != 0)
                 enabled = 1;
-            self->mEmitters[4].m_enabled = enabled;
+            mEmitters[4].m_enabled = enabled;
         }
-        self->mEmitters[1].m_enabled = self->mIsPlayer;
-        self->mEmitters[2].m_enabled = self->mIsPlayer;
-        self->mEmitters[3].m_enabled = self->mIsPlayer;
-        self->mEmitters[7].m_enabled = self->mIsPlayer;
-        self->mEmitters[8].m_enabled = self->mIsPlayer;
-        self->mEmitters[9].m_enabled = self->mIsPlayer;
+        mEmitters[1].m_enabled = mIsPlayer;
+        mEmitters[2].m_enabled = mIsPlayer;
+        mEmitters[3].m_enabled = mIsPlayer;
+        mEmitters[7].m_enabled = mIsPlayer;
+        mEmitters[8].m_enabled = mIsPlayer;
+        mEmitters[9].m_enabled = mIsPlayer;
         break;
     case cRider::kLOD_Mid:
-        self->mEmitters[5].m_enabled = 1;
-        self->mEmitters[6].m_enabled = 1;
-        self->mEmitters[0].m_enabled = 1;
-        self->mEmitters[1].m_enabled = self->mIsPlayer;
-        self->mEmitters[2].m_enabled = self->mIsPlayer;
-        self->mEmitters[3].m_enabled = self->mIsPlayer;
-        self->mEmitters[7].m_enabled = self->mIsPlayer;
-        self->mEmitters[8].m_enabled = self->mIsPlayer;
-        self->mEmitters[4].m_enabled = 0;
-        self->mEmitters[9].m_enabled = 0;
+        mEmitters[5].m_enabled = 1;
+        mEmitters[6].m_enabled = 1;
+        mEmitters[0].m_enabled = 1;
+        mEmitters[1].m_enabled = mIsPlayer;
+        mEmitters[2].m_enabled = mIsPlayer;
+        mEmitters[3].m_enabled = mIsPlayer;
+        mEmitters[7].m_enabled = mIsPlayer;
+        mEmitters[8].m_enabled = mIsPlayer;
+        mEmitters[4].m_enabled = 0;
+        mEmitters[9].m_enabled = 0;
         break;
     default:
-        self->mEmitters[5].m_enabled = 1;
-        self->mEmitters[6].m_enabled = self->mIsPlayer;
-        self->mEmitters[1].m_enabled = 0;
-        self->mEmitters[0].m_enabled = 0;
-        self->mEmitters[2].m_enabled = 0;
-        self->mEmitters[3].m_enabled = 0;
-        self->mEmitters[7].m_enabled = 0;
-        self->mEmitters[4].m_enabled = 0;
-        self->mEmitters[8].m_enabled = 0;
-        self->mEmitters[9].m_enabled = 0;
+        mEmitters[5].m_enabled = 1;
+        mEmitters[6].m_enabled = mIsPlayer;
+        mEmitters[1].m_enabled = 0;
+        mEmitters[0].m_enabled = 0;
+        mEmitters[2].m_enabled = 0;
+        mEmitters[3].m_enabled = 0;
+        mEmitters[7].m_enabled = 0;
+        mEmitters[4].m_enabled = 0;
+        mEmitters[8].m_enabled = 0;
+        mEmitters[9].m_enabled = 0;
         break;
     }
 }
@@ -3500,38 +3502,37 @@ struct sWakeVt26B8 { short delta; short index; void (*fn)(void*, void*, float); 
  * m_emitter.SeedX0. The
  * cDynamicSprayFX constructor and cDynamicSprayFX_reset call it.
  *
- * @param vself  the spray effect (cDynamicSprayFX, this)
  */
-extern "C" void cDynamicSprayFX_tuneBurstEmitters(cDynamicSprayFX* vself)
+void cDynamicSprayFX::tuneBurstEmitters()
 {
-    int on = vself->mRider->mViewIndex >= 0;
-    vself->mIsPlayer = on;
+    int on = mRider->mViewIndex >= 0;
+    mIsPlayer = on;
     if (on) {
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x498) = 55.0f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x4A0) = 25.0f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x554) = 170.0f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x580) = 30.0f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x588) = 20.0f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x63C) = 60.0f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x498) = 55.0f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x4A0) = 25.0f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x554) = 170.0f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x580) = 30.0f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x588) = 20.0f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x63C) = 60.0f;
     } else {
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x498) = 24.75f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x4A0) = 5.0f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x554) = 76.5f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x580) = 19.5f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x588) = 8.0f;
-        *(float*)(*(char**)(((char*)vself) + 0x2C) + 0x63C) = 39.0f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x498) = 24.75f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x4A0) = 5.0f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x554) = 76.5f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x580) = 19.5f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x588) = 8.0f;
+        *(float*)(*(char**)(((char*)this) + 0x2C) + 0x63C) = 39.0f;
     }
     {
-        cDynamicColourEmitter* emitters = vself->mEmitters;
+        cDynamicColourEmitter* emitters = mEmitters;
         cDynamicColourEmitter* emitter = &emitters[5];
         sWakeVt26B8* vt = (sWakeVt26B8*)emitters[5].mVtbl;
-        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)vself) + 0x2C) + 0x488, emitters[5].m_emitter.SeedX0);
+        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)this) + 0x2C) + 0x488, emitters[5].m_emitter.SeedX0);
     }
     {
-        cDynamicColourEmitter* emitters = vself->mEmitters;
+        cDynamicColourEmitter* emitters = mEmitters;
         cDynamicColourEmitter* emitter = &emitters[6];
         sWakeVt26B8* vt = (sWakeVt26B8*)emitters[6].mVtbl;
-        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)vself) + 0x2C) + 0x570, emitters[6].m_emitter.SeedX0);
+        vt[3].fn(vthis(emitter, vt[3]), *(char**)(((char*)this) + 0x2C) + 0x570, emitters[6].m_emitter.SeedX0);
     }
 }
 #endif

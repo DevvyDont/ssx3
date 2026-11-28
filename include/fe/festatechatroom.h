@@ -38,6 +38,9 @@ struct cUIThing;
 struct cUIMenu;
 struct cUITextScroll;
 
+struct cFEStateNetHelpPopup;
+struct cUIState;
+
 struct cFEStateChatRoom : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateChatRoom_vtbl (vtables.tsv; 32 slots), stored by cFEStateChatRoom_cFEStateChatRoom /
@@ -101,6 +104,19 @@ struct cFEStateChatRoom : public cFEStateNet {
         __asm__("cFEStateChatRoom_onWidgetMenu");
     virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateChatRoom_onPopupEvent");
     virtual void onMenuGainFocus(cUIGroup*) __asm__("cFEStateChatRoom_onMenuGainFocus__FPv");
+    void refreshPlayerList(int reselect) __asm__("cFEStateChatRoom_refreshPlayerList");
+    void showSelectedPlayer(int idx) __asm__("cFEStateChatRoom_showSelectedPlayer");
+    void addChatLine(void* infov) __asm__("cFEStateChatRoom_addChatLine");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateChatRoom_fillHelpPopup");
+    void handleKeyboardText() __asm__("cFEStateChatRoom_handleKeyboardText");
+    void onUserActionsPopupEvent(cUIState* popup, int kind) __asm__("cFEStateChatRoom_onUserActionsPopupEvent");
+    void onChallengeSetupPopupEvent(cUIState* popup, int event) __asm__("cFEStateChatRoom_onChallengeSetupPopupEvent");
+    void onChallengeReceivedPopupEvent(cUIState* popup, int event)
+        __asm__("cFEStateChatRoom_onChallengeReceivedPopupEvent");
+    void selectPlayerByName(void* name) __asm__("cFEStateChatRoom_selectPlayerByName");
+    void* onNetEvent(int msgId, void* data) __asm__("cFEStateChatRoom_onNetEvent");
+    void updateQualityIcons() __asm__("cFEStateChatRoom_updateQualityIcons");
+    void highlightRow(int idx, int on) __asm__("cFEStateChatRoom_highlightRow");
 };
 
 CHECK_OFFSET(cFEStateChatRoom, mpQualityIcon, 0x6D0);

@@ -1022,7 +1022,7 @@ struct sName5_6CF8 { char c[5]; };
  *
  * @param player  the player slot (0 or 1)
  */
-extern "C" void cGameLoadState_showPlayerStats(cGameLoadState* self, char player)
+void cGameLoadState::showPlayerStats(char player)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
@@ -1083,9 +1083,9 @@ extern "C" void cGameLoadState_showPlayerStats(cGameLoadState* self, char player
         char* fmt = str_pct_d_g_6CF8;
         void* obj;
         if (player == 0) {
-            obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ranking00));
+            obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ranking00));
         } else {
-            obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ranking01));
+            obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ranking01));
         }
         sprintf(buf, fmt, rank);
         if (obj != 0) {
@@ -1093,10 +1093,10 @@ extern "C" void cGameLoadState_showPlayerStats(cGameLoadState* self, char player
         }
         for (int i = 0; i < 7; i++) {
             statName.c[2] = i + '0';
-            char* label = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(statName.c));
+            char* label = (char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(statName.c));
             barName.c[0] = player + '0';
             barName.c[1] = i + '0';
-            char* bar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(barName.c));
+            char* bar = (char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(barName.c));
             if (label != 0 && bar != 0) {
                 int statValue = stats[i];
                 int level = statValue / 5;
@@ -1110,8 +1110,8 @@ extern "C" void cGameLoadState_showPlayerStats(cGameLoadState* self, char player
                 cUIProgress_setValue(bar, statValue);
             }
         }
-        cUIIcon* pic = (cUIIcon*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(picName.c));
-        cGameLoadScreen* loadScreen = self->mpParentModule;
+        cUIIcon* pic = (cUIIcon*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(picName.c));
+        cGameLoadScreen* loadScreen = mpParentModule;
         if (loadScreen != 0 && ((char*)pic) != 0) {
             int portraitTexture = loadScreen->mTexID[player];
             if (portraitTexture != 0) {

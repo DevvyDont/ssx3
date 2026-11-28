@@ -6589,11 +6589,11 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getSmoothedHeading);
 /**
  * Returns the rider's mSmoothedHeading (+0x5B4).
  *
- * @param rider  the cRider
  * @return mSmoothedHeading
  */
-extern "C" float cRider_getSmoothedHeading(cRider* rider) {
-    return (rider->mSmoothedHeading);
+float cRider::getSmoothedHeading()
+{
+    return (mSmoothedHeading);
 }
 #endif
 //100%
@@ -8207,9 +8207,9 @@ extern "C" void FocusQuery_addcell(void* a, nash_Cell* node, int leaf);
  * @param node  the cell node (eight child pointers)
  * @param key  the cell's level and coordinates
  */
-extern "C" void FocusCallback_operatorCall(FocusCallback* self, nash_Cell* node, nash_CellKey* key)
+void FocusCallback::operatorCall(nash_Cell* node, nash_CellKey* key)
 {
-    int n = self->numboxes;
+    int n = numboxes;
     int i = 0;
     int ok;
     do {
@@ -8220,7 +8220,7 @@ extern "C" void FocusCallback_operatorCall(FocusCallback* self, nash_Cell* node,
         scaleBits.i = (key->level + 0x7F) << 23;
         float cellSize = scaleBits.f;
         // PORT: pointer arithmetic through int
-        tBoundBox* box = (tBoundBox*)((i << 5) + (int)((tBoundBox*)self->boxes));
+        tBoundBox* box = (tBoundBox*)((i << 5) + (int)((tBoundBox*)boxes));
         ok = 0;
         if (((float)key->x - 0.2f) * cellSize <= box->MaxPoint.x && ((float)key->y - 0.2f) * cellSize <= box->MaxPoint.y && ((float)key->z - 0.2f) * cellSize <= box->MaxPoint.z
             && box->MinPoint.x <= ((float)(key->x + 1) + 0.2f) * cellSize && box->MinPoint.y <= ((float)(key->y + 1) + 0.2f) * cellSize && box->MinPoint.z <= ((float)(key->z + 1) + 0.2f) * cellSize) {
@@ -8229,7 +8229,7 @@ extern "C" void FocusCallback_operatorCall(FocusCallback* self, nash_Cell* node,
         i++;
     } while (!ok);
     int leaf = key->level < 14;
-    FocusQuery_addcell(((void*)self->query), node, leaf);
+    FocusQuery_addcell(((void*)query), node, leaf);
     if (leaf) {
         return;
     }
@@ -8241,21 +8241,21 @@ extern "C" void FocusCallback_operatorCall(FocusCallback* self, nash_Cell* node,
     k.x = key->x * 2;
     k.y = key->y * 2;
     k.z = key->z * 2;
-    if (((nash_Cell**)&node->children[0][0][0])[0]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[0], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[0]) operatorCall(((nash_Cell**)&node->children[0][0][0])[0], &k);
     k.x++;
-    if (((nash_Cell**)&node->children[0][0][0])[4]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[4], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[4]) operatorCall(((nash_Cell**)&node->children[0][0][0])[4], &k);
     k.y++;
-    if (((nash_Cell**)&node->children[0][0][0])[6]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[6], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[6]) operatorCall(((nash_Cell**)&node->children[0][0][0])[6], &k);
     k.x--;
-    if (((nash_Cell**)&node->children[0][0][0])[2]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[2], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[2]) operatorCall(((nash_Cell**)&node->children[0][0][0])[2], &k);
     k.z++;
-    if (((nash_Cell**)&node->children[0][0][0])[3]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[3], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[3]) operatorCall(((nash_Cell**)&node->children[0][0][0])[3], &k);
     k.x++;
-    if (((nash_Cell**)&node->children[0][0][0])[7]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[7], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[7]) operatorCall(((nash_Cell**)&node->children[0][0][0])[7], &k);
     k.y--;
-    if (((nash_Cell**)&node->children[0][0][0])[5]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[5], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[5]) operatorCall(((nash_Cell**)&node->children[0][0][0])[5], &k);
     k.x--;
-    if (((nash_Cell**)&node->children[0][0][0])[1]) FocusCallback_operatorCall(self, ((nash_Cell**)&node->children[0][0][0])[1], &k);
+    if (((nash_Cell**)&node->children[0][0][0])[1]) operatorCall(((nash_Cell**)&node->children[0][0][0])[1], &k);
 }
 #endif
 

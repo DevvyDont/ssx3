@@ -154,6 +154,35 @@ struct cPopupInfo {
     int getUseCenterAlignedText() __asm__("cPopupInfo_getUseCenterAlignedText");
     void setDeferEventsFlag(int deferEvents) __asm__("cPopupInfo_setDeferEventsFlag");
     int getDeferEventsFlag() __asm__("cPopupInfo_getDeferEventsFlag");
+    void setPopupOptionNames(int index, int value) __asm__("cPopupInfo_setPopupOptionNames__FPvii");
+    void setPopupOptionNames1(int option, int unicodeName) __asm__("cPopupInfo_setPopupOptionNames1__FPvii");
+    void setPopupOptionNames2(int option, int nameId) __asm__("cPopupInfo_setPopupOptionNames2__FPvii");
+    void setPopupOptionNames3(int i, void* src) __asm__("cPopupInfo_setPopupOptionNames3");
+    void setPopupConfirmation(int i, const char* value, int extra) __asm__("cPopupInfo_setPopupConfirmation");
+    void setPopupConfirmation1(int index, const unsigned short* value, int extra)
+        __asm__("cPopupInfo_setPopupConfirmation1");
+    void setPopupConfirmation2(int index, int value, int extra) __asm__("cPopupInfo_setPopupConfirmation2");
+    void setPopupConfirmation3(int i, void* src) __asm__("cPopupInfo_setPopupConfirmation3");
+    void setPopupMessage(int message) __asm__("cPopupInfo_setPopupMessage");
+    void setPopupMessage1(int message) __asm__("cPopupInfo_setPopupMessage1");
+    void setPopupMessage2(int messageId) __asm__("cPopupInfo_setPopupMessage2");
+    void setPopupMessage3(tPopupElement* src) __asm__("cPopupInfo_setPopupMessage3");
+    void setPopupTitle(int title) __asm__("cPopupInfo_setPopupTitle");
+    void setPopupTitle1(int title) __asm__("cPopupInfo_setPopupTitle1");
+    void setPopupTitle2(int titleId) __asm__("cPopupInfo_setPopupTitle2");
+    void setPopupTitle3(tPopupElement* src) __asm__("cPopupInfo_setPopupTitle3");
+    void setPopupEntryBoxTitle(int entryBoxTitle) __asm__("cPopupInfo_setPopupEntryBoxTitle");
+    void setPopupEntryBoxTitle1(int entryBoxTitle) __asm__("cPopupInfo_setPopupEntryBoxTitle1");
+    void setPopupEntryBoxTitle2(int entryBoxTitleId) __asm__("cPopupInfo_setPopupEntryBoxTitle2");
+    void setPopupEntryBoxTitle3(tPopupElement* src) __asm__("cPopupInfo_setPopupEntryBoxTitle3");
+    void setPopupEntryBoxInitial(int entryBoxInitial) __asm__("cPopupInfo_setPopupEntryBoxInitial");
+    void setPopupEntryBoxInitial1(int entryBoxInitial) __asm__("cPopupInfo_setPopupEntryBoxInitial1");
+    void setPopupEntryBoxInitial2(int entryBoxInitialId) __asm__("cPopupInfo_setPopupEntryBoxInitial2");
+    void setPopupEntryBoxInitial3(tPopupElement* src) __asm__("cPopupInfo_setPopupEntryBoxInitial3");
+    void setPopupPostPending(int postPending) __asm__("cPopupInfo_setPopupPostPending");
+    void setPopupPostPending1(int postPending) __asm__("cPopupInfo_setPopupPostPending1");
+    void setPopupPostPending2(int postPendingId) __asm__("cPopupInfo_setPopupPostPending2");
+    void setPopupPostPending3(tPopupElement* src) __asm__("cPopupInfo_setPopupPostPending3");
 };
 
 CHECK_OFFSET(cPopupInfo, meType, 0x000);

@@ -311,12 +311,20 @@ CHECK_SIZE(VerticalLineProximityTest, 0x4);
 // query; [R] retail keeps the instances' code under nash_privy_QueryHelper_helpX* (camera/trigger
 // cameratriggerfactory) and calls them with the address of an empty helper as `this` (nash_privy_QueryHelper_help1 in
 // sound/icepick/worldtriggermanager). Flat stand-in for every instance: an empty struct (size 1 in g++).
+struct AudioOverlapCallback;
+struct PointProximityTest;
+
 struct nash_privy_QueryHelper {
 
     // Methods bound to their retail symbols by asm labels.
     void help(TerrainCallback* query, TerrainCallback* insideQuery, VerticalLineProximityTest* test, nash_Cell* node,
               nash_CellKey* cell)
         __asm__("nash_privy_QueryHelper_help");
+
+    // Methods bound to their retail symbols by asm labels.
+    void help1(AudioOverlapCallback* partial, AudioOverlapCallback* inside, PointProximityTest* pos, nash_Cell* node,
+               nash_CellKey* key)
+        __asm__("nash_privy_QueryHelper_help1");
 };
 
 CHECK_SIZE(nash_privy_QueryHelper, 0x1);

@@ -28,6 +28,8 @@
 
 struct cUIMenu;
 
+struct cFEStateNetHelpPopup;
+
 struct cFEStateStats : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateStats_vtbl (32 slots), stored by cFEStateStats_cFEStateStats / cFEStateStats_cFEStateStats1 after
@@ -66,6 +68,17 @@ struct cFEStateStats : public cFEStateNet {
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int index)
         __asm__("cFEStateStats_onWidgetMenu");
     virtual void onMenuGainFocus(cUIGroup*) __asm__("cFEStateStats_onMenuGainFocus__FPv");
+    void fillResultRows() __asm__("cFEStateStats_fillResultRows");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateStats_fillHelpPopup");
+    void placeScrollSlider(int pos, int count) __asm__("cFEStateStats_placeScrollSlider");
+    void showEventPickers(int on) __asm__("cFEStateStats_showEventPickers");
+    void fillEventList() __asm__("cFEStateStats_fillEventList");
+    void fillCourseList() __asm__("cFEStateStats_fillCourseList");
+    void requestResults(int slot) __asm__("cFEStateStats_requestResults");
+    void* onNetEvent(int msg) __asm__("cFEStateStats_onNetEvent");
+    void focusNextMenu() __asm__("cFEStateStats_focusNextMenu");
+    void focusPrevMenu() __asm__("cFEStateStats_focusPrevMenu");
+    void formatTime(char* buf, int frames) __asm__("cFEStateStats_formatTime");
 };
 
 CHECK_OFFSET(cFEStateStats, mpMenus, 0x6D0);

@@ -64,6 +64,10 @@
 
 struct cUIListBox;
 
+struct cBENewRaceInterface;
+struct cUIScreen;
+struct cUIText;
+
 struct cFEStateChallengePopup : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateChallengePopup_vtbl (33 slots), stored by cFEStateChallengePopup_cFEStateChallengePopup /
@@ -126,6 +130,14 @@ struct cFEStateChallengePopup : public cFEStateNet {
         __asm__("cFEStateChallengePopup_onWidgetMenu");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateChallengePopup_onWidgetEvent");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateChallengePopup_onWidgetCreate");
+    void applyRaceOptions() __asm__("cFEStateChallengePopup_applyRaceOptions");
+    void setOptionsLocked(int on) __asm__("cFEStateChallengePopup_setOptionsLocked");
+    void setOptionListBoxes(int all) __asm__("cFEStateChallengePopup_setOptionListBoxes");
+    void showListBoxArrows(cUIText* item, int on) __asm__("cFEStateChallengePopup_showListBoxArrows");
+    int onErrorPopupEvent(void* popup, int event) __asm__("cFEStateChallengePopup_onErrorPopupEvent");
+    void* onNetEvent(int msgId, void* data) __asm__("cFEStateChallengePopup_onNetEvent");
+    void clearChallengeSent() __asm__("cFEStateChallengePopup_clearChallengeSent");
+    void fillRaceTexts(cBENewRaceInterface* iface, cUIScreen* screen) __asm__("cFEStateChallengePopup_fillRaceTexts");
 };
 
 CHECK_OFFSET(cFEStateChallengePopup, mbChallengeSent, 0x6D0);
@@ -137,6 +149,8 @@ CHECK_OFFSET(cFEStateChallengePopup, mpLBPowerUps, 0x6E4);
 CHECK_OFFSET(cFEStateChallengePopup, mpLBMultipliers, 0x6E8);
 CHECK_OFFSET(cFEStateChallengePopup, mpLBPointIcons, 0x6EC);
 CHECK_SIZE(cFEStateChallengePopup, 0x6F0);
+
+struct cUIScreen;
 
 struct cFEStateChallengeReceivedPopup : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
@@ -186,6 +200,13 @@ struct cFEStateChallengeReceivedPopup : public cFEStateNet {
         __asm__("cFEStateChallengeReceivedPopup_onPopupEvent");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
         __asm__("cFEStateChallengeReceivedPopup_onWidgetMenu");
+    void publishPresence() __asm__("cFEStateChallengeReceivedPopup_publishPresence");
+    int onErrorPopupEvent(void* popup, int event) __asm__("cFEStateChallengeReceivedPopup_onErrorPopupEvent");
+    void* onNetEvent(int msgId, void* data) __asm__("cFEStateChallengeReceivedPopup_onNetEvent");
+    void fillRaceTexts(void* iface, cUIScreen* screen) __asm__("cFEStateChallengeReceivedPopup_fillRaceTexts");
+    void setAccepted() __asm__("cFEStateChallengeReceivedPopup_setAccepted");
+    void clearAccepted() __asm__("cFEStateChallengeReceivedPopup_clearAccepted");
+    void declineChallenge() __asm__("cFEStateChallengeReceivedPopup_declineChallenge");
 };
 
 CHECK_OFFSET(cFEStateChallengeReceivedPopup, mszChallenger, 0x6D0);

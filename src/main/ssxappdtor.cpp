@@ -3808,7 +3808,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameLoadStateConquer_onWidgetCreate__FPv);
  * Does nothing: the controller-layout loading state creates no widgets of its own. Slot +0x94 (onWidgetCreate) of
  * D_0047C7A8.
  */
-void cGameLoadStateConquer_onWidgetCreate(void* self)
+void cGameLoadStateConquer::onWidgetCreate(cUIThing*)
 {
 }
 #endif
@@ -3829,15 +3829,15 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  *
  * @return 0
  */
-extern "C" int cGameLoadStateConquer_onGainTransition(cGameLoadStateConquer* self)
+bool cGameLoadStateConquer::onGainTransition(int)
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
-    return 0;
+    return false;
 }
 #endif
 

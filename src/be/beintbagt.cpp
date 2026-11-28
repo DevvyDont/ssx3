@@ -136,7 +136,7 @@ extern char D_00530EC0_raw[] __asm__("D_00530EC0");
  * @param value  the variant index
  * @return 1
  */
-extern "C" int cBEBAGTInterface_setSuperUberVar(cBEBAGTInterface* self, int rider, int idx, int value)
+int cBEBAGTInterface::setSuperUberVar(int rider, int idx, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -177,7 +177,7 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
  * @param bit  the variant
  * @return 1
  */
-extern "C" int cBEBAGTInterface_clearUberForSale(cBEBAGTInterface* self, int rider, int idx, int bit)
+int cBEBAGTInterface::clearUberForSale(int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -254,7 +254,7 @@ extern sBagInfo_FF90 kGrabDB_FF90[] __asm__("kGrabDB");
  * @param count  receives the number of variants
  * @return the variant table
  */
-extern "C" int cBEBAGTInterface_getUberVariants(cBEBAGTInterface* self, int rider, int idx, int* count)
+int cBEBAGTInterface::getUberVariants(int rider, int idx, int* count)
 {
     int uberTable = kGrabDB_FF90[idx].value;
     unsigned short uberCount;
@@ -285,7 +285,7 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
  * @param bit  the variant
  * @return 1 if the bit is set, else 0
  */
-extern "C" int cBEBAGTInterface_isUberForSale(cBEBAGTInterface* self, int rider, int idx, int bit)
+int cBEBAGTInterface::isUberForSale(int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -313,7 +313,7 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
  * @param bit  the variant
  * @return 1 if the bit is set, else 0
  */
-extern "C" int cBEBAGTInterface_isUberOffered(cBEBAGTInterface* self, int rider, int idx, int bit)
+int cBEBAGTInterface::isUberOffered(int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);

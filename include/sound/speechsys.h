@@ -38,6 +38,8 @@ struct tSpeechRequest { // member names are ours, from use
     void (*callback)(int); // 0x1C [U] cSpeechSys_AddRequest stores it; cSpeechSys_ApplyRequest copies it to mCallback (0 clears mCallback / mCallbackInstance)
 };
 
+struct cMonitorInstance;
+
 struct cSpeechSys {
     cStreamSys* mpVStreamSys;           // 0x000 [R] g++ 2.95 virtual-base pointer to cStreamSys (= this + 0xC98 in a complete object; cSSXAudio + 0x7768); [U] methods reach cBankManager as **(this) and its cBankMonitor as **(this) + 0x1D8
     cSpeechInstance** mSpeechInstance;  // 0x004 [R] operator new[](2 x 4, "mSpeechInstance"), both 0; [U] cSpeechSys_CreateInstance
@@ -54,6 +56,30 @@ struct cSpeechSys {
     tSpeechRequest mRequest[10];        // 0x018 [R] ctor clears every used flag (cSpeechSys_ClearRequests); [U] cSpeechSys_AddRequest/cSpeechSys_ApplyRequest/cSpeechSys_RemoveRequest/cSpeechSys_AgeRequests
     char mBigFileName[5][0x14];         // 0x158 [R] ctor copies "audio/speech.big", "audio/english.big", "audio/french.big", "audio/german.big", "audio/spanish.big"; [U] retail accessor cSpeechSys_getBigFileName returns this + 0x158 + 20 * i
     void** mVtbl;                       // 0x1BC [R] cSpeechSys vptr: cSpeechSys_vtbl (cSpeechSys ctor/dtor), D_004836D8 in cSSXAudio; [U] cSpeechSys_ApplyVolumeCallback calls slot 3 through it
+
+    // Methods bound to their retail symbols by asm labels.
+    char* getBigFileName(int i) __asm__("cSpeechSys_getBigFileName");
+    void Update() __asm__("cSpeechSys_Update");
+    void Shutdown() __asm__("cSpeechSys_Shutdown");
+    int CanTakeSpeech(int i) __asm__("cSpeechSys_CanTakeSpeech");
+    void CreateInstance(int i, int streamId, int section, int memType, int loadLangHead, int reserved)
+        __asm__("cSpeechSys_CreateInstance");
+    void ReloadInstanceConfig(int i, int section) __asm__("cSpeechSys_ReloadInstanceConfig");
+    int PlayEvent(int playArgs) __asm__("cSpeechSys_PlayEvent");
+    void SetHoldTime(int i, int holdValue) __asm__("cSpeechSys_SetHoldTime");
+    void TriggerSpeech(int idx, int playArg, void (*callback)(int), int volumeArg, float floatArg)
+        __asm__("cSpeechSys_TriggerSpeech");
+    void FlushChannel(int idx) __asm__("cSpeechSys_FlushChannel");
+    void PurgeInstance(int i) __asm__("cSpeechSys_PurgeInstance");
+    int IsPlaying(int i) __asm__("cSpeechSys_IsPlaying");
+    int GetStreamId(int i) __asm__("cSpeechSys_GetStreamId");
+    void ReleaseHoldCallback() __asm__("cSpeechSys_ReleaseHoldCallback");
+    int ApplyVolumeCallback(cMonitorInstance* msg) __asm__("cSpeechSys_ApplyVolumeCallback");
+    int PollStreamCallback(cMonitorInstance* msg) __asm__("cSpeechSys_PollStreamCallback");
+    void ClearRequests() __asm__("cSpeechSys_ClearRequests");
+    void RemoveRequest(int idx, int key) __asm__("cSpeechSys_RemoveRequest");
+    void AgeRequests() __asm__("cSpeechSys_AgeRequests");
+    int StartNextSpeech(int channel) __asm__("cSpeechSys_StartNextSpeech__FPvi");
 };
 
 CHECK_OFFSET(tSpeechRequest, used, 0x00);

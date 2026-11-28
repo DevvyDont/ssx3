@@ -21,6 +21,16 @@ struct cVoipMan {
                                     //     cVoipMan_disconnect clears it; every other method tests it first
     int mVoiceOn;                   // 0x4 [R] ctor 0; [U] cVoipMan_turnVoiceOn sets 1 (func_003F6B20), cVoipMan_turnVoiceOff clears
                                     //     it (func_003F6B50), cVoipMan_toggleVoice toggles on it
+
+    // Methods bound to their retail symbols by asm labels.
+    void connect(void* peerAddr) __asm__("cVoipMan_connect");
+    void disconnect() __asm__("cVoipMan_disconnect");
+    void turnVoiceOn() __asm__("cVoipMan_turnVoiceOn");
+    void turnVoiceOff() __asm__("cVoipMan_turnVoiceOff");
+    void toggleVoice() __asm__("cVoipMan_toggleVoice");
+    void* getVoiceStatus() __asm__("cVoipMan_getVoiceStatus__FPv");
+    void setVoiceLevel(int level, int maxLevel) __asm__("cVoipMan_setVoiceLevel");
+    void getVoiceLevel(void* outLevel, void* outMax) __asm__("cVoipMan_getVoiceLevel");
 };
 
 CHECK_OFFSET(cVoipMan, mConnected, 0x0);

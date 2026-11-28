@@ -34,6 +34,9 @@
 
 struct cUIListBox;
 
+struct cFEStateNetHelpPopup;
+struct cUIState;
+
 struct cFEStateOnlineCharacterSelect : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateOnlineCharacterSelect_vtbl (vtables.tsv; 32 slots), stored by
@@ -80,6 +83,16 @@ struct cFEStateOnlineCharacterSelect : public cFEStateNet {
         __asm__("cFEStateOnlineCharacterSelect_onWidgetEvent");
     virtual void onUpdate() __asm__("cFEStateOnlineCharacterSelect_onUpdate__FPv");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateOnlineCharacterSelect_onWidgetCreate");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateOnlineCharacterSelect_fillHelpPopup");
+    void* onNetEvent(int eventType, void* eventData) __asm__("cFEStateOnlineCharacterSelect_onNetEvent");
+    void showOpponentRiderName(int player) __asm__("cFEStateOnlineCharacterSelect_showOpponentRiderName");
+    void showPlayerNamesAndRanks() __asm__("cFEStateOnlineCharacterSelect_showPlayerNamesAndRanks");
+    void moveFrameLayer(int up, int highlight) __asm__("cFEStateOnlineCharacterSelect_moveFrameLayer");
+    void showOnlyRiderStats(int sel, int flag) __asm__("cFEStateOnlineCharacterSelect_showOnlyRiderStats");
+    void setRiderStatsPanel(int index, int opponentSide, int show)
+        __asm__("cFEStateOnlineCharacterSelect_setRiderStatsPanel");
+    void onCancelChallengePopupEvent(cUIState* popup, int event)
+        __asm__("cFEStateOnlineCharacterSelect_onCancelChallengePopupEvent");
 };
 
 CHECK_OFFSET(cFEStateOnlineCharacterSelect, mpLBChallengerSelect, 0x6D0);

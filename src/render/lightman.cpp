@@ -1022,45 +1022,45 @@ extern char* D_004A5B84_F300 __asm__("D_004A5B84");
  *
  * @param mode  the layout, cPS2ScratchPad::eLayout
  */
-extern "C" void cPS2ScratchPad_setLayout(cPS2ScratchPad* self, int mode)
+void cPS2ScratchPad::setLayout(int mode)
 {
     // ORIGINAL-PTR: the EE scratchpad RAM (SPR) sits at the fixed address 0x70000000 (EE User's Manual); the buffers
     // are carved out of it from that base.
     int i;
-    if (self->unk_00 == mode) {
+    if (unk_00 == mode) {
         return;
     }
-    self->unk_00 = mode;
+    unk_00 = mode;
     switch (mode) {
-    case cPS2ScratchPad::kLayout_1x1024: self->mNumBlocks = 1; break;
-    case cPS2ScratchPad::kLayout_2x512: self->mNumBlocks = 2; break;
-    case cPS2ScratchPad::kLayout_2x448: self->mNumBlocks = 2; break;
-    case cPS2ScratchPad::kLayout_2x384: self->mNumBlocks = 2; break;
-    case cPS2ScratchPad::kLayout_2x256: self->mNumBlocks = 2; break;
+    case cPS2ScratchPad::kLayout_1x1024: mNumBlocks = 1; break;
+    case cPS2ScratchPad::kLayout_2x512: mNumBlocks = 2; break;
+    case cPS2ScratchPad::kLayout_2x448: mNumBlocks = 2; break;
+    case cPS2ScratchPad::kLayout_2x384: mNumBlocks = 2; break;
+    case cPS2ScratchPad::kLayout_2x256: mNumBlocks = 2; break;
     case cPS2ScratchPad::kLayout_3x320:
     case cPS2ScratchPad::kLayout_3x256:
-        self->mNumBlocks = 3;
+        mNumBlocks = 3;
         break;
     }
-    self->unk_08 = 0;
-    self->mDMABlock = 0;
+    unk_08 = 0;
+    mDMABlock = 0;
     switch (mode) {
-    case cPS2ScratchPad::kLayout_1x1024: self->mBlockSize = 0x400; break;
-    case cPS2ScratchPad::kLayout_2x512: self->mBlockSize = 0x200; break;
-    case cPS2ScratchPad::kLayout_2x448: self->mBlockSize = 0x1C0; break;
-    case cPS2ScratchPad::kLayout_2x384: self->mBlockSize = 0x180; break;
-    case cPS2ScratchPad::kLayout_3x320: self->mBlockSize = 320; break;
+    case cPS2ScratchPad::kLayout_1x1024: mBlockSize = 0x400; break;
+    case cPS2ScratchPad::kLayout_2x512: mBlockSize = 0x200; break;
+    case cPS2ScratchPad::kLayout_2x448: mBlockSize = 0x1C0; break;
+    case cPS2ScratchPad::kLayout_2x384: mBlockSize = 0x180; break;
+    case cPS2ScratchPad::kLayout_3x320: mBlockSize = 320; break;
     case cPS2ScratchPad::kLayout_2x256:
     case cPS2ScratchPad::kLayout_3x256:
-        self->mBlockSize = 0x100;
+        mBlockSize = 0x100;
         break;
     }
-    for (i = 0; i < self->mNumBlocks; i++) {
-        self->mBlockAddr[i] = (char*)0x70000000 + self->mBlockSize * i * 16;
-        ((int*)&self->mBlockMainAddr[0])[i] = 0;
-        self->unk_2C[i] = 0;
+    for (i = 0; i < mNumBlocks; i++) {
+        mBlockAddr[i] = (char*)0x70000000 + mBlockSize * i * 16;
+        ((int*)&mBlockMainAddr[0])[i] = 0;
+        unk_2C[i] = 0;
     }
-    int total = self->mBlockSize * self->mNumBlocks;
+    int total = mBlockSize * mNumBlocks;
     if (total < 0x400) {
         D_004A5B84_F300 = (char*)0x70000000 + total * 16;
     } else {
@@ -1098,9 +1098,9 @@ extern "C" void dma_waitFromScratchpadIdle(void);
  * @param flags  4: wait for the fromSPR channel first
  * @return the scratchpad address of the claimed buffer
  */
-extern "C" int cPS2ScratchPad_claimBuffer(void* self, unsigned int addr, int size, int flags)
+int cPS2ScratchPad::claimBuffer(unsigned int addr, int size, int flags)
 {
-    sLightRing* ring = (sLightRing*)self;
+    sLightRing* ring = (sLightRing*)this;
     if (flags & 4) {
         dma_waitFromScratchpadIdle();
     }
@@ -1133,9 +1133,9 @@ extern "C" void dma_copyToScratchpad(unsigned int madr, int sadr, int qwc, int f
  * @param flags  dma_copyToScratchpad's wait flags
  * @return the scratchpad address of the claimed buffer
  */
-extern "C" int cPS2ScratchPad_claimAndLoadBuffer(void* self, unsigned int addr, int size, int flags)
+int cPS2ScratchPad::claimAndLoadBuffer(unsigned int addr, int size, int flags)
 {
-    int slot = cPS2ScratchPad_claimBuffer(self, addr, size, 0);
+    int slot = cPS2ScratchPad_claimBuffer(this, addr, size, 0);
     dma_copyToScratchpad(addr, slot, size >> 4, flags);
     return slot;
 }
@@ -1154,9 +1154,9 @@ unsigned int cPS2ScratchPad_flushBuffer_f560(cPS2ScratchPad* self, int size, int
  * @param flags  cPS2ScratchPad_flushBuffer's wait flags
  * @return cPS2ScratchPad_flushBuffer's result: the main-memory address after the copied data
  */
-extern "C" unsigned int cPS2ScratchPad_flushCurrentBuffer(cPS2ScratchPad* self, int flags)
+unsigned int cPS2ScratchPad::flushCurrentBuffer(int flags)
 {
-    return cPS2ScratchPad_flushBuffer_f560(self, self->unk_2C[self->mDMABlock] << 4, flags);
+    return cPS2ScratchPad_flushBuffer_f560(this, unk_2C[mDMABlock] << 4, flags);
 }
 #endif
 
@@ -1183,23 +1183,23 @@ unsigned int cPS2ScratchPad_flushBuffer_impl(cPS2ScratchPad* self, int size, int
  * @param flags  dma_copyFromScratchpad's wait flags
  * @return the main-memory address just past the copied data
  */
-unsigned int cPS2ScratchPad_flushBuffer_impl(cPS2ScratchPad* self, int size, int flags)
+unsigned int cPS2ScratchPad::flushBuffer(int size, int flags)
 {
     if (size == 0) {
         if (flags & 6) {
             dma_waitFromScratchpadIdle();
         }
-        unsigned int retAddr = self->mBlockMainAddr[self->mDMABlock];
-        cPS2ScratchPad_advanceBuffer(self);
+        unsigned int retAddr = mBlockMainAddr[mDMABlock];
+        advanceBuffer();
         return retAddr;
     }
     size >>= 4;
     // PORT: EE sync (memory barrier before kicking the DMA)
     __asm__ __volatile__("sync");
-    dma_copyFromScratchpad((int)self->mBlockAddr[self->mDMABlock], self->mBlockMainAddr[self->mDMABlock], size, flags);
-    int cur = self->mDMABlock;
-    unsigned int retAddr = self->mBlockMainAddr[cur] + (size << 4);
-    self->mDMABlock = (cur + 1) % self->mNumBlocks;
+    dma_copyFromScratchpad((int)mBlockAddr[mDMABlock], mBlockMainAddr[mDMABlock], size, flags);
+    int cur = mDMABlock;
+    unsigned int retAddr = mBlockMainAddr[cur] + (size << 4);
+    mDMABlock = (cur + 1) % mNumBlocks;
     return retAddr;
 }
 #endif
@@ -1239,9 +1239,9 @@ INCLUDE_ASM("render/lightman", cPS2ScratchPad_advanceBuffer);
 /**
  * Advances the ring's current-buffer index: mDMABlock = (mDMABlock + 1) % mNumBlocks.
  */
-extern "C" void cPS2ScratchPad_advanceBuffer(cPS2ScratchPad* self)
+void cPS2ScratchPad::advanceBuffer()
 {
-    self->mDMABlock = (self->mDMABlock + 1) % self->mNumBlocks;
+    mDMABlock = (mDMABlock + 1) % mNumBlocks;
 }
 #endif
 
@@ -1811,9 +1811,9 @@ extern float cScreenTint_m_FillB;
  *
  * @param idx  the view index
  */
-extern "C" void cPS2GraphicsMan_copyScreenTint(cPS2GraphicsMan* self, int idx)
+void cPS2GraphicsMan::copyScreenTint(int idx)
 {
-    float* entry = self->unk_6CA4[idx];
+    float* entry = unk_6CA4[idx];
     entry[0] = cScreenTint_m_ColourR;
     entry[1] = cScreenTint_m_ColourG;
     entry[2] = cScreenTint_m_ColourB;
@@ -1848,23 +1848,23 @@ extern "C" void cTextureMan_appendFixedPacketRef(void* self, void* pkt);
  * @param pkt  passed to cTextureMan_appendFixedPacketRef
  * @param addr  in/out: the DMA ring's current main-memory address
  */
-extern "C" void cPS2GraphicsMan_queueScreenTintPass(cPS2GraphicsMan* self, int idx, void* pkt, int* addr)
+void cPS2GraphicsMan::queueScreenTintPass(int idx, void* pkt, int* addr)
 {
     if (cScreenTint_m_Enable == 0) {
         return;
     }
     if (cScreenTint_m_OverrideWP != 0) {
-        cPS2GraphicsMan_copyScreenTint(self, idx);
+        copyScreenTint(idx);
     }
-    float* tint = self->unk_6CA4[idx];
+    float* tint = unk_6CA4[idx];
     if (tint[0] == 1.0f && tint[1] == 1.0f && tint[2] == 1.0f && tint[3] == 0.0f && tint[4] == 0.0f && tint[5] == 0.0f) {
         return;
     }
     void* ring = D_004A4474;
     int mark = cPS2ScratchPad_claimBuffer(ring, *addr, -1, 0);
-    func_003905E8(self, idx, &mark);
+    func_003905E8(this, idx, &mark);
     *addr = cPS2ScratchPad_flushBufferTo_r(ring, mark, 4);
-    cTextureMan_appendFixedPacketRef(self->mTexMan, pkt);
+    cTextureMan_appendFixedPacketRef(mTexMan, pkt);
 }
 #endif
 

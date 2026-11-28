@@ -20,9 +20,17 @@
 // and tint each of the 10 vectors, cIrradiance_Clear zeroes it). The preview's SetIrradiance__15cPS2GraphicsManRC15
 // tIrradianceInfob takes the same 0xA0 block (cPS2GraphicsMan::mIrradianceInfo); whether tIrradianceInfo is a base
 // or another name of this class is not known. What each vector holds is not known yet.
+struct cIrradiance;
+struct tLightRecord;
+
 struct cIrradiance {
     t4Vector mVectors[10];          // 0x000 (name ours) [U] ten quadwords, scaled / tinted / added component-wise
                                     //        (x, y, z, w)
+
+    // Methods bound to their retail symbols by asm labels.
+    void addLightFromDirection(const float* normal, void* dst) __asm__("cIrradiance_addLightFromDirection");
+    void addScaledW(cIrradiance* src, float dt) __asm__("cIrradiance_addScaledW");
+    void addWorldLight(float* point, tLightRecord* forceSrc) __asm__("cIrradiance_addWorldLight");
 };
 
 CHECK_OFFSET(cIrradiance, mVectors, 0x000);

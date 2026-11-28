@@ -528,7 +528,7 @@ extern "C" void cFEStateNetMessenger__cFEStateNetMessenger(cFEStateNetMessenger*
     cUIState* child = self->mpParentState;
     sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cListNode, child);
     vt[32].fn(vthis(child, vt[32]));
-    cFEStateNetMessenger_clearNames(self);
+    self->clearNames();
     tFEStringPtrVector* feStringPtrVector = &(*(&self->mNames));
     Dealloc1A3EA0((void**)feStringPtrVector->mpStart, self->mNames.mpEndOfStorage - self->mNames.mpStart);
     cBXString__cBXString(((char*)&self->mszShownName), 2);
@@ -562,8 +562,8 @@ void cFEStateNetMessenger::onCreateScreen()
     mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        cFEStateNetMessenger_rebuildNameList(this);
-        cFEStateNetMessenger_redrawList(this);
+        this->rebuildNameList();
+        this->redrawList();
     }
 }
 #endif
@@ -589,7 +589,7 @@ void cFEStateNetMessenger::onUpdate()
         cFEStateNet_onUpdate((cFEStateNet*)this);
     } else {
         mLastRefreshFrame = now;
-        cFEStateNetMessenger_redrawList(this);
+        this->redrawList();
         cFEStateNet_onUpdate((cFEStateNet*)this);
     }
 }
@@ -623,7 +623,7 @@ extern char str_kT_POPUPCMNNextChallenge[];
  *
  * @param popup  the cFEStateNetHelpPopup to fill
  */
-extern "C" void cFEStateNetMessenger_fillHelpPopup(cFEStateNetMessenger* self, cFEStateNetHelpPopup* popup)
+void cFEStateNetMessenger::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 5);
     popup->muiScreenName = GetHashValue32(str_kT_BTNEAMessenger);
@@ -660,7 +660,7 @@ bool cFEStateNetMessenger::onInputBegin(cUIInput* obj)
     if (obj->isLShift1() == 0) {
         handled = 0;
     } else {
-        cFEStateNetMessenger_selectMenuItem(this, miSelectedIndex);
+        this->selectMenuItem(miSelectedIndex);
         handled = 1;
     }
     return handled;
@@ -734,7 +734,7 @@ int cFEStateNetMessenger::onWidgetMenu(cUIMenu* pMenu, unsigned int event, unsig
 {
     if (event == cUIMenu::kSCROLLUPDATE) {
         miScrollOffset = value;
-        cFEStateNetMessenger_redrawList(this);
+        this->redrawList();
         return 0;
     }
     return 257;
@@ -817,7 +817,7 @@ void cFEStateNetMessenger::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
         break;
     }
     case cUIState::kONMISC:
-        cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, 0, GetHashValue32(str_kT_231FindPlayer), str_empty_d, 0,
+        this->openKeyboardWithLabelID(0, GetHashValue32(str_kT_231FindPlayer), str_empty_d, 0,
                 cFEStateNetMessenger::kKeyboardFindUser, 0x10);
         mpKeyboard->mbReferEventsToParent = 1;
         mpKeyboard->mbDisableForFirst = 1;
@@ -922,7 +922,7 @@ static inline void* GetSession_001A4670()
  * @param idx  BuddyMan roster index
  * @return kBuddyFlagged, kBuddyOffline or kBuddyOnline as above
  */
-extern "C" int cFEStateNetMessenger_getBuddyStatus(cFEStateNetMessenger* self, int idx)
+int cFEStateNetMessenger::getBuddyStatus(int idx)
 {
     if (BuddyMan_isTempEntry(GetSession_001A4670(), idx) != 0) {
         return cFEStateNetMessenger::kBuddyFlagged;
@@ -943,9 +943,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_getNameIndexForRow);
  * @param row  visible row (0..14)
  * @return the list index
  */
-extern "C" int cFEStateNetMessenger_getNameIndexForRow(cFEStateNetMessenger* self, int row)
+int cFEStateNetMessenger::getNameIndexForRow(int row)
 {
-    return self->miScrollOffset + row;
+    return miScrollOffset + row;
 }
 #endif
 
@@ -981,15 +981,15 @@ static inline void* GetSession_001A4750()
  * mszEditString (+0x74). kKeyboardMessage (opened by cFEStateNet_openPlayerMessages): sends the text as a private message to the current
  * user (BuddyMan_sendMessage with cFEStateNet_getTargetUser's name). Other ids are ignored.
  */
-extern "C" void cFEStateNetMessenger_handleKeyboardText(cFEStateNetMessenger* self)
+void cFEStateNetMessenger::handleKeyboardText()
 {
-    cKeyboardPopup* keyboard = self->mpKeyboard;
+    cKeyboardPopup* keyboard = mpKeyboard;
     switch (keyboard->miMiscData) {
     case cFEStateNetMessenger::kKeyboardFindUser:
-        cFEStateNetMessenger_startFindUser(self, keyboard->mszEditString);
+        startFindUser(keyboard->mszEditString);
         break;
     case cFEStateNetMessenger::kKeyboardMessage:
-        BuddyMan_sendMessage(GetSession_001A4750(), cFEStateNet_getTargetUser(((cFEStateNet*)self)), self->mpKeyboard->mszEditString);
+        BuddyMan_sendMessage(GetSession_001A4750(), this->getTargetUser(), mpKeyboard->mszEditString);
         break;
     }
 }
@@ -1019,30 +1019,30 @@ extern char str_kT_POPUP231SubmittingFind[];
  *
  * @param text  the typed name (C string)
  */
-extern "C" void cFEStateNetMessenger_startFindUser(cFEStateNetMessenger* self, void* text)
+void cFEStateNetMessenger::startFindUser(void* text)
 {
     const char* name = (const char*)text;
     if (strlen(name) < 3) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         int three = 3;
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP220PersonaNameLength);
         popup->info.mtMessage.eType = three;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miLayerOffset = three;
         popup->info.miMiscData = 2054;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     } else {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 0;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP231SubmittingFind);
         popup->info.mtMessage.eType = 3;
         popup->info.miMiscData = 2055;
         popup->info.miLayerOffset = 3;
         popup->info.mbReceivePrev = 0;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
-        cBXString_operatorE1((char*)&self->mszSearchName, name);
+        this->showPopup(popup);
+        cBXString_operatorE1((char*)&mszSearchName, name);
         LobbyMan_findPlayer(LobbyMan_mLobbyMan, name);
     }
 }
@@ -1069,15 +1069,15 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup that sent the event
  * @param event  popup event (kONSCREENPOPUPOPTION0 + option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY closed)
  */
-extern "C" void cFEStateNetMessenger_onFoundUserPopupEvent(cFEStateNetMessenger* self, void* popup, int event)
+void cFEStateNetMessenger::onFoundUserPopupEvent(void* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
-        if (strcasecmp(((const char*)LobbyMan_mLobbyMan->mPersona), (const char*)self->mszFoundName) != 0) {
-            cFEStateNet_setTargetUser((cFEStateNet*)self, (const char*)self->mszFoundName);
-            cFEStateNet_openUserPopup((cFEStateNet*)self, cFEStateNet_getTargetUser(self), 0);
+        if (strcasecmp(((const char*)LobbyMan_mLobbyMan->mPersona), (const char*)mszFoundName) != 0) {
+            this->setTargetUser((const char*)mszFoundName);
+            this->openUserPopup(cFEStateNet_getTargetUser(this), 0);
         }
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -1106,39 +1106,39 @@ extern "C" void cFEStateNet_challengePlayer(cFEStateNet* self, const char* a1, v
  * @param popup  the popup that sent the event
  * @param kind  popup event
  */
-extern "C" void cFEStateNetMessenger_onUserActionsPopupEvent(cFEStateNetMessenger* self, void* popup, unsigned int kind)
+void cFEStateNetMessenger::onUserActionsPopupEvent(void* popup, unsigned int kind)
 {
     int buddyErr;
     int buddyErr2;
     switch (kind) {
     case cUIState::kONSCREENPOPUPOPTION0:
-        cFEStateNet_challengePlayer((cFEStateNet*)self, cFEStateNet_getTargetUser(self), popup, cUIState::kONSCREENPOPUPOPTION0, 1);
+        this->challengePlayer(cFEStateNet_getTargetUser(this), popup, cUIState::kONSCREENPOPUPOPTION0, 1);
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION1);
-        cFEStateNet_openPlayerMessages((cFEStateNet*)self, cFEStateNet_getTargetUser(self), popup, cUIState::kONSCREENPOPUPOPTION1);
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION1);
+        this->openPlayerMessages(cFEStateNet_getTargetUser(this), popup, cUIState::kONSCREENPOPUPOPTION1);
         break;
     case cUIState::kONSCREENPOPUPOPTION2:
-        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABE58(self, cFEStateNet_getTargetUser(self), &buddyErr);
+        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABE58(this, cFEStateNet_getTargetUser(this), &buddyErr);
         if (buddyErr == kBuddyRosterFull) {
-            cFEStateNet_showMaxBuddiesPopup(self);
+            cFEStateNet_showMaxBuddiesPopup(this);
         } else {
-            cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION2);
+            cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION2);
         }
-        cFEStateNetMessenger_rebuildNameList(self);
-        cFEStateNetMessenger_redrawList(self);
+        rebuildNameList();
+        redrawList();
         break;
     case cUIState::kONSCREENPOPUPOPTION3:
-        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABC50(self, cFEStateNet_getTargetUser(self), &buddyErr2);
+        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABC50(this, cFEStateNet_getTargetUser(this), &buddyErr2);
         if (buddyErr2 == kBuddyRosterFull) {
-            cFEStateNet_showMaxBuddiesPopup(self);
+            cFEStateNet_showMaxBuddiesPopup(this);
         } else {
-            cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION3);
+            cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION3);
         }
-        cFEStateNetMessenger_rebuildNameList(self);
+        rebuildNameList();
         break;
     default:
-        cFEStateNet_onPopupEvent(self, popup, kind);
+        cFEStateNet_onPopupEvent(this, popup, kind);
         break;
     }
 }
@@ -1167,37 +1167,37 @@ extern "C" void cFEStateNet_showMaxBuddiesPopup(void* self);
  * @param popup  the popup that sent the event
  * @param kind  popup event
  */
-extern "C" void cFEStateNetMessenger_onOfflineUserActionsPopupEvent(cFEStateNetMessenger* self, void* popup, unsigned int kind)
+void cFEStateNetMessenger::onOfflineUserActionsPopupEvent(void* popup, unsigned int kind)
 {
     int buddyErr;
     int buddyErr2;
     switch (kind) {
     case cUIState::kONSCREENPOPUPOPTION0:
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION0);
-        cFEStateNet_openPlayerMessages((cFEStateNet*)self, cFEStateNet_getTargetUser(self), popup, cUIState::kONSCREENPOPUPOPTION0);
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION0);
+        this->openPlayerMessages(cFEStateNet_getTargetUser(this), popup, cUIState::kONSCREENPOPUPOPTION0);
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
-        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABE58(self, cFEStateNet_getTargetUser(self), &buddyErr);
+        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABE58(this, cFEStateNet_getTargetUser(this), &buddyErr);
         if (buddyErr == kBuddyRosterFull) {
-            cFEStateNet_showMaxBuddiesPopup(self);
+            cFEStateNet_showMaxBuddiesPopup(this);
         } else {
-            cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION1);
+            cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION1);
         }
-        cFEStateNetMessenger_rebuildNameList(self);
-        cFEStateNetMessenger_redrawList(self);
+        rebuildNameList();
+        redrawList();
         break;
     case cUIState::kONSCREENPOPUPOPTION2:
-        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABC50(self, cFEStateNet_getTargetUser(self), &buddyErr2);
+        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABC50(this, cFEStateNet_getTargetUser(this), &buddyErr2);
         if (buddyErr2 == kBuddyRosterFull) {
-            cFEStateNet_showMaxBuddiesPopup(self);
+            cFEStateNet_showMaxBuddiesPopup(this);
         } else {
-            cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION2);
+            cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION2);
         }
-        cFEStateNetMessenger_rebuildNameList(self);
-        cFEStateNetMessenger_redrawList(self);
+        rebuildNameList();
+        redrawList();
         break;
     default:
-        cFEStateNet_onPopupEvent(self, popup, kind);
+        cFEStateNet_onPopupEvent(this, popup, kind);
         break;
     }
 }
@@ -1266,20 +1266,20 @@ extern char str_kT_POPUP279UserFound[];
  *
  * @param src  the find-player event
  */
-extern "C" void cFEStateNetMessenger_showUserFoundPopup(cFEStateNetMessenger* self, online_FindPlayerEvent* src)
+void cFEStateNetMessenger::showUserFoundPopup(online_FindPlayerEvent* src)
 {
-    cBXString_operatorE((char*)&self->mszFoundName, &src->mName);
-    self->mbFoundOnline = src->mOnline;
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cBXString_operatorE((char*)&mszFoundName, &src->mName);
+    mbFoundOnline = src->mOnline;
+    cScreenPopup* popup = (cScreenPopup*)this->createPopup();
     int three = 3;
     cPopupInfo* sub = &popup->info;
     popup->info.meType = 1;
     popup->info.mtTitle.ui = GetHashValue32(str_kT_POPUP279UserFound);
     popup->info.mtTitle.eType = three;
-    cPopupInfo_setPopupOptionNames(sub, 0, (int)self->mszFoundName);
+    sub->setPopupOptionNames(0, (int)mszFoundName);
     popup->info.miLayerOffset = three;
     popup->info.miMiscData = 2057;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    this->showPopup(popup);
 }
 #endif
 
@@ -1299,16 +1299,16 @@ extern char str_kT_BTNOK[];
  * Called by the messenger's message handler cFEStateNetMessenger_onNetEvent on event 270. The text goes in the popup's title slot
  * (mtTitle), not the message.
  */
-extern "C" void cFEStateNetMessenger_showLookingForSelfPopup(cFEStateNetMessenger* self)
+void cFEStateNetMessenger::showLookingForSelfPopup()
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)this->createPopup();
     popup->info.meType = 1;
     popup->info.mtTitle.ui = GetHashValue32(str_kT_279LookingForSelf);
     popup->info.mtTitle.eType = 3;
-    cPopupInfo_setPopupOptionNames2(&popup->info, 0, GetHashValue32(str_kT_BTNOK));
+    popup->info.setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
     popup->info.miLayerOffset = 3;
     popup->info.miMiscData = 2056;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    this->showPopup(popup);
 }
 #endif
 
@@ -1338,17 +1338,17 @@ extern char str_kT_POPUP279UserNotFound[];
  *
  * @param msg  the error event (type 258)
  */
-extern "C" void cFEStateNetMessenger_showFindUserError(cFEStateNetMessenger* self, online_ErrorEvent* msg)
+void cFEStateNetMessenger::showFindUserError(online_ErrorEvent* msg)
 {
     switch (msg->mError) {
     case kLobbyErr_iper: {
-        char* buf = (char*)&self->mustrMessage;
+        char* buf = (char*)&mustrMessage;
         int one = 1;
         int three = 3;
         cFELocale* obj = SSXApp->FELocale;
         sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cUILocaleInterface, obj);
-        sprintf1(buf, vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUP279InvalidName)), self->mszSearchName);
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        sprintf1(buf, vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUP279InvalidName)), mszSearchName);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = one;
         cPopupInfo* sub = &popup->info;
         int textHash = GetHashValue32(str_kT_POPUP279UserNotFound);
@@ -1356,27 +1356,27 @@ extern "C" void cFEStateNetMessenger_showFindUserError(cFEStateNetMessenger* sel
         popup->info.mtMessage.eType = one;
         popup->info.mtTitle.eType = three;
         popup->info.mtTitle.ui = textHash;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miLayerOffset = three;
         popup->info.miMiscData = 2058;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         break;
     }
     case kLobbyErr_inam: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         int three = 3;
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP220PersonaNameLength);
         popup->info.mtMessage.eType = three;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miLayerOffset = three;
         popup->info.miMiscData = 2054;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         break;
     }
     default:
-        cFEStateNet_onNetEvent_msg(self, msg->mType, msg);
+        cFEStateNet_onNetEvent_msg(this, msg->mType, msg);
         break;
     }
 }
@@ -1398,16 +1398,16 @@ extern "C" void* cFEStateNet_onNetEvent_3(void* self, int a1, void* a2) __asm__(
  * @param msgId  event type
  * @param data  the event
  */
-extern "C" void cFEStateNetMessenger_handleErrorEvent(cFEStateNetMessenger* self, int msgId, void* data)
+void cFEStateNetMessenger::handleErrorEvent(int msgId, void* data)
 {
-    if (self->mAttrState & 6) {
-        if (self->mpPopup->miMiscData == 2055) {
-            cFEStateNetMessenger_showFindUserError(self, (online_ErrorEvent*)data);
+    if (mAttrState & 6) {
+        if (mpPopup->miMiscData == 2055) {
+            showFindUserError((online_ErrorEvent*)data);
         } else {
-            cFEStateNet_onNetEvent_3(((cFEStateNet*)self), msgId, data);
+            cFEStateNet_onNetEvent_3(((cFEStateNet*)this), msgId, data);
         }
     } else {
-        cFEStateNet_onNetEvent_3(((cFEStateNet*)self), msgId, data);
+        cFEStateNet_onNetEvent_3(((cFEStateNet*)this), msgId, data);
     }
 }
 #endif
@@ -1442,33 +1442,33 @@ extern "C" void cFEStateNetMessenger_handleErrorEvent(cFEStateNetMessenger* self
  * @param eventData  the event
  * @return 0, or cFEStateNet_onNetEvent's result for unhandled events
  */
-extern "C" void* cFEStateNetMessenger_onNetEvent(cFEStateNetMessenger* self, int eventType, void* eventData)
+void* cFEStateNetMessenger::onNetEvent(int eventType, void* eventData)
 {
     switch (eventType) {
     case 263:
-        cFEStateNetMessenger_rebuildNameList(self);
+        rebuildNameList();
     case 234: case 236: case 237: case 239: case 241: case kNetEvent_BuddyRosterUpdate:
     case 265: case kNetEvent_BuddyAdd: case kNetEvent_BuddyDelete: case 274: case 275:
-        if (self->mDisconnectPopupOpen != 0) {
+        if (mDisconnectPopupOpen != 0) {
             break;
         }
-        cFEStateNetMessenger_appendFlaggedNames(self);
-        cFEStateNetMessenger_selectPendingBuddy(self);
-        cFEStateNetMessenger_redrawList(self);
-        cFEStateNet_refreshUserPopup(((cFEStateNet*)self), cFEStateNet_getTargetUser(((cFEStateNet*)self)), 0);
+        appendFlaggedNames();
+        selectPendingBuddy();
+        redrawList();
+        this->refreshUserPopup(this->getTargetUser(), 0);
         break;
     case 270:
-        cFEStateNetMessenger_showLookingForSelfPopup(self);
+        showLookingForSelfPopup();
         break;
     case 227:
-        cFEStateNetMessenger_showUserFoundPopup(self, (online_FindPlayerEvent*)((void*)eventData));
+        showUserFoundPopup((online_FindPlayerEvent*)((void*)eventData));
         break;
     case kNetEvent_Error:
-        cFEStateNetMessenger_handleErrorEvent(self, eventType, eventData);
+        handleErrorEvent(eventType, eventData);
         break;
     default:
-        cFEStateNet_refreshUserPopup(((cFEStateNet*)self), cFEStateNet_getTargetUser(((cFEStateNet*)self)), 0);
-        return cFEStateNet_onNetEvent_3(((cFEStateNet*)self), eventType, eventData);
+        this->refreshUserPopup(this->getTargetUser(), 0);
+        return cFEStateNet_onNetEvent_3(((cFEStateNet*)this), eventType, eventData);
     }
     return 0;
 }
@@ -1494,14 +1494,14 @@ extern char str_ScrollButton[];
  * @param pos  selected index
  * @param count  number of entries
  */
-extern "C" void cFEStateNetMessenger_placeScrollThumb(cFEStateNetMessenger* self, int pos, int count)
+void cFEStateNetMessenger::placeScrollThumb(int pos, int count)
 {
-    if (self->mpScreen == 0) return;
+    if (mpScreen == 0) return;
     if (pos < 0) return;
     if (count < pos) return;
     if (count <= 0) return;
-    cUIThing* track = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ScrollVector));
-    cUIThing* thumb = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ScrollButton));
+    cUIThing* track = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ScrollVector));
+    cUIThing* thumb = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ScrollButton));
     if (thumb == 0) return;
     if (track == 0) return;
     t3Vector size;
@@ -1558,17 +1558,17 @@ static inline void* GetSession_001A52B0()
  * Takes the first BuddyMan challenger (BuddyMan_getChallenge(.., 0)) when there is one, otherwise the first private message
  * (BuddyMan_getMessage) when BuddyMan_getNumMessages counts any; looks the name up in mNames (cFEStateNetMessenger_findNameIndexByString). -1 when there is neither.
  */
-extern "C" void cFEStateNetMessenger_selectPendingBuddy(cFEStateNetMessenger* self)
+void cFEStateNetMessenger::selectPendingBuddy()
 {
     void* name;
     if ((Count1A52B0((BuddyMan*)GetSession_001A52B0()) != 0 && (name = BuddyMan_getChallenge(GetSession_001A52B0(), 0)) != 0)
         || (BuddyMan_getNumMessages(GetSession_001A52B0()) > 0 && (name = BuddyMan_getMessage(GetSession_001A52B0(), 0)) != 0)) {
         cBXString nameStr;
         cBXString_cBXString1(&nameStr, name);
-        self->miSelectedIndex = cFEStateNetMessenger_findNameIndexByString(self, &nameStr.Str);
+        miSelectedIndex = findNameIndexByString(&nameStr.Str);
         cBXString__cBXString(&nameStr, 2);
     } else {
-        self->miSelectedIndex = -1;
+        miSelectedIndex = -1;
     }
 }
 #endif
@@ -1587,21 +1587,21 @@ extern "C" void* func_0041610C(void* dst, void* src, int n);
  * Pops from the back until the vector is empty; the trailing func_0041610C move and size adjustment are no-ops left
  * over from an inlined erase(begin, end).
  */
-extern "C" void cFEStateNetMessenger_clearNames(cFEStateNetMessenger* self)
+void cFEStateNetMessenger::clearNames()
 {
     for (;;) {
-        if (self->mNames.mpStart == self->mNames.mpFinish) break;
-        cBXString* nameStr = self->mNames.mpFinish[-1];
-        self->mNames.mpFinish--;
+        if (mNames.mpStart == mNames.mpFinish) break;
+        cBXString* nameStr = mNames.mpFinish[-1];
+        mNames.mpFinish--;
         if (nameStr) {
             cBXString__cBXString(nameStr, 3);
         }
     }
-    cBXString** first = self->mNames.mpStart;
-    cBXString** last = self->mNames.mpFinish;
+    cBXString** first = mNames.mpStart;
+    cBXString** last = mNames.mpFinish;
     cBXString** finish = last;
     func_0041610C(first, last, (finish - last) * sizeof(cBXString*));
-    self->mNames.mpFinish -= last - first;
+    mNames.mpFinish -= last - first;
 }
 #endif
 
@@ -1663,15 +1663,15 @@ static inline void PushBack1A54D8(cFEStateNetMessenger* feStateNetMessenger, voi
  * Only once the roster is complete (BuddyMan mbRosterDone, +0xE8). New names are heap cBXStrings (cMemMan_alloc(4,
  * "cBXString")); cFEStateNetMessenger_hasName skips names already present.
  */
-extern "C" void cFEStateNetMessenger_appendFlaggedNames(cFEStateNetMessenger* self)
+void cFEStateNetMessenger::appendFlaggedNames()
 {
     if (GetSession_001A54D8()->mbRosterDone != 0) {
         int i;
         for (i = 0; i < BuddyMan_getNumRosterEntries(GetSession_001A54D8()); i++) {
             const char* name = BuddyMan_getRosterEntry(GetSession_001A54D8(), i);
-            if (name != 0 && BuddyMan_isTempEntryByName(GetSession_001A54D8(), name) != 0 && cFEStateNetMessenger_hasName(self, name) == 0) {
+            if (name != 0 && BuddyMan_isTempEntryByName(GetSession_001A54D8(), name) != 0 && hasName(name) == 0) {
                 void* nameStr = cBXString_cBXString2(cMemMan_alloc(4, str_cBXString, 0x20000000, 0), name);
-                PushBack1A54D8(self, nameStr);
+                PushBack1A54D8(this, nameStr);
             }
         }
     }
@@ -1695,12 +1695,12 @@ static inline unsigned int Count1A56D0(cFEStateNetMessenger* feStateNetMessenger
  * @param name  the name to look for
  * @return true when found, else false
  */
-extern "C" bool cFEStateNetMessenger_hasName(cFEStateNetMessenger* self, const char* name)
+bool cFEStateNetMessenger::hasName(const char* name)
 {
     unsigned int i;
-    for (i = 0; i < Count1A56D0((self)); i++) {
+    for (i = 0; i < Count1A56D0((this)); i++) {
         // through a pointer to the entry: retail adds base first (mpStart[i]->Str puts the index first)
-        cBXString** entry = &self->mNames.mpStart[i];
+        cBXString** entry = &mNames.mpStart[i];
         if (strcasecmp((*entry)->Str, name) == 0) {
             return true;
         }
@@ -1724,12 +1724,12 @@ static inline unsigned int Count1A5768(cFEStateNetMessenger* feStateNetMessenger
  * @param name  the name to look for
  * @return the index, or -1 when absent
  */
-extern "C" int cFEStateNetMessenger_findNameIndex(cFEStateNetMessenger* self, const char* name)
+int cFEStateNetMessenger::findNameIndex(const char* name)
 {
     unsigned int i;
-    for (i = 0; i < Count1A5768((self)); i++) {
+    for (i = 0; i < Count1A5768((this)); i++) {
         // through a pointer to the entry: retail adds base first (mpStart[i]->Str puts the index first)
-        cBXString** entry = &self->mNames.mpStart[i];
+        cBXString** entry = &mNames.mpStart[i];
         if (strcasecmp((*entry)->Str, name) == 0) {
             return i;
         }
@@ -1757,12 +1757,12 @@ static inline unsigned int Count1A5800(cFEStateNetMessenger* feStateNetMessenger
  * @param name  the cBXString to look for
  * @return the index, or -1 when absent
  */
-extern "C" int cFEStateNetMessenger_findNameIndexByString(cFEStateNetMessenger* self, char** name)
+int cFEStateNetMessenger::findNameIndexByString(char** name)
 {
     unsigned int i;
-    for (i = 0; i < Count1A5800((self)); i++) {
+    for (i = 0; i < Count1A5800((this)); i++) {
         // through a pointer to the entry: retail adds base first (mpStart[i]->Str puts the index first)
-        cBXString** entry = &self->mNames.mpStart[i];
+        cBXString** entry = &mNames.mpStart[i];
         if (strcasecmp((*entry)->Str, *name) == 0) {
             return i;
         }
@@ -1845,15 +1845,14 @@ static inline void PushBack1A5898(cFEStateNetMessenger* feStateNetMessenger, voi
  * rest with byte +0xA7 zero. Finally resizes "playerMenu" (cUIMenu_setScrollableMenu) when its item count (+0x96)
  * differs. Returns early when the roster is empty.
  *
- * @param vself  the messenger state (this)
  */
-extern "C" void cFEStateNetMessenger_rebuildNameList(cFEStateNetMessenger* vself)
+void cFEStateNetMessenger::rebuildNameList()
 {
-    cFEStateNetMessenger* self = vself;
+    cFEStateNetMessenger* self = this;
     if (((BuddyMan*)GetSession_001A5898())->mbRosterDone == 0) {
         return;
     }
-    cFEStateNetMessenger_clearNames(self);
+    self->clearNames();
     int count = BuddyMan_getNumRosterEntries(GetSession_001A5898());
     if (count == 0) {
         return;
@@ -1916,17 +1915,17 @@ extern "C" void cFEStateNetMessenger_colourRow(cFEStateNetMessenger* self, unsig
  *
  * @param sel  selected visible row, or -1 for none
  */
-extern "C" void cFEStateNetMessenger_showRowSelectIcon(cFEStateNetMessenger* self, int sel)
+void cFEStateNetMessenger::showRowSelectIcon(int sel)
 {
     char buf[32];
     int i;
     for (i = 0; i < 15; i++) {
         sprintf(buf, str_ps2Xpct_02d, i);
-        cUIText* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIText* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (((void*)obj) != 0) {
             obj->setVisible(i == sel);
         }
-        cFEStateNetMessenger_colourRow(self, sel, i == sel);
+        colourRow(sel, i == sel);
     }
 }
 #endif
@@ -1980,17 +1979,17 @@ static inline BuddyMan* GetSession_001A6070()
  * @param idx  index into mNames
  * @return true when a buddy was shown, false otherwise
  */
-extern "C" bool cFEStateNetMessenger_showBuddyDetails(cFEStateNetMessenger* self, int idx)
+bool cFEStateNetMessenger::showBuddyDetails(int idx)
 {
-    if (self->mpScreen == 0) {
+    if (mpScreen == 0) {
         return false;
     }
-    cUIText* name = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextBuddyName));
-    cUIText* status = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextBuddyLocation));
+    cUIText* name = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextBuddyName));
+    cUIText* status = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextBuddyLocation));
     if (status == 0 || name == 0) {
         return false;
     }
-    int n = self->mNames.mpFinish - self->mNames.mpStart;
+    int n = mNames.mpFinish - mNames.mpStart;
     if (n == 0) {
         cUIText_setAsciiString(name, str_sp);
         if (GetSession_001A6070()->mbRosterDone != 0) {
@@ -2005,19 +2004,19 @@ extern "C" bool cFEStateNetMessenger_showBuddyDetails(cFEStateNetMessenger* self
         return false;
     }
     // through a pointer to the entry: retail adds base first (mpStart[idx] puts the index first)
-    cBXString** entry = &self->mNames.mpStart[idx];
+    cBXString** entry = &mNames.mpStart[idx];
     cBXString* buddyName = *entry;
     int id = BuddyMan_findRosterEntryNoCase(GetSession_001A6070(), buddyName);
     const char* str = BuddyMan_getRosterEntry(GetSession_001A6070(), id);
     if (str == 0) {
         return false;
     }
-    cBXString_operatorE1(&self->mszShownName, str);
+    cBXString_operatorE1(&mszShownName, str);
     cUIText_setAsciiString(name, str);
     name->setVisible(1);
     status->setVisible(1);
     if (func_00263338(GetSession_001A6070(), id) != 0) {
-        cFEStateNet_showBuddyPresence((cFEStateNet*)self, str, BuddyMan_isInSameGame(GetSession_001A6070(), id));
+        this->showBuddyPresence(str, BuddyMan_isInSameGame(GetSession_001A6070(), id));
     } else {
         cUIText_setUnicodeStringByID(status, GetHashValue32(str_kT_279PresenceOffline));
     }
@@ -2045,21 +2044,21 @@ extern char str_IconChallengepct_02d[];
  * @param index  visible row
  * @param state  icon to show
  */
-extern "C" void cFEStateNetMessenger_setRowStatusIcon(cFEStateNetMessenger* self, unsigned int index, int state)
+void cFEStateNetMessenger::setRowStatusIcon(unsigned int index, int state)
 {
     char name[32];
-    if (self->mpScreen == 0) {
+    if (mpScreen == 0) {
         return;
     }
     if (index >= 15) {
         return;
     }
     sprintf(name, str_IconMessagepct_02d, index);
-    cUIThing* messageIcon = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+    cUIThing* messageIcon = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
     sprintf(name, str_IconBlockedpct_02d, index);
-    cUIThing* blockedIcon = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+    cUIThing* blockedIcon = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
     sprintf(name, str_IconChallengepct_02d, index);
-    cUIThing* challengeIcon = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+    cUIThing* challengeIcon = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
     switch (state) {
     case cFEStateNetMessenger::kRowIconBlocked:
         if (messageIcon) messageIcon->setVisible(0);
@@ -2104,12 +2103,12 @@ extern char str_personapct_02d[];
  * @param str  the name to show
  * @param rosterIndex  roster index, or -1 for an empty row
  */
-extern "C" void cFEStateNetMessenger_setRowName(cFEStateNetMessenger* self, unsigned int index, const char* str, int rosterIndex)
+void cFEStateNetMessenger::setRowName(unsigned int index, const char* str, int rosterIndex)
 {
     char buf[32];
-    if (self->mpScreen != 0 && index < 0xF) {
+    if (mpScreen != 0 && index < 0xF) {
         sprintf(buf, str_personapct_02d, index);
-        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (text != 0) {
             cUIText_setAsciiString(text, str);
             text->mMiscData = rosterIndex;
@@ -2182,29 +2181,29 @@ public:
  * @param index  visible row (0..14)
  * @param flag  non-zero for the highlighted row
  */
-extern "C" void cFEStateNetMessenger_colourRow(cFEStateNetMessenger* self, unsigned int index, int flag)
+void cFEStateNetMessenger::colourRow(unsigned int index, int flag)
 {
     char name[32];
-    if (self->mpScreen == 0 || index >= 15) {
+    if (mpScreen == 0 || index >= 15) {
         return;
     }
     sprintf(name, str_personapct_02d, index);
-    cFEVObj_001A66A8* persona = (cFEVObj_001A66A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+    cFEVObj_001A66A8* persona = (cFEVObj_001A66A8*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
     sprintf(name, str_overlaypct_02d, index);
-    cFEVObj_001A66A8* overlay = (cFEVObj_001A66A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
+    cFEVObj_001A66A8* overlay = (cFEVObj_001A66A8*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
     if (flag != 0) {
         overlay->setColour(sCol_001A66A8(1.0f, 0.6078431606292725f, 0.24313727021217346f, 0.0f));
         persona->setColour(sCol_001A66A8(1.0f, 1.0f, 1.0f, 1.0f));
         return;
     }
-    unsigned int idx = cFEStateNetMessenger_getNameIndexForRow(self, index);
-    if (idx >= (unsigned int)(self->mNames.mpFinish - self->mNames.mpStart)) {
+    unsigned int idx = getNameIndexForRow(index);
+    if (idx >= (unsigned int)(mNames.mpFinish - mNames.mpStart)) {
         overlay->setColour(sCol_001A66A8());
         return;
     }
     persona->setColour(sCol_001A66A8(1.0f));
-    switch (cFEStateNetMessenger_getBuddyStatus(self, BuddyMan_findRosterEntryNoCase(GetSession_001A66A8(),
-            *(cBXString**)((char*)self->mNames.mpStart + (idx << 2))))) {
+    switch (getBuddyStatus(BuddyMan_findRosterEntryNoCase(GetSession_001A66A8(),
+            *(cBXString**)((char*)mNames.mpStart + (idx << 2))))) {
     case cFEStateNetMessenger::kBuddyOnline:
         overlay->setColour(sCol_001A66A8(1.0f, 0.5372549295425415f, 0.7411764860153198f, 0.874509871006012f));
         break;
@@ -2270,16 +2269,15 @@ static inline unsigned int Size_001A6978(cFEStateNetMessenger* feStateNetMesseng
  * (at least 1 item), shows the selected buddy's details (cFEStateNetMessenger_showBuddyDetails) and icon (cFEStateNetMessenger_showRowSelectIcon, cFEStateNetMessenger_colourRow), then
  * blanks the rows after the filled ones.
  *
- * @param vself  the messenger state (this)
  */
-extern "C" void cFEStateNetMessenger_redrawList(cFEStateNetMessenger* vself)
+void cFEStateNetMessenger::redrawList()
 {
-    cFEStateNetMessenger* self = vself;
+    cFEStateNetMessenger* self = this;
     if (((void*)self->mpScreen) == 0) {
         return;
     }
-    cFEStateNetMessenger_removeStaleNames(self);
-    cFEStateNetMessenger_updatePendingHints((cFEStateNetMessenger*)self);
+    self->removeStaleNames();
+    self->updatePendingHints();
     unsigned int n = Size_001A6978(self);
     unsigned int first = ((unsigned int)self->miScrollOffset);
     if (n >= 16) {
@@ -2296,11 +2294,11 @@ extern "C" void cFEStateNetMessenger_redrawList(cFEStateNetMessenger* vself)
         cBXString* name = *entry;
         int idx = BuddyMan_findRosterEntryNoCase(GetSession_001A6978(), name);
         if (idx < 0) {
-            cFEStateNetMessenger_fillRow((cFEStateNetMessenger*)self, row, 0, -1);
+            self->fillRow(row, 0, -1);
         } else {
             count++;
-            cFEStateNetMessenger_fillRow((cFEStateNetMessenger*)self, row, BuddyMan_getRosterEntry(GetSession_001A6978(), idx), idx);
-            cFEStateNetMessenger_colourRow((cFEStateNetMessenger*)self, row, 0);
+            self->fillRow(row, BuddyMan_getRosterEntry(GetSession_001A6978(), idx), idx);
+            self->colourRow(row, 0);
         }
         row++;
         first++;
@@ -2313,16 +2311,16 @@ extern "C" void cFEStateNetMessenger_redrawList(cFEStateNetMessenger* vself)
                 cUIMenu_setScrollableMenu(menu, 1);
             }
         }
-        if (cFEStateNetMessenger_showBuddyDetails((cFEStateNetMessenger*)self, menu->mScrollItemCurrent) != 0 && Size_001A6978(self) != 0) {
-            cFEStateNetMessenger_showRowSelectIcon((cFEStateNetMessenger*)((cFEStateNet*)self), menu->mScrollItemCurrent - menu->mScrollItemOffset);
-            cFEStateNetMessenger_colourRow((cFEStateNetMessenger*)self, menu->mScrollItemCurrent - menu->mScrollItemOffset, 1);
+        if (self->showBuddyDetails(menu->mScrollItemCurrent) != 0 && Size_001A6978(self) != 0) {
+            self->showRowSelectIcon(menu->mScrollItemCurrent - menu->mScrollItemOffset);
+            self->colourRow(menu->mScrollItemCurrent - menu->mScrollItemOffset, 1);
         } else {
-            cFEStateNetMessenger_showRowSelectIcon((cFEStateNetMessenger*)((cFEStateNet*)self), -1);
+            self->showRowSelectIcon(-1);
         }
     }
     for (row = count; row < 15; row++) {
-        cFEStateNetMessenger_fillRow((cFEStateNetMessenger*)self, row, 0, -1);
-        cFEStateNetMessenger_colourRow((cFEStateNetMessenger*)self, row, 0);
+        self->fillRow(row, 0, -1);
+        self->colourRow(row, 0);
     }
 }
 #endif
@@ -2341,10 +2339,10 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  *
  * @param idx  menu index; negative values are ignored
  */
-extern "C" void cFEStateNetMessenger_selectMenuItem(cFEStateNetMessenger* self, int idx)
+void cFEStateNetMessenger::selectMenuItem(int idx)
 {
-    if (self->mpScreen != 0 && idx >= 0) {
-        void* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_playerMenu));
+    if (mpScreen != 0 && idx >= 0) {
+        void* menu = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_playerMenu));
         if (menu != 0) {
             cUIMenu_setSelectedByIndex(menu, idx);
         }
@@ -2391,24 +2389,24 @@ static inline void* GetSession_001A6CA0()
  * Shows "ps2L1" and "TextEqGoToNext" when miSelectedIndex >= 0, and then "IconNextChallenge" when BuddyMan has
  * challengers, else "IconNextMessage"; both icons are hidden when nothing is pending.
  */
-extern "C" void cFEStateNetMessenger_updatePendingHints(cFEStateNetMessenger* self)
+void cFEStateNetMessenger::updatePendingHints()
 {
-    if (self->mpScreen == 0) {
+    if (mpScreen == 0) {
         return;
     }
-    cFEStateNetMessenger_selectPendingBuddy(self);
-    int has = self->miSelectedIndex >= 0;
-    cUIThing* hintObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2L1));
+    selectPendingBuddy();
+    int has = miSelectedIndex >= 0;
+    cUIThing* hintObj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2L1));
     if (hintObj != 0) {
         hintObj->setVisible(has);
     }
-    hintObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextEqGoToNext));
+    hintObj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextEqGoToNext));
     if (hintObj != 0) {
         hintObj->setVisible(has);
     }
-    cUIThing* challengeIcon = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen,
+    cUIThing* challengeIcon = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen,
             GetHashValue32(str_IconNextChallenge));
-    cUIThing* messageIcon = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen,
+    cUIThing* messageIcon = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen,
             GetHashValue32(str_IconNextMessage));
     if (challengeIcon != 0 && messageIcon != 0) {
         if (!has) {
@@ -2474,16 +2472,16 @@ static inline void Erase1A6E70(cFEStateNetMessenger* self, tFEStringPtrVector* n
  * Walks backwards and closes each gap with Erase1A6E70 (Copy1A6E70). The removed cBXStrings are neither destroyed nor
  * freed (likely leak).
  */
-extern "C" void cFEStateNetMessenger_removeStaleNames(cFEStateNetMessenger* self)
+void cFEStateNetMessenger::removeStaleNames()
 {
     int i;
-    for (i = (self->mNames.mpFinish - self->mNames.mpStart) - 1; i >= 0; i--) {
-        tFEStringPtrVector* feStringPtrVector = &self->mNames;
+    for (i = (mNames.mpFinish - mNames.mpStart) - 1; i >= 0; i--) {
+        tFEStringPtrVector* feStringPtrVector = &mNames;
         // through a pointer to the entry: retail adds base first (mpStart[i] puts the index first)
-        cBXString** entry = &self->mNames.mpStart[i];
+        cBXString** entry = &mNames.mpStart[i];
         cBXString* name = *entry;
         if (BuddyMan_findRosterEntryNoCase(GetSession_001A6E70(), name) < 0) {
-            Erase1A6E70(self, feStringPtrVector, &self->mNames.mpStart[i]);
+            Erase1A6E70(this, feStringPtrVector, &mNames.mpStart[i]);
         }
     }
 }
@@ -2580,27 +2578,27 @@ static inline void* GetSession_001A71B0()
  * @param name  roster entry (its name first), or 0
  * @param rosterIndex  roster index stored in the row's text
  */
-extern "C" void cFEStateNetMessenger_fillRow(cFEStateNetMessenger* self, unsigned int index, const char* name, int rosterIndex)
+void cFEStateNetMessenger::fillRow(unsigned int index, const char* name, int rosterIndex)
 {
     if (index >= 15) {
         return;
     }
     if (name == 0) {
-        cFEStateNetMessenger_setRowStatusIcon(self, index, 3);
-        cFEStateNetMessenger_setRowName(self, index, str_sp, rosterIndex);
-        cFEStateNetMessenger_colourRow(self, index, 1);
+        setRowStatusIcon(index, 3);
+        setRowName(index, str_sp, rosterIndex);
+        colourRow(index, 1);
         return;
     }
     if (BuddyMan_hasChallengeFrom(GetSession_001A71B0(), name)) {
-        cFEStateNetMessenger_setRowStatusIcon(self, index, 2);
+        setRowStatusIcon(index, 2);
     } else if (BuddyMan_isBlockedByName(GetSession_001A71B0(), name)) {
-        cFEStateNetMessenger_setRowStatusIcon(self, index, 0);
+        setRowStatusIcon(index, 0);
     } else if (BuddyMan_hasMessageFrom(GetSession_001A71B0(), name)) {
-        cFEStateNetMessenger_setRowStatusIcon(self, index, 1);
+        setRowStatusIcon(index, 1);
     } else {
-        cFEStateNetMessenger_setRowStatusIcon(self, index, 3);
+        setRowStatusIcon(index, 3);
     }
-    cFEStateNetMessenger_setRowName(self, index, name, rosterIndex);
+    setRowName(index, name, rosterIndex);
 }
 #endif
 
@@ -2678,18 +2676,18 @@ static inline int Loc1A7390(char* name)
  * @param name  BuddyMan roster entry (name first, tag text at +0x54)
  * @param mode  0 for the raw dump, else the localised presence (cFEStateNetMessenger_showBuddyDetails passes BuddyMan_isInSameGame's result)
  */
-extern "C" void cFEStateNet_showBuddyPresence(cFEStateNet* self, const char* name, int mode)
+void cFEStateNet::showBuddyPresence(const char* name, int mode)
 {
     unsigned short out[80];
     char detail1[0x20];
     char detail2[0x20];
     char detail3[0x20];
-    void* screen = self->mpScreen;
+    void* screen = mpScreen;
     if (screen == 0 || name == 0) {
         return;
     }
-    cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextBuddyName));
-    cUIText* locationText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextBuddyLocation));
+    cUIText* uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextBuddyName));
+    cUIText* locationText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextBuddyLocation));
     if (locationText == 0) {
         return;
     }
@@ -3026,7 +3024,7 @@ void cFEStateReadMessagePopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg
         mpParentState->onPopupEvent(this, cUIState::kONSCREENPOPUPPREV);
         break;
     case cUIState::kONNEXT:
-        cFEStateNet_openKeyboardWithAsciiLabel((cFEStateNet*)this, 0, mszSender, str_empty_d, 0, 0, 0x3F);
+        this->openKeyboardWithAsciiLabel(0, mszSender, str_empty_d, 0, 0, 0x3F);
         mpKeyboard->meType = 0;
         cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
         cKeyboardPopup_setIncludeQuickKeyRow(mpKeyboard, 1);
@@ -3035,7 +3033,7 @@ void cFEStateReadMessagePopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg
     case cUIState::kONOPTION:
         break;
     case cUIState::kONKEYBOARDEND:
-        cFEStateReadMessagePopup_addOwnReply(this, mpKeyboard->mszEditString);
+        this->addOwnReply(mpKeyboard->mszEditString);
         if (BuddyMan_mBuddyMan == 0) {
             BuddyMan_createInstance();
         }
@@ -3046,7 +3044,7 @@ void cFEStateReadMessagePopup::onWidgetEvent(cUIThing* pWidget, unsigned int msg
             LobbyMan_disconnect(LobbyMan_mLobbyMan);
         }
         BuddyMan_sendMessage(BuddyMan_mBuddyMan, mszSender, mpKeyboard->mszEditString);
-        cFEStateReadMessagePopup_redrawConversation(this);
+        this->redrawConversation();
         break;
     default:
         cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, msg);
@@ -3075,7 +3073,7 @@ int cFEStateReadMessagePopup::onWidgetMenu(cUIMenu*pMenu, unsigned int Event, un
 {
     if (Event == cUIMenu::kSCROLLUPDATE) {
         mScrollIndex = index;
-        cFEStateReadMessagePopup_redrawConversation(this);
+        this->redrawConversation();
         return 0;
     }
     return 257;
@@ -3098,14 +3096,14 @@ extern "C" void* cFEStateNet_onNetEvent(void* self);
  * @param msg  event type
  * @return 0 for 265, else cFEStateNet_onNetEvent's result
  */
-extern "C" void* cFEStateReadMessagePopup_onNetEvent(cFEStateReadMessagePopup* self, int msg)
+void* cFEStateReadMessagePopup::onNetEvent(int msg)
 {
     if (msg == 265) {
-        cFEStateReadMessagePopup_collectSenderMessages(self);
-        cFEStateReadMessagePopup_redrawConversation(self);
+        collectSenderMessages();
+        redrawConversation();
         return 0;
     }
-    return cFEStateNet_onNetEvent(self);
+    return cFEStateNet_onNetEvent(this);
 }
 #endif
 
@@ -3128,8 +3126,8 @@ bool cFEStateReadMessagePopup::onGainTransition(int)
 {
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
     vt[32].fn(vthis(this, vt[32]));
-    cFEStateReadMessagePopup_collectSenderMessages(this);
-    cFEStateReadMessagePopup_redrawConversation(this);
+    this->collectSenderMessages();
+    this->redrawConversation();
     return true;
 }
 #endif
@@ -3157,12 +3155,11 @@ static inline cPrivateMessage** Copy1A7DD8(cPrivateMessage** first, cPrivateMess
  * The oldest ones are deleted through their vtable entry 1 (destructor, flags 3). Grows the vector with tFEPrivateMessageVector_insertAux
  * when it is full.
  *
- * @param selfp  the read-message popup state (this)
  * @param item  the cPrivateMessage to add
  */
-extern "C" void cFEStateReadMessagePopup_addMessage(cFEStateReadMessagePopup* selfp, void* item)
+void cFEStateReadMessagePopup::addMessage(void* item)
 {
-    cFEStateReadMessagePopup* self = selfp;
+    cFEStateReadMessagePopup* self = this;
     cPrivateMessage* x = (cPrivateMessage*)item;
     for (;;) {
         if ((unsigned int)(self->mMessages.mpFinish - self->mMessages.mpStart) < 31) break;
@@ -3218,9 +3215,9 @@ static inline void* Init_001A7ED8(char* vvp, const char* a, const char* b, const
  *
  * @param name  the message text the player typed (the keyboard's mszEditString), not a name
  */
-extern "C" void cFEStateReadMessagePopup_addOwnReply(cFEStateReadMessagePopup* self, const char* name)
+void cFEStateReadMessagePopup::addOwnReply(const char* name)
 {
-    cFEStateReadMessagePopup_addMessage(self, Init_001A7ED8((char*)cMemMan_alloc(0x10, str_cPrivateMessage, 0x20000000, 0),
+    addMessage(Init_001A7ED8((char*)cMemMan_alloc(0x10, str_cPrivateMessage, 0x20000000, 0),
                                       ((const char*)LobbyMan_mLobbyMan->mPersona), name, str_empty_d));
 }
 #endif
@@ -3276,17 +3273,17 @@ static inline void* Init_001A7F78(char* vvp, char* vsrc)
  * Copies each matching message (sender compared case-insensitively) into a new cPrivateMessage appended with
  * cFEStateReadMessagePopup_addMessage, then erases those messages from BuddyMan (BuddyMan_removeMessageAt), last first.
  */
-extern "C" void cFEStateReadMessagePopup_collectSenderMessages(cFEStateReadMessagePopup* self)
+void cFEStateReadMessagePopup::collectSenderMessages()
 {
     for (int i = 0; i < BuddyMan_getNumMessages(GetSession_001A7F78()); i++) {
         char* item = (char*)BuddyMan_getMessage(GetSession_001A7F78(), i);
-        if (item != 0 && strcasecmp(*(const char**)item, (const char*)self->mszSender) == 0) {
-            cFEStateReadMessagePopup_addMessage(self, Init_001A7F78((char*)operator new(0x10, str_cPrivateMessage, 0x20000000, 0), item));
+        if (item != 0 && strcasecmp(*(const char**)item, (const char*)mszSender) == 0) {
+            addMessage(Init_001A7F78((char*)operator new(0x10, str_cPrivateMessage, 0x20000000, 0), item));
         }
     }
     for (int i = BuddyMan_getNumMessages(GetSession_001A7F78()) - 1; i >= 0; i--) {
         char* item = (char*)BuddyMan_getMessage(GetSession_001A7F78(), i);
-        if (item != 0 && strcasecmp(*(const char**)item, (const char*)self->mszSender) == 0) {
+        if (item != 0 && strcasecmp(*(const char**)item, (const char*)mszSender) == 0) {
             BuddyMan_removeMessageAt(GetSession_001A7F78(), i);
         }
     }
@@ -3340,21 +3337,21 @@ static inline unsigned int Count1A81F0(cFEStateReadMessagePopup* feStateReadMess
  * The header is "kT_POPUP242PlayerID" formatted with mszSender and the first message's third string. The scroller is
  * cleared and refilled, then trimAndRestoreTextScroll restores its scroll (keep 40 lines, 8 visible) and mbResetScroll is cleared.
  */
-extern "C" void cFEStateReadMessagePopup_redrawConversation(cFEStateReadMessagePopup* self)
+void cFEStateReadMessagePopup::redrawConversation()
 {
     char buf[0x100];
-    if (self->mpScreen == 0) {
+    if (mpScreen == 0) {
         return;
     }
-    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextFromX));
-    if (text != 0 && Count1A81F0(self) != 0) {
-        cPrivateMessage* msgEntry = self->mMessages.mpStart[0];
-        char* who = self->mszSender;
+    cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextFromX));
+    if (text != 0 && Count1A81F0(this) != 0) {
+        cPrivateMessage* msgEntry = mMessages.mpStart[0];
+        char* who = mszSender;
         sprintf1_1A81F0(buf, Loc1A81F0(str_kT_POPUP242PlayerID), who, msgEntry->mDate.Str, str_empty_d);
         cUIText_setUnicodeString(text, buf);
         text->setVisible(1);
     }
-    cUITextScroll* list = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat));
+    cUITextScroll* list = (cUITextScroll*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_textScrollChat));
     if (((cUIText*)list) == 0) {
         return;
     }
@@ -3363,17 +3360,17 @@ extern "C" void cFEStateReadMessagePopup_redrawConversation(cFEStateReadMessageP
     unsigned short sel = list->mLinesOffset;
     cUITextScroll_clearBuffer(list);
     unsigned int i;
-    for (i = 0; i < Count1A81F0(self); i++) {
+    for (i = 0; i < Count1A81F0(this); i++) {
         // through a pointer to the entry: retail adds base first (mpStart[i] puts the index first)
-        cPrivateMessage** entry = &self->mMessages.mpStart[i];
+        cPrivateMessage** entry = &mMessages.mpStart[i];
         cPrivateMessage* msgEntry = *entry;
         strcpy(buf, msgEntry->mSender.Str);
         strcat(buf, str_colon_sp);
         strcat(buf, msgEntry->mText.Str);
         cUITextScroll_addAsciiString(list, buf);
     }
-    trimAndRestoreTextScroll(list, 40, 8, count, top, sel, self->mbResetScroll, 0);
-    self->mbResetScroll = 0;
+    trimAndRestoreTextScroll(list, 40, 8, count, top, sel, mbResetScroll, 0);
+    mbResetScroll = 0;
 }
 #endif
 
@@ -3724,10 +3721,10 @@ static inline void* GetSession_001A8830()
  * says it is not connected) with show 1 and LOCID 0 ("Online") when entry 29 (func_001DE870, returns 1 by default) is
  * non-zero, else show 0 and LOCID 1 ("Offline").
  */
-extern "C" void cFEStateNet_publishPresence(cFEStateNet* self)
+void cFEStateNet::publishPresence()
 {
-    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cListNode, self);
-    if (vt[29].fn(vthis(self, vt[29])) != 0) {
+    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)VPTR_OF(cListNode, this);
+    if (vt[29].fn(vthis(this, vt[29])) != 0) {
         BuddyMan_setPresence(GetSession_001A8830(), 1, 0, 0, 0, 0);
     } else {
         BuddyMan_setPresence(GetSession_001A8830(), 0, 1, 0, 0, 0);
@@ -3785,13 +3782,13 @@ extern "C" void cFEStateNet_showDisconnectPopup(cFEStateNet* self);
  * @param msg  the state to be pushed
  * @return @p msg, or 0 when it was deleted
  */
-extern "C" void* cFEStateNet_validatePushState(cFEStateNet* self, cUIState* msg)
+void* cFEStateNet::validatePushState(cUIState* msg)
 {
     int kind = msg->mHashName;
-    if (self->mNeedsLobby != 0 && kind != 49 && kind != 51 && kind != 77 && kind != 78
+    if (mNeedsLobby != 0 && kind != 49 && kind != 51 && kind != 77 && kind != 78
         && LobbyMan_mLobbyMan->mState == 0) {
         delete msg;
-        cFEStateNet_showDisconnectPopup(self);
+        showDisconnectPopup();
         return 0;
     }
     return msg;
@@ -4109,31 +4106,31 @@ extern "C" int cFEStateNet_onNetEvent_impl(void* self, int msg, void* data) __as
  * @param data  the event
  * @return 0
  */
-extern "C" int cFEStateNet_onNetEvent_impl(void* self, int msg, void* data)
+int cFEStateNet::onNetEvent(int msg, void* data)
 {
-    cFEStateNet* obj = (cFEStateNet*)self;
+    cFEStateNet* obj = (cFEStateNet*)this;
     switch (msg) {
     case kNetEvent_ConnectionMsg:
     case kNetEvent_NetError:
-        cFEStateNet_showDisconnectPopup((cFEStateNet*)self);
+        ((cFEStateNet*)this)->showDisconnectPopup();
         break;
     case kNetEvent_RoomSelected:
         if (LobbyMan_getRoomName(LobbyMan_mLobbyMan) == 0) {
-            cFEStateNet_pushState(self, cFEStateLobbyMenu_cFEStateLobbyMenu_v(cMemMan_alloc(2948, str_cFEStateLobbyMenu, 0, 0),
+            cFEStateNet_pushState(this, cFEStateLobbyMenu_cFEStateLobbyMenu_v(cMemMan_alloc(2948, str_cFEStateLobbyMenu, 0, 0),
                     obj->mpEngine));
         }
         break;
     case 239:
-        cFEStateNet_pushState(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(1744,
+        cFEStateNet_pushState(this, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(1744,
                 str_cFEStateOnlineMainMenu, 0, 0), obj->mpEngine));
         break;
     case kNetEvent_Error:
         if (((online_ErrorEvent*)data)->mError == kLobbyErr_time) {
-            cFEStateNet_showNetInterruptedAndLogOut((cFEStateNet*)self);
+            ((cFEStateNet*)this)->showNetInterruptedAndLogOut();
         } else {
-            void* popup = cFEStateNet_createPopup((cFEStateNet*)self);
-            cFEStateNet_buildErrorPopup((cFEStateNet*)self, &popup, self, (online_ErrorEvent*)data);
-            cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)popup);
+            void* popup = ((cFEStateNet*)this)->createPopup();
+            ((cFEStateNet*)this)->buildErrorPopup(&popup, this, (online_ErrorEvent*)data);
+            ((cFEStateNet*)this)->showPopup((cScreenPopup*)popup);
         }
         break;
     case 221:
@@ -4189,17 +4186,17 @@ static inline void* GetSession_001A8F98()
  * cFEStateNet_onNetInterruptedPopupEvent); then disconnects BuddyMan (BuddyMan_disconnect) and the lobby (LobbyMan_disconnect, LobbyMan_mLobbyMan) and shuts
  * the online session down (cConnMan_disconnect(func_002591B8(), 0)).
  */
-extern "C" void cFEStateNet_showNetInterruptedAndLogOut(cFEStateNet* self)
+void cFEStateNet::showNetInterruptedAndLogOut()
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(self);
+    cScreenPopup* popup = (cScreenPopup*)createPopup();
     popup->info.meType = 1;
-    cPopupInfo_setPopupOptionNames2(&popup->info, 0, GetHashValue32(str_kT_BTNOK));
+    popup->info.setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
     int textHash = GetHashValue32(str_kT_POPUPCMNNetInterrupted);
     popup->info.mtMessage.ui = textHash;
     popup->info.mtMessage.eType = 3;
     popup->info.miMiscData = 2110;
     popup->info.miLayerOffset = 6;
-    cFEStateNet_showPopup(self, popup);
+    showPopup(popup);
     BuddyMan_disconnect(GetSession_001A8F98());
     LobbyMan_disconnect(LobbyMan_mLobbyMan);
     cConnMan_disconnect(func_002591B8(), 0);
@@ -4226,12 +4223,12 @@ extern "C" void cKeyboardPopup_setInputText(void* p, char* a);
  * @param popupId  id stored in the keyboard's miMiscData
  * @param maxChars  length limit
  */
-extern "C" void cFEStateNet_openKeyboardWithAsciiLabel(cFEStateNet* self, void* textObj, const char* staticLabel, char* inputText, int password,
-        int popupId, int maxChars)
+void cFEStateNet::openKeyboardWithAsciiLabel(void* textObj, const char* staticLabel, char* inputText, int password,
+                                             int popupId, int maxChars)
 {
-    cFEStateNet_createKeyboard(self, textObj, password, popupId, maxChars);
-    cKeyboardPopup_setStatic2(self->mpKeyboard, staticLabel);
-    cKeyboardPopup_setInputText(self->mpKeyboard, inputText);
+    createKeyboard(textObj, password, popupId, maxChars);
+    cKeyboardPopup_setStatic2(mpKeyboard, staticLabel);
+    cKeyboardPopup_setInputText(mpKeyboard, inputText);
 }
 #endif
 
@@ -4254,12 +4251,12 @@ extern "C" void cKeyboardPopup_setInputText(void* p, char* a);
  * @param popupId  id stored in the keyboard's miMiscData
  * @param maxChars  length limit
  */
-extern "C" void cFEStateNet_openKeyboardWithUnicodeLabel(cFEStateNet* self, void* textObj, int staticText, char* inputText, int password,
-        int popupId, int maxChars)
+void cFEStateNet::openKeyboardWithUnicodeLabel(void* textObj, int staticText, char* inputText, int password,
+                                               int popupId, int maxChars)
 {
-    cFEStateNet_createKeyboard(self, textObj, password, popupId, maxChars);
-    cKeyboardPopup_setStatic(self->mpKeyboard, staticText);
-    cKeyboardPopup_setInputText(self->mpKeyboard, inputText);
+    createKeyboard(textObj, password, popupId, maxChars);
+    cKeyboardPopup_setStatic(mpKeyboard, staticText);
+    cKeyboardPopup_setInputText(mpKeyboard, inputText);
 }
 #endif
 
@@ -4282,12 +4279,12 @@ extern "C" void cKeyboardPopup_setInputText(void* p, char* a);
  * @param popupId  id stored in the keyboard's miMiscData
  * @param maxChars  length limit
  */
-extern "C" void cFEStateNet_openKeyboardWithLabelID(cFEStateNet* self, void* textObj, int staticText, char* inputText, int password,
-        int popupId, int maxChars)
+void cFEStateNet::openKeyboardWithLabelID(void* textObj, int staticText, char* inputText, int password, int popupId,
+                                          int maxChars)
 {
-    cFEStateNet_createKeyboard(self, textObj, password, popupId, maxChars);
-    cKeyboardPopup_setStatic1(self->mpKeyboard, staticText);
-    cKeyboardPopup_setInputText(self->mpKeyboard, inputText);
+    createKeyboard(textObj, password, popupId, maxChars);
+    cKeyboardPopup_setStatic1(mpKeyboard, staticText);
+    cKeyboardPopup_setInputText(mpKeyboard, inputText);
 }
 #endif
 
@@ -4312,14 +4309,14 @@ extern char str_cKeyboardPopup[];
  * @param popupId  id reported with the keyboard's events
  * @param maxChars  length limit
  */
-extern "C" void cFEStateNet_createKeyboard(cFEStateNet* self, void* textObj, int password, int popupId, int maxChars)
+void cFEStateNet::createKeyboard(void* textObj, int password, int popupId, int maxChars)
 {
-    void* keyboard = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), self->mpEngine, self, password, 0xF);
-    self->mpKeyboard = (cKeyboardPopup*)keyboard;
-    cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, keyboard);
-    self->mpKeyboard->miMiscData = popupId;
-    cKeyboardPopup_setMaxCharacters(self->mpKeyboard, maxChars);
-    self->mpKeyboardText = (cUIText*)textObj;
+    void* keyboard = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), mpEngine, this, password, 0xF);
+    mpKeyboard = (cKeyboardPopup*)keyboard;
+    cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, keyboard);
+    mpKeyboard->miMiscData = popupId;
+    cKeyboardPopup_setMaxCharacters(mpKeyboard, maxChars);
+    mpKeyboardText = (cUIText*)textObj;
 }
 #endif
 
@@ -4345,14 +4342,14 @@ extern const char str_cFEStateOnlineCharacterSelect[];
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPCREATE
  *               shown, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNet_onMessengerPopupEvent(cFEStateNet* self, cUIState* popup, int event)
+void cFEStateNet::onMessengerPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, cUIState::kONSCREENPOPUPOPTION0);
-        cFEStateNet_pushState(self,
-                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), self->mpEngine));
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, cUIState::kONSCREENPOPUPOPTION0);
+        cFEStateNet_pushState(this,
+                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), mpEngine));
     } else {
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, event);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
     }
 }
 #endif
@@ -4377,30 +4374,30 @@ void cFEStateNet_handleDefaultPopupEvent_3(void* self, cUIState* a1, int a2) __a
  * @param kind  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPCREATE
  *               shown, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNet_onNestedChallengePopupEvent(cFEStateNet* self, cUIState* popup, unsigned int kind)
+void cFEStateNet::onNestedChallengePopupEvent(cUIState* popup, unsigned int kind)
 {
     switch (kind) {
     case cUIState::kONPOPUPCREATE:
-        self->mPopupResult = 2;
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, cUIState::kONPOPUPCREATE);
+        mPopupResult = 2;
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, cUIState::kONPOPUPCREATE);
         break;
     case cUIState::kONSCREENPOPUPOPTION0:
-        self->mPopupResult = 0;
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, cUIState::kONSCREENPOPUPOPTION0);
+        mPopupResult = 0;
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, cUIState::kONSCREENPOPUPOPTION0);
         break;
     case cUIState::kONPOPUPDESTROY: {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-        vt[32].fn(vthis(self, vt[32]));
-        if (self->mPopupResult == 0) {
-            cUIState* obj = self->mpParentState;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
+        vt[32].fn(vthis(this, vt[32]));
+        if (mPopupResult == 0) {
+            cUIState* obj = mpParentState;
             sVEntry<void(void*, void*, int)>* vt2 = (sVEntry<void (void*, void*, int)>*)VPTR_OF(cListNode, obj);
-            vt2[17].fn(vthis(obj, vt2[17]), self, cUIState::kONSCREENPOPUPOPTION0);
+            vt2[17].fn(vthis(obj, vt2[17]), this, cUIState::kONSCREENPOPUPOPTION0);
         }
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, cUIState::kONPOPUPDESTROY);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, cUIState::kONPOPUPDESTROY);
         break;
     }
     default:
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, kind);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, kind);
         break;
     }
 }
@@ -4425,17 +4422,16 @@ extern "C" void cFEStateNet_handleDefaultPopupEvent_impl(void* self, int id, int
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPCREATE
  *               shown, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNet_handleDefaultPopupEvent_impl(void* vself, int id, int event)
+void cFEStateNet::handleDefaultPopupEvent(int id, int event)
 {
-    cFEStateNet* self = (cFEStateNet*)vself;
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0: case cUIState::kONSCREENPOPUPOPTION1:
     case cUIState::kONSCREENPOPUPOPTION2: case cUIState::kONSCREENPOPUPOPTION3: case cUIState::kONSCREENPOPUPPREV:
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
         break;
     case cUIState::kONPOPUPDESTROY:
-        if (id == (int)self->mpPopup) {
-            self->mpPopup = 0;
+        if (id == (int)mpPopup) {
+            mpPopup = 0;
         }
         break;
     case cUIState::kONSCREENPOPUPOPTION4:
@@ -4467,16 +4463,16 @@ extern const char str_cFEStateLogin_MemoryCard[];
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPCREATE
  *               shown, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNet_onAccountMemPopupEvent(cFEStateNet* self, cUIState* popup, int event)
+void cFEStateNet::onAccountMemPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONPOPUPDESTROY) {
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-        vt[32].fn(vthis(self, vt[32]));
-        cFEStateNet_pushState(self, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748,
-                str_cFEStateLogin_MemoryCard, 0, 0), self->mpEngine));
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, cUIState::kONPOPUPDESTROY);
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
+        vt[32].fn(vthis(this, vt[32]));
+        cFEStateNet_pushState(this, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748,
+                str_cFEStateLogin_MemoryCard, 0, 0), mpEngine));
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, cUIState::kONPOPUPDESTROY);
     } else {
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, event);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
     }
 }
 #endif
@@ -4511,22 +4507,22 @@ void cFEStateNet_handleDefaultPopupEvent_3(void* self, cUIState* a1, int a2) __a
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPCREATE
  *               shown, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNet_onKeyboardPopupEvent(cFEStateNet* self, cUIState* popup, int event)
+void cFEStateNet::onKeyboardPopupEvent(cUIState* popup, int event)
 {
     switch (event) {
     case cUIState::kONPOPUPCREATE:
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, cUIState::kONPOPUPCREATE);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, cUIState::kONPOPUPCREATE);
         break;
     case cUIState::kONPOPUPDESTROY:
         {
-            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-            vt[32].fn(vthis(self, vt[32]));
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
+            vt[32].fn(vthis(this, vt[32]));
         }
-        self->mpKeyboard = 0;
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, cUIState::kONPOPUPDESTROY);
+        mpKeyboard = 0;
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, cUIState::kONPOPUPDESTROY);
         break;
     default:
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, event);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
         break;
     }
 }
@@ -4558,21 +4554,21 @@ extern const char str_cFEStateOnlineMainMenu[];
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPCREATE
  *               shown, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNet_onChallengeLostPopupEvent(cFEStateNet* self, cUIState* popup, int event)
+void cFEStateNet::onChallengeLostPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, event);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
         void* obj;
         if (LobbyMan_getRoomName(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
             obj = cFEStateChatRoom_cFEStateChatRoom((cFEStateChatRoom*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0),
-                    self->mpEngine);
+                    mpEngine);
         } else {
             obj = cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(1744,
-                    str_cFEStateOnlineMainMenu, 0, 0), self->mpEngine);
+                    str_cFEStateOnlineMainMenu, 0, 0), mpEngine);
         }
-        cFEStateNet_pushState(self, obj);
+        cFEStateNet_pushState(this, obj);
     } else {
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, event);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
     }
 }
 #endif
@@ -4593,7 +4589,7 @@ extern "C" void cFEStateNet_handleDefaultPopupEvent(void* self, int a1, int a2, 
  *               shown, kONPOPUPDESTROY gone)
  * @param extra  unused, passed on
  */
-extern "C" void cFEStateNet_onWaitPlayerPopupEvent(cFEStateNet* self, int popup, int event, int extra)
+void cFEStateNet::onWaitPlayerPopupEvent(int popup, int event, int extra)
 {
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0:
@@ -4601,7 +4597,7 @@ extern "C" void cFEStateNet_onWaitPlayerPopupEvent(cFEStateNet* self, int popup,
     case cUIState::kONSCREENPOPUPPREV:
         break;
     default:
-        cFEStateNet_handleDefaultPopupEvent(self, popup, event, extra);
+        cFEStateNet_handleDefaultPopupEvent(this, popup, event, extra);
         break;
     }
 }
@@ -4632,19 +4628,19 @@ extern const char str_cFEStateLogin[];
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPCREATE
  *               shown, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNet_onDisconnectedPopupEvent(cFEStateNet* self, cUIState* popup, int event)
+void cFEStateNet::onDisconnectedPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, event);
-        cUIStateStack_popToState(&self->mpEngine->mStateStack);
-        self->mBlockInput = 1;
-        cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
+        cUIStateStack_popToState(&mpEngine->mStateStack);
+        mBlockInput = 1;
+        cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&mpEngine->mStateStack);
         st->mAttrState |= 0x80;
-        cFEStateNet_pushState(self, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748, str_cFEStateLogin, 0, 0),
-                self->mpEngine));
-        self->mDisconnectPopupOpen = 0;
+        cFEStateNet_pushState(this, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748, str_cFEStateLogin, 0, 0),
+                mpEngine));
+        mDisconnectPopupOpen = 0;
     } else {
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, event);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
     }
 }
 #endif
@@ -4672,19 +4668,19 @@ extern const char str_cFEStateNetConfig[];
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPCREATE
  *               shown, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNet_onNetInterruptedPopupEvent(cFEStateNet* self, cUIState* popup, int event)
+void cFEStateNet::onNetInterruptedPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, event);
-        cUIStateStack_popToState(&self->mpEngine->mStateStack);
-        self->mBlockInput = 1;
-        cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
+        cUIStateStack_popToState(&mpEngine->mStateStack);
+        mBlockInput = 1;
+        cUIState* st = (cUIState*)cUIStateStack_getCurrentState(&mpEngine->mStateStack);
         st->mAttrState |= 0x80;
-        cFEStateNet_pushState(self, cFEStateNetConfig_cFEStateNetConfig((cFEStateNetConfig*)cMemMan_alloc(2332,
-                str_cFEStateNetConfig, 0, 0), self->mpEngine));
-        self->mDisconnectPopupOpen = 0;
+        cFEStateNet_pushState(this, cFEStateNetConfig_cFEStateNetConfig((cFEStateNetConfig*)cMemMan_alloc(2332,
+                str_cFEStateNetConfig, 0, 0), mpEngine));
+        mDisconnectPopupOpen = 0;
     } else {
-        cFEStateNet_handleDefaultPopupEvent_3(self, popup, event);
+        cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
     }
 }
 #endif
@@ -4718,30 +4714,30 @@ void cFEStateNet_handleDefaultPopupEvent_3(void* self, cUIState* a1, int a2) __a
 void cFEStateNet::onPopupEvent(cUIState* popup, unsigned int event)
 {
     if (popup == mpKeyboard) {
-        cFEStateNet_onKeyboardPopupEvent((cFEStateNet*)this, popup, event);
+        this->onKeyboardPopupEvent(popup, event);
         return;
     }
     switch (popup->miMiscData) {
     case 2098:
-        cFEStateNet_onAccountMemPopupEvent((cFEStateNet*)this, popup, event);
+        this->onAccountMemPopupEvent(popup, event);
         break;
     case 2099:
-        cFEStateNet_onMessengerPopupEvent((cFEStateNet*)this, popup, event);
+        this->onMessengerPopupEvent(popup, event);
         break;
     case 2100:
-        cFEStateNet_onNestedChallengePopupEvent((cFEStateNet*)this, popup, event);
+        this->onNestedChallengePopupEvent(popup, event);
         break;
     case 2103:
-        cFEStateNet_onChallengeLostPopupEvent((cFEStateNet*)this, popup, event);
+        this->onChallengeLostPopupEvent(popup, event);
         break;
     case 2102:
         cFEStateNet_onWaitPlayerPopupEvent_3(this, popup, event);
         break;
     case 2109:
-        cFEStateNet_onDisconnectedPopupEvent((cFEStateNet*)this, popup, event);
+        this->onDisconnectedPopupEvent(popup, event);
         break;
     case 2110:
-        cFEStateNet_onNetInterruptedPopupEvent((cFEStateNet*)this, popup, event);
+        this->onNetInterruptedPopupEvent(popup, event);
         break;
     default:
         cFEStateNet_handleDefaultPopupEvent_3(this, popup, event);
@@ -4760,9 +4756,9 @@ extern "C" void* cBXString_operatorE1(void* self, const char* str);
  *
  * @param str  the user name
  */
-extern "C" void cFEStateNet_setTargetUser(cFEStateNet* self, const char* str)
+void cFEStateNet::setTargetUser(const char* str)
 {
-    cBXString_operatorE1(&self->mszTargetUser, str);
+    cBXString_operatorE1(&mszTargetUser, str);
 }
 #endif
 
@@ -4774,10 +4770,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNet_getTargetUser__FPv);
  *
  * @return the name
  */
-char* cFEStateNet_getTargetUser(void* vself)
+char* cFEStateNet::getTargetUser()
 {
-    cFEStateNet* self = (cFEStateNet*)vself;
-    return self->mszTargetUser;
+    return mszTargetUser;
 }
 #endif
 
@@ -4795,9 +4790,9 @@ extern "C" int strlen(const char* s);
  *
  * @param str  the password to mask
  */
-extern "C" void cFEStateNet_setMaskedText(cFEStateNet* self, const char* str)
+void cFEStateNet::setMaskedText(const char* str)
 {
-    cFEStateNet* feStateNet = self;
+    cFEStateNet* feStateNet = this;
     int len = strlen(str);
     int i;
     for (i = 0; i < len && i < 0x3F; i++) {
@@ -4831,16 +4826,16 @@ extern char str_kT_POPUPCMNDisconnected[];
  * one-OK popup (mbDeferEventsFlag 1, mbReceivePrev 0, layer 6): "kT_POPUPCMNNetInterrupted" with id 2110 when the word
  * at func_002591B8() is 0, else "kT_POPUPCMNDisconnected" with id 2109.
  */
-extern "C" void cFEStateNet_showDisconnectPopup(cFEStateNet* self)
+void cFEStateNet::showDisconnectPopup()
 {
-    if (self->mDisconnectPopupOpen == 0) {
+    if (mDisconnectPopupOpen == 0) {
         int one = 1;
-        self->mDisconnectPopupOpen = one;
-        cUIStateStack_popToState(&self->mpEngine->mStateStack);
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(self);
+        mDisconnectPopupOpen = one;
+        cUIStateStack_popToState(&mpEngine->mStateStack);
+        cScreenPopup* popup = (cScreenPopup*)createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = one;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.mbDeferEventsFlag = one;
         popup->info.mbReceivePrev = 0;
         popup->info.miLayerOffset = 6;
@@ -4853,7 +4848,7 @@ extern "C" void cFEStateNet_showDisconnectPopup(cFEStateNet* self)
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNDisconnected);
             popup->info.mtMessage.eType = 3;
         }
-        cFEStateNet_showPopup(self, popup);
+        showPopup(popup);
     }
 }
 #endif
@@ -4877,7 +4872,7 @@ extern char str_kT_CMNNo[];
  * @param box  the cUIListBox
  * @param value  the current setting
  */
-extern "C" void cFEStateNet_fillYesNoListBox(cFEStateNet* self, cUIListBox* box, int value)
+void cFEStateNet::fillYesNoListBox(cUIListBox* box, int value)
 {
     box->mAttr = (box->mAttr & ~1) | 0x80;
     cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_CMNYes), 1);
@@ -4905,7 +4900,7 @@ extern char str_kT_CMNOff[];
  * @param box  the cUIListBox
  * @param value  the current setting
  */
-extern "C" void cFEStateNet_fillOnOffListBox(cFEStateNet* self, cUIListBox* box, int value)
+void cFEStateNet::fillOnOffListBox(cUIListBox* box, int value)
 {
     box->mAttr = (box->mAttr & ~1) | 0x80;
     cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_CMNOn), 1);
@@ -4929,11 +4924,11 @@ extern const char str_cFEStateNetMessenger[];
  * cMemMan_alloc(1788, "cFEStateNetMessenger") + cFEStateNetMessenger_cFEStateNetMessenger(mem, mpEngine, self), pushed
  * on mpScreen's engine stack; its events come back through cFEStateNet_onMessengerPopupEvent.
  */
-extern "C" void cFEStateNet_openMessenger(cFEStateNet* self)
+void cFEStateNet::openMessenger()
 {
-    cFEStateNetMessenger* messenger = (cFEStateNetMessenger*)cFEStateNetMessenger_cFEStateNetMessenger((cFEStateNetMessenger*)cMemMan_alloc(1788, str_cFEStateNetMessenger, 0x100, 0), self->mpEngine, self);
+    cFEStateNetMessenger* messenger = (cFEStateNetMessenger*)cFEStateNetMessenger_cFEStateNetMessenger((cFEStateNetMessenger*)cMemMan_alloc(1788, str_cFEStateNetMessenger, 0x100, 0), mpEngine, this);
     messenger->miMiscData = 2099;
-    cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, messenger);
+    cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, messenger);
 }
 #endif
 
@@ -4952,16 +4947,16 @@ extern "C" void cScreenPopup_redrawPopup(void* self);
  *
  * @param popup  the cScreenPopup, normally mpPopup
  */
-extern "C" void cFEStateNet_showPopup(cFEStateNet* self, cScreenPopup* popup)
+void cFEStateNet::showPopup(cScreenPopup* popup)
 {
-    void* top = cUIStateStack_getTopState(&self->mpScreen->mpState->mpEngine->mStateStack);
+    void* top = cUIStateStack_getTopState(&mpScreen->mpState->mpEngine->mStateStack);
     if (popup->mbShowing == 0) {
         if (((void*)popup) != top) {
-            cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, popup);
+            cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, popup);
         }
     } else {
         popup->mAttrState = (popup->mAttrState & ~0x3F00) | 0x500;
-        cScreenPopup_redrawPopup(self->mpPopup);
+        cScreenPopup_redrawPopup(mpPopup);
     }
 }
 #endif
@@ -4982,19 +4977,19 @@ extern const char str_createPopup[];
  *
  * @return mpPopup
  */
-extern "C" void* cFEStateNet_createPopup(cFEStateNet* self)
+void* cFEStateNet::createPopup()
 {
     cScreenPopup* popup;
-    cScreenPopup* cur = self->mpPopup;
+    cScreenPopup* cur = mpPopup;
     if (cur == 0) {
-        popup = (cScreenPopup*)cScreenPopup_cScreenPopup(cMemMan_alloc(864, str_createPopup, 0x100, 0), self->mpEngine, self);
-        self->mpPopup = popup;
+        popup = (cScreenPopup*)cScreenPopup_cScreenPopup(cMemMan_alloc(864, str_createPopup, 0x100, 0), mpEngine, this);
+        mpPopup = popup;
         popup->info.mbCenterText = 0;
     } else {
         cur->info.clear();
-        self->mpPopup->info.mbCenterText = 0;
+        mpPopup->info.mbCenterText = 0;
     }
-    return self->mpPopup;
+    return mpPopup;
 }
 #endif
 
@@ -5168,15 +5163,15 @@ static inline void* GetSession_1A9CC0()
  * @param owner  unused
  * @param data  the error event (type 258)
  */
-extern "C" void cFEStateNet_buildErrorPopup(cFEStateNet* self, void** popup, void* owner, online_ErrorEvent* data)
+void cFEStateNet::buildErrorPopup(void** popup, void* owner, online_ErrorEvent* data)
 {
     int resetNetwork = 0;
     int flag = 0;
-    cScreenPopup* newPopup = (cScreenPopup*)cFEStateNet_createPopup(self);
+    cScreenPopup* newPopup = (cScreenPopup*)createPopup();
     *popup = ((char*)newPopup);
     cPopupInfo* sub = &newPopup->info;
     newPopup->info.meType = 1;
-    cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+    sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
     newPopup->info.miMiscData = 258;
     switch (data->mError) {
     case kLobbyErr_imst: // 'imst'
@@ -5246,7 +5241,7 @@ extern "C" void cFEStateNet_buildErrorPopup(cFEStateNet* self, void** popup, voi
     case kLobbyErr_ingm: // 'ingm'
         SetMsg_1A9CC0(((char*)sub), str_kT_POPUPCMNUserInGame);
         break;
-    case kLobbyErr_self: // 'self'
+    case kLobbyErr_self: // 'this'
         SetMsg_1A9CC0(((char*)sub), str_kT_POPUPCMNSelf);
         break;
     case kLobbyErr_npri: // 'npri'
@@ -5288,14 +5283,14 @@ extern "C" void cFEStateNet_buildErrorPopup(cFEStateNet* self, void** popup, voi
             sVEntry<void*(void*, int)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, obj);
             void* text = vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUPCMNLocked));
             int len = USTR_length(text) + strlen(intro) + strlen(date) + 7;
-            if (self->mpPopupTextBuf != 0) {
-                cMemMan_free(self->mpPopupTextBuf);
-                self->mpPopupTextBuf = 0;
+            if (mpPopupTextBuf != 0) {
+                cMemMan_free(mpPopupTextBuf);
+                mpPopupTextBuf = 0;
             }
             void* buf = operator_new_tag(len * 2, str_EC_LOCKED, 0, 0);
-            self->mpPopupTextBuf = buf;
+            mpPopupTextBuf = buf;
             sprintf2_1A9CC0(buf, fmt, text, intro, date);
-            sub->mtMessage.pustr = (const unsigned short*)self->mpPopupTextBuf;
+            sub->mtMessage.pustr = (const unsigned short*)mpPopupTextBuf;
             sub->mtMessage.eType = 1;
         }
         break;
@@ -5512,26 +5507,26 @@ extern char str_IconMessageHint[];
  * "TextMessageCount" likewise with mMessageHintFrame; a zero frame hides them. The frame counter is cAppMan_TheAppMan +
  * 0x18.
  */
-extern "C" void cFEStateNet_blinkPendingHints(cFEStateNet* self)
+void cFEStateNet::blinkPendingHints()
 {
     unsigned int now = (unsigned int)cAppMan_TheAppMan->TimerTick;
-    cUIThing* hintIcon = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen,
+    cUIThing* hintIcon = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen,
             GetHashValue32(str_IconChallengeHint));
     if (hintIcon != 0) {
-        if (self->mChallengeHintFrame != 0) {
-            hintIcon->setVisible((now - self->mChallengeHintFrame) % 60 > 30);
+        if (mChallengeHintFrame != 0) {
+            hintIcon->setVisible((now - mChallengeHintFrame) % 60 > 30);
         } else {
             hintIcon->setVisible(0);
         }
     }
-    cUIThing* countText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen,
+    cUIThing* countText = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen,
             GetHashValue32(str_TextMessageCount));
-    hintIcon = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_IconMessageHint));
+    hintIcon = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_IconMessageHint));
     if (hintIcon != 0) {
-        if (self->mMessageHintFrame != 0) {
-            hintIcon->setVisible((now - self->mMessageHintFrame) % 60 > 30);
+        if (mMessageHintFrame != 0) {
+            hintIcon->setVisible((now - mMessageHintFrame) % 60 > 30);
             if (countText != 0) {
-                countText->setVisible((now - self->mMessageHintFrame) % 60 > 30);
+                countText->setVisible((now - mMessageHintFrame) % 60 > 30);
             }
         } else {
             hintIcon->setVisible(0);
@@ -5621,42 +5616,42 @@ public:
  * mChallengeHintFrame from the challenger list, and shows the count in "TextMessageCount" (" " and hidden when there
  * are none).
  */
-extern "C" void cFEStateNet_pollPendingMessages(cFEStateNet* self)
+void cFEStateNet::pollPendingMessages()
 {
     char buf[16];
-    if (self->mpScreen == 0) {
+    if (mpScreen == 0) {
         return;
     }
-    if (((cFEVObj_001AAB68*)self)->showsOnline() == 0) {
+    if (((cFEVObj_001AAB68*)this)->showsOnline() == 0) {
         return;
     }
     unsigned int now = (unsigned int)cAppMan_TheAppMan->TimerTick;
-    unsigned int elapsed = now - (self)->mLastPollFrame;
+    unsigned int elapsed = now - mLastPollFrame;
     if (elapsed > 0 && elapsed < 60) {
         return;
     }
-    (self)->mLastPollFrame = now;
+    mLastPollFrame = now;
     int n = BuddyMan_getNumMessages(GetSession_001AAB68());
-    if ((self)->mMessageHintFrame != 0) {
+    if (mMessageHintFrame != 0) {
         if (n <= 0) {
-            (self)->mMessageHintFrame = 0;
+            mMessageHintFrame = 0;
         }
     } else {
         if (n > 0) {
-            (self)->mMessageHintFrame = now;
+            mMessageHintFrame = now;
         }
     }
     int has = Count1AAB68((BuddyMan*)GetSession_001AAB68()) != 0;
-    if ((self)->mChallengeHintFrame != 0) {
+    if (mChallengeHintFrame != 0) {
         if (!has) {
-            (self)->mChallengeHintFrame = 0;
+            mChallengeHintFrame = 0;
         }
     } else {
         if (has) {
-            (self)->mChallengeHintFrame = now;
+            mChallengeHintFrame = now;
         }
     }
-    cFEVObj_001AAB68* text = (cFEVObj_001AAB68*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextMessageCount));
+    cFEVObj_001AAB68* text = (cFEVObj_001AAB68*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextMessageCount));
     if (text == 0) {
         return;
     }
@@ -5788,7 +5783,7 @@ struct cLocStr_001AAF90 {
  * @param msg  the error event
  * @return the unicode text, or 0 for an unknown code
  */
-extern "C" int cFEStateNet_getNetErrorText(cFEStateNet* self, online_NetErrorEvent* msg)
+int cFEStateNet::getNetErrorText(online_NetErrorEvent* msg)
 {
     int textId;
     switch ((unsigned int)msg->mError) {
@@ -5845,9 +5840,9 @@ extern char str_kT_OVRCMNWaitPlayer[];
  *
  * Its events go to cFEStateNet_onWaitPlayerPopupEvent, which ignores OK and back.
  */
-extern "C" void cFEStateNet_showWaitPlayerPopup(cFEStateNet* self)
+void cFEStateNet::showWaitPlayerPopup()
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(self);
+    cScreenPopup* popup = (cScreenPopup*)createPopup();
     popup->info.meType = 0;
     popup->info.mbDeferEventsFlag = 0;
     popup->info.miMiscData = 2102;
@@ -5855,7 +5850,7 @@ extern "C" void cFEStateNet_showWaitPlayerPopup(cFEStateNet* self)
     popup->info.mtMessage.ui = GetHashValue32(str_kT_OVRCMNWaitPlayer);
     popup->info.mtMessage.eType = 3;
     popup->info.mbReceivePrev = 0;
-    cFEStateNet_showPopup(self, popup);
+    showPopup(popup);
 }
 #endif
 
@@ -5877,12 +5872,12 @@ extern char str_kT_POPUPCMNExitedChallenge[];
  *
  * @param err  the event type
  */
-extern "C" void cFEStateNet_showChallengeErrorPopup(cFEStateNet* self, int err)
+void cFEStateNet::showChallengeErrorPopup(int err)
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(self);
+    cScreenPopup* popup = (cScreenPopup*)createPopup();
     cPopupInfo* sub = &popup->info;
     popup->info.meType = 1;
-    cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+    sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
     popup->info.miMiscData = 2101;
     popup->info.miLayerOffset = 6;
     popup->info.mbDeferEventsFlag = 0;
@@ -5912,7 +5907,7 @@ extern "C" void cFEStateNet_showChallengeErrorPopup(cFEStateNet* self, int err)
         sub->mtMessage.eType = 3;
         break;
     }
-    cFEStateNet_showPopup(self, popup);
+    showPopup(popup);
 }
 #endif
 
@@ -5936,12 +5931,12 @@ extern char str_kT_POPUPCMNExitedChallenge[];
  *
  * @param err  the event type
  */
-extern "C" void cFEStateNet_showChallengeLostPopup(cFEStateNet* self, int err)
+void cFEStateNet::showChallengeLostPopup(int err)
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(self);
+    cScreenPopup* popup = (cScreenPopup*)createPopup();
     cPopupInfo* sub = &popup->info;
     popup->info.meType = 1;
-    cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+    sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
     popup->info.miMiscData = 2103;
     popup->info.miLayerOffset = 6;
     popup->info.mbDeferEventsFlag = 0;
@@ -5959,7 +5954,7 @@ extern "C" void cFEStateNet_showChallengeLostPopup(cFEStateNet* self, int err)
         sub->mtMessage.eType = 3;
         break;
     }
-    cFEStateNet_showPopup(self, popup);
+    showPopup(popup);
 }
 #endif
 
@@ -5977,11 +5972,11 @@ extern "C" void cFEStateNet_fillUserPopup(cFEStateNet* self, cScreenPopup* popup
  * @param playerName  the player's name
  * @param fiveOptions  non-zero for the 5-option version
  */
-extern "C" void cFEStateNet_openUserPopup(cFEStateNet* self, const char* playerName, int fiveOptions)
+void cFEStateNet::openUserPopup(const char* playerName, int fiveOptions)
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(self);
-    self->mUserPopupOpen = 1;
-    cFEStateNet_fillUserPopup(self, popup, playerName, fiveOptions, 0);
+    cScreenPopup* popup = (cScreenPopup*)createPopup();
+    mUserPopupOpen = 1;
+    fillUserPopup(popup, playerName, fiveOptions, 0);
 }
 #endif
 
@@ -6000,11 +5995,11 @@ extern "C" int cScreenPopup_getCurrentlySelected(void* popup);
  * @param playerName  the player's name
  * @param fiveOptions  non-zero for the 5-option version
  */
-extern "C" void cFEStateNet_refreshUserPopup(cFEStateNet* self, const char* playerName, int fiveOptions)
+void cFEStateNet::refreshUserPopup(const char* playerName, int fiveOptions)
 {
-    if ((self->mAttrState & 6) != 0) {
-        cScreenPopup* popup = self->mpPopup;
-        if (popup != 0 && self->mUserPopupOpen != 0) {
+    if ((mAttrState & 6) != 0) {
+        cScreenPopup* popup = mpPopup;
+        if (popup != 0 && mUserPopupOpen != 0) {
             int id = popup->miMiscData;
             if (id != 2059) {
                 if (id != 2060) {
@@ -6012,7 +6007,7 @@ extern "C" void cFEStateNet_refreshUserPopup(cFEStateNet* self, const char* play
                 }
             }
             if ((*(unsigned char*)((char*)popup + 0x1D) & 0x3F) < 6) {
-                cFEStateNet_fillUserPopup(self, self->mpPopup, playerName, fiveOptions, cScreenPopup_getCurrentlySelected(popup));
+                fillUserPopup(mpPopup, playerName, fiveOptions, cScreenPopup_getCurrentlySelected(popup));
             }
         }
     }
@@ -6099,8 +6094,7 @@ static inline int Text_001AB478(char* name)
  * @param selectedOption  option to select
  */
 // Fills the popup message for one file: a status header, then one line per check.
-extern "C" void cFEStateNet_fillUserPopup(cFEStateNet* self, cScreenPopup* popup, const char* namePtr, int fiveOptions,
-    int selectedOption)
+void cFEStateNet::fillUserPopup(cScreenPopup* popup, const char* namePtr, int fiveOptions, int selectedOption)
 {
     if (((void*)popup) == 0) {
         return;
@@ -6124,18 +6118,18 @@ extern "C" void cFEStateNet_fillUserPopup(cFEStateNet* self, cScreenPopup* popup
         popupData->info.miMiscData = 2059;
         sub->clearPopupConfirmation(n);
         if (BuddyMan_hasChallengeFrom(GetSession_001AB478(), name)) {
-            cPopupInfo_setPopupOptionNames2(sub, n, GetHashValue32(str_kT_TITLEChallengeReceived));
+            sub->setPopupOptionNames2(n, GetHashValue32(str_kT_TITLEChallengeReceived));
         } else {
-            cPopupInfo_setPopupOptionNames2(sub, n, GetHashValue32(str_kT_TITLEChallenge));
+            sub->setPopupOptionNames2(n, GetHashValue32(str_kT_TITLEChallenge));
         }
         n++;
     } else if (stateB != 0 && (stateA != 0 || BuddyMan_hasChallengeFrom(GetSession_001AB478(), name))) {
         *(int*)sub = 4;
         sub->clearPopupConfirmation(n);
         if (BuddyMan_hasChallengeFrom(GetSession_001AB478(), name)) {
-            cPopupInfo_setPopupOptionNames2(sub, n, GetHashValue32(str_kT_TITLEChallengeReceived));
+            sub->setPopupOptionNames2(n, GetHashValue32(str_kT_TITLEChallengeReceived));
         } else {
-            cPopupInfo_setPopupOptionNames2(sub, n, GetHashValue32(str_kT_TITLEChallenge));
+            sub->setPopupOptionNames2(n, GetHashValue32(str_kT_TITLEChallenge));
         }
         n++;
         sub->miMiscData = 2059;
@@ -6145,44 +6139,44 @@ extern "C" void cFEStateNet_fillUserPopup(cFEStateNet* self, cScreenPopup* popup
     }
     if (BuddyMan_hasMessageFrom(GetSession_001AB478(), namePtr)) {
         sub->clearPopupConfirmation(n);
-        cPopupInfo_setPopupOptionNames2(sub, n++, GetHashValue32(str_kT_POPUP235ReadMessage));
+        sub->setPopupOptionNames2(n++, GetHashValue32(str_kT_POPUP235ReadMessage));
     } else {
         sub->clearPopupConfirmation(n);
-        cPopupInfo_setPopupOptionNames2(sub, n++, GetHashValue32(str_kT_POPUP235SendMessage));
+        sub->setPopupOptionNames2(n++, GetHashValue32(str_kT_POPUP235SendMessage));
     }
     if (BuddyMan_isBuddyByName(GetSession_001AB478(), name)) {
-        unsigned short* buf = self->mustrStatusLine1;
+        unsigned short* buf = mustrStatusLine1;
         sprintf1(buf, Text_001AB478(str_kT_POPUP279ConfirmRemoveMessenger), (char*)name);
-        cPopupInfo_setPopupConfirmation1(sub, n, buf, 0);
-        cPopupInfo_setPopupOptionNames2(sub, n, GetHashValue32(str_kT_POPUP235RemoveMessenger));
+        sub->setPopupConfirmation1(n, buf, 0);
+        sub->setPopupOptionNames2(n, GetHashValue32(str_kT_POPUP235RemoveMessenger));
         n++;
     } else {
-        unsigned short* buf = self->mustrStatusLine1;
+        unsigned short* buf = mustrStatusLine1;
         sprintf1(buf, Text_001AB478(str_kT_POPUP279ConfirmAddMessenger), (char*)name);
-        cPopupInfo_setPopupConfirmation1(sub, n, buf, 0);
-        cPopupInfo_setPopupOptionNames2(sub, n, GetHashValue32(str_kT_POPUP235AddMessenger));
+        sub->setPopupConfirmation1(n, buf, 0);
+        sub->setPopupOptionNames2(n, GetHashValue32(str_kT_POPUP235AddMessenger));
         n++;
     }
     if (BuddyMan_isBlockedByName(GetSession_001AB478(), name)) {
-        unsigned short* buf = self->mustrStatusLine2;
+        unsigned short* buf = mustrStatusLine2;
         sprintf1(buf, Text_001AB478(str_kT_POPUP235RemoveBlockConfirm), (char*)name);
-        cPopupInfo_setPopupConfirmation1(sub, n, buf, 0);
-        cPopupInfo_setPopupOptionNames2(sub, n, GetHashValue32(str_kT_POPUP235UnblockUser));
+        sub->setPopupConfirmation1(n, buf, 0);
+        sub->setPopupOptionNames2(n, GetHashValue32(str_kT_POPUP235UnblockUser));
         n++;
     } else {
-        unsigned short* buf = self->mustrStatusLine2;
+        unsigned short* buf = mustrStatusLine2;
         sprintf1(buf, Text_001AB478(str_kT_POPUP235BlockAllConfirm), (char*)name);
-        cPopupInfo_setPopupConfirmation1(sub, n, buf, 0);
-        cPopupInfo_setPopupOptionNames2(sub, n, GetHashValue32(str_kT_POPUP235BlockUser));
+        sub->setPopupConfirmation1(n, buf, 0);
+        sub->setPopupOptionNames2(n, GetHashValue32(str_kT_POPUP235BlockUser));
         n++;
     }
     if (fiveOptions) {
         sub->clearPopupConfirmation(n);
-        cPopupInfo_setPopupOptionNames2(sub, n, GetHashValue32(str_kT_235ReportAbuse));
+        sub->setPopupOptionNames2(n, GetHashValue32(str_kT_235ReportAbuse));
     }
     sub->miDefaultOption = selectedOption;
     sub->mbCenterOptions = 1;
-    cFEStateNet_showPopup(self, (cScreenPopup*)popupData);
+    showPopup((cScreenPopup*)popupData);
 }
 #endif
 
@@ -6211,14 +6205,13 @@ extern char str_cFEStateReadMessagePopup[];
  * the name, id 2, up to 63 characters), enables key 75, sets keys 0..13 (cKeyboardPopup_setIncludeQuickKeyRow) and
  * mbReferEventsToParent; cFEStateNetMessenger_handleKeyboardText sends the typed text.
  *
- * @param feStateNet  the online state (this)
  * @param playerName  the player's name
  * @param popup  unused (the popup)
  * @param event  unused (the popup event)
  */
-extern "C" void cFEStateNet_openPlayerMessages(cFEStateNet* feStateNet, const char* playerName, void* popup, int event)
+void cFEStateNet::openPlayerMessages(const char* playerName, void* popup, int event)
 {
-    cFEStateNet* self = feStateNet;
+    cFEStateNet* self = this;
     self->mUserPopupOpen = 0;
     if (BuddyMan_mBuddyMan == 0) {
         BuddyMan_createInstance();
@@ -6234,7 +6227,7 @@ extern "C" void cFEStateNet_openPlayerMessages(cFEStateNet* feStateNet, const ch
                 0x100, 0), (self->mpEngine), self, playerName);
         cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, obj);
     } else {
-        cFEStateNet_openKeyboardWithAsciiLabel((cFEStateNet*)self, 0, playerName, str_empty_d, 0, 2, 0x3F);
+        self->openKeyboardWithAsciiLabel(0, playerName, str_empty_d, 0, 2, 0x3F);
         self->mpKeyboard->meType = 0;
         cKeyboardPopup_setIncludeKey(((char*)self->mpKeyboard), 75, 1, 2);
         cKeyboardPopup_setIncludeQuickKeyRow(((char*)self->mpKeyboard), 1);
@@ -6266,9 +6259,9 @@ struct sFEObj_001ABC50 {
  * @param playerName  the player's name
  * @param outError  int* receiving BuddyMan's error code
  */
-extern "C" void cFEStateNet_toggleBlockPlayer(cFEStateNet* self, const char* playerName, int* outError)
+void cFEStateNet::toggleBlockPlayer(const char* playerName, int* outError)
 {
-    self->mUserPopupOpen = 0;
+    mUserPopupOpen = 0;
     if (BuddyMan_mBuddyMan == 0) {
         BuddyMan_createInstance();
     }
@@ -6319,10 +6312,10 @@ extern char str_cFEStateChallengePopup[];
  * @param event  its popup event
  * @param fromPopup  non-zero to give the new popup id 2100 (handled by cFEStateNet_onNestedChallengePopupEvent)
  */
-extern "C" void cFEStateNet_challengePlayer(cFEStateNet* self, const char* playerName, void* popup, int event, int fromPopup)
+void cFEStateNet::challengePlayer(const char* playerName, void* popup, int event, int fromPopup)
 {
-    self->mUserPopupOpen = 0;
-    cFEStateNet_onPopupEvent_v(self, popup, event);
+    mUserPopupOpen = 0;
+    cFEStateNet_onPopupEvent_v(this, popup, event);
     if (BuddyMan_mBuddyMan == 0) {
         BuddyMan_createInstance();
     }
@@ -6335,13 +6328,13 @@ extern "C" void cFEStateNet_challengePlayer(cFEStateNet* self, const char* playe
     if (BuddyMan_hasChallengeFrom(BuddyMan_mBuddyMan, playerName)) {
         cUIState* newPopup = (cUIState*)cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup(
                 (cFEStateChallengeReceivedPopup*)cMemMan_alloc(1752, str_cFEStateChallengeReceivedPopup, 0x100, 0),
-                self->mpEngine, self, playerName);
+                mpEngine, this, playerName);
         if (fromPopup) {
             newPopup->miMiscData = 2100;
         } else {
             newPopup->miMiscData = 2049;
         }
-        cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, newPopup);
+        cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, newPopup);
     } else {
         MEM_fill(((char*)&cBERules_mRules), 0, 0x20);
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
@@ -6351,13 +6344,13 @@ extern "C" void cFEStateNet_challengePlayer(cFEStateNet* self, const char* playe
         cBXString_operatorE((char*)&lobbyMan->mOpponent, opponentName);
         cBXString__cBXString(opponentName, 2);
         cUIState* newPopup = (cUIState*)cFEStateChallengePopup_cFEStateChallengePopup_BCD0(
-                cMemMan_alloc(1776, str_cFEStateChallengePopup, 0x100, 0), self->mpEngine, self);
+                cMemMan_alloc(1776, str_cFEStateChallengePopup, 0x100, 0), mpEngine, this);
         if (fromPopup) {
             newPopup->miMiscData = 2100;
         } else {
             newPopup->miMiscData = 0x800;
         }
-        cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, newPopup);
+        cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, newPopup);
     }
 }
 #endif
@@ -6386,9 +6379,9 @@ struct sFEObj_001ABE58 {
  * @param playerName  the player's name
  * @param outError  int* receiving BuddyMan's error code
  */
-extern "C" void cFEStateNet_toggleBuddy(cFEStateNet* self, const char* playerName, int* outError)
+void cFEStateNet::toggleBuddy(const char* playerName, int* outError)
 {
-    self->mUserPopupOpen = 0;
+    mUserPopupOpen = 0;
     if (BuddyMan_mBuddyMan == 0) {
         BuddyMan_createInstance();
     }
@@ -6415,11 +6408,11 @@ extern char str_kT_POPUP235MaxBuddiesExceeded[];
 /**
  * Shows the "kT_POPUP235MaxBuddiesExceeded" popup (one OK, id 2117, layer 6).
  */
-extern "C" void cFEStateNet_showMaxBuddiesPopup(void* self)
+void cFEStateNet::showMaxBuddiesPopup()
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)((cFEStateNet*)this)->createPopup();
     popup->info.meType = 1;
-    cPopupInfo_setPopupOptionNames2(&popup->info, 0, GetHashValue32(str_kT_BTNOK));
+    popup->info.setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
     int textHash = GetHashValue32(str_kT_POPUP235MaxBuddiesExceeded);
     //S
     popup->info.mtMessage.ui = textHash;
@@ -6427,7 +6420,7 @@ extern "C" void cFEStateNet_showMaxBuddiesPopup(void* self)
     popup->info.miMiscData = 2117;
     popup->info.miLayerOffset = 6;
     //E
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    ((cFEStateNet*)this)->showPopup(popup);
 }
 #endif
 
@@ -6641,17 +6634,17 @@ extern char str_kT_BTNOK[];
  *
  * @return true when a password is set, false when the popup was shown
  */
-extern "C" bool cFEUseExistingAccount_checkPasswordEntered(cFEUseExistingAccount* self)
+bool cFEUseExistingAccount::checkPasswordEntered()
 {
     if (strlen(((const char*)LobbyMan_mLobbyMan->mPassword)) == 0) {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)this->createPopup();
     cPopupInfo* sub = &popup->info;
     popup->info.meType = 1;
     popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210PasswordMissing);
     popup->info.mtMessage.eType = 3;
-    cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+    sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
     popup->info.miMiscData = 2061;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    this->showPopup(popup);
     return false;
     }
     return true;
@@ -6676,17 +6669,17 @@ extern char str_kT_BTNOK[];
  *
  * @return true when a name is set, false when the popup was shown
  */
-extern "C" bool cFEUseExistingAccount_checkAccountNameEntered(cFEUseExistingAccount* self)
+bool cFEUseExistingAccount::checkAccountNameEntered()
 {
     if (strlen(((const char*)LobbyMan_mLobbyMan->mUserName)) == 0) {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)this->createPopup();
     cPopupInfo* sub = &popup->info;
     popup->info.meType = 1;
     popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210AccountNameMissing);
     popup->info.mtMessage.eType = 3;
-    cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+    sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
     popup->info.miMiscData = 2061;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    this->showPopup(popup);
     return false;
     }
     return true;
@@ -6706,11 +6699,11 @@ extern "C" bool cFEUseExistingAccount_checkPasswordEntered(cFEUseExistingAccount
  *
  * @return 1 when both are set, else 0
  */
-extern "C" int cFEUseExistingAccount_checkLoginFields(cFEUseExistingAccount* self)
+int cFEUseExistingAccount::checkLoginFields()
 {
     bool ok = true;
-    ok = ok && cFEUseExistingAccount_checkAccountNameEntered(self);
-    ok = ok && cFEUseExistingAccount_checkPasswordEntered(self);
+    ok = ok && checkAccountNameEntered();
+    ok = ok && checkPasswordEntered();
     return ok;
 }
 #endif
@@ -6732,17 +6725,17 @@ extern char str_kT_BTNOK[];
  *
  * @return true when an address is set, false when the popup was shown
  */
-extern "C" bool cFEUseExistingAccount_checkEmailEntered(cFEUseExistingAccount* self)
+bool cFEUseExistingAccount::checkEmailEntered()
 {
-    if (((cBXString*)&self->mszEmail)->getData()->DataLength == 0) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    if (((cBXString*)&mszEmail)->getData()->DataLength == 0) {
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210EmailMissing);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         return false;
     }
     return true;
@@ -6770,7 +6763,7 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the cFEStateNetHelpPopup to fill
  */
-extern "C" void cFEUseExistingAccount_fillHelpPopup(cFEUseExistingAccount* self, cFEStateNetHelpPopup* popup)
+void cFEUseExistingAccount::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 3);
     popup->muiScreenName = GetHashValue32(str_kT_HELP204UseAnotherAccount);
@@ -6855,14 +6848,14 @@ void cFEUseExistingAccount::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
             if (!cFEUseExistingAccount_checkLoginFields_C5C0(((char*)this))) {
                 break;
             }
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             cPopupInfo* sub = &popup->info;
             popup->info.meType = 1;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP201Verify);
             popup->info.mtMessage.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNCancel));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNCancel));
             popup->info.miMiscData = 2062;
-            cFEStateNet_showPopup((cFEStateNet*)this, popup);
+            this->showPopup(popup);
             miRequest = 4;
             LobbyMan_connect_C5C0(LobbyMan_mLobbyMan, 0);
             break;
@@ -6871,19 +6864,19 @@ void cFEUseExistingAccount::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
             if (!cFEUseExistingAccount_checkAccountNameEntered_C5C0(((char*)this))) {
                 break;
             }
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 0;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204RequestPassword);
             popup->info.mtMessage.eType = 3;
             popup->info.mbReceivePrev = 0;
             popup->info.miMiscData = 2066;
-            cFEStateNet_showPopup((cFEStateNet*)this, popup);
+            this->showPopup(popup);
             miRequest = 2;
             LobbyMan_connect_C5C0(LobbyMan_mLobbyMan, 0);
             break;
         }
         case 3: {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = -1;
             popup->info.miMaxChars = 50;
             cPopupInfo* sub = &popup->info;
@@ -6891,9 +6884,9 @@ void cFEUseExistingAccount::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
             popup->info.mtMessage.eType = 3;
             popup->info.mtEntryBoxTitle.ui = GetHashValue32(str_kT_210EmailAddress);
             popup->info.mtEntryBoxTitle.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
             popup->info.miMiscData = 2063;
-            cFEStateNet_showPopup((cFEStateNet*)this, popup);
+            this->showPopup(popup);
             break;
         }
         case 0: {
@@ -6902,7 +6895,7 @@ void cFEUseExistingAccount::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
                 break;
             }
             char* inputText = LobbyMan_mLobbyMan->mUserName;
-            cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, obj, GetHashValue32(str_kT_204AccountName), inputText, 0, 6, 0x10);
+            this->openKeyboardWithLabelID(obj, GetHashValue32(str_kT_204AccountName), inputText, 0, 6, 0x10);
             mpKeyboard->mbDisableForFirst = 1;
             cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
             cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
@@ -6914,7 +6907,7 @@ void cFEUseExistingAccount::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
                 break;
             }
             char* inputText = LobbyMan_mLobbyMan->mPassword;
-            cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, obj, GetHashValue32(str_kT_210Password), inputText, 1, 7, 0x10);
+            this->openKeyboardWithLabelID(obj, GetHashValue32(str_kT_210Password), inputText, 1, 7, 0x10);
             cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             break;
         }
@@ -6959,16 +6952,16 @@ void cFEUseExistingAccount::onPopupEvent(cUIState* pPopup, unsigned int Event)
 {
     switch ((unsigned int)pPopup->miMiscData) {
     case 2062:
-        cFEUseExistingAccount_onVerifyingPopupEvent(this, pPopup, Event);
+        this->onVerifyingPopupEvent(pPopup, Event);
         break;
     case 2063:
-        cFEUseExistingAccount_onEmailEntryPopupEvent(this, (cScreenPopup*)pPopup, Event);
+        this->onEmailEntryPopupEvent((cScreenPopup*)pPopup, Event);
         break;
     case 2092:
-        cFEUseExistingAccount_onAccountMemPopupEvent(this, pPopup, Event);
+        this->onAccountMemPopupEvent(pPopup, Event);
         break;
     case 2078:
-        cFEUseExistingAccount_onSaveAccountPopupEvent(this, pPopup, Event);
+        this->onSaveAccountPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -7000,25 +6993,25 @@ extern char str_kT_POPUP204RequestAccount[];
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEUseExistingAccount_onEmailEntryPopupEvent(cFEUseExistingAccount* self, cScreenPopup* popup, int event)
+void cFEUseExistingAccount::onEmailEntryPopupEvent(cScreenPopup* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
         int three = 3;
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION0);
-        cBXString_operatorE1((char*)&self->mszEmail, popup->mszInputText.Str);
-        cScreenPopup* newPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION0);
+        cBXString_operatorE1((char*)&mszEmail, popup->mszInputText.Str);
+        cScreenPopup* newPopup = (cScreenPopup*)this->createPopup();
         newPopup->info.meType = 0;
         newPopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204RequestAccount);
         newPopup->info.mtMessage.eType = three;
         newPopup->info.mbReceivePrev = 0;
         newPopup->info.miMiscData = 2064;
-        cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)newPopup);
-        if (cFEUseExistingAccount_checkEmailEntered(self) != 0) {
-            self->miRequest = three;
+        this->showPopup((cScreenPopup*)newPopup);
+        if (checkEmailEntered() != 0) {
+            miRequest = three;
             LobbyMan_connect(LobbyMan_mLobbyMan, 0);
         }
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -7056,14 +7049,14 @@ static inline void* GetSession_001ACA88()
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEUseExistingAccount_onVerifyingPopupEvent(cFEUseExistingAccount* self, cUIState* popup, int event)
+void cFEUseExistingAccount::onVerifyingPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
         BuddyMan_disconnect(GetSession_001ACA88());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -7094,23 +7087,23 @@ extern char str_kT_POPUP204SaveAccount[];
  * @param popup  the popup state
  * @param kind  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEUseExistingAccount_onAccountMemPopupEvent(cFEUseExistingAccount* self, cUIState* popup, int kind)
+void cFEUseExistingAccount::onAccountMemPopupEvent(cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case cUIState::kONSCREENPOPUPOPTION0:
     case cUIState::kONSCREENPOPUPOPTION1:
-        self->mbAskSave = 0;
-        cFEStateNet_onPopupEvent(self, popup, kind);
-        cFEStateNet_pushState(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
-                str_cFEStateSelectPersona, 0, 0), self->mpEngine));
+        mbAskSave = 0;
+        cFEStateNet_onPopupEvent(this, popup, kind);
+        cFEStateNet_pushState(this, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
+                str_cFEStateSelectPersona, 0, 0), mpEngine));
         break;
     case cUIState::kONSCREENPOPUPOPTION2:
-        self->mbAskSave = 1;
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION2);
+        mbAskSave = 1;
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION2);
         break;
     case cUIState::kONPOPUPDESTROY:
-        if (self->mbAskSave != 0) {
-            cScreenPopup* newPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        if (mbAskSave != 0) {
+            cScreenPopup* newPopup = (cScreenPopup*)this->createPopup();
             newPopup->info.meType = 2;
             char* sub = (char*)&newPopup->info;
             cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
@@ -7120,13 +7113,13 @@ extern "C" void cFEUseExistingAccount_onAccountMemPopupEvent(cFEUseExistingAccou
             newPopup->info.mtMessage.eType = 3;
             newPopup->info.miDefaultOption = 0;
             newPopup->info.mbReceivePrev = 0;
-            cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)newPopup);
+            this->showPopup((cScreenPopup*)newPopup);
         }
-        self->mbAskSave = 0;
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONPOPUPDESTROY);
+        mbAskSave = 0;
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONPOPUPDESTROY);
         break;
     default:
-        cFEStateNet_onPopupEvent(self, popup, kind);
+        cFEStateNet_onPopupEvent(this, popup, kind);
         break;
     }
 }
@@ -7155,25 +7148,25 @@ extern const char str_cFEStateSelectPersona[];
  * @param popup  the popup state
  * @param kind  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEUseExistingAccount_onSaveAccountPopupEvent(cFEUseExistingAccount* self, cUIState* popup, int kind)
+void cFEUseExistingAccount::onSaveAccountPopupEvent(cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case cUIState::kONSCREENPOPUPOPTION0: {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, cUIState::kONSCREENPOPUPOPTION0);
-        cFEStateNetAccountMem* accountMem = (cFEStateNetAccountMem*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine, ((cFEStateNet*)self), 1,
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, cUIState::kONSCREENPOPUPOPTION0);
+        cFEStateNetAccountMem* accountMem = (cFEStateNetAccountMem*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), mpEngine, ((cFEStateNet*)this), 1,
                                 (LobbyMan_mLobbyMan->mUserName), (LobbyMan_mLobbyMan->mPassword));
         accountMem->miMiscData = 2092;
-        cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, accountMem);
+        cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, accountMem);
         break;
     }
     case cUIState::kONSCREENPOPUPOPTION1:
     case cUIState::kONSCREENPOPUPPREV:
-        cFEStateNet_pushState(((cFEStateNet*)self),
+        cFEStateNet_pushState(((cFEStateNet*)this),
                 cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
-                str_cFEStateSelectPersona, 0, 0), self->mpEngine));
+                str_cFEStateSelectPersona, 0, 0), mpEngine));
         break;
     default:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
         break;
     }
 }
@@ -7200,29 +7193,29 @@ extern char str_EnterPassword[];
  * it (cFEStateNet_setMaskedText) into mpKeyboardText, and stores it in mPassword. Both stores construct over the old cBXString
  * (cBXString_operatorE1).
  */
-extern "C" void cFEUseExistingAccount_handleKeyboardText(cFEUseExistingAccount* self)
+void cFEUseExistingAccount::handleKeyboardText()
 {
-    cKeyboardPopup* keyboard = self->mpKeyboard;
+    cKeyboardPopup* keyboard = mpKeyboard;
     switch (keyboard->miMiscData) {
     case 6: {
         const char* name = keyboard->mszEditString;
-        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterAccountName));
+        cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterAccountName));
         if (text != 0) {
             cUIText_setAsciiString(text, name);
         }
         if (strlen(name) != 0) {
-            self->mpTextForgotPassword->setStatic(0);
+            mpTextForgotPassword->setStatic(0);
         } else {
-            self->mpTextForgotPassword->setStatic(1);
+            mpTextForgotPassword->setStatic(1);
         }
         cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, name);
         break;
     }
     case 7: {
         const char* name = keyboard->mszEditString;
-        if (cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterPassword)) != 0) {
-            cFEStateNet_setMaskedText((cFEStateNet*)self, name);
-            cUIText_setAsciiString(self->mpKeyboardText, (char*)&self->mszMaskedText);
+        if (cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterPassword)) != 0) {
+            this->setMaskedText(name);
+            cUIText_setAsciiString(mpKeyboardText, (char*)&mszMaskedText);
         }
         cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, name);
         break;
@@ -7263,16 +7256,16 @@ extern char str_kT_CMNNo[];
  * @param data  the event
  * @return 0, or cFEStateNet_onNetEvent's result
  */
-extern "C" int cFEUseExistingAccount_onNetEvent(cFEUseExistingAccount* self, int id, void* data)
+int cFEUseExistingAccount::onNetEvent(int id, void* data)
 {
     switch (id) {
     case kNetEvent_LobbyConnect:
-        switch (self->miRequest) {
+        switch (miRequest) {
         case 2:
             LobbyMan_requestLostPassword(LobbyMan_mLobbyMan, (LobbyMan_mLobbyMan->mUserName));
             break;
         case 3:
-            LobbyMan_requestLostAccount(LobbyMan_mLobbyMan, self->mszEmail);
+            LobbyMan_requestLostAccount(LobbyMan_mLobbyMan, mszEmail);
             break;
         case 4:
             LobbyMan_authenticate(LobbyMan_mLobbyMan);
@@ -7280,43 +7273,43 @@ extern "C" int cFEUseExistingAccount_onNetEvent(cFEUseExistingAccount* self, int
         }
         break;
     case kNetEvent_LostAccountRequestSent: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204MailAccount);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2065;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         break;
     }
     case kNetEvent_LostPasswordRequestSent: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204MailPassword);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2067;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         break;
     }
     case kNetEvent_Authentication: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 2;
         cPopupInfo* sub = &popup->info;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-        cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+        sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
         popup->info.miMiscData = 2078;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204SaveAccount);
         popup->info.mtMessage.eType = 3;
         popup->info.miDefaultOption = 0;
         popup->info.mbReceivePrev = 0;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         break;
     }
     default:
-        return cFEStateNet_onNetEvent_3i(self, id, data);
+        return cFEStateNet_onNetEvent_3i(this, id, data);
     }
     return 0;
 }
@@ -7406,25 +7399,25 @@ extern char str_kT_POPUP220SubmittingPersona[];
  *
  * @param name  the typed persona name
  */
-extern "C" void cFEStateSelectPersona_createPersona(cFEStateSelectPersona* self, const char* name)
+void cFEStateSelectPersona::createPersona(const char* name)
 {
     if (strlen(name) < 3) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP220PersonaNameLength);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2068;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     } else {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 0;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP220SubmittingPersona);
         popup->info.mtMessage.eType = 3;
         popup->info.miMiscData = 2069;
         popup->info.mbReceivePrev = 0;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         LobbyMan_createPersona(LobbyMan_mLobbyMan, name);
     }
 }
@@ -7459,7 +7452,7 @@ void cFEStateSelectPersona::onWidgetCreate(cUIThing* pWidget)
     cUIText* text = (cUIText*)pWidget;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     if (IsHash1AD308(text->mHashName, str_PersonaMenu)) {
-        cFEStateSelectPersona_fillPersonaMenu(this, text);
+        this->fillPersonaMenu(text);
     } else if (IsHash1AD308(text->mHashName, str_EditAccount)) {
         text->mMiscData = -1;
     } else if (IsHash1AD308(text->mHashName, str_TextAccountName)) {
@@ -7494,7 +7487,7 @@ struct sFEGlobals1AD3E8 {
  *
  * @param text  the persona menu ("PersonaMenu")
  */
-extern "C" void cFEStateSelectPersona_fillPersonaMenu(cFEStateSelectPersona* self, cUIText* text)
+void cFEStateSelectPersona::fillPersonaMenu(cUIText* text)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int i = 0;
@@ -7536,7 +7529,7 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the cFEStateNetHelpPopup to fill
  */
-extern "C" void cFEStateSelectPersona_fillHelpPopup(cFEStateSelectPersona* self, cFEStateNetHelpPopup* popup)
+void cFEStateSelectPersona::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     popup->muiScreenName = GetHashValue32(str_kT_HELP220Persona);
@@ -7591,7 +7584,7 @@ void cFEStateSelectPersona::onWidgetEvent(cUIThing* pWidget, unsigned int Event)
             break;
         }
         if (idx >= LobbyMan_mLobbyMan->mNumPersonas) {
-            cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, pWidget, GetHashValue32(str_kT_220CreateNewPersona),
+            this->openKeyboardWithLabelID(pWidget, GetHashValue32(str_kT_220CreateNewPersona),
                           str_empty_d, 0, -1, 0xC);
             mpKeyboard->mbDisableForFirst = 1;
             cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
@@ -7629,17 +7622,17 @@ void cFEStateSelectPersona::onWidgetEvent(cUIThing* pWidget, unsigned int Event)
         }
         if (idx < LobbyMan_mLobbyMan->mNumPersonas) {
             miDeletePersona = idx;
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             cPopupInfo* sub = &popup->info;
             popup->info.meType = 2;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP220DeleteInitial);
             popup->info.mtMessage.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNDelete));
-            cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_BTNCancel));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNDelete));
+            sub->setPopupOptionNames2(1, GetHashValue32(str_kT_BTNCancel));
             cPopupInfo_setPopupConfirmation2_D5E8(sub, 0, GetHashValue32(str_kT_POPUP220DeleteFinal), 1);
             popup->info.miDefaultOption = 1;
             popup->info.miMiscData = 2070;
-            cFEStateNet_showPopup((cFEStateNet*)this, popup);
+            this->showPopup(popup);
         }
         break;
     }
@@ -7681,7 +7674,7 @@ void cFEStateSelectPersona::onPopupEvent(cUIState* pPopup, unsigned int Event)
         }
         break;
     case 2073:
-        cFEStateSelectPersona_onMessengerErrorPopupEvent(this, pPopup, Event);
+        this->onMessengerErrorPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -7709,15 +7702,15 @@ extern char str_cFEStateNetAccountMem[];
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateSelectPersona_onMessengerErrorPopupEvent(cFEStateSelectPersona* self, void* popup, int event)
+void cFEStateSelectPersona::onMessengerErrorPopupEvent(void* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, cUIState::kONSCREENPOPUPOPTION0);
-        cFEStateNetAccountMem* accountMem = (cFEStateNetAccountMem*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine, ((cFEStateNet*)self), 0, 0, 0);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, cUIState::kONSCREENPOPUPOPTION0);
+        cFEStateNetAccountMem* accountMem = (cFEStateNetAccountMem*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), mpEngine, ((cFEStateNet*)this), 0, 0, 0);
         accountMem->miMiscData = 2098;
-        cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, accountMem);
+        cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, accountMem);
     } else {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, event);
     }
 }
 #endif
@@ -7737,13 +7730,13 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateSelectPersona_onDeletePersonaPopupEvent(cFEStateSelectPersona* self, void* popup, int event)
+void cFEStateSelectPersona::onDeletePersonaPopupEvent(void* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
-        LobbyMan_deletePersona(LobbyMan_mLobbyMan, self->miDeletePersona);
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION0);
+        LobbyMan_deletePersona(LobbyMan_mLobbyMan, miDeletePersona);
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION0);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -7790,17 +7783,17 @@ extern char str_kT_POPUPCMNErrorEAMessenger[];
  * @param data  the event
  * @return -1 when handled here, else cFEStateNet_onNetEvent's result
  */
-extern "C" int cFEStateSelectPersona_onNetEvent(cFEStateSelectPersona* self, int msgId, void* data)
+int cFEStateSelectPersona::onNetEvent(int msgId, void* data)
 {
     switch (msgId) {
     case 217: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(((cFEStateNet*)self));
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 0;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP220SelectingPersona);
         popup->info.mtMessage.eType = 3;
         popup->info.miMiscData = 2071;
         popup->info.mbReceivePrev = 0;
-        cFEStateNet_showPopup(((cFEStateNet*)self), popup);
+        this->showPopup(popup);
         break;
     }
     case kNetEvent_BuddyConnect: {
@@ -7815,34 +7808,34 @@ extern "C" int cFEStateSelectPersona_onNetEvent(cFEStateSelectPersona* self, int
         }
         BuddyMan_disconnect(BuddyMan_mBuddyMan);
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(((cFEStateNet*)self));
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNErrorEAMessenger);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.mbReceivePrev = 0;
         popup->info.miMiscData = 2073;
-        cFEStateNet_showPopup(((cFEStateNet*)self), popup);
+        this->showPopup(popup);
     }
     case kNetEvent_PersonaCreated:
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
     case kNetEvent_PersonaDeleted:
         {
-            sVEntry<void(void*, cUIText*)>* vt = (sVEntry<void(void*, cUIText*)>*)VPTR_OF(cListNode, self);
-            vt[18].fn(vthis(self, vt[18]), cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PersonaMenu)));
+            sVEntry<void(void*, cUIText*)>* vt = (sVEntry<void(void*, cUIText*)>*)VPTR_OF(cListNode, this);
+            vt[18].fn(vthis(this, vt[18]), cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_PersonaMenu)));
         }
         break;
     case kNetEvent_Error:
-        cFEStateSelectPersona_handlePersonaError(self, data);
+        handlePersonaError(data);
         break;
     case 273:
-        cFEStateNet_pushState(((cFEStateNet*)self),
+        cFEStateNet_pushState(((cFEStateNet*)this),
                 cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(1744,
-                str_cFEStateOnlineMainMenu, 0, 0), self->mpEngine));
+                str_cFEStateOnlineMainMenu, 0, 0), mpEngine));
         break;
     default:
-        return (int)cFEStateNet_onNetEvent_3(((cFEStateNet*)self), msgId, data);
+        return (int)cFEStateNet_onNetEvent_3(((cFEStateNet*)this), msgId, data);
     case kNetEvent_RankListUpdate:
         break;
     }
@@ -7877,33 +7870,33 @@ extern char str_kT_POPUPCMNProfanityPersona[];
  *
  * @param msgPtr  the error event (code at +0x8)
  */
-extern "C" void cFEStateSelectPersona_handlePersonaError(cFEStateSelectPersona* self, void* msgPtr)
+void cFEStateSelectPersona::handlePersonaError(void* msgPtr)
 {
     online_ErrorEvent* msg = (online_ErrorEvent*)((void*)msgPtr);
     switch ((unsigned int)msg->mError) {
     case kLobbyErr_dupl:
-        cFEStateNet_pushState(self,
+        cFEStateNet_pushState(this,
                 cFEStateCreateDuplicate_cFEStateCreateDuplicate((cFEStateCreateDuplicate*)cMemMan_alloc(1760,
-                str_cFEStateCreateDuplicate, 0, 0), self->mpEngine, 0));
+                str_cFEStateCreateDuplicate, 0, 0), mpEngine, 0));
         break;
     case kLobbyErr_inam:
         {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 1;
             cPopupInfo* sub = &popup->info;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP220PersonaNameLength);
             popup->info.mtMessage.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
             popup->info.miMiscData = 2072;
-            cFEStateNet_showPopup((cFEStateNet*)self, popup);
+            this->showPopup(popup);
         }
         break;
     case kLobbyErr_filt:
         {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 1;
             cPopupInfo* sub = &popup->info;
-            if (self->mbExistingPersona == 0) {
+            if (mbExistingPersona == 0) {
                 popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNProfanityPersona);
                 popup->info.mtMessage.eType = 3;
                 popup->info.miMiscData = 2072;
@@ -7912,12 +7905,12 @@ extern "C" void cFEStateSelectPersona_handlePersonaError(cFEStateSelectPersona* 
                 popup->info.mtMessage.eType = 3;
                 popup->info.miMiscData = 2109;
             }
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
-            cFEStateNet_showPopup((cFEStateNet*)self, popup);
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
+            this->showPopup(popup);
         }
         break;
     default:
-        cFEStateNet_onNetEvent_1ADC30(self, msg->mType, msg);
+        cFEStateNet_onNetEvent_1ADC30(this, msg->mType, msg);
         break;
     }
 }
@@ -8022,8 +8015,8 @@ void cFEStateChallengePopup::onCreateScreen()
         cBENewRaceInterface_setNumberAI(iface, D_004A4E88_w[1]);
         sVEntry<int(void*)>* ivt = (sVEntry<int (void*)>*)VPTR_OF(cBEInterface, iface);
         ivt[1].fn(vthis(iface, ivt[1]));
-        cFEStateChallengePopup_fillRaceTexts(this, iface, mpScreen);
-        cFEStateChallengePopup_clearChallengeSent(this);
+        this->fillRaceTexts(iface, mpScreen);
+        this->clearChallengeSent();
         LobbyMan_findPlayer(LobbyMan_mLobbyMan, ((const char*)LobbyMan_mLobbyMan->mOpponent));
         clearOpponentStats(mpScreen);
         if (mbFirstCreate == 0) {
@@ -8033,7 +8026,7 @@ void cFEStateChallengePopup::onCreateScreen()
         }
     }
     if (LobbyMan_mLobbyMan->mState == 0) {
-        cFEStateNet_showDisconnectPopup((cFEStateNet*)this);
+        this->showDisconnectPopup();
     }
 }
 #endif
@@ -8111,8 +8104,8 @@ extern "C" void cFEStateChallengePopup_onGainFocus(cFEStateChallengePopup* self,
         self->mpEventOptions = (int*)D_00441268;
         break;
     }
-    cFEStateChallengePopup_setOptionListBoxes(self, cBENetworkInterface_networkOpt.bIsRankedGame);
-    cFEStateChallengePopup_setOptionsLocked(self, self->mbChallengeSent);
+    self->setOptionListBoxes(cBENetworkInterface_networkOpt.bIsRankedGame);
+    self->setOptionsLocked(self->mbChallengeSent);
 }
 #endif
 
@@ -8343,20 +8336,20 @@ struct sOpts1AE680 {
  * bits 6, 7 and 8 of the race-option word at cBERules_mRules + 0x18; mpLBCPURiders becomes the new-race interface's AI count
  * (cBENewRaceInterface_setNumberAI), followed by its vtable entry 1. Called from cFEStateChallengePopup_onWidgetEvent.
  */
-extern "C" void cFEStateChallengePopup_applyRaceOptions(cFEStateChallengePopup* self)
+void cFEStateChallengePopup::applyRaceOptions()
 {
-    if (self->mpScreen != 0) {
+    if (mpScreen != 0) {
         cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
-        cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(self->mpLBRankedGame) != 0;
+        cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(mpLBRankedGame) != 0;
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cBEInterface, iface);
         vt[1].fn(vthis(iface, vt[1]));
-        int multipliers = cUIListBox_getCurrentEntryData(self->mpLBMultipliers);
+        int multipliers = cUIListBox_getCurrentEntryData(mpLBMultipliers);
         sOpts1AE680* raceOptions = (sOpts1AE680*)((char*)&cBERules_mRules);
         raceOptions->noIconMultiplier = multipliers;
-        raceOptions->noIconPowerUp = cUIListBox_getCurrentEntryData(self->mpLBPowerUps);
-        raceOptions->noIconPoints = cUIListBox_getCurrentEntryData(self->mpLBPointIcons);
+        raceOptions->noIconPowerUp = cUIListBox_getCurrentEntryData(mpLBPowerUps);
+        raceOptions->noIconPoints = cUIListBox_getCurrentEntryData(mpLBPointIcons);
         cBEInterface* nr = cBE_getInterface_Fv(cBE_getBE(), 0);
-        cBENewRaceInterface_setNumberAI(nr, cUIListBox_getCurrentEntryData(self->mpLBCPURiders));
+        cBENewRaceInterface_setNumberAI(nr, cUIListBox_getCurrentEntryData(mpLBCPURiders));
         sVEntry<int(void*)>* nvt = (sVEntry<int(void*)>*)VPTR_OF(cBEInterface, nr);
         nvt[1].fn(vthis(nr, nvt[1]));
     }
@@ -8574,90 +8567,90 @@ extern char str_Textselectevent[];
  *
  * @param on  1 to lock (challenge sent), 0 to unlock
  */
-extern "C" void cFEStateChallengePopup_setOptionsLocked(cFEStateChallengePopup* self, int on)
+void cFEStateChallengePopup::setOptionsLocked(int on)
 {
-    if (self->mpScreen == 0) {
+    if (mpScreen == 0) {
         return;
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     int locked = cBENetworkInterface_networkOpt.bIsRankedGame;
-    cUIThing* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairRankedGame));
+    cUIThing* widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_PairRankedGame));
     if (widget != 0) {
         widget->setStatic(on);
     }
-    widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairNumCPURiders));
+    widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_PairNumCPURiders));
     if (widget != 0) {
-        self->mpLBCPURiders->setStatic(on);
+        mpLBCPURiders->setStatic(on);
         widget->setStatic(on);
         if (on == 0) {
             {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, widget);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)(vthis(widget, vt[8]), (self->mpEventOptions)[0] == 0 || locked != 0);
+            (*pf)(vthis(widget, vt[8]), mpEventOptions[0] == 0 || locked != 0);
         }
             {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self->mpLBCPURiders);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, mpLBCPURiders);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)(vthis(self->mpLBCPURiders, vt[8]), (self->mpEventOptions)[0] == 0 || locked != 0);
+            (*pf)(vthis(mpLBCPURiders, vt[8]), mpEventOptions[0] == 0 || locked != 0);
         }
         }
     }
-    widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairPowerUps));
+    widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_PairPowerUps));
     if (widget != 0) {
         widget->setStatic(on);
-        self->mpLBPowerUps->setStatic(on);
+        mpLBPowerUps->setStatic(on);
         if (on == 0) {
             {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self->mpLBPowerUps);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, mpLBPowerUps);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)(vthis(self->mpLBPowerUps, vt[8]), (self->mpEventOptions)[1] == 0 || locked != 0);
+            (*pf)(vthis(mpLBPowerUps, vt[8]), mpEventOptions[1] == 0 || locked != 0);
         }
             {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, widget);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)(vthis(widget, vt[8]), (self->mpEventOptions)[1] == 0 || locked != 0);
+            (*pf)(vthis(widget, vt[8]), mpEventOptions[1] == 0 || locked != 0);
         }
         }
     }
-    widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairMultipliers));
+    widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_PairMultipliers));
     if (widget != 0) {
         widget->setStatic(on);
-        self->mpLBMultipliers->setStatic(on);
+        mpLBMultipliers->setStatic(on);
         if (on == 0) {
             {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self->mpLBMultipliers);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, mpLBMultipliers);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)(vthis(self->mpLBMultipliers, vt[8]), (self->mpEventOptions)[3] == 0 || locked != 0);
+            (*pf)(vthis(mpLBMultipliers, vt[8]), mpEventOptions[3] == 0 || locked != 0);
         }
             {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, widget);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)(vthis(widget, vt[8]), (self->mpEventOptions)[3] == 0 || locked != 0);
+            (*pf)(vthis(widget, vt[8]), mpEventOptions[3] == 0 || locked != 0);
         }
         }
     }
-    widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairPointIcons));
+    widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_PairPointIcons));
     if (widget != 0) {
         widget->setStatic(on);
-        self->mpLBPointIcons->setStatic(on);
+        mpLBPointIcons->setStatic(on);
         if (on == 0) {
             {
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, self->mpLBPointIcons);
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, mpLBPointIcons);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)(vthis(self->mpLBPointIcons, vt[8]), (self->mpEventOptions)[2] == 0 || locked != 0);
+            (*pf)(vthis(mpLBPointIcons, vt[8]), mpEventOptions[2] == 0 || locked != 0);
         }
             {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, widget);
             void (**pf)(void*, int) = &vt[8].fn;
-            (*pf)(vthis(widget, vt[8]), (self->mpEventOptions)[2] == 0 || locked != 0);
+            (*pf)(vthis(widget, vt[8]), mpEventOptions[2] == 0 || locked != 0);
         }
         }
     }
-    widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Textselectevent));
+    widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Textselectevent));
     if (widget != 0) {
         widget->setStatic(on);
     }
-    self->mpLBRankedGame->setStatic(on);
+    mpLBRankedGame->setStatic(on);
 }
 #endif
 
@@ -8682,39 +8675,39 @@ extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
  *
  * @param all  non-zero to reset to the defaults
  */
-extern "C" void cFEStateChallengePopup_setOptionListBoxes(cFEStateChallengePopup* self, int all)
+void cFEStateChallengePopup::setOptionListBoxes(int all)
 {
     cBEInterface* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (all) {
-        cUIListBox_setCurrentEntryByIndex(self->mpLBPowerUps, 1);
-        cUIListBox_setCurrentEntryByIndex(self->mpLBMultipliers, 1);
-        cUIListBox_setCurrentEntryByIndex(self->mpLBPointIcons, 1);
-        cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
+        cUIListBox_setCurrentEntryByIndex(mpLBPowerUps, 1);
+        cUIListBox_setCurrentEntryByIndex(mpLBMultipliers, 1);
+        cUIListBox_setCurrentEntryByIndex(mpLBPointIcons, 1);
+        cUIListBox_setCurrentEntryByIndex(mpLBCPURiders, 0);
         return;
     }
-    if (self->mpEventOptions[1] != 0) {
-        cUIListBox_setCurrentEntryByIndex(self->mpLBPowerUps, (D_005308D0[0] >> 8) & 1);
+    if (mpEventOptions[1] != 0) {
+        cUIListBox_setCurrentEntryByIndex(mpLBPowerUps, (D_005308D0[0] >> 8) & 1);
     } else {
-        cUIListBox_setCurrentEntryByIndex(self->mpLBPowerUps, 1);
+        cUIListBox_setCurrentEntryByIndex(mpLBPowerUps, 1);
     }
-    if (self->mpEventOptions[3] != 0) {
-        cUIListBox_setCurrentEntryByIndex(self->mpLBMultipliers, (D_005308D0[0] >> 6) & 1);
+    if (mpEventOptions[3] != 0) {
+        cUIListBox_setCurrentEntryByIndex(mpLBMultipliers, (D_005308D0[0] >> 6) & 1);
     } else {
-        cUIListBox_setCurrentEntryByIndex(self->mpLBMultipliers, 1);
+        cUIListBox_setCurrentEntryByIndex(mpLBMultipliers, 1);
     }
-    if (self->mpEventOptions[2] != 0) {
+    if (mpEventOptions[2] != 0) {
         int pointIconsBits = D_005308D0[0] >> 7;
-        cUIListBox_setCurrentEntryByIndex(self->mpLBPointIcons, pointIconsBits & 1);
+        cUIListBox_setCurrentEntryByIndex(mpLBPointIcons, pointIconsBits & 1);
     } else {
-        cUIListBox_setCurrentEntryByIndex(self->mpLBPointIcons, 1);
+        cUIListBox_setCurrentEntryByIndex(mpLBPointIcons, 1);
     }
     if (cBENewRaceInterface_newRace.cGameEvent != 0) {
         cBENewRaceInterface_setNumberAI(iface, 0);
         sVEntry<int(void*)>* ivt = (sVEntry<int(void*)>*)VPTR_OF(cBEInterface, iface);
         ivt[1].fn(vthis(iface, ivt[1]));
-        cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
+        cUIListBox_setCurrentEntryByIndex(mpLBCPURiders, 0);
     } else {
-        cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, D_004A4E88_AF098[4]);
+        cUIListBox_setCurrentEntryByIndex(mpLBCPURiders, D_004A4E88_AF098[4]);
     }
 }
 #endif
@@ -8757,7 +8750,7 @@ static inline cUIThing* Get1AF208(cUIState* self, char* name)
  * @param item  the list box (null is ignored)
  * @param on  1 to show, 0 to hide
  */
-extern "C" void cFEStateChallengePopup_showListBoxArrows(cFEStateChallengePopup* self, cUIText* item, int on)
+void cFEStateChallengePopup::showListBoxArrows(cUIText* item, int on)
 {
     if (item == 0) {
         return;
@@ -8765,20 +8758,20 @@ extern "C" void cFEStateChallengePopup_showListBoxArrows(cFEStateChallengePopup*
     cUIThing* rightArrow = 0;
     cUIThing* leftArrow = 0;
     if (IsHash1AF208(item->mHashName, str_ListBoxRankedGame)) {
-        rightArrow = Get1AF208(self, str_InformRight1);
-        leftArrow = Get1AF208(self, str_InformLeft1);
+        rightArrow = Get1AF208(this, str_InformRight1);
+        leftArrow = Get1AF208(this, str_InformLeft1);
     } else if (IsHash1AF208(item->mHashName, str_ListBoxCPURiders)) {
-        rightArrow = Get1AF208(self, str_InformRight2);
-        leftArrow = Get1AF208(self, str_InformLeft2);
+        rightArrow = Get1AF208(this, str_InformRight2);
+        leftArrow = Get1AF208(this, str_InformLeft2);
     } else if (IsHash1AF208(item->mHashName, str_ListBoxPowerUps)) {
-        rightArrow = Get1AF208(self, str_InformRight3);
-        leftArrow = Get1AF208(self, str_InformLeft3);
+        rightArrow = Get1AF208(this, str_InformRight3);
+        leftArrow = Get1AF208(this, str_InformLeft3);
     } else if (IsHash1AF208(item->mHashName, str_ListBoxMultipliers)) {
-        rightArrow = Get1AF208(self, str_InformRight4);
-        leftArrow = Get1AF208(self, str_InformLeft4);
+        rightArrow = Get1AF208(this, str_InformRight4);
+        leftArrow = Get1AF208(this, str_InformLeft4);
     } else if (IsHash1AF208(item->mHashName, str_ListBoxPointicons)) {
-        rightArrow = Get1AF208(self, str_InformRight5);
-        leftArrow = Get1AF208(self, str_InformLeft5);
+        rightArrow = Get1AF208(this, str_InformRight5);
+        leftArrow = Get1AF208(this, str_InformLeft5);
     }
     if (rightArrow != 0) {
         rightArrow->setVisible(on);
@@ -8807,12 +8800,12 @@ extern "C" int cUIStateStack_popToState(void* p);
  * @return cUIStateStack_popToState's result (a state-stack node) for OK/back, else the value left by cFEStateNet_onPopupEvent, which returns
  *     nothing
  */
-extern "C" int cFEStateChallengePopup_onErrorPopupEvent(cFEStateChallengePopup* self, void* popup, int event)
+int cFEStateChallengePopup::onErrorPopupEvent(void* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
-        return cUIStateStack_popToState(&self->mpEngine->mStateStack);
+        return cUIStateStack_popToState(&mpEngine->mStateStack);
     }
-    return cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
+    return cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, event);
 }
 #endif
 
@@ -8870,28 +8863,28 @@ extern const char str_cFEStateOnlineCharacterSelect[];
  * @param data  the event
  * @return 0, or cFEStateNet_onNetEvent's result
  */
-extern "C" void* cFEStateChallengePopup_onNetEvent(cFEStateChallengePopup* self, int msgId, void* data)
+void* cFEStateChallengePopup::onNetEvent(int msgId, void* data)
 {
     switch (msgId) {
     case 243:
-        cFEStateNet_pushState(((cFEStateNet*)self),
-                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), self->mpEngine));
+        cFEStateNet_pushState(((cFEStateNet*)this),
+                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), mpEngine));
         break;
     case 237: case 238: case 0xF0: case 241: case 242: case 268: case 274: case 275:
-        cFEStateChallengePopup_clearChallengeSent(self);
-        cFEStateNet_showChallengeErrorPopup(((cFEStateNet*)self), msgId);
+        clearChallengeSent();
+        this->showChallengeErrorPopup(msgId);
         break;
     case 272:
-        cFEStateNet_showWaitPlayerPopup(((cFEStateNet*)self));
+        this->showWaitPlayerPopup();
         break;
     case 227:
-        showOpponentStats(self->mpScreen, (online_FindPlayerEvent*)data);
+        showOpponentStats(mpScreen, (online_FindPlayerEvent*)data);
         break;
     case kNetEvent_Ping:
-        showOpponentConnection(self->mpScreen, (online_PingEvent*)((void*)data));
+        showOpponentConnection(mpScreen, (online_PingEvent*)((void*)data));
         break;
     default:
-        return cFEStateNet_onNetEvent_3(((cFEStateNet*)self), msgId, data);
+        return cFEStateNet_onNetEvent_3(((cFEStateNet*)this), msgId, data);
     case 239:
         break;
     }
@@ -8938,7 +8931,7 @@ extern "C" void cFEStateChallengePopup_setChallengeSent(cFEStateChallengePopup* 
         cUIText* submitText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit));
         submitText->setStatic(1);
         cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge)), 7);
-        cFEStateChallengePopup_setOptionsLocked(self, 1);
+        self->setOptionsLocked(1);
     }
 }
 #endif
@@ -8961,14 +8954,14 @@ extern char str_TextSubmit[];
  * When "staticTextSetchallenge" exists: shows "kT_241SetChallengeOptions" in it, clears "TextSubmit"'s static flag (not
  * null-checked) and unlocks the options (cFEStateChallengePopup_setOptionsLocked(self, 0)).
  */
-extern "C" void cFEStateChallengePopup_clearChallengeSent(cFEStateChallengePopup* self)
+void cFEStateChallengePopup::clearChallengeSent()
 {
-    self->mbChallengeSent = 0;
-    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_staticTextSetchallenge));
+    mbChallengeSent = 0;
+    cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_staticTextSetchallenge));
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_241SetChallengeOptions));
-        ((cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit)))->setStatic(0);
-        cFEStateChallengePopup_setOptionsLocked(self, 0);
+        ((cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextSubmit)))->setStatic(0);
+        setOptionsLocked(0);
     }
 }
 #endif
@@ -9017,7 +9010,7 @@ public:
  * @param iface  the new-race interface (only tested for null)
  * @param screen  the screen to fill (null: nothing)
  */
-extern "C" void cFEStateChallengePopup_fillRaceTexts(cFEStateChallengePopup* self, cBENewRaceInterface* iface, cUIScreen* screen)
+void cFEStateChallengePopup::fillRaceTexts(cBENewRaceInterface* iface, cUIScreen* screen)
 {
     if (((void*)screen) == 0) {
         return;
@@ -9046,8 +9039,8 @@ extern "C" void cFEStateChallengePopup_fillRaceTexts(cFEStateChallengePopup* sel
             cRaceIface_001AF728* iface = (cRaceIface_001AF728*)cBE_getInterface_Fv(cBE_getBE(), 0);
             cBENewRaceInterface_setNumberAI(iface, 0);
             iface->submit();
-            cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
-            ((cUIThing*)self->mpLBCPURiders)->setStatic(1);
+            cUIListBox_setCurrentEntryByIndex(mpLBCPURiders, 0);
+            ((cUIThing*)mpLBCPURiders)->setStatic(1);
         }
         cUIText_setAsciiString(uiText, cBENewRaceInterface_getEventName(iface));
     }
@@ -9357,7 +9350,7 @@ void cFEStateChallengeReceivedPopup::onCreateScreen()
     void* net = cBE_getInterface_Fv_FE68(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsRankedGame = challenge->mbRanked;
     vcall_FE68(net);
-    cFEStateChallengeReceivedPopup_fillRaceTexts(this, be, mpScreen);
+    this->fillRaceTexts(be, mpScreen);
     LobbyMan_findPlayer((char*)LobbyMan_mLobbyMan, LobbyMan_mLobbyMan->mOpponent);
     clearOpponentStats(mpScreen);
 }
@@ -9378,7 +9371,7 @@ extern "C" void BuddyMan_setPresence(void* self, int a1, int a2, int a3, int a4,
  * cFEStateChallengeReceivedPopup's vtable entry 32 (cFEStateNet's presence refresh). Gets BuddyMan (created or
  * reconnected on demand) and calls BuddyMan_setPresence(BuddyMan, 1, 8, mszChallenger, 0, 0).
  */
-extern "C" void cFEStateChallengeReceivedPopup_publishPresence(cFEStateChallengeReceivedPopup* self)
+void cFEStateChallengeReceivedPopup::publishPresence()
 {
     if (BuddyMan_mBuddyMan == 0) {
         BuddyMan_createInstance();
@@ -9389,7 +9382,7 @@ extern "C" void cFEStateChallengeReceivedPopup_publishPresence(cFEStateChallenge
     if (BuddyMan_mBuddyMan == 0) {
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
     }
-    BuddyMan_setPresence(BuddyMan_mBuddyMan, 1, 8, (int)self->mszChallenger, 0, 0);
+    BuddyMan_setPresence(BuddyMan_mBuddyMan, 1, 8, (int)mszChallenger, 0, 0);
 }
 #endif
 
@@ -9563,12 +9556,12 @@ void cFEStateChallengeReceivedPopup::onWidgetEvent(cUIThing* obj, unsigned int m
         switch (obj->mMiscData) {
         case 11:
             if (mbAccepted == 0) {
-                cFEStateChallengeReceivedPopup_setAccepted(this);
+                this->setAccepted();
                 LobbyMan_lockChallenge(LobbyMan_mLobbyMan, (LobbyMan_mLobbyMan->mOpponent), mCurrentCtrl);
             }
             break;
         case 0xC:
-            cFEStateChallengeReceivedPopup_declineChallenge(this);
+            this->declineChallenge();
             break;
         }
         break;
@@ -9623,12 +9616,12 @@ extern "C" int cUIStateStack_popToState(void* p);
  * @return cUIStateStack_popToState's result (a state-stack node) for OK/back, else the value left by cFEStateNet_onPopupEvent, which returns
  *     nothing
  */
-extern "C" int cFEStateChallengeReceivedPopup_onErrorPopupEvent(cFEStateChallengeReceivedPopup* self, void* popup, int event)
+int cFEStateChallengeReceivedPopup::onErrorPopupEvent(void* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
-        return cUIStateStack_popToState(&self->mpEngine->mStateStack);
+        return cUIStateStack_popToState(&mpEngine->mStateStack);
     }
-    return cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
+    return cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, event);
 }
 #endif
 
@@ -9654,7 +9647,7 @@ bool cFEStateChallengeReceivedPopup::onGainTransition(int bFirstTime)
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
     vt[32].fn(vthis(this, vt[32]));
     if (bFirstTime != 0) {
-        cFEStateChallengeReceivedPopup_fillRaceTexts(this, cBE_getInterface_Fv(cBE_getBE(), 0), mpScreen);
+        this->fillRaceTexts(cBE_getInterface_Fv(cBE_getBE(), 0), mpScreen);
     }
     return true;
 }
@@ -9720,7 +9713,7 @@ extern const char str_cFEStateOnlineCharacterSelect[];
  * @param data  the event
  * @return 0, or cFEStateNet_onNetEvent's result
  */
-extern "C" void* cFEStateChallengeReceivedPopup_onNetEvent(cFEStateChallengeReceivedPopup* self, int msgId, void* data)
+void* cFEStateChallengeReceivedPopup::onNetEvent(int msgId, void* data)
 {
     switch (msgId) {
     case 239:
@@ -9733,27 +9726,27 @@ extern "C" void* cFEStateChallengeReceivedPopup_onNetEvent(cFEStateChallengeRece
         if (BuddyMan_mBuddyMan == 0) {
             LobbyMan_disconnect(LobbyMan_mLobbyMan);
         }
-        BuddyMan_declineChallenge(BuddyMan_mBuddyMan, self->mszChallenger);
+        BuddyMan_declineChallenge(BuddyMan_mBuddyMan, mszChallenger);
         break;
     case 272:
-        cFEStateNet_showWaitPlayerPopup((cFEStateNet*)self);
+        this->showWaitPlayerPopup();
         break;
     case 237: case 238: case 0xF0: case 241: case 268: case 274: case 275:
-        cFEStateChallengeReceivedPopup_setAccepted(self);
-        cFEStateNet_showChallengeErrorPopup((cFEStateNet*)self, msgId);
+        setAccepted();
+        this->showChallengeErrorPopup(msgId);
         break;
     case 243:
-        cFEStateNet_pushState(self,
-                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), self->mpEngine));
+        cFEStateNet_pushState(this,
+                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), mpEngine));
         break;
     case 227:
-        showOpponentStats(self->mpScreen, (online_FindPlayerEvent*)data);
+        showOpponentStats(mpScreen, (online_FindPlayerEvent*)data);
         break;
     case kNetEvent_Ping:
-        showOpponentConnection(self->mpScreen, (online_PingEvent*)((void*)data));
+        showOpponentConnection(mpScreen, (online_PingEvent*)((void*)data));
         break;
     default:
-        return cFEStateNet_onNetEvent_3(self, msgId, data);
+        return cFEStateNet_onNetEvent_3(this, msgId, data);
     }
     return 0;
 }
@@ -9798,7 +9791,7 @@ extern char str_kT_CMNNo[];
  * @param iface  the new-race interface (only tested for null)
  * @param screen  the screen (null: nothing)
  */
-extern "C" void cFEStateChallengeReceivedPopup_fillRaceTexts(cFEStateChallengeReceivedPopup* self, void* iface, cUIScreen* screen)
+void cFEStateChallengeReceivedPopup::fillRaceTexts(void* iface, cUIScreen* screen)
 {
     char buf[16];
     if (((void*)screen) == 0) {
@@ -9908,24 +9901,24 @@ extern char str_TextAccept[];
  * With a screen: focuses "TextDecline" (vtable entry 7), selects row 1 of "MenuChallenge", makes
  * "staticTextSetchallenge" visible with "kT_OVRCMNWaitPlayer" and sets "TextAccept" static.
  */
-extern "C" void cFEStateChallengeReceivedPopup_setAccepted(cFEStateChallengeReceivedPopup* self)
+void cFEStateChallengeReceivedPopup::setAccepted()
 {
-    self->mbAccepted = 1;
-    if (self->mpScreen != 0) {
-        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextDecline));
+    mbAccepted = 1;
+    if (mpScreen != 0) {
+        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextDecline));
         if (widget != 0) {
             widget->setFocus(1);
         }
-        cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge));
+        cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_MenuChallenge));
         if (((cUIText*)menu) != 0) {
             cUIMenu_setSelectedByIndex(menu, 1);
         }
-        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_staticTextSetchallenge));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_staticTextSetchallenge));
         if (widget != 0) {
             widget->setVisible(1);
             cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNWaitPlayer));
         }
-        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextAccept));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextAccept));
         if (widget != 0) {
             widget->setStatic(1);
         }
@@ -9944,19 +9937,19 @@ extern char str_kT_BTNDecline[];
  * With a screen: clears "TextAccept"'s static flag, hides "staticTextSetchallenge" and sets "TextDecline" to
  * "kT_BTNDecline". Nothing in retail calls it (no call or pointer to it).
  */
-extern "C" void cFEStateChallengeReceivedPopup_clearAccepted(cFEStateChallengeReceivedPopup* self)
+void cFEStateChallengeReceivedPopup::clearAccepted()
 {
-    self->mbAccepted = 0;
-    if (self->mpScreen != 0) {
-        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextAccept));
+    mbAccepted = 0;
+    if (mpScreen != 0) {
+        cUIThing* widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextAccept));
         if (widget != 0) {
             widget->setStatic(0);
         }
-        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_staticTextSetchallenge));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_staticTextSetchallenge));
         if (widget != 0) {
             widget->setVisible(0);
         }
-        widget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextDecline));
+        widget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextDecline));
         if (widget != 0) {
             cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_BTNDecline));
         }
@@ -10000,18 +9993,18 @@ static inline void* GetSession_001B0E10()
  * from BuddyMan (BuddyMan_declineChallenge) and calls cGameConnMan_shutdown(func_002591D0(), 2). Then calls mpParentState's onPopupEvent
  * (vtable entry 17) with this state and 20.
  */
-extern "C" void cFEStateChallengeReceivedPopup_declineChallenge(cFEStateChallengeReceivedPopup* self)
+void cFEStateChallengeReceivedPopup::declineChallenge()
 {
-    cFEStateChallengeReceivedPopup_setAccepted(self);
-    if (self->mbAccepted != 0) {
+    setAccepted();
+    if (mbAccepted != 0) {
         LobbyMan_leaveGame(LobbyMan_mLobbyMan, 0);
         BuddyMan_declineChallenge(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
         cGameConnMan_shutdown(func_002591D0(), 2);
     } else {
         BuddyMan_declineChallenge(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
     }
-    cUIState* obj = self->mpParentState;
-    obj->onPopupEvent((cUIState*)self, 20);
+    cUIState* obj = mpParentState;
+    obj->onPopupEvent((cUIState*)this, 20);
 }
 #endif
 
@@ -10094,7 +10087,7 @@ void cFEStateOnlineCharacterSelect::onCreateScreen()
         cUIScreen_playFrame(screen, 0, 0);
     }
     for (i = 0; i < 30; i++) {
-        cFEStateOnlineCharacterSelect_setRiderStatsPanel(this, i, 1, 0);
+        this->setRiderStatsPanel(i, 1, 0);
     }
 }
 #endif
@@ -10134,14 +10127,14 @@ extern "C" void cFEStateOnlineCharacterSelect_showPlayerNamesAndRanks(cFEStateOn
 bool cFEStateOnlineCharacterSelect::onGainTransition(int bFirstTime)
 {
     if (bFirstTime != 0) {
-        cFEStateOnlineCharacterSelect_showOnlyRiderStats(this, cUIListBox_getCurrentEntryData(mpLBChallengerSelect), 0);
+        this->showOnlyRiderStats(cUIListBox_getCurrentEntryData(mpLBChallengerSelect), 0);
         cBE_getInterface_Fv(SSXApp->BE, 7);
         tBENetworkDB* net = &cBENetworkInterface_networkOpt;
         if (net->OpponentCharacterID >= 0) {
-            cFEStateOnlineCharacterSelect_showOpponentRiderName(this, net->OpponentCharacterID);
-            cFEStateOnlineCharacterSelect_showOnlyRiderStats(this, net->OpponentCharacterID, 1);
+            this->showOpponentRiderName(net->OpponentCharacterID);
+            this->showOnlyRiderStats(net->OpponentCharacterID, 1);
         }
-        cFEStateOnlineCharacterSelect_showPlayerNamesAndRanks(this);
+        this->showPlayerNamesAndRanks();
         mbConfirmed = 0;
     }
     return false;
@@ -10301,25 +10294,25 @@ void cFEStateOnlineCharacterSelect::onWidgetEvent(cUIThing* pWidget, unsigned in
         }
         miConfirmCtrl = mCurrentCtrl;
         obj->setStatic(1);
-        cFEStateOnlineCharacterSelect_moveFrameLayer(this, 1, 0);
+        this->moveFrameLayer(1, 0);
         mbConfirmed = 1;
         break;
     case cUIState::kONPREV:
         if (mbConfirmed == 0) {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 2;
             cPopupInfo* sub = &popup->info;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNCancelChallenge);
             popup->info.mtMessage.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-            cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+            sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
             popup->info.miMiscData = 2104;
             popup->info.miDefaultOption = 1;
-            cFEStateNet_showPopup((cFEStateNet*)this, popup);
+            this->showPopup(popup);
         } else {
             cSetupMan_unconfirmCharacter(cSetupMan_mSetupMan);
             obj->setStatic(0);
-            cFEStateOnlineCharacterSelect_moveFrameLayer(this, 0, 0);
+            this->moveFrameLayer(0, 0);
             mbConfirmed = 0;
         }
         break;
@@ -10327,7 +10320,7 @@ void cFEStateOnlineCharacterSelect::onWidgetEvent(cUIThing* pWidget, unsigned in
         if (IsHash1B1280(obj->mHashName, str_LBChallengerSelect)) {
             void* mgr = cSetupMan_mSetupMan;
             cSetupMan_highlightCharacter(mgr, cUIListBox_getCurrentEntryData(mpLBChallengerSelect));
-            cFEStateOnlineCharacterSelect_showOnlyRiderStats(this, cUIListBox_getCurrentEntryData(mpLBChallengerSelect), 0);
+            this->showOnlyRiderStats(cUIListBox_getCurrentEntryData(mpLBChallengerSelect), 0);
         }
     default:
         cFEStateNet_onWidgetEvent((cFEStateNet*)this, pWidget, msg);
@@ -10357,7 +10350,7 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the cFEStateNetHelpPopup to fill
  */
-extern "C" void cFEStateOnlineCharacterSelect_fillHelpPopup(cFEStateOnlineCharacterSelect* self, cFEStateNetHelpPopup* popup)
+void cFEStateOnlineCharacterSelect::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 3);
     popup->muiScreenName = GetHashValue32(str_kT_HELP245SelectCharacter);
@@ -10426,42 +10419,42 @@ extern const char str_cFEStateBraggingRights[];
  * @param eventData  the event
  * @return 0, or cFEStateNet_onNetEvent's result
  */
-extern "C" void* cFEStateOnlineCharacterSelect_onNetEvent(cFEStateOnlineCharacterSelect* self, int eventType, void* eventData)
+void* cFEStateOnlineCharacterSelect::onNetEvent(int eventType, void* eventData)
 {
     void* obj;
     switch (eventType) {
     case 243:
         cBE_getInterface_Fv(SSXApp->BE, 7);
         if (cBENetworkInterface_networkOpt.OpponentCharacterID >= 0) {
-            cFEStateOnlineCharacterSelect_showOpponentRiderName(self, cBENetworkInterface_networkOpt.OpponentCharacterID);
-            cFEStateOnlineCharacterSelect_showOnlyRiderStats(self, cBENetworkInterface_networkOpt.OpponentCharacterID, 1);
+            showOpponentRiderName(cBENetworkInterface_networkOpt.OpponentCharacterID);
+            showOnlyRiderStats(cBENetworkInterface_networkOpt.OpponentCharacterID, 1);
         }
         break;
     case 245:
-        cFEStateOnlineCharacterSelect_moveFrameLayer(self, 1, 1);
+        moveFrameLayer(1, 1);
         break;
     case 247:
-        cFEStateOnlineCharacterSelect_moveFrameLayer(self, 0, 1);
+        moveFrameLayer(0, 1);
         break;
     case 238: case 241: case 0xF8: case 250: case 274: case 275:
-        cFEStateNet_showChallengeLostPopup(((cFEStateNet*)self), eventType);
+        this->showChallengeLostPopup(eventType);
         break;
     case 246:
-        cFEStateNet_pushState(((cFEStateNet*)self), cFEStateBraggingRights_cFEStateBraggingRights(cMemMan_alloc(1852,
-                str_cFEStateBraggingRights, 0, 0), self->mpEngine));
+        cFEStateNet_pushState(((cFEStateNet*)this), cFEStateBraggingRights_cFEStateBraggingRights(cMemMan_alloc(1852,
+                str_cFEStateBraggingRights, 0, 0), mpEngine));
         break;
     case 268:
         if (LobbyMan_getRoomName(LobbyMan_mLobbyMan) != 0 && D_004A4E88 == 0) {
             obj = cFEStateChatRoom_cFEStateChatRoom((cFEStateChatRoom*)cMemMan_alloc(1852, str_cFEStateChatRoom, 0, 0),
-                    self->mpEngine);
+                    mpEngine);
         } else {
             obj = cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(1744,
-                    str_cFEStateOnlineMainMenu, 0, 0), self->mpEngine);
+                    str_cFEStateOnlineMainMenu, 0, 0), mpEngine);
         }
-        cFEStateNet_pushState(((cFEStateNet*)self), obj);
+        cFEStateNet_pushState(((cFEStateNet*)this), obj);
         break;
     default:
-        return cFEStateNet_onNetEvent_3(((cFEStateNet*)self), eventType, eventData);
+        return cFEStateNet_onNetEvent_3(((cFEStateNet*)this), eventType, eventData);
     case 0xE0:
         break;
     }
@@ -10490,11 +10483,11 @@ extern char str_TextOpponentSelect[];
  *
  * @param player  the opponent's character id
  */
-extern "C" void cFEStateOnlineCharacterSelect_showOpponentRiderName(cFEStateOnlineCharacterSelect* self, int player)
+void cFEStateOnlineCharacterSelect::showOpponentRiderName(int player)
 {
-    if (self->mpScreen != 0) {
+    if (mpScreen != 0) {
         const char* str = (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), player, 0);
-        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextOpponentSelect));
+        cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextOpponentSelect));
         ((cUIThing*)text)->setVisible(1);
         cUIText_setAsciiString(text, str);
     }
@@ -10538,23 +10531,23 @@ static inline int Loc1B1808(char* name)
  * "TextPlayerRank" and "TextChallengerRank" "kT_OVRCMNRanking %d" with mStats.mRank and mOpponentStats.mRank; each text
  * found is made visible.
  */
-extern "C" void cFEStateOnlineCharacterSelect_showPlayerNamesAndRanks(cFEStateOnlineCharacterSelect* self)
+void cFEStateOnlineCharacterSelect::showPlayerNamesAndRanks()
 {
     char buf[0x100];
-    if (self->mpScreen == 0) {
+    if (mpScreen == 0) {
         return;
     }
-    cUIThing* textObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextPlayerName));
+    cUIThing* textObj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextPlayerName));
     if (textObj != 0) {
         cUIText_setAsciiString((cUIText*)textObj, ((const char*)LobbyMan_mLobbyMan->mPersona));
         textObj->setVisible(1);
     }
-    textObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextChallengerName));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextChallengerName));
     if (textObj != 0) {
         cUIText_setAsciiString((cUIText*)textObj, ((const char*)LobbyMan_mLobbyMan->mOpponent));
         textObj->setVisible(1);
     }
-    textObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextPlayerRank));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextPlayerRank));
     if (textObj != 0) {
         LobbyMan* mgr = LobbyMan_mLobbyMan;
         int name = Loc1B1808(str_kT_OVRCMNRanking);
@@ -10562,7 +10555,7 @@ extern "C" void cFEStateOnlineCharacterSelect_showPlayerNamesAndRanks(cFEStateOn
         cUIText_setUnicodeString((cUIText*)textObj, buf);
         textObj->setVisible(1);
     }
-    textObj = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextChallengerRank));
+    textObj = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextChallengerRank));
     if (textObj != 0) {
         LobbyMan* mgr = LobbyMan_mLobbyMan;
         int name = Loc1B1808(str_kT_OVRCMNRanking);
@@ -10623,16 +10616,16 @@ struct sText1B1A08 {
  * @param up  non-zero to move up, 0 to move down
  * @param highlight  non-zero for the challenger's frame
  */
-extern "C" void cFEStateOnlineCharacterSelect_moveFrameLayer(cFEStateOnlineCharacterSelect* self, int up, int highlight)
+void cFEStateOnlineCharacterSelect::moveFrameLayer(int up, int highlight)
 {
-    if (self->mpScreen != 0) {
+    if (mpScreen != 0) {
         sText1B1A08* frame;
         if (highlight != 0) {
-            frame = (sText1B1A08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_frameChallenger));
-            cFEVObj_001B1A08* opponentText = (cFEVObj_001B1A08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextOpponentSelect));
+            frame = (sText1B1A08*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_frameChallenger));
+            cFEVObj_001B1A08* opponentText = (cFEVObj_001B1A08*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextOpponentSelect));
             opponentText->setColour(sColor1B1A08(1.0f, 0.0f, 0.0f, 0.0f));
         } else {
-            frame = (sText1B1A08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_framePlayer));
+            frame = (sText1B1A08*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_framePlayer));
         }
         // Step the text's 5-bit size field up or down by 2 (wraps within the field).
         if (frame != 0) {
@@ -10662,14 +10655,14 @@ extern "C" void cFEStateOnlineCharacterSelect_setRiderStatsPanel(cFEStateOnlineC
  * @param sel  the rider id to show
  * @param flag  1 for the opponent's (right) side, 0 for the player's (left)
  */
-extern "C" void cFEStateOnlineCharacterSelect_showOnlyRiderStats(cFEStateOnlineCharacterSelect* self, int sel, int flag)
+void cFEStateOnlineCharacterSelect::showOnlyRiderStats(int sel, int flag)
 {
     int i;
     for (i = 0; i < 30; i++) {
         if (i == sel && flag) {
-            cFEStateOnlineCharacterSelect_showOpponentRiderName(self, i);
+            showOpponentRiderName(i);
         }
-        cFEStateOnlineCharacterSelect_setRiderStatsPanel(self, i, flag, i == sel);
+        setRiderStatsPanel(i, flag, i == sel);
     }
 }
 #endif
@@ -10718,7 +10711,7 @@ extern char str_0RightAttribute[];
  * @param opponentSide  non-zero for the opponent's (right) side
  * @param show  non-zero to show the panel and fill it
  */
-extern "C" void cFEStateOnlineCharacterSelect_setRiderStatsPanel(cFEStateOnlineCharacterSelect* self, int index, int opponentSide, int show)
+void cFEStateOnlineCharacterSelect::setRiderStatsPanel(int index, int opponentSide, int show)
 {
     char buf[0x30];
     int stats[7];
@@ -10733,7 +10726,7 @@ extern "C" void cFEStateOnlineCharacterSelect_setRiderStatsPanel(cFEStateOnlineC
     } else {
         sprintf(buf, str_pct_spct_s, D_004412C8[index], D_004A1B20);
     }
-    cUIThing* panel = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+    cUIThing* panel = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
     if (panel != 0) {
         panel->setVisible(show);
     }
@@ -10769,9 +10762,9 @@ extern "C" void cFEStateOnlineCharacterSelect_setRiderStatsPanel(cFEStateOnlineC
     }
     for (int i = 0; i < 7; i++) {
         name1[0] = '0' + i;
-        cUIThing* valueText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name1));
+        cUIThing* valueText = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name1));
         name2[0] = '0' + i;
-        cUIProgress* attrBar = (cUIProgress*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name2));
+        cUIProgress* attrBar = (cUIProgress*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name2));
         if (valueText != 0 && ((void*)attrBar) != 0) {
             int attrValue = stats[i];
             int displayValue = attrValue / 5;
@@ -10804,7 +10797,7 @@ void cFEStateOnlineCharacterSelect::onPopupEvent(cUIState*pPopup, unsigned int E
 {
     switch (pPopup->miMiscData) {
     case 2104:
-        cFEStateOnlineCharacterSelect_onCancelChallengePopupEvent(this, pPopup, Event);
+        this->onCancelChallengePopupEvent(pPopup, Event);
         break;
     case 2101:
         func_001A94D8(this);
@@ -10832,15 +10825,15 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateOnlineCharacterSelect_onCancelChallengePopupEvent(cFEStateOnlineCharacterSelect* self, cUIState* popup, int event)
+void cFEStateOnlineCharacterSelect::onCancelChallengePopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
         if (cSetupMan_mSetupMan != 0) {
             cSetupMan_cancelSetup(cSetupMan_mSetupMan, 249);
         }
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION0);
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION0);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -10955,8 +10948,8 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
         return;
     }
     cUIScreen_playFrame(screen, 0, 0);
-    cFEStateChatRoom_refreshPlayerList(self, 1);
-    cFEStateChatRoom_selectPlayerByName(self, LobbyMan_mLobbyMan->mPersona);
+    self->refreshPlayerList(1);
+    self->selectPlayerByName(LobbyMan_mLobbyMan->mPersona);
     self->mpTextScrollChat->mAttrTextScroll.mMode = 1;
     cUITextScroll_setInputMap(self->mpTextScrollChat, 1);
     self->mpTextScrollChat->mSelectedColour = self->mChatColour;
@@ -11045,7 +11038,7 @@ extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 extern "C" void cFEStateChatRoom_onUpdate(cFEStateChatRoom* self)
 {
     if (cAppMan_TheAppMan->TimerTick % 10000 == 0) {
-        cFEStateChatRoom_updateQualityIcons(self);
+        self->updateQualityIcons();
     }
     cFEStateNet_onUpdate((cFEStateNet*)self);
 }
@@ -11123,30 +11116,29 @@ public:
  * re-selects mszPlayerName (cFEStateChatRoom_selectPlayerByName); then updates the quality icons (cFEStateChatRoom_updateQualityIcons). Each row constructs a new
  * cBXString over the last one, and only the final one is destroyed (likely leak).
  *
- * @param vself  the chat-room state (this)
  * @param reselect  non-zero to re-select the previously selected player
  */
-extern "C" void cFEStateChatRoom_refreshPlayerList(cFEStateChatRoom* vself, int reselect)
+void cFEStateChatRoom::refreshPlayerList(int reselect)
 {
-    if (vself->mpScreen == 0) {
+    if (mpScreen == 0) {
         return;
     }
     int n = LobbyMan_getNumUsers(LobbyMan_mLobbyMan);
-    cFEStateChatRoom_highlightRow(vself, -1, 0);
-    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_PlayerListMenu));
+    highlightRow(-1, 0);
+    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_PlayerListMenu));
     if (menu->mScrollItemNum != n) {
         cUIMenu_setScrollableMenu(menu, n);
     }
     if (n < 7) {
-        vself->miMenuScroll[0] = 0;
+        miMenuScroll[0] = 0;
     }
     sName_001B2378 name = D_00463A48;
     sBXString_001B2378 rowText;
     int flag = 0;
     for (int i = 5; i >= 0; i--) {
-        int idx = vself->miMenuScroll[0] + i;
+        int idx = miMenuScroll[0] + i;
         sprintf(name.c, str_PlayerListItempct_02d, i);
-        cFEVObj_001B2378* rowItem = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(name.c));
+        cFEVObj_001B2378* rowItem = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name.c));
         rowItem->setColour(sCol_001B2378(1.0f, 0.0f, 0.0f, 0.0f));
         if (idx < n) {
             cBXString_operatorE1(&rowText, LobbyMan_getUserName_p(LobbyMan_mLobbyMan, idx, &flag));
@@ -11154,12 +11146,12 @@ extern "C" void cFEStateChatRoom_refreshPlayerList(cFEStateChatRoom* vself, int 
                 char buf[256];
                 buildRoomDisplayName(LobbyMan_getRoomName_s(LobbyMan_mLobbyMan), buf);
                 if (LobbyMan_getRoomName(LobbyMan_mLobbyMan) == 0) {
-                    cFEStateNet_pushState(((char*)vself),
+                    cFEStateNet_pushState(((char*)this),
                                   cFEStateLobbyMenu_cFEStateLobbyMenu(
                                       (cFEStateLobbyMenu*)cMemMan_alloc(2948, str_cFEStateLobbyMenu, 0, 0),
-                                      vself->mpEngine));
+                                      mpEngine));
                 }
-                cUIText_setUnicodeString(vself->mpTextRoomName, buf);
+                cUIText_setUnicodeString(mpTextRoomName, buf);
             }
         } else {
             cBXString_operatorE1(&rowText, str_sp);
@@ -11168,9 +11160,9 @@ extern "C" void cFEStateChatRoom_refreshPlayerList(cFEStateChatRoom* vself, int 
         ((cUIThing*)rowItem)->mMiscData = idx;
     }
     if (reselect != 0) {
-        cFEStateChatRoom_selectPlayerByName(vself, vself->mszPlayerName);
+        selectPlayerByName(mszPlayerName);
     }
-    cFEStateChatRoom_updateQualityIcons(vself);
+    updateQualityIcons();
     cBXString__cBXString(&rowText, 2);
 }
 #endif
@@ -11309,18 +11301,17 @@ struct sInfo_1B27B0 {
  * "TextDisconnects" and "TextOverallRanking" ("kT_235OverallRanking"); the two ranking texts show the same word of the
  * record. Invalid rows get empty texts.
  *
- * @param vself  the chat-room state (this)
  * @param idx  the player's index in the room list
  */
-extern "C" void cFEStateChatRoom_showSelectedPlayer(cFEStateChatRoom* vself, int idx)
+void cFEStateChatRoom::showSelectedPlayer(int idx)
 {
     cBXString playerName;
     char buf[0x400];
     sInfo_1B27B0 info;
     int flag = 0;
     cBXString_cBXString2(&playerName, LobbyMan_getUserName_p(LobbyMan_mLobbyMan, idx, &flag));
-    strcpy(vself->mszPlayerName, playerName.Str);
-    if (vself->mpScreen == 0) {
+    strcpy(mszPlayerName, playerName.Str);
+    if (mpScreen == 0) {
         cBXString__cBXString(&playerName, 2);
         return;
     }
@@ -11328,10 +11319,10 @@ extern "C" void cFEStateChatRoom_showSelectedPlayer(cFEStateChatRoom* vself, int
     if (LobbyMan_getNumUsers(LobbyMan_mLobbyMan) > 0) {
         valid = idx < LobbyMan_getNumUsers(LobbyMan_mLobbyMan);
     }
-    cUIText* title = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextPlayerName));
+    cUIText* title = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextPlayerName));
     if (title != 0) {
-        cFEVObj_001B2378* selectText = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_Txt_Select));
-        cFEVObj_001B2378* selectIcon = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_ps2X));
+        cFEVObj_001B2378* selectText = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Txt_Select));
+        cFEVObj_001B2378* selectIcon = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2X));
         if (selectText != 0 && selectIcon != 0) {
             if (flag != 0) {
                 selectIcon->setVisible(0);
@@ -11348,7 +11339,7 @@ extern "C" void cFEStateChatRoom_showSelectedPlayer(cFEStateChatRoom* vself, int
         }
     }
     LobbyMan_getUserInfo(LobbyMan_mLobbyMan, idx, &info);
-    cUIText* uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextRanking));
+    cUIText* uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextRanking));
     if (uiText != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B30, Loc1B25E0(str_kT_CMNRaceRanking), info.a);
@@ -11357,7 +11348,7 @@ extern "C" void cFEStateChatRoom_showSelectedPlayer(cFEStateChatRoom* vself, int
             cUIText_setAsciiString(uiText, str_empty_d);
         }
     }
-    uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextGamesPlayed));
+    uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextGamesPlayed));
     if (uiText != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B34, Loc1B25E0(str_kT_CMNGamesPlayed), info.c);
@@ -11366,7 +11357,7 @@ extern "C" void cFEStateChatRoom_showSelectedPlayer(cFEStateChatRoom* vself, int
             cUIText_setAsciiString(uiText, str_empty_d);
         }
     }
-    uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextWinRatio));
+    uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextWinRatio));
     if (uiText != 0) {
         if (valid) {
             int done = info.b;
@@ -11383,7 +11374,7 @@ extern "C" void cFEStateChatRoom_showSelectedPlayer(cFEStateChatRoom* vself, int
             cUIText_setAsciiString(uiText, str_empty_d);
         }
     }
-    uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextDisconnects));
+    uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextDisconnects));
     if (uiText != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B3C, Loc1B25E0(str_kT_CMNDisconnects), info.d);
@@ -11392,7 +11383,7 @@ extern "C" void cFEStateChatRoom_showSelectedPlayer(cFEStateChatRoom* vself, int
             cUIText_setAsciiString(uiText, str_empty_d);
         }
     }
-    uiText = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_TextOverallRanking));
+    uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextOverallRanking));
     if (uiText != 0) {
         if (valid) {
             sprintf2_v(buf, D_004A1B40, Loc1B25E0(str_kT_235OverallRanking), info.a);
@@ -11431,13 +11422,13 @@ extern "C" cBXString* cBXString_operatorPlusE1(cBXString* self, char** other);
  * @param infov  the chat event
  */
 // Shows the item's name and value text in the list and refreshes it.
-extern "C" void cFEStateChatRoom_addChatLine(cFEStateChatRoom* self, void* infov)
+void cFEStateChatRoom::addChatLine(void* infov)
 {
     char* info = (char*)infov;
-    if ((int)self->mpScreen == 0) {
+    if ((int)mpScreen == 0) {
         return;
     }
-    cUITextScroll* list = self->mpTextScrollChat;
+    cUITextScroll* list = mpTextScrollChat;
     if (list == 0) {
         return;
     }
@@ -11449,8 +11440,8 @@ extern "C" void cFEStateChatRoom_addChatLine(cFEStateChatRoom* self, void* infov
     cBXString_cBXString1(&text, info + 0x8);
     cBXString_Concat(&text, str_colon_sp);
     cBXString_operatorPlusE1((cBXString*)&text, (char**)(info + 0xC));
-    cUITextScroll_addAsciiString(self->mpTextScrollChat, text.Str);
-    trimAndRestoreTextScroll(self->mpTextScrollChat, 0x40, 6, lineCount, pos, lineOffset, first, 1);
+    cUITextScroll_addAsciiString(mpTextScrollChat, text.Str);
+    trimAndRestoreTextScroll(mpTextScrollChat, 0x40, 6, lineCount, pos, lineOffset, first, 1);
     cBXString__cBXString(&text, 2);
 }
 #endif
@@ -11479,7 +11470,7 @@ extern char str_kT_HELP235ScrollChat[];
  *
  * @param popup  the cFEStateNetHelpPopup to fill
  */
-extern "C" void cFEStateChatRoom_fillHelpPopup(cFEStateChatRoom* self, cFEStateNetHelpPopup* popup)
+void cFEStateChatRoom::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 6);
     popup->muiScreenName = GetHashValue32(str_kT_HELP235ChatRoom);
@@ -11628,8 +11619,8 @@ void cFEStateChatRoom::onWidgetEvent(cUIThing* msg, unsigned int ev)
         if (LobbyMan_getUserFlag(LobbyMan_mLobbyMan, id) != 0) {
             return;
         }
-        cFEStateNet_setTargetUser((cFEStateNet*)this, LobbyMan_getUserName_p(LobbyMan_mLobbyMan, id, 0));
-        cFEStateNet_openUserPopup((cFEStateNet*)this, cFEStateNet_getTargetUser(((char*)this)), 1);
+        this->setTargetUser(LobbyMan_getUserName_p(LobbyMan_mLobbyMan, id, 0));
+        this->openUserPopup(cFEStateNet_getTargetUser(((char*)this)), 1);
         return;
     }
     case cUIState::kONGAINFOCUS:
@@ -11637,7 +11628,7 @@ void cFEStateChatRoom::onWidgetEvent(cUIThing* msg, unsigned int ev)
             sprintf(buf, str_PlayerListItempct_02d, i);
             int hash = msg->mHashName;
             if (hash == GetHashValue32(buf)) {
-                cFEStateChatRoom_highlightRow(this, i, 1);
+                this->highlightRow(i, 1);
                 return;
             }
         }
@@ -11648,7 +11639,7 @@ void cFEStateChatRoom::onWidgetEvent(cUIThing* msg, unsigned int ev)
             sprintf(buf, str_PlayerListItempct_02d, i);
             int hash = msg->mHashName;
             if (hash == GetHashValue32(buf)) {
-                cFEStateChatRoom_highlightRow(this, i, 0);
+                this->highlightRow(i, 0);
                 return;
             }
         }
@@ -11656,24 +11647,24 @@ void cFEStateChatRoom::onWidgetEvent(cUIThing* msg, unsigned int ev)
         return;
     case cUIState::kONPREV: {
         mbExiting = 1;
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 0;
         int hash = GetHashValue32(str_kT_POPUP231ExitingRoom);
         popup->info.mbReceivePrev = 0;
         popup->info.mtMessage.ui = hash;
         popup->info.mtMessage.eType = 3;
         popup->info.miMiscData = 2050;
-        cFEStateNet_showPopup((cFEStateNet*)this, (cScreenPopup*)popup);
+        this->showPopup((cScreenPopup*)popup);
         LobbyMan_joinRoomAt(LobbyMan_mLobbyMan, -1, 0);
         return;
     }
     case cUIState::kONMISC:
         if ((mAttrState & 6) == 0) {
-            cFEStateNet_openMessenger((cFEStateNet*)this);
+            this->openMessenger();
         }
         return;
     case cUIState::kONKEYBOARDEND:
-        cFEStateChatRoom_handleKeyboardText(this);
+        this->handleKeyboardText();
         return;
     }
     cFEStateNet_onWidgetEvent((cFEStateNet*)this, msg, ev);
@@ -11711,15 +11702,15 @@ static inline void* GetSession_001B33D8()
  * 4: LobbyMan_sendChatMessage(LobbyMan, the keyboard's mszEditString). 2: BuddyMan_sendMessage(BuddyMan, the name from cFEStateNet_getTargetUser
  * (mszTargetUser), the text), BuddyMan created or reconnected on demand.
  */
-extern "C" void cFEStateChatRoom_handleKeyboardText(cFEStateChatRoom* self)
+void cFEStateChatRoom::handleKeyboardText()
 {
-    cKeyboardPopup* keyboard = self->mpKeyboard;
+    cKeyboardPopup* keyboard = mpKeyboard;
     switch (keyboard->miMiscData) {
     case 4:
         LobbyMan_sendChatMessage(LobbyMan_mLobbyMan, keyboard->mszEditString);
         break;
     case 2:
-        BuddyMan_sendMessage(GetSession_001B33D8(), cFEStateNet_getTargetUser(((cFEStateNet*)self)), self->mpKeyboard->mszEditString);
+        BuddyMan_sendMessage(GetSession_001B33D8(), this->getTargetUser(), mpKeyboard->mszEditString);
         break;
     }
 }
@@ -11750,7 +11741,7 @@ bool cFEStateChatRoom::onGainTransition(int bFirstTime)
                 mpMenu[i]->setFocus(1);
             }
         }
-        cFEStateChatRoom_selectPlayerByName(this, LobbyMan_mLobbyMan->mPersona);
+        this->selectPlayerByName(LobbyMan_mLobbyMan->mPersona);
     }
     return false;
 }
@@ -11769,7 +11760,7 @@ extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int a1);
  */
 extern "C" void cFEStateChatRoom_onGainFocus(cFEStateChatRoom* self, int pPrevState)
 {
-    cFEStateChatRoom_updateQualityIcons(self);
+    self->updateQualityIcons();
     cFEStateNet_onGainFocus((cFEStateNet*)self, pPrevState);
 }
 #endif
@@ -11795,7 +11786,7 @@ int cFEStateChatRoom::onWidgetMenu(cUIMenu* sender, unsigned int event, unsigned
     if (event == cUIMenu::kSCROLLUPDATE) {
         if (sender == (void*)mpMenu[0]) {
             miMenuScroll[0] = value;
-            cFEStateChatRoom_refreshPlayerList(this, 0);
+            this->refreshPlayerList(0);
             return 257;
         }
         if (sender == (void*)mpMenu[1]) {
@@ -11838,48 +11829,50 @@ extern char str_kT_POPUP235SubmittingAbuse[];
  * @param popup  the popup state
  * @param kind  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateChatRoom_onUserActionsPopupEvent(cFEStateChatRoom* self, cUIState* popup, int kind)
+void cFEStateChatRoom::onUserActionsPopupEvent(cUIState* popup, int kind)
 {
     int messengerErr;
     int blockErr;
     switch (kind) {
     case cUIState::kONSCREENPOPUPOPTION0:
-        cFEStateNet_challengePlayer(((cFEStateNet*)self), cFEStateNet_getTargetUser(((cFEStateNet*)self)), popup, kind, 0);
+        this->challengePlayer(this->getTargetUser(), popup, kind, 0);
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
-        cFEStateNet_openPlayerMessages(((cFEStateNet*)self), cFEStateNet_getTargetUser(((cFEStateNet*)self)), popup, kind);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
+        this->openPlayerMessages(this->getTargetUser(), popup, kind);
         break;
     case cUIState::kONSCREENPOPUPOPTION2:
-        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABE58(((cFEStateNet*)self), cFEStateNet_getTargetUser(((cFEStateNet*)self)), &messengerErr);
+        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABE58(
+                ((cFEStateNet*)this), this->getTargetUser(), &messengerErr);
         if (messengerErr == kBuddyRosterFull) {
-            cFEStateNet_showMaxBuddiesPopup(((cFEStateNet*)self));
+            this->showMaxBuddiesPopup();
         } else {
-            cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
+            cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
         }
         break;
     case cUIState::kONSCREENPOPUPOPTION3:
-        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABC50(((cFEStateNet*)self), cFEStateNet_getTargetUser(((cFEStateNet*)self)), &blockErr);
+        cFEStateNetMessenger_onOfflineUserActionsPopupEvent_ABC50(((cFEStateNet*)this), this->getTargetUser(),
+                                                                  &blockErr);
         if (blockErr == kBuddyRosterFull) {
-            cFEStateNet_showMaxBuddiesPopup(((cFEStateNet*)self));
+            this->showMaxBuddiesPopup();
         } else {
-            cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
+            cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
         }
         break;
     case cUIState::kONSCREENPOPUPOPTION4: {
-        self->mUserPopupOpen = 0;
+        mUserPopupOpen = 0;
         LobbyMan* mc = LobbyMan_mLobbyMan;
-        LobbyMan_reportAbuse(mc, cFEStateNet_getTargetUser(((cFEStateNet*)self)));
-        cScreenPopup* abusePopup = (cScreenPopup*)cFEStateNet_createPopup(((cFEStateNet*)self));
+        LobbyMan_reportAbuse(mc, this->getTargetUser());
+        cScreenPopup* abusePopup = (cScreenPopup*)this->createPopup();
         abusePopup->info.meType = 0;
         abusePopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP235SubmittingAbuse);
         abusePopup->info.mtMessage.eType = 3;
         abusePopup->info.miMiscData = 2053;
         abusePopup->info.mbReceivePrev = 0;
-        cFEStateNet_showPopup(((cFEStateNet*)self), (cScreenPopup*)abusePopup);
+        this->showPopup((cScreenPopup*)abusePopup);
     }
     default:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
         break;
     }
 }
@@ -11906,14 +11899,14 @@ extern const char str_cFEStateOnlineCharacterSelect[];
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateChatRoom_onChallengeSetupPopupEvent(cFEStateChatRoom* self, cUIState* popup, int event)
+void cFEStateChatRoom::onChallengeSetupPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
-        cUIStateStack_popToFloor(&self->mpEngine->mStateStack);
-        cFEStateNet_pushState(((cFEStateNet*)self),
-                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), self->mpEngine));
+        cUIStateStack_popToFloor(&mpEngine->mStateStack);
+        cFEStateNet_pushState(((cFEStateNet*)this),
+                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), mpEngine));
     } else {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, event);
     }
 }
 #endif
@@ -11939,14 +11932,14 @@ extern const char str_cFEStateOnlineCharacterSelect[];
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateChatRoom_onChallengeReceivedPopupEvent(cFEStateChatRoom* self, cUIState* popup, int event)
+void cFEStateChatRoom::onChallengeReceivedPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
-        cUIStateStack_popToFloor(&self->mpEngine->mStateStack);
-        cFEStateNet_pushState(((cFEStateNet*)self),
-                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), self->mpEngine));
+        cUIStateStack_popToFloor(&mpEngine->mStateStack);
+        cFEStateNet_pushState(((cFEStateNet*)this),
+                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), mpEngine));
     } else {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, event);
     }
 }
 #endif
@@ -11971,13 +11964,13 @@ void cFEStateChatRoom::onPopupEvent(cUIState* pPopup, unsigned int Event)
 {
     switch ((unsigned int)pPopup->miMiscData) {
     case 2059:
-        cFEStateChatRoom_onUserActionsPopupEvent(this, pPopup, Event);
+        this->onUserActionsPopupEvent(pPopup, Event);
         break;
     case 0x800:
-        cFEStateChatRoom_onChallengeSetupPopupEvent(this, pPopup, Event);
+        this->onChallengeSetupPopupEvent(pPopup, Event);
         break;
     case 2049:
-        cFEStateChatRoom_onChallengeReceivedPopupEvent(this, pPopup, Event);
+        this->onChallengeReceivedPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -12008,7 +12001,7 @@ extern char str_empty_d[];
 bool cFEStateChatRoom::onInputBegin(cUIInput* obj)
 {
     if (obj->isLShift1() != 0) {
-        cFEStateNet_openKeyboardWithLabelID(((cFEStateNet*)this), 0, GetHashValue32(str_kT_POPUP235Chat), str_empty_d, 0, 4, 0x3F);
+        this->openKeyboardWithLabelID(0, GetHashValue32(str_kT_POPUP235Chat), str_empty_d, 0, 4, 0x3F);
         mpKeyboard->meType = 0;
         cKeyboardPopup_setIncludeQuickKeyRow(mpKeyboard, 1);
         cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
@@ -12039,9 +12032,9 @@ extern char str_PlayerListMenu[];
  *
  * @param name  the player name
  */
-extern "C" void cFEStateChatRoom_selectPlayerByName(cFEStateChatRoom* self, void* name)
+void cFEStateChatRoom::selectPlayerByName(void* name)
 {
-    if (self->mpScreen != 0) {
+    if (mpScreen != 0) {
         int sel = -1;
         int i = 0;
         int n = LobbyMan_getNumUsers(LobbyMan_mLobbyMan);
@@ -12052,7 +12045,7 @@ extern "C" void cFEStateChatRoom_selectPlayerByName(cFEStateChatRoom* self, void
             }
         }
         if (sel >= 0) {
-            cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PlayerListMenu)), sel);
+            cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_PlayerListMenu)), sel);
         }
     }
 }
@@ -12096,51 +12089,51 @@ extern char str_kT_BTNOK[];
  * @param data  the event
  * @return 0, or cFEStateNet_onNetEvent's result
  */
-extern "C" void* cFEStateChatRoom_onNetEvent(cFEStateChatRoom* self, int msgId, void* data)
+void* cFEStateChatRoom::onNetEvent(int msgId, void* data)
 {
     switch (msgId) {
     case 0xE0: {
         char buf[32];
-        strcpy(buf, (char*)&self->mszPlayerName);
-        cFEStateChatRoom_refreshPlayerList(self, 1);
-        cFEStateChatRoom_selectPlayerByName(self, buf);
+        strcpy(buf, (char*)&mszPlayerName);
+        refreshPlayerList(1);
+        selectPlayerByName(buf);
         break;
     }
     case kNetEvent_RoomSelected:
         if (LobbyMan_getRoomName(LobbyMan_mLobbyMan) == 0) {
-            cFEStateNet_pushState(self, cFEStateLobbyMenu_cFEStateLobbyMenu(
+            cFEStateNet_pushState(this, cFEStateLobbyMenu_cFEStateLobbyMenu(
                                     (cFEStateLobbyMenu*)cMemMan_alloc(2948, str_cFEStateLobbyMenu, 0, 0),
-                                    self->mpEngine));
+                                    mpEngine));
             break;
         }
-        cFEStateChatRoom_refreshPlayerList(self, 1);
+        refreshPlayerList(1);
         break;
     case 232: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP235Abuse);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2052;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         break;
     }
     case kNetEvent_Chat:
-        if (self->mbExiting == 0) {
-            cFEStateChatRoom_addChatLine(self, data);
+        if (mbExiting == 0) {
+            addChatLine(data);
         }
         break;
     case kNetEvent_RankListUpdate:
-        cFEStateChatRoom_refreshPlayerList(self, 1);
+        refreshPlayerList(1);
         break;
     case 234: case 235: case 236: case 237: case 238: case 239: case 0xF0:
     case kNetEvent_BuddyRosterUpdate: case kNetEvent_BuddyAdd: case kNetEvent_BuddyDelete:
-        cFEStateNet_refreshUserPopup((cFEStateNet*)self, cFEStateNet_getTargetUser(self), 1);
+        this->refreshUserPopup(cFEStateNet_getTargetUser(this), 1);
         break;
     default:
-        cFEStateNet_refreshUserPopup((cFEStateNet*)self, cFEStateNet_getTargetUser(self), 1);
-        return cFEStateNet_onNetEvent_3(self, msgId, data);
+        this->refreshUserPopup(cFEStateNet_getTargetUser(this), 1);
+        return cFEStateNet_onNetEvent_3(this, msgId, data);
     }
     return 0;
 }
@@ -12183,11 +12176,10 @@ struct sOwner1B3BF0 {
  * player's mPing (LobbyMan_getUserInfo). The "PlayerListItem%02d" name it formats for each row is not
  * used.
  *
- * @param feStateChatRoom  the chat-room state (this)
  */
-extern "C" void cFEStateChatRoom_updateQualityIcons(cFEStateChatRoom* feStateChatRoom)
+void cFEStateChatRoom::updateQualityIcons()
 {
-    sOwner1B3BF0* self = (sOwner1B3BF0*)feStateChatRoom;
+    sOwner1B3BF0* self = (sOwner1B3BF0*)this;
     char buf[32];
     sInfo1B3BF0 info;
     int n = LobbyMan_getNumUsers(LobbyMan_mLobbyMan);
@@ -12267,15 +12259,15 @@ static inline cFEVObj_001B3D20* Get1B3D20(cUIState* self, char* name)
  * @param idx  the visible row (0-5; -1 for none)
  * @param on  non-zero to show the highlight
  */
-extern "C" void cFEStateChatRoom_highlightRow(cFEStateChatRoom* self, int idx, int on)
+void cFEStateChatRoom::highlightRow(int idx, int on)
 {
     char name[32];
-    if (self->mpScreen == 0) {
+    if (mpScreen == 0) {
         return;
     }
     sprintf(name, str_PlayerListItempct_02d, idx);
-    cFEVObj_001B3D20* sel = Get1B3D20(self, name);
-    cUIScrollBar_setValues(self->mpSlider1, self->miMenuScroll[0], 6, LobbyMan_getNumUsers(LobbyMan_mLobbyMan));
+    cFEVObj_001B3D20* sel = Get1B3D20(this, name);
+    cUIScrollBar_setValues(mpSlider1, miMenuScroll[0], 6, LobbyMan_getNumUsers(LobbyMan_mLobbyMan));
     if (sel == 0) {
         if (idx >= 0) {
             if (idx < 6) {
@@ -12286,9 +12278,9 @@ extern "C" void cFEStateChatRoom_highlightRow(cFEStateChatRoom* self, int idx, i
     int i;
     for (i = 0; i < 6; i++) {
         sprintf(name, str_PlayerListItempct_02d, i);
-        Get1B3D20(self, name)->setColour(sCol1B3D20(1.0f, 0.0f, 0.0f, 0.0f));
+        Get1B3D20(this, name)->setColour(sCol1B3D20(1.0f, 0.0f, 0.0f, 0.0f));
     }
-    cFEVObj_001B3D20* hl = Get1B3D20(self, str_hl);
+    cFEVObj_001B3D20* hl = Get1B3D20(this, str_hl);
     if (hl == 0) {
         return;
     }
@@ -12297,7 +12289,7 @@ extern "C" void cFEStateChatRoom_highlightRow(cFEStateChatRoom* self, int idx, i
         return;
     }
     sprintf(name, str_whitebarpct_02d, idx);
-    cFEVObj_001B3D20* whiteBar = Get1B3D20(self, name);
+    cFEVObj_001B3D20* whiteBar = Get1B3D20(this, name);
     if (whiteBar == 0) {
         return;
     }
@@ -12307,7 +12299,7 @@ extern "C" void cFEStateChatRoom_highlightRow(cFEStateChatRoom* self, int idx, i
     pos.g += 3.0f;
     ((cUIThing*)hl)->mPosition = *(t3Vector*)&pos;
     hl->setVisible(1);
-    cFEStateChatRoom_showSelectedPlayer(self, ((cUIThing*)sel)->mMiscData);
+    showSelectedPlayer(((cUIThing*)sel)->mMiscData);
     sel->setColour(sCol1B3D20(1.0f, 1.0f, 1.0f, 1.0f));
 }
 #endif
@@ -12443,7 +12435,7 @@ void cFEStateNetConfig::onCreateScreen()
     if (cGameComm_mGameComm != 0) {
         cGameComm_destroy();
     }
-    cFEStateNetConfig_rescanConfigs(this, 0);
+    this->rescanConfigs(0);
     cSSXAudio_StopSong(cAudioInterface_bxAudio());
 }
 #endif
@@ -12474,10 +12466,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_startConnect__FPv);
  *
  * cFEStateNetConfig_onUpdate then re-checks the memory card (states 6-8) and connects in cFEStateNetConfig_connectWithSelectedConfig.
  */
-void cFEStateNetConfig_startConnect(void* vself)
+void cFEStateNetConfig::startConnect()
 {
-    cFEStateNetConfig* self = (cFEStateNetConfig*)vself;
-    self->miState = 6;
+    miState = 6;
 }
 #endif
 
@@ -12541,17 +12532,17 @@ void cFEStateNetConfig::onUpdate()
         break;
     case 3:
         if (VCall1B41A8(11) == 0) {
-            cFEStateNetConfig_checkCardSlot(this);
+            this->checkCardSlot();
         }
         break;
     case 4:
-        cFEStateNetConfig_checkCardAndLoadConfigs(this);
+        this->checkCardAndLoadConfigs();
         break;
     case 5:
         if ((miWaitFrames)-- < 0) {
             if (VCall1B41A8(53) == 0) {
-                cFEStateNetConfig_showConfigLists(this, -1);
-                cFEStateNetConfig_showCardErrorPopup(this, 2114, 0x18, D_004A1B80);
+                this->showConfigLists(-1);
+                this->showCardErrorPopup(2114, 0x18, D_004A1B80);
             } else {
                 cUIStateStack_popToState(&mpEngine->mStateStack);
             }
@@ -12576,7 +12567,7 @@ void cFEStateNetConfig::onUpdate()
         break;
     case 8:
         if (VCall1B41A8(11) == 0) {
-            cFEStateNetConfig_connectWithSelectedConfig(this);
+            this->connectWithSelectedConfig();
         }
         break;
     }
@@ -12660,19 +12651,19 @@ public:
  * Available: loads the configurations (cFEStateNetConfig_loadConfigs). Otherwise miState 0, the no-configuration view and popup 2112
  * "not detected" (error 2).
  */
-extern "C" void cFEStateNetConfig_checkCardAndLoadConfigs(cFEStateNetConfig* self)
+void cFEStateNetConfig::checkCardAndLoadConfigs()
 {
     int cardAvailable = ((cFEVObj_001B43A8*)D_004A1B78)->IsAvailable1();
     if (((cFEVObj_001B43A8*)D_004A1B78)->IsFormatted1() == 0) {
-        self->miState = 0;
-        cFEStateNetConfig_showConfigLists(self, -1);
-        cFEStateNetConfig_showCardErrorPopup(self, 2112, 20, -1);
+        miState = 0;
+        showConfigLists(-1);
+        showCardErrorPopup(2112, 20, -1);
     } else if (cardAvailable != 0) {
-        cFEStateNetConfig_loadConfigs(self);
+        loadConfigs();
     } else {
-        self->miState = 0;
-        cFEStateNetConfig_showConfigLists(self, -1);
-        cFEStateNetConfig_showCardErrorPopup(self, 2112, 2, -1);
+        miState = 0;
+        showConfigLists(-1);
+        showCardErrorPopup(2112, 2, -1);
     }
 }
 #endif
@@ -12700,9 +12691,8 @@ extern "C" void cFEStateNetConfig_reportLoadResult_4470(void* self, int err) __a
  * miResult 1 it shows popup 2112 "not detected" (missing card) or 2113 "not formatted" for slot 2. A usable card sets
  * miState 4.
  *
- * @param self_  the network-configuration state (this)
  */
-extern "C" void cFEStateNetConfig_checkCardSlot(cFEStateNetConfig* self_)
+void cFEStateNetConfig::checkCardSlot()
 {
     int k;
     int result;
@@ -12710,40 +12700,40 @@ extern "C" void cFEStateNetConfig_checkCardSlot(cFEStateNetConfig* self_)
         k = D_004A1B80;
         if (k == 0) {
             D_004A1B80 = 1;
-            cFEStateNetConfig_showCheckingCardPopup_4470(((char*)self_), 2);
-            self_->miState = 2;
+            cFEStateNetConfig_showCheckingCardPopup_4470(((char*)this), 2);
+            miState = 2;
         } else {
-            result = self_->miResult;
-            self_->miState = 0;
+            result = miResult;
+            miState = 0;
             if (result != 1) {
                 D_004A1B80 = (k + 1) % 2;
-                cFEStateNetConfig_reportLoadResult_4470(((char*)self_), result);
+                cFEStateNetConfig_reportLoadResult_4470(((char*)this), result);
             } else {
-                cFEStateNetConfig_showConfigLists(self_, -1);
-                cFEStateNetConfig_showCardErrorPopup(self_, 2112, 2, -1);
+                showConfigLists(-1);
+                showCardErrorPopup(2112, 2, -1);
             }
         }
     } else {
         if (((cFEVObj_001B43A8*)D_004A1B78)->IsFormatted1() == 0) {
             k = D_004A1B80;
                 if (k == 0) {
-                self_->miResult = -200;
+                miResult = -200;
                 D_004A1B80 = 1;
-                cFEStateNetConfig_showCheckingCardPopup_4470(((char*)self_), 2);
-                self_->miState = 2;
+                cFEStateNetConfig_showCheckingCardPopup_4470(((char*)this), 2);
+                miState = 2;
             } else {
-                result = self_->miResult;
-                self_->miState = 0;
+                result = miResult;
+                miState = 0;
                 if (result != 1) {
                     D_004A1B80 = (k + 1) % 2;
-                    cFEStateNetConfig_reportLoadResult_4470(((char*)self_), result);
+                    cFEStateNetConfig_reportLoadResult_4470(((char*)this), result);
                 } else {
-                    cFEStateNetConfig_showCardErrorPopup(self_, 2113, 20, 1);
+                    showCardErrorPopup(2113, 20, 1);
                 }
-                cFEStateNetConfig_showConfigLists(self_, -1);
+                showConfigLists(-1);
             }
         } else {
-            self_->miState = 4;
+            miState = 4;
         }
     }
 }
@@ -12851,33 +12841,33 @@ public:
  * (id 2062), starts the connection with configuration miSelectedSetting (cConnMan_connect on func_002591B8()) and sets
  * miState 0.
  */
-extern "C" void cFEStateNetConfig_connectWithSelectedConfig(cFEStateNetConfig* self)
+void cFEStateNetConfig::connectWithSelectedConfig()
 {
     if (((cFEVObj_001B45E8*)D_004A1B78)->IsAvailable1() == 0) {
-        self->miState = 0;
-        cFEStateNetConfig_showConfigLists((cFEStateNetConfig*)self, -1);
-        char* buf = (char*)&self->mustrPopupText[0];
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        miState = 0;
+        showConfigLists(-1);
+        char* buf = (char*)&mustrPopupText[0];
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         int name = Loc1B45E8(str_kT_POPUPCMNYourNetwork);
         sprintf1_1B45E8(buf, Loc1B45E8(str_kT_MEMFENotDetectedFile), D_004A1B80 + 1, name);
         popup->info.mtMessage.pustr = (const unsigned short*)buf;
         popup->info.mtMessage.eType = 1;
         popup->info.meType = 1;
-        cPopupInfo_setPopupOptionNames2(&popup->info, 0, GetHashValue32(str_kT_CMNContinue));
+        popup->info.setPopupOptionNames2(0, GetHashValue32(str_kT_CMNContinue));
         popup->info.mbReceivePrev = 0;
         popup->info.miMiscData = 2115;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     } else {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP200ConnectingISP);
         popup->info.mtMessage.eType = 3;
         popup->info.miMiscData = 2062;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNCancel));
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
-        cConnMan_connect(func_002591B8(), self->miSelectedSetting);
-        self->miState = 0;
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNCancel));
+        this->showPopup(popup);
+        cConnMan_connect(func_002591B8(), miSelectedSetting);
+        miState = 0;
     }
 }
 #endif
@@ -12911,7 +12901,7 @@ extern "C" void cFEStateNetConfig_showCheckingCardPopup(cFEStateNetConfig* self,
     sVEntry<int(void* self, int hash)>* vt = (sVEntry<int(void* self, int hash)>*)VPTR_OF(cUILocaleInterface, locale);
     void* obj = vthis(locale, vt[4]);
     sprintf1(str, vt[4].fn(obj, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)self->createPopup();
     // stores
     popup->info.meType = 0;
     popup->info.mtMessage.pustr = (const unsigned short*)str;
@@ -12921,7 +12911,7 @@ extern "C" void cFEStateNetConfig_showCheckingCardPopup(cFEStateNetConfig* self,
     popup->info.mbReceivePrev = 0;
     popup->info.miDefaultOption = 0;
     // end
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    self->showPopup(popup);
 }
 #endif
 
@@ -12970,23 +12960,23 @@ static inline int Loc1B4888(char* name)
  * @param cardError  error kind (2, 6, 20 or 24)
  * @param cardSlot  0-based slot, or -1
  */
-extern "C" void cFEStateNetConfig_showCardErrorPopup(cFEStateNetConfig* self, int popupId, int cardError, int cardSlot)
+void cFEStateNetConfig::showCardErrorPopup(int popupId, int cardError, int cardSlot)
 {
     char buf[0x20];
     int flag = 0;
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)this->createPopup();
     cPopupInfo* sub = &popup->info;
     switch (cardError) {
     case 2:
         if (cardSlot == -1) {
-            char* dst = (char*)&self->mustrPopupText;
+            char* dst = (char*)&mustrPopupText;
             cardSlot = 1;
             int name = Loc1B4888(str_kT_POPUPCMNYourNetwork);
             sprintf1_1B4888(dst, Loc1B4888(str_kT_MEMFENotDetectedFile), cardSlot, name);
             popup->info.mtMessage.pustr = (const unsigned short*)dst;
             popup->info.mtMessage.eType = cardSlot;
         } else {
-            char* dst = (char*)&self->mustrPopupText;
+            char* dst = (char*)&mustrPopupText;
             int name = Loc1B4888(str_kT_POPUPCMNYourNetwork);
             sprintf1_1B4888(dst, Loc1B4888(str_kT_MEMFENotDetectedFile), cardSlot + 1, name);
             popup->info.mtMessage.pustr = (const unsigned short*)dst;
@@ -12996,7 +12986,7 @@ extern "C" void cFEStateNetConfig_showCardErrorPopup(cFEStateNetConfig* self, in
         break;
     case 20: {
         usprintf_1B4888(buf, str_pct_d_b, cardSlot + 1);
-        char* dst = (char*)&self->mustrPopupText;
+        char* dst = (char*)&mustrPopupText;
         sprintf1_1B4888(dst, Loc1B4888(str_kT_MEMOVNotFormattedPS2), buf);
         popup->info.mtMessage.pustr = (const unsigned short*)dst;
         popup->info.mtMessage.eType = 1;
@@ -13004,7 +12994,7 @@ extern "C" void cFEStateNetConfig_showCardErrorPopup(cFEStateNetConfig* self, in
     }
     case 0x18: {
         usprintf_1B4888(buf, str_pct_d_b, cardSlot + 1);
-        char* dst = (char*)&self->mustrPopupText;
+        char* dst = (char*)&mustrPopupText;
         int name = Loc1B4888(str_kT_POPUPCMNYourNetwork);
         sprintf1_1B4888(dst, Loc1B4888(str_kT_MEMFECorruptPS2), name, buf);
         popup->info.mtMessage.pustr = (const unsigned short*)dst;
@@ -13017,15 +13007,15 @@ extern "C" void cFEStateNetConfig_showCardErrorPopup(cFEStateNetConfig* self, in
         break;
     }
     *(int*)sub = 2;
-    cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_MEMOVRetry));
+    sub->setPopupOptionNames2(0, GetHashValue32(str_kT_MEMOVRetry));
     if (flag == 0) {
-        cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNContinue));
+        sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNContinue));
     } else {
-        cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_BTNCancel));
+        sub->setPopupOptionNames2(1, GetHashValue32(str_kT_BTNCancel));
     }
     sub->miMiscData = popupId;
     sub->mbReceivePrev = 0;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    this->showPopup(popup);
 }
 #endif
 
@@ -13042,13 +13032,13 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  * @return the value left by cFEStateNet_onPopupEvent, which returns nothing
  */
-extern "C" int cFEStateNetConfig_onNoConfigPopupEvent(cFEStateNetConfig* self, cUIState* popup, int event)
+int cFEStateNetConfig::onNoConfigPopupEvent(cUIState* popup, int event)
 {
     int result;
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
-        result = cFEStateNet_onPopupEvent(self, popup, event);
+        result = cFEStateNet_onPopupEvent(this, popup, event);
     } else {
-        result = cFEStateNet_onPopupEvent(self, popup, event);
+        result = cFEStateNet_onPopupEvent(this, popup, event);
     }
     return result;
 }
@@ -13071,21 +13061,21 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNetConfig_onCardErrorPopupEvent(cFEStateNetConfig* self, cUIState* popup, unsigned int event)
+void cFEStateNetConfig::onCardErrorPopupEvent(cUIState* popup, unsigned int event)
 {
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0:
         D_004A1B80 = 0;
-        self->miResult = 1;
-        cFEStateNetConfig_showCheckingCardPopup(self, 1);
-        self->miState = 1;
+        miResult = 1;
+        cFEStateNetConfig_showCheckingCardPopup(this, 1);
+        miState = 1;
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
     case cUIState::kONSCREENPOPUPPREV:
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
         break;
     default:
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
         break;
     }
 }
@@ -13131,7 +13121,7 @@ extern sNetEntry_4CD8 cCommSystem_mNetConns[10];
  * 2 or more; data 20 + i) and its device name in mpLBAdapters (data 30 + i; both branches of the "SCE/Ethernet (Network
  * Adaptor)" test add it the same way), then cFEStateNetConfig_showConfigLists shows the lists. Ends in miState 5 with miWaitFrames 15.
  */
-extern "C" void cFEStateNetConfig_loadConfigs(cFEStateNetConfig* self)
+void cFEStateNetConfig::loadConfigs()
 {
     char buf[64];
     unsigned short name[64];
@@ -13140,43 +13130,43 @@ extern "C" void cFEStateNetConfig_loadConfigs(cFEStateNetConfig* self)
     t3Vector scale;
     tRect pos;
     func_00255F20(cCommSystem_mCommSystem, D_004A1B90[D_004A1B80]);
-    self->miNumSettings = cCommSystem_mNumNetConn;
-    if (self->miNumSettings > 4) {
-        self->miNumSettings = 4;
+    miNumSettings = cCommSystem_mNumNetConn;
+    if (miNumSettings > 4) {
+        miNumSettings = 4;
     }
-    if (self->miNumSettings <= 0) {
+    if (miNumSettings <= 0) {
         if (D_004A1B80 == 0) {
             D_004A1B80 = 1;
-            cFEStateNetConfig_showCheckingCardPopup(self, 2);
-            self->miState = 1;
-            self->miResult = self->miNumSettings;
+            cFEStateNetConfig_showCheckingCardPopup(this, 2);
+            miState = 1;
+            miResult = miNumSettings;
             return;
         }
-        if (self->miNumSettings != 0) {
-            if (self->miResult == 0) {
+        if (miNumSettings != 0) {
+            if (miResult == 0) {
                 D_004A1B80 = 0;
-                self->miState = 5;
-                self->miWaitFrames = 15;
+                miState = 5;
+                miWaitFrames = 15;
                 return;
             }
-            cFEStateNetConfig_reportLoadResult(self, self->miNumSettings);
-            self->miState = 0;
+            reportLoadResult(miNumSettings);
+            miState = 0;
             return;
         }
     } else {
-        ((cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen,
+        ((cUIThing*)cUIScreen_getObjectByHashName(mpScreen,
                 GetHashValue32(str_LBSettings)))->getSize((t3Vector*)&pos);
-        scale = *(&self->mpLBSettings->mScale);
-        if (self->miNumSettings > 4) {
-            self->miNumSettings = 4;
+        scale = *(&mpLBSettings->mScale);
+        if (miNumSettings > 4) {
+            miNumSettings = 4;
         }
-        for (int i = 0; i < self->miNumSettings; i++) {
+        for (int i = 0; i < miNumSettings; i++) {
             char* nm = cCommSystem_mNetConns[i].name42;
             float w;
             int len;
-            if (self->miNumSettings >= 2) {
+            if (miNumSettings >= 2) {
                 len = sprintf(buf, str_pct_d_c, i + 1);
-                w = pos.X - cFont_textExtent(cUIListBox_getFont(self->mpLBSettings), buf, &size, 1, scale.x, scale.y);
+                w = pos.X - cFont_textExtent(cUIListBox_getFont(mpLBSettings), buf, &size, 1, scale.x, scale.y);
             } else {
                 w = pos.X;
                 len = 0;
@@ -13185,18 +13175,18 @@ extern "C" void cFEStateNetConfig_loadConfigs(cFEStateNetConfig* self)
             char* rec = cCommSystem_mNetConns[i].name4;
             func_003EFA48(name, 0x40, nm);
             UIAsciiToUnicode(line, buf);
-            cFont_textSmartLimit1(cUIListBox_getFont(self->mpLBSettings), scale.x, w, name, line + len, 0x40 - len);
-            cUIListBox_addEntryByUnicodeString(self->mpLBSettings, line, i + 20);
+            cFont_textSmartLimit1(cUIListBox_getFont(mpLBSettings), scale.x, w, name, line + len, 0x40 - len);
+            cUIListBox_addEntryByUnicodeString(mpLBSettings, line, i + 20);
             if (strcmp(D_004A1B7C, rec) == 0) {
-                cUIListBox_addEntryByAsciiString(self->mpLBAdapters, rec, i + 0x1E);
+                cUIListBox_addEntryByAsciiString(mpLBAdapters, rec, i + 0x1E);
             } else {
-                cUIListBox_addEntryByAsciiString(self->mpLBAdapters, rec, i + 0x1E);
+                cUIListBox_addEntryByAsciiString(mpLBAdapters, rec, i + 0x1E);
             }
         }
-        cFEStateNetConfig_showConfigLists(self, self->miNumSettings);
+        showConfigLists(miNumSettings);
     }
-    self->miState = 5;
-    self->miWaitFrames = 15;
+    miState = 5;
+    miWaitFrames = 15;
 }
 #endif
 
@@ -13217,25 +13207,25 @@ extern int D_004A1B80;
  *
  * @param err  the load result
  */
-extern "C" void cFEStateNetConfig_reportLoadResult(cFEStateNetConfig* self, int err)
+void cFEStateNetConfig::reportLoadResult(int err)
 {
     switch (err) {
     case 0:
-        cUIStateStack_popToState(&self->mpEngine->mStateStack);
+        cUIStateStack_popToState(&mpEngine->mStateStack);
         break;
     // PORT: GNU case ranges
     case -21 ... -16:
     case -14 ... -1:
-        cFEStateNetConfig_showCardErrorPopup(self, 2114, 0x18, D_004A1B80);
+        showCardErrorPopup(2114, 0x18, D_004A1B80);
         break;
     case -15:
-        cFEStateNetConfig_showCardErrorPopup(self, 2113, 6, -1);
+        showCardErrorPopup(2113, 6, -1);
         break;
     case -200:
-        cFEStateNetConfig_showCardErrorPopup(self, 2113, 20, 0);
+        showCardErrorPopup(2113, 20, 0);
         break;
     }
-    cFEStateNetConfig_showConfigLists(self, -1);
+    showConfigLists(-1);
 }
 #endif
 
@@ -13276,29 +13266,29 @@ public:
  *
  * @param configCount  number of configurations
  */
-extern "C" void cFEStateNetConfig_showConfigLists(cFEStateNetConfig* self, int configCount)
+void cFEStateNetConfig::showConfigLists(int configCount)
 {
     if (configCount <= 0) {
-        cUIListBox_deleteAllEntries(((cFEVObj_001B5068*)self->mpLBAdapters));
-        cUIListBox_deleteAllEntries(((cFEVObj_001B5068*)self->mpLBSettings));
-        ((cFEVObj_001B5068*)self->mpLBSettings)->setStatic(1);
-        ((cFEVObj_001B5068*)self->mpLBAdapters)->setStatic(1);
-        ((cFEVObj_001B5068*)self->mpPairSettings)->setStatic(1);
-        ((cFEVObj_001B5068*)self->mpLBSettings)->setVisible(0);
-        ((cFEVObj_001B5068*)self->mpLBAdapters)->setVisible(0);
-        ((cFEVObj_001B5068*)self->mpConfigRectangle)->setVisible(0);
-        ((cFEVObj_001B5068*)self->mpNoConfiguration)->setVisible(1);
-        ((cFEVObj_001B5068*)self->mpNoConfiguration)->setColour(gStaticColour);
-        cUIMenu_setSelectedByIndex(self->mpMenuConfig, 0);
+        cUIListBox_deleteAllEntries(((cFEVObj_001B5068*)mpLBAdapters));
+        cUIListBox_deleteAllEntries(((cFEVObj_001B5068*)mpLBSettings));
+        ((cFEVObj_001B5068*)mpLBSettings)->setStatic(1);
+        ((cFEVObj_001B5068*)mpLBAdapters)->setStatic(1);
+        ((cFEVObj_001B5068*)mpPairSettings)->setStatic(1);
+        ((cFEVObj_001B5068*)mpLBSettings)->setVisible(0);
+        ((cFEVObj_001B5068*)mpLBAdapters)->setVisible(0);
+        ((cFEVObj_001B5068*)mpConfigRectangle)->setVisible(0);
+        ((cFEVObj_001B5068*)mpNoConfiguration)->setVisible(1);
+        ((cFEVObj_001B5068*)mpNoConfiguration)->setColour(gStaticColour);
+        cUIMenu_setSelectedByIndex(mpMenuConfig, 0);
     } else {
-        ((cFEVObj_001B5068*)self->mpPairSettings)->setStatic(0);
-        ((cFEVObj_001B5068*)self->mpLBSettings)->setStatic(0);
-        ((cFEVObj_001B5068*)self->mpLBAdapters)->setStatic(0);
-        ((cFEVObj_001B5068*)self->mpLBSettings)->setVisible(1);
-        ((cFEVObj_001B5068*)self->mpLBAdapters)->setVisible(1);
-        ((cFEVObj_001B5068*)self->mpConfigRectangle)->setVisible(1);
-        ((cFEVObj_001B5068*)self->mpNoConfiguration)->setVisible(0);
-        cUIMenu_setSelectedByIndex(self->mpMenuConfig, 1);
+        ((cFEVObj_001B5068*)mpPairSettings)->setStatic(0);
+        ((cFEVObj_001B5068*)mpLBSettings)->setStatic(0);
+        ((cFEVObj_001B5068*)mpLBAdapters)->setStatic(0);
+        ((cFEVObj_001B5068*)mpLBSettings)->setVisible(1);
+        ((cFEVObj_001B5068*)mpLBAdapters)->setVisible(1);
+        ((cFEVObj_001B5068*)mpConfigRectangle)->setVisible(1);
+        ((cFEVObj_001B5068*)mpNoConfiguration)->setVisible(0);
+        cUIMenu_setSelectedByIndex(mpMenuConfig, 1);
     }
 }
 #endif
@@ -13318,18 +13308,17 @@ extern "C" void cFEStateNetConfig_showCheckingCardPopup(cFEStateNetConfig* self,
  * Selects row 0 of mpMenuConfig, sets D_004A1B80 to 0 and miResult to 1, clears mpLBAdapters and mpLBSettings
  * (cUIListBox_deleteAllEntries), shows the "checking" popup for slot 1 (cFEStateNetConfig_showCheckingCardPopup) and sets miState 1.
  *
- * @param obj  the network-configuration state (this)
  * @param ignored  unused
  */
-extern "C" void cFEStateNetConfig_rescanConfigs(cFEStateNetConfig* obj, int ignored)
+void cFEStateNetConfig::rescanConfigs(int ignored)
 {
-    cFEStateNetConfig* self = obj;
+    cFEStateNetConfig* self = this;
     cUIMenu_setSelectedByIndex(((void*)self->mpMenuConfig), 0);
     D_004A1B80 = 0;
     self->miResult = 1;
     cUIListBox_deleteAllEntries(((void*)self->mpLBAdapters));
     cUIListBox_deleteAllEntries(((void*)self->mpLBSettings));
-    cFEStateNetConfig_showCheckingCardPopup(obj, 1);
+    cFEStateNetConfig_showCheckingCardPopup(this, 1);
     self->miState = 1;
 }
 #endif
@@ -13428,7 +13417,7 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the cFEStateNetHelpPopup to fill
  */
-extern "C" void cFEStateNetConfig_fillHelpPopup(cFEStateNetConfig* self, cFEStateNetHelpPopup* popup)
+void cFEStateNetConfig::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 5);
     popup->muiScreenName = GetHashValue32(str_kT_HELP200NetworkConfig);
@@ -13483,31 +13472,31 @@ static inline void* GetSession_001B55B0()
  * @param popup  the popup state
  * @param kind  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNetConfig_onConnectingPopupEvent(cFEStateNetConfig* self, cUIState* popup, unsigned int kind)
+void cFEStateNetConfig::onConnectingPopupEvent(cUIState* popup, unsigned int kind)
 {
     switch (kind) {
     case cUIState::kONSCREENPOPUPOPTION0:
     case cUIState::kONSCREENPOPUPPREV: {
-        cUIThing* pairSettings = self->mpPairSettings;
-        self->mbCancelled = 1;
+        cUIThing* pairSettings = mpPairSettings;
+        mbCancelled = 1;
         pairSettings->setStatic(0);
         BuddyMan_disconnect(GetSession_001B55B0());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
         cConnMan_disconnect(func_002591B8(), 0);
-        cFEStateNet_onPopupEvent(self, popup, kind);
+        cFEStateNet_onPopupEvent(this, popup, kind);
         break;
     }
     case cUIState::kONPOPUPDESTROY:
-        if (self->mbCancelled == 0) {
-            cFEStateAuthDNAS* authPopup = cFEStateAuthDNAS_cFEStateAuthDNAS((cFEStateAuthDNAS*)((cFEStateAuthDNAS*)cMemMan_alloc(0x700, str_NetConfigAuthPopup, 0, 0)), self->mpEngine, self);
+        if (mbCancelled == 0) {
+            cFEStateAuthDNAS* authPopup = cFEStateAuthDNAS_cFEStateAuthDNAS((cFEStateAuthDNAS*)((cFEStateAuthDNAS*)cMemMan_alloc(0x700, str_NetConfigAuthPopup, 0, 0)), mpEngine, this);
             authPopup->miMiscData = 2074;
-            cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, authPopup);
+            cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, authPopup);
         }
-        self->mbCancelled = 0;
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONPOPUPDESTROY);
+        mbCancelled = 0;
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONPOPUPDESTROY);
         break;
     default:
-        cFEStateNet_onPopupEvent(self, popup, kind);
+        cFEStateNet_onPopupEvent(this, popup, kind);
         break;
     }
 }
@@ -13549,16 +13538,16 @@ static inline void* GetSession_001B5740()
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNetConfig_onDNASErrorPopupEvent(cFEStateNetConfig* self, cUIState* popup, int event)
+void cFEStateNetConfig::onDNASErrorPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
         BuddyMan_disconnect(GetSession_001B5740());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
         cConnMan_disconnect(func_002591B8(), 0);
-        self->mpPairSettings->setStatic(0);
-        cFEStateNet_onPopupEvent(self, popup, event);
+        mpPairSettings->setStatic(0);
+        cFEStateNet_onPopupEvent(this, popup, event);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -13612,46 +13601,46 @@ static inline void* GetSession_001B5830()
  * @param popup  the popup state
  * @param kind  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNetConfig_onDNASAuthPopupEvent(cFEStateNetConfig* self, cUIState* popup, unsigned int kind)
+void cFEStateNetConfig::onDNASAuthPopupEvent(cUIState* popup, unsigned int kind)
 {
     switch (kind) {
     case cUIState::kONSCREENPOPUPOPTION0:
-        cFEStateNet_onPopupEvent_v(self, popup, cUIState::kONSCREENPOPUPOPTION0);
-        self->mbAuthFailed = 0;
+        cFEStateNet_onPopupEvent_v(this, popup, cUIState::kONSCREENPOPUPOPTION0);
+        mbAuthFailed = 0;
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
-        self->mbAuthFailed = 1;
-        cFEStateNet_onPopupEvent_v(self, popup, cUIState::kONSCREENPOPUPOPTION1);
+        mbAuthFailed = 1;
+        cFEStateNet_onPopupEvent_v(this, popup, cUIState::kONSCREENPOPUPOPTION1);
         break;
     case cUIState::kONSCREENPOPUPPREV:
         BuddyMan_disconnect(GetSession_001B5830());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
         cConnMan_disconnect(func_002591B8(), 0);
-        self->mbCancelled = 1;
-        self->mpPairSettings->setStatic(0);
-        cFEStateNet_onPopupEvent_v(self, popup, cUIState::kONSCREENPOPUPPREV);
+        mbCancelled = 1;
+        mpPairSettings->setStatic(0);
+        cFEStateNet_onPopupEvent_v(this, popup, cUIState::kONSCREENPOPUPPREV);
         break;
     case cUIState::kONPOPUPDESTROY:
-        cFEStateNet_onPopupEvent_v(self, popup, cUIState::kONPOPUPDESTROY);
-        if (self->mbAuthFailed != 0) {
+        cFEStateNet_onPopupEvent_v(this, popup, cUIState::kONPOPUPDESTROY);
+        if (mbAuthFailed != 0) {
             cUIState* nextPopup = (cUIState*)cFEStateAuthDNASError_cFEStateAuthDNASError(
-                    (cFEStateAuthDNASError*)cMemMan_alloc(1768, str_cFEStateAuthDNASError, 0, 0), self->mpEngine,
-                    self, self->mpustrAuthError[1], self->mpustrAuthError[2],
-                    self->mpustrAuthError[0]);
+                    (cFEStateAuthDNASError*)cMemMan_alloc(1768, str_cFEStateAuthDNASError, 0, 0), mpEngine,
+                    this, mpustrAuthError[1], mpustrAuthError[2],
+                    mpustrAuthError[0]);
             nextPopup->miMiscData = 2075;
-            cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, nextPopup);
-        } else if (self->mbCancelled == 0) {
+            cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, nextPopup);
+        } else if (mbCancelled == 0) {
             cUIState* nextPopup = (cUIState*)cFEStateNetAccountMem_cFEStateNetAccountMem(
-                    (cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine,
-                    self, 0, 0, 0);
+                    (cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), mpEngine,
+                    this, 0, 0, 0);
             nextPopup->miMiscData = 2092;
-            cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, nextPopup);
+            cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, nextPopup);
         }
-        self->mbAuthFailed = 0;
-        self->mbCancelled = 0;
+        mbAuthFailed = 0;
+        mbCancelled = 0;
         break;
     default:
-        cFEStateNet_onPopupEvent_v(self, popup, kind);
+        cFEStateNet_onPopupEvent_v(this, popup, kind);
         break;
     }
 }
@@ -13689,19 +13678,19 @@ extern const char str_cFEStateLogin[];
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNetConfig_onAccountMemPopupEvent(cFEStateNetConfig* self, cUIState* popup, int event)
+void cFEStateNetConfig::onAccountMemPopupEvent(cUIState* popup, int event)
 {
     switch (event) {
     case cUIState::kONPOPUPCREATE:
-        self->mbPushLogin = 0;
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        mbPushLogin = 0;
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         break;
     case cUIState::kONSCREENPOPUPOPTION0:
-        cFEStateNet_onPopupEvent_v(self, popup, event);
-        self->mbPushLogin = 1;
+        cFEStateNet_onPopupEvent_v(this, popup, event);
+        mbPushLogin = 1;
         break;
     case cUIState::kONSCREENPOPUPOPTION1: case cUIState::kONSCREENPOPUPPREV: {
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         if (BuddyMan_mBuddyMan == 0) {
             BuddyMan_createInstance();
         }
@@ -13714,19 +13703,19 @@ extern "C" void cFEStateNetConfig_onAccountMemPopupEvent(cFEStateNetConfig* self
         BuddyMan_disconnect(BuddyMan_mBuddyMan);
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
         cConnMan_disconnect(func_002591B8(), 0);
-        cUIThing* obj = self->mpPairSettings;
+        cUIThing* obj = mpPairSettings;
         obj->setStatic(0);
         break;
     }
     case cUIState::kONPOPUPDESTROY:
-        if (self->mbPushLogin != 0) {
-            cFEStateNet_pushState(self, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748, str_cFEStateLogin, 0,
-                    0), self->mpEngine));
+        if (mbPushLogin != 0) {
+            cFEStateNet_pushState(this, cFEStateLogin_cFEStateLogin((cFEStateLogin*)cMemMan_alloc(1748, str_cFEStateLogin, 0,
+                    0), mpEngine));
         }
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         break;
     default:
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         break;
     }
 }
@@ -13782,27 +13771,27 @@ struct sFlags1B5BD8 {
  * @param popup  the popup state
  * @param kind  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNetConfig_onCreateConfigPopupEvent(cFEStateNetConfig* self, cUIState* popup, unsigned int kind)
+void cFEStateNetConfig::onCreateConfigPopupEvent(cUIState* popup, unsigned int kind)
 {
     switch (kind) {
     case cUIState::kONSCREENPOPUPOPTION0: {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, cUIState::kONSCREENPOPUPOPTION0);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, cUIState::kONSCREENPOPUPOPTION0);
         cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
         func_00256088();
-        cFEVObj_001B5BD8* createConfigText = (cFEVObj_001B5BD8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextCreateConfig));
+        cFEVObj_001B5BD8* createConfigText = (cFEVObj_001B5BD8*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextCreateConfig));
         if (createConfigText != 0) {
             createConfigText->setEnabled(0);
             createConfigText->setColour(sColor1B5BD8(1.0f, 0.5f, 0.5f, 0.5f));
         }
-        ((sFlags1B5BD8*)&self->mAttrState)->mode = 7;
+        ((sFlags1B5BD8*)&mAttrState)->mode = 7;
         break;
     }
     case cUIState::kONSCREENPOPUPOPTION1:
     case cUIState::kONSCREENPOPUPPREV:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
         break;
     default:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
         break;
     }
 }
@@ -13822,13 +13811,13 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateNetConfig_onConnectionWarningPopupEvent(cFEStateNetConfig* self, cUIState* popup, int event)
+void cFEStateNetConfig::onConnectionWarningPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONPOPUPDESTROY) {
-        cFEStateNet_onPopupEvent(self, popup, event);
-        self->mpPairSettings->setStatic(0);
+        cFEStateNet_onPopupEvent(this, popup, event);
+        mpPairSettings->setStatic(0);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -13852,28 +13841,28 @@ void cFEStateNetConfig::onPopupEvent(cUIState* pPopup, unsigned int Event)
 {
     switch (pPopup->miMiscData) {
     case 2076:
-        cFEStateNetConfig_onConnectionWarningPopupEvent(this, pPopup, Event);
+        this->onConnectionWarningPopupEvent(pPopup, Event);
         break;
     case 2062:
-        cFEStateNetConfig_onConnectingPopupEvent(this, pPopup, Event);
+        this->onConnectingPopupEvent(pPopup, Event);
         break;
     case 2075:
-        cFEStateNetConfig_onDNASErrorPopupEvent(this, pPopup, Event);
+        this->onDNASErrorPopupEvent(pPopup, Event);
         break;
     case 2074:
-        cFEStateNetConfig_onDNASAuthPopupEvent(this, pPopup, Event);
+        this->onDNASAuthPopupEvent(pPopup, Event);
         break;
     case 2092:
-        cFEStateNetConfig_onAccountMemPopupEvent(this, pPopup, Event);
+        this->onAccountMemPopupEvent(pPopup, Event);
         break;
     case 2112: case 2113: case 2114:
-        cFEStateNetConfig_onCardErrorPopupEvent(this, pPopup, Event);
+        this->onCardErrorPopupEvent(pPopup, Event);
         break;
     case 2115:
-        cFEStateNetConfig_onNoConfigPopupEvent(this, pPopup, Event);
+        this->onNoConfigPopupEvent(pPopup, Event);
         break;
     case 2116:
-        cFEStateNetConfig_onCreateConfigPopupEvent(this, pPopup, Event);
+        this->onCreateConfigPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -13929,12 +13918,12 @@ static inline int Loc1B5E28(char* name)
  * @param msgPtr  the event
  * @return 0, or cFEStateNet_onNetEvent's result
  */
-extern "C" int cFEStateNetConfig_onNetEvent(cFEStateNetConfig* self, int id, void* msgPtr)
+int cFEStateNetConfig::onNetEvent(int id, void* msgPtr)
 {
     online_NetErrorEvent* msg = (online_NetErrorEvent*)((char*)msgPtr);
     if (id == 261) {
-        if (self->mAttrState & 6) {
-            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        if (mAttrState & 6) {
+            cUIStateStack_pop(&mpEngine->mStateStack, 1);
         }
     } else {
         if (id >= 261) {
@@ -13956,33 +13945,33 @@ extern "C" int cFEStateNetConfig_onNetEvent(cFEStateNetConfig* self, int id, voi
                             str = Loc1B5E28(str_kT_POPUP200WarningProblemISP);
                             break;
                         }
-                        if (self->mpustrPopupText != 0) {
-                            cMemMan_free(self->mpustrPopupText);
-                            self->mpustrPopupText = 0;
+                        if (mpustrPopupText != 0) {
+                            cMemMan_free(mpustrPopupText);
+                            mpustrPopupText = 0;
                         }
-                        void* errText = (void*)cFEStateNet_getNetErrorText((cFEStateNet*)self, msg);
+                        void* errText = (void*)this->getNetErrorText(msg);
                         if (errText != 0) {
-                            self->mpustrPopupText = (unsigned short*)operator_new_tag((USTR_length(errText) + 1) * 2, str_disconnected_from_serverErrorString, 0x100, 0);
-                            USTR_copy(self->mpustrPopupText, errText);
+                            mpustrPopupText = (unsigned short*)operator_new_tag((USTR_length(errText) + 1) * 2, str_disconnected_from_serverErrorString, 0x100, 0);
+                            USTR_copy(mpustrPopupText, errText);
                         } else {
-                            self->mpustrPopupText = (unsigned short*)operator_new_tag((USTR_length((void*)str) + 1) * 2, str_disconnected_from_serverErrorString, 0x100, 0);
-                            strcpy1(self->mpustrPopupText, str);
+                            mpustrPopupText = (unsigned short*)operator_new_tag((USTR_length((void*)str) + 1) * 2, str_disconnected_from_serverErrorString, 0x100, 0);
+                            strcpy1(mpustrPopupText, str);
                         }
                         int one = 1;
-                        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+                        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
                         popup->info.meType = one;
                         cPopupInfo* sub = &popup->info;
-                        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
-                        popup->info.mtMessage.pustr = (const unsigned short*)((void*)self->mpustrPopupText);
+                        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
+                        popup->info.mtMessage.pustr = (const unsigned short*)((void*)mpustrPopupText);
                         popup->info.miMiscData = 2076;
                         popup->info.mtMessage.eType = one;
-                        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+                        this->showPopup(popup);
                     }
                     return 0;
                 }
             }
         }
-        return cFEStateNet_onNetEvent_3i(self, id, msgPtr);
+        return cFEStateNet_onNetEvent_3i(this, id, msgPtr);
     }
     return 0;
 }
@@ -14075,19 +14064,19 @@ void cFEStateNetConfig::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
         switch (miscData) {
         case 0:
             mpPairSettings->setStatic(1);
-            cFEStateNetConfig_startConnect(this);
+            this->startConnect();
             break;
         case 1: {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 2;
             cPopupInfo* sub = &popup->info;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-            cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+            sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP200CreateEdit);
             popup->info.mtMessage.eType = 3;
             popup->info.miMiscData = 2116;
             popup->info.miDefaultOption = 1;
-            cFEStateNet_showPopup((cFEStateNet*)this, popup);
+            this->showPopup(popup);
             break;
         }
         }
@@ -14100,7 +14089,7 @@ void cFEStateNetConfig::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
         }
         break;
     case cUIState::kONMISC:
-        cFEStateNetConfig_rescanConfigs(this, 0);
+        this->rescanConfigs(0);
         break;
     case cUIState::kONPREV:
         cFEStateNet_setFEPath(0);
@@ -14851,20 +14840,20 @@ extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountM
     SetNames_001B6ED0(buf1, buf2, name, name2);
     switch (mode) {
     case 0:
-        cFEStateNetAccountMem_setStep_v(self, 0);
+        self->setStep(0);
         self->miStartState = 0;
         break;
     case 1:
-        cFEStateNetAccountMem_setStep_v(self, 5);
+        self->setStep(5);
         self->miStartState = 5;
         break;
     case 2:
-        cFEStateNetAccountMem_setStep_v(self, 11);
+        self->setStep(11);
         self->miStartState = 11;
         break;
     case 3:
         SetNames_001B6ED0(buf1, buf2, AccountData, AccountData + 0x11);
-        cFEStateNetAccountMem_setStep_v(self, 19);
+        self->setStep(19);
         self->miStartState = 19;
         break;
     }
@@ -14928,13 +14917,12 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_clearAccount__FPv);
  *
  * @return the value left by cFEStateNetAccountMem_copyToAccountData
  */
-void* cFEStateNetAccountMem_clearAccount(void* vself)
+void* cFEStateNetAccountMem::clearAccount()
 {
-    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
     int zero = 0;
-    self->mszUserName[0] = (signed char)zero;
-    self->mszPassword[0] = (signed char)zero;
-    return cFEStateNetAccountMem_copyToAccountData((cFEStateNetAccountMem*)self);
+    mszUserName[0] = (signed char)zero;
+    mszPassword[0] = (signed char)zero;
+    return copyToAccountData();
 }
 #endif
 
@@ -15005,176 +14993,174 @@ extern "C" void cFEStateNetAccountMem_setStep_v(void* self, int state) __asm__("
  * a request runs. 0, 5, 11 and 19 clear mbCardError and mbCardBusy, 2 only mbCardBusy. The Yes/No popups' ids are the
  * next step (default option 1).
  *
- * @param vself  the account memory-card popup (this)
  * @param state  the new step
  */
-extern "C" void cFEStateNetAccountMem_setStep_v(void* vself, int state)
+void cFEStateNetAccountMem::setStep(int state)
 {
-    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
     char buf[0x20];
-    self->miState = state;
+    miState = state;
     int str = Loc1B70D0(str_kT_POPUPCMNEABigLogin);
     usprintf(buf, str_pct_d_b, 1);
     switch ((unsigned int)state) {
     case 1: {
-        unsigned short* text = self->mustrText;
+        unsigned short* text = mustrText;
         cSharedLoginMan_clearCardChanged(SharedLoginMan);
         cSharedLoginMan_requestReadAccount(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 6: {
-        unsigned short* text = self->mustrText;
+        unsigned short* text = mustrText;
         cSharedLoginMan_clearCardChanged(SharedLoginMan);
         cSharedLoginMan_requestReadAccount(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 7: {
-        unsigned short* text = self->mustrText;
-        self->mbCardError = 0;
-        self->mbCardBusy = 0;
+        unsigned short* text = mustrText;
+        mbCardError = 0;
+        mbCardBusy = 0;
         cSharedLoginMan_clearCardChanged(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVOverWriteFile), str);
         int yesId = GetHashValue32(str_kT_CMNYes);
         int noId = GetHashValue32(str_kT_CMNNo);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 8, 1, yesId, noId, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 8, 1, yesId, noId, 0, text);
         break;
     }
     case 8: {
-        cFEStateNetAccountMem_copyToAccountData_v(self);
-        self->mbCardBusy = 1;
-        if (self->mbCardError != 0) {
-            cFEStateNetAccountMem_setStep_v(self, 9);
+        cFEStateNetAccountMem_copyToAccountData_v(this);
+        mbCardBusy = 1;
+        if (mbCardError != 0) {
+            setStep(9);
             break;
         }
-        unsigned short* text = self->mustrText;
+        unsigned short* text = mustrText;
         cSharedLoginMan_requestSaveAccount(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 12: {
-        unsigned short* text = self->mustrText;
+        unsigned short* text = mustrText;
         cSharedLoginMan_clearCardChanged(SharedLoginMan);
         cSharedLoginMan_requestReadAccount(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 13: {
-        unsigned short* text = self->mustrText;
-        self->mbCardBusy = 0;
-        self->mbCardError = 0;
+        unsigned short* text = mustrText;
+        mbCardBusy = 0;
+        mbCardError = 0;
         cSharedLoginMan_clearCardChanged(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFormatCardPS2), buf);
         int yesId = GetHashValue32(str_kT_CMNYes);
         int noId = GetHashValue32(str_kT_CMNNo);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0xE, 1, yesId, noId, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0xE, 1, yesId, noId, 0, text);
         break;
     }
     case 14: {
-        self->mbCardBusy = 1;
-        unsigned short* text = self->mustrText;
+        mbCardBusy = 1;
+        unsigned short* text = mustrText;
         cSharedLoginMan_requestFormat(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFormattingPS2), buf);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 16: {
-        self->mbCardBusy = 0;
+        mbCardBusy = 0;
         if (cSharedLoginMan_getCardFreeSpace(SharedLoginMan) < 17) {
-            self->miError = 3;
-            cFEStateNetAccountMem_setStep_v(self, 17);
+            miError = 3;
+            setStep(17);
             break;
         }
-        self->mbCardBusy = 1;
-        unsigned short* text = self->mustrText;
-        cFEStateNetAccountMem_copyToAccountData_v(self);
+        mbCardBusy = 1;
+        unsigned short* text = mustrText;
+        cFEStateNetAccountMem_copyToAccountData_v(this);
         cSharedLoginMan_requestCreateAccount(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 0:
     case 5:
     case 11:
     case 19:
-        self->mbCardError = 0;
+        mbCardError = 0;
     case 2:
-        self->mbCardBusy = 0;
+        mbCardBusy = 0;
         break;
     case 20: {
-        unsigned short* text = self->mustrText;
+        unsigned short* text = mustrText;
         cSharedLoginMan_clearCardChanged(SharedLoginMan);
         cSharedLoginMan_requestReadAccount(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMFECheckingCardPS2), buf);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 21: {
-        unsigned short* text = self->mustrText;
-        self->mbCardBusy = 0;
-        self->mbCardError = 0;
+        unsigned short* text = mustrText;
+        mbCardBusy = 0;
+        mbCardError = 0;
         cSharedLoginMan_clearCardChanged(SharedLoginMan);
         strcpy1(text, Loc1B70D0(str_kT_POPUPTITLEDeleteAccount));
         int yesId = GetHashValue32(str_kT_CMNYes);
         int noId = GetHashValue32(str_kT_CMNNo);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 22, 1, yesId, noId, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 22, 1, yesId, noId, 0, text);
         break;
     }
     case 22: {
-        self->mbCardBusy = 1;
-        if (self->mbCardError != 0) {
-            cFEStateNetAccountMem_setStep_v(self, 23);
+        mbCardBusy = 1;
+        if (mbCardError != 0) {
+            setStep(23);
             break;
         }
-        unsigned short* text = self->mustrText;
+        unsigned short* text = mustrText;
         func_00265E20(SharedLoginMan);
         strcpy1(text, Loc1B70D0(str_kT_MEMDeletingPS2));
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 23:
-        cFEStateNetAccountMem_copyToAccountData_v(self);
+        cFEStateNetAccountMem_copyToAccountData_v(this);
     case 3:
     case 9:
     case 15:
     case 17:
-        cFEStateNetAccountMem_showErrorPopup((char*)self, self->miError);
+        cFEStateNetAccountMem_showErrorPopup((char*)this, miError);
         break;
     case 25: {
-        unsigned short* text = self->mustrText;
-        self->mbCardBusy = 0;
-        self->mbCardError = 0;
+        unsigned short* text = mustrText;
+        mbCardBusy = 0;
+        mbCardError = 0;
         cSharedLoginMan_clearCardChanged(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVDamagedDataPS2), buf);
         int yesId = GetHashValue32(str_kT_CMNYes);
         int noId = GetHashValue32(str_kT_CMNNo);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 26, 1, yesId, noId, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 26, 1, yesId, noId, 0, text);
         break;
     }
     case 26: {
-        self->mbCardBusy = 1;
-        if (self->mbCardError != 0) {
-            cFEStateNetAccountMem_setStep_v(self, 0x1C);
+        mbCardBusy = 1;
+        if (mbCardError != 0) {
+            setStep(0x1C);
             break;
         }
-        unsigned short* text = self->mustrText;
+        unsigned short* text = mustrText;
         func_00265E20(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 27: {
-        self->mbCardBusy = 1;
-        unsigned short* text = self->mustrText;
-        cFEStateNetAccountMem_copyToAccountData_v(self);
+        mbCardBusy = 1;
+        unsigned short* text = mustrText;
+        cFEStateNetAccountMem_copyToAccountData_v(this);
         cSharedLoginMan_requestCreateAccount(SharedLoginMan);
         sprintf1_1B70D0(text, Loc1B70D0(str_kT_MEMOVSaveSavingPS2NGC), buf);
-        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, 0, 0, 0, 0, 0, text);
+        cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, 0, 0, 0, 0, 0, text);
         break;
     }
     case 4:
@@ -15182,10 +15168,10 @@ extern "C" void cFEStateNetAccountMem_setStep_v(void* vself, int state)
     case 18:
     case 24:
     case 29:
-        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&mpEngine->mStateStack, 1);
         break;
     case 28:
-        cFEStateNetAccountMem_showErrorPopup((char*)self, self->miError);
+        cFEStateNetAccountMem_showErrorPopup((char*)this, miError);
         break;
     }
 }
@@ -15216,17 +15202,17 @@ extern "C" void cFEStateNetAccountMem_showPopup(cFEStateNetAccountMem* self, int
         int secondButton,
     const unsigned short* titleText, const unsigned short* bodyText)
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)self->createPopup();
     cPopupInfo* sub = &popup->info;
     if (firstButton != 0) {
         if (secondButton != 0) {
             popup->info.meType = 2;
-            cPopupInfo_setPopupOptionNames2(sub, 0, firstButton);
-            cPopupInfo_setPopupOptionNames2(sub, 1, secondButton);
+            sub->setPopupOptionNames2(0, firstButton);
+            sub->setPopupOptionNames2(1, secondButton);
             popup->info.miDefaultOption = defaultSel;
         } else {
             popup->info.meType = 1;
-            cPopupInfo_setPopupOptionNames2(sub, 0, firstButton);
+            sub->setPopupOptionNames2(0, firstButton);
             popup->info.miDefaultOption = 0;
         }
     } else {
@@ -15245,7 +15231,7 @@ extern "C" void cFEStateNetAccountMem_showPopup(cFEStateNetAccountMem* self, int
     sub->miMiscData = popupId;
     sub->mbReceivePrev = 0;
     sub->mbPassUpdate = 1;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    self->showPopup(popup);
 }
 #endif
 
@@ -15260,10 +15246,10 @@ extern "C" void* sharedlogin_setAccountPassword(void*);
  *
  * @return the value left by sharedlogin_setAccountPassword, which returns nothing (strcpy's result there: the password field)
  */
-extern "C" void* cFEStateNetAccountMem_copyToAccountData(cFEStateNetAccountMem* self)
+void* cFEStateNetAccountMem::copyToAccountData()
 {
-    sharedlogin_setAccountName((char*)&self->mszUserName);
-    return sharedlogin_setAccountPassword((char*)&self->mszPassword);
+    sharedlogin_setAccountName((char*)&mszUserName);
+    return sharedlogin_setAccountPassword((char*)&mszPassword);
 }
 #endif
 
@@ -15277,9 +15263,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_updateCheckCardStep__FPv);
  *
  * @return the value left by cFEStateNetAccountMem_setStep, which returns nothing
  */
-void* cFEStateNetAccountMem_updateCheckCardStep(void* self)
+void* cFEStateNetAccountMem::updateCheckCardStep()
 {
-    return cFEStateNetAccountMem_setStep(self, 2);
+    return cFEStateNetAccountMem_setStep(this, 2);
 }
 #endif
 
@@ -15300,15 +15286,15 @@ static inline bool IsMode_001B77C8(int m)
  * Read succeeded (manager state 4): step 4 (close). Read failed (state 5): step 4 for miError 1, else step 3 (the error
  * popup).
  */
-extern "C" void cFEStateNetAccountMem_updateLoadReadStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateLoadReadStep()
 {
     if (IsMode_001B77C8(4)) {
-        cFEStateNetAccountMem_setStep(self, 4);
+        cFEStateNetAccountMem_setStep(this, 4);
     } else if (IsMode_001B77C8(5)) {
-        if (self->miError == 1) {
-            cFEStateNetAccountMem_setStep(self, 4);
+        if (miError == 1) {
+            cFEStateNetAccountMem_setStep(this, 4);
         } else {
-            cFEStateNetAccountMem_setStep(self, 3);
+            cFEStateNetAccountMem_setStep(this, 3);
         }
     }
 }
@@ -15333,21 +15319,21 @@ static inline bool IsMode_001B7820(int m)
  * (cSharedLoginMan_isCardUnformatted) goes to 13 (ask to format), 1 to 16 (create the save), 5 or 6 to 25 (damaged data), anything else to
  * 9 (error popup).
  */
-extern "C" void cFEStateNetAccountMem_updateSaveReadStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateSaveReadStep()
 {
     if (IsMode_001B7820(4)) {
-        cFEStateNetAccountMem_setStep(self, 7);
+        cFEStateNetAccountMem_setStep(this, 7);
     } else if (IsMode_001B7820(5)) {
-        if (self->miError == 2 && cSharedLoginMan_isCardUnformatted(SharedLoginMan) != 0) {
-            cFEStateNetAccountMem_setStep(self, 13);
-        } else if (self->miError == 1) {
-            cFEStateNetAccountMem_setStep(self, 0x10);
-        } else if (self->miError == 5) {
-            cFEStateNetAccountMem_setStep(self, 25);
-        } else if (self->miError == 6) {
-            cFEStateNetAccountMem_setStep(self, 25);
+        if (miError == 2 && cSharedLoginMan_isCardUnformatted(SharedLoginMan) != 0) {
+            cFEStateNetAccountMem_setStep(this, 13);
+        } else if (miError == 1) {
+            cFEStateNetAccountMem_setStep(this, 0x10);
+        } else if (miError == 5) {
+            cFEStateNetAccountMem_setStep(this, 25);
+        } else if (miError == 6) {
+            cFEStateNetAccountMem_setStep(this, 25);
         } else {
-            cFEStateNetAccountMem_setStep(self, 9);
+            cFEStateNetAccountMem_setStep(this, 9);
         }
     }
 }
@@ -15367,12 +15353,12 @@ static inline bool IsMode_001B78F0(int m)
 /**
  * Runs step 8 of the account memory-card popup: the save finished (manager state 8, step 10) or failed (9, step 9).
  */
-extern "C" void cFEStateNetAccountMem_updateSaveStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateSaveStep()
 {
     if (IsMode_001B78F0(8)) {
-        cFEStateNetAccountMem_setStep(self, 10);
+        cFEStateNetAccountMem_setStep(this, 10);
     } else if (IsMode_001B78F0(9)) {
-        cFEStateNetAccountMem_setStep(self, 9);
+        cFEStateNetAccountMem_setStep(this, 9);
     }
 }
 #endif
@@ -15395,21 +15381,21 @@ static inline bool IsMode_001B7938(int m)
  * Read succeeded: step 7. Failed: miError 2 on an available, unformatted card goes to 13, 1 to 16, 5 or 6 to 25,
  * anything else to 17 (where cFEStateNetAccountMem_updateSaveReadStep uses 9).
  */
-extern "C" void cFEStateNetAccountMem_updateMode2ReadStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateMode2ReadStep()
 {
     if (IsMode_001B7938(4)) {
-        cFEStateNetAccountMem_setStep(self, 7);
+        cFEStateNetAccountMem_setStep(this, 7);
     } else if (IsMode_001B7938(5)) {
-        if (self->miError == 2 && cSharedLoginMan_isCardUnformatted(SharedLoginMan) != 0) {
-            cFEStateNetAccountMem_setStep(self, 13);
-        } else if (self->miError == 1) {
-            cFEStateNetAccountMem_setStep(self, 0x10);
-        } else if (self->miError == 5) {
-            cFEStateNetAccountMem_setStep(self, 25);
-        } else if (self->miError == 6) {
-            cFEStateNetAccountMem_setStep(self, 25);
+        if (miError == 2 && cSharedLoginMan_isCardUnformatted(SharedLoginMan) != 0) {
+            cFEStateNetAccountMem_setStep(this, 13);
+        } else if (miError == 1) {
+            cFEStateNetAccountMem_setStep(this, 0x10);
+        } else if (miError == 5) {
+            cFEStateNetAccountMem_setStep(this, 25);
+        } else if (miError == 6) {
+            cFEStateNetAccountMem_setStep(this, 25);
         } else {
-            cFEStateNetAccountMem_setStep(self, 17);
+            cFEStateNetAccountMem_setStep(this, 17);
         }
     }
 }
@@ -15430,12 +15416,12 @@ static inline bool IsMode_001B7A08(int m)
  * Runs step 14 of the account memory-card popup: format done (manager state 21, step 16: create the save) or failed
  * (22, step 15).
  */
-extern "C" void cFEStateNetAccountMem_updateFormatStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateFormatStep()
 {
     if (IsMode_001B7A08(21)) {
-        cFEStateNetAccountMem_setStep(self, 0x10);
+        cFEStateNetAccountMem_setStep(this, 0x10);
     } else if (IsMode_001B7A08(22)) {
-        cFEStateNetAccountMem_setStep(self, 0xF);
+        cFEStateNetAccountMem_setStep(this, 0xF);
     }
 }
 #endif
@@ -15454,12 +15440,12 @@ static inline bool IsMode_001B7A50(int m)
 /**
  * Runs step 16 of the account memory-card popup: the save was created (manager state 12, step 18) or not (13, step 17).
  */
-extern "C" void cFEStateNetAccountMem_updateCreateSaveStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateCreateSaveStep()
 {
     if (IsMode_001B7A50(0xC)) {
-        cFEStateNetAccountMem_setStep(self, 18);
+        cFEStateNetAccountMem_setStep(this, 18);
     } else if (IsMode_001B7A50(13)) {
-        cFEStateNetAccountMem_setStep(self, 17);
+        cFEStateNetAccountMem_setStep(this, 17);
     }
 }
 #endif
@@ -15487,38 +15473,38 @@ static inline bool IsMode_001B7A98(int m)
  * when the card is available but unformatted, then calls cFEStateNetAccountMem_setStep(self, 23) twice (the branch falls into the
  * default one; likely bug); anything else goes to 23.
  */
-extern "C" void cFEStateNetAccountMem_updateDeleteReadStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateDeleteReadStep()
 {
     if (IsMode_001B7A98(4)) {
-        if (strcmp(AccountData, (char*)&self->mszUserName) != 0 || strcmp(AccountData + 0x11, (char*)&self->mszPassword) != 0) {
-            self->miError = 0x18;
-            self->mbAccountMismatch = 1;
-            self->mbCardError = 1;
-            cFEStateNetAccountMem_setStep(self, 23);
+        if (strcmp(AccountData, (char*)&mszUserName) != 0 || strcmp(AccountData + 0x11, (char*)&mszPassword) != 0) {
+            miError = 0x18;
+            mbAccountMismatch = 1;
+            mbCardError = 1;
+            cFEStateNetAccountMem_setStep(this, 23);
         } else {
-            cFEStateNetAccountMem_setStep(self, 21);
+            cFEStateNetAccountMem_setStep(this, 21);
         }
     } else if (IsMode_001B7A98(5)) {
-        int error = self->miError;
+        int error = miError;
         if (error == 1) {
-            self->mbAccountMismatch = 1;
-            self->mbCardError = 1;
-            self->miError = 0x18;
-            cFEStateNetAccountMem_setStep(self, 23);
+            mbAccountMismatch = 1;
+            mbCardError = 1;
+            miError = 0x18;
+            cFEStateNetAccountMem_setStep(this, 23);
         } else if (error == 5) {
-            cFEStateNetAccountMem_setStep(self, 21);
+            cFEStateNetAccountMem_setStep(this, 21);
         } else if (error == 6) {
-            cFEStateNetAccountMem_setStep(self, 21);
+            cFEStateNetAccountMem_setStep(this, 21);
         } else if (error == 2) {
             if (cSharedLoginMan_isCardUnformatted(SharedLoginMan) != 0) {
-                self->mbAccountMismatch = 1;
-                self->miError = 0x18;
+                mbAccountMismatch = 1;
+                miError = 0x18;
             }
-            cFEStateNetAccountMem_setStep(self, 23);
+            cFEStateNetAccountMem_setStep(this, 23);
             goto dflt;
         } else {
         dflt:
-            cFEStateNetAccountMem_setStep(self, 23);
+            cFEStateNetAccountMem_setStep(this, 23);
         }
     }
 }
@@ -15542,13 +15528,13 @@ static inline bool IsMode_001B7BC0(int m)
  *
  * Manager state 16 is success, 17 failure.
  */
-extern "C" void cFEStateNetAccountMem_updateDeleteStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateDeleteStep()
 {
     if (IsMode_001B7BC0(0x10)) {
-        cFEStateNetAccountMem_clearAccount(self);
-        cFEStateNetAccountMem_setStep(self, 0x18);
+        clearAccount();
+        cFEStateNetAccountMem_setStep(this, 0x18);
     } else if (IsMode_001B7BC0(17)) {
-        cFEStateNetAccountMem_setStep(self, 23);
+        cFEStateNetAccountMem_setStep(this, 23);
     }
 }
 #endif
@@ -15570,12 +15556,12 @@ static inline bool IsMode_001B7C28(int m)
  *
  * Manager state 16 is success, 17 failure.
  */
-extern "C" void cFEStateNetAccountMem_updateRemoveDamagedStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateRemoveDamagedStep()
 {
     if (IsMode_001B7C28(0x10)) {
-        cFEStateNetAccountMem_setStep(self, 27);
+        cFEStateNetAccountMem_setStep(this, 27);
     } else if (IsMode_001B7C28(17)) {
-        cFEStateNetAccountMem_setStep(self, 0x1C);
+        cFEStateNetAccountMem_setStep(this, 0x1C);
     }
 }
 #endif
@@ -15594,12 +15580,12 @@ static inline bool IsMode_001B7C70(int m)
 /**
  * Runs step 27 of the account memory-card popup: the save was created (manager state 12, step 29) or not (13, step 28).
  */
-extern "C" void cFEStateNetAccountMem_updateRecreateSaveStep(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::updateRecreateSaveStep()
 {
     if (IsMode_001B7C70(0xC)) {
-        cFEStateNetAccountMem_setStep(self, 29);
+        cFEStateNetAccountMem_setStep(this, 29);
     } else if (IsMode_001B7C70(13)) {
-        cFEStateNetAccountMem_setStep(self, 0x1C);
+        cFEStateNetAccountMem_setStep(this, 0x1C);
     }
 }
 #endif
@@ -15647,21 +15633,21 @@ void cFEStateNetAccountMem::onUpdate()
     }
     switch (miState) {
     case 0: cFEStateNetAccountMem_setStep(this, 1); break;
-    case 1: cFEStateNetAccountMem_updateCheckCardStep(this); break;
-    case 2: cFEStateNetAccountMem_updateLoadReadStep(this); break;
+    case 1: this->updateCheckCardStep(); break;
+    case 2: this->updateLoadReadStep(); break;
     case 5: cFEStateNetAccountMem_setStep(this, 6); break;
-    case 6: cFEStateNetAccountMem_updateSaveReadStep(this); break;
-    case 8: cFEStateNetAccountMem_updateSaveStep(this); break;
+    case 6: this->updateSaveReadStep(); break;
+    case 8: this->updateSaveStep(); break;
     case 11: cFEStateNetAccountMem_setStep(this, 0xC); break;
-    case 12: cFEStateNetAccountMem_updateMode2ReadStep(this); break;
-    case 14: cFEStateNetAccountMem_updateFormatStep(this); break;
-    case 16: cFEStateNetAccountMem_updateCreateSaveStep(this); break;
+    case 12: this->updateMode2ReadStep(); break;
+    case 14: this->updateFormatStep(); break;
+    case 16: this->updateCreateSaveStep(); break;
     case 19: cFEStateNetAccountMem_setStep(this, 20); break;
-    case 20: cFEStateNetAccountMem_updateDeleteReadStep(this); break;
-    case 22: cFEStateNetAccountMem_updateDeleteStep(this); break;
+    case 20: this->updateDeleteReadStep(); break;
+    case 22: this->updateDeleteStep(); break;
     case 7: case 13: case 21: case 25: cSharedLoginMan_recheckCard(SharedLoginMan); break;
-    case 26: cFEStateNetAccountMem_updateRemoveDamagedStep(this); break;
-    case 27: cFEStateNetAccountMem_updateRecreateSaveStep(this); break;
+    case 26: this->updateRemoveDamagedStep(); break;
+    case 27: this->updateRecreateSaveStep(); break;
     case 28: case 29: break;
     }
 }
@@ -15738,7 +15724,7 @@ extern "C" void cFEStateNetAccountMem_showErrorPopup_s(cFEStateNetAccountMem* se
  *
  * @param mode  the card error (miError)
  */
-extern "C" void cFEStateNetAccountMem_showErrorPopup_s(cFEStateNetAccountMem* self, unsigned int mode)
+void cFEStateNetAccountMem::showErrorPopup(unsigned int mode)
 {
     char buf[0x20];
     unsigned short* cur = 0;
@@ -15748,39 +15734,39 @@ extern "C" void cFEStateNetAccountMem_showErrorPopup_s(cFEStateNetAccountMem* se
     usprintf_v(buf, str_pct_d_b, 1);
     switch (mode) {
     case 2:
-        if (self->mbCardBusy == 0) {
+        if (mbCardBusy == 0) {
             if (cSharedLoginMan_isCardUnformatted(SharedLoginMan)) {
-                sprintf1_v(self->mustrText, Loc_B7E40(str_kT_MEMOVNotFormattedPS2), buf);
+                sprintf1_v(mustrText, Loc_B7E40(str_kT_MEMOVNotFormattedPS2), buf);
             } else {
-                cFEStateNetAccountMem_formatNotDetectedText_7E40((char*)self);
+                cFEStateNetAccountMem_formatNotDetectedText_7E40((char*)this);
             }
         } else {
-            cFEStateNetAccountMem_formatFailedText_7E40((char*)self);
+            cFEStateNetAccountMem_formatFailedText_7E40((char*)this);
         }
         flag = 0;
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->mustrText;
+        cur = mustrText;
         break;
     case 3:
-        sprintf1_v(self->mustrText, Loc_B7E40(str_kT_MEMOnlineTooBigPS2), buf, 17);
+        sprintf1_v(mustrText, Loc_B7E40(str_kT_MEMOnlineTooBigPS2), buf, 17);
         flag = 0;
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->mustrText;
+        cur = mustrText;
         break;
     case 5:
-        if (self->miState == 3) {
+        if (miState == 3) {
             flag = 0;
             int loginText = Loc_B7E40(str_kT_POPUPCMNEABigLogin);
             int corruptFormat = Loc_B7E40(str_kT_MEMOnlineCorruptPS2);
-            sprintf1_v(self->mustrText, corruptFormat, loginText, buf);
+            sprintf1_v(mustrText, corruptFormat, loginText, buf);
         } else {
-            cFEStateNetAccountMem_formatFailedText_7E40((char*)self);
+            cFEStateNetAccountMem_formatFailedText_7E40((char*)this);
         }
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->mustrText;
+        cur = mustrText;
         break;
     case 1:
     case 4:
@@ -15803,38 +15789,38 @@ extern "C" void cFEStateNetAccountMem_showErrorPopup_s(cFEStateNetAccountMem* se
     case 22:
     case 23:
     case 24:
-        cFEStateNetAccountMem_formatFailedText_7E40((char*)self);
+        cFEStateNetAccountMem_formatFailedText_7E40((char*)this);
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->mustrText;
+        cur = mustrText;
         break;
     case 0:
         if (IsMode_001B7E40(22)) {
             if (cSharedLoginMan_isCardMissing(SharedLoginMan)) {
-                sprintf1_v(self->mustrText, Loc_B7E40(str_kT_MEMOVNotDetectedPS2), buf);
+                sprintf1_v(mustrText, Loc_B7E40(str_kT_MEMOVNotDetectedPS2), buf);
             } else {
-                sprintf1_v(self->mustrText, Loc_B7E40(str_kT_MEMFEFormatFailed), buf);
+                sprintf1_v(mustrText, Loc_B7E40(str_kT_MEMFEFormatFailed), buf);
             }
             firstOption = GetHashValue32(str_kT_MEMOVRetry);
             secondOption = GetHashValue32(str_kT_CMNContinue);
-            cur = self->mustrText;
+            cur = mustrText;
         }
         break;
     }
-    if (flag && self->mbCardError != 0) {
-        sprintf1_v(self->mustrText, Loc_B7E40(str_kT_POPUPCMNCardRemoved), buf);
+    if (flag && mbCardError != 0) {
+        sprintf1_v(mustrText, Loc_B7E40(str_kT_POPUPCMNCardRemoved), buf);
         firstOption = GetHashValue32(str_kT_MEMOVRetry);
         secondOption = GetHashValue32(str_kT_CMNContinue);
-        cur = self->mustrText;
+        cur = mustrText;
     }
     int popupId = -1;
     if (secondOption == 0)
         popupId = 0;
-    if (self->miState == 23) {
+    if (miState == 23) {
         secondOption = 0;
         firstOption = GetHashValue32(str_kT_CMNContinue);
     }
-    cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)self, popupId, 0, firstOption, secondOption, 0, cur);
+    cFEStateNetAccountMem_showPopup((cFEStateNetAccountMem*)this, popupId, 0, firstOption, secondOption, 0, cur);
 }
 #endif
 
@@ -15868,28 +15854,28 @@ extern char str_kT_MEMOVNotDetectedPS2[];
  * Steps 3 and 23: "kT_MEMFENotDetectedFile" (slot 1, "kT_POPUPCMNEABigLogin"); 9, 15 and 17: "kT_MEMFENotDetectedSize"
  * (slot 1, 17 KB); 28: "kT_MEMOVNotDetectedPS2". Other steps leave it unchanged.
  */
-extern "C" void cFEStateNetAccountMem_formatNotDetectedText(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::formatNotDetectedText()
 {
     char buf[32];
     usprintf_1B8238(buf, str_pct_d_b, 1);
-    switch (self->miState) {
+    switch (miState) {
     case 3:
     case 23: {
         int name = Loc_001B8238(str_kT_POPUPCMNEABigLogin);
         int str = Loc_001B8238(str_kT_MEMFENotDetectedFile);
-        sprintf1_1B8238(&self->mustrText[0], str, 1, name);
+        sprintf1_1B8238(&mustrText[0], str, 1, name);
         break;
     }
     case 9:
     case 15:
     case 17: {
         int str = Loc_001B8238(str_kT_MEMFENotDetectedSize);
-        sprintf1_1B8238(&self->mustrText[0], str, 1, 17);
+        sprintf1_1B8238(&mustrText[0], str, 1, 17);
         break;
     }
     case 28: {
         int str = Loc_001B8238(str_kT_MEMOVNotDetectedPS2);
-        sprintf1_1B8238(&self->mustrText[0], str, buf);
+        sprintf1_1B8238(&mustrText[0], str, buf);
         break;
     }
     }
@@ -15935,24 +15921,24 @@ static inline void SetText_001B83C0(cFEStateNetAccountMem* self, char* key, char
  * Step 3: "kT_MEMOVLoadFailedPS2NGC"; 9, 17 and 28: "kT_MEMOVSaveFailed"; 23: "kT_MEMOVDeleteFailedError"; 15:
  * "kT_MEMFEFormatFailed" (slot "1"). Other steps leave it unchanged.
  */
-extern "C" void cFEStateNetAccountMem_formatFailedText(cFEStateNetAccountMem* self)
+void cFEStateNetAccountMem::formatFailedText()
 {
     char buf[32];
     usprintf_1B83C0(buf, str_pct_d_b, 1);
-    switch (self->miState) {
+    switch (miState) {
     case 3:
-        SetText_001B83C0(self, str_kT_MEMOVLoadFailedPS2NGC, buf);
+        SetText_001B83C0(this, str_kT_MEMOVLoadFailedPS2NGC, buf);
         break;
     case 9:
     case 17:
     case 28:
-        SetText_001B83C0(self, str_kT_MEMOVSaveFailed, buf);
+        SetText_001B83C0(this, str_kT_MEMOVSaveFailed, buf);
         break;
     case 23:
-        SetText_001B83C0(self, str_kT_MEMOVDeleteFailedError, buf);
+        SetText_001B83C0(this, str_kT_MEMOVDeleteFailedError, buf);
         break;
     case 15:
-        SetText_001B83C0(self, str_kT_MEMFEFormatFailed, buf);
+        SetText_001B83C0(this, str_kT_MEMFEFormatFailed, buf);
         break;
     }
 }
@@ -15998,10 +15984,10 @@ void cFEStateNetAccountMem::onPopupEvent(cUIState* w, unsigned int msg)
             cFEStateNet_onPopupEvent_v(this, w, cUIState::kONSCREENPOPUPOPTION0);
             if (cSharedLoginMan_isCardMissing(SharedLoginMan) != 0) {
                 miError = 2;
-                cFEStateNetAccountMem_setStep(this, cFEStateNetAccountMem_getErrorStep(this, miState));
+                cFEStateNetAccountMem_setStep(this, this->getErrorStep(miState));
             } else if (mbCardError != 0) {
                 miError = 6;
-                cFEStateNetAccountMem_setStep(this, cFEStateNetAccountMem_getErrorStep(this, miState));
+                cFEStateNetAccountMem_setStep(this, this->getErrorStep(miState));
             } else {
                 int x = w->miMiscData;
                 if (x != 0) {
@@ -16192,7 +16178,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_getErrorStep);
  * @param id  the question step (miState)
  * @return the step to go to
  */
-extern "C" int cFEStateNetAccountMem_getErrorStep(cFEStateNetAccountMem* self, int id)
+int cFEStateNetAccountMem::getErrorStep(int id)
 {
     switch (id) {
     case 25:
@@ -16322,18 +16308,18 @@ extern "C" void cFEStateCreateStep1_saveAccountFields(cFEStateCreateStep1* self)
 bool cFEStateCreateStep1::onGainTransition(int bFirstTime)
 {
     if (bFirstTime != 0) {
-        cFEStateCreateStep1_showAccountName(this);
-        cFEStateCreateStep1_showPassword(this);
-        cFEStateCreateStep1_showConfirmPassword(this);
-        cFEStateCreateStep1_showEmail(this);
-        cFEStateCreateStep1_selectShareInfoOption(this);
-        cFEStateCreateStep1_selectInformOption(this);
-        cFEStateCreateStep1_saveAccountFields(this);
+        this->showAccountName();
+        this->showPassword();
+        this->showConfirmPassword();
+        this->showEmail();
+        this->selectShareInfoOption();
+        this->selectInformOption();
+        this->saveAccountFields();
         cUIText* obj = mpStaticContinue;
         if (obj != 0) {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, obj);
             void* target = vthis(obj, vt[8]);
-            vt[8].fn(target, !cFEStateCreateStep1_isFormFilled(this));
+            vt[8].fn(target, !this->isFormFilled());
         }
     }
     return false;
@@ -16381,7 +16367,7 @@ void cFEStateCreateStep1::onWidgetCreate(cUIThing* pWidget)
             text->setStatic(1);
         }
     } else if (IsHash1B8AA0(text->mHashName, str_LBInformYesNo) || IsHash1B8AA0(text->mHashName, str_LBShareInfoYesNo)) {
-        cFEStateNet_fillYesNoListBox((cFEStateNet*)this, (cUIListBox*)text, 1);
+        this->fillYesNoListBox((cUIListBox*)text, 1);
     } else if (IsHash1B8AA0(text->mHashName, str_StaticContinue)) {
         if (mbEditAccount != 0) {
             text->setUseStaticColour(1);
@@ -16474,7 +16460,7 @@ void cFEStateCreateStep1::onWidgetEvent(cUIThing* w, unsigned int msg)
         if (NameHash1B8C38(w) == GetHashValue32(str_StaticAccountName)) {
             cUIText* uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterAccountName));
             if (uiText != 0) {
-                cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, uiText, GetHashValue32(str_kT_210AccountName),
+                this->openKeyboardWithLabelID(uiText, GetHashValue32(str_kT_210AccountName),
                         mpAccount->mName, 0, 10, 0x10);
                 mpKeyboard->mbDisableForFirst = 1;
                 cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
@@ -16483,32 +16469,32 @@ void cFEStateCreateStep1::onWidgetEvent(cUIThing* w, unsigned int msg)
         } else if (NameHash1B8C38(w) == GetHashValue32(str_StaticPassword)) {
             cUIText* uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterPassword));
             if (uiText != 0) {
-                cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, uiText, GetHashValue32(str_kT_210Password),
+                this->openKeyboardWithLabelID(uiText, GetHashValue32(str_kT_210Password),
                         mpAccount->mPassword, 1, 11, 0x10);
                 cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(str_StaticConfirmPassword)) {
             cUIText* uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterConfirmPassword));
             if (uiText != 0) {
-                cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, uiText, GetHashValue32(str_kT_210ConfirmPassword),
+                this->openKeyboardWithLabelID(uiText, GetHashValue32(str_kT_210ConfirmPassword),
                         mpAccount->mConfirmPassword, 1, 12, 0x10);
                 cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(str_StaticEmail)) {
             cUIText* uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterEmail));
             if (uiText != 0) {
-                cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, uiText, GetHashValue32(str_kT_210EmailAddress),
+                this->openKeyboardWithLabelID(uiText, GetHashValue32(str_kT_210EmailAddress),
                         mpAccount->mMail, 0, 13, 50);
                 cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             }
         } else if (NameHash1B8C38(w) == GetHashValue32(str_StaticContinue)) {
-            if (cFEStateCreateStep1_checkForm(this) != 0) {
+            if (this->checkForm() != 0) {
                 if (mbEditAccount != 0) {
                     cFEStateNet_pushState(((char*)this), cFEStateCreateStep2_cFEStateCreateStep2(
                             (cFEStateCreateStep2*)((cFEStateNet*)cMemMan_alloc(1760, str_cFEStateCreateStep2, 0, 0)),
                             mpEngine));
                 } else {
-                    cFEStateCreateStep1_submitAccountEdit(this);
+                    this->submitAccountEdit();
                 }
             }
         }
@@ -16521,18 +16507,18 @@ void cFEStateCreateStep1::onWidgetEvent(cUIThing* w, unsigned int msg)
             newState->miMiscData = 2098;
             cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, newState);
         } else {
-            cFEStateCreateStep1_restoreAccountFields(this);
+            this->restoreAccountFields();
             cFEStateNet_pushState(((char*)this),
                     cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
                     str_cFEStateSelectPersona, 0, 0), mpEngine));
         }
         break;
     case cUIState::kONKEYBOARDEND: {
-        cFEStateCreateStep1_handleKeyboardText(this);
+        this->handleKeyboardText();
         cUIText* staticContinue = mpStaticContinue;
         if (((char*)staticContinue) != 0) {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cListNode, staticContinue);
-            vt[8].fn(vthis(staticContinue, vt[8]), !cFEStateCreateStep1_isFormFilled(this));
+            vt[8].fn(vthis(staticContinue, vt[8]), !this->isFormFilled());
         }
         break;
     }
@@ -16582,7 +16568,7 @@ extern char str_kT_HELP211Note[];
  *
  * @param popup  the cFEStateNetHelpPopup to fill
  */
-extern "C" void cFEStateCreateStep1_fillHelpPopup(cFEStateCreateStep1* self, cFEStateNetHelpPopup* popup)
+void cFEStateCreateStep1::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 5);
     popup->muiScreenName = GetHashValue32(str_kT_HELP211CreateNewAccount);
@@ -16622,25 +16608,25 @@ extern const char str_cFEStateSelectPersona[];
  * @param popup  the popup state
  * @param kind  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateCreateStep1_onSaveAccountPopupEvent(cFEStateCreateStep1* self, cUIState* popup, int kind)
+void cFEStateCreateStep1::onSaveAccountPopupEvent(cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case cUIState::kONSCREENPOPUPOPTION0: {
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION0);
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION0);
         cUIState* accountMem = (cUIState*)cFEStateNetAccountMem_cFEStateNetAccountMem(
-                (cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine, self,
-                1, self->mpAccount->mName, self->mpAccount->mPassword);
+                (cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), mpEngine, this,
+                1, mpAccount->mName, mpAccount->mPassword);
         accountMem->miMiscData = 2092;
-        cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, accountMem);
+        cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, accountMem);
         break;
     }
     case cUIState::kONSCREENPOPUPOPTION1:
     case cUIState::kONSCREENPOPUPPREV:
-        cFEStateNet_pushState(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
-                str_cFEStateSelectPersona, 0, 0), self->mpEngine));
+        cFEStateNet_pushState(this, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
+                str_cFEStateSelectPersona, 0, 0), mpEngine));
         break;
     default:
-        cFEStateNet_onPopupEvent(self, popup, kind);
+        cFEStateNet_onPopupEvent(this, popup, kind);
         break;
     }
 }
@@ -16675,21 +16661,21 @@ extern char str_kT_CMNNo[];
  * @param popup  the popup state
  * @param event  popup event (kONSCREENPOPUPOPTION0 + chosen option, kONSCREENPOPUPPREV back, kONPOPUPDESTROY gone)
  */
-extern "C" void cFEStateCreateStep1_onAccountMemPopupEvent(cFEStateCreateStep1* self, cUIState* popup, int event)
+void cFEStateCreateStep1::onAccountMemPopupEvent(cUIState* popup, int event)
 {
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0: case cUIState::kONSCREENPOPUPOPTION1: case cUIState::kONSCREENPOPUPPREV:
-        self->mbSaveAccount = 0;
-        cFEStateNet_onPopupEvent(self, popup, event);
+        mbSaveAccount = 0;
+        cFEStateNet_onPopupEvent(this, popup, event);
         break;
     case cUIState::kONSCREENPOPUPOPTION2:
-        self->mbSaveAccount = 1;
-        cFEStateNet_onPopupEvent(self, popup, event);
+        mbSaveAccount = 1;
+        cFEStateNet_onPopupEvent(this, popup, event);
         break;
     case cUIState::kONPOPUPDESTROY:
-        if (self->mbSaveAccount != 0) {
-            cFEStateNet_onPopupEvent(self, popup, event);
-            cScreenPopup* savePopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        if (mbSaveAccount != 0) {
+            cFEStateNet_onPopupEvent(this, popup, event);
+            cScreenPopup* savePopup = (cScreenPopup*)this->createPopup();
             char* sub = (char*)&savePopup->info;
             savePopup->info.meType = 2;
             savePopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204SaveAccount);
@@ -16699,15 +16685,15 @@ extern "C" void cFEStateCreateStep1_onAccountMemPopupEvent(cFEStateCreateStep1* 
             savePopup->info.miMiscData = 2078;
             savePopup->info.miDefaultOption = 0;
             savePopup->info.mbReceivePrev = 0;
-            cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)savePopup);
+            this->showPopup((cScreenPopup*)savePopup);
         } else {
-            cFEStateNet_pushState(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
-                    str_cFEStateSelectPersona, 0, 0), self->mpEngine));
+            cFEStateNet_pushState(this, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
+                    str_cFEStateSelectPersona, 0, 0), mpEngine));
         }
-        self->mbSaveAccount = 0;
+        mbSaveAccount = 0;
         break;
     default:
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
         break;
     }
 }
@@ -16733,10 +16719,10 @@ void cFEStateCreateStep1::onPopupEvent(cUIState*pPopup, unsigned int Event)
 {
     switch (pPopup->miMiscData) {
     case 2078:
-        cFEStateCreateStep1_onSaveAccountPopupEvent(this, pPopup, Event);
+        this->onSaveAccountPopupEvent(pPopup, Event);
         break;
     case 2092:
-        cFEStateCreateStep1_onAccountMemPopupEvent(this, pPopup, Event);
+        this->onAccountMemPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -16768,23 +16754,23 @@ extern char str_kT_CMNNo[];
  * @param data  the event
  * @return -1 for kNetEvent_AccountEdited, else cFEStateNet_onNetEvent's result
  */
-extern "C" int cFEStateCreateStep1_onNetEvent(cFEStateCreateStep1* self, int msgId, void* data)
+int cFEStateCreateStep1::onNetEvent(int msgId, void* data)
 {
     if (msgId == kNetEvent_AccountEdited) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 2;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204SaveAccount);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-        cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+        sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
         popup->info.miDefaultOption = 0;
         popup->info.mbReceivePrev = 0;
         popup->info.miMiscData = 2078;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         return -1;
     }
-    return cFEStateNet_onNetEvent_3i(self, msgId, data);
+    return cFEStateNet_onNetEvent_3i(this, msgId, data);
 }
 #endif
 
@@ -16804,9 +16790,9 @@ static inline bool has_9558(char*& s)
  *
  * @return true when none is empty
  */
-extern "C" bool cFEStateCreateStep1_isFormFilled(cFEStateCreateStep1* self)
+bool cFEStateCreateStep1::isFormFilled()
 {
-    tLobbyAccount* account = self->mpAccount;
+    tLobbyAccount* account = mpAccount;
     bool ok = true;
     ok = ok && has_9558(account->mName);
     ok = ok && has_9558(account->mPassword);
@@ -16828,11 +16814,11 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 /**
  * Shows the form's account name (mpAccount->mName) in "EnterAccountName".
  */
-extern "C" void cFEStateCreateStep1_showAccountName(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::showAccountName()
 {
-    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterAccountName));
+    cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterAccountName));
     if (text != 0) {
-        cUIText_setAsciiString(text, *(const char**)self->mpAccount);
+        cUIText_setAsciiString(text, *(const char**)mpAccount);
     }
 }
 #endif
@@ -16850,12 +16836,12 @@ extern "C" void cFEStateNet_setMaskedText(cFEStateNet* self, const char* str);
 /**
  * Shows the form's password masked with '*' (cFEStateNet_setMaskedText into mszMaskedText) in "EnterPassword".
  */
-extern "C" void cFEStateCreateStep1_showPassword(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::showPassword()
 {
-    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterPassword));
+    cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterPassword));
     if (text != 0) {
-        cFEStateNet_setMaskedText((cFEStateNet*)self, (const char*)self->mpAccount->mPassword);
-        cUIText_setAsciiString(text, (char*)&self->mszMaskedText);
+        this->setMaskedText((const char*)mpAccount->mPassword);
+        cUIText_setAsciiString(text, (char*)&mszMaskedText);
     }
 }
 #endif
@@ -16873,12 +16859,12 @@ extern "C" void cFEStateNet_setMaskedText(cFEStateNet* self, const char* str);
 /**
  * Shows the form's password confirmation (mpAccount->mConfirmPassword) masked with '*' in "EnterConfirmPassword".
  */
-extern "C" void cFEStateCreateStep1_showConfirmPassword(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::showConfirmPassword()
 {
-    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterConfirmPassword));
+    cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterConfirmPassword));
     if (text != 0) {
-        cFEStateNet_setMaskedText((cFEStateNet*)self, (const char*)self->mpAccount->mConfirmPassword);
-        cUIText_setAsciiString(text, (char*)&self->mszMaskedText);
+        this->setMaskedText((const char*)mpAccount->mConfirmPassword);
+        cUIText_setAsciiString(text, (char*)&mszMaskedText);
     }
 }
 #endif
@@ -16895,13 +16881,13 @@ extern "C" void cFEStateCreateStep1_setFittedText(cFEStateCreateStep1* self, cUI
 /**
  * Shows the form's e-mail address in "EnterEmail", shortened to fit (cFEStateCreateStep1_setFittedText), when it is not empty.
  */
-extern "C" void cFEStateCreateStep1_showEmail(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::showEmail()
 {
-    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterEmail));
+    cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EnterEmail));
     if (text != 0) {
-        char* email = self->mpAccount->mMail;
-        if (((cBXString*)&self->mpAccount->mMail)->getData()->DataLength != 0) {
-            cFEStateCreateStep1_setFittedText(self, text, email);
+        char* email = mpAccount->mMail;
+        if (((cBXString*)&mpAccount->mMail)->getData()->DataLength != 0) {
+            setFittedText(text, email);
         }
     }
 }
@@ -16920,12 +16906,12 @@ extern char str_LBInformYesNo[];
 /**
  * Selects the "LBInformYesNo" entry matching mpAccount->mSpam[0] (data 1 when set, 0 when not).
  */
-extern "C" void cFEStateCreateStep1_selectInformOption(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::selectInformOption()
 {
-    cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBInformYesNo));
+    cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBInformYesNo));
     if (box != 0) {
         unsigned char out = 0;
-        cUIListBox_getEntryByData(box, self->mpAccount->mSpam[0] != 0, &out);
+        cUIListBox_getEntryByData(box, mpAccount->mSpam[0] != 0, &out);
         cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
@@ -16944,12 +16930,12 @@ extern char str_LBShareInfoYesNo[];
 /**
  * Selects the "LBShareInfoYesNo" entry matching mpAccount->mSpam[1] (data 1 when set, 0 when not).
  */
-extern "C" void cFEStateCreateStep1_selectShareInfoOption(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::selectShareInfoOption()
 {
-    cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBShareInfoYesNo));
+    cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBShareInfoYesNo));
     if (box != 0) {
         unsigned char out = 0;
-        cUIListBox_getEntryByData(box, self->mpAccount->mSpam[1] != 0, &out);
+        cUIListBox_getEntryByData(box, mpAccount->mSpam[1] != 0, &out);
         cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
@@ -16972,35 +16958,35 @@ extern "C" void cFEStateCreateStep1_setFittedText(cFEStateCreateStep1* self, cUI
  * when not empty and without a mpKeyboardText null check. The stores construct over the old cBXString
  * (cBXString_operatorE1).
  */
-extern "C" void cFEStateCreateStep1_handleKeyboardText(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::handleKeyboardText()
 {
-    cKeyboardPopup* keyboard = self->mpKeyboard;
+    cKeyboardPopup* keyboard = mpKeyboard;
     switch ((unsigned int)keyboard->miMiscData) {
     case 11:
-        if (self->mpKeyboardText != 0) {
-            cFEStateNet_setMaskedText((cFEStateNet*)self, keyboard->mszEditString);
-            cUIText_setAsciiString(self->mpKeyboardText, (char*)&self->mszMaskedText);
+        if (mpKeyboardText != 0) {
+            this->setMaskedText(keyboard->mszEditString);
+            cUIText_setAsciiString(mpKeyboardText, (char*)&mszMaskedText);
         }
-        cBXString_operatorE1(&self->mpAccount->mPassword, self->mpKeyboard->mszEditString);
+        cBXString_operatorE1(&mpAccount->mPassword, mpKeyboard->mszEditString);
         break;
     case 12:
-        if (self->mpKeyboardText != 0) {
-            cFEStateNet_setMaskedText((cFEStateNet*)self, keyboard->mszEditString);
-            cUIText_setAsciiString(self->mpKeyboardText, (char*)&self->mszMaskedText);
+        if (mpKeyboardText != 0) {
+            this->setMaskedText(keyboard->mszEditString);
+            cUIText_setAsciiString(mpKeyboardText, (char*)&mszMaskedText);
         }
-        cBXString_operatorE1(&self->mpAccount->mConfirmPassword, self->mpKeyboard->mszEditString);
+        cBXString_operatorE1(&mpAccount->mConfirmPassword, mpKeyboard->mszEditString);
         break;
     case 10:
-        if (self->mpKeyboardText != 0) {
-            cUIText_setAsciiString(self->mpKeyboardText, keyboard->mszEditString);
+        if (mpKeyboardText != 0) {
+            cUIText_setAsciiString(mpKeyboardText, keyboard->mszEditString);
         }
-        cBXString_operatorE1((char*)self->mpAccount, self->mpKeyboard->mszEditString);
+        cBXString_operatorE1((char*)mpAccount, mpKeyboard->mszEditString);
         break;
     case 13: {
-        cBXString_operatorE1(&self->mpAccount->mMail, keyboard->mszEditString);
-        char* email = self->mpAccount->mMail;
-        if (((cBXString*)&self->mpAccount->mMail)->getData()->DataLength != 0) {
-            cFEStateCreateStep1_setFittedText(self, self->mpKeyboardText, email);
+        cBXString_operatorE1(&mpAccount->mMail, keyboard->mszEditString);
+        char* email = mpAccount->mMail;
+        if (((cBXString*)&mpAccount->mMail)->getData()->DataLength != 0) {
+            setFittedText(mpKeyboardText, email);
         }
         break;
     }
@@ -17038,7 +17024,7 @@ static inline void Measure1B9950(cUIText* text, const char* s, tRect* out)
  * @param text  the text widget
  * @param str  the ASCII string
  */
-extern "C" void cFEStateCreateStep1_setFittedText(cFEStateCreateStep1* self, cUIText* text, char* str)
+void cFEStateCreateStep1::setFittedText(cUIText* text, char* str)
 {
     int cut = 0;
     t3Vector scale = *(&text->mScale);
@@ -17097,43 +17083,43 @@ extern char str_kT_BTNOK[];
  *
  * @return 1 when the address passes, else 0
  */
-extern "C" int cFEStateCreateStep1_checkEmail(cFEStateCreateStep1* self)
+int cFEStateCreateStep1::checkEmail()
 {
     int ok = 1;
     cPopupInfo popupInfo;
     cPopupInfo_cPopupInfo((cPopupInfo*)(&popupInfo));
-    int len = strlen((const char*)self->mpAccount->mMail);
+    int len = strlen((const char*)mpAccount->mMail);
     if (len == 0) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210EmailMissing);
         ok = 0;
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     }
     if (len < 7) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210EmailLength);
         ok = 0;
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
-    } else if (!cFEStateCreateStep1_isEmailAddress(self, (const char*)self->mpAccount->mMail)) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        this->showPopup(popup);
+    } else if (!isEmailAddress((const char*)mpAccount->mMail)) {
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210EmailInvalid);
         ok = 0;
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     }
     cPopupInfo__cPopupInfo((cPopupInfo*)(&popupInfo), 2);
     return ok;
@@ -17154,7 +17140,7 @@ extern "C" int strlen(const char* s);
  * @param str  the NUL-terminated text to scan
  * @return true when both characters occur, else false
  */
-extern "C" bool cFEStateCreateStep1_isEmailAddress(cFEStateCreateStep1* self, const char* str)
+bool cFEStateCreateStep1::isEmailAddress(const char* str)
 {
     bool hasAt = false;
     bool hasDot = false;
@@ -17200,61 +17186,62 @@ extern char str_kT_BTNOK[];
  *
  * @return 1 when the name is valid, 0 after showing an error popup
  */
-extern "C" int cFEStateCreateStep1_checkAccountName(cFEStateCreateStep1* self)
+int cFEStateCreateStep1::checkAccountName()
 {
     int ok = 1;
     cPopupInfo popupInfo;
     cPopupInfo_cPopupInfo((cPopupInfo*)(&popupInfo));
-    int len = strlen(*(const char**)self->mpAccount);
+    int len = strlen(*(const char**)mpAccount);
     if (len == 0) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210AccountNameMissing);
         ok = 0;
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     } else if (len < 4 || len > 16) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210AccountNameLength);
         ok = 0;
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     } else {
-        signed char firstChar = (*(signed char**)self->mpAccount)[0];
+        signed char firstChar = (*(signed char**)mpAccount)[0];
         if (firstChar > '0') {
             if (firstChar < '9') {
-                cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+                cScreenPopup* popup = (cScreenPopup*)this->createPopup();
                 popup->info.meType = 1;
                 cPopupInfo* sub = &popup->info;
                 popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210AccountNameInvalid);
                 ok = 0;
                 popup->info.mtMessage.eType = 3;
-                cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+                sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
                 popup->info.miMiscData = 2061;
-                cFEStateNet_showPopup((cFEStateNet*)self, popup);
+                this->showPopup(popup);
                 goto done;
             }
         }
         int i;
         for (i = 0; i < len; i++) {
-            signed char chr = (*(signed char**)self->mpAccount)[i];
-            if (chr != ' ' && !cFEStateCreateStep1_isCharInRange(self, chr, '0', '9') && !cFEStateCreateStep1_isCharInRange(self, chr, 'a', 'z') && !cFEStateCreateStep1_isCharInRange(self, chr, 'A', 'Z')) {
+            signed char chr = (*(signed char**)mpAccount)[i];
+            if (chr != ' ' && !isCharInRange(chr, '0', '9') && !isCharInRange(chr, 'a', 'z')
+                && !isCharInRange(chr, 'A', 'Z')) {
                 ok = 0;
-                cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+                cScreenPopup* popup = (cScreenPopup*)this->createPopup();
                 popup->info.meType = 1;
                 cPopupInfo* sub = &popup->info;
                 popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210AccountNameInvalid);
                 popup->info.mtMessage.eType = 3;
-                cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+                sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
                 popup->info.miMiscData = 2061;
-                cFEStateNet_showPopup((cFEStateNet*)self, popup);
+                this->showPopup(popup);
                 break;
             }
         }
@@ -17276,7 +17263,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_isCharInRange);
  * @param hi  the highest accepted character
  * @return true when lo <= val <= hi, else false
  */
-extern "C" bool cFEStateCreateStep1_isCharInRange(cFEStateCreateStep1* self, signed char val, signed char lo, signed char hi)
+bool cFEStateCreateStep1::isCharInRange(signed char val, signed char lo, signed char hi)
 {
     if (val <= hi && val >= lo) {
         return true;
@@ -17312,42 +17299,42 @@ extern char str_kT_BTNOK[];
  *
  * @return 1 when the password is accepted, 0 after showing an error popup
  */
-extern "C" int cFEStateCreateStep1_checkPassword(cFEStateCreateStep1* self)
+int cFEStateCreateStep1::checkPassword()
 {
     int ok = 1;
     cPopupInfo popupInfo;
     cPopupInfo_cPopupInfo((cPopupInfo*)(&popupInfo));
-    unsigned int len = strlen((const char*)self->mpAccount->mPassword);
+    unsigned int len = strlen((const char*)mpAccount->mPassword);
     if (len == 0) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210PasswordMissing);
         ok = 0;
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     } else if (len - 4 > 12) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210PasswordLength);
         ok = 0;
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
-    } else if (strcmp((const char*)self->mpAccount->mPassword, (const char*)self->mpAccount->mConfirmPassword)) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        this->showPopup(popup);
+    } else if (strcmp((const char*)mpAccount->mPassword, (const char*)mpAccount->mConfirmPassword)) {
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210PasswordMatch);
         ok = 0;
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     }
     cPopupInfo__cPopupInfo((cPopupInfo*)(&popupInfo), 2);
     return ok;
@@ -17365,12 +17352,12 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_checkForm);
  *
  * @return 1 when every check passed, else 0
  */
-extern "C" int cFEStateCreateStep1_checkForm(cFEStateCreateStep1* self)
+int cFEStateCreateStep1::checkForm()
 {
     bool ok = true;
-    ok = ok && cFEStateCreateStep1_checkAccountName(self);
-    ok = ok && cFEStateCreateStep1_checkPassword(self);
-    ok = ok && cFEStateCreateStep1_checkEmail(self);
+    ok = ok && checkAccountName();
+    ok = ok && checkPassword();
+    ok = ok && checkEmail();
     return ok;
 }
 #endif
@@ -17390,23 +17377,23 @@ extern "C" void cBXString_Reset(void* self);
  * from cFEStateCreateStep1_onGainTransition. Note the header describes the saving as happening when editing; the code
  * saves when mbEditAccount is 0.
  */
-extern "C" void cFEStateCreateStep1_saveAccountFields(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::saveAccountFields()
 {
-    if (self->mbEditAccount == 0) {
-        cBXString_operatorE((char*)&self->mszSavedPassword, &self->mpAccount->mPassword);
-        cBXString_operatorE((char*)&self->mszSavedConfirm, &self->mpAccount->mConfirmPassword);
-        cBXString_operatorE((char*)&self->mszSavedMail, &self->mpAccount->mMail);
-        tLobbyAccount* account = self->mpAccount;
-        self->miSavedSpam[0] = account->mSpam[0];
-        self->miSavedSpam[1] = account->mSpam[1];
+    if (mbEditAccount == 0) {
+        cBXString_operatorE((char*)&mszSavedPassword, &mpAccount->mPassword);
+        cBXString_operatorE((char*)&mszSavedConfirm, &mpAccount->mConfirmPassword);
+        cBXString_operatorE((char*)&mszSavedMail, &mpAccount->mMail);
+        tLobbyAccount* account = mpAccount;
+        miSavedSpam[0] = account->mSpam[0];
+        miSavedSpam[1] = account->mSpam[1];
     } else {
-        cBXString_Reset((char*)&self->mszSavedPassword);
-        cBXString_Reset((char*)&self->mszSavedConfirm);
-        cBXString_Reset((char*)&self->mszSavedMail);
+        cBXString_Reset((char*)&mszSavedPassword);
+        cBXString_Reset((char*)&mszSavedConfirm);
+        cBXString_Reset((char*)&mszSavedMail);
     }
-    self->mpAccount->mChangeMail = 0;
-    self->mpAccount->mChangePassword = 0;
-    self->mpAccount->mChangeSpam = 0;
+    mpAccount->mChangeMail = 0;
+    mpAccount->mChangePassword = 0;
+    mpAccount->mChangeSpam = 0;
 }
 #endif
 
@@ -17422,13 +17409,13 @@ extern "C" void* cBXString_operatorE(void* self, void* other);
  * (cBXString_operatorE) and miSavedSpam into mpAccount->mSpam[0..1]. Called when cFEStateCreateStep1_onWidgetEvent
  * leaves the screen with "back".
  */
-extern "C" void cFEStateCreateStep1_restoreAccountFields(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::restoreAccountFields()
 {
-    cBXString_operatorE(&self->mpAccount->mPassword, (char*)&self->mszSavedPassword);
-    cBXString_operatorE(&self->mpAccount->mConfirmPassword, (char*)&self->mszSavedConfirm);
-    cBXString_operatorE(&self->mpAccount->mMail, (char*)&self->mszSavedMail);
-    self->mpAccount->mSpam[0] = self->miSavedSpam[0];
-    self->mpAccount->mSpam[1] = self->miSavedSpam[1];
+    cBXString_operatorE(&mpAccount->mPassword, (char*)&mszSavedPassword);
+    cBXString_operatorE(&mpAccount->mConfirmPassword, (char*)&mszSavedConfirm);
+    cBXString_operatorE(&mpAccount->mMail, (char*)&mszSavedMail);
+    mpAccount->mSpam[0] = miSavedSpam[0];
+    mpAccount->mSpam[1] = miSavedSpam[1];
 }
 #endif
 
@@ -17454,22 +17441,22 @@ extern char str_kT_POPUP210EditingAccount[];
  * it shows a buttonless popup "kT_POPUP210EditingAccount" (miMiscData 0x81D, mbReceivePrev 0) and sends the account to
  * the lobby server with LobbyMan_editAccount (the "edit" request).
  */
-extern "C" void cFEStateCreateStep1_submitAccountEdit(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::submitAccountEdit()
 {
-    cFEStateCreateStep1_markChangedFields(self);
-    tLobbyAccount* account = self->mpAccount;
+    markChangedFields();
+    tLobbyAccount* account = mpAccount;
     if (account->mChangeMail == 0 && account->mChangePassword == 0 && account->mChangeSpam == 0) {
-        cFEStateNet_pushState(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
-                str_cFEStateSelectPersona, 0, 0), self->mpEngine));
+        cFEStateNet_pushState(this, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
+                str_cFEStateSelectPersona, 0, 0), mpEngine));
     } else {
-        cScreenPopup* pp = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* pp = (cScreenPopup*)this->createPopup();
         pp->info.meType = 0;
         pp->info.mtMessage.ui = GetHashValue32(str_kT_POPUP210EditingAccount);
         pp->info.mtMessage.eType = 3;
         pp->info.miMiscData = 2077;
         pp->info.mbReceivePrev = 0;
-        cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)pp);
-        LobbyMan_editAccount(LobbyMan_mLobbyMan, self->mpAccount);
+        this->showPopup((cScreenPopup*)pp);
+        LobbyMan_editAccount(LobbyMan_mLobbyMan, mpAccount);
     }
 }
 #endif
@@ -17486,16 +17473,16 @@ extern "C" int strcmp(const char* a, const char* b);
  * mszSavedMail (both compared with strcmp), mChangeSpam when either mSpam entry differs from miSavedSpam. Flags
  * are only ever set here, never cleared.
  */
-extern "C" void cFEStateCreateStep1_markChangedFields(cFEStateCreateStep1* self)
+void cFEStateCreateStep1::markChangedFields()
 {
-    if (strcmp(self->mpAccount->mPassword, self->mszSavedPassword) != 0) {
-        self->mpAccount->mChangePassword = 1;
+    if (strcmp(mpAccount->mPassword, mszSavedPassword) != 0) {
+        mpAccount->mChangePassword = 1;
     }
-    if (strcmp(self->mpAccount->mMail, self->mszSavedMail) != 0) {
-        self->mpAccount->mChangeMail = 1;
+    if (strcmp(mpAccount->mMail, mszSavedMail) != 0) {
+        mpAccount->mChangeMail = 1;
     }
-    tLobbyAccount* account = self->mpAccount;
-    if (account->mSpam[0] != self->miSavedSpam[0] || account->mSpam[1] != self->miSavedSpam[1]) {
+    tLobbyAccount* account = mpAccount;
+    if (account->mSpam[0] != miSavedSpam[0] || account->mSpam[1] != miSavedSpam[1]) {
         account->mChangeSpam = 1;
     }
 }
@@ -17561,11 +17548,11 @@ void cFEStateCreateStep2::onCreateScreen()
     }
     mpAccount->mLegalAccepted = 0;
     unk_6DC = 0;
-    cFEStateCreateStep2_selectBornMonth(this);
-    cFEStateCreateStep2_selectBornDay(this);
-    cFEStateCreateStep2_selectBornYear(this);
-    cFEStateCreateStep2_selectGender(this);
-    cFEStateCreateStep2_selectLegalAccepted(this);
+    this->selectBornMonth();
+    this->selectBornDay();
+    this->selectBornYear();
+    this->selectGender();
+    this->selectLegalAccepted();
     cFEStateNet_onCreateScreen((this));
     mbScreenReady = 1;
 }
@@ -17611,15 +17598,15 @@ static inline int IsHash1BA500(int id, char* name) { return id == GetHashValue32
 void cFEStateCreateStep2::onWidgetCreate(cUIThing* box)
 {
     if (IsHash1BA500(box->mHashName, str_LBLegalYesNo)) {
-        cFEStateNet_fillYesNoListBox((cFEStateNet*)this, (cUIListBox*)box, 0);
+        this->fillYesNoListBox((cUIListBox*)box, 0);
     } else if (IsHash1BA500(box->mHashName, str_LBMonth)) {
-        cFEStateCreateStep2_fillMonthListBox(this, (cUIListBox*)box, 1);
+        this->fillMonthListBox((cUIListBox*)box, 1);
     } else if (IsHash1BA500(box->mHashName, str_LBDay)) {
-        cFEStateCreateStep2_fillDayListBox(this, (cUIText*)box, 1, 1985, 1);
+        this->fillDayListBox((cUIText*)box, 1, 1985, 1);
     } else if (IsHash1BA500(box->mHashName, str_LBYear)) {
-        cFEStateCreateStep2_fillYearListBox(this, (cUIListBox*)box, 1985);
+        this->fillYearListBox((cUIListBox*)box, 1985);
     } else if (IsHash1BA500(box->mHashName, str_LBGender)) {
-        cFEStateCreateStep2_fillGenderListBox(this, (cUIListBox*)box, 1);
+        this->fillGenderListBox((cUIListBox*)box, 1);
     }
 }
 #endif
@@ -17678,7 +17665,7 @@ void cFEStateCreateStep2::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
                 cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBDay));
                 if (box != 0) {
                     tLobbyAccount* account = mpAccount;
-                    cFEStateCreateStep2_fillDayListBox(this, box, account->mBornMonth, account->mBornYear, account->mBornDay);
+                    this->fillDayListBox(box, account->mBornMonth, account->mBornYear, account->mBornDay);
                 }
             }
             if (IsHash_001BA618(obj->mHashName, str_LBYear)) {
@@ -17690,7 +17677,7 @@ void cFEStateCreateStep2::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
                 cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBDay));
                 if (box != 0) {
                     tLobbyAccount* account = mpAccount;
-                    cFEStateCreateStep2_fillDayListBox(this, box, account->mBornMonth, account->mBornYear, account->mBornDay);
+                    this->fillDayListBox(box, account->mBornMonth, account->mBornYear, account->mBornDay);
                 }
             }
             if (IsHash_001BA618(obj->mHashName, str_LBDay)) {
@@ -17706,8 +17693,8 @@ void cFEStateCreateStep2::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
         break;
     case cUIState::kONNEXT:
         if (IsHash_001BA618(obj->mHashName, str_StaticSubmit)) {
-            if (cFEStateCreateStep2_canSubmit(this)) {
-                cFEStateCreateStep2_submitAccount(this, 1);
+            if (this->canSubmit()) {
+                this->submitAccount(1);
             }
         }
         break;
@@ -17758,7 +17745,7 @@ extern char str_kT_HELP211Note[];
  *
  * @param popup  the help popup to fill
  */
-extern "C" void cFEStateCreateStep2_fillHelpPopup(cFEStateCreateStep2* self, cFEStateNetHelpPopup* popup)
+void cFEStateCreateStep2::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 5);
     popup->muiScreenName = GetHashValue32(str_kT_HELP211CreateNewAccount);
@@ -17793,15 +17780,15 @@ extern char str_kT_POPUP211Submitting[];
  *
  * @param connectFirst  nonzero to connect first; 0 to send the account now
  */
-extern "C" void cFEStateCreateStep2_submitAccount(cFEStateCreateStep2* self, int connectFirst)
+void cFEStateCreateStep2::submitAccount(int connectFirst)
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)this->createPopup();
     popup->info.meType = 0;
     popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP211Submitting);
     popup->info.mtMessage.eType = 3;
     popup->info.mbReceivePrev = 0;
     popup->info.miMiscData = 2080;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    this->showPopup(popup);
     if (connectFirst != 0) {
         LobbyMan_connect(LobbyMan_mLobbyMan, 0);
     } else {
@@ -17832,19 +17819,19 @@ void cFEStateCreateStep2::onPopupEvent(cUIState* pPopup, unsigned int Event)
 {
     switch (pPopup->miMiscData) {
     case 2079:
-        cFEStateCreateStep2_onSaveAccountPopupEvent(this, pPopup, Event);
+        this->onSaveAccountPopupEvent(pPopup, Event);
         break;
     case 2081:
-        cFEStateCreateStep2_onParentEmailPopupEvent(this, (cScreenPopup*)pPopup, Event);
+        this->onParentEmailPopupEvent((cScreenPopup*)pPopup, Event);
         break;
     case 2082:
-        cFEStateCreateStep2_onInvalidParentEmailPopupEvent(this, pPopup, Event);
+        this->onInvalidParentEmailPopupEvent(pPopup, Event);
         break;
     case 2062:
-        cFEStateCreateStep2_onVerifyPopupEvent(this, pPopup, Event);
+        this->onVerifyPopupEvent(pPopup, Event);
         break;
     case 2092:
-        cFEStateCreateStep2_onAccountMemPopupEvent(this, pPopup, Event);
+        this->onAccountMemPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -17887,36 +17874,36 @@ extern char str_kT_CMNNo[];
  * @param data  the event's message (for kNetEvent_Error: the error reply, its status code at +8)
  * @return -1 for the handled ids, else cFEStateNet_onNetEvent's result
  */
-extern "C" int cFEStateCreateStep2_onNetEvent(cFEStateCreateStep2* self, int id, void* data)
+int cFEStateCreateStep2::onNetEvent(int id, void* data)
 {
     switch (id) {
     case kNetEvent_LobbyConnect:
         LobbyMan_createAccount(LobbyMan_mLobbyMan, &LobbyMan_mLobbyMan->mNewAccount);
         break;
     case kNetEvent_AccountCreated: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(((cFEStateNet*)self));
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 2;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP211Congratulations2);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-        cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+        sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
         popup->info.mbReceivePrev = 0;
         popup->info.miMiscData = 2079;
-        cFEStateNet_showPopup(((cFEStateNet*)self), popup);
+        this->showPopup(popup);
         break;
     }
     case kNetEvent_Authentication:
         LobbyMan_resetNewAccount(LobbyMan_mLobbyMan);
-        cFEStateNet_pushState(((cFEStateNet*)self),
+        cFEStateNet_pushState(((cFEStateNet*)this),
                 cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
-                str_cFEStateSelectPersona, 0, 0), self->mpEngine));
+                str_cFEStateSelectPersona, 0, 0), mpEngine));
         break;
     case kNetEvent_Error:
-        cFEStateCreateStep2_handleAccountError(self, (online_ErrorEvent*)((void*)data));
+        handleAccountError((online_ErrorEvent*)((void*)data));
         break;
     default:
-        return cFEStateNet_onNetEvent_3i(((cFEStateNet*)self), id, data);
+        return cFEStateNet_onNetEvent_3i(((cFEStateNet*)this), id, data);
     }
     return -1;
 }
@@ -17950,33 +17937,33 @@ extern char str_kT_BTNOK[];
  *
  * @param msg  the lobby error event (type 258; for 'tooy' an online_AcctTooYoungEvent)
  */
-extern "C" void cFEStateCreateStep2_handleAccountError(cFEStateCreateStep2* self, online_ErrorEvent* msg)
+void cFEStateCreateStep2::handleAccountError(online_ErrorEvent* msg)
 {
     switch ((unsigned int)msg->mError) {
     case kLobbyErr_dupl:
-        cFEStateNet_pushState(self,
+        cFEStateNet_pushState(this,
                 cFEStateCreateDuplicate_cFEStateCreateDuplicate((cFEStateCreateDuplicate*)cMemMan_alloc(1760,
-                str_cFEStateCreateDuplicate, 0, 0), self->mpEngine, 1));
+                str_cFEStateCreateDuplicate, 0, 0), mpEngine, 1));
         break;
     case kLobbyErr_tooy:
-        cFEStateCreateStep2_checkAge(self, ((online_AcctTooYoungEvent*)msg)->mAge);
+        cFEStateCreateStep2_checkAge(this, ((online_AcctTooYoungEvent*)msg)->mAge);
         break;
     case kLobbyErr_pmal:
-        if (((cBXString*)&self->mpAccount->mParentMail)->getData()->DataLength != 0) {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        if (((cBXString*)&mpAccount->mParentMail)->getData()->DataLength != 0) {
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 1;
             cPopupInfo* sub = &popup->info;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP211InvalidParentalEmail);
             popup->info.mtMessage.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
             popup->info.miMiscData = 2082;
-            cFEStateNet_showPopup((cFEStateNet*)self, popup);
+            this->showPopup(popup);
         } else {
-            cFEStateCreateStep2_checkAge(self, 17);
+            cFEStateCreateStep2_checkAge(this, 17);
         }
         break;
     default:
-        cFEStateNet_onNetEvent_msg(self, msg->mType, msg);
+        cFEStateNet_onNetEvent_msg(this, msg->mType, msg);
         break;
     }
 }
@@ -18026,17 +18013,17 @@ static inline void* GetSession_001BADE8()
  * @param popup  the popup that sent the event
  * @param event  the popup event (kONSCREENPOPUPOPTION0 + option index, kONSCREENPOPUPPREV back, kONPOPUPDESTROY closed)
  */
-extern "C" void cFEStateCreateStep2_onVerifyPopupEvent(cFEStateCreateStep2* self, cUIState* popup, int event)
+void cFEStateCreateStep2::onVerifyPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
-        cFEStateNet_onPopupEvent_v(((cFEStateNet*)self), popup, event);
+        cFEStateNet_onPopupEvent_v(((cFEStateNet*)this), popup, event);
         BuddyMan_disconnect(GetSession_001BADE8());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
-        cFEStateNetAccountMem* accountMem = (cFEStateNetAccountMem*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine, ((cFEStateNet*)self), 0, 0, 0);
+        cFEStateNetAccountMem* accountMem = (cFEStateNetAccountMem*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), mpEngine, ((cFEStateNet*)this), 0, 0, 0);
         accountMem->miMiscData = 2098;
-        cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, accountMem);
+        cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, accountMem);
     } else {
-        cFEStateNet_onPopupEvent_v(((cFEStateNet*)self), popup, event);
+        cFEStateNet_onPopupEvent_v(((cFEStateNet*)this), popup, event);
     }
 }
 #endif
@@ -18073,21 +18060,21 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void cFEStateCreateStep2_onAccountMemPopupEvent(cFEStateCreateStep2* self, cUIState* popup, int event)
+void cFEStateCreateStep2::onAccountMemPopupEvent(cUIState* popup, int event)
 {
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0: case cUIState::kONSCREENPOPUPOPTION1: case cUIState::kONSCREENPOPUPPREV:
-        self->mbSaveAccount = 0;
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        mbSaveAccount = 0;
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         break;
     case cUIState::kONSCREENPOPUPOPTION2:
-        self->mbSaveAccount = 1;
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        mbSaveAccount = 1;
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         break;
     case cUIState::kONPOPUPDESTROY:
-        cFEStateNet_onPopupEvent_v(self, popup, event);
-        if (self->mbSaveAccount != 0) {
-            cScreenPopup* nextPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cFEStateNet_onPopupEvent_v(this, popup, event);
+        if (mbSaveAccount != 0) {
+            cScreenPopup* nextPopup = (cScreenPopup*)this->createPopup();
             char* sub = (char*)&nextPopup->info;
             nextPopup->info.meType = 2;
             nextPopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204SaveAccount);
@@ -18096,24 +18083,24 @@ extern "C" void cFEStateCreateStep2_onAccountMemPopupEvent(cFEStateCreateStep2* 
             cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
             nextPopup->info.mbReceivePrev = 0;
             nextPopup->info.miMiscData = 2079;
-            cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)nextPopup);
+            this->showPopup((cScreenPopup*)nextPopup);
         } else {
-            cScreenPopup* nextPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+            cScreenPopup* nextPopup = (cScreenPopup*)this->createPopup();
             char* sub = (char*)&nextPopup->info;
             nextPopup->info.meType = 1;
             nextPopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP201Verify);
             nextPopup->info.mtMessage.eType = 3;
             cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNCancel));
             nextPopup->info.miMiscData = 2062;
-            cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)nextPopup);
-            cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(char**)self->mpAccount);
-            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->mpAccount->mPassword);
+            this->showPopup((cScreenPopup*)nextPopup);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(char**)mpAccount);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, mpAccount->mPassword);
             LobbyMan_authenticate(LobbyMan_mLobbyMan);
         }
-        self->mbSaveAccount = 0;
+        mbSaveAccount = 0;
         break;
     default:
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         break;
     }
 }
@@ -18134,13 +18121,13 @@ extern "C" void cFEStateCreateStep2_checkAge(void* self, int state);
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void cFEStateCreateStep2_onInvalidParentEmailPopupEvent(cFEStateCreateStep2* self, cUIState* popup, int event)
+void cFEStateCreateStep2::onInvalidParentEmailPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONPOPUPDESTROY) {
-        cFEStateNet_onPopupEvent(self, popup, event);
-        cFEStateCreateStep2_checkAge(self, 17);
+        cFEStateNet_onPopupEvent(this, popup, event);
+        cFEStateCreateStep2_checkAge(this, 17);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -18162,14 +18149,14 @@ extern "C" void cFEStateCreateStep2_submitAccount(cFEStateCreateStep2* self, int
  * @param popup  the entry popup (its text at +0x2B0)
  * @param event  the popup event
  */
-extern "C" void cFEStateCreateStep2_onParentEmailPopupEvent(cFEStateCreateStep2* self, cScreenPopup* popup, int event)
+void cFEStateCreateStep2::onParentEmailPopupEvent(cScreenPopup* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION0);
-        cBXString_operatorE1(&self->mpAccount->mParentMail, popup->mszInputText.Str);
-        cFEStateCreateStep2_submitAccount(self, 0);
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION0);
+        cBXString_operatorE1(&mpAccount->mParentMail, popup->mszInputText.Str);
+        submitAccount(0);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -18204,35 +18191,35 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param kind  the popup event
  */
-extern "C" void cFEStateCreateStep2_onSaveAccountPopupEvent(cFEStateCreateStep2* self, cUIState* popup, unsigned int kind)
+void cFEStateCreateStep2::onSaveAccountPopupEvent(cUIState* popup, unsigned int kind)
 {
     switch (kind) {
     case cUIState::kONSCREENPOPUPOPTION0: {
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION0);
-        cScreenPopup* newPopup = (cScreenPopup*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine, self, 1,
-                                self->mpAccount->mName, self->mpAccount->mPassword);
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION0);
+        cScreenPopup* newPopup = (cScreenPopup*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), mpEngine, this, 1,
+                                mpAccount->mName, mpAccount->mPassword);
         newPopup->miMiscData = 2092;
-        cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, newPopup);
+        cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, newPopup);
         break;
     }
     case cUIState::kONSCREENPOPUPOPTION1:
     case cUIState::kONSCREENPOPUPPREV: {
-        cFEStateNet_onPopupEvent(self, popup, kind);
-        cScreenPopup* newPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cFEStateNet_onPopupEvent(this, popup, kind);
+        cScreenPopup* newPopup = (cScreenPopup*)this->createPopup();
         newPopup->info.meType = 1;
         char* sub = (char*)&newPopup->info;
         newPopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP201Verify);
         newPopup->info.mtMessage.eType = 3;
         cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNCancel));
         newPopup->info.miMiscData = 2062;
-        cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)newPopup);
-        cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(const char**)self->mpAccount);
-        cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, (const char*)self->mpAccount->mPassword);
+        this->showPopup((cScreenPopup*)newPopup);
+        cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(const char**)mpAccount);
+        cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, (const char*)mpAccount->mPassword);
         LobbyMan_authenticate(LobbyMan_mLobbyMan);
         break;
     }
     default:
-        cFEStateNet_onPopupEvent(self, popup, kind);
+        cFEStateNet_onPopupEvent(this, popup, kind);
         break;
     }
 }
@@ -18254,12 +18241,12 @@ extern char str_LBMonth[];
  * Looks the box up by hash name and, when found, finds the entry whose data equals the month
  * (cUIListBox_getEntryByData) and makes it current. Called from cFEStateCreateStep2_onCreateScreen.
  */
-extern "C" void cFEStateCreateStep2_selectBornMonth(cFEStateCreateStep2* self)
+void cFEStateCreateStep2::selectBornMonth()
 {
-    cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBMonth));
+    cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBMonth));
     if (box != 0) {
         unsigned char out = 0;
-        cUIListBox_getEntryByData(box, self->mpAccount->mBornMonth, &out);
+        cUIListBox_getEntryByData(box, mpAccount->mBornMonth, &out);
         cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
@@ -18280,12 +18267,12 @@ extern char str_LBDay[];
  *
  * Same as cFEStateCreateStep2_selectBornMonth but for the day box. Called from cFEStateCreateStep2_onCreateScreen.
  */
-extern "C" void cFEStateCreateStep2_selectBornDay(cFEStateCreateStep2* self)
+void cFEStateCreateStep2::selectBornDay()
 {
-    cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBDay));
+    cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBDay));
     if (box != 0) {
         unsigned char out = 0;
-        cUIListBox_getEntryByData(box, self->mpAccount->mBornDay, &out);
+        cUIListBox_getEntryByData(box, mpAccount->mBornDay, &out);
         cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
@@ -18309,14 +18296,14 @@ extern char str_pct_d_b[];
  * When the box exists it overwrites entry 0's text with the year printed by "%d" and makes entry (unsigned char)(year -
  * 108) current, which is year - 1900 modulo 256 (1900 = 7 * 256 + 108). Called from cFEStateCreateStep2_onCreateScreen.
  */
-extern "C" void cFEStateCreateStep2_selectBornYear(cFEStateCreateStep2* self)
+void cFEStateCreateStep2::selectBornYear()
 {
     char buf[16];
-    cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBYear));
+    cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBYear));
     if (box != 0) {
-        sprintf(buf, str_pct_d_b, self->mpAccount->mBornYear);
+        sprintf(buf, str_pct_d_b, mpAccount->mBornYear);
         cUIListBox_setEntryByAsciiString(box, 0, buf, 0);
-        cUIListBox_setCurrentEntryByIndex(box, (unsigned char)(self->mpAccount->mBornYear - 108));
+        cUIListBox_setCurrentEntryByIndex(box, (unsigned char)(mpAccount->mBornYear - 108));
     }
 }
 #endif
@@ -18336,12 +18323,12 @@ extern char str_LBGender[];
  *
  * Same as cFEStateCreateStep2_selectBornMonth but for the gender box. Called from cFEStateCreateStep2_onCreateScreen.
  */
-extern "C" void cFEStateCreateStep2_selectGender(cFEStateCreateStep2* self)
+void cFEStateCreateStep2::selectGender()
 {
-    cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBGender));
+    cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBGender));
     if (box != 0) {
         unsigned char out = 0;
-        cUIListBox_getEntryByData(box, self->mpAccount->mGender, &out);
+        cUIListBox_getEntryByData(box, mpAccount->mGender, &out);
         cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
@@ -18363,12 +18350,12 @@ extern char str_LBLegalYesNo[];
  * Looks the box up by hash name and, when found, makes current the entry whose data is (mLegalAccepted != 0). Called
  * from cFEStateCreateStep2_onCreateScreen.
  */
-extern "C" void cFEStateCreateStep2_selectLegalAccepted(cFEStateCreateStep2* self)
+void cFEStateCreateStep2::selectLegalAccepted()
 {
-    cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBLegalYesNo));
+    cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_LBLegalYesNo));
     if (box != 0) {
         unsigned char out = 0;
-        cUIListBox_getEntryByData(box, self->mpAccount->mLegalAccepted != 0, &out);
+        cUIListBox_getEntryByData(box, mpAccount->mLegalAccepted != 0, &out);
         cUIListBox_setCurrentEntryByIndex(box, out);
     }
 }
@@ -18394,7 +18381,7 @@ extern char str_kT_CMNFemale[];
  * @param box  the "LBGender" list box
  * @param flag  0 selects Female, nonzero selects Male
  */
-extern "C" void cFEStateCreateStep2_fillGenderListBox(cFEStateCreateStep2* self, cUIListBox* box, int flag)
+void cFEStateCreateStep2::fillGenderListBox(cUIListBox* box, int flag)
 {
     unsigned char out = 0;
     box->mAttr = (box->mAttr & ~1) | 0x80;
@@ -18436,7 +18423,7 @@ extern char str_kT_CMNDecember[];
  * @param box  the "LBMonth" list box
  * @param ignored  unused (cFEStateCreateStep2_onWidgetCreate passes 1)
  */
-extern "C" void cFEStateCreateStep2_fillMonthListBox(cFEStateCreateStep2* self, cUIListBox* box, int ignored)
+void cFEStateCreateStep2::fillMonthListBox(cUIListBox* box, int ignored)
 {
     unsigned char out = 0;
     box->mAttr = (box->mAttr & ~1) | 0x80;
@@ -18479,7 +18466,7 @@ extern char str_pct_d_b[];
  * @param box  the "LBYear" list box
  * @param value  the year to select (cFEStateCreateStep2_onWidgetCreate passes 1985)
  */
-extern "C" void cFEStateCreateStep2_fillYearListBox(cFEStateCreateStep2* self, cUIListBox* box, int value)
+void cFEStateCreateStep2::fillYearListBox(cUIListBox* box, int value)
 {
     char buf[16];
     cUIListBox_deleteAllEntries(box);
@@ -18516,11 +18503,11 @@ extern char str_pct_d_b[];
  * @param year  the year (for February's length)
  * @param sel  the day to select
  */
-extern "C" void cFEStateCreateStep2_fillDayListBox(cFEStateCreateStep2* self, cUIText* box, int month, int year, int sel)
+void cFEStateCreateStep2::fillDayListBox(cUIText* box, int month, int year, int sel)
 {
     char buf[16];
     unsigned char idx;
-    int n = cFEStateCreateStep2_getDaysInMonth(self, month, year);
+    int n = getDaysInMonth(month, year);
     cUIListBox_deleteAllEntries(box);
     box->mAttr = (box->mAttr & ~1) | 0x80;
     int i;
@@ -18530,7 +18517,7 @@ extern "C" void cFEStateCreateStep2_fillDayListBox(cFEStateCreateStep2* self, cU
     }
     if (n < sel) {
         sel = n;
-        self->mpAccount->mBornDay = sel;
+        mpAccount->mBornDay = sel;
     }
     idx = 0;
     cUIListBox_getEntryByData(box, sel, &idx);
@@ -18550,7 +18537,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_isLeapYear);
  * @param year  the year
  * @return 1 for a leap year, else 0
  */
-extern "C" int cFEStateCreateStep2_isLeapYear(cFEStateCreateStep2* self, int year)
+int cFEStateCreateStep2::isLeapYear(int year)
 {
     int leap = 0;
     if ((year & 3) == 0) {
@@ -18578,10 +18565,10 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_getDaysInMonth);
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Days in a month (1-based); February uses the leap-year test.
-extern "C" int cFEStateCreateStep2_getDaysInMonth(cFEStateCreateStep2* self, int month, int year)
+int cFEStateCreateStep2::getDaysInMonth(int month, int year)
 {
     if (month == 2) {
-        if (cFEStateCreateStep2_isLeapYear(self, year))
+        if (isLeapYear(year))
             return 29;
         return 28;
     }
@@ -18608,7 +18595,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_isEmailAddress);
  * @param email  the text to scan
  * @return true when both characters occur, else false
  */
-extern "C" bool cFEStateCreateStep2_isEmailAddress(cFEStateCreateStep2* self, const char* email)
+bool cFEStateCreateStep2::isEmailAddress(const char* email)
 {
     int hasDot = 0;
     int hasAt = 0;
@@ -18634,9 +18621,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_canSubmit__FPv);
  *
  * @return true when the form may be submitted, else false
  */
-bool cFEStateCreateStep2_canSubmit(void* self)
+bool cFEStateCreateStep2::canSubmit()
 {
-    return (cFEStateCreateStep2_checkLegalAccepted(self) != 0);
+    return (cFEStateCreateStep2_checkLegalAccepted(this) != 0);
 }
 #endif
 
@@ -18666,23 +18653,23 @@ extern "C" int cFEStateCreateStep2_checkAge_impl(cFEStateCreateStep2* self, int 
  * @param code  the age the server reported ('tooy' reply), or 17 to ask for the parental e-mail again
  * @return 0 after showing a popup, 1 for 18 and over
  */
-extern "C" int cFEStateCreateStep2_checkAge_impl(cFEStateCreateStep2* self, int code)
+int cFEStateCreateStep2::checkAge(int code)
 {
     sObj1BBAC8 popupInfo;
     cPopupInfo_cPopupInfo((cPopupInfo*)(&popupInfo));
     if (code < 13) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP211UnderAge);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         cPopupInfo__cPopupInfo((cPopupInfo*)(&popupInfo), 2);
         return 0;
     } else if (code < 18) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = -1;
         popup->info.miMaxChars = 50;
         cPopupInfo* sub = &popup->info;
@@ -18690,13 +18677,13 @@ extern "C" int cFEStateCreateStep2_checkAge_impl(cFEStateCreateStep2* self, int 
         popup->info.mtTitle.eType = 3;
         popup->info.mtEntryBoxTitle.ui = GetHashValue32(str_kT_POPUPParentEmail);
         popup->info.mtEntryBoxTitle.eType = 3;
-        popup->info.mtEntryBoxInitial.psz = self->mpAccount->mParentMail;
+        popup->info.mtEntryBoxInitial.psz = mpAccount->mParentMail;
         popup->info.mtEntryBoxInitial.eType = 2;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP211Age13to17);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2081;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         cPopupInfo__cPopupInfo((cPopupInfo*)(&popupInfo), 2);
         return 0;
     }
@@ -18728,19 +18715,19 @@ extern "C" int cFEStateCreateStep2_checkLegalAccepted_r(cFEStateCreateStep2* sel
  *
  * @return 1 when accepted, 0 after showing the popup
  */
-extern "C" int cFEStateCreateStep2_checkLegalAccepted_r(cFEStateCreateStep2* self)
+int cFEStateCreateStep2::checkLegalAccepted()
 {
     cPopupInfo popupInfo;
     cPopupInfo_cPopupInfo((cPopupInfo*)(&popupInfo));
-    if (self->mpAccount->mLegalAccepted == 0) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    if (mpAccount->mLegalAccepted == 0) {
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP211AcceptLegal);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2061;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         cPopupInfo__cPopupInfo((cPopupInfo*)(&popupInfo), 2);
         return 0;
     }
@@ -18803,7 +18790,7 @@ void cFEStateCreateDuplicate::onCreateScreen()
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cFEStateCreateDuplicate_showNameSuggestions(this);
+    this->showNameSuggestions();
     cFEStateNet_onCreateScreen(this);
 }
 #endif
@@ -18933,13 +18920,13 @@ void cFEStateCreateDuplicate::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
         int option = pWidget->mMiscData;
         if (option == 4) {
             if (mbAccount != 0) {
-                cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, 0, GetHashValue32(str_kT_TITLEDuplicateAccount), str_empty_d, 0,
+                this->openKeyboardWithLabelID(0, GetHashValue32(str_kT_TITLEDuplicateAccount), str_empty_d, 0,
                               -1, 0x10);
                 mpKeyboard->mbDisableForFirst = 1;
                 cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
                 cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             } else {
-                cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, 0, GetHashValue32(str_kT_TITLEDuplicateUser), str_empty_d, 0, -1,
+                this->openKeyboardWithLabelID(0, GetHashValue32(str_kT_TITLEDuplicateUser), str_empty_d, 0, -1,
                               0xC);
                 mpKeyboard->mbDisableForFirst = 1;
                 cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
@@ -18948,10 +18935,10 @@ void cFEStateCreateDuplicate::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
         } else if (mbAccount != 0) {
             tLobbyAccount* lobbyAccount = mpAccount;
             cBXString_operatorE(lobbyAccount, &lobbyAccount->mNameOptions[option]);
-            cFEStateCreateDuplicate_resubmitAccount(this);
+            this->resubmitAccount();
         } else {
             // through a pointer, not the array: retail adds the index first
-            cFEStateCreateDuplicate_createPersona(this, (&mpAccount->mNameOptions[0])[option]);
+            this->createPersona((&mpAccount->mNameOptions[0])[option]);
         }
         break;
     }
@@ -18970,9 +18957,9 @@ void cFEStateCreateDuplicate::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
     case cUIState::kONKEYBOARDEND:
         if (mbAccount != 0) {
             cBXString_operatorE1(mpAccount, mpKeyboard->mszEditString);
-            cFEStateCreateDuplicate_resubmitAccount(this);
+            this->resubmitAccount();
         } else {
-            cFEStateCreateDuplicate_createPersona(this, mpKeyboard->mszEditString);
+            this->createPersona(mpKeyboard->mszEditString);
         }
         break;
     default:
@@ -19007,10 +18994,10 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the help popup to fill
  */
-extern "C" void cFEStateCreateDuplicate_fillHelpPopup(cFEStateCreateDuplicate* self, cFEStateNetHelpPopup* popup)
+void cFEStateCreateDuplicate::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 3);
-    if (self->mbAccount != 0) {
+    if (mbAccount != 0) {
         popup->muiScreenName = GetHashValue32(str_kT_HELP212DuplicateAccountName);
         cFEStateNetHelpPopup_setDescription(popup, 0, GetHashValue32(str_kT_HELP212DuplicateAccountNameMessage));
     } else {
@@ -19039,15 +19026,15 @@ extern char str_kT_POPUP211Submitting[];
  * is sent with LobbyMan_createAccount (the create-account request). Called from cFEStateCreateDuplicate_onWidgetEvent for the
  * account case.
  */
-extern "C" void cFEStateCreateDuplicate_resubmitAccount(cFEStateCreateDuplicate* self)
+void cFEStateCreateDuplicate::resubmitAccount()
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)this->createPopup();
     popup->info.meType = 0;
     popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP211Submitting);
     popup->info.mtMessage.eType = 3;
     popup->info.miMiscData = 2080;
     popup->info.mbReceivePrev = 0;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    this->showPopup(popup);
     LobbyMan_createAccount(LobbyMan_mLobbyMan, &LobbyMan_mLobbyMan->mNewAccount);
 }
 #endif
@@ -19074,25 +19061,25 @@ extern char str_kT_POPUP220SubmittingPersona[];
  *
  * @param name  the chosen suggestion or the typed name
  */
-extern "C" void cFEStateCreateDuplicate_createPersona(cFEStateCreateDuplicate* self, const char* name)
+void cFEStateCreateDuplicate::createPersona(const char* name)
 {
     if (strlen(name) < 3) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP220PersonaNameLength);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2068;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     } else {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 0;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP220SubmittingPersona);
         popup->info.mtMessage.eType = 3;
         popup->info.miMiscData = 2069;
         popup->info.mbReceivePrev = 0;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         LobbyMan_createPersona(LobbyMan_mLobbyMan, name);
     }
 }
@@ -19117,15 +19104,15 @@ extern char str_empty_d[];
  * the text's setStatic (virtual slot 8) with 0; otherwise it shows str_empty_d and calls it with 1. Called on screen
  * creation and again when a 'dupl' reply arrives (cFEStateCreateDuplicate_onNetEvent).
  */
-extern "C" void cFEStateCreateDuplicate_showNameSuggestions(cFEStateCreateDuplicate* self)
+void cFEStateCreateDuplicate::showNameSuggestions()
 {
     char buf[64];
     int i;
     for (i = 0; i < 4; i++) {
         sprintf(buf, str_SelectNamepct_d, i);
-        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (text != 0) {
-            tLobbyAccount* names = self->mpAccount;
+            tLobbyAccount* names = mpAccount;
             if (i < names->mNumNameOptions) {
                 cUIText_setAsciiString(text, (&names->mNameOptions[0])[i]);
                 text->setStatic(0);
@@ -19171,45 +19158,45 @@ extern char str_kT_CMNNo[];
  * @param data  the event's message (for kNetEvent_Error an online_ErrorEvent)
  * @return -1 for the handled ids, else cFEStateNet_onNetEvent's result
  */
-extern "C" int cFEStateCreateDuplicate_onNetEvent(cFEStateCreateDuplicate* self, int id, void* data)
+int cFEStateCreateDuplicate::onNetEvent(int id, void* data)
 {
     switch (id) {
     case kNetEvent_AccountCreated: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(((cFEStateNet*)self));
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 2;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP211Congratulations2);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-        cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+        sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
         popup->info.mbReceivePrev = 0;
         popup->info.miMiscData = 2079;
-        cFEStateNet_showPopup(((cFEStateNet*)self), popup);
+        this->showPopup(popup);
         break;
     }
     case kNetEvent_Authentication:
         LobbyMan_resetNewAccount(LobbyMan_mLobbyMan);
     case kNetEvent_PersonaCreated:
-        cFEStateNet_pushState(((cFEStateNet*)self),
+        cFEStateNet_pushState(((cFEStateNet*)this),
                 cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
-                str_cFEStateSelectPersona, 0, 0), self->mpEngine));
+                str_cFEStateSelectPersona, 0, 0), mpEngine));
         break;
     case kNetEvent_Error:
         if (((online_ErrorEvent*)data)->mError == kLobbyErr_dupl) {
-            cScreenPopup* openPopup = self->mpPopup;
+            cScreenPopup* openPopup = mpPopup;
             if (((char*)openPopup) != 0) {
                 int popupId = openPopup->miMiscData;
                 if (popupId == 2080 || popupId == 2069) {
-                    cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+                    cUIStateStack_pop(&mpEngine->mStateStack, 1);
                 }
             }
-            cFEStateCreateDuplicate_showNameSuggestions(self);
+            showNameSuggestions();
         } else {
-            cFEStateNet_onNetEvent_3i(((cFEStateNet*)self), id, data);
+            cFEStateNet_onNetEvent_3i(((cFEStateNet*)this), id, data);
         }
         break;
     default:
-        return cFEStateNet_onNetEvent_3i(((cFEStateNet*)self), id, data);
+        return cFEStateNet_onNetEvent_3i(((cFEStateNet*)this), id, data);
     }
     return -1;
 }
@@ -19236,13 +19223,13 @@ void cFEStateCreateDuplicate::onPopupEvent(cUIState* pPopup, unsigned int Event)
 {
     switch ((unsigned int)pPopup->miMiscData) {
     case 2079:
-        cFEStateCreateDuplicate_onSaveAccountPopupEvent(this, pPopup, Event);
+        this->onSaveAccountPopupEvent(pPopup, Event);
         break;
     case 2062:
-        cFEStateCreateDuplicate_onVerifyPopupEvent(this, pPopup, Event);
+        this->onVerifyPopupEvent(pPopup, Event);
         break;
     case 2092:
-        cFEStateCreateDuplicate_onAccountMemPopupEvent(this, pPopup, Event);
+        this->onAccountMemPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -19294,17 +19281,17 @@ static inline void* GetSession_001BC728()
  * @param popup  the popup that sent the event
  * @param event  the popup event (kONSCREENPOPUPOPTION0 + option index, kONSCREENPOPUPPREV back, kONPOPUPDESTROY closed)
  */
-extern "C" void cFEStateCreateDuplicate_onVerifyPopupEvent(cFEStateCreateDuplicate* self, cUIState* popup, int event)
+void cFEStateCreateDuplicate::onVerifyPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
-        cFEStateNet_onPopupEvent_v(((cFEStateNet*)self), popup, event);
+        cFEStateNet_onPopupEvent_v(((cFEStateNet*)this), popup, event);
         BuddyMan_disconnect(GetSession_001BC728());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
-        cFEStateNetAccountMem* accountMem = (cFEStateNetAccountMem*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine, ((cFEStateNet*)self), 0, 0, 0);
+        cFEStateNetAccountMem* accountMem = (cFEStateNetAccountMem*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), mpEngine, ((cFEStateNet*)this), 0, 0, 0);
         accountMem->miMiscData = 2098;
-        cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, accountMem);
+        cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, accountMem);
     } else {
-        cFEStateNet_onPopupEvent_v(((cFEStateNet*)self), popup, event);
+        cFEStateNet_onPopupEvent_v(((cFEStateNet*)this), popup, event);
     }
 }
 #endif
@@ -19338,35 +19325,35 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param kind  the popup event
  */
-extern "C" void cFEStateCreateDuplicate_onSaveAccountPopupEvent(cFEStateCreateDuplicate* self, cUIState* popup, int kind)
+void cFEStateCreateDuplicate::onSaveAccountPopupEvent(cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case cUIState::kONSCREENPOPUPOPTION0: {
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION0);
-        cScreenPopup* newPopup = (cScreenPopup*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), self->mpEngine, self, 1,
-                                self->mpAccount->mName, self->mpAccount->mPassword);
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION0);
+        cScreenPopup* newPopup = (cScreenPopup*)cFEStateNetAccountMem_cFEStateNetAccountMem((cFEStateNetAccountMem*)cMemMan_alloc(2832, str_cFEStateNetAccountMem, 0, 0), mpEngine, this, 1,
+                                mpAccount->mName, mpAccount->mPassword);
         newPopup->miMiscData = 2092;
-        cUIStateStack_pushPopup(&self->mpScreen->mpState->mpEngine->mStateStack, newPopup);
+        cUIStateStack_pushPopup(&mpScreen->mpState->mpEngine->mStateStack, newPopup);
         break;
     }
     case cUIState::kONSCREENPOPUPOPTION1:
     case cUIState::kONSCREENPOPUPPREV: {
-        cFEStateNet_onPopupEvent(self, popup, kind);
-        cScreenPopup* newPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cFEStateNet_onPopupEvent(this, popup, kind);
+        cScreenPopup* newPopup = (cScreenPopup*)this->createPopup();
         newPopup->info.meType = 1;
         char* sub = (char*)&newPopup->info;
         newPopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP201Verify);
         newPopup->info.mtMessage.eType = 3;
         cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNCancel));
         newPopup->info.miMiscData = 2062;
-        cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)newPopup);
-        cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(const char**)self->mpAccount);
-        cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, (const char*)self->mpAccount->mPassword);
+        this->showPopup((cScreenPopup*)newPopup);
+        cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(const char**)mpAccount);
+        cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, (const char*)mpAccount->mPassword);
         LobbyMan_authenticate(LobbyMan_mLobbyMan);
         break;
     }
     default:
-        cFEStateNet_onPopupEvent(self, popup, kind);
+        cFEStateNet_onPopupEvent(this, popup, kind);
         break;
     }
 }
@@ -19403,21 +19390,21 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void cFEStateCreateDuplicate_onAccountMemPopupEvent(cFEStateCreateDuplicate* self, cUIState* popup, int event)
+void cFEStateCreateDuplicate::onAccountMemPopupEvent(cUIState* popup, int event)
 {
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0: case cUIState::kONSCREENPOPUPOPTION1: case cUIState::kONSCREENPOPUPPREV:
-        self->mbAskSave = 0;
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        mbAskSave = 0;
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         break;
     case cUIState::kONSCREENPOPUPOPTION2:
-        self->mbAskSave = 1;
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        mbAskSave = 1;
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         break;
     case cUIState::kONPOPUPDESTROY:
-        cFEStateNet_onPopupEvent_v(self, popup, event);
-        if (self->mbAskSave != 0) {
-            cScreenPopup* newPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cFEStateNet_onPopupEvent_v(this, popup, event);
+        if (mbAskSave != 0) {
+            cScreenPopup* newPopup = (cScreenPopup*)this->createPopup();
             char* sub = (char*)&newPopup->info;
             newPopup->info.meType = 2;
             newPopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP204SaveAccount);
@@ -19427,24 +19414,24 @@ extern "C" void cFEStateCreateDuplicate_onAccountMemPopupEvent(cFEStateCreateDup
             newPopup->info.miDefaultOption = 0;
             newPopup->info.mbReceivePrev = 0;
             newPopup->info.miMiscData = 2079;
-            cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)newPopup);
+            this->showPopup((cScreenPopup*)newPopup);
         } else {
-            cScreenPopup* newPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+            cScreenPopup* newPopup = (cScreenPopup*)this->createPopup();
             char* sub = (char*)&newPopup->info;
             newPopup->info.meType = 1;
             newPopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP201Verify);
             newPopup->info.mtMessage.eType = 3;
             cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNCancel));
             newPopup->info.miMiscData = 2062;
-            cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)newPopup);
-            cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(char**)self->mpAccount);
-            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->mpAccount->mPassword);
+            this->showPopup((cScreenPopup*)newPopup);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, *(char**)mpAccount);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, mpAccount->mPassword);
             LobbyMan_authenticate(LobbyMan_mLobbyMan);
         }
-        self->mbAskSave = 0;
+        mbAskSave = 0;
         break;
     default:
-        cFEStateNet_onPopupEvent_v(self, popup, event);
+        cFEStateNet_onPopupEvent_v(this, popup, event);
         break;
     }
 }
@@ -19581,11 +19568,11 @@ bool cFEStateLobbyMenu::onGainTransition(int reset)
         sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
         vt[32].fn(vthis(this, vt[32]));
         mbRoomChanged = 0;
-        cFEStateLobbyMenu_rebuildChannelLists(this);
-        cFEStateLobbyMenu_updatePlayerScrollArrows(this);
+        this->rebuildChannelLists();
+        this->updatePlayerScrollArrows();
         cFEStateLobbyMenu_selectChannelRoom(this, mpChannelPair[0]);
     } else if (mbRoomChanged != 0) {
-        cFEStateLobbyMenu_rebuildChannelLists(this);
+        this->rebuildChannelLists();
         int cur = miSelectedChannel;
         if (cur < 4) {
             cUIListBox* list = mpChannelList[cur];
@@ -19597,7 +19584,7 @@ bool cFEStateLobbyMenu::onGainTransition(int reset)
         }
         cUIMenu_setSelectedByIndex(mpMenuRoomMenus, miSelectedChannel);
         cFEStateLobbyMenu_selectChannelRoom(this, mpChannelPair[miSelectedChannel]);
-        cFEStateLobbyMenu_updatePlayerScrollArrows(this);
+        this->updatePlayerScrollArrows();
         cFEStateLobbyMenu_showChannelArrow_1BDC18(this, mpChannelPair[miSelectedChannel]);
     }
     return false;
@@ -19837,7 +19824,7 @@ void cFEStateLobbyMenu::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
     }
     case cUIState::kONMISC:
         if ((mAttrState & 6) == 0) {
-            cFEStateNet_openMessenger((cFEStateNet*)this);
+            this->openMessenger();
         }
         break;
     case cUIState::kONKEYBOARDEND:
@@ -19862,11 +19849,11 @@ extern "C" void cFEStateLobbyMenu_joinRoomByName(cFEStateLobbyMenu* self, const 
  * calls cFEStateLobbyMenu_joinRoomByName with mszRoomName and the typed text (mpKeyboard + 0x74). cFEStateLobbyMenu_onWidgetEvent calls it
  * on event 13 (keyboard done).
  */
-extern "C" void cFEStateLobbyMenu_handleKeyboardText(cFEStateLobbyMenu* self)
+void cFEStateLobbyMenu::handleKeyboardText()
 {
-    cKeyboardPopup* keyboard = self->mpKeyboard;
+    cKeyboardPopup* keyboard = mpKeyboard;
     if (keyboard->miMiscData == 8) {
-        cFEStateLobbyMenu_joinRoomByName(self, self->mszRoomName, keyboard->mszEditString);
+        joinRoomByName(mszRoomName, keyboard->mszEditString);
     }
 }
 #endif
@@ -19900,23 +19887,23 @@ struct sFEObj_001BD460 {
  * @param roomId  the room's id in LobbyMan's room list
  * @param str  the room password, or null / empty for none
  */
-extern "C" void cFEStateLobbyMenu_joinRoomById(cFEStateLobbyMenu* self, int roomId, const char* str)
+void cFEStateLobbyMenu::joinRoomById(int roomId, const char* str)
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)this->createPopup();
     popup->info.meType = 0;
     popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP231EnteringRoom);
     popup->info.mbReceivePrev = 0;
     popup->info.mtMessage.eType = 3;
     popup->info.miMiscData = 2089;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    this->showPopup(popup);
     if (str == 0 || strlen(str) == 0) {
-        self->mbRoomHasPassword = 0;
+        mbRoomHasPassword = 0;
         LobbyMan_joinRoomAt(LobbyMan_mLobbyMan, roomId, 0);
     } else {
-        self->mbRoomHasPassword = 1;
+        mbRoomHasPassword = 1;
         LobbyMan_joinRoomAt(LobbyMan_mLobbyMan, roomId, str);
     }
-    char* roomName = ((char*)&self->mszRoomName);
+    char* roomName = ((char*)&mszRoomName);
     cBXString_operatorE1(roomName, LobbyMan_getRoomNameAt(LobbyMan_mLobbyMan, roomId));
 }
 #endif
@@ -19942,23 +19929,23 @@ extern char str_kT_POPUP231EnteringRoom[];
  * @param roomName  the room's name
  * @param password  the room password, or null / empty for none
  */
-extern "C" void cFEStateLobbyMenu_joinRoomByName(cFEStateLobbyMenu* self, const char* roomName, void* password)
+void cFEStateLobbyMenu::joinRoomByName(const char* roomName, void* password)
 {
-    cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+    cScreenPopup* popup = (cScreenPopup*)this->createPopup();
     popup->info.meType = 0;
     popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP231EnteringRoom);
     popup->info.mbReceivePrev = 0;
     popup->info.mtMessage.eType = 3;
     popup->info.miMiscData = 2089;
-    cFEStateNet_showPopup((cFEStateNet*)self, popup);
+    this->showPopup(popup);
     if (password == 0 || strlen((const char*)password) == 0) {
-        (self)->mbRoomHasPassword = 0;
+        mbRoomHasPassword = 0;
         LobbyMan_joinRoom(LobbyMan_mLobbyMan, roomName, 0);
     } else {
-        (self)->mbRoomHasPassword = 1;
+        mbRoomHasPassword = 1;
         LobbyMan_joinRoom(LobbyMan_mLobbyMan, roomName, (const char*)password);
     }
-    cBXString_operatorE1(((char*)&(self)->mszRoomName), roomName);
+    cBXString_operatorE1(((char*)&mszRoomName), roomName);
 }
 #endif
 
@@ -19987,27 +19974,27 @@ extern char str_kT_POPUP231SubmittingCreateRoom[];
  * @param channelName  the channel name, passed to LobbyMan_createRoom first
  * @param extraPtr  the password; empty means none
  */
-extern "C" void cFEStateLobbyMenu_createRoom(cFEStateLobbyMenu* self, const char* namePtr, char* channelName, const char* extraPtr)
+void cFEStateLobbyMenu::createRoom(const char* namePtr, char* channelName, const char* extraPtr)
 {
     const char* name = namePtr;
     const char* extra = extraPtr;
     if (strlen(name) == 0) {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP231UniqueRoom);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2084;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
     } else {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 0;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP231SubmittingCreateRoom);
         popup->info.mtMessage.eType = 3;
         popup->info.miMiscData = 2088;
         popup->info.mbReceivePrev = 0;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         LobbyMan_createRoom(lobbyMan, channelName, name, strlen(extra) != 0 ? extra : 0);
     }
@@ -20050,31 +20037,31 @@ struct sFE1BD738 {
  * @param data  the event's message
  * @return 0 for the handled ids, else cFEStateNet_onNetEvent's result
  */
-extern "C" void* cFEStateLobbyMenu_onNetEvent(cFEStateLobbyMenu* self, int msgId, void* data)
+void* cFEStateLobbyMenu::onNetEvent(int msgId, void* data)
 {
     switch (msgId) {
     case 0xE0:
-        cFEStateLobbyMenu_redrawPlayerList_BD738(((char*)self), self->miRoomId);
+        cFEStateLobbyMenu_redrawPlayerList_BD738(((char*)this), miRoomId);
         break;
     case kNetEvent_RoomListUpdate: {
-        int n = self->mpMenuRoomMenus->mpSelected->mMiscData;
-        self->miSelectedChannel = n;
+        int n = mpMenuRoomMenus->mpSelected->mMiscData;
+        miSelectedChannel = n;
         if (n < 4) {
-            cBXString_operatorE1(&self->mszChannelName, cUIListBox_getCurrentAsciiText(((sFE1BD738*)self)->boxes[n]));
+            cBXString_operatorE1(&mszChannelName, cUIListBox_getCurrentAsciiText(((sFE1BD738*)this)->boxes[n]));
         }
-        cFEStateLobbyMenu_rebuildChannelLists(self);
-        cFEStateLobbyMenu_restoreChannelSelections_BD738(((char*)self));
+        rebuildChannelLists();
+        cFEStateLobbyMenu_restoreChannelSelections_BD738(((char*)this));
         break;
     }
     case kNetEvent_RoomSelected: case 228:
-        cFEStateNet_pushState(((char*)self), cFEStateChatRoom_cFEStateChatRoom((cFEStateChatRoom*)cMemMan_alloc(1852,
-                str_cFEStateChatRoom, 0, 0), self->mpEngine));
+        cFEStateNet_pushState(((char*)this), cFEStateChatRoom_cFEStateChatRoom((cFEStateChatRoom*)cMemMan_alloc(1852,
+                str_cFEStateChatRoom, 0, 0), mpEngine));
         break;
     case kNetEvent_Error:
-        cFEStateLobbyMenu_handleErrorEvent(self, msgId, data);
+        handleErrorEvent(msgId, data);
         break;
     default:
-        return cFEStateNet_onNetEvent_3(((char*)self), msgId, data);
+        return cFEStateNet_onNetEvent_3(((char*)this), msgId, data);
     }
     return 0;
 }
@@ -20097,22 +20084,22 @@ extern "C" void cFEStateLobbyMenu_handleJoinRoomError(cFEStateLobbyMenu* self, v
  * @param msgId  the net event id (258)
  * @param data  the error message
  */
-extern "C" void cFEStateLobbyMenu_handleErrorEvent(cFEStateLobbyMenu* self, int msgId, void* data)
+void cFEStateLobbyMenu::handleErrorEvent(int msgId, void* data)
 {
-    if (self->mAttrState & 6) {
-        switch (self->mpPopup->miMiscData) {
+    if (mAttrState & 6) {
+        switch (mpPopup->miMiscData) {
         case 2088:
-            cFEStateLobbyMenu_handleCreateRoomError(self, data);
+            handleCreateRoomError(data);
             break;
         case 2089:
-            cFEStateLobbyMenu_handleJoinRoomError(self, data);
+            handleJoinRoomError(data);
             break;
         default:
-            cFEStateNet_onNetEvent_3(((cFEStateNet*)self), msgId, data);
+            cFEStateNet_onNetEvent_3(((cFEStateNet*)this), msgId, data);
             break;
         }
     } else {
-        cFEStateNet_onNetEvent_3(((cFEStateNet*)self), msgId, data);
+        cFEStateNet_onNetEvent_3(((cFEStateNet*)this), msgId, data);
     }
 }
 #endif
@@ -20145,44 +20132,44 @@ extern char str_kT_BTNCancel[];
  *
  * @param msgPtr  the error event (an online_ErrorEvent)
  */
-extern "C" void cFEStateLobbyMenu_handleJoinRoomError(cFEStateLobbyMenu* self, void* msgPtr)
+void cFEStateLobbyMenu::handleJoinRoomError(void* msgPtr)
 {
     online_ErrorEvent* msg = (online_ErrorEvent*)msgPtr;
     switch ((unsigned int)msg->mError) {
     case kLobbyErr_full:
     case kLobbyErr_urom: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 1;
         cPopupInfo* sub = &popup->info;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP231InvalidRoom);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miMiscData = 2091;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         break;
     }
     case kLobbyErr_pass:
-        if (self->mbRoomHasPassword == 0) {
-            char* buf = (char*)&self->mustrPopupText;
-            char* name = self->mszRoomName;
+        if (mbRoomHasPassword == 0) {
+            char* buf = (char*)&mustrPopupText;
+            char* name = mszRoomName;
             cFELocale* obj = SSXApp->FELocale;
             sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cUILocaleInterface, obj);
             sprintf1(buf, vt[4].fn(vthis(obj, vt[4]), GetHashValue32(str_kT_POPUP231RoomPassword)), name);
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.mtMessage.pustr = (const unsigned short*)buf;
             popup->info.meType = 2;
             popup->info.mtMessage.eType = 1;
             cPopupInfo* sub = &popup->info;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_POPUP231EnterPassword));
-            cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_BTNCancel));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_POPUP231EnterPassword));
+            sub->setPopupOptionNames2(1, GetHashValue32(str_kT_BTNCancel));
             popup->info.miMiscData = 2090;
-            cFEStateNet_showPopup((cFEStateNet*)self, popup);
+            this->showPopup(popup);
         } else {
-            cFEStateNet_onNetEvent_msg(self, msg->mType, msg);
+            cFEStateNet_onNetEvent_msg(this, msg->mType, msg);
         }
         break;
     default:
-        cFEStateNet_onNetEvent_msg(self, msg->mType, msg);
+        cFEStateNet_onNetEvent_msg(this, msg->mType, msg);
         break;
     }
 }
@@ -20210,48 +20197,48 @@ extern char str_kT_BTNOK[];
  *
  * @param msgPtr  the error message (status code at +8)
  */
-extern "C" void cFEStateLobbyMenu_handleCreateRoomError(cFEStateLobbyMenu* self, void* msgPtr)
+void cFEStateLobbyMenu::handleCreateRoomError(void* msgPtr)
 {
     online_ErrorEvent* msg = (online_ErrorEvent*)((void*)msgPtr);
     switch ((unsigned int)msg->mError) {
     case kLobbyErr_full:
         {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 1;
             cPopupInfo* sub = &popup->info;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP231MaxRooms);
             popup->info.mtMessage.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
             popup->info.miMiscData = 2085;
-            cFEStateNet_showPopup((cFEStateNet*)self, popup);
+            this->showPopup(popup);
         }
         break;
     case kLobbyErr_dupl:
         {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 1;
             cPopupInfo* sub = &popup->info;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP231AlreadyExists);
             popup->info.mtMessage.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
             popup->info.miMiscData = 2086;
-            cFEStateNet_showPopup((cFEStateNet*)self, popup);
+            this->showPopup(popup);
         }
         break;
     case kLobbyErr_filt:
         {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 1;
             cPopupInfo* sub = &popup->info;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNProfanityRoom);
             popup->info.mtMessage.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
             popup->info.miMiscData = 2087;
-            cFEStateNet_showPopup((cFEStateNet*)self, popup);
+            this->showPopup(popup);
         }
         break;
     default:
-        cFEStateNet_onNetEvent_msg(self, msg->mType, msg);
+        cFEStateNet_onNetEvent_msg(this, msg->mType, msg);
         break;
     }
 }
@@ -20367,13 +20354,13 @@ extern "C" void cFEStateLobbyMenu_createRoom(cFEStateLobbyMenu* self, const char
  * @param popup  the create-room popup
  * @param event  the popup event
  */
-extern "C" void cFEStateLobbyMenu_onCreateRoomPopupEvent(cFEStateLobbyMenu* self, cFEStateNetCreateRoomPopup* popup, int event)
+void cFEStateLobbyMenu::onCreateRoomPopupEvent(cFEStateNetCreateRoomPopup* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
-        cFEStateNet_onPopupEvent(self, popup, event);
-        cFEStateLobbyMenu_createRoom(self, popup->mszRoomName, popup->mszChannelName, popup->mszPassword);
+        cFEStateNet_onPopupEvent(this, popup, event);
+        createRoom(popup->mszRoomName, popup->mszChannelName, popup->mszPassword);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -20399,15 +20386,15 @@ extern char str_empty_d[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void cFEStateLobbyMenu_onRoomPasswordPopupEvent(cFEStateLobbyMenu* self, cUIState* popup, int event)
+void cFEStateLobbyMenu::onRoomPasswordPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, cUIState::kONSCREENPOPUPOPTION0);
-        cFEStateNet_openKeyboardWithLabelID(((cFEStateNet*)self), 0, GetHashValue32(str_kT_POPUP231EnterPassword), str_empty_d, 0, 8,
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, cUIState::kONSCREENPOPUPOPTION0);
+        this->openKeyboardWithLabelID(0, GetHashValue32(str_kT_POPUP231EnterPassword), str_empty_d, 0, 8,
                       0x3F);
-        cKeyboardPopup_setIncludeKey(self->mpKeyboard, 53, 0, 2);
+        cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
     } else {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, event);
     }
 }
 #endif
@@ -20432,10 +20419,10 @@ void cFEStateLobbyMenu::onPopupEvent(cUIState*pPopup, unsigned int Event)
 {
     switch (pPopup->miMiscData) {
     case 2083:
-        cFEStateLobbyMenu_onCreateRoomPopupEvent(this, (cFEStateNetCreateRoomPopup*)pPopup, Event);
+        this->onCreateRoomPopupEvent((cFEStateNetCreateRoomPopup*)pPopup, Event);
         break;
     case 2090:
-        cFEStateLobbyMenu_onRoomPasswordPopupEvent(this, pPopup, Event);
+        this->onRoomPasswordPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -20470,7 +20457,7 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the help popup to fill
  */
-extern "C" void cFEStateLobbyMenu_fillHelpPopup(cFEStateLobbyMenu* self, cFEStateNetHelpPopup* popup)
+void cFEStateLobbyMenu::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 6);
     popup->muiScreenName = GetHashValue32(str_kT_HELP231MainLobby);
@@ -20506,7 +20493,7 @@ extern "C" void cFEStateLobbyMenu_hideChannelArrows(cFEStateLobbyMenu* self);
  */
 extern "C" void cFEStateLobbyMenu_showChannelArrow(sFESlots1BDF60* self, int id)
 {
-    cFEStateLobbyMenu_hideChannelArrows((cFEStateLobbyMenu*)self);
+    ((cFEStateLobbyMenu*)self)->hideChannelArrows();
     for (int i = 0; i < 4; i++) {
         if (id == self->ids[i]) {
             self->objs[i]->setVisible(1);
@@ -20522,11 +20509,11 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_hideChannelArrows);
 /**
  * Hides the four channel arrows: calls setVisible (virtual slot 9) with 0 on each mpChannelArrow widget.
  */
-extern "C" void cFEStateLobbyMenu_hideChannelArrows(cFEStateLobbyMenu* self)
+void cFEStateLobbyMenu::hideChannelArrows()
 {
     int i;
     for (i = 0; i < 4; i++) {
-        self->mpChannelArrow[i]->setVisible(0);
+        mpChannelArrow[i]->setVisible(0);
     }
 }
 #endif
@@ -20619,10 +20606,10 @@ struct sBXTmp_001BE0A8 {
  * initialised, and the "first room of the channel" test that sets the channel's lock icon (mpChannelLock slot 9 with
  * LobbyMan_isRoomLocked's result) runs after the increment, so both it and the "no rooms" test depend on stack garbage.
  */
-extern "C" void cFEStateLobbyMenu_rebuildChannelLists(cFEStateLobbyMenu* self)
+void cFEStateLobbyMenu::rebuildChannelLists()
 {
     LobbyMan* mgr = LobbyMan_mLobbyMan;
-    cUIThing** lists = (cUIThing**)(&self->mpChannelList[0]);
+    cUIThing** lists = (cUIThing**)(&mpChannelList[0]);
     int n = LobbyMan_getnumrooms(mgr);
     sBXStr_001BE0A8 name;
     sBXStr_001BE0A8 base;
@@ -20651,26 +20638,26 @@ extern "C" void cFEStateLobbyMenu_rebuildChannelLists(cFEStateLobbyMenu* self)
         int type;
         if (strcmp(base.p, D_004A1A6C) == 0) {
             type = 0;
-            list = (cUIThing*)self->mpChannelList[0];
+            list = (cUIThing*)mpChannelList[0];
             counts[0]++;
         } else if (strcmp(base.p, D_004A1A68) == 0) {
             type = 1;
-            list = (cUIThing*)self->mpChannelList[1];
+            list = (cUIThing*)mpChannelList[1];
             counts[1]++;
         } else if (strcmp(base.p, D_004A1A64) == 0) {
             type = 2;
-            list = (cUIThing*)self->mpChannelList[2];
+            list = (cUIThing*)mpChannelList[2];
             counts[2]++;
         } else if (strcmp(base.p, D_004A1A60) == 0) {
             type = 3;
-            list = (cUIThing*)self->mpChannelList[3];
+            list = (cUIThing*)mpChannelList[3];
             counts[3]++;
         } else {
             continue;
         }
         if (counts[type] == 0) {
             int on = LobbyMan_isRoomLocked(LobbyMan_mLobbyMan, i);
-            ((cUIThing*)self->mpChannelLock[type])->setVisible(on);
+            ((cUIThing*)mpChannelLock[type])->setVisible(on);
         }
         cUIListBox_addEntryByAsciiString(list, ext.p, i);
         list->setStatic(0);
@@ -20681,7 +20668,7 @@ extern "C" void cFEStateLobbyMenu_rebuildChannelLists(cFEStateLobbyMenu* self)
             lists[k]->setStatic(1);
         }
     }
-    cFEStateLobbyMenu_restoreChannelSelections((sFELists1BE038*)self);
+    cFEStateLobbyMenu_restoreChannelSelections((sFELists1BE038*)this);
     cBXString__cBXString(&ext, 2);
     cBXString__cBXString(&base, 2);
     cBXString__cBXString(&name, 2);
@@ -20759,10 +20746,10 @@ extern "C" void cFEStateLobbyMenu_updatePlayerScrollArrows(cFEStateLobbyMenu*);
  * Callers pass a room index as a second argument, which reaches cFEStateLobbyMenu_fillPlayerRows untouched in a1 (it takes (self, room));
  * the C declaration has only self.
  */
-extern "C" void cFEStateLobbyMenu_redrawPlayerList(cFEStateLobbyMenu* self)
+void cFEStateLobbyMenu::redrawPlayerList()
 {
-    cFEStateLobbyMenu_fillPlayerRows(self);
-    cFEStateLobbyMenu_updatePlayerScrollArrows(self);
+    cFEStateLobbyMenu_fillPlayerRows(this);
+    updatePlayerScrollArrows();
 }
 #endif
 
@@ -20805,34 +20792,34 @@ extern "C" void cFEStateLobbyMenu_fillPlayerRows_2(cFEStateLobbyMenu* self, int 
  *
  * @param page  the room index, or -1 for none
  */
-extern "C" void cFEStateLobbyMenu_fillPlayerRows_2(cFEStateLobbyMenu* self, int page)
+void cFEStateLobbyMenu::fillPlayerRows(int page)
 {
     int i;
     if (page != -1) {
         LobbyMan* mgr = LobbyMan_mLobbyMan;
-        self->miNumPlayers = LobbyMan_getNumUsers(mgr);
+        miNumPlayers = LobbyMan_getNumUsers(mgr);
         char buf[80];
-        sprintf1_v(buf, Loc1BE540(str_kT_231PlayersInRoom), self->miNumPlayers);
-        cUIText_setUnicodeString(self->mpText3InRoom, buf);
-        unsigned char n = self->miNumPlayers;
-        self->mpMenuPlayers->mScrollItemNum = n;
+        sprintf1_v(buf, Loc1BE540(str_kT_231PlayersInRoom), miNumPlayers);
+        cUIText_setUnicodeString(mpText3InRoom, buf);
+        unsigned char n = miNumPlayers;
+        mpMenuPlayers->mScrollItemNum = n;
         for (i = 0; i < 10; i++) {
-            int idx = self->miFirstPlayer + i;
-            if (idx < self->miNumPlayers) {
-                cUIText_setAsciiString(self->mpTextPlayer[i], LobbyMan_getUserName(mgr, idx, 0));
-                self->mpTextPlayer[i]->mMiscData = idx;
-                self->mpTextPlayer[i]->setVisible(1);
-                self->mpTextPlayer[i]->setStatic(0);
+            int idx = miFirstPlayer + i;
+            if (idx < miNumPlayers) {
+                cUIText_setAsciiString(mpTextPlayer[i], LobbyMan_getUserName(mgr, idx, 0));
+                mpTextPlayer[i]->mMiscData = idx;
+                mpTextPlayer[i]->setVisible(1);
+                mpTextPlayer[i]->setStatic(0);
             } else {
-                self->mpTextPlayer[i]->setVisible(0);
-                self->mpTextPlayer[i]->setStatic(1);
+                mpTextPlayer[i]->setVisible(0);
+                mpTextPlayer[i]->setStatic(1);
             }
         }
     } else {
-        self->miNumPlayers = 0;
+        miNumPlayers = 0;
         for (int j = 0; j < 10; j++) {
-            self->mpTextPlayer[j]->setVisible(0);
-            self->mpTextPlayer[j]->setStatic(1);
+            mpTextPlayer[j]->setVisible(0);
+            mpTextPlayer[j]->setStatic(1);
         }
     }
 }
@@ -20847,17 +20834,17 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_updatePlayerScrollArrows);
  * mpPlayerUp is shown (virtual slot 9 with 1) when miFirstPlayer > 0; mpPlayerDown when miFirstPlayer + 10 <
  * miNumPlayers.
  */
-extern "C" void cFEStateLobbyMenu_updatePlayerScrollArrows(cFEStateLobbyMenu* self)
+void cFEStateLobbyMenu::updatePlayerScrollArrows()
 {
-    if (self->miFirstPlayer == 0) {
-        self->mpPlayerUp->setVisible(0);
+    if (miFirstPlayer == 0) {
+        mpPlayerUp->setVisible(0);
     } else {
-        self->mpPlayerUp->setVisible(1);
+        mpPlayerUp->setVisible(1);
     }
-    if (self->miFirstPlayer + 10 >= self->miNumPlayers) {
-        self->mpPlayerDown->setVisible(0);
+    if (miFirstPlayer + 10 >= miNumPlayers) {
+        mpPlayerDown->setVisible(0);
     } else {
-        self->mpPlayerDown->setVisible(1);
+        mpPlayerDown->setVisible(1);
     }
 }
 #endif
@@ -21044,17 +21031,17 @@ void cFEStateNetCreateRoomPopup::onWidgetEvent(cUIThing* pWidget, unsigned int m
     case cUIState::kONNEXT:
         switch (obj->mMiscData) {
         case 1:
-            cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, mpTextRoomName, GetHashValue32(str_kT_POPUP231NewRoom),
+            this->openKeyboardWithLabelID(mpTextRoomName, GetHashValue32(str_kT_POPUP231NewRoom),
                     mszRoomName, 0, 1, 8);
             cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             break;
         case 2:
-            cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, mpTextPassword, GetHashValue32(str_kT_POPUP231AddPassword),
+            this->openKeyboardWithLabelID(mpTextPassword, GetHashValue32(str_kT_POPUP231AddPassword),
                     mszPassword, 0, 2, 8);
             cKeyboardPopup_setIncludeKey(mpKeyboard, 53, 0, 2);
             break;
         case 3:
-            if (cFEStateNetCreateRoomPopup_checkRoomName(this)) {
+            if (this->checkRoomName()) {
                 mpParentState->onPopupEvent(this, 0xF);
             }
             break;
@@ -21119,19 +21106,19 @@ extern char str_kT_BTNOK[];
  *
  * @return true when a name was entered, false after showing the popup
  */
-extern "C" bool cFEStateNetCreateRoomPopup_checkRoomName(cFEStateNetCreateRoomPopup* self)
+bool cFEStateNetCreateRoomPopup::checkRoomName()
 {
-    if (strlen((const char*)self->mszRoomName) == 0) {
+    if (strlen((const char*)mszRoomName) == 0) {
         int three = 3;
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 1;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP231UniqueRoom);
         popup->info.mtMessage.eType = three;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
         popup->info.miLayerOffset = three;
         popup->info.miMiscData = 2119;
-        cFEStateNet_showPopup((cFEStateNet*)self, popup);
+        this->showPopup(popup);
         return false;
     }
     return true;
@@ -21208,7 +21195,7 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the help popup to fill
  */
-extern "C" void cFEStateNetCreateRoomPopup_fillHelpPopup(cFEStateNetCreateRoomPopup* self, cFEStateNetHelpPopup* popup)
+void cFEStateNetCreateRoomPopup::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     popup->muiScreenName = GetHashValue32(str_kT_HELP232CreateRoom);
@@ -21431,18 +21418,18 @@ extern char AccountData[];
  * @param eventData  the event's data
  * @return 0 for the handled ids, else cFEStateNet_onNetEvent's result
  */
-extern "C" int cFEStateLogin_onNetEvent(cFEStateLogin* self, int id, void* eventData)
+int cFEStateLogin::onNetEvent(int id, void* eventData)
 {
     switch (id) {
     case 200: {
-        cScreenPopup* verifyPopup = (cScreenPopup*)cFEStateNet_createPopup(((cFEStateNet*)self));
+        cScreenPopup* verifyPopup = (cScreenPopup*)this->createPopup();
         verifyPopup->info.meType = 1;
         char* sub = (char*)&verifyPopup->info;
         verifyPopup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP201Verify);
         verifyPopup->info.mtMessage.eType = 3;
         cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNCancel));
         verifyPopup->info.miMiscData = 2062;
-        cFEStateNet_showPopup(((cFEStateNet*)self), (cScreenPopup*)verifyPopup);
+        this->showPopup((cScreenPopup*)verifyPopup);
         break;
     }
     case kNetEvent_LobbyConnect: {
@@ -21453,12 +21440,12 @@ extern "C" int cFEStateLogin_onNetEvent(cFEStateLogin* self, int id, void* event
         break;
     }
     case kNetEvent_Authentication:
-        cFEStateNet_pushState(((cFEStateNet*)self),
+        cFEStateNet_pushState(((cFEStateNet*)this),
                 cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752,
-                str_cFEStateSelectPersona, 0, 0), self->mpEngine));
+                str_cFEStateSelectPersona, 0, 0), mpEngine));
         break;
     default:
-        return cFEStateNet_onNetEvent_3i(((cFEStateNet*)self), id, eventData);
+        return cFEStateNet_onNetEvent_3i(((cFEStateNet*)this), id, eventData);
     }
     return 0;
 }
@@ -21498,14 +21485,14 @@ static inline void* GetSession_001BF378()
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void cFEStateLogin_onVerifyPopupEvent(cFEStateLogin* self, void* popup, int event)
+void cFEStateLogin::onVerifyPopupEvent(void* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
         BuddyMan_disconnect(GetSession_001BF378());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -21534,35 +21521,35 @@ extern char str_Menu0000[];
  * @param popup  the popup that sent the event
  * @param kind  the popup event
  */
-extern "C" void cFEStateLogin_onAccountMemPopupEvent(cFEStateLogin* self, cUIState* popup, int kind)
+void cFEStateLogin::onAccountMemPopupEvent(cUIState* popup, int kind)
 {
     if (kind == cUIState::kONSCREENPOPUPOPTION0) {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, cUIState::kONSCREENPOPUPOPTION0);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, cUIState::kONSCREENPOPUPOPTION0);
         {
-            cUIThing* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextUseAccount));
+            cUIThing* widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextUseAccount));
             if (widget) {
-                self->onWidgetCreate(widget);
+                onWidgetCreate(widget);
             }
         }
         {
-            cUIThing* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextDelectAccount));
+            cUIThing* widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextDelectAccount));
             if (widget) {
-                self->onWidgetCreate(widget);
+                onWidgetCreate(widget);
             }
         }
         {
-            cUIThing* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1rectangle));
+            cUIThing* widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_1rectangle));
             if (widget) {
-                self->onWidgetCreate(widget);
+                onWidgetCreate(widget);
             }
         }
         {
-            cUIThing* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_4rectangle));
+            cUIThing* widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_4rectangle));
             if (widget) {
-                self->onWidgetCreate(widget);
+                onWidgetCreate(widget);
             }
         }
-        cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
+        cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu0000));
         if (((void*)menu)) {
             cUIThing* item = menu->mpSelected;
             if (item && ((item->mAttr >> 5) & 1)) {
@@ -21570,7 +21557,7 @@ extern "C" void cFEStateLogin_onAccountMemPopupEvent(cFEStateLogin* self, cUISta
             }
         }
     } else {
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
     }
 }
 #endif
@@ -21616,14 +21603,14 @@ static inline void* GetSession_001BF5A8()
  * @param popup  the popup that sent the event
  * @param kind  the popup event
  */
-extern "C" void cFEStateLogin_onNetConfigPopupEvent(cFEStateLogin* self, cUIState* popup, int kind)
+void cFEStateLogin::onNetConfigPopupEvent(cUIState* popup, int kind)
 {
     switch ((unsigned int)kind) {
     case cUIState::kONSCREENPOPUPOPTION0:
-        self->mLeavingOnline = 1;
-        if (cFEStateNet_pushState_r(((cFEStateNet*)self),
+        mLeavingOnline = 1;
+        if (cFEStateNet_pushState_r(((cFEStateNet*)this),
                 cFEStateNetConfig_cFEStateNetConfig((cFEStateNetConfig*)cMemMan_alloc(2332, str_cFEStateNetConfig, 0,
-                0), self->mpEngine)) != 0) {
+                0), mpEngine)) != 0) {
             BuddyMan_disconnect(GetSession_001BF5A8());
             LobbyMan_disconnect(LobbyMan_mLobbyMan);
             cConnMan_disconnect(func_002591B8(), 0);
@@ -21631,10 +21618,10 @@ extern "C" void cFEStateLogin_onNetConfigPopupEvent(cFEStateLogin* self, cUIStat
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
     case cUIState::kONSCREENPOPUPPREV:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
         break;
     default:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, kind);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, kind);
         break;
     }
 }
@@ -21667,10 +21654,10 @@ void cFEStateLogin::onPopupEvent(cUIState* pPopup, unsigned int Event)
         }
         break;
     case 2092:
-        cFEStateLogin_onAccountMemPopupEvent(this, pPopup, Event);
+        this->onAccountMemPopupEvent(pPopup, Event);
         break;
     case 2120:
-        cFEStateLogin_onNetConfigPopupEvent(this, pPopup, Event);
+        this->onNetConfigPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -21783,7 +21770,7 @@ void cFEStateLogin::onWidgetEvent(cUIThing* popup, unsigned int kind)
         char* sep = str_pct_s_pct_s;
         int len = USTR_length((void*)bodyText) + USTR_length((void*)titleText) + strlen(sep) + 1;
         mpustrDisconnect = (unsigned short*)operator_new_tag(len * 2, str_cFEStateLogin, 0x100, 0);
-        cScreenPopup* newPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+        cScreenPopup* newPopup = (cScreenPopup*)this->createPopup();
         cPopupInfo* sub = &newPopup->info;
         if (mpustrDisconnect != 0) {
             sprintf2(mpustrDisconnect, sep, bodyText, titleText);
@@ -21794,11 +21781,11 @@ void cFEStateLogin::onWidgetEvent(cUIThing* popup, unsigned int kind)
             newPopup->info.mtMessage.eType = 3;
         }
         *(int*)sub = 2;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-        cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+        sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
         sub->miDefaultOption = 1;
         sub->miMiscData = 2120;
-        cFEStateNet_showPopup((cFEStateNet*)this, (cScreenPopup*)newPopup);
+        this->showPopup((cScreenPopup*)newPopup);
         break;
     }
     case cUIState::kONMISC: {
@@ -21837,7 +21824,7 @@ extern char str_kT_HELPCmnMembershipAgreement[];
  *
  * @param popup  the help popup to fill
  */
-extern "C" void cFEStateLogin_fillHelpPopup(cFEStateLogin* self, cFEStateNetHelpPopup* popup)
+void cFEStateLogin::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     popup->muiScreenName = GetHashValue32(str_kT_HELP201SelectLoginType);
@@ -21898,7 +21885,7 @@ extern "C" void cFEStateOnlineMainMenu_onCreateScreen(cFEStateNet* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     if (LobbyMan_mLobbyMan->mState == 0) {
-        cFEStateNet_showDisconnectPopup(self);
+        self->showDisconnectPopup();
     }
     if (cGameComm_mGameComm != 0) {
         cGameComm_destroy();
@@ -22071,34 +22058,34 @@ extern "C" void cFEStateOnlineMainMenu_onWidgetEvent(cFEStateNet* self, cUIThing
                     str_cFEStateNetSSXWorld, 0, 0), self->mpEngine));
             break;
         case 5: {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(self);
+            cScreenPopup* popup = (cScreenPopup*)self->createPopup();
             cPopupInfo* sub = &popup->info;
             popup->info.meType = 2;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUP230WarningLeaving);
             popup->info.mtMessage.eType = 3;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
-            cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_BTNCancel));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNOK));
+            sub->setPopupOptionNames2(1, GetHashValue32(str_kT_BTNCancel));
             popup->info.miMiscData = 2093;
-            cFEStateNet_showPopup(self, popup);
+            self->showPopup(popup);
             break;
         }
         }
         break;
     case cUIState::kONPREV: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup(self);
+        cScreenPopup* popup = (cScreenPopup*)self->createPopup();
         cPopupInfo* sub = &popup->info;
         popup->info.meType = 2;
         popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNDisconnectServer);
         popup->info.mtMessage.eType = 3;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-        cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+        sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
         popup->info.miMiscData = 2118;
-        cFEStateNet_showPopup(self, popup);
+        self->showPopup(popup);
         break;
     }
     case cUIState::kONMISC:
         if ((self->mAttrState & 6) == 0) {
-            cFEStateNet_openMessenger(self);
+            self->openMessenger();
         }
         break;
     default:
@@ -22183,10 +22170,10 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup that sent the event
  * @param kind  the popup event
  */
-extern "C" void cFEStateNet_swallowFirstOptionPopupEvent(cFEStateNet* self, void* popup, int kind)
+void cFEStateNet::swallowFirstOptionPopupEvent(void* popup, int kind)
 {
     if (kind != cUIState::kONSCREENPOPUPOPTION0) {
-        cFEStateNet_onPopupEvent(self, popup, kind);
+        cFEStateNet_onPopupEvent(this, popup, kind);
     }
 }
 #endif
@@ -22404,7 +22391,7 @@ void cFEStateOnlineAgreement::onCreateScreen()
     mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        cFEStateOnlineAgreement_buildTOSLines(this);
+        this->buildTOSLines();
     }
     cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_AgreementMenu));
     if (text != 0) {
@@ -22456,65 +22443,65 @@ extern char str_kT_TOS153b[];
  * 118-121 and 154-157 are never used; "kT_TOS125", "kT_TOS129" and "kT_TOS130" are added by name instead of by the
  * loop. Called from cFEStateOnlineAgreement_onCreateScreen.
  */
-extern "C" void cFEStateOnlineAgreement_buildTOSLines(cFEStateOnlineAgreement* self)
+void cFEStateOnlineAgreement::buildTOSLines()
 {
-    self->miNumTOSLines = 178;
-    if (self->mpTOSLines != 0) {
-        cMemMan_free(self->mpTOSLines);
-        self->mpTOSLines = 0;
+    miNumTOSLines = 178;
+    if (mpTOSLines != 0) {
+        cMemMan_free(mpTOSLines);
+        mpTOSLines = 0;
     }
-    if (self->miNumTOSLines != 0) {
+    if (miNumTOSLines != 0) {
         char buf[32];
         int i;
         int n;
-        self->mpTOSLines = (int*)operator_new_tag(self->miNumTOSLines * 4, str_cFEStateOnlineAgreement, 0x100, 0);
+        mpTOSLines = (int*)operator_new_tag(miNumTOSLines * 4, str_cFEStateOnlineAgreement, 0x100, 0);
         n = 0;
         for (i = 0x0; i < 116; i++) {
             sprintf(buf, str_kT_TOSpct_03d, i);
-            (self->mpTOSLines)[n++] = GetHashValue32(buf);
+            mpTOSLines[n++] = GetHashValue32(buf);
         }
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS115a);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS115a);
         for (i = 116; i < 118; i++) {
             sprintf(buf, str_kT_TOSpct_03d, i);
-            (self->mpTOSLines)[n++] = GetHashValue32(buf);
+            mpTOSLines[n++] = GetHashValue32(buf);
         }
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS117a);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS117b);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS117c);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS117d);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS117e);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS117a);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS117b);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS117c);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS117d);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS117e);
         for (i = 122; i < 125; i++) {
             sprintf(buf, str_kT_TOSpct_03d, i);
-            (self->mpTOSLines)[n++] = GetHashValue32(buf);
+            mpTOSLines[n++] = GetHashValue32(buf);
         }
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS124a);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS125);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS125a);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS125b);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS124a);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS125);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS125a);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS125b);
         for (i = 0x7E; i < 129; i++) {
             sprintf(buf, str_kT_TOSpct_03d, i);
-            (self->mpTOSLines)[n++] = GetHashValue32(buf);
+            mpTOSLines[n++] = GetHashValue32(buf);
         }
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS128a);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS128b);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS128c);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS128d);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS128e);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS129);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS130);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS130a);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS130b);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS130c);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS130d);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS128a);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS128b);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS128c);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS128d);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS128e);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS129);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS130);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS130a);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS130b);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS130c);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS130d);
         for (i = 131; i < 154; i++) {
             sprintf(buf, str_kT_TOSpct_03d, i);
-            (self->mpTOSLines)[n++] = GetHashValue32(buf);
+            mpTOSLines[n++] = GetHashValue32(buf);
         }
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS153a);
-        (self->mpTOSLines)[n++] = GetHashValue32(str_kT_TOS153b);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS153a);
+        mpTOSLines[n++] = GetHashValue32(str_kT_TOS153b);
         for (i = 158; i < 166; i++) {
             sprintf(buf, str_kT_TOSpct_03d, i);
-            (self->mpTOSLines)[n++] = GetHashValue32(buf);
+            mpTOSLines[n++] = GetHashValue32(buf);
         }
     }
 }
@@ -22750,9 +22737,9 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement_onNetEvent__FPv);
  *
  * @return cFEStateNet_onNetEvent's result
  */
-void* cFEStateOnlineAgreement_onNetEvent(void* self)
+void* cFEStateOnlineAgreement::onNetEvent()
 {
-    return cFEStateNet_onNetEvent(self);
+    return cFEStateNet_onNetEvent(this);
 }
 #endif
 
@@ -22777,7 +22764,7 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the help popup to fill
  */
-extern "C" void cFEStateOnlineAgreement_fillHelpPopup(cFEStateOnlineAgreement* self, cFEStateNetHelpPopup* popup)
+void cFEStateOnlineAgreement::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 2);
     popup->muiScreenName = GetHashValue32(str_kT_HELP259MembershipAgreement);
@@ -22914,23 +22901,23 @@ void cFEStateNetQuickPlayPopup::onWidgetCreate(cUIThing* obj)
         mpTextOK = (cUIText*)obj;
         ((cUIText*)obj)->setUseStaticColour(1);
     } else if (id == GetHashValue32(str_LBRanked)) {
-        cFEStateNet_fillOnOffListBox((cFEStateNet*)this, (cUIListBox*)obj, 1);
+        this->fillOnOffListBox((cUIListBox*)obj, 1);
         ((cUIListBox*)obj)->setUseStaticColour(1);
         mpLBRanked = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_LBRace)) {
-        cFEStateNet_fillOnOffListBox((cFEStateNet*)this, (cUIListBox*)obj, 1);
+        this->fillOnOffListBox((cUIListBox*)obj, 1);
         ((cUIListBox*)obj)->setUseStaticColour(1);
         mpLBRace = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_LBBigAir)) {
-        cFEStateNet_fillOnOffListBox((cFEStateNet*)this, (cUIListBox*)obj, 1);
+        this->fillOnOffListBox((cUIListBox*)obj, 1);
         ((cUIListBox*)obj)->setUseStaticColour(1);
         mpLBBigAir = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_LBSuperpipe)) {
-        cFEStateNet_fillOnOffListBox((cFEStateNet*)this, (cUIListBox*)obj, 1);
+        this->fillOnOffListBox((cUIListBox*)obj, 1);
         ((cUIListBox*)obj)->setUseStaticColour(1);
         mpLBSuperpipe = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_LBSlopeStyle)) {
-        cFEStateNet_fillOnOffListBox((cFEStateNet*)this, (cUIListBox*)obj, 1);
+        this->fillOnOffListBox((cUIListBox*)obj, 1);
         ((cUIListBox*)obj)->setUseStaticColour(1);
         mpLBSlopeStyle = (cUIListBox*)obj;
     } else if (id == GetHashValue32(str_StaticRanked)) {
@@ -22982,14 +22969,14 @@ extern char str_ps2Square[];
  *
  * @param show  1 to show, 0 to hide
  */
-extern "C" void cFEStateNetQuickPlayPopup_showOptionsHint(cFEStateNetQuickPlayPopup* self, int show)
+void cFEStateNetQuickPlayPopup::showOptionsHint(int show)
 {
-    if (self->mpScreen != 0) {
-        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Txt_Options));
+    if (mpScreen != 0) {
+        cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Txt_Options));
         if (text != 0) {
             ((cUIThing*)text)->setVisible(show);
         }
-        text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2Square));
+        text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2Square));
         if (text != 0) {
             ((cUIThing*)text)->setVisible(show);
         }
@@ -23020,7 +23007,7 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the help popup to fill
  */
-extern "C" void cFEStateNetQuickPlayPopup_fillHelpPopup(cFEStateNetQuickPlayPopup* self, cFEStateNetHelpPopup* popup)
+void cFEStateNetQuickPlayPopup::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     popup->muiScreenName = GetHashValue32(str_kT_HELP233QuickMatchup);
@@ -23079,14 +23066,14 @@ void cFEStateNetQuickPlayPopup::onWidgetEvent(cUIThing* pWidget, unsigned int ms
             if (mbSearching != 0) {
                 cUIText_setUnicodeStringByID(mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
                 mpTextOK->setStatic(1);
-                cFEStateNetQuickPlayPopup_showOptionsHint(this, mbSearching ^ 1);
+                this->showOptionsHint(mbSearching ^ 1);
                 LobbyMan_cancelQuickMatch(LobbyMan_mLobbyMan);
             } else {
                 mbQuickMatchTimeout = 0;
                 mbSearching = 1;
                 cFEStateNetQuickPlayPopup* feStateNetQuickPlayPopup = this;
                 int* ids = feStateNetQuickPlayPopup->miSearchOptions;
-                cFEStateNetQuickPlayPopup_showOptionsHint(this, 0);
+                this->showOptionsHint(0);
                 cBEInterface* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
                 cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(mpLBRanked) != 0;
                 iface->submit();
@@ -23100,12 +23087,12 @@ void cFEStateNetQuickPlayPopup::onWidgetEvent(cUIThing* pWidget, unsigned int ms
                 mpTextSearching->setVisible(1);
                 cUIText_setUnicodeStringByID(mpTextOK, GetHashValue32(str_kT_BTNCancel));
                 miBlinkFrames = 0x1E;
-                cFEStateNetQuickPlayPopup_setOptionsLocked(this, 1);
+                this->setOptionsLocked(1);
             }
         }
         break;
     case cUIState::kONPREV:
-        cFEStateNetQuickPlayPopup_showOptionsHint(this, mbSearching ^ 1);
+        this->showOptionsHint(mbSearching ^ 1);
         if (mbSearching != 0) {
             cUIText_setUnicodeStringByID(mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
             mpTextOK->setStatic(1);
@@ -23163,23 +23150,23 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickPlayPopup_setOptionsLocked);
  *
  * @param on  the value passed to slot 8 (1 while searching)
  */
-extern "C" void cFEStateNetQuickPlayPopup_setOptionsLocked(cFEStateNetQuickPlayPopup* self, int on)
+void cFEStateNetQuickPlayPopup::setOptionsLocked(int on)
 {
-    self->mpStaticRanked->setStatic(on);
-    self->mpStaticRace->setStatic(on);
-    self->mpStaticBigAir->setStatic(on);
-    self->mpStaticSuperpipe->setStatic(on);
-    self->mpStaticSlopeStyle->setStatic(on);
-    ((cUIThing*)self->mpLBRanked)->setStatic(on);
-    ((cUIThing*)self->mpLBRace)->setStatic(on);
-    ((cUIThing*)self->mpLBBigAir)->setStatic(on);
-    ((cUIThing*)self->mpLBSuperpipe)->setStatic(on);
-    ((cUIThing*)self->mpLBSlopeStyle)->setStatic(on);
-    self->mpRankedPair->setStatic(on);
-    self->mpRacePair->setStatic(on);
-    self->mpBigAirPair->setStatic(on);
-    self->mpSuperpipePair->setStatic(on);
-    self->mpSlopestylePair->setStatic(on);
+    mpStaticRanked->setStatic(on);
+    mpStaticRace->setStatic(on);
+    mpStaticBigAir->setStatic(on);
+    mpStaticSuperpipe->setStatic(on);
+    mpStaticSlopeStyle->setStatic(on);
+    ((cUIThing*)mpLBRanked)->setStatic(on);
+    ((cUIThing*)mpLBRace)->setStatic(on);
+    ((cUIThing*)mpLBBigAir)->setStatic(on);
+    ((cUIThing*)mpLBSuperpipe)->setStatic(on);
+    ((cUIThing*)mpLBSlopeStyle)->setStatic(on);
+    mpRankedPair->setStatic(on);
+    mpRacePair->setStatic(on);
+    mpBigAirPair->setStatic(on);
+    mpSuperpipePair->setStatic(on);
+    mpSlopestylePair->setStatic(on);
 }
 #endif
 
@@ -23239,19 +23226,19 @@ struct cFEObj_001C19C8 {
  * @param eventData  the event's data
  * @return 0 for the handled ids, else cFEStateNet_onNetEvent's result
  */
-extern "C" void* cFEStateNetQuickPlayPopup_onNetEvent(cFEStateNetQuickPlayPopup* self, int netEvent, void* eventData)
+void* cFEStateNetQuickPlayPopup::onNetEvent(int netEvent, void* eventData)
 {
     switch (netEvent) {
     case 230:
-        self->mbQuickMatchTimeout = 1;
+        mbQuickMatchTimeout = 1;
         break;
     case 268: case 274:
-        cUIStateStack_popToState(&self->mpEngine->mStateStack);
-        cFEStateNet_showChallengeErrorPopup((cFEStateNet*)self, netEvent);
+        cUIStateStack_popToState(&mpEngine->mStateStack);
+        this->showChallengeErrorPopup(netEvent);
         break;
     case 231:
-        if (self->mbQuickMatchTimeout != 0) {
-            cScreenPopup* timeoutPopup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+        if (mbQuickMatchTimeout != 0) {
+            cScreenPopup* timeoutPopup = (cScreenPopup*)this->createPopup();
             char* sub = (char*)&timeoutPopup->info;
             timeoutPopup->info.meType = 1;
             cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
@@ -23259,18 +23246,18 @@ extern "C" void* cFEStateNetQuickPlayPopup_onNetEvent(cFEStateNetQuickPlayPopup*
             timeoutPopup->info.mtMessage.eType = 3;
             timeoutPopup->info.miMiscData = 2095;
             timeoutPopup->info.miLayerOffset = 6;
-            cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)timeoutPopup);
+            this->showPopup((cScreenPopup*)timeoutPopup);
         } else {
-            self->mbSearching = 0;
-            ((cFEObj_001C19C8*)self->mpParentState)->onPopupEvent(self, 20);
+            mbSearching = 0;
+            ((cFEObj_001C19C8*)mpParentState)->onPopupEvent(this, 20);
         }
         break;
     case 243:
-        cFEStateNet_pushState(self,
-                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), self->mpEngine));
+        cFEStateNet_pushState(this,
+                cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), mpEngine));
         break;
     default:
-        return cFEStateNet_onNetEvent_3(self, netEvent, eventData);
+        return cFEStateNet_onNetEvent_3(this, netEvent, eventData);
     case 239:
         break;
     }
@@ -23296,7 +23283,7 @@ extern "C" int cFEStateNetQuickPlayPopup_onPopupEvent(cFEStateNetQuickPlayPopup*
 {
     int result;
     if (pPopup->miMiscData == 2095) {
-        result = cFEStateNetQuickPlayPopup_onTimeoutPopupEvent(self, pPopup, Event);
+        result = self->onTimeoutPopupEvent(pPopup, Event);
     } else {
         result = cFEStateNet_onPopupEvent(self, pPopup, Event);
     }
@@ -23327,18 +23314,18 @@ extern char str_kT_BTNOK[];
  * @param event  the popup event
  * @return cFEStateNet_onPopupEvent's result
  */
-extern "C" int cFEStateNetQuickPlayPopup_onTimeoutPopupEvent(cFEStateNetQuickPlayPopup* self, cFEStateNetQuickPlayPopup* popup, int event)
+int cFEStateNetQuickPlayPopup::onTimeoutPopupEvent(cFEStateNetQuickPlayPopup* popup, int event)
 {
     int result;
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
-        self->mbSearching = 0;
-        ((cUIThing*)self->mpTextSearching)->setVisible(0);
-        cFEStateNetQuickPlayPopup_showOptionsHint(self, self->mbSearching ^ 1);
-        cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(str_kT_BTNOK));
-        cFEStateNetQuickPlayPopup_setOptionsLocked(self, 0);
-        result = cFEStateNet_onPopupEvent(self, popup, event);
+        mbSearching = 0;
+        ((cUIThing*)mpTextSearching)->setVisible(0);
+        showOptionsHint(mbSearching ^ 1);
+        cUIText_setUnicodeStringByID(mpTextOK, GetHashValue32(str_kT_BTNOK));
+        setOptionsLocked(0);
+        result = cFEStateNet_onPopupEvent(this, popup, event);
     } else {
-        result = cFEStateNet_onPopupEvent(self, popup, event);
+        result = cFEStateNet_onPopupEvent(this, popup, event);
     }
     return result;
 }
@@ -23388,7 +23375,7 @@ extern "C" void cFEStateNetSSXWorld_onCreateScreen(cFEStateNet* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     if (LobbyMan_mLobbyMan->mState == 0) {
-        cFEStateNet_showDisconnectPopup(self);
+        self->showDisconnectPopup();
     }
 }
 #endif
@@ -23564,7 +23551,7 @@ extern "C" void cFEStateNetSSXWorld_onWidgetEvent(cFEStateNet* self, cUIThing* m
     }
     case cUIState::kONMISC:
         if ((self->mAttrState & 6) == 0) {
-            cFEStateNet_openMessenger(self);
+            self->openMessenger();
         }
         break;
     default:
@@ -23654,7 +23641,7 @@ extern char str_kT_206ResetMessages[];
  *
  * @param popup  the help popup to fill
  */
-extern "C" void cFEStateNetQuickMessages_fillHelpPopup(cFEStateNetQuickMessages* self, cFEStateNetHelpPopup* popup)
+void cFEStateNetQuickMessages::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     popup->muiScreenName = GetHashValue32(str_kT_HELP206QuickMessages);
@@ -23731,7 +23718,7 @@ bool cFEStateNetQuickMessages::onGainTransition(int bFirstTime)
     sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
     vt[32].fn(vthis(this, vt[32]));
     if (bFirstTime != 0) {
-        cFEStateNetQuickMessages_showAllMessageRows(this);
+        this->showAllMessageRows();
     }
     return false;
 }
@@ -23745,11 +23732,11 @@ extern "C" void cFEStateNetQuickMessages_showMessageRow(cFEStateNetQuickMessages
 /**
  * Refreshes all ten quick-message rows: cFEStateNetQuickMessages_showMessageRow for 0..9.
  */
-extern "C" void cFEStateNetQuickMessages_showAllMessageRows(cFEStateNetQuickMessages* self)
+void cFEStateNetQuickMessages::showAllMessageRows()
 {
     int i;
     for (i = 0; i < 10; i++) {
-        cFEStateNetQuickMessages_showMessageRow(self, i);
+        cFEStateNetQuickMessages_showMessageRow(this, i);
     }
 }
 #endif
@@ -23801,7 +23788,7 @@ extern "C" void cFEStateNetQuickMessages_showMessageRow(cFEStateNetQuickMessages
     } else {
         cBXString_Concat(&label, msg);
     }
-    cFEStateNetQuickMessages_setFittedText(self, (cUIText*)((void*)self->mpMessage[idx]), label.Str);
+    self->setFittedText((cUIText*)((void*)self->mpMessage[idx]), label.Str);
     cBXString__cBXString(&label, 2);
 }
 #endif
@@ -23838,7 +23825,7 @@ static inline void Measure1C2578(cUIText* text, const char* s, tRect* out)
  * @param vtext  the cUIText to set
  * @param str  the text to show
  */
-extern "C" void cFEStateNetQuickMessages_setFittedText(cFEStateNetQuickMessages* self, cUIText* vtext, char* str)
+void cFEStateNetQuickMessages::setFittedText(cUIText* vtext, char* str)
 {
     cUIText* text = (cUIText*)vtext;
     int cut = 0;
@@ -23928,10 +23915,10 @@ void cFEStateNetQuickMessages::onWidgetEvent(cUIThing* w, unsigned int msg)
                 void* obj = vthis(locale, vt[4]);
                 void* str = vt[4].fn(obj, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(iface, idx));
                 USTR_strcpyW(msgBuf, str);
-                cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, 0, GetHashValue32(str_kT_POPUP206EditQuickMessage), msgBuf, 0, idx,
+                this->openKeyboardWithLabelID(0, GetHashValue32(str_kT_POPUP206EditQuickMessage), msgBuf, 0, idx,
                         0x3F);
             } else {
-                cFEStateNet_openKeyboardWithLabelID((cFEStateNet*)this, 0, GetHashValue32(str_kT_POPUP206EditQuickMessage), name, 0, idx,
+                this->openKeyboardWithLabelID(0, GetHashValue32(str_kT_POPUP206EditQuickMessage), name, 0, idx,
                         0x3F);
             }
             cKeyboardPopup_setIncludeKey(mpKeyboard, 75, 1, 2);
@@ -23940,17 +23927,17 @@ void cFEStateNetQuickMessages::onWidgetEvent(cUIThing* w, unsigned int msg)
     }
     case cUIState::kONPREV:
         if (mbChanged != 0) {
-            cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+            cScreenPopup* popup = (cScreenPopup*)this->createPopup();
             popup->info.meType = 2;
             cPopupInfo* sub = &popup->info;
             int hash = GetHashValue32(str_kT_POPUP206SaveQuickMessage);
             popup->info.mtMessage.eType = 3;
             popup->info.mtMessage.ui = hash;
-            cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-            cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+            sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+            sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
             popup->info.miDefaultOption = 0;
             popup->info.miMiscData = 2106;
-            cFEStateNet_showPopup((cFEStateNet*)this, popup);
+            this->showPopup(popup);
         } else {
             cFEStateNet_pushState(this, cFEStateNetSSXWorld_cFEStateNetSSXWorld((cFEStateNet*)cMemMan_alloc(1744,
                     str_cFEStateNetSSXWorld, 0, 0), mpEngine));
@@ -23958,24 +23945,24 @@ void cFEStateNetQuickMessages::onWidgetEvent(cUIThing* w, unsigned int msg)
         break;
     case cUIState::kONMISC:
         if (!(mAttrState & 6)) {
-            cFEStateNet_openMessenger((cFEStateNet*)this);
+            this->openMessenger();
         }
         break;
     case cUIState::kONKEYBOARDEND:
-        cFEStateNetQuickMessages_handleKeyboardText(this);
+        this->handleKeyboardText();
         break;
     case cUIState::kONSELECT: {
-        cScreenPopup* popup = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)this);
+        cScreenPopup* popup = (cScreenPopup*)this->createPopup();
         popup->info.meType = 2;
         cPopupInfo* sub = &popup->info;
         int hash = GetHashValue32(str_kT_POPUP206CheckResetMessages);
         popup->info.mtMessage.eType = 3;
         popup->info.mtMessage.ui = hash;
-        cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_CMNYes));
-        cPopupInfo_setPopupOptionNames2(sub, 1, GetHashValue32(str_kT_CMNNo));
+        sub->setPopupOptionNames2(0, GetHashValue32(str_kT_CMNYes));
+        sub->setPopupOptionNames2(1, GetHashValue32(str_kT_CMNNo));
         popup->info.miMiscData = 2107;
         popup->info.miDefaultOption = 1;
-        cFEStateNet_showPopup((cFEStateNet*)this, popup);
+        this->showPopup(popup);
         break;
     }
     default:
@@ -24013,30 +24000,30 @@ extern char D_00535617[];
  * sets mbChanged, calls the option interface's (cBE_getInterface kind 4) virtual slot 1 through its vtable at +0xC and
  * redraws the row (cFEStateNetQuickMessages_showMessageRow).
  */
-extern "C" void cFEStateNetQuickMessages_handleKeyboardText(cFEStateNetQuickMessages* self)
+void cFEStateNetQuickMessages::handleKeyboardText()
 {
-    cKeyboardPopup* keyboard = self->mpKeyboard;
+    cKeyboardPopup* keyboard = mpKeyboard;
     unsigned int idx = (unsigned int)keyboard->miMiscData;
     char* name = keyboard->mszEditString;
     if (idx < 10) {
         cBEOptionInterface* iface = (cBEOptionInterface*)((char*)cBE_getInterface_Fv(cBE_getBE(), 4));
         if (strlen(name) == 0) {
-            cScreenPopup* pop = (cScreenPopup*)cFEStateNet_createPopup((cFEStateNet*)self);
+            cScreenPopup* pop = (cScreenPopup*)this->createPopup();
             char* sub = (char*)&pop->info;
             pop->info.meType = 1;
             pop->info.mtMessage.ui = GetHashValue32(str_kT_POPUP206EmptyMessages);
             pop->info.mtMessage.eType = 3;
             cPopupInfo_setPopupOptionNames2(sub, 0, GetHashValue32(str_kT_BTNOK));
             pop->info.miMiscData = 2108;
-            cFEStateNet_showPopup((cFEStateNet*)self, (cScreenPopup*)pop);
+            this->showPopup((cScreenPopup*)pop);
             cBEOptionInterface_resetQuickKey(iface, idx);
         } else {
-            char* src = self->mpKeyboard->mszEditString;
+            char* src = mpKeyboard->mszEditString;
             strcpy(D_00535617 + (idx << 6), src);
         }
-        self->mbChanged = 1;
+        mbChanged = 1;
         iface->submit();
-        cFEStateNetQuickMessages_showMessageRow(self, idx);
+        cFEStateNetQuickMessages_showMessageRow(this, idx);
     }
 }
 #endif
@@ -24060,10 +24047,10 @@ void cFEStateNetQuickMessages::onPopupEvent(cUIState*pPopup, unsigned int Event)
 {
     switch (pPopup->miMiscData) {
     case 2106:
-        cFEStateNetQuickMessages_onSaveChangesPopupEvent(this, pPopup, Event);
+        this->onSaveChangesPopupEvent(pPopup, Event);
         break;
     case 2107:
-        cFEStateNetQuickMessages_onResetMessagesPopupEvent(this, pPopup, Event);
+        this->onResetMessagesPopupEvent(pPopup, Event);
         break;
     default:
         cFEStateNet_onPopupEvent(this, pPopup, Event);
@@ -24100,17 +24087,17 @@ extern "C" void cFEStateNetQuickMessages_showAllMessageRows(cFEStateNetQuickMess
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void cFEStateNetQuickMessages_onResetMessagesPopupEvent(cFEStateNetQuickMessages* self, cUIState* popup, int event)
+void cFEStateNetQuickMessages::onResetMessagesPopupEvent(cUIState* popup, int event)
 {
     if (event == cUIState::kONSCREENPOPUPOPTION0) {
         cBEVIface_001C2BA8* iface = (cBEVIface_001C2BA8*)cBE_getInterface_Fv(cBE_getBE(), 4);
         cBEOptionInterface_resetAllQuickKeys(iface);
-        self->mbChanged = 1;
+        mbChanged = 1;
         iface->submit();
-        cFEStateNetQuickMessages_showAllMessageRows(self);
-        cFEStateNet_onPopupEvent(self, popup, cUIState::kONSCREENPOPUPOPTION0);
+        showAllMessageRows();
+        cFEStateNet_onPopupEvent(this, popup, cUIState::kONSCREENPOPUPOPTION0);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, event);
+        cFEStateNet_onPopupEvent(this, popup, event);
     }
 }
 #endif
@@ -24139,21 +24126,21 @@ extern const char str_cFEStateNetSSXWorld[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-extern "C" void cFEStateNetQuickMessages_onSaveChangesPopupEvent(cFEStateNetQuickMessages* self, cUIState* popup, int event)
+void cFEStateNetQuickMessages::onSaveChangesPopupEvent(cUIState* popup, int event)
 {
     switch (event) {
     case cUIState::kONSCREENPOPUPOPTION0:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, cUIState::kONSCREENPOPUPOPTION0);
-        cFEStateNet_pushState(((cFEStateNet*)self), cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(cMemMan_alloc(572,
-                str_cFEStateOptionsDeviceSelect, 0, 0), self->mpEngine, 2, 1, 1));
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, cUIState::kONSCREENPOPUPOPTION0);
+        cFEStateNet_pushState(((cFEStateNet*)this), cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(cMemMan_alloc(572,
+                str_cFEStateOptionsDeviceSelect, 0, 0), mpEngine, 2, 1, 1));
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, cUIState::kONSCREENPOPUPOPTION1);
-        cFEStateNet_pushState(((cFEStateNet*)self), cFEStateNetSSXWorld_cFEStateNetSSXWorld((cFEStateNet*)cMemMan_alloc(1744,
-                str_cFEStateNetSSXWorld, 0, 0), self->mpEngine));
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, cUIState::kONSCREENPOPUPOPTION1);
+        cFEStateNet_pushState(((cFEStateNet*)this), cFEStateNetSSXWorld_cFEStateNetSSXWorld((cFEStateNet*)cMemMan_alloc(1744,
+                str_cFEStateNetSSXWorld, 0, 0), mpEngine));
         break;
     default:
-        cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
+        cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, event);
         break;
     }
 }
@@ -24236,7 +24223,7 @@ void cFEStateStats::onCreateScreen()
     mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        cFEStateStats_fillResultRows(this);
+        this->fillResultRows();
     }
 }
 #endif
@@ -24439,17 +24426,16 @@ extern char str_pct_3d[];
  * cFEStateStats_formatTime when mbShowTime is set, else by "%d" (entry and score from LobbyMan_getRankRow). Rows past the end get
  * str_sp in all three texts, which are then set without the null checks used for filled rows.
  *
- * @param self_  the cFEStateStats screen (this)
  */
-extern "C" void cFEStateStats_fillResultRows(cFEStateStats* self_)
+void cFEStateStats::fillResultRows()
 {
     char name[32];
     char txt[64];
     int score;
     int secondStat;
-    if (self_->mpScreen != 0) {
+    if (mpScreen != 0) {
         int n = LobbyMan_getNumRankRows(LobbyMan_mLobbyMan);
-        cUIText* obj = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_ResultsMenu));
+        cUIText* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ResultsMenu));
         if (((char*)obj) != 0) {
             if (((cUIMenu*)obj)->mScrollItemNum != n) {
                 cUIMenu_setScrollableMenu(obj, n);
@@ -24458,7 +24444,7 @@ extern "C" void cFEStateStats_fillResultRows(cFEStateStats* self_)
                 }
             }
         }
-        int idx = self_->miFirstResult;
+        int idx = miFirstResult;
         if (n >= 11) {
             if (n - idx <= 10 - 1) {
                 idx = n - 10;
@@ -24471,16 +24457,16 @@ extern "C" void cFEStateStats_fillResultRows(cFEStateStats* self_)
         pb = &secondStat;
         for (i = 0; i < 10; i++, idx++) {
             sprintf(name, str_personaItem0pct_i, i);
-            cUIText* uiText = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(name));
+            cUIText* uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
             sprintf(name, str_resultsItem0pct_i, i);
-            cUIText* resultsText = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(name));
+            cUIText* resultsText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
             sprintf(name, str_pointsItem0pct_i, i);
-            cUIText* pointsText = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(name));
+            cUIText* pointsText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(name));
             char* entry = LobbyMan_getRankRow(LobbyMan_mLobbyMan, idx, pa, pb);
             if (entry != 0 && n > 0) {
                 if (pointsText != 0) {
-                    if (self_->mbShowTime != 0) {
-                        cFEStateStats_formatTime(self_, txt, score);
+                    if (mbShowTime != 0) {
+                        formatTime(txt, score);
                     } else {
                         sprintf(txt, str_pct_d_b, score);
                     }
@@ -24527,7 +24513,7 @@ extern char str_kT_HELPCmnPrevious[];
  *
  * @param popup  the help popup to fill
  */
-extern "C" void cFEStateStats_fillHelpPopup(cFEStateStats* self, cFEStateNetHelpPopup* popup)
+void cFEStateStats::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 5);
     popup->muiScreenName = GetHashValue32(str_kT_HELP249HighScore);
@@ -24774,14 +24760,14 @@ extern char str_slider[];
  * @param pos  the row the slider should point at
  * @param count  the number of rows
  */
-extern "C" void cFEStateStats_placeScrollSlider(cFEStateStats* self, int pos, int count)
+void cFEStateStats::placeScrollSlider(int pos, int count)
 {
-    if (self->mpScreen == 0) return;
+    if (mpScreen == 0) return;
     if (pos < 0) return;
     if (count < pos) return;
     if (count <= 0) return;
-    cUIThing* track = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_sliderbox));
-    cUIThing* thumb = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slider));
+    cUIThing* track = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_sliderbox));
+    cUIThing* thumb = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_slider));
     if (thumb == 0) return;
     if (track == 0) return;
     t3Vector size;
@@ -24868,7 +24854,7 @@ extern "C" void cFEStateStats_setMode(cFEStateStats* self, int mode)
     switch (mode) {
     case 2:
         self->mbShowTime = 0;
-        cFEStateStats_showEventPickers(self, 1);
+        self->showEventPickers(1);
         widget = Find_001C3EE8(self, str_Txt_FreeStyle);
         if (widget != 0) {
             widget->setColor(sColor_001C3EE8(1.0f, 1.0f, 1.0f, 1.0f));
@@ -24900,12 +24886,12 @@ extern "C" void cFEStateStats_setMode(cFEStateStats* self, int mode)
             }
         }
         if (changed) {
-            cFEStateStats_fillEventList(self);
+            self->fillEventList();
         }
         break;
     case 0:
         self->mbShowTime = 0;
-        cFEStateStats_showEventPickers(self, 0);
+        self->showEventPickers(0);
         widget = Find_001C3EE8(self, str_Txt_Overal);
         if (widget != 0) {
             widget->setColor(sColor_001C3EE8(1.0f, 1.0f, 1.0f, 1.0f));
@@ -24936,11 +24922,11 @@ extern "C" void cFEStateStats_setMode(cFEStateStats* self, int mode)
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNPoints));
             }
         }
-        cFEStateStats_requestResults(self, 0);
+        self->requestResults(0);
         break;
     case 1:
         self->mbShowTime = 1;
-        cFEStateStats_showEventPickers(self, 1);
+        self->showEventPickers(1);
         widget = Find_001C3EE8(self, str_Txt_Race);
         if (widget != 0) {
             widget->setColor(sColor_001C3EE8(1.0f, 1.0f, 1.0f, 1.0f));
@@ -24972,7 +24958,7 @@ extern "C" void cFEStateStats_setMode(cFEStateStats* self, int mode)
             }
         }
         if (changed) {
-            cFEStateStats_fillEventList(self);
+            self->fillEventList();
         }
         break;
     }
@@ -25013,22 +24999,22 @@ static inline void Show_001C4538(cUIState* self, char* name, int on)
  *
  * @param on  1 to show, 0 to hide
  */
-extern "C" void cFEStateStats_showEventPickers(cFEStateStats* self, int on)
+void cFEStateStats::showEventPickers(int on)
 {
-    if (self->mpScreen == 0) {
+    if (mpScreen == 0) {
         return;
     }
-    Show_001C4538(self, str_Txt_event, on);
-    Show_001C4538(self, str_EventsMenu, on);
-    Show_001C4538(self, str_EventList, on);
-    Show_001C4538(self, str_txt_Course, on);
-    Show_001C4538(self, str_CoursesMenu, on);
-    Show_001C4538(self, str_CourseList, on);
-    Show_001C4538(self, str_coursebox, on);
-    Show_001C4538(self, str_eventbox, on);
+    Show_001C4538(this, str_Txt_event, on);
+    Show_001C4538(this, str_EventsMenu, on);
+    Show_001C4538(this, str_EventList, on);
+    Show_001C4538(this, str_txt_Course, on);
+    Show_001C4538(this, str_CoursesMenu, on);
+    Show_001C4538(this, str_CourseList, on);
+    Show_001C4538(this, str_coursebox, on);
+    Show_001C4538(this, str_eventbox, on);
     if (on == 0) {
-        Show_001C4538(self, str_event_hl, 0);
-        Show_001C4538(self, str_course_hl, 0);
+        Show_001C4538(this, str_event_hl, 0);
+        Show_001C4538(this, str_course_hl, 0);
     }
 }
 #endif
@@ -25060,14 +25046,14 @@ extern int D_0046DB88[];
  * is added as "kT_CMNBackCountry" by string id, the others by the name cBENewRaceInterface_getModeName1 returns from cBE_getInterface kind
  * 0; each entry's data is its id. Modes 1 and 2 then call cFEStateStats_fillCourseList.
  */
-extern "C" void cFEStateStats_fillEventList(cFEStateStats* self)
+void cFEStateStats::fillEventList()
 {
-    cUIThing* box = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EventList));
+    cUIThing* box = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EventList));
     if (box == 0) {
         return;
     }
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    switch (self->miMode) {
+    switch (miMode) {
     case 0:
         cUIListBox_deleteAllEntries(box);
         box->setStatic(1);
@@ -25083,7 +25069,7 @@ extern "C" void cFEStateStats_fillEventList(cFEStateStats* self)
                 cUIListBox_addEntryByAsciiString(box, cBENewRaceInterface_getModeName1(iface, id), id);
             }
         }
-        cFEStateStats_fillCourseList(self);
+        fillCourseList();
         break;
     case 2:
         cUIListBox_deleteAllEntries(box);
@@ -25096,7 +25082,7 @@ extern "C" void cFEStateStats_fillEventList(cFEStateStats* self)
                 cUIListBox_addEntryByAsciiString(box, cBENewRaceInterface_getModeName1(iface, id), id);
             }
         }
-        cFEStateStats_fillCourseList(self);
+        fillCourseList();
         break;
     }
 }
@@ -25142,15 +25128,15 @@ extern sEntry1C49C8 D_0046D9B8[];
  * rows (cFEStateStats_fillResultRows). Likely bug: with no matching entry the first-match copy is never written, so the range test
  * reads an uninitialised local. Returns early when either list box is missing.
  */
-extern "C" void cFEStateStats_fillCourseList(cFEStateStats* self)
+void cFEStateStats::fillCourseList()
 {
-    cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EventList));
+    cUIText* box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_EventList));
     if (box == 0) {
         return;
     }
     int key = cUIListBox_getCurrentEntryData(box);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CourseList));
+    box = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_CourseList));
     if (box == 0) {
         return;
     }
@@ -25160,7 +25146,7 @@ extern "C" void cFEStateStats_fillCourseList(cFEStateStats* self)
     int i;
     for (i = 0; i < 29; i++) {
         sEntry1C49C8 courseEntry = D_0046D9B8[i];
-        if (courseEntry.key == key && courseEntry.mode == self->miMode) {
+        if (courseEntry.key == key && courseEntry.mode == miMode) {
             cUIListBox_addEntryByAsciiString(box, cBENewRaceInterface_getLocationName(iface, courseEntry.name), courseEntry.data);
             if (!found) {
                 first = courseEntry;
@@ -25170,12 +25156,12 @@ extern "C" void cFEStateStats_fillCourseList(cFEStateStats* self)
     }
     if (first.data >= 0) {
         if (first.data < 29) {
-            cFEStateStats_requestResults(self, first.data);
+            requestResults(first.data);
             cUIListBox_setCurrentEntryByIndex(box, 0);
-            cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ResultsMenu)), 0);
+            cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ResultsMenu)), 0);
         }
     }
-    cFEStateStats_fillResultRows(self);
+    fillResultRows();
 }
 #endif
 
@@ -25189,9 +25175,9 @@ extern "C" void LobbyMan_selectRankList(void* self, int slot);
  *
  * @param slot  the course / ranking id whose results to fetch
  */
-extern "C" void cFEStateStats_requestResults(cFEStateStats* self, int slot)
+void cFEStateStats::requestResults(int slot)
 {
-    self->miFirstResult = 0;
+    miFirstResult = 0;
     LobbyMan_selectRankList(LobbyMan_mLobbyMan, slot);
 }
 #endif
@@ -25218,7 +25204,7 @@ int cFEStateStats::onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int
         return 0x100;
     case cUIMenu::kSCROLLUPDATE:
         miFirstResult = index;
-        cFEStateStats_fillResultRows(this);
+        this->fillResultRows();
         break;
     }
     return 257;
@@ -25260,9 +25246,9 @@ extern "C" void cFEStateStats_onInputAlways(cFEStateStats* self, char* pInput)
     if ((Pad1C4BD8(pInput, 17) || Pad1C4BD8(pInput, 18) || Pad1C4BD8(pInput, 20) || Pad1C4BD8(pInput, 19)) &&
         self->miFocusMenu < 3) {
         if (Pad1C4BD8(pInput, 17)) {
-            cFEStateStats_focusPrevMenu(self);
+            self->focusPrevMenu();
         } else if (Pad1C4BD8(pInput, 18)) {
-            cFEStateStats_focusNextMenu(self);
+            self->focusNextMenu();
         }
     }
 }
@@ -25282,14 +25268,14 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  * @param msg  the net event id
  * @return 0 for kNetEvent_RankListUpdate, else cFEStateNet_onNetEvent's result
  */
-extern "C" void* cFEStateStats_onNetEvent(cFEStateStats* self, int msg)
+void* cFEStateStats::onNetEvent(int msg)
 {
     if (msg == kNetEvent_RankListUpdate) {
-        cFEStateStats_fillResultRows(self);
-        cUIMenu_setSelectedByIndex(self->mpMenus[3], 0);
+        fillResultRows();
+        cUIMenu_setSelectedByIndex(mpMenus[3], 0);
         return 0;
     }
-    return cFEStateNet_onNetEvent(self);
+    return cFEStateNet_onNetEvent(this);
 }
 #endif
 
@@ -25308,30 +25294,30 @@ extern char gUISoundNull;
  * the focus (slot 7 with 1) only when bit 6 of their flags word (+0x14) is set, otherwise it recurses (playing the
  * sound again). Likely bug: it never returns if no menu 0-2 has bit 6 set.
  */
-extern "C" void cFEStateStats_focusNextMenu(cFEStateStats* self)
+void cFEStateStats::focusNextMenu()
 {
-    char* snd = (char*)self->mpEngine->mpSound;
+    char* snd = (char*)mpEngine->mpSound;
     if (snd == 0) snd = &gUISoundNull;
     if (snd != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)snd;
         vt[2].fn(vthis(snd, vt[2]), 1);
     }
-    if (self->miFocusMenu != 3) {
-        self->mpMenus[self->miFocusMenu]->setFocus(0);
+    if (miFocusMenu != 3) {
+        mpMenus[miFocusMenu]->setFocus(0);
     }
-    self->miFocusMenu += 1;
-    if (self->miFocusMenu >= 4) {
-        self->miFocusMenu = 0;
+    miFocusMenu += 1;
+    if (miFocusMenu >= 4) {
+        miFocusMenu = 0;
     }
-    if (self->miFocusMenu == 3) {
-        self->mpMenus[3]->setFocus(1);
-        cFEStateStats_focusNextMenu(self);
+    if (miFocusMenu == 3) {
+        mpMenus[3]->setFocus(1);
+        focusNextMenu();
     } else {
-        cUIMenu* item = self->mpMenus[self->miFocusMenu];
+        cUIMenu* item = mpMenus[miFocusMenu];
         if ((item->mAttr >> 6) & 1) {
             item->setFocus(1);
         } else {
-            cFEStateStats_focusNextMenu(self);
+            focusNextMenu();
         }
     }
 }
@@ -25349,30 +25335,30 @@ extern char gUISoundNull;
  * The mirror of cFEStateStats_focusNextMenu: miFocusMenu steps back, wrapping from 0 (unsigned underflow) to 3; menu 3 is shown and
  * skipped, menus 0-2 need bit 6 of their flags word, otherwise it recurses.
  */
-extern "C" void cFEStateStats_focusPrevMenu(cFEStateStats* self)
+void cFEStateStats::focusPrevMenu()
 {
-    char* snd = (char*)self->mpEngine->mpSound;
+    char* snd = (char*)mpEngine->mpSound;
     if (snd == 0) snd = &gUISoundNull;
     if (snd != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)snd;
         vt[2].fn(vthis(snd, vt[2]), 1);
     }
-    if (self->miFocusMenu != 3) {
-        self->mpMenus[self->miFocusMenu]->setFocus(0);
+    if (miFocusMenu != 3) {
+        mpMenus[miFocusMenu]->setFocus(0);
     }
-    self->miFocusMenu -= 1;
-    if (self->miFocusMenu >= 4) {
-        self->miFocusMenu = 3;
+    miFocusMenu -= 1;
+    if (miFocusMenu >= 4) {
+        miFocusMenu = 3;
     }
-    if (self->miFocusMenu == 3) {
-        self->mpMenus[3]->setFocus(1);
-        cFEStateStats_focusPrevMenu(self);
+    if (miFocusMenu == 3) {
+        mpMenus[3]->setFocus(1);
+        focusPrevMenu();
     } else {
-        cUIMenu* item = self->mpMenus[self->miFocusMenu];
+        cUIMenu* item = mpMenus[miFocusMenu];
         if ((item->mAttr >> 6) & 1) {
             item->setFocus(1);
         } else {
-            cFEStateStats_focusPrevMenu(self);
+            focusPrevMenu();
         }
     }
 }
@@ -25395,7 +25381,7 @@ extern char str_pct_02d_pct_02d_pct_02d[];
  * @param buf  the output text buffer
  * @param frames  the time in 1/60 s frames
  */
-extern "C" void cFEStateStats_formatTime(cFEStateStats* self, char* buf, int frames)
+void cFEStateStats::formatTime(char* buf, int frames)
 {
     float seconds = frames * (1.0f / 60.0f);
     int ms = (int)((seconds - (int)seconds) * 1000.0f);
@@ -25628,7 +25614,7 @@ extern "C" void cFEStateNetNews_onWidgetEvent(cFEStateNet* self, cUIThing* pWidg
         switch (msg) {
         case cUIState::kONMISC:
             if ((self->mAttrState & 6) == 0) {
-                cFEStateNet_openMessenger(self);
+                self->openMessenger();
             }
             break;
         case cUIState::kONPREV:
@@ -25857,9 +25843,9 @@ struct cFEAsyncSlots {
  * @param index  the option, 0..4
  * @param value  the string pointer, passed as an int
  */
-void cPopupInfo_setPopupOptionNames(void* self, int index, int value)
+void cPopupInfo::setPopupOptionNames(int index, int value)
 {
-    cFEAsyncSlots* slots = (cFEAsyncSlots*)self;
+    cFEAsyncSlots* slots = (cFEAsyncSlots*)this;
     slots->mSlots[index].mValue = value;
     slots->mSlots[index].mState = 2;
 }
@@ -25876,9 +25862,9 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_setPopupOptionNames1__FPvii);
  * @param option  the option, 0..4
  * @param unicodeName  the unicode string pointer, passed as an int
  */
-void cPopupInfo_setPopupOptionNames1(void* self, int option, int unicodeName)
+void cPopupInfo::setPopupOptionNames1(int option, int unicodeName)
 {
-    cFEAsyncSlots* slots = (cFEAsyncSlots*)self;
+    cFEAsyncSlots* slots = (cFEAsyncSlots*)this;
     slots->mSlots[option].mValue = unicodeName;
     slots->mSlots[option].mState = 1;
 }
@@ -25896,9 +25882,9 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_setPopupOptionNames2__FPvii);
  * @param option  the option, 0..4
  * @param nameId  the string's hash id
  */
-void cPopupInfo_setPopupOptionNames2(void* self, int option, int nameId)
+void cPopupInfo::setPopupOptionNames2(int option, int nameId)
 {
-    cFEAsyncSlots* slots = (cFEAsyncSlots*)self;
+    cFEAsyncSlots* slots = (cFEAsyncSlots*)this;
     slots->mSlots[option].mValue = nameId;
     slots->mSlots[option].mState = 3;
 }
@@ -25915,9 +25901,9 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_setPopupOptionNames3);
  * @param i  the option, 0..4
  * @param src  the tPopupElement to copy
  */
-extern "C" void cPopupInfo_setPopupOptionNames3(void* self, int i, void* src)
+void cPopupInfo::setPopupOptionNames3(int i, void* src)
 {
-    cFEAsyncSlots* slots = (cFEAsyncSlots*)self;
+    cFEAsyncSlots* slots = (cFEAsyncSlots*)this;
     slots->mSlots[i] = *(cFEAsyncSlot*)src;
 }
 #endif
@@ -25949,9 +25935,9 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_setPopupConfirmation);
  * @param value  the prompt string
  * @param extra  the confirmation popup's default option (iDefaultOption)
  */
-extern "C" void cPopupInfo_setPopupConfirmation(void* self, int i, const char* value, int extra)
+void cPopupInfo::setPopupConfirmation(int i, const char* value, int extra)
 {
-    cPopupInfo* info = (cPopupInfo*)self;
+    cPopupInfo* info = (cPopupInfo*)this;
     info->mtConfirmation[i].psz = value;
     info->mtConfirmation[i].eType = 2;
     info->mtConfirmation[i].iDefaultOption = extra;
@@ -25982,11 +25968,11 @@ struct cFEAsyncReqs {
  * @param value  the unicode prompt
  * @param extra  the confirmation popup's default option (iDefaultOption)
  */
-extern "C" void cPopupInfo_setPopupConfirmation1(cPopupInfo* self, int index, const unsigned short* value, int extra)
+void cPopupInfo::setPopupConfirmation1(int index, const unsigned short* value, int extra)
 {
-    self->mtConfirmation[index].pustr = value;
-    self->mtConfirmation[index].eType = 1;
-    self->mtConfirmation[index].iDefaultOption = extra;
+    mtConfirmation[index].pustr = value;
+    mtConfirmation[index].eType = 1;
+    mtConfirmation[index].iDefaultOption = extra;
 }
 #endif
 
@@ -26016,9 +26002,9 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_setPopupConfirmation2);
  * @param value  the prompt's hash id
  * @param extra  the confirmation popup's default option (iDefaultOption)
  */
-extern "C" void cPopupInfo_setPopupConfirmation2(void* self, int index, int value, int extra)
+void cPopupInfo::setPopupConfirmation2(int index, int value, int extra)
 {
-    cFEAsyncReqs* reqs = (cFEAsyncReqs*)self;
+    cFEAsyncReqs* reqs = (cFEAsyncReqs*)this;
     reqs->mReqs[index].mValue = value;
     reqs->mReqs[index].mState = 3;
     reqs->mReqs[index].mExtra = extra;
@@ -26037,9 +26023,9 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_setPopupConfirmation3);
  * @param i  the option, 0..4
  * @param src  the tConfirmElement to copy
  */
-extern "C" void cPopupInfo_setPopupConfirmation3(void* self, int i, void* src)
+void cPopupInfo::setPopupConfirmation3(int i, void* src)
 {
-    cFEAsyncReqs* reqs = (cFEAsyncReqs*)self;
+    cFEAsyncReqs* reqs = (cFEAsyncReqs*)this;
     reqs->mReqs[i] = *(cFEAsyncReq*)src;
 }
 #endif

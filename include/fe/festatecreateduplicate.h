@@ -34,6 +34,9 @@
 
 struct tLobbyAccount;
 
+struct cFEStateNetHelpPopup;
+struct cUIState;
+
 struct cFEStateCreateDuplicate : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateCreateDuplicate_vtbl (vtables.tsv; 32 slots), stored by
@@ -75,6 +78,15 @@ struct cFEStateCreateDuplicate : public cFEStateNet {
     virtual void onUpdate() __asm__("cFEStateCreateDuplicate_onUpdate__FPv");
     virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateCreateDuplicate_onPopupEvent");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateCreateDuplicate_onWidgetCreate");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateCreateDuplicate_fillHelpPopup");
+    void resubmitAccount() __asm__("cFEStateCreateDuplicate_resubmitAccount");
+    void createPersona(const char* name) __asm__("cFEStateCreateDuplicate_createPersona");
+    void showNameSuggestions() __asm__("cFEStateCreateDuplicate_showNameSuggestions");
+    int onNetEvent(int id, void* data) __asm__("cFEStateCreateDuplicate_onNetEvent");
+    void onVerifyPopupEvent(cUIState* popup, int event) __asm__("cFEStateCreateDuplicate_onVerifyPopupEvent");
+    void onSaveAccountPopupEvent(cUIState* popup, int kind) __asm__("cFEStateCreateDuplicate_onSaveAccountPopupEvent");
+    void onAccountMemPopupEvent(cUIState* popup, int event) __asm__("cFEStateCreateDuplicate_onAccountMemPopupEvent");
+    int isOnlineState() __asm__("cFEStateCreateDuplicate_isOnlineState__FPv");
 };
 
 CHECK_OFFSET(cFEStateCreateDuplicate, mbAccount, 0x6D0);

@@ -1502,10 +1502,10 @@ extern "C" const tBoundBox* tModifierBlock_getBoundBox(void*);
  *
  * @return tModifierBlock_getBoundBox() of the block at +0x1C, or 0 when the node has no modifier block
  */
-extern "C" const tBoundBox* cMoveNode_getBoundBox(cMoveNode* self)
+const tBoundBox* cMoveNode::getBoundBox() const
 {
-    if (((void*)self->ModifierBlock) != 0) {
-        return tModifierBlock_getBoundBox(((void*)self->ModifierBlock));
+    if (((void*)ModifierBlock) != 0) {
+        return tModifierBlock_getBoundBox(((void*)ModifierBlock));
     }
     return 0;
 }

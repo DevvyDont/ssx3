@@ -669,7 +669,7 @@ extern char str_kT_HELP65Cancel[];
  *
  * @param popup  the help popup (cFEStateNetHelpPopup)
  */
-extern "C" void cFEStateBraggingRights_fillHelpPopup(cFEStateBraggingRights* self, cFEStateNetHelpPopup* popup)
+void cFEStateBraggingRights::fillHelpPopup(cFEStateNetHelpPopup* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     popup->muiScreenName = GetHashValue32(str_kT_HELP65BraggingRights);
@@ -928,7 +928,7 @@ extern "C" void cFEStateBraggingRights_onPopupEvent(cFEStateBraggingRights* self
 {
     if (isOn00194168()) {
         if (pPopup->miMiscData == cFEStateBraggingRights::kCancelChallengePopup) {
-            cFEStateBraggingRights_onCancelChallengePopupEvent(self, pPopup, Event);
+            self->onCancelChallengePopupEvent(pPopup, Event);
         } else {
             cFEStateNet_onPopupEvent(self, pPopup, Event);
         }
@@ -1060,15 +1060,15 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * @param popup  the popup
  * @param popupEvent  the popup event
  */
-extern "C" void cFEStateBraggingRights_onCancelChallengePopupEvent(cFEStateBraggingRights* self, cUIState* popup, int popupEvent)
+void cFEStateBraggingRights::onCancelChallengePopupEvent(cUIState* popup, int popupEvent)
 {
     if (popupEvent == cUIState::kONSCREENPOPUPOPTION0) {
         if (cSetupMan_mSetupMan != 0) {
             cSetupMan_cancelSetup(cSetupMan_mSetupMan, 249);
         }
-        func_001A94D8(self);
+        func_001A94D8(this);
     } else {
-        cFEStateNet_onPopupEvent(self, popup, popupEvent);
+        cFEStateNet_onPopupEvent(this, popup, popupEvent);
     }
 }
 #endif

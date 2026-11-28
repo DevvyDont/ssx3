@@ -113,10 +113,15 @@ CHECK_OFFSET(FocusQuery, numinstances, 0x000);
 CHECK_OFFSET(FocusQuery, instances, 0x004);
 CHECK_SIZE(FocusQuery, 0x804);
 
+struct nash_CellKey;
+
 struct FocusCallback {
     FocusQuery* query;              // 0x0 [O] FocusQuery&; [U] FocusQuery_addcell's first argument
     const tBoundBox* boxes;         // 0x4 [O]; [U] the boxes the cell is tested against (stride 0x20)
     int numboxes;                   // 0x8 [O]; [U] the loop bound
+
+    // Methods bound to their retail symbols by asm labels.
+    void operatorCall(nash_Cell* node, nash_CellKey* key) __asm__("FocusCallback_operatorCall");
 };
 
 CHECK_OFFSET(FocusCallback, query, 0x0);

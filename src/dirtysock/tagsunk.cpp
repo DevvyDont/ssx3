@@ -300,7 +300,7 @@ extern "C" void* LobbyMan_LobbyMan(LobbyMan* self_)
     cBXString_cBXString((cBXString2*)(&self_->mAccount));
     for (int i = 0x1C; i >= 0; i--)
         self_->mRankSnapshot[i] = 0;
-    LobbyMan_resetNewAccount(self_);
+    self_->resetNewAccount();
     return ((char*)self_);
 }
 #endif
@@ -356,7 +356,7 @@ static inline void dtorList_9628(char* lst)
  */
 extern "C" void LobbyMan__LobbyMan(LobbyMan* self_, int flags)
 {
-    LobbyMan_disconnect(self_);
+    self_->disconnect();
     dtorSub_9628((char*)&self_->mAccount);
     dtorSub_9628((char*)&self_->mNewAccount);
     dtorList_9628((char*)&self_->mEventList);
@@ -458,7 +458,7 @@ void LobbyMan::onconnectionmsg(int* msg)
         sMsgListK2_insert((sMsgListNodeK2*)mEventList.mpHead, mp);
         mDisconnected = 1;
         if (*func_002591D0() != 0)
-            cGameConnMan_shutdown((cGameConnMan*)func_002591D0(), 2);
+            ((cGameConnMan*)func_002591D0())->shutdown(2);
     }
 }
 #endif
@@ -652,9 +652,9 @@ static inline void* Mgr_9B10()
     if (BuddyMan_mBuddyMan == 0)
         BuddyMan_createInstance();
     if (BuddyMan_isLoggedIn(BuddyMan_mBuddyMan) == 0)
-        BuddyMan_reconnect(BuddyMan_mBuddyMan);
+        BuddyMan_mBuddyMan->reconnect();
     if (BuddyMan_mBuddyMan == 0)
-        LobbyMan_disconnect(LobbyMan_mLobbyMan);
+        LobbyMan_mLobbyMan->disconnect();
     return BuddyMan_mBuddyMan;
 }
 
@@ -713,21 +713,23 @@ void LobbyMan::onchatmsg(LobbyApiMsgT* msg)
         sscanf(text, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct, cmd, &locationId, &gameMode, &gameEvent, &ranked, &multipliers, &powerUps, &numberAI, &pointIcons, sig, &i, &j, &k, &rank);
         if (strcmp(cmd, str_challenge) == 0) {
             if (strcmp(sig, cCommSystem_getSignature(cCommSystem_mCommSystem)) != 0) {
-                LobbyMan_sendPrivateMessage(this, (int)name, D_004807E8);
-            } else if (BuddyMan_isBlockedByName((BuddyMan*)Mgr_9B10(), (int)name) != 0) {
-                LobbyMan_sendPrivateMessage(this, (int)name, D_004A2F50);
+                this->sendPrivateMessage((int)name, D_004807E8);
+            } else if (((BuddyMan*)Mgr_9B10())->isBlockedByName((int)name) != 0) {
+                this->sendPrivateMessage((int)name, D_004A2F50);
             } else if (*(int*)this == 22 && strcmp(mOpponent, name) == 0) {
-                LobbyMan_cancelChallenge(this, 1, 1);
+                this->cancelChallenge(1, 1);
             } else {
-                BuddyMan_addChallenge((BuddyMan*)Mgr_9B10(), name, locationId, gameMode, gameEvent, ranked != 0, multipliers != 0, powerUps != 0, numberAI, pointIcons != 0, text, i, j, k, rank);
+                ((BuddyMan*)Mgr_9B10())->addChallenge(name, locationId, gameMode, gameEvent, ranked != 0,
+                                                      multipliers != 0, powerUps != 0, numberAI, pointIcons != 0,
+                                                      text, i, j, k, rank);
             }
         } else if (strcmp(cmd, str_lockChal) == 0) {
             if (*(int*)this == 22 && strcmp(mOpponent, name) == 0) {
-                LobbyMan_sendHostChallenge(this, name);
+                this->sendHostChallenge(name);
             } else if (*(int*)this == 23) {
-                LobbyMan_sendGuestChallenge(this, name);
+                this->sendGuestChallenge(name);
             } else {
-                LobbyMan_sendPrivateMessage(this, (int)name, D_004807F8);
+                this->sendPrivateMessage((int)name, D_004807F8);
             }
         } else if (strcmp(cmd, str_decline) == 0) {
             if (*(int*)this == 22)
@@ -739,13 +741,13 @@ void LobbyMan::onchatmsg(LobbyApiMsgT* msg)
                 post_9B10(((char*)this), event);
             }
         } else if (strcmp(cmd, str_abortChal) == 0) {
-            if (BuddyMan_hasChallengeFrom((BuddyMan*)Mgr_9B10(), name) != 0)
-                BuddyMan_declineChallenge((BuddyMan*)Mgr_9B10(), name);
+            if (((BuddyMan*)Mgr_9B10())->hasChallengeFrom(name) != 0)
+                ((BuddyMan*)Mgr_9B10())->declineChallenge(name);
             int gone = strcasecmp(mOpponent, name) == 0;
             int send = 0;
             if (*(int*)this == 0x18) {
                 if (gone) {
-                    LobbyMan_clearChallenge(this);
+                    this->clearChallenge();
                     send = 1;
                 }
             } else if (*(int*)this == 22 || *(int*)this == 23) {
@@ -785,12 +787,12 @@ void LobbyMan::onchatmsg(LobbyApiMsgT* msg)
         break;
     }
     case 'chat': // 'chat'
-        if (BuddyMan_isBlockedByName((BuddyMan*)Mgr_9B10(), (int)name) == 0)
-            LobbyMan_postChatEvent(this, name, text);
+        if (((BuddyMan*)Mgr_9B10())->isBlockedByName((int)name) == 0)
+            this->postChatEvent(name, text);
         break;
     case 'cast': { // 'cast'
         sBXStr_9B10 res = cBXString_operatorPlus1(sBXStr_9B10(str_broadcast), text);
-        LobbyMan_postChatEvent(this, name, res.p);
+        this->postChatEvent(name, res.p);
         break;
     }
     }
@@ -909,10 +911,10 @@ void LobbyMan::onplaymsg(LobbyApiMsgT* msg)
     int ev = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_P1), -1);
     int kind = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_P2), -1);
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_P1), p1Text, 0x100, str_empty_i);
-    mHostAddr = LobbyMan_getConfigValue(
-        this, hostName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_FROM), 0));
-    mOppoAddr = LobbyMan_getConfigValue(
-        this, oppoName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_ADDR), 0));
+    mHostAddr = this->getConfigValue(
+            hostName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_FROM), 0));
+    mOppoAddr = this->getConfigValue(
+            oppoName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_ADDR), 0));
     cBXString_operatorE1(&mGameName, name);
     cBXString_operatorE1(&mHostName, hostName);
     cBXString_operatorE1(&mOppoName, oppoName);
@@ -924,7 +926,7 @@ void LobbyMan::onplaymsg(LobbyApiMsgT* msg)
     if (*(int*)this != 0x18 && *(int*)this != 20)
     {
         *(int*)this = 25;
-        cGameConnMan_shutdown((cGameConnMan*)func_002591D0(), 0);
+        ((cGameConnMan*)func_002591D0())->shutdown(0);
         return;
     }
     *(int*)this = 25;
@@ -998,20 +1000,20 @@ extern char str_SSX_PS2_2004[];
  * non-empty string. Then it creates the handle with NetGameUtilCreate() and loads that text into it under the section
  * "SSX-PS2-2004" (NetGameUtil_advertise). LobbyMan_getConfigValue() reads keys from it and LobbyMan_destroyConfig() frees it.
  */
-extern "C" void LobbyMan_createConfig(LobbyMan* self)
+void LobbyMan::createConfig()
 {
-    if (self->mLoggedIn == 0)
+    if (mLoggedIn == 0)
         return;
-    if (self->mpConfig != 0)
+    if (mpConfig != 0)
         return;
-    if (LobbyApi_getText(self->mpLobbyApi, 'pers') == 0)
+    if (LobbyApi_getText(mpLobbyApi, 'pers') == 0)
         return;
-    if (*LobbyApi_getText(self->mpLobbyApi, 'pers') == 0)
+    if (*LobbyApi_getText(mpLobbyApi, 'pers') == 0)
         return;
-    self->mpConfig = NetGameUtilCreate();
-    if (self->mpConfig == 0)
+    mpConfig = NetGameUtilCreate();
+    if (mpConfig == 0)
         return;
-    NetGameUtil_advertise(self->mpConfig, str_SSX_PS2_2004, LobbyApi_getText(self->mpLobbyApi, 'pers'));
+    NetGameUtil_advertise(mpConfig, str_SSX_PS2_2004, LobbyApi_getText(mpLobbyApi, 'pers'));
 }
 #endif
 
@@ -1023,12 +1025,12 @@ extern "C" void NetGameUtilDestroy(void*);
 /**
  * Frees the lobby config handle mpConfig (NetGameUtilDestroy) and clears it, if there is one.
  */
-extern "C" void LobbyMan_destroyConfig(LobbyMan* self)
+void LobbyMan::destroyConfig()
 {
-    void* config = self->mpConfig;
+    void* config = mpConfig;
     if (config != 0) {
         NetGameUtilDestroy(config);
-        self->mpConfig = 0;
+        mpConfig = 0;
     }
 }
 #endif
@@ -1048,9 +1050,9 @@ extern "C" int NetGameUtil_locate(void* tags, const char* key, const char* def);
  * @param def  value returned when there is no config or NetGameUtil_locate() returns 0
  * @return the configured value, or @p def
  */
-extern "C" int LobbyMan_getConfigValue(LobbyMan* self, const char* key, int def)
+int LobbyMan::getConfigValue(const char* key, int def)
 {
-    void* tags = self->mpConfig;
+    void* tags = mpConfig;
     if (tags != 0) {
         int configValue = NetGameUtil_locate(tags, str_SSX_PS2_2004, key);
         if (configValue != 0) {
@@ -1112,13 +1114,13 @@ extern "C" void LobbyApi_closeList(void* ctx, int kind, void* p);
  * Releases every open rank-list snapshot: each non-null mRankSnapshot[i] (29 slots) goes to LobbyApi_closeList(..., 4, ...)
  * and is cleared.
  */
-extern "C" void LobbyMan_releaseRankSnapshots(LobbyMan* self)
+void LobbyMan::releaseRankSnapshots()
 {
     int i;
-    void** arr = (void**)&self->mRankSnapshot;
+    void** arr = (void**)&mRankSnapshot;
     for (i = 0; i < 29; i++) {
         if (arr[i] != 0) {
-            LobbyApi_closeList(self->mpLobbyApi, 4, arr[i]);
+            LobbyApi_closeList(mpLobbyApi, 4, arr[i]);
             arr[i] = 0;
         }
     }
@@ -1139,25 +1141,25 @@ struct sTagsUnkCallbackObj {
  * Releases mpRoomList, mpUserList and mpRankList through LobbyApi_closeList() (kinds 0, 1, 2) and clears them, frees the
  * snapshots with LobbyMan_releaseRankSnapshots(), and releases mpHostLookup through its own release function (+0xC) before clearing it.
  */
-extern "C" void LobbyMan_closeLists(LobbyMan* self)
+void LobbyMan::closeLists()
 {
-    if (self->mpRoomList != 0) {
-        LobbyApi_closeList(self->mpLobbyApi, 0, self->mpRoomList);
-        self->mpRoomList = 0;
+    if (mpRoomList != 0) {
+        LobbyApi_closeList(mpLobbyApi, 0, mpRoomList);
+        mpRoomList = 0;
     }
-    if (self->mpUserList != 0) {
-        LobbyApi_closeList(self->mpLobbyApi, 1, self->mpUserList);
-        self->mpUserList = 0;
+    if (mpUserList != 0) {
+        LobbyApi_closeList(mpLobbyApi, 1, mpUserList);
+        mpUserList = 0;
     }
-    if (self->mpRankList != 0) {
-        LobbyApi_closeList(self->mpLobbyApi, 2, self->mpRankList);
-        self->mpRankList = 0;
+    if (mpRankList != 0) {
+        LobbyApi_closeList(mpLobbyApi, 2, mpRankList);
+        mpRankList = 0;
     }
-    LobbyMan_releaseRankSnapshots(self);
-    sTagsUnkCallbackObj* obj = (sTagsUnkCallbackObj*)self->mpHostLookup;
+    releaseRankSnapshots();
+    sTagsUnkCallbackObj* obj = (sTagsUnkCallbackObj*)mpHostLookup;
     if (obj != 0) {
         obj->fn(obj);
-        self->mpHostLookup = 0;
+        mpHostLookup = 0;
     }
 }
 #endif
@@ -1193,9 +1195,8 @@ extern char str_Sep_17_2003[];
  * (3, connection) and LobbyMan_LobbyFunctor_onplaymsg_invoke (4, game start) with LobbyApi_setEventRoutine(); then opens the lists with LobbyMan_openLists().
  * The connect function LobbyMan_connect() calls it when there is no instance yet.
  *
- * @param self_  the lobby manager
  */
-extern "C" void LobbyMan_createLobbyApi(LobbyMan* self_)
+void LobbyMan::createLobbyApi()
 {
     char buf[0x40];
     char tag[0x100];
@@ -1207,12 +1208,12 @@ extern "C" void LobbyMan_createLobbyApi(LobbyMan* self_)
     cDirtysock_tag_TagFieldSetString(tag, 0x100, key, func_00259198());
     cDirtysock_tag_TagFieldSetString(tag, 0x100, str_SLUS, str_SLUS_20772);
     void* mgr = LobbyApi_create(tag, 0, (void*)func_00259390);
-    self_->mpLobbyApi = (LobbyApiRefT*)mgr;
-    LobbyApi_setEventRoutine(mgr, 0, (void*)LobbyMan_LobbyFunctor_onincomingmsg_invoke, ((char*)self_));
-    LobbyApi_setEventRoutine(self_->mpLobbyApi, 1, (void*)LobbyMan_LobbyFunctor_onchatmsg_invoke, ((char*)self_));
-    LobbyApi_setEventRoutine(self_->mpLobbyApi, 3, (void*)LobbyMan_LobbyFunctor_onconnectionmsg_invoke, ((char*)self_));
-    LobbyApi_setEventRoutine(self_->mpLobbyApi, 4, (void*)LobbyMan_LobbyFunctor_onplaymsg_invoke, ((char*)self_));
-    LobbyMan_openLists((sDsSessK2*)self_);
+    mpLobbyApi = (LobbyApiRefT*)mgr;
+    LobbyApi_setEventRoutine(mgr, 0, (void*)LobbyMan_LobbyFunctor_onincomingmsg_invoke, ((char*)this));
+    LobbyApi_setEventRoutine(mpLobbyApi, 1, (void*)LobbyMan_LobbyFunctor_onchatmsg_invoke, ((char*)this));
+    LobbyApi_setEventRoutine(mpLobbyApi, 3, (void*)LobbyMan_LobbyFunctor_onconnectionmsg_invoke, ((char*)this));
+    LobbyApi_setEventRoutine(mpLobbyApi, 4, (void*)LobbyMan_LobbyFunctor_onplaymsg_invoke, ((char*)this));
+    LobbyMan_openLists((sDsSessK2*)this);
 }
 #endif
 
@@ -1227,13 +1228,13 @@ extern "C" void LobbyApi_destroy(void* p);
  * Shuts the LobbyApi down: closes the lists (LobbyMan_closeLists), then calls LobbyApi_disconnect() and LobbyApi_destroy() on
  * mpLobbyApi and clears it.
  */
-extern "C" void LobbyMan_destroyLobbyApi(LobbyMan* self)
+void LobbyMan::destroyLobbyApi()
 {
-    LobbyMan_closeLists(self);
-    if (self->mpLobbyApi != 0) {
-        LobbyApi_disconnect(self->mpLobbyApi);
-        LobbyApi_destroy(self->mpLobbyApi);
-        self->mpLobbyApi = 0;
+    closeLists();
+    if (mpLobbyApi != 0) {
+        LobbyApi_disconnect(mpLobbyApi);
+        LobbyApi_destroy(mpLobbyApi);
+        mpLobbyApi = 0;
     }
 }
 #endif
@@ -1253,13 +1254,13 @@ extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* us
  *
  * @param value  the message text
  */
-extern "C" void LobbyMan_sendChatMessage(LobbyMan* self, const char* value)
+void LobbyMan::sendChatMessage(const char* value)
 {
     char buf[0x200];
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetUnk(buf, 0x200, str_TEXT, value);
-        LobbyApi_sendCommand(self->mpLobbyApi, 'mesg', buf, 0, 0);
+        LobbyApi_sendCommand(mpLobbyApi, 'mesg', buf, 0, 0);
     }
 }
 #endif
@@ -1315,7 +1316,7 @@ struct cBXStrAB40 {
  * @param sender  the sender's name
  * @param text  the message text
  */
-extern "C" void LobbyMan_postChatEvent(LobbyMan* self, const char* sender, const char* text)
+void LobbyMan::postChatEvent(const char* sender, const char* text)
 {
     int* event = (int*)operator new(0x10, str_ChatEvent, 0x20000000, 0);
     cBXStrAB40 sa;
@@ -1329,7 +1330,7 @@ extern "C" void LobbyMan_postChatEvent(LobbyMan* self, const char* sender, const
     cBXString__cBXString(&sa, 2);
     cBXString__cBXString(&sb, 2);
     void* mp = event;
-    sMsgListAB40_insert((sMsgListNodeAB40*)self->mEventList.mpHead, mp);
+    sMsgListAB40_insert((sMsgListNodeAB40*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -1428,9 +1429,9 @@ static inline void* Mgr_AC50()
     if (BuddyMan_mBuddyMan == 0)
         BuddyMan_createInstance();
     if (BuddyMan_isLoggedIn(BuddyMan_mBuddyMan) == 0)
-        BuddyMan_reconnect(BuddyMan_mBuddyMan);
+        BuddyMan_mBuddyMan->reconnect();
     if (BuddyMan_mBuddyMan == 0)
-        LobbyMan_disconnect(LobbyMan_mLobbyMan);
+        LobbyMan_mLobbyMan->disconnect();
     return BuddyMan_mBuddyMan;
 }
 
@@ -1491,95 +1492,95 @@ static inline void closeConn_AC50(char* self)
  * down by the frame time. Always: updates BuddyMan (BuddyMan_update), then pops every mEventList event, hands it to
  * dispatchLobbyEvent() and deletes it through its virtual destructor (slot 1, flags 3). cRealFE_update calls it.
  */
-extern "C" void LobbyMan_update(LobbyMan* self)
+void LobbyMan::update()
 {
-    if (self->mpLobbyApi != 0) {
-        LobbyApi_update(self->mpLobbyApi);
-        int ev = LobbyApi_takeEvent(self->mpLobbyApi);
-        LobbyMan_createConfig(self);
-        if (self->mDisconnected != 0) {
-            self->mDisconnected = 0;
-            LobbyMan_disconnect(self);
+    if (mpLobbyApi != 0) {
+        LobbyApi_update(mpLobbyApi);
+        int ev = LobbyApi_takeEvent(mpLobbyApi);
+        createConfig();
+        if (mDisconnected != 0) {
+            mDisconnected = 0;
+            disconnect();
             int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             event[0] = 277;
             *(void***)((char*)event + 0x4) = online_Event_vtbl;
-            post_AC50(((char*)self), event);
+            post_AC50(((char*)this), event);
         } else {
-            int state = *(int*)self;
+            int state = *(int*)this;
             if (state == 2) {
-                sDsCallbackAC50* obj = (sDsCallbackAC50*)self->mpHostLookup;
+                sDsCallbackAC50* obj = (sDsCallbackAC50*)mpHostLookup;
                 int lookupStatus = obj->poll(obj);
                 if (lookupStatus > 0) {
-                    LobbyMan* sess = self;
+                    LobbyMan* sess = this;
                     int serverAddr = ((sDsCallbackAC50*)sess->mpHostLookup)->value;
                     sess->mServerAddr = serverAddr;
                     D_004A3018 = serverAddr;
                     sess->mState = 3;
                     sess->mTimeout = 30.0f;
                     // PORT: function pointer passed as a callback argument.
-                    LobbyApi_connect(((void*)sess->mpLobbyApi), serverAddr, 11000, (void*)LobbyMan_LobbyFunctor_onlobbyconnect_invoke, ((char*)self));
+                    LobbyApi_connect(((void*)sess->mpLobbyApi), serverAddr, 11000, (void*)LobbyMan_LobbyFunctor_onlobbyconnect_invoke, ((char*)this));
                 } else if (lookupStatus < 0) {
-                    LobbyMan_disconnect(self);
+                    disconnect();
                     int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
                     *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
                     event[2] = 'dnsf';
-                    post_AC50(((char*)self), event);
+                    post_AC50(((char*)this), event);
                 }
                 if (lookupStatus != 0)
-                    closeConn_AC50(((char*)self));
+                    closeConn_AC50(((char*)this));
             } else if (state == 3) {
                 if (ev == 0x400) {
-                    char* downReason = LobbyApi_getText(self->mpLobbyApi, 'down');
+                    char* downReason = LobbyApi_getText(mpLobbyApi, 'down');
                     int* event = (int*)operator new(0x10, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
                     event[2] = 'down';
                     *(void***)((char*)event + 0x4) = D_004811B0;
                     cBXString_cBXString2((char*)event + 0xC, downReason);
-                    post_AC50(((char*)self), event);
-                    LobbyMan_disconnect(self);
-                } else if (expired_AC50(((char*)self))) {
-                    LobbyMan_disconnect(self);
+                    post_AC50(((char*)this), event);
+                    disconnect();
+                } else if (expired_AC50(((char*)this))) {
+                    disconnect();
                     int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
                     *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
                     event[2] = 'time';
-                    post_AC50(((char*)self), event);
-                    closeConn_AC50(((char*)self));
+                    post_AC50(((char*)this), event);
+                    closeConn_AC50(((char*)this));
                 }
             } else if (state == 26) {
                 if (BuddyMan_mBuddyMan->miError != 0) {
-                    BuddyMan_disconnect(BuddyMan_mBuddyMan);
+                    BuddyMan_mBuddyMan->disconnect();
                     int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     int val = BuddyMan_mBuddyMan->miError;
                     event[0] = 259;
                     *(void***)((char*)event + 0x4) = online_BuddyErrorEvent_vtbl;
                     event[2] = val;
-                    post_AC50(((char*)self), event);
+                    post_AC50(((char*)this), event);
                 } else if (BuddyMan_isLoggedIn(BuddyMan_mBuddyMan) != 0) {
-                    *(int*)self = 1;
+                    *(int*)this = 1;
                     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     event[0] = 218;
                     *(void***)((char*)event + 0x4) = online_Event_vtbl;
-                    post_AC50(((char*)self), event);
+                    post_AC50(((char*)this), event);
                 }
             } else if (state == 22) {
             } else if (state == 23) {
-                float timeout = self->mTimeout;
+                float timeout = mTimeout;
                 if (timeout < D_004A5154 - 1.0f)
                     D_004A5154 = timeout;
                 if (isNeg_AC50(timeout)) {
-                    if (BuddyMan_hasChallengeFrom((BuddyMan*)Mgr_AC50(), self->mOpponent) != 0)
-                        BuddyMan_declineChallenge((BuddyMan*)Mgr_AC50(), self->mOpponent);
+                    if (((BuddyMan*)Mgr_AC50())->hasChallengeFrom(mOpponent) != 0)
+                        ((BuddyMan*)Mgr_AC50())->declineChallenge(mOpponent);
                     int type = 274;
                     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     event[0] = type;
                     *(void***)((char*)event + 0x4) = online_Event_vtbl;
-                    post_AC50(((char*)self), event);
-                    *(int*)self = 1;
+                    post_AC50(((char*)this), event);
+                    *(int*)this = 1;
                 }
             } else if (state == 0x18) {
-                float timeout = self->mTimeout;
+                float timeout = mTimeout;
                 if (timeout < D_004A5154 - 1.0f)
                     D_004A5154 = timeout;
                 if (isNeg_AC50(timeout)) {
@@ -1587,52 +1588,52 @@ extern "C" void LobbyMan_update(LobbyMan* self)
                     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     event[0] = type;
                     *(void***)((char*)event + 0x4) = online_Event_vtbl;
-                    post_AC50(((char*)self), event);
-                    LobbyMan_cancelChallenge(self, 0, 1);
+                    post_AC50(((char*)this), event);
+                    cancelChallenge(0, 1);
                 }
             } else if (state == 20) {
-                if (expired_AC50(((char*)self))) {
+                if (expired_AC50(((char*)this))) {
                     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
                     event[0] = 230;
                     *(void***)((char*)event + 0x4) = online_Event_vtbl;
-                    post_AC50(((char*)self), event);
-                    LobbyMan_cancelQuickMatch(self);
+                    post_AC50(((char*)this), event);
+                    cancelQuickMatch();
                 }
             } else if (state != 25) {
                 int notIdle = state != 1;
-                int active = notIdle || self->mFindingPlayer != 0;
-                if (active && expired_AC50(((char*)self))) {
-                    LobbyMan_disconnect(self);
+                int active = notIdle || mFindingPlayer != 0;
+                if (active && expired_AC50(((char*)this))) {
+                    disconnect();
                     int* event = (int*)operator new(0xC, str_NetEvent, 0x20000000, 0);
                     event[0] = 258;
                     *(void***)((char*)event + 0x4) = online_ErrorEvent_vtbl;
                     event[2] = 'time';
-                    post_AC50(((char*)self), event);
-                    self->mFindingPlayer = 0;
-                    closeConn_AC50(((char*)self));
+                    post_AC50(((char*)this), event);
+                    mFindingPlayer = 0;
+                    closeConn_AC50(((char*)this));
                 }
             }
         }
-        int notJoined = *(int*)self != 25;
+        int notJoined = *(int*)this != 25;
         if (notJoined) {
             if (*func_002591D0() != 0)
-                cGameConnMan_shutdown((cGameConnMan*)func_002591D0(), 0);
+                ((cGameConnMan*)func_002591D0())->shutdown(0);
             else if (cCommSystem_isChannelOpen(cCommSystem_mCommSystem, 0) != 0)
                 cCommSystem_closeChannel(cCommSystem_mCommSystem, 0);
         }
-        if (self->mLoggedIn != 0) {
-            func_003EE620(self->mpRoomList);
-            func_003EE620(self->mpUserList);
+        if (mLoggedIn != 0) {
+            func_003EE620(mpRoomList);
+            func_003EE620(mpUserList);
         }
         cSSXApp* app = SSXApp;
-        self->mTimeout -= app->TimerPeriod;
-        self->mCountdown -= app->TimerPeriod;
+        mTimeout -= app->TimerPeriod;
+        mCountdown -= app->TimerPeriod;
     }
-    BuddyMan_update(BuddyMan_mBuddyMan);
-    while (((sMsgListAC50*)(&self->mEventList))->first() != (sMsgListNodeAC50*)self->mEventList.mpHead) {
-        void* msg = ((sMsgListAC50*)(&self->mEventList))->front();
-        ((sMsgListAC50*)(&self->mEventList))->pop_front();
-        dispatchLobbyEvent(((char*)self), msg);
+    BuddyMan_mBuddyMan->update();
+    while (((sMsgListAC50*)(&mEventList))->first() != (sMsgListNodeAC50*)mEventList.mpHead) {
+        void* msg = ((sMsgListAC50*)(&mEventList))->front();
+        ((sMsgListAC50*)(&mEventList))->pop_front();
+        dispatchLobbyEvent(((char*)this), msg);
         if (msg != 0) {
             sVEntryAC50* vt = *(sVEntryAC50**)((char*)msg + 4);
             vt[1].fn(vthis(msg, vt[1]), 3);
@@ -1658,11 +1659,11 @@ extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* us
  * @param callback  the functor thunk that receives the reply, passed as an int
  * @param timeout   seconds before LobbyMan_update() gives up (stored in mTimeout)
  */
-extern "C" void LobbyMan_sendRequest(LobbyMan* self, int newState, int tag, void* cb, int callback, float timeout)
+void LobbyMan::sendRequest(int newState, int tag, void* cb, int callback, float timeout)
 {
-    *(int*)self = newState;
-    self->mTimeout = timeout;
-    self->mRequestId = LobbyApi_sendCommand(self->mpLobbyApi, tag, cb, callback, self);
+    *(int*)this = newState;
+    mTimeout = timeout;
+    mRequestId = LobbyApi_sendCommand(mpLobbyApi, tag, cb, callback, this);
 }
 #endif
 
@@ -1701,7 +1702,7 @@ extern "C" void cGameComm_destroy(void);
 extern "C" void LobbyMan_destroyInstance(void)
 {
     if (LobbyMan_mLobbyMan != 0) {
-        LobbyMan_disconnect(LobbyMan_mLobbyMan);
+        LobbyMan_mLobbyMan->disconnect();
         if (LobbyMan_mLobbyMan != 0) {
             LobbyMan__LobbyMan(LobbyMan_mLobbyMan, 3);
         }
@@ -1760,28 +1761,28 @@ static inline sMsgListIterB6D8 sMsgListB6D8_insert(sMsgListIterB6D8 pos, void* c
  *
  * @param conn  nonzero to connect to the cached server address, 0 to look the server name up first
  */
-extern "C" void LobbyMan_connect(LobbyMan* self, int conn)
+void LobbyMan::connect(int conn)
 {
-    if (self->mpLobbyApi == 0)
-        LobbyMan_createLobbyApi(self);
-    self->mbUseCachedAddr = conn;
+    if (mpLobbyApi == 0)
+        createLobbyApi();
+    mbUseCachedAddr = conn;
     if (conn != 0) {
         int serverAddr = D_004A3018;
-        *(int*)self = 3;
-        self->mTimeout = 30.0f;
-        self->mServerAddr = serverAddr;
+        *(int*)this = 3;
+        mTimeout = 30.0f;
+        mServerAddr = serverAddr;
         // PORT: function pointer passed as a callback argument.
-        LobbyApi_connect(self->mpLobbyApi, serverAddr, 11000, (void*)LobbyMan_LobbyFunctor_onlobbyconnect_invoke, ((char*)self));
+        LobbyApi_connect(mpLobbyApi, serverAddr, 11000, (void*)LobbyMan_LobbyFunctor_onlobbyconnect_invoke, ((char*)this));
     } else {
-        *(int*)self = 2;
-        self->mpHostLookup = (void*)SocketLookup(self->mServerName, 0);
+        *(int*)this = 2;
+        mpHostLookup = (void*)SocketLookup(mServerName, 0);
     }
     int type = 200;
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
     event->mVtbl = online_Event_vtbl;
     void* mp = event;
-    sMsgListB6D8_insert((sMsgListNodeB6D8*)self->mEventList.mpHead, mp);
+    sMsgListB6D8_insert((sMsgListNodeB6D8*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -1795,15 +1796,15 @@ extern "C" void LobbyMan_destroyLobbyApi(LobbyMan* self);
  * Disconnects the lobby manager: frees mpConfig (LobbyMan_destroyConfig), shuts the LobbyApi down if there is one
  * (LobbyMan_destroyLobbyApi) and clears mAuthenticated, mLoggedIn and mState.
  */
-extern "C" void LobbyMan_disconnect(LobbyMan* self)
+void LobbyMan::disconnect()
 {
-    LobbyMan_destroyConfig(self);
-    if (self->mpLobbyApi != 0) {
-        LobbyMan_destroyLobbyApi(self);
+    destroyConfig();
+    if (mpLobbyApi != 0) {
+        destroyLobbyApi();
     }
-    self->mAuthenticated = 0;
-    self->mLoggedIn = 0;
-    self->mState = 0;
+    mAuthenticated = 0;
+    mLoggedIn = 0;
+    mState = 0;
 }
 #endif
 
@@ -1942,7 +1943,7 @@ static inline sMsgListIterB9C8 sMsgListB9C8_insert(sMsgListIterB9C8 pos, void* c
  *
  * @param msg  the account form (a tLobbyAccount)
  */
-extern "C" void LobbyMan_createAccount(LobbyMan* self, tLobbyAccount* msg)
+void LobbyMan::createAccount(tLobbyAccount* msg)
 {
     char buf[0x200];
     char yn[16];
@@ -1968,12 +1969,12 @@ extern "C" void LobbyMan_createAccount(LobbyMan* self, tLobbyAccount* msg)
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_MINAGE, 13);
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_LANG, func_00259198());
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest(self, 4, 'acct', buf, (int)LobbyMan_LobbyFunctor_onaccountcreated_invoke, 20.0f);
+    sendRequest(4, 'acct', buf, (int)LobbyMan_LobbyFunctor_onaccountcreated_invoke, 20.0f);
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
     event->mVtbl = online_Event_vtbl;
     void* mp = event;
-    sMsgListB9C8_insert((sMsgListNodeB9C8*)self->mEventList.mpHead, mp);
+    sMsgListB9C8_insert((sMsgListNodeB9C8*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -2002,21 +2003,21 @@ struct sDsNameListK2 {
  * @param msg  the LobbyApi reply (tag record pointer mpTagText)
  */
 // Splits a comma-separated tag field into up to 4 strings.
-extern "C" void LobbyMan_readNameOptions(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::readNameOptions(LobbyApiMsgT* msg)
 {
     char buf[256];
     char* cursor;
     char* start;
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_OPTS), buf, 256, str_empty_i);
-    self->mNewAccount.mNumNameOptions = 0;
+    mNewAccount.mNumNameOptions = 0;
     cursor = buf;
-    while ((*cursor != 0) && (self->mNewAccount.mNumNameOptions < 4)) {
+    while ((*cursor != 0) && (mNewAccount.mNumNameOptions < 4)) {
         start = cursor;
         while ((*cursor != 0) && (*cursor != ','))
             cursor++;
         if (*cursor != 0)
             *cursor++ = 0;
-        cBXString_operatorE1(&self->mNewAccount.mNameOptions[self->mNewAccount.mNumNameOptions++], start);
+        cBXString_operatorE1(&mNewAccount.mNameOptions[mNewAccount.mNumNameOptions++], start);
     }
 }
 #endif
@@ -2097,7 +2098,7 @@ void LobbyMan::onaccountcreated(LobbyApiMsgT* msg)
         post_BD30(((char*)this), event);
     } else {
         if (err == kLobbyErr_dupl)
-            LobbyMan_readNameOptions(this, msg);
+            this->readNameOptions(msg);
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
@@ -2156,14 +2157,14 @@ static inline sMsgListIterBF18 sMsgListBF18_insert(sMsgListIterBF18 pos, void* c
  *
  * @param msg  the account form (a tLobbyAccount)
  */
-extern "C" void LobbyMan_editAccount(LobbyMan* self, tLobbyAccount* msg)
+void LobbyMan::editAccount(tLobbyAccount* msg)
 {
     char buf[0x200];
     char spamText[16];
     buf[0] = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, (const char*)self->mUserName);
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, (const char*)mUserName);
     if (msg->mChangePassword != 0) {
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PASS, (const char*)self->mPassword);
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PASS, (const char*)mPassword);
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_CHNG, (const char*)msg->mPassword);
     }
     if (msg->mChangeSpam != 0) {
@@ -2174,13 +2175,13 @@ extern "C" void LobbyMan_editAccount(LobbyMan* self, tLobbyAccount* msg)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, (const char*)msg->mMail);
     }
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest(self, 5, 'edit', buf, (int)LobbyMan_LobbyFunctor_onaccountedited_invoke, 20.0f);
+    sendRequest(5, 'edit', buf, (int)LobbyMan_LobbyFunctor_onaccountedited_invoke, 20.0f);
     int type = 205;
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
     event->mVtbl = online_Event_vtbl;
     void* mp = event;
-    sMsgListBF18_insert((sMsgListNodeBF18*)self->mEventList.mpHead, mp);
+    sMsgListBF18_insert((sMsgListNodeBF18*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -2291,19 +2292,19 @@ static inline sMsgListIterC1E0 sMsgListC1E0_insert(sMsgListIterC1E0 pos, void* c
  *
  * @param value  the e-mail address
  */
-extern "C" void LobbyMan_requestLostAccount(LobbyMan* self, const char* value)
+void LobbyMan::requestLostAccount(const char* value)
 {
     char buf[0x200];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MAIL, value);
     int type = 209;
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest(self, 6, 'lost', buf, (int)LobbyMan_LobbyFunctor_onlostaccountrequestsent_invoke, 20.0f);
+    sendRequest(6, 'lost', buf, (int)LobbyMan_LobbyFunctor_onlostaccountrequestsent_invoke, 20.0f);
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
     event->mVtbl = online_Event_vtbl;
     void* mp = event;
-    sMsgListC1E0_insert((sMsgListNodeC1E0*)self->mEventList.mpHead, mp);
+    sMsgListC1E0_insert((sMsgListNodeC1E0*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -2414,19 +2415,19 @@ static inline sMsgListIterC3F8 sMsgListC3F8_insert(sMsgListIterC3F8 pos, void* c
  *
  * @param value  the account name
  */
-extern "C" void LobbyMan_requestLostPassword(LobbyMan* self, const char* value)
+void LobbyMan::requestLostPassword(const char* value)
 {
     char buf[0x200];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, value);
     int type = 208;
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest(self, 7, 'lost', buf, (int)LobbyMan_LobbyFunctor_onlostpasswordrequestsent_invoke, 20.0f);
+    sendRequest(7, 'lost', buf, (int)LobbyMan_LobbyFunctor_onlostpasswordrequestsent_invoke, 20.0f);
     online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     event->mType = type;
     event->mVtbl = online_Event_vtbl;
     void* mp = event;
-    sMsgListC3F8_insert((sMsgListNodeC3F8*)self->mEventList.mpHead, mp);
+    sMsgListC3F8_insert((sMsgListNodeC3F8*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -2567,14 +2568,14 @@ struct sDsSlotC610 {
  * timeout, reply through LobbyMan_LobbyFunctor_onauthentication_invoke to LobbyMan_onauthentication()), and an Event of type 211 (vtable
  * online_Event_vtbl) is pushed onto mEventList.
  */
-extern "C" void LobbyMan_authenticate(LobbyMan* self)
+void LobbyMan::authenticate()
 {
     char buf[0x200];
     int flags = 0;
     int caps = 0;
     buf[0] = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, (const char*)self->mUserName);
-    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PASS, (const char*)self->mPassword);
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, (const char*)mUserName);
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PASS, (const char*)mPassword);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_TOS, 1);
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MID, NetConnMAC());
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PID, str_SSX_PS2_2004);
@@ -2604,11 +2605,11 @@ extern "C" void LobbyMan_authenticate(LobbyMan* self)
     int type = 211;
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_HWMASK, caps);
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest(self, 8, 'auth', buf, (int)LobbyMan_LobbyFunctor_onauthentication_invoke, 20.0f);
+    sendRequest(8, 'auth', buf, (int)LobbyMan_LobbyFunctor_onauthentication_invoke, 20.0f);
     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     event[0] = type;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
-    post_C610((char*)&self->mEventList, event);
+    post_C610((char*)&mEventList, event);
 }
 #endif
 
@@ -2622,10 +2623,10 @@ extern "C" void LobbyApi_cancelCallbacks(void* p, int a);
  *
  * mState itself is left unchanged.
  */
-extern "C" void LobbyMan_cancelAuthentication(LobbyMan* self)
+void LobbyMan::cancelAuthentication()
 {
-    if (self->mState == 8) {
-        LobbyApi_cancelCallbacks(self->mpLobbyApi, self->mRequestId);
+    if (mState == 8) {
+        LobbyApi_cancelCallbacks(mpLobbyApi, mRequestId);
     }
 }
 #endif
@@ -2781,9 +2782,9 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_selectPersonaAt__FPvi);
  * @param personaIndex  index into mPersonas (0..3); not range-checked
  * @return no meaningful value (LobbyMan_selectPersona() returns nothing)
  */
-void* LobbyMan_selectPersonaAt(void* self, int personaIndex)
+void* LobbyMan::selectPersonaAt(int personaIndex)
 {
-    return LobbyMan_selectPersona(self, *(int*)((char*)((char*)self + personaIndex * 4) + 0x70));
+    return LobbyMan_selectPersona(this, *(int*)((char*)((char*)this + personaIndex * 4) + 0x70));
 }
 #endif
 
@@ -2846,26 +2847,25 @@ extern "C" void LobbyMan_selectPersona_impl(char* self, const char* name) __asm_
  *
  * @param name  the persona name
  */
-extern "C" void LobbyMan_selectPersona_impl(char* vself, const char* name)
+void LobbyMan::selectPersona(const char* name)
 {
-    LobbyMan* self = (LobbyMan*)vself;
-    cBXString_operatorE1(&self->mPersona, name);
+    cBXString_operatorE1(&mPersona, name);
     char buf[0x200];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, name);
     const char* key = str_MID;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, key, NetConnMAC());
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PID, str_SSX_PS2_2004);
-    if (self->mHaveCPAT != 0)
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_CDEV, self->mCPAT);
+    if (mHaveCPAT != 0)
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_CDEV, mCPAT);
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest((LobbyMan*)self, 9, 'pers', buf, (int)LobbyMan_LobbyFunctor_onpersonaselected_invoke, 20.0f);
+    sendRequest(9, 'pers', buf, (int)LobbyMan_LobbyFunctor_onpersonaselected_invoke, 20.0f);
     int type = 217;
     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     event[0] = type;
     *(void***)((char*)event + 0x4) = online_Event_vtbl;
     void* mp = event;
-    sMsgListCD50_insert((sMsgListNodeCD50*)self->mEventList.mpHead, mp);
+    sMsgListCD50_insert((sMsgListNodeCD50*)mEventList.mpHead, mp);
 }
 #endif
 
@@ -2922,7 +2922,7 @@ void LobbyMan::onpersonaselected(LobbyApiMsgT* msg)
 {
     mState = 1;
     if (msg->mStatus == 0) {
-        LobbyMan_requestStats(this);
+        this->requestStats();
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 218;
         event->mVtbl = online_Event_vtbl;
@@ -2950,13 +2950,13 @@ extern "C" void func_00268CC0(void* self, void* a1, int a2);
  *
  * LobbyMan_sendRequest() sends it with mState 27 and a 20 s timeout; the reply goes through func_00268CC0 to LobbyMan_handleStatsReply().
  */
-extern "C" void LobbyMan_requestStats(LobbyMan* self)
+void LobbyMan::requestStats()
 {
     char buf[0x200];
     buf[0] = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, (const char*)self->mPersona);
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, (const char*)mPersona);
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest(self, 27, 'onln', buf, (int)func_00268CC0, 20.0f);
+    sendRequest(27, 'onln', buf, (int)func_00268CC0, 20.0f);
 }
 #endif
 
@@ -3023,28 +3023,28 @@ static inline void post_D048(char* self, void* msg)
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_handleStatsReply(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::handleStatsReply(LobbyApiMsgT* msg)
 {
-    *(int*)self = 1;
+    *(int*)this = 1;
     if (msg->mStatus == 0) {
         char buf[0x100];
         int st[16];
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_STAT), buf, 0x100,
                                           str_empty_i);
         cDirtysock_tag_TagFieldGetStructure(buf, st, 0x40, str_l);
-        self->mStats.mWins = st[2];
-        self->mStats.mGamesPlayed = st[2] + st[3] + st[4];
-        self->mStats.mDisconnects = st[6];
-        self->mStats.mRank =
+        mStats.mWins = st[2];
+        mStats.mGamesPlayed = st[2] + st[3] + st[4];
+        mStats.mDisconnects = st[6];
+        mStats.mRank =
             cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(msg->mpTagText, D_004A3130), 0);
-        self->mStats.mPing = -1;
-        LobbyMan_requestNews(self, 0);
+        mStats.mPing = -1;
+        requestNews(0);
     } else {
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
         event->mError = msg->mStatus;
-        post_D048(((char*)self), event);
+        post_D048(((char*)this), event);
     }
 }
 #endif
@@ -3095,22 +3095,22 @@ static inline sMsgListIterD1B8 sMsgListD1B8_insert(sMsgListIterD1B8 pos, void* c
  *
  * @param name  the new persona's name
  */
-extern "C" void LobbyMan_createPersona(LobbyMan* self, const char* name)
+void LobbyMan::createPersona(const char* name)
 {
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         char buf[0x200];
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, name);
         int type = 213;
         // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-        LobbyMan_sendRequest(self, 10, 'cper', buf, (int)LobbyMan_LobbyFunctor_onpersonacreated_invoke, 20.0f);
-        LobbyMan* lobbyMan = self;
+        sendRequest(10, 'cper', buf, (int)LobbyMan_LobbyFunctor_onpersonacreated_invoke, 20.0f);
+        LobbyMan* lobbyMan = this;
         cBXString_operatorE1(&lobbyMan->mPersonas[lobbyMan->mNumPersonas], name);
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         event[0] = type;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
         void* mp = event;
-        sMsgListD1B8_insert((sMsgListNodeD1B8*)self->mEventList.mpHead, mp);
+        sMsgListD1B8_insert((sMsgListNodeD1B8*)mEventList.mpHead, mp);
     }
 }
 #endif
@@ -3180,7 +3180,7 @@ void LobbyMan::onpersonacreated(LobbyApiMsgT* msg)
         post_D2D8(((char*)this), event);
     } else {
         if (msg->mStatus == kLobbyErr_dupl)
-            LobbyMan_readNameOptions(this, msg);
+            this->readNameOptions(msg);
         online_ErrorEvent* event = (online_ErrorEvent*)operator new(0xC, str_NetEvent, 0x20000000, 0);
         event->mType = 258;
         event->mVtbl = online_ErrorEvent_vtbl;
@@ -3233,21 +3233,21 @@ static inline sMsgListIterD428 sMsgListD428_insert(sMsgListIterD428 pos, void* c
  *
  * @param idx  index into mPersonas; not range-checked
  */
-extern "C" void LobbyMan_deletePersona(LobbyMan* self, int idx)
+void LobbyMan::deletePersona(int idx)
 {
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         char buf[0x200];
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, *(const char**)((char*)&self->mPersonas[0] + (idx << 2)));
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, *(const char**)((char*)&mPersonas[0] + (idx << 2)));
         int type = 215;
         // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-        LobbyMan_sendRequest(self, 11, 'dper', buf, (int)LobbyMan_LobbyFunctor_onpersonadeleted_invoke, 20.0f);
-        self->mDeletePersonaIdx = idx;
+        sendRequest(11, 'dper', buf, (int)LobbyMan_LobbyFunctor_onpersonadeleted_invoke, 20.0f);
+        mDeletePersonaIdx = idx;
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         event[0] = type;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
         void* mp = event;
-        sMsgListD428_insert((sMsgListNodeD428*)self->mEventList.mpHead, mp);
+        sMsgListD428_insert((sMsgListNodeD428*)mEventList.mpHead, mp);
     }
 }
 #endif
@@ -3399,20 +3399,20 @@ extern "C" void* LobbyMan_getRoomNameAt(LobbyMan* self);
  *
  * @param idx  index into the room list, or LobbyMan::kRoomIndex_None
  */
-extern "C" void LobbyMan_peekRoom(LobbyMan* self, int idx)
+void LobbyMan::peekRoom(int idx)
 {
     char buf[256];
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         const char* key = str_NAME;
         const char* name;
         buf[0] = 0;
         if (idx != LobbyMan::kRoomIndex_None) {
-            name = (const char*)LobbyMan_getRoomNameAt(self);
+            name = (const char*)getRoomNameAt();
         } else {
             name = str_empty_i;
         }
         cDirtysock_tag_TagFieldSetString(buf, 0x100, key, name);
-        LobbyApi_sendCommand(self->mpLobbyApi, 'peek', buf, 0, 0);
+        LobbyApi_sendCommand(mpLobbyApi, 'peek', buf, 0, 0);
     }
 }
 #endif
@@ -3433,15 +3433,15 @@ extern "C" void LobbyMan_joinRoom(LobbyMan* self, void* name, int a2);
  * @param idx  index into the room list, or LobbyMan::kRoomIndex_None
  * @param password   the room password, or 0
  */
-extern "C" void LobbyMan_joinRoomAt(LobbyMan* self, int idx, int password)
+void LobbyMan::joinRoomAt(int idx, int password)
 {
     void* name;
     if (idx != LobbyMan::kRoomIndex_None) {
-        name = LobbyMan_getRoomNameAt(self);
+        name = getRoomNameAt();
     } else {
         name = str_empty_i;
     }
-    LobbyMan_joinRoom(self, name, password);
+    joinRoom(name, password);
 }
 #endif
 
@@ -3462,9 +3462,9 @@ extern "C" void LobbyMan_LobbyFunctor_onroomselected_invoke(void* self, void* a1
  * @param password  the room password as a string pointer in an int, or 0 for none
  */
 // PORT: the unit declares a2 as int; it carries an optional string pointer.
-extern "C" void LobbyMan_joinRoom(LobbyMan* self, void* name, int password)
+void LobbyMan::joinRoom(void* name, int password)
 {
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         char buf[0x100];
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_NAME, (const char*)name);
@@ -3472,7 +3472,7 @@ extern "C" void LobbyMan_joinRoom(LobbyMan* self, void* name, int password)
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS, (const char*)password);
         }
         // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-        LobbyMan_sendRequest(self, 0xC, 'move', buf, (int)LobbyMan_LobbyFunctor_onroomselected_invoke, 20.0f);
+        sendRequest(0xC, 'move', buf, (int)LobbyMan_LobbyFunctor_onroomselected_invoke, 20.0f);
     }
 }
 #endif
@@ -3562,13 +3562,13 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_getRoomName);
  *
  * @return mRoomName when mpLobbyApi is set and the name is non-empty, otherwise 0
  */
-extern "C" char* LobbyMan_getRoomName(LobbyMan* self)
+char* LobbyMan::getRoomName()
 {
     char* roomName;
-    if (self->mpLobbyApi == 0) {
+    if (mpLobbyApi == 0) {
         return 0;
     }
-    roomName = self->mRoomName;
+    roomName = mRoomName;
     if (roomName != 0) {
         if (*roomName != 0) {
             return roomName;
@@ -3597,9 +3597,9 @@ extern "C" void LobbyMan_LobbyFunctor_onRoomCreated_invoke(void* self, void* a1,
  * @param nameSuffix  second part of the room name (a string pointer in an int)
  * @param password    the room password, or 0 for none
  */
-extern "C" void LobbyMan_createRoom(LobbyMan* self, int namePrefix, int nameSuffix, const char* password)
+void LobbyMan::createRoom(int namePrefix, int nameSuffix, const char* password)
 {
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         char buf[0x100];
         char name[0x100];
         sprintf(name, str_pct_s_pct_s_f, namePrefix, nameSuffix);
@@ -3609,7 +3609,7 @@ extern "C" void LobbyMan_createRoom(LobbyMan* self, int namePrefix, int nameSuff
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PASS, password);
         }
         // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-        LobbyMan_sendRequest(self, 17, 'room', buf, (int)LobbyMan_LobbyFunctor_onRoomCreated_invoke, 20.0f);
+        sendRequest(17, 'room', buf, (int)LobbyMan_LobbyFunctor_onRoomCreated_invoke, 20.0f);
     }
 }
 #endif
@@ -3712,10 +3712,11 @@ extern "C" int LobbyApi_ping(void* p, const char* key, int value, int timeout, v
  * @param key  the player's name (also the config key looked up)
  * @param def  the player's address, used unless the config overrides it
  */
-extern "C" void LobbyMan_pingPlayer(LobbyMan* self, const char* key, int def)
+void LobbyMan::pingPlayer(const char* key, int def)
 {
-    if (*(int*)self != 0) {
-        LobbyApi_ping(self->mpLobbyApi, key, LobbyMan_getConfigValue(self, key, def), 5000, (void*)LobbyMan_LobbyFunctor_onPingReceived_invoke, self);
+    if (*(int*)this != 0) {
+        LobbyApi_ping(mpLobbyApi, key, getConfigValue(key, def), 5000,
+                      (void*)LobbyMan_LobbyFunctor_onPingReceived_invoke, this);
     }
 }
 #endif
@@ -3736,13 +3737,14 @@ extern "C" void* func_003EE560(void*);
  * pings its name (entry + 0x8) at the address from its word +0x30 (or the config override, LobbyMan_getConfigValue()) with
  * LobbyApi_ping(), timeout 5000 and callback thunk LobbyMan_LobbyFunctor_onPingReceived_invoke.
  */
-extern "C" void LobbyMan_pingUser(LobbyMan* self)
+void LobbyMan::pingUser()
 {
-    if (*(int*)self != 0) {
-        char* userEntry = (char*)func_003EE560(self->mpUserList);
+    if (*(int*)this != 0) {
+        char* userEntry = (char*)func_003EE560(mpUserList);
         if (userEntry != 0) {
             const char* key = userEntry + 8;
-            LobbyApi_ping(self->mpLobbyApi, key, LobbyMan_getConfigValue(self, key, *(int*)(userEntry + 0x30)), 5000, (void*)LobbyMan_LobbyFunctor_onPingReceived_invoke, ((char*)self));
+            LobbyApi_ping(mpLobbyApi, key, getConfigValue(key, *(int*)(userEntry + 0x30)), 5000,
+                          (void*)LobbyMan_LobbyFunctor_onPingReceived_invoke, ((char*)this));
         }
     }
 }
@@ -3830,16 +3832,16 @@ extern "C" void LobbyMan_LobbyFunctor_onAbuseReportReceived_invoke(void* self, v
  *
  * @param name  the reported persona
  */
-extern "C" void LobbyMan_reportAbuse(LobbyMan* self, const char* name)
+void LobbyMan::reportAbuse(const char* name)
 {
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         char buf[0x100];
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
         const char* key = str_LANG;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, key, func_00259198());
         // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-        LobbyMan_sendRequest(self, 0x10, 'rept', buf, (int)LobbyMan_LobbyFunctor_onAbuseReportReceived_invoke, 20.0f);
+        sendRequest(0x10, 'rept', buf, (int)LobbyMan_LobbyFunctor_onAbuseReportReceived_invoke, 20.0f);
     }
 }
 #endif
@@ -3929,14 +3931,14 @@ extern "C" void LobbyMan_LobbyFunctor_onNewsRetrieved_invoke(void* self, void* a
  *
  * @param value  the news item number
  */
-extern "C" void LobbyMan_requestNews(LobbyMan* self, int value)
+void LobbyMan::requestNews(int value)
 {
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         char buf[0x100];
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_NAME, value);
         // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-        LobbyMan_sendRequest(self, 0xE, 'news', buf, (int)LobbyMan_LobbyFunctor_onNewsRetrieved_invoke, 20.0f);
+        sendRequest(0xE, 'news', buf, (int)LobbyMan_LobbyFunctor_onNewsRetrieved_invoke, 20.0f);
     }
 }
 #endif
@@ -4036,7 +4038,7 @@ void LobbyMan::onNewsRetrieved(LobbyApiMsgT* msg)
             BuddyMan_mBuddyMan->miMsgTimeout = cDirtysock_tag_TagFieldGetNumber(
                 cDirtysock_tag_TagFieldFind(msg->mpTagText, str_BUDDYMSGTIMEOUT), 0xD2F00);
             // PORT: a pointer passed through BuddyMan_connect's int parameter.
-            BuddyMan_connect(BuddyMan_mBuddyMan, host, port, mPersona, mPassword, (int)name);
+            BuddyMan_mBuddyMan->connect(host, port, mPersona, mPassword, (int)name);
         }
         online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
         event->mType = 273;
@@ -4083,12 +4085,12 @@ extern "C" void LobbyMan_selectRankList(sDsSlotSessK2* self, int slot)
         int old = self->slot;
         self->slot = slot;
         self->slotTag = LobbyApi_getStatus(self->ctx, 'slot');
-        if (LobbyMan_getNumRankRows((LobbyMan*)self) < self->limit[slot]) {
+        if (((LobbyMan*)self)->getNumRankRows() < self->limit[slot]) {
             if (self->handles[self->slot] != 0) {
                 LobbyApi_closeList(self->ctx, 4, self->handles[self->slot]);
                 self->handles[self->slot] = 0;
             }
-            LobbyMan_requestRankRows((LobbyMan*)self, 0, 100, old);
+            ((LobbyMan*)self)->requestRankRows(0, 100, old);
         } else {
             ((LobbyMan*)self)->onranklistupdate(0);
         }
@@ -4136,14 +4138,13 @@ struct sDsSlotSessE420 {
  * 'snap' with LobbyMan_sendRequest(), keeping the current mState (20 s timeout, reply through LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke to
  * LobbyMan_onRanklistRetrieved()). The new request id goes into mRankRequest[mRankSlot].
  *
- * @param self_  the lobby manager (LobbyMan_mLobbyMan)
  * @param start     first row to fetch
  * @param range     number of rows to fetch
  * @param prevSlot     slot whose pending request is cancelled (the previously selected one)
  */
-extern "C" void LobbyMan_requestRankRows(LobbyMan* self_, int start, int range, int prevSlot)
+void LobbyMan::requestRankRows(int start, int range, int prevSlot)
 {
-    sDsSlotSessE420* self = (sDsSlotSessE420*)self_;
+    sDsSlotSessE420* self = (sDsSlotSessE420*)this;
     if (self->active == 0)
         return;
     if (self->handles[self->slot] == 0)
@@ -4157,7 +4158,8 @@ extern "C" void LobbyMan_requestRankRows(LobbyMan* self_, int start, int range, 
     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_SEQN, self->slot);
     LobbyApi_cancelCallbacks(self->ctx, self->limitB[prevSlot]);
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest((LobbyMan*)self, self->active, 'snap', buf, (int)LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke, 20.0f);
+    ((LobbyMan*)self)->sendRequest(
+            self->active, 'snap', buf, (int)LobbyMan_LobbyFunctor_onRanklistRetrieved_invoke, 20.0f);
     self->limitB[self->slot] = self->mRequestId;
 }
 #endif
@@ -4265,23 +4267,23 @@ static inline sMsgListIterE6D0 sMsgListE6D0_insert(sMsgListIterE6D0 pos, void* c
  *
  * @param name  the persona to find
  */
-extern "C" void LobbyMan_findPlayer(LobbyMan* self, const char* name)
+void LobbyMan::findPlayer(const char* name)
 {
-    if (*(int*)self != 0) {
-        if (strcasecmp(self->mPersona, (void*)name) == 0) {
+    if (*(int*)this != 0) {
+        if (strcasecmp(mPersona, (void*)name) == 0) {
             int type = 270;
             online_Event* event = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
             event->mType = type;
             event->mVtbl = online_Event_vtbl;
             void* mp = event;
-            sMsgListE6D0_insert((sMsgListNodeE6D0*)self->mEventList.mpHead, mp);
+            sMsgListE6D0_insert((sMsgListNodeE6D0*)mEventList.mpHead, mp);
         } else {
             char buf[0x100];
             buf[0] = 0;
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
-            self->mFindingPlayer = 1;
+            mFindingPlayer = 1;
             // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-            LobbyMan_sendRequest(self, *(int*)self, 'user', buf, (int)LobbyMan_LobbyFunctor_onPlayerFound_invoke, 20.0f);
+            sendRequest(*(int*)this, 'user', buf, (int)LobbyMan_LobbyFunctor_onPlayerFound_invoke, 20.0f);
         }
     }
 }
@@ -4426,13 +4428,13 @@ extern "C" void func_00268E50();
  *
  * @param name  the persona to look up
  */
-extern "C" void LobbyMan_requestPlayerInfo(LobbyMan* self, const char* name)
+void LobbyMan::requestPlayerInfo(const char* name)
 {
     char buf[0x100];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
     // PORT: function pointer passed through LobbyApi_sendCommand's int parameter.
-    LobbyApi_sendCommand(self->mpLobbyApi, 'onln', buf, (int)func_00268E50, ((char*)self));
+    LobbyApi_sendCommand(mpLobbyApi, 'onln', buf, (int)func_00268E50, ((char*)this));
 }
 #endif
 //100%
@@ -4504,7 +4506,7 @@ struct sUserMsg_25EB00 {
  *
  * @param msg  the LobbyApi reply: mStatus (0 = success), the tag record mpTagText
  */
-extern "C" void LobbyMan_handlePlayerInfoReply(LobbyMan* self, LobbyApiMsgT* msg)
+void LobbyMan::handlePlayerInfoReply(LobbyApiMsgT* msg)
 {
     int type = msg->mStatus;
     if (type == 0) {
@@ -4540,7 +4542,7 @@ extern "C" void LobbyMan_handlePlayerInfoReply(LobbyMan* self, LobbyApiMsgT* msg
         strcpy(netEvent->s2, tagN);
         strcpy(netEvent->s3, tagA);
         netEvent->stats = info;
-        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(&self->mEventList.mpHead);
+        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(&mEventList.mpHead);
         void* mp = netEvent;
         eventList->insert(eventList->end(), mp);
     } else if (type != kLobbyErr_uusr) {
@@ -4548,7 +4550,7 @@ extern "C" void LobbyMan_handlePlayerInfoReply(LobbyMan* self, LobbyApiMsgT* msg
         netEvent[0] = 258;
         *(void***)((char*)netEvent + 0x4) = online_ErrorEvent_vtbl;
         netEvent[2] = type;
-        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(&self->mEventList.mpHead);
+        sMsgList_25EB00* eventList = (sMsgList_25EB00*)(&mEventList.mpHead);
         void* mp = netEvent;
         eventList->insert(eventList->end(), mp);
     }
@@ -4575,19 +4577,19 @@ extern "C" void LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke(void* self, vo
  * @param data       the search options (five ints; the quick-play popup's miSearchOptions)
  * @param matchType  the game kind, kept in mMatchType
  */
-extern "C" void LobbyMan_startQuickMatch(LobbyMan* self, const void* data, int matchType)
+void LobbyMan::startQuickMatch(const void* data, int matchType)
 {
-    int st = *(int*)self;
+    int st = *(int*)this;
     if (st != 0) {
         bool on = (st == 1);
         if (on) {
             char buf[0x100];
-            self->mMatchType = matchType;
+            mMatchType = matchType;
             buf[0] = 0;
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_KIND, str_DeathRace);
             cDirtysock_tag_TagFieldSetStructure(buf, 0x100, str_QMFP, data, 20, str_l);
             // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-            LobbyMan_sendRequest(self, 18, 'quik', buf, (int)LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke, 20.0f);
+            sendRequest(18, 'quik', buf, (int)LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke, 20.0f);
         }
     }
 }
@@ -4649,28 +4651,28 @@ static inline void post_EED8(char* self, void* msg)
  * "*" straight to LobbyApi_sendCommand() (setting mTimeout to 20.0 and mRequestId; reply to LobbyMan_onQuickMatchResponse()).
  * Then sets mState to 1 and pushes an Event of type 231 onto mEventList.
  */
-extern "C" void LobbyMan_cancelQuickMatch(LobbyMan* self)
+void LobbyMan::cancelQuickMatch()
 {
-    int st = *(int*)self;
+    int st = *(int*)this;
     if (st == 0)
         return;
     if (st == 25) {
         if (*func_002591D0() != 0)
-            cGameConnMan_shutdown((cGameConnMan*)func_002591D0(), 2);
+            ((cGameConnMan*)func_002591D0())->shutdown(2);
     } else if (st != 1) {
         char buf[0x100];
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_KIND, str_star);
-        self->mTimeout = 20.0f;
+        mTimeout = 20.0f;
         // PORT: function pointer passed through LobbyApi_sendCommand's int parameter.
-        self->mRequestId = LobbyApi_sendCommand(self->mpLobbyApi, 'quik', buf, (int)LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke, ((char*)self));
+        mRequestId = LobbyApi_sendCommand(mpLobbyApi, 'quik', buf, (int)LobbyMan_LobbyFunctor_onQuickMatchResponse_invoke, ((char*)this));
     }
-    *(int*)self = 1;
+    *(int*)this = 1;
     int type = 231;
     online_Event* netEvent = (online_Event*)operator new(8, str_NetEvent, 0x20000000, 0);
     netEvent->mType = type;
     netEvent->mVtbl = online_Event_vtbl;
-    post_EED8(((char*)self), netEvent);
+    post_EED8(((char*)this), netEvent);
 }
 #endif
 
@@ -4771,12 +4773,12 @@ extern "C" void* func_003EE560(void*);
  *
  * @return the room's name, or 0 when mState is 0
  */
-extern "C" void* LobbyMan_getRoomNameAt(LobbyMan* self)
+void* LobbyMan::getRoomNameAt()
 {
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         return 0;
     }
-    return (char*)func_003EE560(self->mpRoomList) + 0x1C;
+    return (char*)func_003EE560(mpRoomList) + 0x1C;
 }
 #endif
 
@@ -4799,12 +4801,12 @@ static inline short getFlags(void* p)
  *
  * @return 1 when the room's bit is set, otherwise 0 (also when mState is 0)
  */
-extern "C" int LobbyMan_isRoomLocked(LobbyMan* self)
+int LobbyMan::isRoomLocked()
 {
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         return 0;
     }
-    return getFlags(func_003EE560(self->mpRoomList)) & 1;
+    return getFlags(func_003EE560(mpRoomList)) & 1;
 }
 #endif
 
@@ -4818,12 +4820,12 @@ extern "C" int func_003EE558(void*);
  *
  * @return func_003EE558()'s count for mpUserList, or 0 when mState is 0
  */
-extern "C" int LobbyMan_getNumUsers(LobbyMan* self)
+int LobbyMan::getNumUsers()
 {
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         return 0;
     }
-    return func_003EE558(self->mpUserList);
+    return func_003EE558(mpUserList);
 }
 #endif
 
@@ -4841,12 +4843,12 @@ void* func_003EE560_2(void* list, int idx) __asm__("func_003EE560");
  * @param outFlag  receives bit 21 of the entry's word +0x4, or 0 to skip it (written only when the entry exists)
  * @return the entry's name (entry + 0x8), " " (str_sp_c) when there is no such entry, or 0 when mState is 0
  */
-extern "C" char* LobbyMan_getUserName(LobbyMan* self, int idx, int* outFlag)
+char* LobbyMan::getUserName(int idx, int* outFlag)
 {
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         return 0;
     }
-    char* userEntry = (char*)func_003EE560_2(self->mpUserList, idx);
+    char* userEntry = (char*)func_003EE560_2(mpUserList, idx);
     if (userEntry != 0) {
         if (outFlag != 0) {
             *outFlag = (*(int*)(userEntry + 0x4) >> 21) & 1;
@@ -4868,13 +4870,13 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_getUserFlag);
  *
  * @return the bit, or 0 when mState is 0 or there is no such entry
  */
-extern "C" int LobbyMan_getUserFlag(LobbyMan* self)
+int LobbyMan::getUserFlag()
 {
     void* userEntry;
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         return 0;
     }
-    userEntry = func_003EE560(self->mpUserList);
+    userEntry = func_003EE560(mpUserList);
     if (userEntry != 0) {
         return (*(int*)((char*)userEntry + 0x4) >> 21) & 1;
     }
@@ -4997,12 +4999,11 @@ static inline int handleCount_F338(void* h)
 /**
  * Returns how many rows the selected rank list's snapshot holds.
  *
- * @param self_  the lobby manager (LobbyMan_mLobbyMan)
  * @return func_003EE550()'s count for mRankSnapshot[mRankSlot], or 0 when there is no snapshot or mState is 0
  */
-extern "C" unsigned int LobbyMan_getNumRankRows(LobbyMan* self_)
+unsigned int LobbyMan::getNumRankRows()
 {
-    LobbyMan* self = self_;
+    LobbyMan* self = this;
     if (self->mState == 0)
         return 0;
     return handleCount_F338(self->mRankSnapshot[self->mRankSlot]);
@@ -5036,16 +5037,16 @@ struct sDsSlotSessK2b {
  * @param outB  receives the row's second value
  * @return the row entry, or 0 when it is missing or mState is 0
  */
-extern "C" void* LobbyMan_getRankRow(LobbyMan* self, int rowIndex, int* outA, int* outB)
+void* LobbyMan::getRankRow(int rowIndex, int* outA, int* outB)
 {
-    if (self->mState == 0)
+    if (mState == 0)
         return 0;
-    char* rankEntry = (char*)func_003EE560(self->mRankSnapshot[self->mRankSlot]);
+    char* rankEntry = (char*)func_003EE560(mRankSnapshot[mRankSlot]);
     if (rankEntry != 0) {
         int st[2];
         cDirtysock_tag_TagFieldGetStructure(rankEntry + 0x28, st, 8, str_l);
         *outB = st[1];
-        if (self->mRankSlot != 0)
+        if (mRankSlot != 0)
             *outA = st[0];
         else
             *outA = *(int*)rankEntry;
@@ -5063,13 +5064,13 @@ extern "C" char* LobbyApi_getText(void* p, int tag);
  *
  * @return true when mState is non-zero and LobbyApi_getText(mpLobbyApi, 'room') gives a non-empty string
  */
-extern "C" bool LobbyMan_isInRoom(LobbyMan* self)
+bool LobbyMan::isInRoom()
 {
     char* room;
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         return false;
     }
-    room = LobbyApi_getText(self->mpLobbyApi, 'room');
+    room = LobbyApi_getText(mpLobbyApi, 'room');
     return room != 0 && *room != 0;
 }
 #endif
@@ -5085,9 +5086,9 @@ extern "C" void LobbyMan_challengePlayer(void*, char*, int);
  * @param idx        index into mpUserList
  * @param matchType  the game kind, passed on
  */
-extern "C" void LobbyMan_challengeUser(LobbyMan* self, int idx, int matchType)
+void LobbyMan::challengeUser(int idx, int matchType)
 {
-    LobbyMan_challengePlayer(self, LobbyMan_getUserName(self, idx, 0), matchType);
+    LobbyMan_challengePlayer(this, getUserName(idx, 0), matchType);
 }
 #endif
 
@@ -5128,14 +5129,13 @@ extern "C" void LobbyMan_challengePlayer_impl(char* self, const char* name, int 
  * @param name  the challenged persona
  * @param matchType    the game kind, kept in mMatchType
  */
-extern "C" void LobbyMan_challengePlayer_impl(char* vself, const char* name, int matchType)
+void LobbyMan::challengePlayer(const char* name, int matchType)
 {
-    LobbyMan* self = (LobbyMan*)vself;
-    if (*(int*)self == 0)
+    if (*(int*)this == 0)
         return;
-    self->mIsHost = 1;
-    cBXString_operatorE1(&self->mOpponent, name);
-    self->mMatchType = matchType;
+    mIsHost = 1;
+    cBXString_operatorE1(&mOpponent, name);
+    mMatchType = matchType;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     int locationID = cBENewRaceInterface_getLocationID(cBE_getInterface_Fv(cBE_getBE(), 0));
     int flags = D_005308D0[0];
@@ -5149,9 +5149,9 @@ extern "C" void LobbyMan_challengePlayer_impl(char* vself, const char* name, int
     char buf[0x40];
     sprintf(buf, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct_b, str_challenge, locationID, event, track, y, multipliers, powerUps, ai, pointIcons,
             cCommSystem_getSignature_F4C0(cCommSystem_mCommSystem),
-            (self)->mStats.mWins, (self)->mStats.mGamesPlayed, (self)->mStats.mDisconnects, (self)->mStats.mRank);
-    LobbyMan_sendPrivateMessage_v(self, (int)self->mOpponent, buf);
-    *(int*)self = 22;
+            mStats.mWins, mStats.mGamesPlayed, mStats.mDisconnects, mStats.mRank);
+    LobbyMan_sendPrivateMessage_v(this, (int)mOpponent, buf);
+    *(int*)this = 22;
 }
 #endif
 
@@ -5200,21 +5200,20 @@ static inline sMsgListIterF628 sMsgListF628_insert(sMsgListIterF628 pos, void* c
  * instead. With @p notify set it then posts an online::Event of type 238 (vtable online_Event_vtbl) on mEventList. The
  * update LobbyMan_update calls it when the state-24 timeout runs out; the challenge popup calls it to cancel.
  *
- * @param selfp   the lobby manager
  * @param notify  nonzero to post the type-238 event
  * @param flag    nonzero to send "abortChal" to the opponent first (challenge states only)
  */
-extern "C" void LobbyMan_cancelChallenge(LobbyMan* selfp, int notify, int flag)
+void LobbyMan::cancelChallenge(int notify, int flag)
 {
-    int st = *(int*)selfp;
+    int st = *(int*)this;
     if (st != 0) {
         if (st == 21 || st == 22 || st == 0x18) {
             if (flag)
-                LobbyMan_sendAbortChallenge(((char*)selfp));
-            LobbyApi_cancelCallbacks(selfp->mpLobbyApi, selfp->mRequestId);
-            LobbyMan_clearChallenge(selfp);
+                LobbyMan_sendAbortChallenge(((char*)this));
+            LobbyApi_cancelCallbacks(mpLobbyApi, mRequestId);
+            clearChallenge();
         } else if (st == 25) {
-            LobbyMan_leaveGame(selfp, 0);
+            leaveGame(0);
         }
         if (notify) {
             int type = 238;
@@ -5222,7 +5221,7 @@ extern "C" void LobbyMan_cancelChallenge(LobbyMan* selfp, int notify, int flag)
             netEvent[0] = type;
             *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
             void* mp = netEvent;
-            sMsgListF628_insert((sMsgListNodeF628*)selfp->mEventList.mpHead, mp);
+            sMsgListF628_insert((sMsgListNodeF628*)mEventList.mpHead, mp);
         }
     }
 }
@@ -5270,26 +5269,25 @@ static inline sMsgListIterF740 sMsgListF740_insert(sMsgListIterF740 pos, void* c
  * online::Event of that type (vtable online_Event_vtbl) on mEventList. The challenge-received popup calls it to back
  * out of an accepted game.
  *
- * @param selfp  the lobby manager
  * @param type   event type to post, or 0 for none
  */
-extern "C" void LobbyMan_leaveGame(LobbyMan* selfp, int type)
+void LobbyMan::leaveGame(int type)
 {
-    if (*(int*)selfp != 0) {
-        if (*(int*)selfp == 25) {
+    if (*(int*)this != 0) {
+        if (*(int*)this == 25) {
             char buf[0x100];
-            selfp->mTimeout = 20.0f;
+            mTimeout = 20.0f;
             buf[0] = 0;
             cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, str_star);
-            LobbyApi_sendCommand(selfp->mpLobbyApi, 'chal', buf, 0, 0);
-            *(int*)selfp = 1;
+            LobbyApi_sendCommand(mpLobbyApi, 'chal', buf, 0, 0);
+            *(int*)this = 1;
         }
         if (type != 0) {
             int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             netEvent[0] = type;
             *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
             void* mp = netEvent;
-            sMsgListF740_insert((sMsgListNodeF740*)selfp->mEventList.mpHead, mp);
+            sMsgListF740_insert((sMsgListNodeF740*)mEventList.mpHead, mp);
         }
     }
 }
@@ -5306,10 +5304,10 @@ extern "C" int LobbyApi_sendCommand(void* p, int tag, void* cb, int a3, void* us
  *
  * The record is the empty string str_empty_i and no reply callback is registered.
  */
-extern "C" void LobbyMan_clearChallenge(LobbyMan* self)
+void LobbyMan::clearChallenge()
 {
-    LobbyApi_sendCommand(self->mpLobbyApi, 'chal', str_empty_i, 0, 0);
-    *(int*)self = 1;
+    LobbyApi_sendCommand(mpLobbyApi, 'chal', str_empty_i, 0, 0);
+    *(int*)this = 1;
 }
 #endif
 
@@ -5386,7 +5384,7 @@ void LobbyMan::onchallengeresponse(LobbyApiMsgT* msg)
         }
     } else if (strcmp(buf, str_chal) == 0) {
         if (*(int*)this == 21)
-            LobbyMan_sendLockChallenge(this, (int)mOpponent, 0x18);
+            this->sendLockChallenge((int)mOpponent, 0x18);
     } else if (strcmp(buf, str_idle) == 0) {
     } else if (strcmp(buf, str_play) == 0) {
         if (*(int*)this == 21) {
@@ -5415,15 +5413,15 @@ extern "C" void LobbyMan_LobbyFunctor_onchallengeresponse_invoke(void* self, voi
  *
  * @param name  persona name sent as PERS
  */
-extern "C" void LobbyMan_sendHostChallenge(LobbyMan* self, const char* name)
+void LobbyMan::sendHostChallenge(const char* name)
 {
     char buf[0x100];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_HOST, D_004A3240);
-    *(int*)self = 1;
+    *(int*)this = 1;
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest(self, 21, 'chal', buf, (int)LobbyMan_LobbyFunctor_onchallengeresponse_invoke, 20.0f);
+    sendRequest(21, 'chal', buf, (int)LobbyMan_LobbyFunctor_onchallengeresponse_invoke, 20.0f);
 }
 #endif
 
@@ -5442,15 +5440,15 @@ extern "C" void LobbyMan_LobbyFunctor_onchallengeresponse_invoke(void* self, voi
  *
  * @param name  persona name sent as PERS
  */
-extern "C" void LobbyMan_sendGuestChallenge(LobbyMan* self, const char* name)
+void LobbyMan::sendGuestChallenge(const char* name)
 {
     char buf[0x100];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, name);
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_HOST, D_004A3250);
-    *(int*)self = 1;
+    *(int*)this = 1;
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest(self, 0x18, 'chal', buf, (int)LobbyMan_LobbyFunctor_onchallengeresponse_invoke, 20.0f);
+    sendRequest(0x18, 'chal', buf, (int)LobbyMan_LobbyFunctor_onchallengeresponse_invoke, 20.0f);
 }
 #endif
 
@@ -5468,11 +5466,11 @@ extern "C" void LobbyMan_sendLockChallenge(LobbyMan* self, int a1, int a2);
  * @param recipient  name of the challenged player (a string pointer passed as an int)
  * @param matchType  the game kind stored in mMatchType
  */
-extern "C" void LobbyMan_lockChallenge(LobbyMan* self, int recipient, int matchType)
+void LobbyMan::lockChallenge(int recipient, int matchType)
 {
-    if (*(int*)self != 0) {
-        self->mMatchType = matchType;
-        LobbyMan_sendLockChallenge(self, recipient, 23);
+    if (*(int*)this != 0) {
+        mMatchType = matchType;
+        sendLockChallenge(recipient, 23);
     }
 }
 #endif
@@ -5499,7 +5497,7 @@ extern "C" void func_00268EC8(void* self, void* a1, int a2);
  * @return the request handle LobbyApi_sendCommand() returns
  */
 // PORT: a1 carries a string pointer in an int (the unit's declaration).
-extern "C" void* LobbyMan_sendPrivateMessage(LobbyMan* self, int recipient, void* text)
+void* LobbyMan::sendPrivateMessage(int recipient, void* text)
 {
     char buf[0x100];
     buf[0] = 0;
@@ -5507,7 +5505,7 @@ extern "C" void* LobbyMan_sendPrivateMessage(LobbyMan* self, int recipient, void
     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_TEXT, (const char*)text);
     cDirtysock_tag_TagFieldSetFlags(buf, 0x100, str_ATTR, 0x40004000);
     // PORT: function pointer passed through LobbyApi_sendCommand's int parameter.
-    return (void*)LobbyApi_sendCommand(self->mpLobbyApi, 'mesg', buf, (int)func_00268EC8, self);
+    return (void*)LobbyApi_sendCommand(mpLobbyApi, 'mesg', buf, (int)func_00268EC8, this);
 }
 #endif
 
@@ -5534,9 +5532,9 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_sendDecline__FPvi);
  * @param playerName  name of the player whose challenge is declined (a string pointer passed as an int)
  * @return LobbyMan_sendPrivateMessage()'s result
  */
-void* LobbyMan_sendDecline(void* self, int playerName)
+void* LobbyMan::sendDecline(int playerName)
 {
-    return LobbyMan_sendPrivateMessage((LobbyMan*)self, playerName, (void*)D_004A3270);
+    return ((LobbyMan*)this)->sendPrivateMessage(playerName, (void*)D_004A3270);
 }
 #endif
 
@@ -5551,10 +5549,9 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_sendAbortChallenge__FPv);
  *
  * @return LobbyMan_sendPrivateMessage()'s result
  */
-void* LobbyMan_sendAbortChallenge(void* vself)
+void* LobbyMan::sendAbortChallenge()
 {
-    LobbyMan* self = (LobbyMan*)vself;
-    return LobbyMan_sendPrivateMessage((LobbyMan*)self, (int)self->mOpponent, (void*)D_004807F8);
+    return sendPrivateMessage((int)mOpponent, (void*)D_004807F8);
 }
 #endif
 
@@ -5604,17 +5601,17 @@ static inline sMsgListIter_0025FC70 sMsgList_0025FC70_insert(sMsgListIter_0025FC
  * @param playerName    name of the player (a string pointer passed as an int)
  * @param newState    the new mState (23 from LobbyMan_lockChallenge, 24 from LobbyMan_onchallengeresponse)
  */
-extern "C" void LobbyMan_sendLockChallenge(LobbyMan* self, int playerName, int newState)
+void LobbyMan::sendLockChallenge(int playerName, int newState)
 {
-    LobbyMan_sendPrivateMessage(self, playerName, str_lockChal_b);
+    sendPrivateMessage(playerName, str_lockChal_b);
     int kind = 272;
-    *(int*)self = newState;
+    *(int*)this = newState;
     int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     netEvent[0] = kind;
     *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
     void* mp = netEvent;
-    sMsgList_0025FC70_insert((sMsgListNode_0025FC70*)self->mEventList.mpHead, mp);
-    self->mTimeout = 20.0f;
+    sMsgList_0025FC70_insert((sMsgListNode_0025FC70*)mEventList.mpHead, mp);
+    mTimeout = 20.0f;
     D_004A5154 = 21.0f;
 }
 #endif
@@ -6090,7 +6087,8 @@ extern "C" void LobbyMan_reportRaceResult(char* const self, int sendName, int id
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTWI1, opp->TotalPointsLostToWipeouts);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_PLOSTRE1, opp->TotalPointsLostToResets);
     // PORT: function pointer passed through LobbyMan_sendRequest's int parameter.
-    LobbyMan_sendRequest((LobbyMan*)self, *(int*)self, 'rank', buf, (int)LobbyMan_LobbyFunctor_onresultsreportresponse_invoke, 20.0f);
+    ((LobbyMan*)self)->sendRequest(*(int*)self, 'rank', buf,
+                                   (int)LobbyMan_LobbyFunctor_onresultsreportresponse_invoke, 20.0f);
     postMsg(self, 0x100);
 }
 #endif
@@ -6236,20 +6234,20 @@ extern "C" void cBXString_Reset(void* self);
  * to {1, 1}, mBornMonth and mBornDay to 1, mBornYear to 1985, mGender to 0 and mLegalAccepted to 0. mNameOptions and
  * the mChange* flags are left alone. The constructor LobbyMan_LobbyMan and the account screens call it.
  */
-extern "C" void LobbyMan_resetNewAccount(LobbyMan* self)
+void LobbyMan::resetNewAccount()
 {
-    cBXString_Reset((char*)&self->mNewAccount);
-    cBXString_Reset(&self->mNewAccount.mPassword);
-    cBXString_Reset(&self->mNewAccount.mConfirmPassword);
-    cBXString_Reset(&self->mNewAccount.mMail);
-    cBXString_Reset(&self->mNewAccount.mParentMail);
-    self->mNewAccount.mSpam[0] = 1;
-    self->mNewAccount.mSpam[1] = 1;
-    self->mNewAccount.mBornMonth = 1;
-    self->mNewAccount.mGender = 0;
-    self->mNewAccount.mBornDay = 1;
-    self->mNewAccount.mBornYear = 1985;
-    self->mNewAccount.mLegalAccepted = 0;
+    cBXString_Reset((char*)&mNewAccount);
+    cBXString_Reset(&mNewAccount.mPassword);
+    cBXString_Reset(&mNewAccount.mConfirmPassword);
+    cBXString_Reset(&mNewAccount.mMail);
+    cBXString_Reset(&mNewAccount.mParentMail);
+    mNewAccount.mSpam[0] = 1;
+    mNewAccount.mSpam[1] = 1;
+    mNewAccount.mBornMonth = 1;
+    mNewAccount.mGender = 0;
+    mNewAccount.mBornDay = 1;
+    mNewAccount.mBornYear = 1985;
+    mNewAccount.mLegalAccepted = 0;
 }
 #endif
 
@@ -6315,9 +6313,9 @@ extern "C" void BuddyMan__BuddyMan(void* self, int flags);
 extern "C" void BuddyMan_destroyInstance(void)
 {
     if (BuddyMan_mBuddyMan != 0) {
-        BuddyMan_clearConnectSettings(BuddyMan_mBuddyMan);
-        BuddyMan_deleteMessages(BuddyMan_mBuddyMan);
-        BuddyMan_disconnect(BuddyMan_mBuddyMan);
+        BuddyMan_mBuddyMan->clearConnectSettings();
+        BuddyMan_mBuddyMan->deleteMessages();
+        BuddyMan_mBuddyMan->disconnect();
         if (BuddyMan_mBuddyMan != 0) {
             BuddyMan__BuddyMan(BuddyMan_mBuddyMan, 3);
         }
@@ -6335,13 +6333,12 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_clearConnectSettings__FPv);
  * Empties mServerName, mUserName and mPassword (first byte 0) and sets miPort to -1, which BuddyMan_reconnect treats as "no
  * saved server".
  */
-void BuddyMan_clearConnectSettings(void* vself)
+void BuddyMan::clearConnectSettings()
 {
-    BuddyMan* self = (BuddyMan*)vself;
-    *(char*)self = 0;
-    self->miPort = -1;
-    self->mUserName[0] = 0;
-    self->mPassword[0] = 0;
+    *(char*)this = 0;
+    miPort = -1;
+    mUserName[0] = 0;
+    mPassword[0] = 0;
 }
 #endif
 
@@ -6366,11 +6363,11 @@ struct sObj261070 {
  * Pops the pointers from the back (mMessagesFinish) and destroys each non-null cPrivateMessage through its virtual
  * destructor (vtable at +0xC, slot 1) with delete flags 3.
  */
-extern "C" void BuddyMan_deleteMessages(BuddyMan* self)
+void BuddyMan::deleteMessages()
 {
-    while (((sObj261070**)self->mMessagesStart) != ((sObj261070**)self->mMessagesFinish)) {
-        sObj261070* message = ((sObj261070*)self->mMessagesFinish[-1]);
-        (*(sObj261070***)&self->mMessagesFinish)--;
+    while (((sObj261070**)mMessagesStart) != ((sObj261070**)mMessagesFinish)) {
+        sObj261070* message = ((sObj261070*)mMessagesFinish[-1]);
+        (*(sObj261070***)&mMessagesFinish)--;
         if (message != 0) {
             message->vt[1].fn(vthis(message, message->vt[1]), 3);
         }
@@ -6395,9 +6392,9 @@ static inline void* Mgr_2610D0()
     if (BuddyMan_mBuddyMan == 0)
         BuddyMan_createInstance();
     if (BuddyMan_isLoggedIn(BuddyMan_mBuddyMan) == 0)
-        BuddyMan_reconnect(BuddyMan_mBuddyMan);
+        BuddyMan_mBuddyMan->reconnect();
     if (BuddyMan_mBuddyMan == 0)
-        LobbyMan_disconnect(LobbyMan_mLobbyMan);
+        LobbyMan_mLobbyMan->disconnect();
     return BuddyMan_mBuddyMan;
 }
 
@@ -6412,13 +6409,13 @@ static inline void* Mgr_2610D0()
  */
 extern "C" void BuddyMan_addMessageSendersToRoster()
 {
-    for (int i = 0; i < BuddyMan_getNumMessages((BuddyMan*)Mgr_2610D0()); i++)
+    for (int i = 0; i < ((BuddyMan*)Mgr_2610D0())->getNumMessages(); i++)
     {
-        int* message = (int*)BuddyMan_getMessage((BuddyMan*)Mgr_2610D0(), i);
-        if (BuddyMan_findRosterEntry((BuddyMan*)Mgr_2610D0(), *message) < 0)
+        int* message = (int*)((BuddyMan*)Mgr_2610D0())->getMessage(i);
+        if (((BuddyMan*)Mgr_2610D0())->findRosterEntry(*message) < 0)
         {
             int out;
-            BuddyMan_moveToRosterList((BuddyMan*)Mgr_2610D0(), *message, 2, &out);
+            ((BuddyMan*)Mgr_2610D0())->moveToRosterList(*message, 2, &out);
         }
     }
 }
@@ -6466,22 +6463,22 @@ struct sBXStr_261248 {
  * @param a5_    resource name, a string pointer passed as an int
  */
 // PORT: the unit declares (void*, void*, int, void*, void*, int); the last int is really a string pointer.
-extern "C" void BuddyMan_connect(BuddyMan* self_, void* name_, int port, void* a3_, void* a4_, int a5_)
+void BuddyMan::connect(void* name_, int port, void* a3_, void* a4_, int a5_)
 {
     const char* name = (const char*)name_;
     const char* userName = (const char*)a3_;
     const char* password = (const char*)a4_;
     const char* resource = (const char*)a5_;
-    if (self_->mpBuddyApi == 0)
+    if (mpBuddyApi == 0)
     {
-        BuddyMan_createBuddyApi(self_, (void*)resource);
-        func_003F0818(self_->mpBuddyApi, resource, 'ssx3', func_00259198(), 0);
+        createBuddyApi((void*)resource);
+        func_003F0818(mpBuddyApi, resource, 'ssx3', func_00259198(), 0);
     }
-    strcpy(((char*)self_), name);
-    self_->miPort = port;
-    strcpy(self_->mUserName, userName);
-    strcpy(self_->mPassword, password);
-    BuddyMan* buddyMan = self_;
+    strcpy(((char*)this), name);
+    miPort = port;
+    strcpy(mUserName, userName);
+    strcpy(mPassword, password);
+    BuddyMan* buddyMan = this;
     buddyMan->miError = 0;
     buddyMan->mfTimeout = 30.0f;
     buddyMan->mState = 1;
@@ -6494,8 +6491,9 @@ extern "C" void BuddyMan_connect(BuddyMan* self_, void* name_, int port, void* a
     sBXStr_261248 resourceString;
     cBXString_operatorE1(&resourceString, str_cso);
     cBXString_Concat(&resourceString, resource);
-    cBXString_operatorE1(&self_->mResource, resource);
-    func_003F08E8(self_->mpBuddyApi, name, port, 0x1E, loginString.p, resourceString.p, (void*)BuddyMan_BuddyFunctor_onconnect_invoke, ((char*)self_));
+    cBXString_operatorE1(&mResource, resource);
+    func_003F08E8(mpBuddyApi, name, port, 0x1E, loginString.p, resourceString.p,
+                  (void*)BuddyMan_BuddyFunctor_onconnect_invoke, ((char*)this));
     cBXString__cBXString(&resourceString, 2);
     cBXString__cBXString(&loginString, 2);
 }
@@ -6511,13 +6509,13 @@ extern "C" void BuddyMan_connect(BuddyMan* self, void* self2, int idx, void* a, 
  * Only when miPort is not negative and the low byte of mState is 0 (idle); then calls BuddyMan_connect() with mServerName,
  * miPort, mUserName, mPassword and mResource.
  */
-extern "C" void BuddyMan_reconnect(BuddyMan* self)
+void BuddyMan::reconnect()
 {
-    int idx = self->miPort;
+    int idx = miPort;
     if (idx >= 0) {
-        bool ok = !*(bool*)&self->mState;
+        bool ok = !*(bool*)&mState;
         if (ok) {
-            BuddyMan_connect(self, self, idx, (char*)&self->mUserName, (char*)&self->mPassword, (int)self->mResource);
+            connect(this, idx, (char*)&mUserName, (char*)&mPassword, (int)mResource);
         }
     }
 }
@@ -6535,15 +6533,15 @@ extern "C" void BuddyMan_destroyBuddyApi(BuddyMan* self);
  * First updates the presence with BuddyMan_setPresence(self, 0, 1, 0, 0, 0), then releases the BuddyApi (BuddyMan_destroyBuddyApi), then
  * clears mState, miError, mbDisconnected, mbLoggedIn and mbRosterDone.
  */
-extern "C" void BuddyMan_disconnect(BuddyMan* self)
+void BuddyMan::disconnect()
 {
-    BuddyMan_setPresence(self, 0, 1, 0, 0, 0);
-    BuddyMan_destroyBuddyApi(self);
-    self->mState = 0;
-    self->miError = 0;
-    self->mbDisconnected = 0;
-    self->mbLoggedIn = 0;
-    self->mbRosterDone = 0;
+    setPresence(0, 1, 0, 0, 0);
+    destroyBuddyApi();
+    mState = 0;
+    miError = 0;
+    mbDisconnected = 0;
+    mbLoggedIn = 0;
+    mbRosterDone = 0;
 }
 #endif
 
@@ -6579,14 +6577,14 @@ extern "C" void BuddyMan_disconnect(BuddyMan* self);
  * With a BuddyApi it calls func_003F17D8(mpBuddyApi); when mbDisconnected was set (by BuddyMan_onconnect) it then
  * disconnects (BuddyMan_disconnect) and clears mbDisconnected.
  */
-extern "C" void BuddyMan_update(BuddyMan* self)
+void BuddyMan::update()
 {
-    void* buddyApi = self->mpBuddyApi;
+    void* buddyApi = mpBuddyApi;
     if (buddyApi != 0) {
         func_003F17D8(buddyApi);
-        if (self->mbDisconnected != 0) {
-            BuddyMan_disconnect(self);
-            self->mbDisconnected = 0;
+        if (mbDisconnected != 0) {
+            disconnect();
+            mbDisconnected = 0;
         }
     }
 }
@@ -6619,11 +6617,11 @@ extern "C" void func_003F17C8(void* h, void (*cb)(void*), void* user);
  *
  * @param resourceName    the resource name passed on from BuddyMan_connect
  */
-extern "C" void BuddyMan_createBuddyApi(BuddyMan* self, void* resourceName)
+void BuddyMan::createBuddyApi(void* resourceName)
 {
     void* buddyApi = func_003F0710(resourceName, str_2003_10_20);
-    self->mpBuddyApi = (BuddyApiRefT*)buddyApi;
-    func_003F17C8(buddyApi, BuddyMan_BuddyFunctor_onReceiveMessage_invoke, self);
+    mpBuddyApi = (BuddyApiRefT*)buddyApi;
+    func_003F17C8(buddyApi, BuddyMan_BuddyFunctor_onReceiveMessage_invoke, this);
 }
 #endif
 
@@ -6656,11 +6654,10 @@ struct sObj261530 {
  * at +0x3C, slot 1, delete flags 3). Then calls func_003F0BE0 and func_003F07A0 on mpBuddyApi and clears mpBuddyApi and
  * mpRoster.
  *
- * @param vself  the buddy manager
  */
-extern "C" void BuddyMan_destroyBuddyApi(BuddyMan* vself)
+void BuddyMan::destroyBuddyApi()
 {
-    BuddyMan* self = vself;
+    BuddyMan* self = this;
     if (((void*)self->mpBuddyApi) != 0) {
         while (((sObj261530**)self->mChallengersStart) != ((sObj261530**)self->mChallengersFinish)) {
             sObj261530* challenger = ((sObj261530*)self->mChallengersFinish[-1]);
@@ -6765,7 +6762,7 @@ void BuddyMan::onconnect(int* msg)
             // PORT: function pointers passed as callbacks.
             mpRoster = func_003F0C90(mpBuddyApi, (void*)BuddyMan_BuddyFunctor_onrosterupdate_invoke, ((char*)this));
             func_003EE5A0(mpRoster, 0, 0, (void*)lobbyman_compareRosterNames);
-            BuddyMan_setPresence(this, 1, 0, 0, 0, 0);
+            this->setPresence(1, 0, 0, 0, 0);
             mState = 0;
             mbLoggedIn = 1;
         } else {
@@ -7018,9 +7015,9 @@ static inline sMsgListIter_00261A28 sMsgList_00261A28_insert(sMsgListIter_00261A
 static inline void sTagVec_00261A28_remove(char* self, char* name)
 {
     for (unsigned int i = 0; i < (unsigned int)((*(int*)(self + 0xB0) - *(int*)(self + 0xAC)) >> 2); i++) {
-        void* e = BuddyMan_getMessage((BuddyMan*)self, i);
+        void* e = ((BuddyMan*)self)->getMessage(i);
         if (e != 0 && strcmp(*(void**)e, name) == 0) {
-            BuddyMan_removeMessageAt((BuddyMan*)self, i);
+            ((BuddyMan*)self)->removeMessageAt(i);
             return;
         }
     }
@@ -7060,15 +7057,15 @@ void BuddyMan::onReceiveMessage(BuddyApiMsgT* msg)
 
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_TYPE), flag, 2, str_Not_Present);
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_USER), name, 0x40, str_Not_Present);
-    if (BuddyMan_isBlockedByName(this, (int)name))
+    if (this->isBlockedByName((int)name))
         return;
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_SUBJ), text, 2255, str_sp_c);
     cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_BODY), raw, 0x800, str_Not_Present);
     strcat(text, raw);
     cDirtysock_tag_TagFieldGetDateTime(cDirtysock_tag_TagFieldFind(msg->mpTagText, str_TIME), &year, &month, &day, &hour, &minute, &second, 0);
     sprintf(date, str_pct_02d_pct_02d_pct_02d_pct_02d_pct_02d, month, day, year, hour, minute);
-    BuddyMan_storeMessage(this, name, text, date);
-    if (BuddyMan_countMessagesFromName(this, (int)name) >= 0x1F) {
+    this->storeMessage(name, text, date);
+    if (this->countMessagesFromName((int)name) >= 0x1F) {
         sTagVec_00261A28_remove(((char*)this), name);
     }
     int kind = 265;
@@ -7168,21 +7165,21 @@ static inline void post_1CD0(char* owner, void* msg)
  * @param date    the formatted date
  */
 // PORT: name pointers passed through int parameters of some callees.
-extern "C" void BuddyMan_storeMessage(BuddyMan* self, char* name, char* text, char* date)
+void BuddyMan::storeMessage(char* name, char* text, char* date)
 {
-    if (BuddyMan_isBuddyByName(self, (int)name) == 0
-        && BuddyMan_isBlockedByName(self, (int)name) == 0
-        && BuddyMan_isTempEntryByName(self, (int)name) == 0) {
+    if (isBuddyByName((int)name) == 0
+        && isBlockedByName((int)name) == 0
+        && isTempEntryByName((int)name) == 0) {
         int err;
-        BuddyMan_addRosterEntry(self, name, 2, &err, 0);
+        addRosterEntry(name, 2, &err, 0);
         if (err == 2) {
-            for (int i = 0; i < BuddyMan_getNumRosterEntries(self); i++) {
-                if (BuddyMan_isTempEntry(self, i)) {
-                    BuddyMan_removeTempEntry(self, i);
+            for (int i = 0; i < getNumRosterEntries(); i++) {
+                if (isTempEntry(i)) {
+                    removeTempEntry(i);
                     break;
                 }
             }
-            BuddyMan_addRosterEntry(self, name, 2, &err, 0);
+            addRosterEntry(name, 2, &err, 0);
             int type = 264;
             LobbyMan* owner = LobbyMan_mLobbyMan;
             int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -7197,7 +7194,7 @@ extern "C" void BuddyMan_storeMessage(BuddyMan* self, char* name, char* text, ch
     cBXString_cBXString2(obj + 4, text);
     cBXString_cBXString2(obj + 8, date);
     void* message = obj;
-    sOwner1CD0_push_back(self, message);
+    sOwner1CD0_push_back(this, message);
 }
 #endif
 
@@ -7231,29 +7228,29 @@ extern "C" void BuddyMan_BuddyFunctor_onBuddyDelete_invoke(void* self, void* a1,
  *                 full, 3 own persona)
  */
 // PORT: the unit declares (void*, int, int, void*); a1 carries the name pointer.
-extern "C" void BuddyMan_moveToRosterList(BuddyMan* self_, int rawName, int kind, void* out)
+void BuddyMan::moveToRosterList(int rawName, int kind, void* out)
 {
     char* name = (char*)rawName;
     int* err = (int*)out;
-    char* rosterEntry = (char*)func_003F14D8(self_->mpBuddyApi);
+    char* rosterEntry = (char*)func_003F14D8(mpBuddyApi);
     if (rosterEntry == 0) {
-        BuddyMan_addRosterEntry(self_, name, kind, err, 0);
+        addRosterEntry(name, kind, err, 0);
         if (*err == 0)
             *err = 0;
         return;
     }
     int flags = *(int*)(rosterEntry + 0xA8);
     // PORT: function pointer passed as a callback argument.
-    func_003F11F8(self_->mpBuddyApi, rosterEntry, (void*)BuddyMan_BuddyFunctor_onBuddyDelete_invoke, ((char*)self_), 600);
-    int has = BuddyMan_hasChallengeFrom(self_, name);
+    func_003F11F8(mpBuddyApi, rosterEntry, (void*)BuddyMan_BuddyFunctor_onBuddyDelete_invoke, ((char*)this), 600);
+    int has = hasChallengeFrom(name);
     switch (kind) {
     case 0:
         if (!(flags & 4)) {
-            BuddyMan_addRosterEntry(self_, name, 0, err, rosterEntry);
+            addRosterEntry(name, 0, err, rosterEntry);
             if (*err != 0) {
                 if (flags & 0x100000) {
                     int discardErr;
-                    BuddyMan_addRosterEntry(self_, name, 2, &discardErr, rosterEntry);
+                    addRosterEntry(name, 2, &discardErr, rosterEntry);
                 }
                 return;
             }
@@ -7264,24 +7261,24 @@ extern "C" void BuddyMan_moveToRosterList(BuddyMan* self_, int rawName, int kind
     case 1:
         if (flags & 0x200)
             goto do2;
-        BuddyMan_addRosterEntry(self_, name, 1, err, rosterEntry);
+        addRosterEntry(name, 1, err, rosterEntry);
         if (*err != 0) {
             if (has)
-                BuddyMan_declineChallenge(self_, name);
+                declineChallenge(name);
             return;
         }
         break;
     case 2:
         if (!(flags & 0x100000)) {
         do2:
-            BuddyMan_addRosterEntry(self_, name, 2, err, rosterEntry);
+            addRosterEntry(name, 2, err, rosterEntry);
             if (*err != 0)
                 return;
         }
         break;
     }
     if (has)
-        BuddyMan_declineChallenge(self_, name);
+        declineChallenge(name);
     *err = 0;
 }
 #endif
@@ -7318,7 +7315,7 @@ struct sTagsUnkReq20D8 {
  * @param other  the player's current roster entry (flags at +0xA8), or 0 when not on the roster
  * @return func_003F0E38()'s result, or 0 when refused
  */
-extern "C" int BuddyMan_addRosterEntry(BuddyMan* self, char* name, int kind, int* err, char* other)
+int BuddyMan::addRosterEntry(char* name, int kind, int* err, char* other)
 {
     sTagsUnkReq20D8 rec;
     if (strcasecmp(LobbyMan_mLobbyMan->mPersona, name) == 0) {
@@ -7336,25 +7333,25 @@ extern "C" int BuddyMan_addRosterEntry(BuddyMan* self, char* name, int kind, int
         extraFlagged = 1;
     }
     strcpy(rec.name, name);
-    strcpy(rec.resource, self->mResource);
+    strcpy(rec.resource, mResource);
     rec.group[0] = 0;
     switch (kind) {
     case 0:
-        if (BuddyMan_countNonTempEntries(self) + extraUnflagged >= 41) {
+        if (countNonTempEntries() + extraUnflagged >= 41) {
             *err = 1;
             return 0;
         }
         rec.flags |= 4;
         break;
     case 1:
-        if (BuddyMan_countNonTempEntries(self) + extraUnflagged >= 41) {
+        if (countNonTempEntries() + extraUnflagged >= 41) {
             *err = 1;
             return 0;
         }
         rec.flags |= 0x200;
         break;
     case 2:
-        if (BuddyMan_countTempEntries(self) + extraFlagged >= 11) {
+        if (countTempEntries() + extraFlagged >= 11) {
             *err = 2;
             return 0;
         }
@@ -7364,7 +7361,7 @@ extern "C" int BuddyMan_addRosterEntry(BuddyMan* self, char* name, int kind, int
     }
     *err = 0;
     // PORT: function pointer passed as a callback argument.
-    return func_003F0E38(self->mpBuddyApi, &rec, (void*)BuddyMan_BuddyFunctor_onBuddyAdd_invoke, ((char*)self), 600);
+    return func_003F0E38(mpBuddyApi, &rec, (void*)BuddyMan_BuddyFunctor_onBuddyAdd_invoke, ((char*)this), 600);
 }
 #endif
 
@@ -7379,11 +7376,11 @@ extern "C" int BuddyMan_getNumRosterEntries(BuddyMan* self);
  *
  * @return the number of such entries among BuddyMan_getNumRosterEntries() roster entries
  */
-extern "C" int BuddyMan_countNonTempEntries(BuddyMan* self)
+int BuddyMan::countNonTempEntries()
 {
     int n = 0;
-    for (int i = 0; i < BuddyMan_getNumRosterEntries(self); i++) {
-        if (BuddyMan_isTempEntry(self, i) == 0)
+    for (int i = 0; i < getNumRosterEntries(); i++) {
+        if (isTempEntry(i) == 0)
             n++;
     }
     return n;
@@ -7401,11 +7398,11 @@ extern "C" int BuddyMan_getNumRosterEntries(BuddyMan* self);
  *
  * @return the number of such entries among BuddyMan_getNumRosterEntries() roster entries
  */
-extern "C" int BuddyMan_countTempEntries(BuddyMan* self)
+int BuddyMan::countTempEntries()
 {
     int n = 0;
-    for (int i = 0; i < BuddyMan_getNumRosterEntries(self); i++) {
-        if (BuddyMan_isTempEntry(self, i) != 0)
+    for (int i = 0; i < getNumRosterEntries(); i++) {
+        if (isTempEntry(i) != 0)
             n++;
     }
     return n;
@@ -7429,9 +7426,9 @@ int BuddyMan_isBuddy_2(void* self, int a1) __asm__("BuddyMan_isBuddy__FPv");
  * @param name  the player's name (a string pointer passed as an int)
  * @return nonzero when the player is on the roster with flag 4, otherwise 0
  */
-extern "C" int BuddyMan_isBuddyByName(BuddyMan* self, int name)
+int BuddyMan::isBuddyByName(int name)
 {
-    return BuddyMan_isBuddy_2(self, BuddyMan_findRosterEntry(self, name));
+    return BuddyMan_isBuddy_2(this, findRosterEntry(name));
 }
 #endif
 
@@ -7449,9 +7446,9 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_isBuddy__FPv);
  *
  * @return 1 when BuddyMan_getBuddyEntry() finds the entry with the flag, otherwise 0
  */
-int BuddyMan_isBuddy(void* self)
+int BuddyMan::isBuddy()
 {
-    return (BuddyMan_getBuddyEntry(self) != 0);
+    return (BuddyMan_getBuddyEntry(this) != 0);
 }
 #endif
 
@@ -7473,9 +7470,9 @@ int BuddyMan_isBlocked_2(void* self, int a1) __asm__("BuddyMan_isBlocked__FPv");
  * @param name  the player name, passed as an int
  * @return 1 when the entry exists and has the flag, otherwise 0
  */
-extern "C" int BuddyMan_isBlockedByName(BuddyMan* self, int name)
+int BuddyMan::isBlockedByName(int name)
 {
-    return BuddyMan_isBlocked_2(self, BuddyMan_findRosterEntry(self, name));
+    return BuddyMan_isBlocked_2(this, findRosterEntry(name));
 }
 #endif
 
@@ -7492,9 +7489,9 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_isBlocked__FPv);
  *
  * @return 1 when BuddyMan_getBlockedEntry() finds the entry with the flag, otherwise 0
  */
-int BuddyMan_isBlocked(void* self)
+int BuddyMan::isBlocked()
 {
-    return (BuddyMan_getBlockedEntry(self) != 0);
+    return (BuddyMan_getBlockedEntry(this) != 0);
 }
 #endif
 
@@ -7512,9 +7509,9 @@ extern "C" void* BuddyMan_getRosterEntry(BuddyMan* self, int idx);
  * @param rosterIndex  index into mpRoster
  * @return 1 when the entry exists and has the bit, otherwise 0
  */
-extern "C" int BuddyMan_isTempEntry(BuddyMan* self, int rosterIndex)
+int BuddyMan::isTempEntry(int rosterIndex)
 {
-    void* rosterEntry = BuddyMan_getRosterEntry(self, rosterIndex);
+    void* rosterEntry = getRosterEntry(rosterIndex);
     if (rosterEntry != 0) {
         return (*(int*)((char*)rosterEntry + 0xA8) >> 20) & 1;
     }
@@ -7536,9 +7533,9 @@ extern "C" int BuddyMan_isTempEntry(BuddyMan* self, int a1);
  * @param name  the player name, passed as an int
  * @return 1 when the entry exists and has the bit, otherwise 0
  */
-extern "C" int BuddyMan_isTempEntryByName(BuddyMan* self, int name)
+int BuddyMan::isTempEntryByName(int name)
 {
-    return BuddyMan_isTempEntry(self, BuddyMan_findRosterEntry(self, name));
+    return isTempEntry(findRosterEntry(name));
 }
 #endif
 
@@ -7558,12 +7555,12 @@ extern "C" void* BuddyMan_getRosterEntry(BuddyMan* self, int idx);
  * @return the entry's index, or -1 when no entry has that name
  */
 // PORT: a1 carries a name pointer in an int (the unit's declaration).
-extern "C" int BuddyMan_findRosterEntry(BuddyMan* self, int name)
+int BuddyMan::findRosterEntry(int name)
 {
     int i;
-    int n = BuddyMan_getNumRosterEntries(self);
+    int n = getNumRosterEntries();
     for (i = 0; i < n; i++) {
-        void* rosterEntry = BuddyMan_getRosterEntry(self, i);
+        void* rosterEntry = getRosterEntry(i);
         if (rosterEntry != 0 && strcmp(rosterEntry, (void*)name) == 0) {
             return i;
         }
@@ -7586,16 +7583,16 @@ extern "C" void* BuddyMan_getRosterEntry(BuddyMan* self, int idx);
  * @param key  the name as a cBXString, or 0
  * @return the entry's index, or -1 when @p key is 0 or no entry matches
  */
-extern "C" int BuddyMan_findRosterEntryNoCase(BuddyMan* self, void** key)
+int BuddyMan::findRosterEntryNoCase(void** key)
 {
     int i;
     int n;
     if (key == 0) {
         return -1;
     }
-    n = BuddyMan_getNumRosterEntries(self);
+    n = getNumRosterEntries();
     for (i = 0; i < n; i++) {
-        void* rosterEntry = BuddyMan_getRosterEntry(self, i);
+        void* rosterEntry = getRosterEntry(i);
         if (rosterEntry != 0 && strcasecmp(*key, rosterEntry) == 0) {
             return i;
         }
@@ -7616,9 +7613,9 @@ extern "C" int func_003EE550(void*);
  *
  * @return the entry count, or 0 when there is no roster yet (mpRoster is 0)
  */
-extern "C" int BuddyMan_getNumRosterEntries(BuddyMan* self)
+int BuddyMan::getNumRosterEntries()
 {
-    void* roster = self->mpRoster;
+    void* roster = mpRoster;
     if (roster == 0) {
         return 0;
     }
@@ -7642,13 +7639,13 @@ void* func_003EE560_2(void* list, int idx) __asm__("func_003EE560");
  * @param idx  index into mpRoster
  * @return the entry (its name is at +0, its flags word at +0xA8), or 0 when @p idx is negative or too large
  */
-extern "C" void* BuddyMan_getRosterEntry(BuddyMan* self, int idx)
+void* BuddyMan::getRosterEntry(int idx)
 {
     void* rosterEntry;
-    if (idx < 0 || BuddyMan_getNumRosterEntries(self) < idx) {
+    if (idx < 0 || getNumRosterEntries() < idx) {
         rosterEntry = 0;
     } else {
-        rosterEntry = func_003EE560_2(self->mpRoster, idx);
+        rosterEntry = func_003EE560_2(mpRoster, idx);
     }
     return rosterEntry;
 }
@@ -7670,9 +7667,9 @@ void* BuddyMan_getBuddyEntry_2(void* self, int idx) __asm__("BuddyMan_getBuddyEn
  * @param idx  index into mpRoster
  * @return the entry, or 0 when it is missing or lacks the flag
  */
-void* BuddyMan_getBuddyEntry_2(void* self, int idx)
+void* BuddyMan::getBuddyEntry(int idx)
 {
-    void* rosterEntry = BuddyMan_getRosterEntry((BuddyMan*)self, idx);
+    void* rosterEntry = ((BuddyMan*)this)->getRosterEntry(idx);
     if ((rosterEntry != 0) && (*(int*)((char*)rosterEntry + 0xA8) & 0x4)) {
         return rosterEntry;
     }
@@ -7696,9 +7693,9 @@ void* BuddyMan_getBlockedEntry_2(void* self, int idx) __asm__("BuddyMan_getBlock
  * @param idx  index into mpRoster
  * @return the entry, or 0 when it is missing or lacks the flag
  */
-void* BuddyMan_getBlockedEntry_2(void* self, int idx)
+void* BuddyMan::getBlockedEntry(int idx)
 {
-    void* rosterEntry = BuddyMan_getRosterEntry((BuddyMan*)self, idx);
+    void* rosterEntry = ((BuddyMan*)this)->getRosterEntry(idx);
     if ((rosterEntry != 0) && (*(int*)((char*)rosterEntry + 0xA8) & 0x200)) {
         return rosterEntry;
     }
@@ -7729,7 +7726,7 @@ extern "C" void func_003F16D8(void* ctx, char* buf, void* cb, void* user, int a4
  * @param name  recipient's name
  * @param messageText    message text
  */
-extern "C" void BuddyMan_sendMessage(BuddyMan* self, const char* name, const char* messageText)
+void BuddyMan::sendMessage(const char* name, const char* messageText)
 {
     char buf[0x1000];
     buf[0] = 0;
@@ -7737,8 +7734,8 @@ extern "C" void BuddyMan_sendMessage(BuddyMan* self, const char* name, const cha
     cDirtysock_tag_TagFieldSetString(buf, 0x1000, str_SUBJ, str_empty_i);
     cDirtysock_tag_TagFieldSetString(buf, 0x1000, str_USER, name);
     cDirtysock_tag_TagFieldSetUnk(buf, 0x1000, str_BODY, messageText);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x1000, str_SECS, self->miMsgTimeout);
-    func_003F16D8(self->mpBuddyApi, buf, (void*)BuddyMan_BuddyFunctor_onBuddySend_invoke, ((char*)self), self->miMsgTimeout);
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x1000, str_SECS, miMsgTimeout);
+    func_003F16D8(mpBuddyApi, buf, (void*)BuddyMan_BuddyFunctor_onBuddySend_invoke, ((char*)this), miMsgTimeout);
 }
 #endif
 
@@ -7779,13 +7776,13 @@ extern char str_en[];
  * @param detail3     third detail string (SZ3), passed as an int, or 0
  */
 // PORT: the unit declares every argument as int; a3..a5 are really string pointers.
-extern "C" void BuddyMan_setPresence(BuddyMan* self_, int presenceState, int locationId, int detail1, int detail2, int detail3)
+void BuddyMan::setPresence(int presenceState, int locationId, int detail1, int detail2, int detail3)
 {
-    if (self_->mpBuddyApi == 0)
+    if (mpBuddyApi == 0)
         return;
     char buf[80];
     buf[0] = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 80, D_004A31F8, (const char*)self_->mResource);
+    cDirtysock_tag_TagFieldSetString(buf, 80, D_004A31F8, (const char*)mResource);
     cDirtysock_tag_TagFieldSetNumber(buf, 80, str_SSXID, 3);
     cDirtysock_tag_TagFieldSetNumber(buf, 80, str_LOCID_b, locationId);
     if (detail1 != 0)
@@ -7798,11 +7795,11 @@ extern "C" void BuddyMan_setPresence(BuddyMan* self_, int presenceState, int loc
                 cDirtysock_tag_TagFieldSetString(buf, 80, str_SZ3_b, (const char*)detail3);
         }
     }
-    func_003F1538(self_->mpBuddyApi);
-    func_003F1548(self_->mpBuddyApi, buf);
-    func_003F1578(self_->mpBuddyApi, str_is_playing_SSX_3, str_en);
-    const char* name = (const char*)self_->mResource;
-    func_003F15C8(self_->mpBuddyApi, name, BuddyMan_checkPresenceState(self_, presenceState), 2000);
+    func_003F1538(mpBuddyApi);
+    func_003F1548(mpBuddyApi, buf);
+    func_003F1578(mpBuddyApi, str_is_playing_SSX_3, str_en);
+    const char* name = (const char*)mResource;
+    func_003F15C8(mpBuddyApi, name, checkPresenceState(presenceState), 2000);
 }
 #endif
 
@@ -7815,9 +7812,9 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_checkPresenceState);
  * @param sel  the requested state
  * @return @p sel when it is 0..3, otherwise -1; also -1 when mpBuddyApi is 0
  */
-extern "C" int BuddyMan_checkPresenceState(BuddyMan* self, int sel)
+int BuddyMan::checkPresenceState(int sel)
 {
-    if (self->mpBuddyApi == 0) {
+    if (mpBuddyApi == 0) {
         return -1;
     }
     switch (sel) {
@@ -7842,9 +7839,9 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_getNumMessages);
  *
  * @return the message count
  */
-extern "C" int BuddyMan_getNumMessages(BuddyMan* self)
+int BuddyMan::getNumMessages()
 {
-    return ((int)self->mMessagesFinish - (int)self->mMessagesStart) >> 2;
+    return ((int)mMessagesFinish - (int)mMessagesStart) >> 2;
 }
 #endif
 
@@ -7869,15 +7866,15 @@ static inline unsigned int sDsListK2_size(void* self)
  * @return the number of messages from that player, or -1 when the entry does not exist
  */
 // Counts the entries whose name matches entry `idx`'s name.
-extern "C" int BuddyMan_countMessagesFrom(BuddyMan* self, int idx)
+int BuddyMan::countMessagesFrom(int idx)
 {
-    void* key = BuddyMan_getRosterEntry(self, idx);
+    void* key = getRosterEntry(idx);
     if (key == 0)
         return -1;
     int count = 0;
     unsigned int i;
-    for (i = 0; i < sDsListK2_size(self); i++) {
-        void** message = (void**)BuddyMan_getMessage(self, i);
+    for (i = 0; i < sDsListK2_size(this); i++) {
+        void** message = (void**)getMessage(i);
         if (message != 0) {
             if (strcmp(*message, key) == 0)
                 count++;
@@ -7902,9 +7899,9 @@ extern "C" int BuddyMan_countMessagesFrom(BuddyMan* self, int a1);
  * @param name  the player name, passed as an int
  * @return the number of messages from that player, or -1 when the name is not on the roster
  */
-extern "C" int BuddyMan_countMessagesFromName(BuddyMan* self, int name)
+int BuddyMan::countMessagesFromName(int name)
 {
-    return BuddyMan_countMessagesFrom(self, BuddyMan_findRosterEntry(self, name));
+    return countMessagesFrom(findRosterEntry(name));
 }
 #endif
 
@@ -7921,9 +7918,9 @@ extern "C" int strcmp(void*, void*);
  * @param name  the player name
  * @return true when a message from that player is held
  */
-extern "C" bool BuddyMan_hasMessageFrom(BuddyMan* self, void* name)
+bool BuddyMan::hasMessageFrom(void* name)
 {
-    for (void*** it = (void***)self->mMessagesStart; it != (void***)self->mMessagesFinish; it++) {
+    for (void*** it = (void***)mMessagesStart; it != (void***)mMessagesFinish; it++) {
         if (strcmp(**it, name) == 0)
             return true;
     }
@@ -7943,10 +7940,10 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_hasAnyMessage);
  * @param nameStr  the name as a cBXString (a pointer to the text pointer)
  * @return true when at least one message is held
  */
-extern "C" bool BuddyMan_hasAnyMessage(BuddyMan* self, void** nameStr)
+bool BuddyMan::hasAnyMessage(void** nameStr)
 {
-    void*** messageIter = (void***)self->mMessagesStart;
-    if (messageIter != (void***)self->mMessagesFinish) {
+    void*** messageIter = (void***)mMessagesStart;
+    if (messageIter != (void***)mMessagesFinish) {
         strcmp(**messageIter, *nameStr);
         return true;
     }
@@ -8064,31 +8061,32 @@ static inline void push_back_262AF0(char* vo, sObjVec_262AF0* v, void* const& x)
  * @param statField6    third number after it; stored at +0x34
  * @param rank    fourth number after it; stored at +0x28
  */
-extern "C" void BuddyMan_addChallenge(BuddyMan* self, char* name, int locationId, int gameMode, int gameEvent, int ranked, int multipliers, int powerUps,
-                              int numberAI, int pointIcons, char* messageText, int statField2, int statTotal, int statField6, int rank)
+void BuddyMan::addChallenge(char* name, int locationId, int gameMode, int gameEvent, int ranked, int multipliers,
+                            int powerUps, int numberAI, int pointIcons, char* messageText, int statField2,
+                            int statTotal, int statField6, int rank)
 {
     if (strcasecmp(LobbyMan_mLobbyMan->mPersona, name) == 0)
         return;
-    while (BuddyMan_hasChallengeFrom(self, name))
-        BuddyMan_declineChallenge(self, name);
-    int idx = BuddyMan_findRosterEntry(self, (int)name);
+    while (hasChallengeFrom(name))
+        declineChallenge(name);
+    int idx = findRosterEntry((int)name);
     if (idx < 0)
     {
         int err;
-        BuddyMan_addRosterEntry(self, name, 2, &err, 0);
+        addRosterEntry(name, 2, &err, 0);
         if (err == 2)
         {
             int i;
-            for (i = 0; i < BuddyMan_getNumRosterEntries(self); i++)
+            for (i = 0; i < getNumRosterEntries(); i++)
             {
-                if (BuddyMan_isTempEntry(self, i))
+                if (isTempEntry(i))
                 {
-                    BuddyMan_removeTempEntry(self, i);
+                    removeTempEntry(i);
                     break;
                 }
             }
             int type = 264;
-            BuddyMan_addRosterEntry(self, name, 2, &err, 0);
+            addRosterEntry(name, 2, &err, 0);
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
             netEvent[0] = type;
@@ -8096,7 +8094,7 @@ extern "C" void BuddyMan_addChallenge(BuddyMan* self, char* name, int locationId
             post_262AF0((char*)lobbyMan, netEvent);
         }
     }
-    else if (BuddyMan_isBlocked_2(((char*)self), idx))
+    else if (BuddyMan_isBlocked_2(((char*)this), idx))
     {
         return;
     }
@@ -8117,7 +8115,7 @@ extern "C" void BuddyMan_addChallenge(BuddyMan* self, char* name, int locationId
     *(int*)(obj + 0x34) = statField6;
     *(int*)(obj + 0x28) = rank;
     void* op = obj;
-    push_back_262AF0(((char*)self), (sObjVec_262AF0*)(&self->mChallengersAlloc), op);
+    push_back_262AF0(((char*)this), (sObjVec_262AF0*)(&mChallengersAlloc), op);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
@@ -8147,10 +8145,10 @@ static inline void** BuddyMan_findChallenge_at(void* self, unsigned int i)
  * @param name  the challenger's name
  * @return the index in the challenger vector, or -1 when there is none
  */
-extern "C" int BuddyMan_findChallenge(BuddyMan* self, void* name)
+int BuddyMan::findChallenge(void* name)
 {
-    for (unsigned int i = 0; i < BuddyMan_findChallenge_count(self); i++) {
-        void** challenger = BuddyMan_findChallenge_at(self, i);
+    for (unsigned int i = 0; i < BuddyMan_findChallenge_count(this); i++) {
+        void** challenger = BuddyMan_findChallenge_at(this, i);
         if (challenger != 0 && strcasecmp(*challenger, name) == 0) {
             return i;
         }
@@ -8203,36 +8201,36 @@ static inline void** sObjVec_262EC0_copy(void** first, void** last, void** resul
  *
  * @param idx  index into mpRoster
  */
-extern "C" void BuddyMan_removeTempEntry(BuddyMan* self, int idx)
+void BuddyMan::removeTempEntry(int idx)
 {
-    if (BuddyMan_isTempEntry(self, idx) == 0)
+    if (isTempEntry(idx) == 0)
         return;
-    char* name = (char*)BuddyMan_getRosterEntry(self, idx);
+    char* name = (char*)getRosterEntry(idx);
     if (name == 0)
         return;
     cBXString nameStr;
     cBXString_cBXString2(&nameStr, name);
-    func_003F11F8(self->mpBuddyApi, name, (void*)BuddyMan_BuddyFunctor_onBuddyDelete_invoke, ((char*)self), 600);
-    if (BuddyMan_hasMessageFrom(self, nameStr.Str))
+    func_003F11F8(mpBuddyApi, name, (void*)BuddyMan_BuddyFunctor_onBuddyDelete_invoke, ((char*)this), 600);
+    if (hasMessageFrom(nameStr.Str))
     {
-        for (int i = BuddyMan_getNumMessages(self) - 1; i >= 0; i--)
+        for (int i = getNumMessages() - 1; i >= 0; i--)
         {
-            void** message = (void**)BuddyMan_getMessage(self, i);
+            void** message = (void**)getMessage(i);
             if (message != 0 && strcasecmp(*message, nameStr.Str) == 0)
-                BuddyMan_removeMessageAt(self, i);
+                removeMessageAt(i);
         }
     }
-    if (BuddyMan_hasChallengeFrom(self, nameStr.Str))
+    if (hasChallengeFrom(nameStr.Str))
     {
         // PORT: the name is passed through an int parameter.
         LobbyMan_sendDecline_v(LobbyMan_mLobbyMan, (int)nameStr.Str);
-        int k = BuddyMan_findChallenge(self, nameStr.Str);
-        sObjVec_262EC0* challengers = (sObjVec_262EC0*)(&self->mChallengersAlloc);
+        int k = findChallenge(nameStr.Str);
+        sObjVec_262EC0* challengers = (sObjVec_262EC0*)(&mChallengersAlloc);
         // PORT: pointer arithmetic through int.
-        void** pos = (void**)(k * 4 + (int)(void**)self->mChallengersStart);
-        if (pos + 1 != (void**)self->mChallengersFinish)
+        void** pos = (void**)(k * 4 + (int)(void**)mChallengersStart);
+        if (pos + 1 != (void**)mChallengersFinish)
             sObjVec_262EC0_copy(pos + 1, challengers->mFinish, pos);
-        --*(void***)&self->mChallengersFinish;
+        --*(void***)&mChallengersFinish;
     }
     cBXString__cBXString(&nameStr, 2);
 }
@@ -8280,28 +8278,28 @@ static inline void** sTagsUnkObjVec18_copy(void** first, void** last, void** res
  * @param name  the challenger's name
  */
 // PORT: the name is passed through int parameters of some callees.
-extern "C" void BuddyMan_declineChallenge(BuddyMan* self, void* name)
+void BuddyMan::declineChallenge(void* name)
 {
-    int idx = BuddyMan_findChallenge(self, name);
+    int idx = findChallenge(name);
     if (idx >= 0) {
         LobbyMan_sendDecline_v(LobbyMan_mLobbyMan, (int)name);
-        sTagsUnkObjVec18* challengers = (sTagsUnkObjVec18*)&self->mChallengersAlloc;
-        void** pos = (void**)self->mChallengersStart + idx;
+        sTagsUnkObjVec18* challengers = (sTagsUnkObjVec18*)&mChallengersAlloc;
+        void** pos = (void**)mChallengersStart + idx;
         cChallenger* obj = (cChallenger*)((char*)*pos);
-        if (pos + 1 != (void**)self->mChallengersFinish) {
+        if (pos + 1 != (void**)mChallengersFinish) {
             sTagsUnkObjVec18_copy(pos + 1, challengers->mFinish, pos);
         }
-        --*(void***)&self->mChallengersFinish;
+        --*(void***)&mChallengersFinish;
         if (((char*)obj) != 0) {
             sTagsUnkVEntry18* vt = (sTagsUnkVEntry18*)obj->mVtbl;
             vt[1].fn(vthis(obj, vt[1]), 3);
         }
-        if (BuddyMan_isTempEntryByName(self, (int)name)) {
-            if (BuddyMan_hasMessageFrom(self, name) == 0) {
-                void* rosterEntry = BuddyMan_getRosterEntry(self, BuddyMan_findRosterEntry(self, (int)name));
+        if (isTempEntryByName((int)name)) {
+            if (hasMessageFrom(name) == 0) {
+                void* rosterEntry = getRosterEntry(findRosterEntry((int)name));
                 if (rosterEntry != 0) {
                     // PORT: function pointer passed as a callback argument.
-                    func_003F11F8(self->mpBuddyApi, rosterEntry, (void*)BuddyMan_BuddyFunctor_onBuddyDelete_invoke, self, 600);
+                    func_003F11F8(mpBuddyApi, rosterEntry, (void*)BuddyMan_BuddyFunctor_onBuddyDelete_invoke, this, 600);
                 }
             }
         }
@@ -8326,11 +8324,11 @@ extern "C" int strcmp(void*, void*);
  * @return true when a challenge from that player is pending
  */
 // Returns 1 if any entry's name equals `name`.
-extern "C" bool BuddyMan_hasChallengeFrom(BuddyMan* self, char* name)
+bool BuddyMan::hasChallengeFrom(char* name)
 {
-    if (((void***)self->mChallengersFinish - (void***)self->mChallengersStart) == 0)
+    if (((void***)mChallengersFinish - (void***)mChallengersStart) == 0)
         return false;
-    for (void*** it = (void***)self->mChallengersStart; it != (void***)self->mChallengersFinish; it++) {
+    for (void*** it = (void***)mChallengersStart; it != (void***)mChallengersFinish; it++) {
         void** challenger = *it;
         char* nameCopy;
         cBXString_cBXString2(&nameCopy, name);
@@ -8355,12 +8353,12 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_hasChallengeFromString);
  * @param name  the name as a cBXString (a pointer to the text pointer)
  * @return true when a challenge from that player is pending
  */
-extern "C" bool BuddyMan_hasChallengeFromString(BuddyMan* self, void** name)
+bool BuddyMan::hasChallengeFromString(void** name)
 {
-    if ((unsigned int)((void**)self->mChallengersFinish - (void**)self->mChallengersStart) == 0) {
+    if ((unsigned int)((void**)mChallengersFinish - (void**)mChallengersStart) == 0) {
         return false;
     }
-    for (void** it = (void**)self->mChallengersStart; it != (void**)self->mChallengersFinish; it++) {
+    for (void** it = (void**)mChallengersStart; it != (void**)mChallengersFinish; it++) {
         void* challenger = *it;
         if (strcmp(*(void**)challenger, *name) == 0) {
             return true;
@@ -8382,12 +8380,12 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_getChallengeFrom);
  * @param name  the challenger's name
  * @return the cChallenger, or 0 when none is pending from that player
  */
-extern "C" void* BuddyMan_getChallengeFrom(BuddyMan* self, void* name)
+void* BuddyMan::getChallengeFrom(void* name)
 {
-    if ((unsigned int)((void**)self->mChallengersFinish - (void**)self->mChallengersStart) == 0) {
+    if ((unsigned int)((void**)mChallengersFinish - (void**)mChallengersStart) == 0) {
         return 0;
     }
-    for (void** it = (void**)self->mChallengersStart; it != (void**)self->mChallengersFinish; it++) {
+    for (void** it = (void**)mChallengersStart; it != (void**)mChallengersFinish; it++) {
         void* challenger = *it;
         if (strcmp(*(void**)challenger, name) == 0) {
             return challenger;
@@ -8406,10 +8404,10 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_getChallenge);
  * @param i  index into mChallengersStart..mChallengersFinish
  * @return the cChallenger, or 0 when @p i is out of range
  */
-extern "C" void* BuddyMan_getChallenge(BuddyMan* self, unsigned int i)
+void* BuddyMan::getChallenge(unsigned int i)
 {
-    cChallenger** begin = self->mChallengersStart;
-    cChallenger** end = self->mChallengersFinish;
+    cChallenger** begin = mChallengersStart;
+    cChallenger** end = mChallengersFinish;
     if (i >= (unsigned int)(end - begin)) {
         return 0;
     }
@@ -8441,7 +8439,7 @@ extern "C" int func_00263338(BuddyMan* self, int idx)
     if (BuddyMan_getNumRosterEntries_noarg() < idx) {
         return 0;
     }
-    char* rosterEntry = (char*)BuddyMan_getRosterEntry(self, idx);
+    char* rosterEntry = (char*)self->getRosterEntry(idx);
     if (rosterEntry == 0) {
         return 0;
     }
@@ -8467,7 +8465,7 @@ extern "C" int func_00263338(BuddyMan* self, int a1);
  */
 extern "C" int func_002633C8(BuddyMan* self, int name)
 {
-    return func_00263338(self, BuddyMan_findRosterEntry(self, name));
+    return func_00263338(self, self->findRosterEntry(name));
 }
 #endif
 
@@ -8493,7 +8491,7 @@ extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int
  * @param idx  index into mpRoster
  * @return true when the entry's "S" value equals mResource (false also for a missing entry)
  */
-extern "C" bool BuddyMan_isInSameGame(BuddyMan* self, int idx)
+bool BuddyMan::isInSameGame(int idx)
 {
     if (idx < 0) {
         return false;
@@ -8501,14 +8499,14 @@ extern "C" bool BuddyMan_isInSameGame(BuddyMan* self, int idx)
     if (BuddyMan_getNumRosterEntries_noarg() < idx) {
         return false;
     }
-    char* rosterEntry = (char*)BuddyMan_getRosterEntry(self, idx);
+    char* rosterEntry = (char*)getRosterEntry(idx);
     if (rosterEntry == 0) {
         return false;
     }
     char buf[16];
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(rosterEntry + 0x54, D_004A31F8), buf, 0x10,
                                       str_empty_i);
-    return strcmp(self->mResource, buf) == 0;
+    return strcmp(mResource, buf) == 0;
 }
 #endif
 
@@ -8524,9 +8522,9 @@ extern "C" bool BuddyMan_isInSameGame(BuddyMan* self, int a1);
  * @param name  the player name, passed as an int
  * @return BuddyMan_isInSameGame()'s result for the entry BuddyMan_findRosterEntry() finds (0 when the name is not on the roster)
  */
-extern "C" int BuddyMan_isInSameGameByName(BuddyMan* self, int name)
+int BuddyMan::isInSameGameByName(int name)
 {
-    return BuddyMan_isInSameGame(self, BuddyMan_findRosterEntry(self, name));
+    return isInSameGame(findRosterEntry(name));
 }
 #endif
 
@@ -8568,16 +8566,16 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_removeMessage);
  *
  * @param obj  the cPrivateMessage to remove
  */
-extern "C" void BuddyMan_removeMessage(BuddyMan* self, void* obj)
+void BuddyMan::removeMessage(void* obj)
 {
-    for (void** it = (void**)self->mMessagesFinish; it != (void**)self->mMessagesStart; it--) {
+    for (void** it = (void**)mMessagesFinish; it != (void**)mMessagesStart; it--) {
         cPrivateMessage* message = (cPrivateMessage*)((char*)*it);
         if (((char*)message) == obj) {
-            sTagsUnkObjVec18* messages = (sTagsUnkObjVec18*)(&self->mMessagesAlloc);
-            if (it + 1 != (void**)self->mMessagesFinish) {
+            sTagsUnkObjVec18* messages = (sTagsUnkObjVec18*)(&mMessagesAlloc);
+            if (it + 1 != (void**)mMessagesFinish) {
                 sTagsUnkObjVec18_copy(it + 1, messages->mFinish, it);
             }
-            --*(void***)&self->mMessagesFinish;
+            --*(void***)&mMessagesFinish;
             if (((char*)message) != 0) {
                 sTagsUnkVEntry18* vt = (sTagsUnkVEntry18*)message->mVtbl;
                 vt[1].fn(vthis(message, vt[1]), 3);
@@ -8619,15 +8617,15 @@ static inline void** sTagsUnkObjVec_copy(void** first, void** last, void** resul
  *
  * @param idx  index of the message
  */
-extern "C" void BuddyMan_removeMessageAt(BuddyMan* self, int idx)
+void BuddyMan::removeMessageAt(int idx)
 {
-    sTagsUnkObjVec* messages = (sTagsUnkObjVec*)&self->mMessagesAlloc;
-    void** pos = (void**)self->mMessagesStart + idx;
+    sTagsUnkObjVec* messages = (sTagsUnkObjVec*)&mMessagesAlloc;
+    void** pos = (void**)mMessagesStart + idx;
     cPrivateMessage* obj = (cPrivateMessage*)((char*)*pos);
-    if (pos + 1 != (void**)self->mMessagesFinish) {
+    if (pos + 1 != (void**)mMessagesFinish) {
         sTagsUnkObjVec_copy(pos + 1, messages->mFinish, pos);
     }
-    --*(void***)&self->mMessagesFinish;
+    --*(void***)&mMessagesFinish;
     if (((char*)obj) != 0) {
         sTagsUnkVEntry* vt = (sTagsUnkVEntry*)obj->mVtbl;
         vt[1].fn(vthis(obj, vt[1]), 3);
@@ -8644,10 +8642,10 @@ INCLUDE_ASM("dirtysock/tagsunk", BuddyMan_getMessage);
  * @param i  index into mMessagesStart..mMessagesFinish
  * @return the cPrivateMessage, or 0 when @p i is out of range
  */
-extern "C" void* BuddyMan_getMessage(BuddyMan* self, unsigned int i)
+void* BuddyMan::getMessage(unsigned int i)
 {
-    cPrivateMessage** begin = self->mMessagesStart;
-    cPrivateMessage** end = self->mMessagesFinish;
+    cPrivateMessage** begin = mMessagesStart;
+    cPrivateMessage** end = mMessagesFinish;
     if (i >= (unsigned int)(end - begin)) {
         return 0;
     }
@@ -8715,7 +8713,7 @@ extern "C" void cCommSystem_netConnConnect(void* p);
  * the second argument register. Sets the timeout at +0x4 to 60.0 seconds on broadband (mBroadBand set) or 180.0
  * otherwise, and the state at +0x0 to 1; cConnMan_update() then watches mNetConnState.
  */
-extern "C" void cConnMan_connect(cConnMan* self)
+void cConnMan::connect()
 {
     cCommSystem_netConnConnect(cCommSystem_mCommSystem);
     float timeout;
@@ -8724,8 +8722,8 @@ extern "C" void cConnMan_connect(cConnMan* self)
     } else {
         timeout = D_004A2F10;
     }
-    self->mTimeout = timeout;
-    *(int*)self = 1;
+    mTimeout = timeout;
+    *(int*)this = 1;
 }
 #endif
 
@@ -8788,11 +8786,11 @@ extern "C" void cConnMan_disconnect(int* out, int val)
     if (BuddyMan_mBuddyMan == 0)
         BuddyMan_createInstance();
     if (BuddyMan_isLoggedIn(BuddyMan_mBuddyMan) == 0)
-        BuddyMan_reconnect(BuddyMan_mBuddyMan);
+        BuddyMan_mBuddyMan->reconnect();
     if (BuddyMan_mBuddyMan == 0)
-        LobbyMan_disconnect(LobbyMan_mLobbyMan);
-    BuddyMan_disconnect(BuddyMan_mBuddyMan);
-    LobbyMan_disconnect(LobbyMan_mLobbyMan);
+        LobbyMan_mLobbyMan->disconnect();
+    BuddyMan_mBuddyMan->disconnect();
+    LobbyMan_mLobbyMan->disconnect();
     if (!isState_36F0(1)) {
         cCommSystem_netConnDisconnect(cCommSystem_mCommSystem);
         if (val != 0) {
@@ -9013,8 +9011,8 @@ extern "C" void cGameConnMan_connect(int* self, unsigned int ip, int isHost, int
     self[1] = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, cBENetworkInterface_networkOpt.iPort, isHost);
     cBE_getInterface_Fv(cBE_getBE(), 4);
     if ((cBEOptionInterface_mOption[0] >> 18) & 1) {
-        cVoipMan_connect((cVoipMan*)VoipMan, (void*)ip);
-        cVoipMan_turnVoiceOn((cVoipMan*)VoipMan);
+        ((cVoipMan*)VoipMan)->connect((void*)ip);
+        ((cVoipMan*)VoipMan)->turnVoiceOn();
     }
     *(float*)&self[4] = D_004A2F14;
     self[0] = one;
@@ -9081,21 +9079,20 @@ static inline void post_3BA8(char* self, void* msg)
  * online::Event to LobbyMan's mEventList: type 268 for @p reason 1, type 274 for @p reason 0, none otherwise (callers
  * pass 2).
  *
- * @param gameConn    the game-connection manager (cRealFE + 0xB5ABC, from func_002591D0)
  * @param reason  reason: 0 connect failure or timeout, 1 cancelled after connecting, other values post nothing
  */
-extern "C" void cGameConnMan_shutdown(cGameConnMan* gameConn, int reason)
+void cGameConnMan::shutdown(int reason)
 {
-    int* self = (int*)gameConn;
+    int* self = (int*)this;
     if (self[0] != 0 && cCommSystem_isChannelOpen(cCommSystem_mCommSystem, self[1]) != 0)
     {
         cCommSystem_closeChannel(cCommSystem_mCommSystem, self[1]);
-        cVoipMan_turnVoiceOff((cVoipMan*)VoipMan);
-        cVoipMan_disconnect((cVoipMan*)VoipMan);
+        ((cVoipMan*)VoipMan)->turnVoiceOff();
+        ((cVoipMan*)VoipMan)->disconnect();
     }
     if (cSetupMan_mSetupMan != 0)
         cSetupMan_destroyInstance();
-    LobbyMan_leaveGame(LobbyMan_mLobbyMan, 0);
+    LobbyMan_mLobbyMan->leaveGame(0);
     self[0] = 0;
     if (reason == 1) {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
@@ -9157,9 +9154,9 @@ static inline void* Mgr_263CF0()
     if (BuddyMan_mBuddyMan == 0)
         BuddyMan_createInstance();
     if (BuddyMan_isLoggedIn(BuddyMan_mBuddyMan) == 0)
-        BuddyMan_reconnect(BuddyMan_mBuddyMan);
+        BuddyMan_mBuddyMan->reconnect();
     if (BuddyMan_mBuddyMan == 0)
-        LobbyMan_disconnect(LobbyMan_mLobbyMan);
+        LobbyMan_mLobbyMan->disconnect();
     return BuddyMan_mBuddyMan;
 }
 
@@ -9189,7 +9186,7 @@ extern "C" void cGameConnMan_update(int* self)
         {
             if (self[3] != 0)
             {
-                cGameConnMan_shutdown((cGameConnMan*)self, 1);
+                ((cGameConnMan*)self)->shutdown(1);
                 return;
             }
             cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -9200,7 +9197,7 @@ extern "C" void cGameConnMan_update(int* self)
         }
         if (cCommSystem_getError(cCommSystem_mCommSystem, self[1]) || tsTimedOut_263CF0(self))
         {
-            cGameConnMan_shutdown((cGameConnMan*)self, 0);
+            ((cGameConnMan*)self)->shutdown(0);
             return;
         }
         *(float*)(self + 4) = *(float*)(self + 4) - SSXApp->TimerPeriod;
@@ -9216,23 +9213,23 @@ extern "C" void cGameConnMan_update(int* self)
                 netEvent[0] = 275;
                 post_3BA8((char*)lobbyMan, netEvent);
             }
-            cGameConnMan_shutdown((cGameConnMan*)self, 2);
+            ((cGameConnMan*)self)->shutdown(2);
             return;
         }
         {
-            cSetupMan_update((cSetupMan*)cSetupMan_mSetupMan);
+            ((cSetupMan*)cSetupMan_mSetupMan)->update();
             int go = 0;
             int st = *(int*)cSetupMan_mSetupMan;
             if (st == 13)
                 go = 1;
             else if (st == 11)
-                cGameConnMan_shutdown((cGameConnMan*)self, 2);
+                ((cGameConnMan*)self)->shutdown(2);
             if (go == 0)
                 return;
             cSetupMan_destroyInstance();
-            LobbyMan_disconnect(LobbyMan_mLobbyMan);
+            LobbyMan_mLobbyMan->disconnect();
             cRealFE_mStartState = 52;
-            BuddyMan_setPresence((BuddyMan*)Mgr_263CF0(), 1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
+            ((BuddyMan*)Mgr_263CF0())->setPresence(1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
             void* bi7 = cBE_getInterface_Fv(SSXApp->BE, 7);
             cBEInterface* bi1 = cBE_getInterface_Fv(SSXApp->BE, 1);
             cBENewPlayerInterface_setRiderCharID(bi1, 0, cBENetworkInterface_networkOpt.MyCharacterID);
@@ -9378,11 +9375,11 @@ extern "C" void cSetupMan__cSetupMan(cSetupMan* self_, int flags)
 {
     cSetupMan* self = self_;
     if (((int*)self->mPacketCache) != 0)
-        cSetupMan_freePacket((cSetupMan*)self, ((int*)self->mPacketCache));
+        self->freePacket(((int*)self->mPacketCache));
     while (PeekA_264138(self) != 0)
-        cSetupMan_freePacket((cSetupMan*)self, PopA_264138(self));
+        self->freePacket(PopA_264138(self));
     while (PeekB_264138(self) != 0)
-        cSetupMan_freePacket((cSetupMan*)self, PopB_264138(self));
+        self->freePacket(PopB_264138(self));
     self->mState = 1;
     if (flags & 1)
         operator_delete((int*)self);
@@ -9463,9 +9460,9 @@ static inline void* Mgr_42B8()
     if (BuddyMan_mBuddyMan == 0)
         BuddyMan_createInstance();
     if (BuddyMan_isLoggedIn(BuddyMan_mBuddyMan) == 0)
-        BuddyMan_reconnect(BuddyMan_mBuddyMan);
+        BuddyMan_mBuddyMan->reconnect();
     if (BuddyMan_mBuddyMan == 0)
-        LobbyMan_disconnect(LobbyMan_mLobbyMan);
+        LobbyMan_mLobbyMan->disconnect();
     return BuddyMan_mBuddyMan;
 }
 
@@ -9500,14 +9497,13 @@ static inline void post_42B8(char* g, void* msg)
  * challenge from mOpponent (BuddyMan_declineChallenge()) and pass the type to LobbyMan_leaveGame. Likely bug: the 0x10 case block-copies
  * a tLobbyStats of which only mRank is set, so the other four fields get stack garbage.
  *
- * @param vself  the setup manager: state +0x0, host flag +0x124, ranked flag +0x128
  */
-extern "C" void cSetupMan_update(cSetupMan* vself)
+void cSetupMan::update()
 {
-    cSetupMan* self = vself;
+    cSetupMan* self = this;
     sMsg42B8 msg;
-    cSetupMan_receivePackets((cSetupMan*)self);
-    cSetupMan_flushSendQueue((cSetupMan*)self);
+    self->receivePackets();
+    self->flushSendQueue();
     int st = self->mState;
     if (st == 5 || st == 10) {
         if (self->mRanked != 0 || st == 10) {
@@ -9545,21 +9541,21 @@ extern "C" void cSetupMan_update(cSetupMan* vself)
         tLobbyStats info;
         ((int*)&info.mRank)[0] = msg.a;
         (*(&LobbyMan_mLobbyMan->mOpponentStats)) = info;
-        cSetupMan_highlightCharacter((cSetupMan*)self, cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0));
+        self->highlightCharacter(cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0));
         return;
     }
     if (self->mIsHost != 0) {
         if (self->mState < 7) {
             switch (msg.type) {
             case 1: cSetupMan_handleOpponentHighlight_p(self, msg.a, &msg.c); break;
-            case 3: cSetupMan_handleOpponentConfirm((cSetupMan*)self, msg.a); break;
+            case 3: self->handleOpponentConfirm(msg.a); break;
             case 5: cSetupMan_handleOpponentUnconfirm((int*)self); break;
             case 0xF8:
             case 250: {
                 self->mState = 11;
-                if (BuddyMan_hasChallengeFrom((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent) != 0)
-                    BuddyMan_declineChallenge((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
-                LobbyMan_leaveGame(LobbyMan_mLobbyMan, msg.type);
+                if (((BuddyMan*)Mgr_42B8())->hasChallengeFrom(LobbyMan_mLobbyMan->mOpponent) != 0)
+                    ((BuddyMan*)Mgr_42B8())->declineChallenge(LobbyMan_mLobbyMan->mOpponent);
+                LobbyMan_mLobbyMan->leaveGame(msg.type);
                 break;
             }
             }
@@ -9572,9 +9568,9 @@ extern "C" void cSetupMan_update(cSetupMan* vself)
             case 0xF8:
             case 250: {
                 self->mState = 11;
-                if (BuddyMan_hasChallengeFrom((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent) != 0)
-                    BuddyMan_declineChallenge((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
-                LobbyMan_leaveGame(LobbyMan_mLobbyMan, msg.type);
+                if (((BuddyMan*)Mgr_42B8())->hasChallengeFrom(LobbyMan_mLobbyMan->mOpponent) != 0)
+                    ((BuddyMan*)Mgr_42B8())->declineChallenge(LobbyMan_mLobbyMan->mOpponent);
+                LobbyMan_mLobbyMan->leaveGame(msg.type);
                 break;
             }
             }
@@ -9591,9 +9587,9 @@ extern "C" void cSetupMan_update(cSetupMan* vself)
             case 0xF8:
             case 250: {
                 self->mState = 11;
-                if (BuddyMan_hasChallengeFrom((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent) != 0)
-                    BuddyMan_declineChallenge((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
-                LobbyMan_leaveGame(LobbyMan_mLobbyMan, msg.type);
+                if (((BuddyMan*)Mgr_42B8())->hasChallengeFrom(LobbyMan_mLobbyMan->mOpponent) != 0)
+                    ((BuddyMan*)Mgr_42B8())->declineChallenge(LobbyMan_mLobbyMan->mOpponent);
+                LobbyMan_mLobbyMan->leaveGame(msg.type);
                 break;
             }
             }
@@ -9610,9 +9606,9 @@ extern "C" void cSetupMan_update(cSetupMan* vself)
             case 0xF8:
             case 250: {
                 self->mState = 11;
-                if (BuddyMan_hasChallengeFrom((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent) != 0)
-                    BuddyMan_declineChallenge((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
-                LobbyMan_leaveGame(LobbyMan_mLobbyMan, msg.type);
+                if (((BuddyMan*)Mgr_42B8())->hasChallengeFrom(LobbyMan_mLobbyMan->mOpponent) != 0)
+                    ((BuddyMan*)Mgr_42B8())->declineChallenge(LobbyMan_mLobbyMan->mOpponent);
+                LobbyMan_mLobbyMan->leaveGame(msg.type);
                 break;
             }
             }
@@ -9650,7 +9646,7 @@ INCLUDE_ASM("dirtysock/tagsunk", cSetupMan_freePacket);
  *
  * @param packet  the buffer to free
  */
-extern "C" void cSetupMan_freePacket(cSetupMan* self, int* packet)
+void cSetupMan::freePacket(int* packet)
 {
     operator_delete(packet);
 }
@@ -9689,14 +9685,14 @@ struct sDsPacketQueueK2 {
 // Pops the oldest queued packet into `dst`; returns its payload size (0 if empty).
 extern "C" int cSetupMan_readMessage(sDsPacketQueueK2* self, void* dst)
 {
-    cSetupMan_receivePackets((cSetupMan*)self);
+    ((cSetupMan*)self)->receivePackets();
     int head = self->head;
     if (head != self->tail) {
         self->head = head + 1;
         sDsPacketK2* packet = self->slots[head % 32];
         int len = packet->size - 4;
         MEM_copy(dst, packet->data, len);
-        cSetupMan_freePacket((cSetupMan*)self, (int*)packet);
+        ((cSetupMan*)self)->freePacket((int*)packet);
         return len;
     }
     return 0;
@@ -9730,9 +9726,9 @@ struct sDsRecvQueue_00264A58 {
  * @param setupMan  the setup manager (receive queue: tail +0x8, head +0xC, slots +0x10)
  */
 // Fills the 32-entry receive queue until it is full or no packet is pending.
-extern "C" void cSetupMan_receivePackets(cSetupMan* setupMan)
+void cSetupMan::receivePackets()
 {
-    sDsRecvQueue_00264A58* self = (sDsRecvQueue_00264A58*)setupMan;
+    sDsRecvQueue_00264A58* self = (sDsRecvQueue_00264A58*)this;
     void* buf;
     while (self->cur != 0
            || (buf = cSetupMan_allocPacket_self(self), self->cur = buf,
@@ -9765,9 +9761,9 @@ extern "C" int cCommSystem_writePacket(void* mgr, int idx, void* buf, int len);
  * @param setupMan  the setup manager (send queue: tail +0x90, head +0x94, slots +0x98)
  */
 // Sends queued packets until the queue is empty or the channel refuses one.
-extern "C" void cSetupMan_flushSendQueue(cSetupMan* setupMan)
+void cSetupMan::flushSendQueue()
 {
-    cSetupMan* self = setupMan;
+    cSetupMan* self = this;
     while (self->mWriteQueue.mTail != self->mWriteQueue.mHead)
     {
         tGameCommPacket* pkt;
@@ -9779,7 +9775,7 @@ extern "C" void cSetupMan_flushSendQueue(cSetupMan* setupMan)
         if (cCommSystem_writePacket(cCommSystem_mCommSystem, self->mChannel, pkt, pkt->mSize) == 0)
             return;
         self->mWriteQueue.mTail++;
-        cSetupMan_freePacket((cSetupMan*)self, (int*)pkt);
+        self->freePacket((int*)pkt);
     }
 }
 #endif
@@ -9829,7 +9825,7 @@ int cSetupMan_sendMessage_impl(void* p, const void* src, int len) __asm__("cSetu
 int cSetupMan_sendMessage_impl(void* setupMan, const void* src, int len)
 {
     sDsSendQueue_00264BE8* self = (sDsSendQueue_00264BE8*)setupMan;
-    cSetupMan_flushSendQueue((cSetupMan*)self);
+    ((cSetupMan*)self)->flushSendQueue();
     sDsOutPacket_00264BE8 pkt;
     pkt.kind = 0;
     pkt.flags = 0;
@@ -9862,13 +9858,13 @@ struct sTagMsg264CB8 {
  * cGameConnMan_update calls it right after creating the setup manager, passing LobbyMan's mChallengeMessage in the second
  * argument register, which is ignored. cSetupMan_update() stores the peer's rank when the message arrives.
  */
-extern "C" void cSetupMan_sendRank(cSetupMan* self)
+void cSetupMan::sendRank()
 {
     sTagMsg264CB8 msg;
     msg.state = LobbyMan_mLobbyMan->mStats.mRank;
     msg.type = 16;
     msg.id = 0;
-    cSetupMan_sendMessage(self, &msg, sizeof(msg));
+    cSetupMan_sendMessage(this, &msg, sizeof(msg));
 }
 #endif
 
@@ -9888,7 +9884,7 @@ extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int ch
  *
  * @param charID  the chosen character
  */
-extern "C" void cSetupMan_applyMyCharacter(cSetupMan* self, int charID)
+void cSetupMan::applyMyCharacter(int charID)
 {
     cBEInterface* playerInterface = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBENewPlayerInterface_setPlayerCharID(playerInterface, 0, charID);
@@ -9978,7 +9974,7 @@ struct sTagMsg264E50 {
  * @param rider  the character id, or -1
  * @param state  the sender's setup state (0 for a client pick)
  */
-extern "C" void cSetupMan_sendCharacterMessage(cSetupMan* self, int type, int rider, int state)
+void cSetupMan::sendCharacterMessage(int type, int rider, int state)
 {
     sTagMsg264E50 msg;
     msg.type = type;
@@ -9986,7 +9982,7 @@ extern "C" void cSetupMan_sendCharacterMessage(cSetupMan* self, int type, int ri
     msg.rider = rider;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (self->mRanked != 0) {
+    if (mRanked != 0) {
         int i;
         for (i = 0; i < 7; i++)
             msg.stats[i] = 40;
@@ -9999,7 +9995,7 @@ extern "C" void cSetupMan_sendCharacterMessage(cSetupMan* self, int type, int ri
         msg.stats[5] = cBEStatInterface_getHumanToughness(iface, 0, rider);
         msg.stats[6] = cBEStatInterface_getHumanTrick(iface, 0, rider);
     }
-    cSetupMan_sendMessage(self, &msg, sizeof(msg));
+    cSetupMan_sendMessage(this, &msg, sizeof(msg));
 }
 #endif
 
@@ -10018,20 +10014,20 @@ extern "C" void cSetupMan_sendCharacterMessage(cSetupMan* self, int event, int a
  *
  * @param rider  the character id
  */
-extern "C" void cSetupMan_highlightCharacter(cSetupMan* self, int rider)
+void cSetupMan::highlightCharacter(int rider)
 {
-    int state = *(int*)self;
+    int state = *(int*)this;
     if (state == 0xC) {
         return;
     }
-    if (self->mIsHost != 0) {
+    if (mIsHost != 0) {
         if (state == 1) {
-            *(int*)self = 2;
+            *(int*)this = 2;
         }
-        cSetupMan_applyMyCharacter(self, rider);
-        cSetupMan_sendCharacterMessage(self, 0, rider, *(int*)self);
+        applyMyCharacter(rider);
+        sendCharacterMessage(0, rider, *(int*)this);
     } else {
-        cSetupMan_sendCharacterMessage(self, 1, rider, 0);
+        sendCharacterMessage(1, rider, 0);
     }
 }
 #endif
@@ -10079,19 +10075,19 @@ static inline sMsgListIter5018 sMsgList5018_insert(sMsgListIter5018 pos, void* c
  *
  * @param rider  the chosen character
  */
-extern "C" void cSetupMan_confirmCharacter(cSetupMan* self, int rider)
+void cSetupMan::confirmCharacter(int rider)
 {
-    if (self->mIsHost != 0) {
-        int st = *(int*)self;
+    if (mIsHost != 0) {
+        int st = *(int*)this;
         if (st > 0) {
             if (st < 3)
-                *(int*)self = 4;
+                *(int*)this = 4;
             else if (st == 3)
-                *(int*)self = 5;
+                *(int*)this = 5;
         }
-        cSetupMan_applyMyCharacter(self, rider);
+        applyMyCharacter(rider);
         int type = 244;
-        cSetupMan_sendCharacterMessage(self, 2, rider, *(int*)self);
+        sendCharacterMessage(2, rider, *(int*)this);
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         netEvent[0] = type;
@@ -10099,7 +10095,7 @@ extern "C" void cSetupMan_confirmCharacter(cSetupMan* self, int rider)
         void* mp = netEvent;
         sMsgList5018_insert(((sMsgListNode5018*)lobbyMan->mEventList.mpHead), mp);
     } else {
-        cSetupMan_sendCharacterMessage(self, 3, rider, *(int*)self);
+        sendCharacterMessage(3, rider, *(int*)this);
     }
 }
 #endif
@@ -10115,19 +10111,19 @@ extern "C" void cSetupMan_sendCharacterMessage(cSetupMan* self, int event, int a
  * Ignored in state 12. The host returns state 4 to 2 and sends message 4; a client sends message 5 (rider -1, its
  * current state).
  */
-extern "C" void cSetupMan_unconfirmCharacter(cSetupMan* self)
+void cSetupMan::unconfirmCharacter()
 {
     int event;
-    if (self->mState != 0xC) {
-        if (self->mIsHost != 0) {
-            if (self->mState == 4) {
-                self->mState = 2;
+    if (mState != 0xC) {
+        if (mIsHost != 0) {
+            if (mState == 4) {
+                mState = 2;
             }
             event = 4;
         } else {
             event = 5;
         }
-        cSetupMan_sendCharacterMessage(self, event, -1, self->mState);
+        sendCharacterMessage(event, -1, mState);
     }
 }
 #endif
@@ -10189,7 +10185,7 @@ extern "C" void cSetupMan_handleOpponentHighlight(cSetupMan* self, int rider, sN
     }
     cSetupMan_applyOpponentCharacter(self, rider, name);
     int type = 243;
-    cSetupMan_sendCharacterMessage(self, 1, rider, *(int*)self);
+    self->sendCharacterMessage(1, rider, *(int*)self);
     {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -10245,18 +10241,18 @@ static inline sMsgListIter5290 sMsgList5290_insert(sMsgListIter5290 pos, void* c
  *
  * @param rider  the opponent's character id from the message
  */
-extern "C" void cSetupMan_handleOpponentConfirm(cSetupMan* self, int rider)
+void cSetupMan::handleOpponentConfirm(int rider)
 {
-    int st = *(int*)self;
+    int st = *(int*)this;
     if (st > 0) {
         if (st < 3)
-            *(int*)self = 3;
+            *(int*)this = 3;
         else if (st == 4)
-            *(int*)self = 5;
+            *(int*)this = 5;
     }
     int type = 245;
-    cSetupMan_applyOpponentCharacter(self, rider, 0);
-    cSetupMan_sendCharacterMessage(self, 3, rider, *(int*)self);
+    cSetupMan_applyOpponentCharacter(this, rider, 0);
+    sendCharacterMessage(3, rider, *(int*)this);
     {
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         int* netEvent = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -10386,24 +10382,24 @@ struct sNetMsg5458 {
  *
  * @param id  the highlighted row (the menu's byte at +0x95)
  */
-extern "C" void cSetupMan_sendBraggingSelection(cSetupMan* self, int id)
+void cSetupMan::sendBraggingSelection(int id)
 {
-    int st = *(int*)self;
+    int st = *(int*)this;
     if (st != 12) {
         int type;
-        if (self->mIsHost != 0) {
+        if (mIsHost != 0) {
             if (st >= 5) {
                 if (st < 7)
-                    *(int*)self = 7;
+                    *(int*)this = 7;
             }
             type = 6;
         } else
             type = 7;
         sTagMsg5458 msg;
         msg.type = type;
-        msg.state = *(int*)self;
+        msg.state = *(int*)this;
         msg.id = id;
-        cSetupMan_sendMessage(self, &msg, sizeof(msg));
+        cSetupMan_sendMessage(this, &msg, sizeof(msg));
         sNetMsg5458* updateEvent = (sNetMsg5458*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
         updateEvent->type = 251;
         updateEvent->vt = D_00481150;
@@ -10475,15 +10471,15 @@ struct sNetMsg5568 {
  * @param ruleSlot  the rule slot
  * @param newValue  the new value
  */
-extern "C" void cSetupMan_sendBraggingRule(cSetupMan* self, int ruleSlot, int newValue)
+void cSetupMan::sendBraggingRule(int ruleSlot, int newValue)
 {
-    int st = *(int*)self;
+    int st = *(int*)this;
     if (st != 12) {
         int type;
-        if (self->mIsHost != 0) {
+        if (mIsHost != 0) {
             if (st >= 5) {
                 if (st < 7)
-                    *(int*)self = 7;
+                    *(int*)this = 7;
             }
             type = 8;
         } else
@@ -10492,7 +10488,7 @@ extern "C" void cSetupMan_sendBraggingRule(cSetupMan* self, int ruleSlot, int ne
         msg.type = type;
         msg.a = ruleSlot;
         msg.b = newValue;
-        cSetupMan_sendMessage(self, &msg, sizeof(msg));
+        cSetupMan_sendMessage(this, &msg, sizeof(msg));
         sNetMsg5568* updateEvent = (sNetMsg5568*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
         updateEvent->type = 0xFC;
         updateEvent->vt = D_00481130;
@@ -10571,24 +10567,24 @@ extern "C" void cSetupMan_sendMessage(void* self, void* msg, int size);
  * a client sends type 13. The {type, state, -1} message goes out through cSetupMan_sendMessage. cFEStateBraggingRights_onUpdate
  * calls it when Back unlocks a locked panel online.
  */
-extern "C" void cSetupMan_unlockBragging(cSetupMan* self)
+void cSetupMan::unlockBragging()
 {
     sTagMsg265700 msg;
     int type;
-    int state = *(int*)self;
+    int state = *(int*)this;
     if (state == 12)
         return;
-    if (self->mIsHost != 0) {
+    if (mIsHost != 0) {
         if (state == 9)
-            *(int*)self = 7;
+            *(int*)this = 7;
         type = 12;
     } else {
         type = 13;
     }
     msg.type = type;
-    msg.state = *(int*)self;
+    msg.state = *(int*)this;
     msg.id = 0xFFFFFFFF;
-    cSetupMan_sendMessage(self, &msg, sizeof(msg));
+    cSetupMan_sendMessage(this, &msg, sizeof(msg));
 }
 #endif
 
@@ -10625,7 +10621,7 @@ extern "C" void cSetupMan_cancelSetup(int* self, int ev)
         msg.state = 0xFFFFFFFF;
         msg.id = 0;
         cSetupMan_sendMessage(self, &msg, sizeof(msg));
-        LobbyMan_leaveGame(LobbyMan_mLobbyMan, ev);
+        LobbyMan_mLobbyMan->leaveGame(ev);
         self[0] = 11;
     }
 }
@@ -10684,7 +10680,7 @@ extern "C" void cSharedLoginMan_init(cSharedLoginMan* self);
  */
 extern "C" void* cSharedLoginMan_cSharedLoginMan(cSharedLoginMan* self)
 {
-    cSharedLoginMan_init(self);
+    self->init();
     return ((void*)self);
 }
 #endif
@@ -10702,7 +10698,7 @@ void operator_delete(int*);
  */
 extern "C" void cSharedLoginMan__cSharedLoginMan(cSharedLoginMan* self, int flags)
 {
-    cSharedLoginMan_shutdown(self);
+    self->shutdown();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -10739,9 +10735,9 @@ extern "C" void* cMemCard_CreateInstance();
  * @param vself  the shared-login manager
  */
 // Resets the DirtySock session state and creates the session object.
-extern "C" void cSharedLoginMan_init(cSharedLoginMan* vself)
+void cSharedLoginMan::init()
 {
-    int* self = (int*)vself;
+    int* self = (int*)this;
     self[0] = 1;
     D_004A33D4 = 0;
     self[1] = 0;
@@ -10768,9 +10764,9 @@ extern "C" void cMemCard_DeleteInstance(void* h);
  *
  * Calls func_003F7F18 (the library shutdown) and cMemCard_DeleteInstance(D_004A33D8).
  */
-extern "C" void cSharedLoginMan_shutdown(cSharedLoginMan* self)
+void cSharedLoginMan::shutdown()
 {
-    *(int*)self = 0;
+    *(int*)this = 0;
     func_003F7F18();
     cMemCard_DeleteInstance(D_004A33D8);
 }
@@ -10789,7 +10785,7 @@ extern int MemCardDevice;
  * with the port MemCardDevice that sharedlogin_cardCheckPort recorded. cFEStateNetAccountMem_onUpdate calls it in its popup-wait
  * states 7, 13, 21 and 25.
  */
-extern "C" void cSharedLoginMan_recheckCard(cSharedLoginMan* self)
+void cSharedLoginMan::recheckCard()
 {
     if (((cMemCard*)D_004A33D8)->IsBusy() == 0) {
         ((cMemCard*)D_004A33D8)->CheckDevice(MemCardDevice);
@@ -10809,7 +10805,7 @@ extern void* D_004A33D8;
  *
  * @return the free space in KB
  */
-extern "C" int cSharedLoginMan_getCardFreeSpace(cSharedLoginMan* self)
+int cSharedLoginMan::getCardFreeSpace()
 {
     return ((cMemCard*)D_004A33D8)->GetFreeSpace();
 }
@@ -10850,17 +10846,17 @@ extern "C" void cSharedLoginMan_update(int* state)
         break;
     case 2:
         if (!((cMemCard*)D_004A33D8)->IsBusy()) {
-            cSharedLoginMan_startReadAccount((cSharedLoginMan*)state);
+            ((cSharedLoginMan*)state)->startReadAccount();
         }
         break;
     case 6:
         if (!((cMemCard*)D_004A33D8)->IsBusy()) {
-            cSharedLoginMan_startSaveAccount((cSharedLoginMan*)state);
+            ((cSharedLoginMan*)state)->startSaveAccount();
         }
         break;
     case 10:
         if (!((cMemCard*)D_004A33D8)->IsBusy()) {
-            cSharedLoginMan_startCreateAccount((cSharedLoginMan*)state);
+            ((cSharedLoginMan*)state)->startCreateAccount();
         }
         break;
     case 14:
@@ -10870,7 +10866,7 @@ extern "C" void cSharedLoginMan_update(int* state)
         break;
     case 18:
         if (!((cMemCard*)D_004A33D8)->IsBusy()) {
-            cSharedLoginMan_startFormat((cSharedLoginMan*)state);
+            ((cSharedLoginMan*)state)->startFormat();
         }
         break;
     case 3:
@@ -10931,7 +10927,7 @@ extern void* D_004A33D8;
  *
  * @return true when the card is available and not formatted
  */
-extern "C" bool cSharedLoginMan_isCardUnformatted(cSharedLoginMan* self)
+bool cSharedLoginMan::isCardUnformatted()
 {
     if (((cMemCard*)D_004A33D8)->IsAvailable1() != 0) {
         return !((cMemCard*)D_004A33D8)->IsFormatted();
@@ -10951,7 +10947,7 @@ extern void* D_004A33D8;
  *
  * That slot also turns a last result of -1 into 0. cFEStateNetAccountMem_setStep calls it before starting most card steps.
  */
-extern "C" void cSharedLoginMan_clearCardChanged(cSharedLoginMan* self)
+void cSharedLoginMan::clearCardChanged()
 {
     ((cMemCard*)D_004A33D8)->ClearCardChanged();
 }
@@ -10968,7 +10964,7 @@ extern void* D_004A33D8;
  *
  * @return non-zero when the card was changed
  */
-extern "C" int cSharedLoginMan_hasCardChanged(cSharedLoginMan* self)
+int cSharedLoginMan::hasCardChanged()
 {
     return ((cMemCard*)D_004A33D8)->CardChanged();
 }
@@ -10985,7 +10981,7 @@ extern void* D_004A33D8;
  *
  * @return true when the card is not available
  */
-extern "C" bool cSharedLoginMan_isCardMissing(cSharedLoginMan* self)
+bool cSharedLoginMan::isCardMissing()
 {
     return !((cMemCard*)D_004A33D8)->IsAvailable1();
 }
@@ -11006,13 +11002,13 @@ extern "C" int func_003F8000(void* p);
  * password at +0x11), starts func_003F8000(AccountData) and sets the state word to 3. cFEStateNetAccountMem_updateDeleteReadStep later compares the
  * buffer with the typed user name and password.
  */
-extern "C" void cSharedLoginMan_startReadAccount(cSharedLoginMan* self)
+void cSharedLoginMan::startReadAccount()
 {
-    self->mError = 0;
+    mError = 0;
     D_004A33E0 = 0;
     MEM_fill(AccountData, 0, 36);
     func_003F8000(AccountData);
-    *(int*)self = 3;
+    *(int*)this = 3;
 }
 #endif
 
@@ -11024,10 +11020,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_requestReadAccount__FPv);
  *
  * cFEStateNetAccountMem_setStep uses it for its "checking card" steps; cSharedLoginMan_update then runs cSharedLoginMan_startReadAccount.
  */
-void cSharedLoginMan_requestReadAccount(void* vself)
+void cSharedLoginMan::requestReadAccount()
 {
-    cSharedLoginMan* self = (cSharedLoginMan*)vself;
-    *(int*)self = 2;
+    *(int*)this = 2;
 }
 #endif
 
@@ -11039,10 +11034,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_requestSaveAccount__FPv);
  *
  * cSharedLoginMan_update then runs cSharedLoginMan_startSaveAccount.
  */
-void cSharedLoginMan_requestSaveAccount(void* vself)
+void cSharedLoginMan::requestSaveAccount()
 {
-    cSharedLoginMan* self = (cSharedLoginMan*)vself;
-    *(int*)self = 6;
+    *(int*)this = 6;
 }
 #endif
 
@@ -11054,10 +11048,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_requestCreateAccount__FPv);
  *
  * cFEStateNetAccountMem_setStep uses it once the card has at least 17 KB free; cSharedLoginMan_update then runs cSharedLoginMan_startCreateAccount.
  */
-void cSharedLoginMan_requestCreateAccount(void* vself)
+void cSharedLoginMan::requestCreateAccount()
 {
-    cSharedLoginMan* self = (cSharedLoginMan*)vself;
-    *(int*)self = 10;
+    *(int*)this = 10;
 }
 #endif
 
@@ -11084,10 +11077,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_requestFormat__FPv);
  *
  * cFEStateNetAccountMem_setStep uses it in its "formatting" step; cSharedLoginMan_update then formats the card.
  */
-void cSharedLoginMan_requestFormat(void* vself)
+void cSharedLoginMan::requestFormat()
 {
-    cSharedLoginMan* self = (cSharedLoginMan*)vself;
-    *(int*)self = 18;
+    *(int*)this = 18;
 }
 #endif
 
@@ -11104,12 +11096,12 @@ extern "C" int func_003F8048(void* p);
  * Clears the result word (+0x4) and D_004A33E0, starts func_003F8048(AccountData) (which copies the user name and
  * password from the buffer into the library session) and sets the state word to 7.
  */
-extern "C" void cSharedLoginMan_startSaveAccount(cSharedLoginMan* self)
+void cSharedLoginMan::startSaveAccount()
 {
-    self->mError = 0;
+    mError = 0;
     D_004A33E0 = 0;
     func_003F8048(AccountData);
-    *(int*)self = 7;
+    *(int*)this = 7;
 }
 #endif
 
@@ -11127,12 +11119,12 @@ extern "C" int func_003F7F48(void* a, void* b);
  * Clears the result word (+0x4) and D_004A33E0, starts func_003F7F48(D_00442A60, AccountData) (which also copies the
  * user name and password from the buffer) and sets the state word to 11.
  */
-extern "C" void cSharedLoginMan_startCreateAccount(cSharedLoginMan* self)
+void cSharedLoginMan::startCreateAccount()
 {
-    self->mError = 0;
+    mError = 0;
     D_004A33E0 = 0;
     func_003F7F48(D_00442A60, AccountData);
-    *(int*)self = 11;
+    *(int*)this = 11;
 }
 #endif
 
@@ -11166,11 +11158,11 @@ extern int D_004A33E0;
  *
  * Clears the result word (+0x4) and D_004A33E0 and sets the state word to 19, where cSharedLoginMan_update formats the card.
  */
-extern "C" void cSharedLoginMan_startFormat(cSharedLoginMan* self)
+void cSharedLoginMan::startFormat()
 {
-    self->mError = 0;
+    mError = 0;
     D_004A33E0 = 0;
-    *(int*)self = 19;
+    *(int*)this = 19;
 }
 #endif
 
@@ -12013,42 +12005,42 @@ static inline int ringIdx_668E8(int w)
  * waiting). Flag bit 4 is set from func_003F6838(block, 0, 0, 0x10) and bits 1..3 from bit 0 of the block's first word.
  * cSSXApp_preUpdate calls it.
  */
-extern "C" void cUsbKeyboard_update(cUsbKeyboard* self)
+void cUsbKeyboard::update()
 {
-    if (self->mEnabled == 0)
+    if (mEnabled == 0)
         return;
     func_003F63F0();
     for (int i = 0; i < 8; i++) {
-        tUsbKeyboardSlot* keyboardSlot = &self->mSlots[i];
+        tUsbKeyboardSlot* keyboardSlot = &mSlots[i];
         (*(sSlotFlags_668E8*)&keyboardSlot->mFlags).active = func_003F6520(i) == 1;
         if (!(*(sSlotFlags_668E8*)&keyboardSlot->mFlags).active)
             *(int*)&(*(sSlotFlags_668E8*)&keyboardSlot->mFlags) = 0;
     }
     int n = func_003F6348();
     for (int j = 0; j < n; j++) {
-        if ((*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).active) {
+        if ((*(sSlotFlags_668E8*)&mSlots[j].mFlags).active) {
             sConn_668E8* readBlock = (sConn_668E8*)func_003F64E0(j);
             if (readBlock != 0) {
                 for (int k = 0; k < readBlock->count; k++) {
                     unsigned char* translated = func_003F68F0(readBlock, 0, k);
                     if (translated[0] != 0 || translated[1] != 0) {
-                        int w = self->mSlots[j].mCount;
+                        int w = mSlots[j].mCount;
                         int idx = ringIdx_668E8(w);
-                        int ringStart = self->mSlots[j].mRead;
+                        int ringStart = mSlots[j].mRead;
                         if (w - ringStart >= 0x40)
-                            self->mSlots[j].mRead = ringStart + 1;
-                        self->mSlots[j].mKeys[idx][0] = translated[0];
-                        self->mSlots[j].mKeys[idx][1] = translated[1];
-                        self->mSlots[j].mCount++;
+                            mSlots[j].mRead = ringStart + 1;
+                        mSlots[j].mKeys[idx][0] = translated[0];
+                        mSlots[j].mKeys[idx][1] = translated[1];
+                        mSlots[j].mCount++;
                     }
                 }
                 if (func_003F6838(readBlock, 0, 0, 0x10))
-                    (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).shiftDown = 1;
+                    (*(sSlotFlags_668E8*)&mSlots[j].mFlags).shiftDown = 1;
                 else
-                    (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).shiftDown = 0;
-                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).ledBitB = readBlock->on;
-                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).ledBitC = readBlock->on;
-                (*(sSlotFlags_668E8*)&self->mSlots[j].mFlags).ledBitA = readBlock->on;
+                    (*(sSlotFlags_668E8*)&mSlots[j].mFlags).shiftDown = 0;
+                (*(sSlotFlags_668E8*)&mSlots[j].mFlags).ledBitB = readBlock->on;
+                (*(sSlotFlags_668E8*)&mSlots[j].mFlags).ledBitC = readBlock->on;
+                (*(sSlotFlags_668E8*)&mSlots[j].mFlags).ledBitA = readBlock->on;
             }
         }
     }
@@ -12202,7 +12194,7 @@ void operator_delete(int*);
  */
 extern "C" void cVoipMan__cVoipMan(cVoipMan* self, int flags)
 {
-    cVoipMan_disconnect(self);
+    self->disconnect();
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -12232,19 +12224,19 @@ extern "C" void cVoipMan_turnVoiceOn(cVoipMan* self);
  *
  * @param peerAddr  the peer's address
  */
-extern "C" void cVoipMan_connect(cVoipMan* self, void* peerAddr)
+void cVoipMan::connect(void* peerAddr)
 {
-    if (*(int*)self == 0) {
+    if (*(int*)this == 0) {
         func_003F6AB8(peerAddr, 6000, 6000);
         int n = D_004A33F8;
-        *(int*)self = 1;
+        *(int*)this = 1;
         func_003F6C10(n, 85);
         if (D_004A33F8 < 10) {
-            cVoipMan_turnVoiceOff(self);
+            turnVoiceOff();
         } else {
             cBE_getInterface_Fv(cBE_getBE(), 4);
             if ((cBEOptionInterface_mOption[0] >> 18) & 1) {
-                cVoipMan_turnVoiceOn(self);
+                turnVoiceOn();
             }
         }
     }
@@ -12259,11 +12251,11 @@ extern "C" void func_003F6AF0(void* self);
 /**
  * Disconnects voice chat: when connected (+0x0), stops the voice module (func_003F6AF0) and clears the connected word.
  */
-extern "C" void cVoipMan_disconnect(cVoipMan* self)
+void cVoipMan::disconnect()
 {
-    if (*(void**)self != 0) {
-        func_003F6AF0(self);
-        *(void**)self = 0;
+    if (*(void**)this != 0) {
+        func_003F6AF0(this);
+        *(void**)this = 0;
     }
 }
 #endif
@@ -12279,11 +12271,11 @@ extern "C" void func_003F6B20();
  *
  * Sets the voice-on word (+0x4).
  */
-extern "C" void cVoipMan_turnVoiceOn(cVoipMan* self)
+void cVoipMan::turnVoiceOn()
 {
-    if (*(int*)self != 0 && self->mVoiceOn == 0 && D_004A33F8 >= 10) {
+    if (*(int*)this != 0 && mVoiceOn == 0 && D_004A33F8 >= 10) {
         func_003F6B20();
-        self->mVoiceOn = 1;
+        mVoiceOn = 1;
     }
 }
 #endif
@@ -12296,11 +12288,11 @@ extern "C" void func_003F6B50(void* self);
 /**
  * Turns the voice off (func_003F6B50) when connected and on, and clears the voice-on word (+0x4).
  */
-extern "C" void cVoipMan_turnVoiceOff(cVoipMan* self)
+void cVoipMan::turnVoiceOff()
 {
-    if (*(int*)self != 0 && self->mVoiceOn != 0) {
-        func_003F6B50(self);
-        self->mVoiceOn = 0;
+    if (*(int*)this != 0 && mVoiceOn != 0) {
+        func_003F6B50(this);
+        mVoiceOn = 0;
     }
 }
 #endif
@@ -12313,12 +12305,12 @@ INCLUDE_ASM("dirtysock/tagsunk", cVoipMan_toggleVoice);
 /**
  * Toggles the voice: turns it off when the voice-on word (+0x4) is set (cVoipMan_turnVoiceOff), else on (cVoipMan_turnVoiceOn).
  */
-extern "C" void cVoipMan_toggleVoice(cVoipMan* self)
+void cVoipMan::toggleVoice()
 {
-    if (self->mVoiceOn != 0) {
-        cVoipMan_turnVoiceOff(self);
+    if (mVoiceOn != 0) {
+        turnVoiceOff();
     } else {
-        cVoipMan_turnVoiceOn(self);
+        turnVoiceOn();
     }
 }
 #endif
@@ -12348,10 +12340,9 @@ INCLUDE_ASM("dirtysock/tagsunk", cVoipMan_getVoiceStatus__FPv);
  *
  * @return the status word
  */
-void* cVoipMan_getVoiceStatus(void* vself)
+void* cVoipMan::getVoiceStatus()
 {
-    cVoipMan* self = (cVoipMan*)vself;
-    return func_003F6C40(self);
+    return func_003F6C40(this);
 }
 #endif
 
@@ -12370,9 +12361,9 @@ extern "C" void func_003F6C10(int a0, int a1);
  * @param level  the voice level (below 10 counts as off)
  * @param maxLevel  the second value for the module (the maximum level)
  */
-extern "C" void cVoipMan_setVoiceLevel(cVoipMan* self, int level, int maxLevel)
+void cVoipMan::setVoiceLevel(int level, int maxLevel)
 {
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         func_003F6C10(level, maxLevel);
     }
     D_004A33F8 = level;
@@ -12392,9 +12383,9 @@ extern "C" void func_003F6BA0(void* a, void* b);
  * @param outLevel  receives the first word (the level)
  * @param outMax  receives the second word (the maximum)
  */
-extern "C" void cVoipMan_getVoiceLevel(cVoipMan* self, void* outLevel, void* outMax)
+void cVoipMan::getVoiceLevel(void* outLevel, void* outMax)
 {
-    if (*(int*)self != 0) {
+    if (*(int*)this != 0) {
         func_003F6BA0(outLevel, outMax);
     }
 }

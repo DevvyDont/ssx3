@@ -47,6 +47,8 @@ enum eSongTag {
 // [R] the cSongConfiguration ctor stores -1 and only a music.inf SEDVALUE key replaces it.
 enum { kNoSedValue = -1 };
 
+struct cSongInstance;
+
 struct cMusicSys {
     cStreamSys* mpVStreamSys;                 // 0x0000 [R] g++ 2.95 virtual-base pointer to cStreamSys (= this + 0x5F20 in a complete object; cSSXAudio + 0x7768); [U] every method reaches cBankManager as **(this) and its cBankMonitor as **(this) + 0x1D8
     cSongConfiguration* mSongConfig[64];      // 0x0004 [R] one cMemMan_alloc(0xAC, "cSongConfiguration") + ctor cSongConfiguration_cSongConfiguration per song (PATHDATA/MUSDATA/LOOPDATA/BeatsPerMeasure.. go into it); dtor deletes each through its vtable (+0xA8); [U] cMusicSys_StartSong, cMusicSys_GetCurrentSongSedValue__FPv, cMusicSys_PreviewSong
@@ -95,6 +97,51 @@ struct cMusicSys {
     void setCurrentSongNum(int songNum) __asm__("cMusicSys_setCurrentSongNum");
     long getActiveMap() __asm__("cMusicSys_getActiveMap");
     int GetMPFFile() __asm__("cMusicSys_GetMPFFile__FPv");
+    void clearSongPlaying() __asm__("cMusicSys_clearSongPlaying");
+    int getMusicState() __asm__("cMusicSys_getMusicState");
+    void PlaySong(int songName, int bankIndex, int volumeControl, int syncLoad) __asm__("cMusicSys_PlaySong");
+    void StartSong(int songName, int bankIndex, int syncLoad) __asm__("cMusicSys_StartSong");
+    void PauseSong() __asm__("cMusicSys_PauseSong");
+    void ResumeSong() __asm__("cMusicSys_ResumeSong");
+    void StopSong() __asm__("cMusicSys_StopSong");
+    void SendMusicEvent(int musicEvent) __asm__("cMusicSys_SendMusicEvent");
+    int SetMusicState(int musicState) __asm__("cMusicSys_SetMusicState");
+    void SetVolume() __asm__("cMusicSys_SetVolume");
+    void SetBaseVolume(signed char baseVol) __asm__("cMusicSys_SetBaseVolume");
+    void SetVolumeEnabled(int enabled) __asm__("cMusicSys_SetVolumeEnabled");
+    void SetLowPass(int cutoff) __asm__("cMusicSys_SetLowPass");
+    void SetOverlayLevel(signed char levelPercent) __asm__("cMusicSys_SetOverlayLevel");
+    void FadeOut(float fadeTime) __asm__("cMusicSys_FadeOut");
+    void FadeBaseVolume(signed char target, float duration) __asm__("cMusicSys_FadeBaseVolume");
+    bool StepBaseVolumeFade() __asm__("cMusicSys_StepBaseVolumeFade");
+    void ClearActiveSongs() __asm__("cMusicSys_ClearActiveSongs");
+    void AddActiveSongByName(const char* name) __asm__("cMusicSys_AddActiveSongByName");
+    void AddActiveSong(int idx) __asm__("cMusicSys_AddActiveSong");
+    void SetActiveSongs(ulong mask) __asm__("cMusicSys_SetActiveSongs");
+    void SelectActiveSong(int n) __asm__("cMusicSys_SelectActiveSong");
+    void UpdateSong() __asm__("cMusicSys_UpdateSong");
+    void LoadRandomLoopBank() __asm__("cMusicSys_LoadRandomLoopBank");
+    void ArmOverlay() __asm__("cMusicSys_ArmOverlay");
+    void CancelOverlay() __asm__("cMusicSys_CancelOverlay");
+    void OverlayBeatCallback(int monitorInst) __asm__("cMusicSys_OverlayBeatCallback");
+    void ArmBeatCallback(cSongInstance* ent) __asm__("cMusicSys_ArmBeatCallback");
+    int StartOverlay() __asm__("cMusicSys_StartOverlay");
+    void RequestOverlay() __asm__("cMusicSys_RequestOverlay");
+    void* IsOverlayArmed() __asm__("cMusicSys_IsOverlayArmed");
+    void ClearOverlayArmed() __asm__("cMusicSys_ClearOverlayArmed");
+    int GetBaseVolume() __asm__("cMusicSys_GetBaseVolume");
+    bool WaitLoopBankCallback() __asm__("cMusicSys_WaitLoopBankCallback");
+    bool CheckLoopBankCallback() __asm__("cMusicSys_CheckLoopBankCallback");
+    int GetDuckToLoops() __asm__("cMusicSys_GetDuckToLoops");
+    int GetSedValue() __asm__("cMusicSys_GetSedValue");
+    int GetCurrentSongSedValue() __asm__("cMusicSys_GetCurrentSongSedValue__FPv");
+    float GetTimeToNextBeat() __asm__("cMusicSys_GetTimeToNextBeat");
+    void SetSongTag(int songTag) __asm__("cMusicSys_SetSongTag");
+    int GetSongTag() __asm__("cMusicSys_GetSongTag");
+    void SetHoldEvents(int holdEvents) __asm__("cMusicSys_SetHoldEvents");
+    void LoadMPFFile(void* name, int sync) __asm__("cMusicSys_LoadMPFFile");
+    bool IsMPFLoaded(int force) __asm__("cMusicSys_IsMPFLoaded");
+    ulong IsCurrentSongActive() __asm__("cMusicSys_IsCurrentSongActive");
 };
 
 CHECK_OFFSET(cMusicSys, mpVStreamSys, 0x0000);

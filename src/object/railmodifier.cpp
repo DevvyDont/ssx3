@@ -8200,16 +8200,16 @@ INCLUDE_ASM("object/railmodifier", tDeferBucket_appendPacket);
  * @param tail  address of its closing tag
  */
 // PORT: 64-bit DMA tag writes (ulong) and addresses held in int.
-extern "C" void tDeferBucket_appendPacket(tDeferBucket* self, int packet, int tail)
+void tDeferBucket::appendPacket(int packet, int tail)
 {
-    if (self->mPacket != 0) {
-        ulong* tag = (ulong*)(self->mTail | 0x30000000);
+    if (mPacket != 0) {
+        ulong* tag = (ulong*)(mTail | 0x30000000);
         tag[0] = ((ulong)packet << 32) | 0x20000000;
         tag[1] = 0;
-        self->mTail = tail;
+        mTail = tail;
     } else {
-        self->mPacket = packet;
-        self->mTail = tail;
+        mPacket = packet;
+        mTail = tail;
     }
 }
 #endif
@@ -8258,10 +8258,10 @@ static inline cDrawStateList* save_29B8(cPS2DeferManager* self, cPS2GraphicsMan*
  * each copy into the draw-state array (+0x51484, count +0x51480): the presets at +0x57488, +0x5748C and +0x57490
  * (mpPresetStates). The base is then set to the count so later resets keep them.
  */
-extern "C" void cPS2DeferManager_buildPresetStates(cPS2DeferManager* self)
+void cPS2DeferManager::buildPresetStates()
 {
-    self->mNumStaticStates = 0;
-    cPS2DeferManager_resetFrame(self);
+    mNumStaticStates = 0;
+    resetFrame();
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan_29B8;
     *ctx->m_pCurrentDrawState = sDrawState_s_defaultDrawState_29B8;
     set1_29B8(ctx, 0x3, 0, 0);
@@ -8273,9 +8273,9 @@ extern "C" void cPS2DeferManager_buildPresetStates(cPS2DeferManager* self)
     set0_29B8(ctx, 0x3C0, 6, 3);
     set1_29B8(ctx, 0x7C, 2, 1);
     set1_29B8(ctx, 0xF80, 7, 17);
-    self->mpPresetStates[0] = (cDrawStateList*)save_29B8((self), ctx);
+    mpPresetStates[0] = (cDrawStateList*)save_29B8((this), ctx);
     set1_29B8(ctx, 0xF80, 7, 2);
-    self->mpPresetStates[1] = (cDrawStateList*)save_29B8((self), ctx);
+    mpPresetStates[1] = (cDrawStateList*)save_29B8((this), ctx);
     set1_29B8(ctx, 0x7C, 2, 5);
     set1_29B8(ctx, 0xF80, 7, 3);
     set1_29B8(ctx, 0x3, 0, 1);
@@ -8283,8 +8283,8 @@ extern "C" void cPS2DeferManager_buildPresetStates(cPS2DeferManager* self)
     set1_29B8(ctx, 0x1800000, 23, 1);
     set1_29B8(ctx, 0x300000, 20, 3);
     set1_29B8(ctx, 0xFF000, 12, 92);
-    self->mpPresetStates[2] = (cDrawStateList*)save_29B8((self), ctx);
-    self->mNumStaticStates = self->mUsedDrawStates;
+    mpPresetStates[2] = (cDrawStateList*)save_29B8((this), ctx);
+    mNumStaticStates = mUsedDrawStates;
 }
 #endif
 
@@ -8311,25 +8311,25 @@ extern sRail20_2CC8 sDrawState_s_defaultDrawState;
  * draw state (+0x69CA8) to sDrawState_s_defaultDrawState, and the current matrix (+0x69CC0) and scissor (+0x69CC4) to
  * -1 with no cached matrices (+0x69CC8).
  */
-extern "C" void cPS2DeferManager_resetFrame(cPS2DeferManager* self)
+void cPS2DeferManager::resetFrame()
 {
-    self->mNumSubmitDMA = 0;
-    self->mUsedStates = 0;
-    self->mUsedDrawStates = self->mNumStaticStates;
-    char* stateHashTable = (char*)&self->mStateHash[0];
-    InvalidDCache(stateHashTable, ((char*)self) + 0x6789F);
-    char* nodeHashTable = (char*)&self->mBucketHash[0];
-    InvalidDCache(nodeHashTable, ((char*)self) + 0x67C9F);
+    mNumSubmitDMA = 0;
+    mUsedStates = 0;
+    mUsedDrawStates = mNumStaticStates;
+    char* stateHashTable = (char*)&mStateHash[0];
+    InvalidDCache(stateHashTable, ((char*)this) + 0x6789F);
+    char* nodeHashTable = (char*)&mBucketHash[0];
+    InvalidDCache(nodeHashTable, ((char*)this) + 0x67C9F);
     MEM_fill(D_004A5B84, 0, 0x400);
     scratchpad_storeSpareArea(stateHashTable, 0x400, 2);
     scratchpad_storeSpareArea(nodeHashTable, 0x400, 2);
-    self->mNumSortItems = 0;
-    sRail20_2CC8* currentState = (sRail20_2CC8*)(&self->mCurrentState);
+    mNumSortItems = 0;
+    sRail20_2CC8* currentState = (sRail20_2CC8*)(&mCurrentState);
     *currentState = sDrawState_s_defaultDrawState;
-    self->mIndexPort = 0;
-    self->mActiveViewIndex = -1;
-    self->mIndexView = 0;
-    self->mActivePortIndex = -1;
+    mIndexPort = 0;
+    mActiveViewIndex = -1;
+    mIndexView = 0;
+    mActivePortIndex = -1;
 }
 #endif
 
@@ -8443,7 +8443,7 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, tDeferSubmit* e, unsigned 
             self->items[self->nItems++].node = n;
         }
     }
-    tDeferBucket_appendPacket((tDeferBucket*)node, e->mPacket, e->mTail);
+    ((tDeferBucket*)node)->appendPacket(e->mPacket, e->mTail);
     if (e->mContinuation != 0) {
         sRmNode_2DE8* prev = self->last;
         if (prev != 0) {
@@ -8466,9 +8466,9 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, tDeferSubmit* e, unsigned 
  * @param vself  the defer manager
  */
 // PORT: (int) of a pointer for hashing.
-extern "C" void cPS2DeferManager_bucketRecords(cPS2DeferManager* vself)
+void cPS2DeferManager::bucketRecords()
 {
-    sRmBatch_2DE8* self = (sRmBatch_2DE8*)vself;
+    sRmBatch_2DE8* self = (sRmBatch_2DE8*)this;
     self->last = 0;
     SyncDCache(self->entries, (char*)&self->entries[self->count] - 1);
     void* ring = D_004A4474;
@@ -8579,13 +8579,13 @@ extern "C" void cPS2DeferManager_buildDmaChains(sRmBatch_3490* self, int* pktAdd
     sRmPassTypes_3490 split;
     int bounds[3];
     ulong* pkt;
-    cPS2DeferManager_bucketRecords((cPS2DeferManager*)self);
+    ((cPS2DeferManager*)self)->bucketRecords();
     *out1 = 0;
     *out2 = 0;
     pkt = (ulong*)(*pktAddr | 0x30000000);
     resetState_3490(&self->state);
-    cPS2DeferManager_writeDefaultState((cPS2DeferManager*)self, &pkt);
-    cPS2DeferManager_sortItems((cPS2DeferManager*)self);
+    ((cPS2DeferManager*)self)->writeDefaultState(&pkt);
+    ((cPS2DeferManager*)self)->sortItems();
     resetTextureUseTable();
     void* ring = D_004A4474;
     int saved = *(int*)ring;
@@ -8664,7 +8664,7 @@ extern "C" void cPS2DeferManager_buildDmaChains(sRmBatch_3490* self, int* pktAdd
                 self->lastTex = -1;
                 prev = 0;
                 resetState_3490(&self->state);
-                cPS2DeferManager_writeDefaultState((cPS2DeferManager*)self, &pkt);
+                ((cPS2DeferManager*)self)->writeDefaultState(&pkt);
                 int* tc = (int*)(&obj->mBoundTex[0]);
                 for (int k = 0; k < 2; k++)
                     tc[k] = -1;
@@ -8688,7 +8688,7 @@ extern "C" void cPS2DeferManager_buildDmaChains(sRmBatch_3490* self, int* pktAdd
                 self->lastTex = -1;
                 prev = 0;
                 resetState_3490(&self->state);
-                cPS2DeferManager_writeDefaultState((cPS2DeferManager*)self, &pkt);
+                ((cPS2DeferManager*)self)->writeDefaultState(&pkt);
                 int* tc = (int*)(&obj->mBoundTex[0]);
                 for (int k = 0; k < 2; k++)
                     tc[k] = -1;
@@ -8868,12 +8868,12 @@ extern "C" void cPS2ScratchPad_advanceBuffer(void* ring);
  * The 4 x 257 histogram lives in the scratchpad ring (cPS2ScratchPad_claimBuffer) and D_00505B70 is the swap buffer; after the
  * fourth pass the sorted items are back in place.
  */
-extern "C" void cPS2DeferManager_sortItems(cPS2DeferManager* self)
+void cPS2DeferManager::sortItems()
 {
     void* ring = D_004A4474;
     tDeferSortItem* dst = D_00505B70;
-    int n = self->mNumSortItems;
-    tDeferSortItem* src = ((&self->mSortItems[0]));
+    int n = mNumSortItems;
+    tDeferSortItem* src = ((&mSortItems[0]));
     int (*hist)[257] = (int (*)[257])cPS2ScratchPad_claimBuffer(ring, 0, -1, 0);
     MEM_fill(hist, 0, 4112);
     for (int i = 0; i < n; i++) {
@@ -9008,7 +9008,7 @@ struct sRmPkt4360 {
  * @param pp  DMA chain cursor
  */
 // PORT: 64-bit DMA/GIF tag writes (ulong).
-extern "C" void cPS2DeferManager_writeDefaultState(cPS2DeferManager* self, ulong** pp)
+void cPS2DeferManager::writeDefaultState(ulong** pp)
 {
     cPS2GraphicsMan* gs = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_railmodifier;
     sRmGsState4360 st;
@@ -9019,7 +9019,7 @@ extern "C" void cPS2DeferManager_writeDefaultState(cPS2DeferManager* self, ulong
     (*pp)[2] = 0;
     (*pp)[3] = (ulong)1 << 60;
     *pp += 4;
-    cPS2DeferManager_writeVu1ProgramSetup(self, (st.m_bitGroups[0] & 0x3C0) >> 6, 0, st.m_bitGroups[3] & 0x3FFFFFFF, pp);
+    writeVu1ProgramSetup((st.m_bitGroups[0] & 0x3C0) >> 6, 0, st.m_bitGroups[3] & 0x3FFFFFFF, pp);
     pkt.count = 0;
     pkt.base = *pp;
     pkt.cur = *pp + 6;
@@ -9187,9 +9187,9 @@ INCLUDE_ASM("object/railmodifier", cPS2DeferManager_setCurrentState);
  *
  * @param src  draw state to copy
  */
-extern "C" void cPS2DeferManager_setCurrentState(cPS2DeferManager* self, const sDrawState* src)
+void cPS2DeferManager::setCurrentState(const sDrawState* src)
 {
-    self->mCurrentState = *src;
+    mCurrentState = *src;
 }
 #endif
 
@@ -9346,9 +9346,9 @@ static inline void putQw_4CD0(ulong*& p, const void* src, int n)
  * @param pp  DMA chain cursor
  */
 // PORT: 64-bit DMA/VIF/GIF words (ulong), 128-bit copies (cQuad128), addresses held in int.
-extern "C" void cPS2DeferManager_writeVu1ProgramSetup(cPS2DeferManager* vself, int type, int mode, unsigned int w3, ulong** pp)
+void cPS2DeferManager::writeVu1ProgramSetup(int type, int mode, unsigned int w3, ulong** pp)
 {
-    cPS2DeferManager* self = vself;
+    cPS2DeferManager* self = this;
     sPkt_4CD0 pk(*pp);
     sMtxRec_4CD0* mtxRec = &((sMtxRec_4CD0*)&self->mViewStates[0])[self->mActiveViewIndex];
     switch (type) {
@@ -10638,10 +10638,10 @@ extern char str_TempTex[];
  *
  * @param tex  the texture record to convert
  */
-extern "C" void cTextureMan_rearrangeMipLevels(cTextureMan* self, tTexInfo* tex)
+void cTextureMan::rearrangeMipLevels(tTexInfo* tex)
 {
     int n = 0;
-    char* buf = new (str_TempTex, self->TexMemType ^ 0x100, 0) char[tex->mSize];
+    char* buf = new (str_TempTex, TexMemType ^ 0x100, 0) char[tex->mSize];
     int tw = (tex->mTEX0 >> 26) & 0xF;
     int th = (tex->mTEX0 >> 30) & 0xF;
     int bpp = tex->mBPP;
@@ -10656,7 +10656,7 @@ extern "C" void cTextureMan_rearrangeMipLevels(cTextureMan* self, tTexInfo* tex)
                 bytes = 0x100;
             }
             MEM_copy(buf, src, bytes);
-            tex_rearrange8BitTexture(self, w, height, buf, src);
+            tex_rearrange8BitTexture(this, w, height, buf, src);
             src += bytes;
             w >>= 1;
             height >>= 1;
@@ -10697,17 +10697,17 @@ extern "C" void vramHeap_init(void* list, int a, int size, void* pool);
  * the heap at +0x1F60 over 0x400000 bytes (the 4 MB of GS memory) and the one at +0x4350 over 0x1000 bytes, both
  * pointing at the record table at +0x8. cPS2GraphicsMan_Init calls it right after allocating the manager.
  */
-extern "C" void cTextureMan_init(cTextureMan* self)
+void cTextureMan::init()
 {
-    self->TexMemType = 0;
-    self->InitTexInfo();
-    int* bound = (int*)(&self->mBoundTex[0]);
+    TexMemType = 0;
+    InitTexInfo();
+    int* bound = (int*)(&mBoundTex[0]);
     for (int i = 1; i >= 0; i--) {
         bound[i] = -1;
     }
-    self->mCLUTTex = -1;
-    vramHeap_init(self->mMainHeap, 0, 0x400000, &self->m_pTexInfo[0]);
-    vramHeap_init(self->mTempHeap, 0, 0x1000, &self->m_pTexInfo[0]);
+    mCLUTTex = -1;
+    vramHeap_init(mMainHeap, 0, 0x400000, &m_pTexInfo[0]);
+    vramHeap_init(mTempHeap, 0, 0x1000, &m_pTexInfo[0]);
 }
 #endif
 
@@ -10723,15 +10723,15 @@ extern "C" void vramHeap_freeAllBlocks(void* list);
  * +0x1F60, then sets the bound texture of both contexts (+0x1F4C, +0x1F50) and the loaded CLUT texture (+0x1F54) to -1.
  * cPS2GraphicsMan_applyDisplayMode calls it before reserving the frame and depth buffers.
  */
-extern "C" void cTextureMan_freeAllHeapBlocks(cTextureMan* self)
+void cTextureMan::freeAllHeapBlocks()
 {
-    vramHeap_freeAllBlocks(self->mTempHeap);
-    vramHeap_freeAllBlocks(self->mMainHeap);
-    int* bound = (int*)(&self->mBoundTex[0]);
+    vramHeap_freeAllBlocks(mTempHeap);
+    vramHeap_freeAllBlocks(mMainHeap);
+    int* bound = (int*)(&mBoundTex[0]);
     for (int i = 1; i >= 0; i--) {
         bound[i] = -1;
     }
-    self->mCLUTTex = -1;
+    mCLUTTex = -1;
 }
 #endif
 

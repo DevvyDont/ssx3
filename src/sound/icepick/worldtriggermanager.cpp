@@ -2403,8 +2403,8 @@ static inline int Classify83F8(const t4Vector* v, const nash_CellKey* key)
  * @param node  the octree cell
  * @param key  its cell key (level, x, y, z)
  */
-extern "C" void nash_privy_QueryHelper_help1(nash_privy_QueryHelper* self, AudioOverlapCallback* partial, AudioOverlapCallback* inside,
-                              PointProximityTest* pos, nash_Cell* node, nash_CellKey* key)
+void nash_privy_QueryHelper::help1(AudioOverlapCallback* partial, AudioOverlapCallback* inside,
+                                   PointProximityTest* pos, nash_Cell* node, nash_CellKey* key)
 {
     int overlap = Classify83F8(pos->position, key);
     if (overlap == kOctInside)
@@ -2443,21 +2443,21 @@ extern "C" void nash_privy_QueryHelper_help1(nash_privy_QueryHelper* self, Audio
         k.x = key->x * 2;
         k.y = key->y * 2;
         k.z = key->z * 2;
-        if (node->children[0][0][0]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[0][0][0], &k);
+        if (node->children[0][0][0]) help1(partial, inside, pos, node->children[0][0][0], &k);
         k.x++;
-        if (node->children[1][0][0]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[1][0][0], &k);
+        if (node->children[1][0][0]) help1(partial, inside, pos, node->children[1][0][0], &k);
         k.y++;
-        if (node->children[1][1][0]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[1][1][0], &k);
+        if (node->children[1][1][0]) help1(partial, inside, pos, node->children[1][1][0], &k);
         k.x--;
-        if (node->children[0][1][0]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[0][1][0], &k);
+        if (node->children[0][1][0]) help1(partial, inside, pos, node->children[0][1][0], &k);
         k.z++;
-        if (node->children[0][1][1]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[0][1][1], &k);
+        if (node->children[0][1][1]) help1(partial, inside, pos, node->children[0][1][1], &k);
         k.x++;
-        if (node->children[1][1][1]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[1][1][1], &k);
+        if (node->children[1][1][1]) help1(partial, inside, pos, node->children[1][1][1], &k);
         k.y--;
-        if (node->children[1][0][1]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[1][0][1], &k);
+        if (node->children[1][0][1]) help1(partial, inside, pos, node->children[1][0][1], &k);
         k.x--;
-        if (node->children[0][0][1]) nash_privy_QueryHelper_help1(self, partial, inside, pos, node->children[0][0][1], &k);
+        if (node->children[0][0][1]) help1(partial, inside, pos, node->children[0][0][1], &k);
     }
 }
 #endif

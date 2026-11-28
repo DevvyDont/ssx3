@@ -28,6 +28,7 @@ struct cBEProfileLib {
     void init(int reload) __asm__("cBEProfileLib_init");
     void backupCharProfile(int idx) __asm__("cBEProfileLib_backupCharProfile");
     void restoreCharProfile() __asm__("cBEProfileLib_restoreCharProfile");
+    void resetAllRelations() __asm__("cBEProfileLib_resetAllRelations");
 };
 
 CHECK_OFFSET(cBEProfileLib, charProfile, 0x0);

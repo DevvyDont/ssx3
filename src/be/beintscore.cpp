@@ -344,7 +344,7 @@ extern "C" tBEHighScore* cBELibrary_getHighScoreTable(int a, int b);
  * @param mode  the game event
  * @return the score, or 0 when the event has no table
  */
-extern "C" int cBEScoreInterface_getHighScore(cBEScoreInterface* self, int i, int event, int mode)
+int cBEScoreInterface::getHighScore(int i, int event, int mode)
 {
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(event, mode);
     if (highScores != 0) {
@@ -371,7 +371,7 @@ extern int D_005305F0[];
  * @param i  entry index, 0 (best) to 4
  * @return the score, or 0 when the event has no table
  */
-extern "C" int cBEScoreInterface_getCurrentHighScore(cBEScoreInterface* self, int i)
+int cBEScoreInterface::getCurrentHighScore(int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
@@ -403,7 +403,7 @@ extern void* D_004A1244;
  * @param i  entry index, 0 (best) to 4
  * @return the character record, or D_004A1244 when the event has no table
  */
-extern "C" void* cBEScoreInterface_getCurrentHighScoreCharacter(cBEScoreInterface* self, int i)
+void* cBEScoreInterface::getCurrentHighScoreCharacter(int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
@@ -426,7 +426,7 @@ extern void* D_004A1244;
  * @param i  entry index, 0 (best) to 4
  * @return the name, or D_004A1244 when the event has no table
  */
-extern "C" void* cBEScoreInterface_getCurrentHighScoreName(cBEScoreInterface* self, int i)
+void* cBEScoreInterface::getCurrentHighScoreName(int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);

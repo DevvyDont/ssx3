@@ -1157,34 +1157,34 @@ static inline tBEProfileBolt* getItemK19FA78(cBECharProfileDB* list, int i)
  *
  * @param list  the character's item list, or null to fetch it (cBEBoltInterface_getCharProfile)
  */
-extern "C" void cFERider_releasePartTextures(cFERider* self, cBECharProfileDB* list)
+void cFERider::releasePartTextures(cBECharProfileDB* list)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = cBEBoltInterface_getBoltDB_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    if (self->mProfileIndex < 0)
+    if (mProfileIndex < 0)
         return;
-    if (self->mCharID < 0)
+    if (mCharID < 0)
         return;
     if (list == 0)
-        list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, self->mProfileIndex, self->mCharID);
+        list = (cBECharProfileDB*)cBEBoltInterface_getCharProfile(iface, mProfileIndex, mCharID);
     int flag = 1;
-    int n = cBEBoltDB_getNumCharBolts(db, self->mCharID);
-    sBoneEntFA78* partEntry = (sBoneEntFA78*)cBEBoltDB_getCharBolts(db, self->mCharID);
+    int n = cBEBoltDB_getNumCharBolts(db, mCharID);
+    sBoneEntFA78* partEntry = (sBoneEntFA78*)cBEBoltDB_getCharBolts(db, mCharID);
     int i;
     for (i = 0; i < n; i++, partEntry++) {
         tBEProfileBolt* it = getItemK19FA78(list, list->mpBoltsMap[partEntry->slot]);
-        int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, self->mProfileIndex, it->id);
+        int fileSlot = cBoltFileIndexManager_getPartTextureFile(D_004A1968, mProfileIndex, it->id);
         if (fileSlot >= 0) {
             if (partEntry->type != 6) {
-                cFEBoltFileManager_releaseFile(mgr, self->mCharID, fileSlot);
-                cBoltFileIndexManager_setPartTextureFile(D_004A1968, self->mProfileIndex, it->id, -1);
+                cFEBoltFileManager_releaseFile(mgr, mCharID, fileSlot);
+                cBoltFileIndexManager_setPartTextureFile(D_004A1968, mProfileIndex, it->id, -1);
             } else {
                 flag = 0;
             }
         }
     }
-    self->mDoneLoadingTextures = flag;
+    mDoneLoadingTextures = flag;
 }
 #endif
 
@@ -1238,7 +1238,7 @@ void cFERider::loadTextures(cBECharProfileDB* list, int ignored, int keepLoaded)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = cBEBoltInterface_getBoltDB_noarg();
     char* mgr = SSXApp->RealFE->mBoltFileManager;
-    cFERider_releasePartTextures(this, (cBECharProfileDB*)list);
+    this->releasePartTextures((cBECharProfileDB*)list);
     mDoneLoadingTextures = 0;
     mDoneUpdatingModelParts = 0;
     int n = cBEBoltDB_getNumCharBolts(db, mCharID);

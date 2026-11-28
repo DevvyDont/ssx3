@@ -29,6 +29,8 @@ struct tMidiBank {
     void* mpData; // 0x4 [U] the MIDI sequence inside the bank (On Tour SetMIDI's pData)
 };
 
+struct cMonitorInstance;
+
 struct cMidiSys {
     // --- cBankSys (non-virtual part 0x10; sound/banksys.h)
     cBankManager* mpVBankManager; // 0x000 [R] virtual-base pointer (this + 0x1C in a complete cMidiSys); [U] MIDI_Begin/MIDI_End reach the play options at mpVBankManager + 0x1D8
@@ -37,6 +39,9 @@ struct cMidiSys {
     void** mVtbl;                 // 0x00C [R] cBankSys_vtbl (cMidiSys ctor/dtor; cBankSys's primary vtable)
     // --- cMidiSys
     tMidiBank* mMidiBanks;        // 0x010 [R] operator new(0x20, "MIDIBANKS") (4 play-option levels); dtor cMemMan_free()s it; [U] cMidiSys_OpenMidiOpts / cMidiSys_PlayMidi
+
+    // Methods bound to their retail symbols by asm labels.
+    int EchoCallback(cMonitorInstance* obj) __asm__("cMidiSys_EchoCallback");
 };
 
 CHECK_OFFSET(tMidiBank, mBank, 0x0);

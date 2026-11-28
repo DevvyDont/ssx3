@@ -46,6 +46,8 @@ struct cUIMenu;
 struct cTextureElement;
 struct tBEBoltDef;
 
+struct cBECharProfileDB;
+
 struct cFEStateCharEquip : public cFEState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateCharEquip_vtbl (ctor; dtor first), cFEState_vtbl (dtor)
@@ -175,6 +177,22 @@ struct cFEStateCharEquip : public cFEState {
     virtual bool onInputBegin(cUIInput* in) __asm__("cFEStateCharEquip_onInputBegin");
     virtual void onPopupEvent(cUIState* widget, unsigned int msg) __asm__("cFEStateCharEquip_onPopupEvent");
     void updatePreviewLoad() __asm__("cFEStateCharEquip_updatePreviewLoad");
+    void updatePreview() __asm__("cFEStateCharEquip_updatePreview");
+    void updateInventoryPreview() __asm__("cFEStateCharEquip_updateInventoryPreview");
+    void updateStorePreview() __asm__("cFEStateCharEquip_updateStorePreview");
+    void scrollRows(int n) __asm__("cFEStateCharEquip_scrollRows");
+    bool hasInventoryItemInCategory(int library, cBECharProfileDB* db, int itemId)
+        __asm__("cFEStateCharEquip_hasInventoryItemInCategory");
+    bool isStoreCategoryEmpty(int library, cBECharProfileDB* db, int itemId)
+        __asm__("cFEStateCharEquip_isStoreCategoryEmpty");
+    int drawInventoryRows() __asm__("cFEStateCharEquip_drawInventoryRows");
+    int drawStoreRows() __asm__("cFEStateCharEquip_drawStoreRows");
+    void redrawRows(int reset, int select) __asm__("cFEStateCharEquip_redrawRows");
+    void drawInventoryRow(int i) __asm__("cFEStateCharEquip_drawInventoryRow");
+    void drawStoreRow(int i) __asm__("cFEStateCharEquip_drawStoreRow");
+    void buySelectedItem() __asm__("cFEStateCharEquip_buySelectedItem");
+    bool toggleSelectedItem() __asm__("cFEStateCharEquip_toggleSelectedItem");
+    void openBuyPopup(tBEBoltDef* item) __asm__("cFEStateCharEquip_openBuyPopup");
 };
 
 CHECK_OFFSET(cFEStateCharEquip, mpTitleText, 0x048);

@@ -32,6 +32,9 @@ struct tFEStringPtrVector {
     cBXString** mpFinish;           // 0x8 [R] 0; [U] push_back stores here and advances it, cFEStateNetMessenger_clearNames pops from it
     cBXString** mpEndOfStorage;     // 0xC [R] 0; [U] push_back compares mpFinish with it; the dtor frees
                                     //     [mpStart, mpEndOfStorage)
+
+    // Methods bound to their retail symbols by asm labels.
+    void insertAux(cBXString** pos, cBXString* const& x) __asm__("tFEStringPtrVector_insertAux");
 };
 
 CHECK_OFFSET(tFEStringPtrVector, unk_00, 0x0);
@@ -39,6 +42,10 @@ CHECK_OFFSET(tFEStringPtrVector, mpStart, 0x4);
 CHECK_OFFSET(tFEStringPtrVector, mpFinish, 0x8);
 CHECK_OFFSET(tFEStringPtrVector, mpEndOfStorage, 0xC);
 CHECK_SIZE(tFEStringPtrVector, 0x10);
+
+struct cFEStateNetHelpPopup;
+struct online_ErrorEvent;
+struct online_FindPlayerEvent;
 
 struct cFEStateNetMessenger : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
@@ -118,6 +125,39 @@ struct cFEStateNetMessenger : public cFEStateNet {
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNetMessenger_onWidgetEvent");
     virtual void onPopupEvent(cUIState* pPopup, unsigned int popupEvent) __asm__("cFEStateNetMessenger_onPopupEvent");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateNetMessenger_onWidgetCreate");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateNetMessenger_fillHelpPopup");
+    int getBuddyStatus(int idx) __asm__("cFEStateNetMessenger_getBuddyStatus");
+    int getNameIndexForRow(int row) __asm__("cFEStateNetMessenger_getNameIndexForRow");
+    void handleKeyboardText() __asm__("cFEStateNetMessenger_handleKeyboardText");
+    void startFindUser(void* text) __asm__("cFEStateNetMessenger_startFindUser");
+    void onFoundUserPopupEvent(void* popup, int event) __asm__("cFEStateNetMessenger_onFoundUserPopupEvent");
+    void onUserActionsPopupEvent(void* popup, unsigned int kind)
+        __asm__("cFEStateNetMessenger_onUserActionsPopupEvent");
+    void onOfflineUserActionsPopupEvent(void* popup, unsigned int kind)
+        __asm__("cFEStateNetMessenger_onOfflineUserActionsPopupEvent");
+    void showUserFoundPopup(online_FindPlayerEvent* src) __asm__("cFEStateNetMessenger_showUserFoundPopup");
+    void showLookingForSelfPopup() __asm__("cFEStateNetMessenger_showLookingForSelfPopup");
+    void showFindUserError(online_ErrorEvent* msg) __asm__("cFEStateNetMessenger_showFindUserError");
+    void handleErrorEvent(int msgId, void* data) __asm__("cFEStateNetMessenger_handleErrorEvent");
+    void* onNetEvent(int eventType, void* eventData) __asm__("cFEStateNetMessenger_onNetEvent");
+    void placeScrollThumb(int pos, int count) __asm__("cFEStateNetMessenger_placeScrollThumb");
+    void selectPendingBuddy() __asm__("cFEStateNetMessenger_selectPendingBuddy");
+    void clearNames() __asm__("cFEStateNetMessenger_clearNames");
+    void appendFlaggedNames() __asm__("cFEStateNetMessenger_appendFlaggedNames");
+    bool hasName(const char* name) __asm__("cFEStateNetMessenger_hasName");
+    int findNameIndex(const char* name) __asm__("cFEStateNetMessenger_findNameIndex");
+    int findNameIndexByString(char** name) __asm__("cFEStateNetMessenger_findNameIndexByString");
+    void rebuildNameList() __asm__("cFEStateNetMessenger_rebuildNameList");
+    void showRowSelectIcon(int sel) __asm__("cFEStateNetMessenger_showRowSelectIcon");
+    bool showBuddyDetails(int idx) __asm__("cFEStateNetMessenger_showBuddyDetails");
+    void setRowStatusIcon(unsigned int index, int state) __asm__("cFEStateNetMessenger_setRowStatusIcon");
+    void setRowName(unsigned int index, const char* str, int rosterIndex) __asm__("cFEStateNetMessenger_setRowName");
+    void colourRow(unsigned int index, int flag) __asm__("cFEStateNetMessenger_colourRow");
+    void redrawList() __asm__("cFEStateNetMessenger_redrawList");
+    void selectMenuItem(int idx) __asm__("cFEStateNetMessenger_selectMenuItem");
+    void updatePendingHints() __asm__("cFEStateNetMessenger_updatePendingHints");
+    void removeStaleNames() __asm__("cFEStateNetMessenger_removeStaleNames");
+    void fillRow(unsigned int index, const char* name, int rosterIndex) __asm__("cFEStateNetMessenger_fillRow");
 };
 
 CHECK_OFFSET(cFEStateNetMessenger, mszFoundName, 0x6D0);

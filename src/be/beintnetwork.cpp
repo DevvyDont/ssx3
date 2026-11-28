@@ -371,7 +371,7 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_setOpponentName);
  *
  * @param src  the name
  */
-extern "C" void cBENetworkInterface_setOpponentName(cBENetworkInterface* self, const char* src)
+void cBENetworkInterface::setOpponentName(const char* src)
 {
     strcpy(cBENetworkInterface_networkOpt.strOpponentName, src);
 }
@@ -389,7 +389,7 @@ INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_setMyName);
  *
  * @param src  the name
  */
-extern "C" void cBENetworkInterface_setMyName(cBENetworkInterface* self, const char* src)
+void cBENetworkInterface::setMyName(const char* src)
 {
     strcpy(cBENetworkInterface_networkOpt.strMyName, src);
 }

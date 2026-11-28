@@ -108,6 +108,8 @@ struct cPS2GridMesh {
     void Update3(float* verts, float* colors, float* uvs) __asm__("cPS2GridMesh_Update3");
     void Render(int meshMatrix, const tMaterialBlockRecord* materialBlock, int texMatrix)
         __asm__("cPS2GridMesh_Render");
+    void storePosition(short* out, int i, t3Vector* src) __asm__("cPS2GridMesh_storePosition");
+    void storeColour(unsigned short* buf, int idx, const float* colour) __asm__("cPS2GridMesh_storeColour");
 };
 
 CHECK_OFFSET(cPS2GridMesh, mNext, 0x000);

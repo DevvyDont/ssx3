@@ -1331,20 +1331,20 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_getAnimMats);
  * @param item  the instance record to draw (On Tour tInstanceRecord* inst)
  * @return the animation matrices, or 0 when the model instance has none
  */
-extern "C" const t4Matrix* cMultiSplineModifier_getAnimMats(cMultiSplineModifier* self, tInstanceRecord* item)
+const t4Matrix* cMultiSplineModifier::getAnimMats(tInstanceRecord* item)
 {
-    tInstanceRecord* cur = self->Instance;
+    tInstanceRecord* cur = Instance;
     if (((void*)item) == ((void*)cur)) {
         cInstanceNode* obj = item->m_pActiveNode;
         if (obj->hasAnimMats()) {
-            obj = self->Instance->m_pActiveNode;
+            obj = Instance->m_pActiveNode;
             return obj->getAnimMats();
         }
         return 0;
     }
     cInstanceNode* obj = cur->m_pActiveNode;
-    obj->makeAnimMats((const t4Matrix*)&item->m_fmTransform, self->AnimMats);
-    return self->AnimMats;
+    obj->makeAnimMats((const t4Matrix*)&item->m_fmTransform, AnimMats);
+    return AnimMats;
 }
 #endif
 

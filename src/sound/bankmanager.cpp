@@ -798,57 +798,57 @@ extern sCfg_BF78 cBEOptionInterface_mOption_BF78 __asm__("cBEOptionInterface_mOp
  *
  * @param state  the new radio mode
  */
-extern "C" void cSSXAudio_SetRadioMode(cSSXAudio* self, int state)
+void cSSXAudio::SetRadioMode(int state)
 {
-    if (self->mRadioModeID == state)
+    if (mRadioModeID == state)
         return;
-    self->mRadioModeID = state;
+    mRadioModeID = state;
     switch (state) {
     case kRADIOMODE_RADIO: {
-        cMusicSys_SetActiveSongs_BF78(&self->MusicSys, *(long*)&self->MusicSys.mDefaultActiveMap);
+        cMusicSys_SetActiveSongs_BF78(&MusicSys, *(long*)&MusicSys.mDefaultActiveMap);
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = cBEOptionInterface_mOption_BF78;
-        cSSXAudio_SetDJSpeech(self, (cfg.flags >> 17) & 1);
+        cSSXAudio_SetDJSpeech(this, (cfg.flags >> 17) & 1);
         if (cAudioInterface_isInGame() == 0)
             return;
-        if (self->MusicSys.mSongPlaying == 0)
+        if (MusicSys.mSongPlaying == 0)
             return;
-        if ((unsigned int)(cMusicSys_GetSongTag(&self->MusicSys) - kSONGTAG_Peak1Amb) >= 3)
+        if ((unsigned int)(cMusicSys_GetSongTag(&MusicSys) - kSONGTAG_Peak1Amb) >= 3)
             return;
-        cSSXAudio_PickRandomSong(self);
-        cSSXAudio_StartLocationMusic(self, 0, 0, -1, 0);
+        PickRandomSong();
+        StartLocationMusic(0, 0, -1, 0);
         break;
     }
     case kRADIOMODE_REQUESTLINE:
     case kRADIOMODE_PLAYLIST: {
-        cMusicSys_SetActiveSongs_BF78(&self->MusicSys, *(long*)&self->mRadioPlayList);
+        cMusicSys_SetActiveSongs_BF78(&MusicSys, *(long*)&mRadioPlayList);
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = cBEOptionInterface_mOption_BF78;
-        cSSXAudio_SetDJSpeech(self, (cfg.flags >> 17) & 1);
-        if (*(long*)&self->mRadioPlayList == 0)
+        cSSXAudio_SetDJSpeech(this, (cfg.flags >> 17) & 1);
+        if (*(long*)&mRadioPlayList == 0)
             return;
         if (cAudioInterface_isInGame() == 0)
             return;
-        if (self->MusicSys.mSongPlaying == 0)
+        if (MusicSys.mSongPlaying == 0)
             return;
-        int st = cMusicSys_GetSongTag(&self->MusicSys);
+        int st = cMusicSys_GetSongTag(&MusicSys);
         if ((unsigned int)(st - kSONGTAG_Peak1) < 3)
             return;
-        if (cMusicSys_IsCurrentSongActive(&self->MusicSys) != 0 && st != kSONGTAG_CharSel)
+        if (cMusicSys_IsCurrentSongActive(&MusicSys) != 0 && st != kSONGTAG_CharSel)
             return;
-        cSSXAudio_PickRandomSong(self);
-        cSSXAudio_StartLocationMusic(self, 0, 0, kPEAKBIT_FromLocation, 0);
+        PickRandomSong();
+        StartLocationMusic(0, 0, kPEAKBIT_FromLocation, 0);
         break;
     }
     case kRADIOMODE_MOUNTAIN:
-        cSSXAudio_SetDJSpeech(self, 0);
+        cSSXAudio_SetDJSpeech(this, 0);
         if (cAudioInterface_isInGame() == 0)
             return;
-        if ((unsigned int)(cMusicSys_GetSongTag(&self->MusicSys) - kSONGTAG_Peak1Amb) < 3)
+        if ((unsigned int)(cMusicSys_GetSongTag(&MusicSys) - kSONGTAG_Peak1Amb) < 3)
             return;
-        cSSXAudio_StartLocationMusic(self, 0, 0, kPEAKBIT_FromLocation, 0);
-        self->mInBigChallenge = 0;
-        self->mCurBigChallengeType = 0;
+        StartLocationMusic(0, 0, kPEAKBIT_FromLocation, 0);
+        mInBigChallenge = 0;
+        mCurBigChallengeType = 0;
         break;
     }
 }
@@ -880,8 +880,8 @@ static inline void bmRestartC2D0(cSSXAudio* self)
     if (cMusicSys_IsCurrentSongActive(mon) != 0 && st != kSONGTAG_CharSel) {
         return;
     }
-    cSSXAudio_PickRandomSong(self);
-    cSSXAudio_StartLocationMusic(self, 0, 0, kPEAKBIT_FromLocation, 0);
+    self->PickRandomSong();
+    self->StartLocationMusic(0, 0, kPEAKBIT_FromLocation, 0);
 }
 
 /**
@@ -899,19 +899,19 @@ static inline void bmRestartC2D0(cSSXAudio* self)
  * @param key  the new playlist mask, one bit per song (64-bit)
  */
 // PORT: 64-bit `long` key.
-extern "C" void cSSXAudio_SetRadioPlayList(cSSXAudio* self, long key)
+void cSSXAudio::SetRadioPlayList(long key)
 {
-    if (*(long*)&self->mRadioPlayList != key) {
-        *(long*)&self->mRadioPlayList = key;
-        int state = self->mRadioModeID;
+    if (*(long*)&mRadioPlayList != key) {
+        *(long*)&mRadioPlayList = key;
+        int state = mRadioModeID;
         if (state == kRADIOMODE_REQUESTLINE || state == kRADIOMODE_PLAYLIST) {
-            cMusicSys_SetActiveSongs(&self->MusicSys);
-            bmRestartC2D0(self);
+            cMusicSys_SetActiveSongs(&MusicSys);
+            bmRestartC2D0(this);
         }
     } else {
-        int state = self->mRadioModeID;
+        int state = mRadioModeID;
         if (state == kRADIOMODE_REQUESTLINE || state == kRADIOMODE_PLAYLIST) {
-            bmRestartC2D0(self);
+            bmRestartC2D0(this);
         }
     }
 }
@@ -1046,10 +1046,9 @@ INCLUDE_ASM("sound/bankmanager", cSSXAudio_SetJumpCountdown__FPvi);
  *
  * @param val  the new count
  */
-void cSSXAudio_SetJumpCountdown(void* vself, int val)
+void cSSXAudio::SetJumpCountdown(int val)
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
-    self->mJumpCountdown = val;
+    mJumpCountdown = val;
 }
 #endif
 
@@ -1117,11 +1116,11 @@ static inline float bmAirTime_C8C8(cSSXAudio* self, cRider* rider)
  * frame, it ends the wind (cSSXAudio_EndWind), sends event 8 when cMusicSys_IsOverlayArmed reports the song's mOverlayArmed set
  * (and the radio is on) and clears it with cMusicSys_ClearOverlayArmed; then it restores base volume 127 and the overlay level.
  */
-extern "C" void cSSXAudio_UpdateAirTimeVolume(cSSXAudio* self)
+void cSSXAudio::UpdateAirTimeVolume()
 {
-    if (self->mJumpCountdown > 0)
-        self->mJumpCountdown--;
-    cRider* rider = cSSXAudio_GetFocusRider_p(self, -1);
+    if (mJumpCountdown > 0)
+        mJumpCountdown--;
+    cRider* rider = cSSXAudio_GetFocusRider_p(this, -1);
     float airTime;
     if (cRider_getMotionState(rider) == MS_Air) {
         int simState = rider->mAirPredictor->SimState;
@@ -1130,48 +1129,48 @@ extern "C" void cSSXAudio_UpdateAirTimeVolume(cSSXAudio* self)
             air = 1;
         if (air) {
             if (D_004A361C == true) {
-                airTime = self->mJumpAirTime;
+                airTime = mJumpAirTime;
             } else {
                 airTime = rider->mAirPredictor->TotalAirTime;
-                self->mJumpMaxAirTime = 0.0f;
-                self->mJumpAirTime = airTime;
+                mJumpMaxAirTime = 0.0f;
+                mJumpAirTime = airTime;
             }
             goto have;
         }
         if (D_004A361C == true) {
-            airTime = self->mJumpAirTime;
+            airTime = mJumpAirTime;
             goto have;
         }
     }
     airTime = 0.0f;
 have:
     int play = 0;
-    self->mOverlayLevel = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0);
+    mOverlayLevel = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0);
     D_004A3620 = D_004A361C;
     D_004A361C = 0;
     if (3.9994986057281494f < airTime) {
-        int duckToLoops = cMusicSys_GetDuckToLoops(&self->MusicSys);
-        if (duckToLoops == true && !cSSXAudio_IsBigAirEvent(self) && !cSSXAudio_IsHalfpipeEvent(self)) {
-            if (!cSSXAudio_GetRiderMusicEvent(self))
+        int duckToLoops = cMusicSys_GetDuckToLoops(&MusicSys);
+        if (duckToLoops == true && !cSSXAudio_IsBigAirEvent(this) && !cSSXAudio_IsHalfpipeEvent(this)) {
+            if (!GetRiderMusicEvent())
                 play = duckToLoops;
         }
     }
-    if (cSSXAudio_ReplayMode(self) == 0) {
+    if (cSSXAudio_ReplayMode(this) == 0) {
         if (2.0f < airTime) {
             D_004A361C = 1;
             float lo = rider->mAirPredictor->CurAirTime;
-            if (lo < self->mJumpMaxAirTime)
-                lo = self->mJumpMaxAirTime;
-            self->mJumpMaxAirTime = lo;
+            if (lo < mJumpMaxAirTime)
+                lo = mJumpMaxAirTime;
+            mJumpMaxAirTime = lo;
             float hi;
             if (D_004A3620 == 0) {
                 hi = (rider->mAirPredictor->ApexTime - rider->mAirPredictor->CurAirTime) * 0.5f;
                 if (hi < 0.5f)
                     hi = 0.5f;
                 hi = hi + lo;
-                self->mJumpVolumeAirTime = hi;
+                mJumpVolumeAirTime = hi;
             } else {
-                hi = self->mJumpVolumeAirTime;
+                hi = mJumpVolumeAirTime;
             }
             float vmax = 127.0f;
             float inv = 0.007874015718698502f;
@@ -1182,33 +1181,33 @@ have:
                 float rawVolume = vmax - ratio * 107.0f;
                 char clampedVolume = (int)((rawVolume <? vmax) >? 20.0f);
                 if (play) {
-                    float k = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0);
+                    float k = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0);
                     int volumeAboveMin = clampedVolume - 20;
                     float musicLevel = (float)(full - volumeAboveMin) * (k * inv);
-                    self->mOverlayLevel = musicLevel;
-                    cMusicSys_SetOverlayLevel(&self->MusicSys, (int)(musicLevel * 100.0f));
+                    mOverlayLevel = musicLevel;
+                    cMusicSys_SetOverlayLevel(&MusicSys, (int)(musicLevel * 100.0f));
                 }
                 rawVolume = vmax - (vmax - vol) * ratio;
                 clampedVolume = (int)((rawVolume <? vmax) >? vol);
-                self->mWindVolume = (float)(full - clampedVolume) * inv;
+                mWindVolume = (float)(full - clampedVolume) * inv;
                 if (play)
-                    cMusicSys_SetBaseVolume(&self->MusicSys, clampedVolume);
+                    cMusicSys_SetBaseVolume(&MusicSys, clampedVolume);
             } else {
-                self->mWindVolume = (vmax - vol) * inv;
+                mWindVolume = (vmax - vol) * inv;
                 if (play) {
-                    cMusicSys_SetBaseVolume(&self->MusicSys, (int)vol);
-                    float k = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0);
-                    self->mOverlayLevel = k;
-                    cMusicSys_SetOverlayLevel(&self->MusicSys, (int)(k * 100.0f));
+                    cMusicSys_SetBaseVolume(&MusicSys, (int)vol);
+                    float k = *(float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0);
+                    mOverlayLevel = k;
+                    cMusicSys_SetOverlayLevel(&MusicSys, (int)(k * 100.0f));
                 }
             }
-            self->mWindVolume = self->mWindVolume * *(float*)cSSXAudio_GetCurrAppliedVolumePtr(self, 5, 0);
+            mWindVolume = mWindVolume * *(float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 5, 0);
             if (D_004A3620 == 0) {
-                cSSXAudio_BeginWind(self);
+                cSSXAudio_BeginWind(this);
                 if (play) {
-                    char* mon = (char*)&self->MusicSys;
-                    if (cMusicSys_StartOverlay(mon) && cSSXAudio_IsMusicRadioMode((cSSXAudio*)self)) {
-                        sBmVtC8C8* musicVt = (sBmVtC8C8*)self->MusicSys.mVtbl;
+                    char* mon = (char*)&MusicSys;
+                    if (cMusicSys_StartOverlay(mon) && IsMusicRadioMode()) {
+                        sBmVtC8C8* musicVt = (sBmVtC8C8*)MusicSys.mVtbl;
                         musicVt[3].fn(vthis(mon, musicVt[3]), 7);
                     }
                 }
@@ -1216,19 +1215,19 @@ have:
             return;
         }
     }
-    char* mon = (char*)&self->MusicSys;
+    char* mon = (char*)&MusicSys;
     if (D_004A3620 == true) {
-        cSSXAudio_EndWind(self);
+        cSSXAudio_EndWind(this);
         if (cMusicSys_IsOverlayArmed(mon)) {
-            if (cSSXAudio_IsMusicRadioMode((cSSXAudio*)self)) {
-                sBmVtC8C8* musicVt = (sBmVtC8C8*)self->MusicSys.mVtbl;
+            if (IsMusicRadioMode()) {
+                sBmVtC8C8* musicVt = (sBmVtC8C8*)MusicSys.mVtbl;
                 musicVt[3].fn(vthis(mon, musicVt[3]), 8);
             }
             cMusicSys_ClearOverlayArmed(mon);
         }
     }
     cMusicSys_SetBaseVolume(mon, 0x7F);
-    cMusicSys_SetOverlayLevel(mon, (int)(self->mOverlayLevel * 100.0f));
+    cMusicSys_SetOverlayLevel(mon, (int)(mOverlayLevel * 100.0f));
 }
 #endif
 
@@ -1256,13 +1255,13 @@ typedef int (*tBmSetCD48)(void*, int);
  * control (cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0)) and 1; tags it 401 (cMusicSys_SetSongTag), sends music event 1 through slot 4
  * (cSSXAudio_SetMusicState) and starts it with cMusicSys_SetVolume (passing 0x7F, which that function's declaration does not take).
  */
-extern "C" void cSSXAudio_PlayPkTransSong(cSSXAudio* self)
+void cSSXAudio::PlayPkTransSong()
 {
-    char* mon = (char*)&self->MusicSys;
-    sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
-    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
+    char* mon = (char*)&MusicSys;
+    sBmVtCD48* vt = (sBmVtCD48*)MusicSys.mVtbl;
+    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0), 1);
     cMusicSys_SetSongTag(mon, kSONGTAG_PkTrans);
-    sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
+    sBmVtCD48* vt2 = (sBmVtCD48*)MusicSys.mVtbl;
     ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), 1);
     cMusicSys_SetVolume(mon, 0x7F);
 }
@@ -1294,12 +1293,12 @@ struct sRace_28CDF8 {
  * kSONGTAG_CharTune (cMusicSys_SetSongTag), sends the event through slot 4, sets the song's mHoldEvents (cMusicSys_SetHoldEvents) so
  * that only forced events apply, and starts it with cMusicSys_SetVolume.
  */
-extern "C" void cSSXAudio_PlayCharTune(cSSXAudio* self)
+void cSSXAudio::PlayCharTune()
 {
-    if (cSSXAudio_ReplayMode(self) != 0) {
+    if (cSSXAudio_ReplayMode(this) != 0) {
         return;
     }
-    if (self->mRadioModeID == kRADIOMODE_MOUNTAIN) {
+    if (mRadioModeID == kRADIOMODE_MOUNTAIN) {
         return;
     }
     sRace_28CDF8* race = (sRace_28CDF8*)SSXApp->GameModeMan;
@@ -1325,12 +1324,12 @@ extern "C" void cSSXAudio_PlayCharTune(cSSXAudio* self)
     if (track < 0) {
         return;
     }
-    char* mon = (char*)&self->MusicSys;
-    self->mSavedSongNum = self->MusicSys.mCurrentSongNum;
-    sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
-    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), str_chartune, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
+    char* mon = (char*)&MusicSys;
+    mSavedSongNum = MusicSys.mCurrentSongNum;
+    sBmVtCD48* vt = (sBmVtCD48*)MusicSys.mVtbl;
+    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), str_chartune, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0), 0);
     cMusicSys_SetSongTag(mon, kSONGTAG_CharTune);
-    sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
+    sBmVtCD48* vt2 = (sBmVtCD48*)MusicSys.mVtbl;
     ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), track);
     cMusicSys_SetHoldEvents(mon, 1);
     cMusicSys_SetVolume(mon, 0x7F);
@@ -1391,61 +1390,61 @@ static inline void bmLoad_CF98(cSSXAudio* self, char* name, int bank, int id)
  * @param type  peak for kRADIOMODE_MOUNTAIN (an ePeakBit), or kPEAKBIT_FromLocation to take it from the location
  * @param requestLine  non-zero skips the peak theme and selects event 36 on the peaks; cFEStateRequestLine_onWidgetMenu passes 1
  */
-extern "C" void cSSXAudio_StartLocationMusic(cSSXAudio* self, int startEvent, int skipPeakTheme, int type, int requestLine)
+void cSSXAudio::StartLocationMusic(int startEvent, int skipPeakTheme, int type, int requestLine)
 {
-    if (cSSXAudio_ReplayMode(self) != 0 && self->mReplayMusicStarted == 0) {
+    if (cSSXAudio_ReplayMode(this) != 0 && mReplayMusicStarted == 0) {
         return;
     }
-    self->mPathfinderCanChangeVolume = 0;
-    self->mMusicEventOwner = kNoMusicEventOwner;
-    self->mRiderMusicEvent = 0;
-    self->mNextRiderMusicEvent = 0;
-    if (self->mRadioModeID == kRADIOMODE_MOUNTAIN) {
+    mPathfinderCanChangeVolume = 0;
+    mMusicEventOwner = kNoMusicEventOwner;
+    mRiderMusicEvent = 0;
+    mNextRiderMusicEvent = 0;
+    if (mRadioModeID == kRADIOMODE_MOUNTAIN) {
         int peakNumber = type == kPEAKBIT_FromLocation
-            ? cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)))
+            ? cSSXAudio_GetLocationPeakBit(this, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)))
             : type;
         if (peakNumber == kPEAKBIT_Peak1) {
-            bmLoad_CF98(self, str_Peak1Amb, 8, kSONGTAG_Peak1Amb);
+            bmLoad_CF98(this, str_Peak1Amb, 8, kSONGTAG_Peak1Amb);
         } else if (peakNumber == kPEAKBIT_Peak2) {
-            bmLoad_CF98(self, str_Peak2Amb, 8, kSONGTAG_Peak2Amb);
+            bmLoad_CF98(this, str_Peak2Amb, 8, kSONGTAG_Peak2Amb);
         } else {
-            bmLoad_CF98(self, str_Peak3Amb, 8, kSONGTAG_Peak3Amb);
+            bmLoad_CF98(this, str_Peak3Amb, 8, kSONGTAG_Peak3Amb);
         }
-        char* mon = (char*)&self->MusicSys;
+        char* mon = (char*)&MusicSys;
         cMusicSys_RequestOverlay(mon);
-        self->mPathfinderCanChangeVolume = 1;
+        mPathfinderCanChangeVolume = 1;
         cMusicSys_SetVolumeEnabled(mon, 0);
         cMusicSys_SetVolume(mon, 0x7F);
         return;
     }
     tBELocationDB info = *(tBELocationDB*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
-    char* mon = (char*)&self->MusicSys;
-    if (info.locationID >= kLOCATION_HUB_A && skipPeakTheme == 0 && requestLine == 0 && cSSXAudio_IsPeakChallengeEvent(self) == 0) {
-        int peakNumber = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+    char* mon = (char*)&MusicSys;
+    if (info.locationID >= kLOCATION_HUB_A && skipPeakTheme == 0 && requestLine == 0 && cSSXAudio_IsPeakChallengeEvent(this) == 0) {
+        int peakNumber = cSSXAudio_GetLocationPeakBit(this, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (peakNumber == kPEAKBIT_Peak1) {
-            bmLoad_CF98(self, str_Peak1_b, 1, kSONGTAG_Peak1);
+            bmLoad_CF98(this, str_Peak1_b, 1, kSONGTAG_Peak1);
         } else if (peakNumber == kPEAKBIT_Peak2) {
-            bmLoad_CF98(self, str_Peak2_b, 1, kSONGTAG_Peak2);
+            bmLoad_CF98(this, str_Peak2_b, 1, kSONGTAG_Peak2);
         } else {
-            bmLoad_CF98(self, str_Peak3_b, 1, kSONGTAG_Peak3);
+            bmLoad_CF98(this, str_Peak3_b, 1, kSONGTAG_Peak3);
         }
         cMusicSys_SetVolumeEnabled(mon, 1);
-        sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
+        sBmVtCD48* vt2 = (sBmVtCD48*)MusicSys.mVtbl;
         ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), 0xC);
         cMusicSys_SetVolume(mon, 0x7F);
         return;
     }
-    sBmVtCD48* vt = (sBmVtCD48*)self->MusicSys.mVtbl;
-    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), 0, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 0);
-    self->mLastPlaylistSong = self->MusicSys.mCurrentSongNum;
-    self->mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue(mon);
+    sBmVtCD48* vt = (sBmVtCD48*)MusicSys.mVtbl;
+    ((tBmLoadCD48)vt[2].fn)(vthis(mon, vt[2]), 0, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0), 0);
+    mLastPlaylistSong = MusicSys.mCurrentSongNum;
+    mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue(mon);
     cMusicSys_SetVolumeEnabled(mon, 1);
     if (requestLine != 0 && info.locationID >= 17) {
         startEvent = 36;
     }
-    sBmVtCD48* vt2 = (sBmVtCD48*)self->MusicSys.mVtbl;
+    sBmVtCD48* vt2 = (sBmVtCD48*)MusicSys.mVtbl;
     ((tBmSetCD48)vt2[4].fn)(vthis(mon, vt2[4]), startEvent);
-    func_0028F108(self, cSSXAudio_GetFocusRider(self, -1));
+    func_0028F108(this, cSSXAudio_GetFocusRider(this, -1));
 }
 #endif
 
@@ -1464,21 +1463,20 @@ extern "C" void cMusicSys_NextActiveSong(void* q, int a, int b);
  * ends on the song saved in mLastPlaylistSong, it steps once more in that category and, if still the same, once without
  * the filter.
  *
- * @param vself  the cSSXAudio
  */
-extern "C" void cSSXAudio_PickRandomSong(cSSXAudio* vself)
+void cSSXAudio::PickRandomSong()
 {
-    unsigned int count = (unsigned int)vself->MusicSys.mNumFESongs;
-    int prev = vself->mLastPlaylistSong;
-    vself->MusicSys.mCurrentSongNum = ((cSoundSys_SndRand(vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF) * count) / 0x7FFF;
-    int n = ((cSoundSys_SndRand(vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF) * 10) / 0x7FFF + 1;
+    unsigned int count = (unsigned int)MusicSys.mNumFESongs;
+    int prev = mLastPlaylistSong;
+    MusicSys.mCurrentSongNum = ((cSoundSys_SndRand(MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF) * count) / 0x7FFF;
+    int n = ((cSoundSys_SndRand(MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) & 0x7FFF) * 10) / 0x7FFF + 1;
     int i;
     for (i = 0; i < n; i++)
-        cMusicSys_NextActiveSong(&vself->MusicSys, 1, cSSXAudio_GetSongCategory((cSSXAudio*)(((char*)vself))));
-    char* monitor = (char*)&vself->MusicSys;
-    if (prev == vself->MusicSys.mCurrentSongNum) {
-        cMusicSys_NextActiveSong(monitor, 1, cSSXAudio_GetSongCategory((cSSXAudio*)(((char*)vself))));
-        if (prev == vself->MusicSys.mCurrentSongNum)
+        cMusicSys_NextActiveSong(&MusicSys, 1, GetSongCategory());
+    char* monitor = (char*)&MusicSys;
+    if (prev == MusicSys.mCurrentSongNum) {
+        cMusicSys_NextActiveSong(monitor, 1, GetSongCategory());
+        if (prev == MusicSys.mCurrentSongNum)
             cMusicSys_NextActiveSong(monitor, 0, 0);
     }
 }
@@ -1501,16 +1499,16 @@ extern "C" void cSSXAudio_StartLocationMusic(cSSXAudio* self, int a1, int a2, in
  *
  * @param id  a race location (eBELocationID)
  */
-extern "C" void cSSXAudio_RefreshPeakAmbience(cSSXAudio* self, int id)
+void cSSXAudio::RefreshPeakAmbience(int id)
 {
     int cur;
     int type;
     int want;
-    if (self->mTransportTrack == kMAX_LOCATIONS) {
+    if (mTransportTrack == kMAX_LOCATIONS) {
         return;
     }
-    cur = cMusicSys_GetSongTag(&self->MusicSys);
-    type = cSSXAudio_GetLocationPeakBit(self, id);
+    cur = cMusicSys_GetSongTag(&MusicSys);
+    type = cSSXAudio_GetLocationPeakBit(this, id);
     if (type == kPEAKBIT_Peak1) {
         want = kSONGTAG_Peak1Amb;
     } else if (type == kPEAKBIT_Peak2) {
@@ -1519,7 +1517,7 @@ extern "C" void cSSXAudio_RefreshPeakAmbience(cSSXAudio* self, int id)
         want = kSONGTAG_Peak3Amb;
     }
     if (want != cur) {
-        cSSXAudio_StartLocationMusic((cSSXAudio*)self, 0, 0, type, 0);
+        StartLocationMusic(0, 0, type, 0);
     }
 }
 #endif
@@ -1544,33 +1542,33 @@ struct sBmVt630b { short delta; short index; int (*fn)(void*, int); };
  * @param id  the music event
  * @param obj  the rider (cRider*)
  */
-extern "C" void cSSXAudio_StartRiderMusicEvent(cSSXAudio* self, int id, cRider* obj)
+void cSSXAudio::StartRiderMusicEvent(int id, cRider* obj)
 {
     int ok;
-    if (self->mInBigChallenge != 0) return;
-    if (self->mBigChallengeStarting != 0) return;
-    if (self->mRiderMusicEvent == id) return;
+    if (mInBigChallenge != 0) return;
+    if (mBigChallengeStarting != 0) return;
+    if (mRiderMusicEvent == id) return;
     ok = 0;
-    if (self->mMusicEventOwner == kNoMusicEventOwner) {
+    if (mMusicEventOwner == kNoMusicEventOwner) {
         // PORT: cSSXAudio_GetFocusRider returns an object pointer as int
-        if ((int)obj == cSSXAudio_GetFocusRider(self, -1)) {
+        if ((int)obj == cSSXAudio_GetFocusRider(this, -1)) {
             ok = 1;
-            self->mMusicEventOwner = obj->getAIIndex();
+            mMusicEventOwner = obj->getAIIndex();
         }
     } else {
-        ok = obj->getAIIndex() == self->mMusicEventOwner;
+        ok = obj->getAIIndex() == mMusicEventOwner;
     }
     if (ok) {
-        int n = self->mRiderMusicEvent;
-        char* mon = (char*)&self->MusicSys;
+        int n = mRiderMusicEvent;
+        char* mon = (char*)&MusicSys;
         if (n != 0) {
-            sBmVt630b* vt = (sBmVt630b*)self->MusicSys.mVtbl;
+            sBmVt630b* vt = (sBmVt630b*)MusicSys.mVtbl;
             vt[4].fn(vthis(mon, vt[4]), n + 1);
         }
-        self->mRiderMusicEvent = id;
-        self->mNextRiderMusicEvent = 0;
+        mRiderMusicEvent = id;
+        mNextRiderMusicEvent = 0;
         {
-            sBmVt630b* vt = (sBmVt630b*)self->MusicSys.mVtbl;
+            sBmVt630b* vt = (sBmVt630b*)MusicSys.mVtbl;
             vt[4].fn(vthis(mon, vt[4]), id);
         }
     }
@@ -1592,22 +1590,22 @@ extern "C" void cSSXAudio_ReleaseRiderMusicEvent(void* self, void* a1);
  * @param id  the music event
  * @param obj  the rider (cRider*)
  */
-extern "C" void cSSXAudio_EndRiderMusicEvent(cSSXAudio* self, int id, cRider* obj)
+void cSSXAudio::EndRiderMusicEvent(int id, cRider* obj)
 {
     int ok;
-    if (self->mNextRiderMusicEvent == id) {
+    if (mNextRiderMusicEvent == id) {
         return;
     }
     ok = 0;
-    if (self->mMusicEventOwner != kNoMusicEventOwner) {
-        ok = obj->getAIIndex() == self->mMusicEventOwner;
+    if (mMusicEventOwner != kNoMusicEventOwner) {
+        ok = obj->getAIIndex() == mMusicEventOwner;
     }
     if (ok) {
-        if (self->mRiderMusicEvent == id) {
-            self->mNextRiderMusicEvent = id;
+        if (mRiderMusicEvent == id) {
+            mNextRiderMusicEvent = id;
             return;
         }
-        cSSXAudio_ReleaseRiderMusicEvent(self, obj);
+        cSSXAudio_ReleaseRiderMusicEvent(this, obj);
     }
 }
 #endif
@@ -1634,29 +1632,29 @@ int cSSXAudio_ReleaseRiderMusicEvent_impl(cSSXAudio* self, cRider* obj) __asm__(
  * @param obj  the rider (cRider*), or null to release unconditionally
  * @return 1 when the slot was released, else 0
  */
-int cSSXAudio_ReleaseRiderMusicEvent_impl(cSSXAudio* self, cRider* obj)
+int cSSXAudio::ReleaseRiderMusicEvent(cRider* obj)
 {
     int ok = 0;
     if (obj == 0) {
         ok = 1;
-        self->mMusicEventOwner = -1;
+        mMusicEventOwner = -1;
     } else {
         int none = -1;
-        if (self->mMusicEventOwner != none) {
-            if (obj->getAIIndex() == self->mMusicEventOwner) {
-                self->mMusicEventOwner = none;
+        if (mMusicEventOwner != none) {
+            if (obj->getAIIndex() == mMusicEventOwner) {
+                mMusicEventOwner = none;
                 ok = 1;
             }
         }
     }
     if (ok) {
-        int n = self->mRiderMusicEvent;
+        int n = mRiderMusicEvent;
         if (n != 0) {
-            char* mon = (char*)&self->MusicSys;
-            sBmVtD7D8* vt = (sBmVtD7D8*)self->MusicSys.mVtbl;
+            char* mon = (char*)&MusicSys;
+            sBmVtD7D8* vt = (sBmVtD7D8*)MusicSys.mVtbl;
             vt[4].fn(vthis(mon, vt[4]), n + 1);
-            self->mRiderMusicEvent = 0;
-            self->mNextRiderMusicEvent = 0;
+            mRiderMusicEvent = 0;
+            mNextRiderMusicEvent = 0;
         }
     }
     return ok;
@@ -1671,10 +1669,9 @@ INCLUDE_ASM("sound/bankmanager", cSSXAudio_GetRiderMusicEvent__FPv);
  *
  * @return the event id, or 0
  */
-int cSSXAudio_GetRiderMusicEvent(void* vself)
+int cSSXAudio::GetRiderMusicEvent()
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
-    return self->mRiderMusicEvent;
+    return mRiderMusicEvent;
 }
 #endif
 
@@ -1701,21 +1698,21 @@ extern "C" int cSSXAudio_IsHalfpipeLocation(void* self, int id);
  *
  * @return the category index
  */
-extern "C" int cSSXAudio_GetSongCategory(cSSXAudio* self)
+int cSSXAudio::GetSongCategory()
 {
     int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     int result;
-    if (cSSXAudio_IsPeakTimeEvent(self)) {
+    if (cSSXAudio_IsPeakTimeEvent(this)) {
         result = 0;
-    } else if (cSSXAudio_IsPeakPointsEvent(self)) {
+    } else if (cSSXAudio_IsPeakPointsEvent(this)) {
         result = 1;
-    } else if (cSSXAudio_IsRaceLocation(self, id)) {
+    } else if (cSSXAudio_IsRaceLocation(this, id)) {
         result = 0;
-    } else if (cSSXAudio_IsSlopestyleLocation(self, id)) {
+    } else if (cSSXAudio_IsSlopestyleLocation(this, id)) {
         result = 1;
-    } else if (cSSXAudio_IsBigAirLocation(self, id)) {
+    } else if (cSSXAudio_IsBigAirLocation(this, id)) {
         result = 2;
-    } else if (cSSXAudio_IsHalfpipeLocation(self, id)) {
+    } else if (cSSXAudio_IsHalfpipeLocation(this, id)) {
         result = 3;
     } else {
         result = 4;
@@ -1733,9 +1730,9 @@ INCLUDE_ASM("sound/bankmanager", cSSXAudio_IsMusicRadioMode);
  *
  * @return true when the radio plays music
  */
-extern "C" bool cSSXAudio_IsMusicRadioMode(cSSXAudio* self)
+bool cSSXAudio::IsMusicRadioMode()
 {
-    unsigned int state = (unsigned int)self->mRadioModeID;
+    unsigned int state = (unsigned int)mRadioModeID;
     if (state < kRADIOMODE_MOUNTAIN || state == kRADIOMODE_PLAYLIST) {
         return true;
     }
@@ -1756,10 +1753,10 @@ INCLUDE_ASM("sound/bankmanager", cSSXAudio_SetLastMusicState);
  * @param newValue  the new value
  * @return true when the value changed, else false
  */
-extern "C" bool cSSXAudio_SetLastMusicState(cSSXAudio* self, int newValue)
+bool cSSXAudio::SetLastMusicState(int newValue)
 {
-    int old = self->mLastMusicState;
-    self->mLastMusicState = newValue;
+    int old = mLastMusicState;
+    mLastMusicState = newValue;
     return old != newValue;
 }
 #endif
@@ -1767,13 +1764,14 @@ extern "C" bool cSSXAudio_SetLastMusicState(cSSXAudio* self, int newValue)
 //100%
 INCLUDE_ASM("sound/bankmanager", cSSXAudio_ResetLastMusicState__FPv);
 #ifdef SKIP_ASM
+void cSSXAudio_ResetLastMusicState(void* vself);
+
 /**
  * Sets mLastMusicState to -1, so that the next cSSXAudio_SetLastMusicState call reports a change.
  */
-void cSSXAudio_ResetLastMusicState(void* vself)
+void cSSXAudio::ResetLastMusicState()
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
-    self->mLastMusicState = -1;
+    mLastMusicState = -1;
 }
 #endif
 
@@ -1814,26 +1812,26 @@ typedef int (*tBmSetDF18)(void*, int);
  * @return 1 when the switch started, else 0
  */
 // PORT: 64-bit long sound key
-extern "C" int cSSXAudio_SwitchToNextSong(cSSXAudio* self, int quiet)
+int cSSXAudio::SwitchToNextSong(int quiet)
 {
     int ok = 0;
-    if (cSSXAudio_IsCharacterSpeaking(self, 10) == 0) {
-        char* mon = (char*)&self->MusicSys;
-        if (self->mDJSpeech == 0) {
+    if (cSSXAudio_IsCharacterSpeaking(this, 10) == 0) {
+        char* mon = (char*)&MusicSys;
+        if (mDJSpeech == 0) {
             cMusicSys_FadeOut(mon, 2.0f);
         }
-        sBmVtDF18* vt = (sBmVtDF18*)self->MusicSys.mVtbl;
+        sBmVtDF18* vt = (sBmVtDF18*)MusicSys.mVtbl;
         ok = 1;
         ((tBmSetDF18)vt[4].fn)(vthis(mon, vt[4]), 18);
-        cSSXAudio_PickRandomSong(self);
-        cMonitor_MONITOR_Create_DF18(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+        PickRandomSong();
+        cMonitor_MONITOR_Create_DF18(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                      2000, D_004A3648_DF18->v, 0, 1, 1, 0, 0);
-        cBankMonitor* bankMonitor = &self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
+        cBankMonitor* bankMonitor = &MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
         const sSndKey8_DF18* key = D_004A3650_DF18;
         int sedValue = cMusicSys_GetCurrentSongSedValue(mon);
         cMonitor_MONITOR_Create_DF18(bankMonitor, 1500, key->v, 0, 3, sedValue, 0, 0);
     } else if (quiet == 0) {
-        cMonitor_MONITOR_Create_DF18(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+        cMonitor_MONITOR_Create_DF18(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                      100, D_004A3658_DF18->v, 0, 0, 0, 0, 0);
     }
     return ok;
@@ -1848,9 +1846,9 @@ INCLUDE_ASM("sound/bankmanager", cSSXAudio_RetrySwitchToNextSong);
  *
  * @return true when cSSXAudio_SwitchToNextSong started the switch, else false
  */
-extern "C" bool cSSXAudio_RetrySwitchToNextSong(void* self)
+bool cSSXAudio::RetrySwitchToNextSong()
 {
-    return cSSXAudio_SwitchToNextSong((cSSXAudio*)self, 1) != 0;
+    return ((cSSXAudio*)this)->SwitchToNextSong(1) != 0;
 }
 #endif
 //100%
@@ -1868,20 +1866,21 @@ extern "C" int cSongInstance_GetPathStatus(int);
  * @param event  the cMonitorInstance that fired
  * @return true when the request was posted, else false
  */
-extern "C" bool cSSXAudio_PostMusicRequest(cSSXAudio* self, cMonitorInstance* event) {
+bool cSSXAudio::PostMusicRequest(cMonitorInstance* event)
+{
     int obj;
     int eventValue;
 
-    obj = (int)self->MusicSys.mSongInstance;
+    obj = (int)MusicSys.mSongInstance;
     if (obj == 0 || cSongInstance_GetPathStatus(obj) == -1) {
-        self->mMusicRequestPending = 1;
-        self->mMusicRequest = event->mData1;
+        mMusicRequestPending = 1;
+        mMusicRequest = event->mData1;
         return true;
     }
     eventValue = event->mData2;
     if (eventValue == true) {
-        self->mMusicRequestPending = eventValue;
-        self->mMusicRequest = event->mData1;
+        mMusicRequestPending = eventValue;
+        mMusicRequest = event->mData1;
         return true;
     }
     return false;
@@ -1953,49 +1952,49 @@ static inline void bmLoadBank_E100(cSSXAudio* self, int t)
  * Request 4: cSSXAudio_StartLocationMusic(self, 0, 0, kPEAKBIT_FromLocation, 0). Other requests: when the radio plays music,
  * cSSXAudio_StartLocationMusic with event 36 for request 3, else 0.
  */
-extern "C" void cSSXAudio_HandleMusicRequest(cSSXAudio* self)
+void cSSXAudio::HandleMusicRequest()
 {
-    if (self->mMusicRequestPending == 0)
+    if (mMusicRequestPending == 0)
         return;
-    int st = self->mMusicRequest;
+    int st = mMusicRequest;
     int id;
     if (st == 0) {
-        if (cSSXAudio_IsMusicRadioMode(self)) {
+        if (IsMusicRadioMode()) {
             int locGroup;
-            id = self->mTransportTrack;
+            id = mTransportTrack;
             if (id == kMAX_LOCATIONS) {
-                locGroup = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+                locGroup = cSSXAudio_GetLocationPeakBit(this, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             } else {
-                locGroup = cSSXAudio_GetLocationPeakBit(self, id);
-                self->mTransportTrack = kMAX_LOCATIONS;
+                locGroup = cSSXAudio_GetLocationPeakBit(this, id);
+                mTransportTrack = kMAX_LOCATIONS;
             }
-            bmLoadBank_E100(self, locGroup);
+            bmLoadBank_E100(this, locGroup);
         }
     } else if (st == 2) {
-        if (cSSXAudio_IsMusicRadioMode(self)) {
-            id = self->mTransportTrack;
+        if (IsMusicRadioMode()) {
+            id = mTransportTrack;
             if (id != kMAX_LOCATIONS) {
-                if (cSSXAudio_IsBackCountryLocation(self)) {
-                    cSSXAudio_PickRandomSong(self);
-                    cSSXAudio_StartLocationMusic(self, 36, 1, kPEAKBIT_FromLocation, 0);
+                if (cSSXAudio_IsBackCountryLocation(this)) {
+                    PickRandomSong();
+                    StartLocationMusic(36, 1, kPEAKBIT_FromLocation, 0);
                 } else {
-                    id = self->mTransportTrack;
-                    bmLoadBank_E100(self, cSSXAudio_GetLocationPeakBit(self, id));
+                    id = mTransportTrack;
+                    bmLoadBank_E100(this, cSSXAudio_GetLocationPeakBit(this, id));
                 }
-                self->mTransportTrack = kMAX_LOCATIONS;
+                mTransportTrack = kMAX_LOCATIONS;
             }
         }
     } else if (st == 4) {
-        cSSXAudio_StartLocationMusic(self, 0, 0, kPEAKBIT_FromLocation, 0);
+        StartLocationMusic(0, 0, kPEAKBIT_FromLocation, 0);
     } else {
-        if (cSSXAudio_IsMusicRadioMode(self)) {
-            if (self->mMusicRequest == 3)
-                cSSXAudio_StartLocationMusic(self, 36, 0, kPEAKBIT_FromLocation, 0);
+        if (IsMusicRadioMode()) {
+            if (mMusicRequest == 3)
+                StartLocationMusic(36, 0, kPEAKBIT_FromLocation, 0);
             else
-                cSSXAudio_StartLocationMusic(self, 0, 0, kPEAKBIT_FromLocation, 0);
+                StartLocationMusic(0, 0, kPEAKBIT_FromLocation, 0);
         }
     }
-    self->mMusicRequestPending = 0;
+    mMusicRequestPending = 0;
 }
 #endif
 
@@ -2012,10 +2011,10 @@ struct sBmVtE510 { short delta; short index; int (*fn)(void*, int); };
  * @param ev  the cMonitorInstance (mData1 = the music state)
  * @return 1
  */
-extern "C" int cSSXAudio_SetMusicStateCallback(cSSXAudio* self, cMonitorInstance* ev)
+int cSSXAudio::SetMusicStateCallback(cMonitorInstance* ev)
 {
-    char* mon = (char*)&self->MusicSys;
-    sBmVtE510* vt = (sBmVtE510*)self->MusicSys.mVtbl;
+    char* mon = (char*)&MusicSys;
+    sBmVtE510* vt = (sBmVtE510*)MusicSys.mVtbl;
     vt[4].fn(vthis(mon, vt[4]), ev->mData1);
     return 1;
 }
@@ -2061,70 +2060,70 @@ struct sLocks_E548 {
  * @param ev  the cMonitorInstance (mData1 = event kind, mData2 = its argument)
  * @return 1
  */
-extern "C" int cSSXAudio_HandleMusicChangeEvent(cSSXAudio* self, cMonitorInstance* ev)
+int cSSXAudio::HandleMusicChangeEvent(cMonitorInstance* ev)
 {
     int st = ev->mData1;
     if (st == 0) {
-        char* mon = (char*)&self->SpeechSys;
+        char* mon = (char*)&SpeechSys;
         cSpeechSys_PurgeInstance(mon, 0);
-        cSSXAudio_SpeakDJChoiceLine(self, 1, 0);
+        cSSXAudio_SpeakDJChoiceLine(this, 1, 0);
         cSpeechSys_StartNextSpeech(mon, 0);
-        if (cSSXAudio_IsPeakChallengeEvent(self) == 0) {
-            self->mPendingPeakLine8378 = 1;
-            int locGroup = cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+        if (cSSXAudio_IsPeakChallengeEvent(this) == 0) {
+            mPendingPeakLine8378 = 1;
+            int locGroup = cSSXAudio_GetLocationPeakBit(this, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             if (locGroup == kPEAKBIT_Peak1) {
-                self->mPendingLine8492 = locGroup;
-                self->mLine8492Played = 2;
-                self->mFirstTimeOnTrack[kLOCATION_ABC1] = 0;
+                mPendingLine8492 = locGroup;
+                mLine8492Played = 2;
+                mFirstTimeOnTrack[kLOCATION_ABC1] = 0;
             }
         }
     } else if (st == 1 || st == 2) {
-        cSpeechSys_PurgeInstance(&self->SpeechSys, 0);
+        cSpeechSys_PurgeInstance(&SpeechSys, 0);
         if (ev->mData1 == 2)
-            cSSXAudio_SpeakDJChoiceLine(self, 0, 1);
+            cSSXAudio_SpeakDJChoiceLine(this, 0, 1);
         else
-            cSSXAudio_SpeakDJChoiceLine(self, 1, 1);
-        cSpeechSys_StartNextSpeech(&self->SpeechSys, 0);
-        if (cSSXAudio_IsPeakChallengeEvent(self) == 0)
-            self->mPendingBetweenEventsLine = 1;
+            cSSXAudio_SpeakDJChoiceLine(this, 1, 1);
+        cSpeechSys_StartNextSpeech(&SpeechSys, 0);
+        if (cSSXAudio_IsPeakChallengeEvent(this) == 0)
+            mPendingBetweenEventsLine = 1;
     } else if (st == 3 || st == 5 || st == 4) {
         if (ev->mData2 != kNoSedValue) {
         if (ev->mData1 == 3 || ev->mData1 == 4) {
-            cSpeechSys_PurgeInstance(&self->SpeechSys, 0);
+            cSpeechSys_PurgeInstance(&SpeechSys, 0);
             if (ev->mData1 == 4)
-                cSSXAudio_SpeakDJChoiceLine(self, 0, 0);
+                cSSXAudio_SpeakDJChoiceLine(this, 0, 0);
             else
-                cSSXAudio_SpeakDJChoiceLine(self, 1, 0);
-            cSpeechSys_StartNextSpeech(&self->SpeechSys, 0);
+                cSSXAudio_SpeakDJChoiceLine(this, 1, 0);
+            cSpeechSys_StartNextSpeech(&SpeechSys, 0);
         }
-        if (cSSXAudio_IsPeakChallengeEvent(self) == 0 && cBENewPlayerInterface_isPeakLocked1(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1) != 0) {
+        if (cSSXAudio_IsPeakChallengeEvent(this) == 0 && cBENewPlayerInterface_isPeakLocked1(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1) != 0) {
             int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0));
-            int locGroup = cSSXAudio_GetLocationPeakBit(self, id);
+            int locGroup = cSSXAudio_GetLocationPeakBit(this, id);
             if (locGroup == kPEAKBIT_Peak1) {
-                int lock = ((sLocks_E548*)(&self->mFirstTimeOnTrack[0]))->v[id];
+                int lock = ((sLocks_E548*)(&mFirstTimeOnTrack[0]))->v[id];
                 if (lock == locGroup) {
-                    if (cSSXAudio_IsRaceLocation(self, id) != 0 || cSSXAudio_IsSlopestyleLocation(self, id) != 0)
-                        self->mPendingLocationLine = lock;
-                    ((sLocks_E548*)(&self->mFirstTimeOnTrack[0]))->v[id] = 0;
+                    if (cSSXAudio_IsRaceLocation(this, id) != 0 || cSSXAudio_IsSlopestyleLocation(this, id) != 0)
+                        mPendingLocationLine = lock;
+                    ((sLocks_E548*)(&mFirstTimeOnTrack[0]))->v[id] = 0;
                 }
             }
         }
-        self->mSongAnnouncePending = 1;
-        self->mSongAnnounceNum = ev->mData2;
+        mSongAnnouncePending = 1;
+        mSongAnnounceNum = ev->mData2;
         }
     } else if (st == 7) {
-        char* mon = (char*)&self->SpeechSys;
+        char* mon = (char*)&SpeechSys;
         cSpeechSys_PurgeInstance(mon, 0);
-        cSSXAudio_SpeakDJChoiceLine(self, 1, 0);
+        cSSXAudio_SpeakDJChoiceLine(this, 1, 0);
         cSpeechSys_StartNextSpeech(mon, 0);
-        self->mPendingPeakLine8491 = 1;
-        self->mSongAnnouncePending = 1;
-        self->mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue(&self->MusicSys);
-        if (cSSXAudio_GetLocationPeakBit(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)))
+        mPendingPeakLine8491 = 1;
+        mSongAnnouncePending = 1;
+        mSongAnnounceNum = cMusicSys_GetCurrentSongSedValue(&MusicSys);
+        if (cSSXAudio_GetLocationPeakBit(this, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)))
             == kPEAKBIT_Peak2)
-            self->mFirstTimeOnTrack[kLOCATION_DBC2] = 0;
+            mFirstTimeOnTrack[kLOCATION_DBC2] = 0;
         else
-            self->mFirstTimeOnTrack[kLOCATION_EBC3] = 0;
+            mFirstTimeOnTrack[kLOCATION_EBC3] = 0;
     }
     return 1;
 }
@@ -2140,11 +2139,11 @@ extern "C" void cSSXAudio_HandleMusicEvent(cSSXAudio* self, int id, int a2);
  *
  * Called with gSSXAudio by cSSXScriptEngine_ClearNISPlayListState when the playing NIS list ends.
  */
-extern "C" void cSSXAudio_EndTransportMusic(cSSXAudio* self)
+void cSSXAudio::EndTransportMusic()
 {
-    if (self->mInTransport != 0) {
-        cSSXAudio_HandleMusicEvent(self, 19, 1);
-        self->mInTransport = 0;
+    if (mInTransport != 0) {
+        HandleMusicEvent(19, 1);
+        mInTransport = 0;
     }
 }
 #endif
@@ -2218,143 +2217,147 @@ typedef int (*tBmSetE8C0)(void*, int);
  * @param transportCall  nonzero to treat ids 19 and 20 as the transport end / start
  */
 // PORT: 64-bit long sound key
-extern "C" void cSSXAudio_HandleMusicEvent(cSSXAudio* vself, int id, int transportCall)
+void cSSXAudio::HandleMusicEvent(int id, int transportCall)
 {
-    if (id == 19 && transportCall != 0 && vself->mRaceMusicOn != 0) {
-        if (cSSXAudio_IsInBackCountry(((char*)vself)) != 0 && vself->mFirstTimeOnPeak == 0) {
-            if (cSSXAudio_IsMusicRadioMode((cSSXAudio*)vself)) {
+    if (id == 19 && transportCall != 0 && mRaceMusicOn != 0) {
+        if (cSSXAudio_IsInBackCountry(((char*)this)) != 0 && mFirstTimeOnPeak == 0) {
+            if (IsMusicRadioMode()) {
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 int mode = cBENewRaceInterface_newRace.cGameMode;
                 if (mode != kGAMEMODE_TIMECHALLENGE && mode != kGAMEMODE_PNTSCHALLENGE) {
-                    if (vself->mBonusLineQueued == 0) {
-                        cBankMonitor* monitor = &vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
+                    if (mBonusLineQueued == 0) {
+                        cBankMonitor* monitor = &MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
                         const sSndKey8_E8C0* key = D_004A3650_E8C0;
-                        int sedValue = cMusicSys_GetCurrentSongSedValue(&vself->MusicSys);
+                        int sedValue = cMusicSys_GetCurrentSongSedValue(&MusicSys);
                         cMonitor_MONITOR_Create(monitor, 0, key->v, 0, 4, sedValue, 0, 0);
                     } else {
-                        cBankMonitor* monitor = &vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
+                        cBankMonitor* monitor = &MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
                         const sSndKey8_E8C0* key = D_004A3650_E8C0;
-                        int sedValue = cMusicSys_GetCurrentSongSedValue(&vself->MusicSys);
+                        int sedValue = cMusicSys_GetCurrentSongSedValue(&MusicSys);
                         cMonitor_MONITOR_Create(monitor, 0, key->v, 0, 5, sedValue, 0, 0);
                     }
-                    char* mon = (char*)&vself->MusicSys;
-                    sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
+                    char* mon = (char*)&MusicSys;
+                    sBmVtE8C0* vt = (sBmVtE8C0*)MusicSys.mVtbl;
                     ((tBmSetE8C0)vt[4].fn)(vthis(mon, vt[4]), 0);
                 }
             }
-        } else if (vself->mFirstTimeOnPeak != 0) {
-            if (cSSXAudio_IsMusicRadioMode((cSSXAudio*)vself)) {
+        } else if (mFirstTimeOnPeak != 0) {
+            if (IsMusicRadioMode()) {
                 // NOTE: the target keeps this 1 in $s1 across five calls (a named local, not a literal).
                 int wantType = kPEAKBIT_Peak1;
-                int locationGroup = cSSXAudio_GetLocationPeakBit(((char*)vself), *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-                if (vself->mDJSpeech == 0) {
-                    cMusicSys_FadeOut(&vself->MusicSys, 2.0f);
+                int locationGroup = cSSXAudio_GetLocationPeakBit(
+                        ((char*)this),
+                        *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+                if (mDJSpeech == 0) {
+                    cMusicSys_FadeOut(&MusicSys, 2.0f);
                 }
                 if (locationGroup == wantType) {
-                    if (cSSXAudio_SetLastMusicState((cSSXAudio*)vself, 11)) {
-                        cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                    if (SetLastMusicState(11)) {
+                        cMonitor_MONITOR_Create(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                                 3000, D_004A3648_E8C0->v, 0, 0, 1, 0, 0);
-                        cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                        cMonitor_MONITOR_Create(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                                 2500, D_004A3650_E8C0->v, 0, 0, 0, 0, 0);
                     }
                 } else {
-                    cSSXAudio_ResetLastMusicState(((char*)vself));
-                    cSSXAudio_PickRandomSong(vself);
-                    cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                    cSSXAudio_ResetLastMusicState(((char*)this));
+                    PickRandomSong();
+                    cMonitor_MONITOR_Create(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                             2000, D_004A3648_E8C0->v, 0, 1, 1, 0, 0);
-                    cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                    cMonitor_MONITOR_Create(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                             1500, D_004A3650_E8C0->v, 0, 7, 0, 0, 0);
                 }
             }
         } else {
-            if (cSSXAudio_IsAtHub(((char*)vself)) && vself->mBonusLineQueued == 0) {
-                cSSXAudio_SpeakDJChoiceLine(((char*)vself), 0, 1);
-                cSpeechSys_StartNextSpeech(&vself->SpeechSys, 0);
-                vself->mPendingBetweenEventsLine = 1;
+            if (cSSXAudio_IsAtHub(((char*)this)) && mBonusLineQueued == 0) {
+                cSSXAudio_SpeakDJChoiceLine(((char*)this), 0, 1);
+                cSpeechSys_StartNextSpeech(&SpeechSys, 0);
+                mPendingBetweenEventsLine = 1;
             }
         }
-        vself->mBonusLineQueued = 0;
+        mBonusLineQueued = 0;
     } else if (id == 20) {
         if (transportCall != 0) {
-            vself->mBonusLineQueued = 0;
-            vself->mPendingLine8492 = 0;
-            vself->mInTransport = 1;
-            vself->mLastTransportTrack = vself->mTransportTrack;
-            cSSXAudio_ResetLastMusicState(((char*)vself));
-            char* mon = (char*)&vself->MusicSys;
-            vself->mFirstTimeOnPeak = 0;
-            cSSXAudio_ClearPendingLines(((char*)vself));
+            mBonusLineQueued = 0;
+            mPendingLine8492 = 0;
+            mInTransport = 1;
+            mLastTransportTrack = mTransportTrack;
+            cSSXAudio_ResetLastMusicState(((char*)this));
+            char* mon = (char*)&MusicSys;
+            mFirstTimeOnPeak = 0;
+            cSSXAudio_ClearPendingLines(((char*)this));
             long key = D_004A3648_E8C0->v;
-            cMonitor_MONITOR_DestroyAll1(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, key);
-            cMonitor_MONITOR_DestroyAll1(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+            cMonitor_MONITOR_DestroyAll1(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, key);
+            cMonitor_MONITOR_DestroyAll1(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                          D_004A3650_E8C0->v);
-            cMonitor_MONITOR_DestroyAll1(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+            cMonitor_MONITOR_DestroyAll1(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                          D_004A3658_E8C0->v);
-            cSSXAudio_StopTone(((char*)vself), 5.029983997344971f);
-            cSSXAudio_WipeoutSlideEnd(((char*)vself), (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
-            cSSXAudio_WipeoutTumbleEnd(((char*)vself), (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
-            cSSXAudio_EndUberSpin(((char*)vself), 0);
-            if (cSSXAudio_IsMusicRadioMode((cSSXAudio*)vself)) {
+            cSSXAudio_StopTone(((char*)this), 5.029983997344971f);
+            cSSXAudio_WipeoutSlideEnd(((char*)this), (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
+            cSSXAudio_WipeoutTumbleEnd(((char*)this), (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
+            cSSXAudio_EndUberSpin(((char*)this), 0);
+            if (IsMusicRadioMode()) {
                 int flag = 1;
-                if (cSSXAudio_IsFreeride(((char*)vself)) == 0) {
-                    if (cSSXAudio_IsRaceEvent(((char*)vself)) || cSSXAudio_IsSlopestyleEvent(((char*)vself))) {
+                if (cSSXAudio_IsFreeride(((char*)this)) == 0) {
+                    if (cSSXAudio_IsRaceEvent(((char*)this)) || cSSXAudio_IsSlopestyleEvent(((char*)this))) {
                         if (*(int*)SSXApp->GameModeMan >= 2) {
-                            cSSXAudio_PickRandomSong(vself);
+                            PickRandomSong();
                             flag = 0;
-                            cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                            cMonitor_MONITOR_Create(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                                     10, key, 0, 3, 1, 0, 0);
                         }
                     }
                 }
-                if (vself->mTransportTrack == kMAX_LOCATIONS
-                    || cSSXAudio_IsBackCountryLocation_id(((char*)vself), vself->mTransportTrack) == 0
-                    || vself->mFirstTimeOnTrack[vself->mTransportTrack] != true) {
-                    if (flag && vself->mTransportTrack != kMAX_LOCATIONS) {
-                        cSSXAudio_PickRandomSong(vself);
-                        cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+                if (mTransportTrack == kMAX_LOCATIONS
+                    || cSSXAudio_IsBackCountryLocation_id(((char*)this), mTransportTrack) == 0
+                    || mFirstTimeOnTrack[mTransportTrack] != true) {
+                    if (flag && mTransportTrack != kMAX_LOCATIONS) {
+                        PickRandomSong();
+                        cMonitor_MONITOR_Create(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                                 10, D_004A3648_E8C0->v, 0, 2, 1, 0, 0);
                     }
-                    if (cSSXAudio_HasTransportTrackChanged(((char*)vself)) && cSSXAudio_IsScriptedDJLinePlaying(((char*)vself)) == 0) {
-                        cSSXAudio_SpeakDJChoiceLine(((char*)vself), 0, 1);
-                        cSpeechSys_StartNextSpeech(&vself->SpeechSys, 0);
-                        vself->mPendingBonusBetweenEventsLine = 1;
-                        vself->mBonusLineQueued = 1;
+                    if (cSSXAudio_HasTransportTrackChanged(((char*)this))
+                        && cSSXAudio_IsScriptedDJLinePlaying(((char*)this)) == 0) {
+                        cSSXAudio_SpeakDJChoiceLine(((char*)this), 0, 1);
+                        cSpeechSys_StartNextSpeech(&SpeechSys, 0);
+                        mPendingBonusBetweenEventsLine = 1;
+                        mBonusLineQueued = 1;
                     }
                 } else {
-                    char* mon2 = (char*)&vself->MusicSys;
-                    if (cSSXAudio_IsScriptedDJLinePlaying(((char*)vself)) == 0) {
-                        cSpeechSys_PurgeInstance(&vself->SpeechSys, 0);
+                    char* mon2 = (char*)&MusicSys;
+                    if (cSSXAudio_IsScriptedDJLinePlaying(((char*)this)) == 0) {
+                        cSpeechSys_PurgeInstance(&SpeechSys, 0);
                     }
-                    sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
-                    ((tBmLoadE8C0)vt[2].fn)(vthis(mon2, vt[2]), str_pktrans, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(((char*)vself), 1, 0), 1);
+                    sBmVtE8C0* vt = (sBmVtE8C0*)MusicSys.mVtbl;
+                    ((tBmLoadE8C0)vt[2].fn)(vthis(mon2, vt[2]), str_pktrans, 0xC,
+                                            cSSXAudio_GetCurrAppliedVolumePtr(((char*)this), 1, 0), 1);
                     cMusicSys_SetSongTag(mon2, kSONGTAG_PkTrans);
-                    if (cSSXAudio_GetLocationPeakBit(((char*)vself), vself->mTransportTrack) == kPEAKBIT_Peak2) {
-                        sBmVtE8C0* vt2 = (sBmVtE8C0*)vself->MusicSys.mVtbl;
+                    if (cSSXAudio_GetLocationPeakBit(((char*)this), mTransportTrack) == kPEAKBIT_Peak2) {
+                        sBmVtE8C0* vt2 = (sBmVtE8C0*)MusicSys.mVtbl;
                         ((tBmSetE8C0)vt2[4].fn)(vthis(mon2, vt2[4]), 2);
                     } else {
-                        sBmVtE8C0* vt2 = (sBmVtE8C0*)vself->MusicSys.mVtbl;
+                        sBmVtE8C0* vt2 = (sBmVtE8C0*)MusicSys.mVtbl;
                         ((tBmSetE8C0)vt2[4].fn)(vthis(mon2, vt2[4]), 3);
                     }
                     cMusicSys_SetVolume(mon2, 0x7F);
                     cMusicSys_PauseSong(mon2);
                 }
             } else {
-                cSSXAudio_RefreshPeakAmbience(vself, vself->mTransportTrack);
-                sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
+                RefreshPeakAmbience(mTransportTrack);
+                sBmVtE8C0* vt = (sBmVtE8C0*)MusicSys.mVtbl;
                 ((tBmSetE8C0)vt[4].fn)(vthis(mon, vt[4]), 0x1E);
             }
-            vself->mRaceMusicOn = 1;
+            mRaceMusicOn = 1;
         }
     } else if (id >= 21 && id <= 25) {
-        if (cSSXAudio_IsMusicRadioMode((cSSXAudio*)vself)) {
-            cSSXAudio_PickRandomSong(vself);
-            cMusicSys_FadeOut(&vself->MusicSys, 1.0f);
-            cMonitor_MONITOR_Create(&vself->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+        if (IsMusicRadioMode()) {
+            PickRandomSong();
+            cMusicSys_FadeOut(&MusicSys, 1.0f);
+            cMonitor_MONITOR_Create(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                     3000, D_004A3648_E8C0->v, 0, 3, 1, 0, 0);
         }
     } else {
-        char* mon = (char*)&vself->MusicSys;
-        sBmVtE8C0* vt = (sBmVtE8C0*)vself->MusicSys.mVtbl;
+        char* mon = (char*)&MusicSys;
+        sBmVtE8C0* vt = (sBmVtE8C0*)MusicSys.mVtbl;
         ((tBmSetE8C0)vt[4].fn)(vthis(mon, vt[4]), id);
     }
 }
@@ -2378,14 +2381,14 @@ extern "C" void cMonitor_MONITOR_Create(void*, int, long, int, int, int, int, in
  * cSSXAudio_SetTransportTrack.
  */
 // PORT: 64-bit long sound key
-extern "C" void cSSXAudio_RestartLocationMusic(cSSXAudio* self)
+void cSSXAudio::RestartLocationMusic()
 {
-    self->mBonusLineQueued = 0;
-    self->mPendingLine8492 = 0;
-    cSSXAudio_ResetLastMusicState(self);
-    self->mFirstTimeOnPeak = 0;
-    cSSXAudio_PickRandomSong(self);
-    cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+    mBonusLineQueued = 0;
+    mPendingLine8492 = 0;
+    ResetLastMusicState();
+    mFirstTimeOnPeak = 0;
+    PickRandomSong();
+    cMonitor_MONITOR_Create(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                             10, D_004A3648_EF90->v, 0, 2, 1, 0, 0);
 }
 #endif
@@ -2405,35 +2408,35 @@ extern "C" int cSSXAudio_GetCharacterLevel(void* self, int rider);
  * kMUSICRAMP_Ramping, counter mMusicRampCounter = 0), advances the counter up to the tier's maximum and sets the volume
  * to 127 x counter / maximum, clamped to 0..1. Called by cSSXAudio_Update.
  */
-extern "C" void cSSXAudio_UpdateMusicRamp(cSSXAudio* self)
+void cSSXAudio::UpdateMusicRamp()
 {
-    char* mon = (char*)&self->MusicSys;
+    char* mon = (char*)&MusicSys;
     int st = cMusicSys_GetSongTag(mon);
     if (st >= kSONGTAG_Peak1 && st <= kSONGTAG_Peak3) {
         cMusicSys_SetVolume(mon, 0x7F);
         return;
     }
-    if (self->mMusicRampState != kMUSICRAMP_Ramping) {
-        self->mMusicRampState = kMUSICRAMP_Ramping;
-        self->mMusicRampCounter = 0;
+    if (mMusicRampState != kMUSICRAMP_Ramping) {
+        mMusicRampState = kMUSICRAMP_Ramping;
+        mMusicRampCounter = 0;
     }
     int max = 800;
-    int tier = cSSXAudio_GetCharacterLevel(self, cSSXAudio_GetFocusRider(self, -1));
+    int tier = cSSXAudio_GetCharacterLevel(this, cSSXAudio_GetFocusRider(this, -1));
     if (tier == 1) {
         max = 1000;
     } else if (tier == 2) {
         max = 1200;
     }
-    int cur = self->mMusicRampCounter;
+    int cur = mMusicRampCounter;
     float ratio = (float)cur / (float)max;
     if (cur < max) {
-        self->mMusicRampCounter = cur + 1;
+        mMusicRampCounter = cur + 1;
     } else {
-        self->mMusicRampCounter = max;
+        mMusicRampCounter = max;
     }
     ratio = ratio <? 1.0f;
     ratio = ratio >? 0.0f;
-    cMusicSys_SetVolume(&self->MusicSys, (int)(ratio * 127.0f));
+    cMusicSys_SetVolume(&MusicSys, (int)(ratio * 127.0f));
 }
 #endif
 
@@ -2459,16 +2462,16 @@ typedef int (*tBmSetF140)(void*, int);
  *
  * @param mode  the front-end music mode
  */
-extern "C" void cSSXAudio_SetFrontEndMusicMode(cSSXAudio* self, int mode)
+void cSSXAudio::SetFrontEndMusicMode(int mode)
 {
     int bank;
-    if (mode == self->mFrontEndMusicMode) {
+    if (mode == mFrontEndMusicMode) {
         return;
     }
-    self->mFrontEndMusicMode = mode;
+    mFrontEndMusicMode = mode;
     switch (mode) {
     case 0:
-        bank = (self->MusicSys.mMusicState == -1) ? 0 : 9;
+        bank = (MusicSys.mMusicState == -1) ? 0 : 9;
         break;
     case 1: bank = 1; break;
     case 3: bank = 3; break;
@@ -2482,8 +2485,8 @@ extern "C" void cSSXAudio_SetFrontEndMusicMode(cSSXAudio* self, int mode)
     default: bank = -1; break;
     }
     if (bank >= 0) {
-        char* mon = (char*)&self->MusicSys;
-        sBmVtF140* vt = (sBmVtF140*)self->MusicSys.mVtbl;
+        char* mon = (char*)&MusicSys;
+        sBmVtF140* vt = (sBmVtF140*)MusicSys.mVtbl;
         ((tBmSetF140)vt[4].fn)(vthis(mon, vt[4]), bank);
     }
 }
@@ -2510,22 +2513,22 @@ extern const sSndKeyF200 D_004A3648[];
  * sets mReplaySongPlaying. Called from the replay code; cSSXAudio_EndReplayMusic undoes it.
  */
 // PORT: 64-bit long sound key
-extern "C" void cSSXAudio_BeginReplayMusic(cSSXAudio* self)
+void cSSXAudio::BeginReplayMusic()
 {
-    char* mon = (char*)&self->MusicSys;
-    self->mReplayMusicStarted = 0;
-    self->mReplaySongPlaying = 0;
-    if (self->MusicSys.mSongPlaying == 0 || cMusicSys_GetSongTag(mon) == kSONGTAG_CharTune) {
-        if (cSSXAudio_IsMusicRadioMode((cSSXAudio*)self)) {
+    char* mon = (char*)&MusicSys;
+    mReplayMusicStarted = 0;
+    mReplaySongPlaying = 0;
+    if (MusicSys.mSongPlaying == 0 || cMusicSys_GetSongTag(mon) == kSONGTAG_CharTune) {
+        if (IsMusicRadioMode()) {
             if (cMusicSys_GetSongTag(mon) == kSONGTAG_CharTune) {
-                self->MusicSys.mCurrentSongNum = self->mSavedSongNum;
+                MusicSys.mCurrentSongNum = mSavedSongNum;
             }
-            cMonitor_MONITOR_Create(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
+            cMonitor_MONITOR_Create(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor,
                                     10, D_004A3648[0].v, 0, 3, 1, 0, 0);
         }
-        self->mReplayMusicStarted = 1;
+        mReplayMusicStarted = 1;
     } else {
-        self->mReplaySongPlaying = 1;
+        mReplaySongPlaying = 1;
     }
 }
 #endif
@@ -2547,17 +2550,17 @@ struct sBankMgrVEntry {
  *
  * Clears both flags.
  */
-extern "C" void cSSXAudio_EndReplayMusic(cSSXAudio* self)
+void cSSXAudio::EndReplayMusic()
 {
-    if (self->mReplayMusicStarted != 0) {
-        cMusicSys_StopSong(&self->MusicSys);
-    } else if (self->mReplaySongPlaying != 0) {
-        char* obj = (char*)&self->MusicSys;
-        sBankMgrVEntry* vt = (sBankMgrVEntry*)self->MusicSys.mVtbl;
+    if (mReplayMusicStarted != 0) {
+        cMusicSys_StopSong(&MusicSys);
+    } else if (mReplaySongPlaying != 0) {
+        char* obj = (char*)&MusicSys;
+        sBankMgrVEntry* vt = (sBankMgrVEntry*)MusicSys.mVtbl;
         vt[4].fn(vthis(obj, vt[4]), 36);
     }
-    self->mReplayMusicStarted = 0;
-    self->mReplaySongPlaying = 0;
+    mReplayMusicStarted = 0;
+    mReplaySongPlaying = 0;
 }
 #endif
 
@@ -2585,16 +2588,16 @@ public:
  *
  * @param code  the music state
  */
-extern "C" void cSSXAudio_SendMusicEvent(cSSXAudio* self, int code)
+void cSSXAudio::SendMusicEvent(int code)
 {
-    void* monitor = (char*)&self->MusicSys;
+    void* monitor = (char*)&MusicSys;
     cMusicSys_SendMusicEvent(monitor, code);
     if (cMusicSys_GetSongTag(monitor) == kSONGTAG_None) {
         if ((unsigned)(code - 10) < 2 || code == 18) {
             if (D_004A3620 == true) {
-                ((cBankMonitor_F328*)(&self->MusicSys))->SendMusicEvent(8);
+                ((cBankMonitor_F328*)(&MusicSys))->SendMusicEvent(8);
             }
-            self->MusicSys.mSongPlaying = 0;
+            MusicSys.mSongPlaying = 0;
         }
     }
 }
@@ -2614,16 +2617,16 @@ extern "C" int cMusicSys_SetMusicState(void* self, int v);
  * @param code  the new music state
  * @return cMusicSys_SetMusicState's result (whether the state changed)
  */
-extern "C" int cSSXAudio_SetMusicState(cSSXAudio* self, int code)
+int cSSXAudio::SetMusicState(int code)
 {
-    void* monitor = (char*)&self->MusicSys;
+    void* monitor = (char*)&MusicSys;
     int changed = cMusicSys_SetMusicState(monitor, code);
     if (cMusicSys_GetSongTag(monitor) == kSONGTAG_None) {
         if ((unsigned)(code - 10) < 2 || code == 18) {
             if (D_004A3620 == true) {
-                ((cBankMonitor_F328*)(&self->MusicSys))->SendMusicEvent(8);
+                ((cBankMonitor_F328*)(&MusicSys))->SendMusicEvent(8);
             }
-            self->MusicSys.mSongPlaying = 0;
+            MusicSys.mSongPlaying = 0;
         }
     }
     return changed;
@@ -2675,10 +2678,10 @@ extern "C" cUiObj_F478* cUIStateStack_findState(void* list, int hash);
  * When music volume control 1 (cSSXAudio_GetCurrAppliedVolume(self, 1, 0)) is above 0 it finds the "hud" state on the game's UI state
  * stack (cUIStateStack_findState) and calls its virtual slot 24 with (5, 0). Slot 2 of D_00483688.
  */
-extern "C" void cSSXAudio_PlaySong(cSSXAudio* self)
+void cSSXAudio::PlaySong()
 {
-    cMusicSys_PlaySong(&self->MusicSys);
-    if (cSSXAudio_GetCurrAppliedVolume(self, 1, 0) > 0.0f) {
+    cMusicSys_PlaySong(&MusicSys);
+    if (cSSXAudio_GetCurrAppliedVolume(this, 1, 0) > 0.0f) {
         cGame* game = SSXApp->Game;
         if (game != 0) {
             cUIEngine* ui = game->UI;
@@ -2705,10 +2708,10 @@ extern "C" void* cMusicSys_StopSong(void*);
 /**
  * Stops the current song (cMusicSys_StopSong) when the music mode allows music (cSSXAudio_IsMusicRadioMode).
  */
-extern "C" void cSSXAudio_StopRadioSong(cSSXAudio* self)
+void cSSXAudio::StopRadioSong()
 {
-    if (cSSXAudio_IsMusicRadioMode((cSSXAudio*)self) != 0) {
-        cMusicSys_StopSong(&self->MusicSys);
+    if (IsMusicRadioMode() != 0) {
+        cMusicSys_StopSong(&MusicSys);
     }
 }
 #endif
@@ -2729,13 +2732,13 @@ extern "C" void cSSXAudio_RestartLocationMusic(cSSXAudio* self);
  *
  * @param id  the location id
  */
-extern "C" void cSSXAudio_SetTransportTrack(cSSXAudio* self, int id)
+void cSSXAudio::SetTransportTrack(int id)
 {
-    self->mTransportTrack = id;
+    mTransportTrack = id;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (iface != 0) {
-        if (*cBENewRaceInterface_getLocation(iface) == self->mTransportTrack) {
-            cSSXAudio_RestartLocationMusic(self);
+        if (*cBENewRaceInterface_getLocation(iface) == mTransportTrack) {
+            RestartLocationMusic();
         }
     }
 }
@@ -2765,21 +2768,21 @@ struct sBmVtF5B8 {
  * kRADIOMODE_MOUNTAIN it fades the song out over 1 s, starts the loading-screen sound (cSSXAudio_StartLoadingLoop), sets music state
  * 0 and full volume. Called when the map screen opens.
  */
-extern "C" void cSSXAudio_EnterMapScreen(cSSXAudio* self)
+void cSSXAudio::EnterMapScreen()
 {
-    self->mPausedSFXForMapScreen = 0;
-    if (self->mAudioPaused != 0) return;
+    mPausedSFXForMapScreen = 0;
+    if (mAudioPaused != 0) return;
     if (cAudioInterface_isInGame() == 0) return;
-    if (self->mScriptedDJLine == 0) {
-        cSSXAudio_PauseSFX(self);
-        self->mPausedSFXForMapScreen = 1;
+    if (mScriptedDJLine == 0) {
+        cSSXAudio_PauseSFX(this);
+        mPausedSFXForMapScreen = 1;
     }
-    cSSXAudio_MenuSound(self, 9);
-    if (self->mRadioModeID != kRADIOMODE_MOUNTAIN) {
-        char* mon = (char*)&self->MusicSys;
+    cSSXAudio_MenuSound(this, 9);
+    if (mRadioModeID != kRADIOMODE_MOUNTAIN) {
+        char* mon = (char*)&MusicSys;
         cMusicSys_FadeOut(mon, 1.0f);
-        cSSXAudio_StartLoadingLoop(self);
-        sBmVtF5B8* vt = (sBmVtF5B8*)self->MusicSys.mVtbl;
+        StartLoadingLoop();
+        sBmVtF5B8* vt = (sBmVtF5B8*)MusicSys.mVtbl;
         vt[4].fn(vthis(mon, vt[4]), 0);
         cMusicSys_SetVolume(mon, 0x7F);
     }
@@ -2803,16 +2806,16 @@ extern "C" void cSSXAudio_StopLoadingLoop(cSSXAudio* self, float v);
  *
  * @param restartMusic  nonzero to restart the location music
  */
-extern "C" void cSSXAudio_LeaveMapScreen(cSSXAudio* self, int restartMusic)
+void cSSXAudio::LeaveMapScreen(int restartMusic)
 {
-    if (self->mPausedSFXForMapScreen != 0) {
-        cSSXAudio_ResumeSFX(self);
-        self->mPausedSFXForMapScreen = 0;
+    if (mPausedSFXForMapScreen != 0) {
+        cSSXAudio_ResumeSFX(this);
+        mPausedSFXForMapScreen = 0;
     }
-    if (self->mLoadingLoopHandle >= 0) {
-        cSSXAudio_StopLoadingLoop(self, 1.0f);
-        if (restartMusic != 0 && cSSXAudio_IsAtHub(self) != 0) {
-            cSSXAudio_StartLocationMusic((cSSXAudio*)self, 0, 0, -1, 0);
+    if (mLoadingLoopHandle >= 0) {
+        StopLoadingLoop(1.0f);
+        if (restartMusic != 0 && cSSXAudio_IsAtHub(this) != 0) {
+            StartLocationMusic(0, 0, -1, 0);
         }
     }
 }
@@ -2829,9 +2832,9 @@ extern void* D_004A3624;
  *
  * Synchronous (cBankManager_BANK_SyncLoad on the cBankManager). Called by the audio system's initialisation.
  */
-extern "C" void cSSXAudio_LoadLoadingScreenBank(cSSXAudio* self)
+void cSSXAudio::LoadLoadingScreenBank()
 {
-    self->MusicSys.mpVStreamSys->mpVBankManager->BANK_SyncLoad(13, D_004A3624, 0);
+    MusicSys.mpVStreamSys->mpVBankManager->BANK_SyncLoad(13, D_004A3624, 0);
 }
 #endif
 
@@ -2846,10 +2849,10 @@ extern "C" void cBankManager_BANK_UnLoad(cBankManager* self, int i);
  *
  * Called by the audio system's shutdown.
  */
-extern "C" void cSSXAudio_UnloadLoadingScreenBank(cSSXAudio* self)
+void cSSXAudio::UnloadLoadingScreenBank()
 {
-    cSSXAudio_StopLoadingLoop(self, 0.0f);
-    self->MusicSys.mpVStreamSys->mpVBankManager->BANK_UnLoad(0);
+    StopLoadingLoop(0.0f);
+    MusicSys.mpVStreamSys->mpVBankManager->BANK_UnLoad(0);
 }
 #endif
 
@@ -2900,19 +2903,18 @@ static inline void bmPush_F768(cSSXAudio* audio, int kind)
  * control 1 (cSSXAudio_GetCurrAppliedVolumePtr(1, 0)) and plays it with cBankSys_SFX_End. Called by the load screen and cSSXAudio_EnterMapScreen;
  * cSSXAudio_StopLoadingLoop stops it.
  *
- * @param ssxAudio  the cSSXAudio
  */
-extern "C" void cSSXAudio_StartLoadingLoop(cSSXAudio* ssxAudio)
+void cSSXAudio::StartLoadingLoop()
 {
-    bmPush_F768(ssxAudio, 13);
-    cBankManager* bankManager = ssxAudio->MusicSys.mpVStreamSys->mpVBankManager;
+    bmPush_F768(this, 13);
+    cBankManager* bankManager = MusicSys.mpVStreamSys->mpVBankManager;
     cBankMonitor* st2 = &bankManager->BankMonitor;
     st2->mBaseVol[bankManager->BankMonitor.mInst] = 127;
     st2->mCurrent[bankManager->BankMonitor.mInst].vol = BM_MAX_F768(BM_MIN_F768(st2->mBaseVol[st2->mInst], 127), 0);
-    cStreamSys* streamSys = ssxAudio->MusicSys.mpVStreamSys;
+    cStreamSys* streamSys = MusicSys.mpVStreamSys;
     streamSys->mpVBankManager->BankMonitor.mVolControl[streamSys->mpVBankManager->BankMonitor.mInst] =
-        (float*)cSSXAudio_GetCurrAppliedVolumePtr(ssxAudio, 1, 0);
-    ssxAudio->mLoadingLoopHandle = cBankSys_SFX_End(ssxAudio);
+        (float*)cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0);
+    mLoadingLoopHandle = cBankSys_SFX_End(this);
 }
 #endif
 
@@ -2928,12 +2930,12 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  *
  * @param fadeTime  the fade time (0 stops at once)
  */
-extern "C" void cSSXAudio_StopLoadingLoop(cSSXAudio* self, float fadeTime)
+void cSSXAudio::StopLoadingLoop(float fadeTime)
 {
-    int idx = self->mLoadingLoopHandle;
+    int idx = mLoadingLoopHandle;
     if (idx >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, idx, 1, fadeTime);
-        self->mLoadingLoopHandle = -1;
+        cBankMonitor_BANKMONITOR_StopHandle(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, idx, 1, fadeTime);
+        mLoadingLoopHandle = -1;
     }
 }
 #endif
@@ -2968,24 +2970,24 @@ extern const sBmKeyFAE0 D_004A3658_FAE0[] __asm__("D_004A3658");
  * mSedValue. Called by the map state.
  */
 // PORT: 64-bit long sound keys.
-extern "C" void cSSXAudio_RestartMusicAfterMap(cSSXAudio* self)
+void cSSXAudio::RestartMusicAfterMap()
 {
-    if (cSSXAudio_IsMusicRadioMode((cSSXAudio*)self) == 0) {
+    if (IsMusicRadioMode() == 0) {
         return;
     }
-    cMonitor_MONITOR_DestroyAll1(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3648_FAE0[0].v);
-    cMonitor_MONITOR_DestroyAll1(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3650_FAE0[0].v);
-    cMonitor_MONITOR_DestroyAll1(&self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3658_FAE0[0].v);
-    int st = cMusicSys_GetSongTag(&self->MusicSys);
-    if ((unsigned int)(st - kSONGTAG_Peak1) < 3 || st == kSONGTAG_PkTrans || self->MusicSys.mSongPlaying == 0) {
-        cSSXAudio_SetLastMusicState((cSSXAudio*)self, 18);
-        self->mStopSpeechOnResume = 1;
-        cMusicSys_StopSong(&self->MusicSys);
-        cSSXAudio_PickRandomSong(self);
-        cSSXAudio_StartLocationMusic((cSSXAudio*)self, 0, 0, kPEAKBIT_FromLocation, 0);
-        cBankMonitor* bankMonitor = &self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
+    cMonitor_MONITOR_DestroyAll1(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3648_FAE0[0].v);
+    cMonitor_MONITOR_DestroyAll1(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3650_FAE0[0].v);
+    cMonitor_MONITOR_DestroyAll1(&MusicSys.mpVStreamSys->mpVBankManager->BankMonitor, D_004A3658_FAE0[0].v);
+    int st = cMusicSys_GetSongTag(&MusicSys);
+    if ((unsigned int)(st - kSONGTAG_Peak1) < 3 || st == kSONGTAG_PkTrans || MusicSys.mSongPlaying == 0) {
+        SetLastMusicState(18);
+        mStopSpeechOnResume = 1;
+        cMusicSys_StopSong(&MusicSys);
+        PickRandomSong();
+        StartLocationMusic(0, 0, kPEAKBIT_FromLocation, 0);
+        cBankMonitor* bankMonitor = &MusicSys.mpVStreamSys->mpVBankManager->BankMonitor;
         const sBmKeyFAE0* key = D_004A3650_FAE0;
-        int sedValue = cMusicSys_GetCurrentSongSedValue(&self->MusicSys);
+        int sedValue = cMusicSys_GetCurrentSongSedValue(&MusicSys);
         cMonitor_MONITOR_Create_FAE0(bankMonitor, 3000, key->v, 0, 4, sedValue, 0, 0);
     }
 }
@@ -3003,10 +3005,9 @@ INCLUDE_ASM("sound/bankmanager", cSSXAudio_StopSong__FPv);
  *
  * @return cMusicSys_StopSong's return value
  */
-void* cSSXAudio_StopSong(void* vself)
+void* cSSXAudio::StopSong()
 {
-    cSSXAudio* self = (cSSXAudio*)vself;
-    return cMusicSys_StopSong(&self->MusicSys);
+    return cMusicSys_StopSong(&MusicSys);
 }
 #endif
 
@@ -3032,14 +3033,14 @@ typedef int (*tBmSetFC58)(void*, int);
  *
  * Uses music volume control 1 and loads synchronously. Called when the network-configuration screen closes.
  */
-extern "C" void cSSXAudio_PlayCharSelSong(cSSXAudio* self)
+void cSSXAudio::PlayCharSelSong()
 {
-    char* mon = (char*)&self->MusicSys;
-    sBmVtFC58* vt = (sBmVtFC58*)self->MusicSys.mVtbl;
-    ((tBmLoadFC58)vt[2].fn)(vthis(mon, vt[2]), str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
+    char* mon = (char*)&MusicSys;
+    sBmVtFC58* vt = (sBmVtFC58*)MusicSys.mVtbl;
+    ((tBmLoadFC58)vt[2].fn)(vthis(mon, vt[2]), str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(this, 1, 0), 1);
     cMusicSys_SetSongTag(mon, kSONGTAG_CharSel);
-    sBmVtFC58* vt2 = (sBmVtFC58*)self->MusicSys.mVtbl;
-    ((tBmSetFC58)vt2[4].fn)(vthis(mon, vt2[4]), self->mFrontEndMusicMode);
+    sBmVtFC58* vt2 = (sBmVtFC58*)MusicSys.mVtbl;
+    ((tBmSetFC58)vt2[4].fn)(vthis(mon, vt2[4]), mFrontEndMusicMode);
 }
 #endif
 

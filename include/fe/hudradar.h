@@ -26,6 +26,9 @@
 #include "render/2drender.h"   // tRect
 
 
+struct cRider;
+struct tRect;
+
 struct cHUDRadar {
     float unk_000[2];                // 0x000 [U] text position x, y (On Tour t2Vector shape; no shared definition in
                                      //       include/ yet): cHUDRadar_calcLayout stores it as one unaligned doubleword
@@ -45,6 +48,12 @@ struct cHUDRadar {
                                      //       store it (lw/sw)
     void** mVtbl;                    // 0x038 [R] cHUDRadar_cHUDRadar stores cHUDRadar_vtbl (1 slot), cHUDRadar__cHUDRadar restores it;
                                      //       [P] _vt$9cHUDRadar
+
+    // Methods bound to their retail symbols by asm labels.
+    void init(tRect* screenRect, tRect* area) __asm__("cHUDRadar_init");
+    void calcLayout(tRect* screenRect, tRect* area) __asm__("cHUDRadar_calcLayout");
+    void renderTracker(cRider* rider) __asm__("cHUDRadar_renderTracker");
+    void renderSplitTracker(cRider* rider, int right) __asm__("cHUDRadar_renderSplitTracker");
 };
 
 CHECK_OFFSET(cHUDRadar, unk_000, 0x000);

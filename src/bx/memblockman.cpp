@@ -1312,13 +1312,13 @@ int cExecutionMan_timerFunction_1(void* self) __asm__("cExecutionMan_timerFuncti
  * (+0x20) is still clear, calls cExecutionMan_timerFunction (which runs cAppMan_timerFunction on cAppMan_TheAppMan, the per-tick update).
  * Once the quit flag is set, wakes the main thread (+0x10) and sleeps.
  */
-extern "C" void cPS2ExecutionMan_runTimerThread(cPS2ExecutionMan* self)
+void cPS2ExecutionMan::runTimerThread()
 {
-    while (WaitSema(self->mTimerSema), (volatile int)self->mQuit == 0)
+    while (WaitSema(mTimerSema), (volatile int)mQuit == 0)
     {
-        cExecutionMan_timerFunction_1(self);
+        cExecutionMan_timerFunction_1(this);
     }
-    WakeupThread(self->mMainThreadId);
+    WakeupThread(mMainThreadId);
     SleepThread();
 }
 #endif
@@ -1339,16 +1339,16 @@ struct sMemJobVEntry {
  * still clear, calls virtual slot 2 of the pending job object (+0x14048) and then clears the job pointer, which
  * cPS2ExecutionMan_isLoadDone reports as done. Once the quit flag is set, wakes the main thread (+0x10) and sleeps.
  */
-extern "C" void cPS2ExecutionMan_runLoaderThread(void* self)
+void cPS2ExecutionMan::runLoaderThread()
 {
-    while (WaitSema(*(int*)((char*)self + 0x14044)), *(volatile int*)((char*)self + 0x20) == 0)
+    while (WaitSema(*(int*)((char*)this + 0x14044)), *(volatile int*)((char*)this + 0x20) == 0)
     {
-        void* obj = *(void* volatile*)((char*)self + 0x14048);
+        void* obj = *(void* volatile*)((char*)this + 0x14048);
         sMemJobVEntry* vt = *(sMemJobVEntry**)obj;
         vt[2].fn(vthis(obj, vt[2]));
-        *(void* volatile*)((char*)self + 0x14048) = 0;
+        *(void* volatile*)((char*)this + 0x14048) = 0;
     }
-    WakeupThread(*(int*)((char*)self + 0x10));
+    WakeupThread(*(int*)((char*)this + 0x10));
     SleepThread();
 }
 #endif

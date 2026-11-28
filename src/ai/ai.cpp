@@ -1091,7 +1091,7 @@ extern int cGameModeMan_iCharRank[];
  * @param idx  the rider's AI index
  * @return 1 when found, else 0
  */
-extern "C" int cAI_isRiderCharacterRanked(cAI* self, int idx)
+int cAI::isRiderCharacterRanked(int idx)
 {
     cGameModeMan* tbl = SSXApp->GameModeMan;
     int characterId = tbl->iCharacters[idx];
@@ -1293,10 +1293,11 @@ INCLUDE_ASM("ai/ai", cAI_reinitRiderPaths);
  *
  * Nothing in the source calls it.
  */
-extern "C" void cAI_reinitRiderPaths(cAI* self) {
+void cAI::reinitRiderPaths()
+{
     int i;
-    for (i = 0; i < self->NumberOfRidersAllocated; i++) {
-        cRider_initPath(self->Riders[i], 0);
+    for (i = 0; i < NumberOfRidersAllocated; i++) {
+        cRider_initPath(Riders[i], 0);
     }
 }
 #endif
@@ -1396,7 +1397,7 @@ static inline t4Vector Front_A560(cRider* rider)
  * @param which  the rider index to move, or -1 (kAllRiders) for all riders
  */
 // Puts the riders (all, or only rider `which`) back on the first path node that has a distance, facing along the path.
-extern "C" void cAI_teleportRiderToEnd(cAI* self, int which)
+void cAI::teleportRiderToEnd(int which)
 {
     const int kAllRiders = -1; // @p which: move every rider
     int n = NodeCount_A560(gPaths);
@@ -1409,17 +1410,17 @@ extern "C" void cAI_teleportRiderToEnd(cAI* self, int which)
                 back = 0.0f;
             t4Vector ahead = cPath_getPathPos_A560(node, 0, markerDist);
             t4Vector pos = cPath_getPathPos_A560(node, 0, back);
-            for (int j = 0; j < self->NumberOfRidersAllocated; j++) {
+            for (int j = 0; j < NumberOfRidersAllocated; j++) {
                 if (which == kAllRiders || which == j) {
-                    cRider_setControlState_impl(self->Riders[j], 0);
-                    cRider_setMotionState_impl(self->Riders[j], 0);
+                    cRider_setControlState_impl(Riders[j], 0);
+                    cRider_setMotionState_impl(Riders[j], 0);
                     t4Vector dir = vSub_A560(ahead, pos);
                     float len = vLen_A560(dir);
                     if (len > 1.0f)
                         vDivEq_A560(dir, len);
                     else
-                        dir = Front_A560(self->Riders[j]);
-                    cRider_putAt_A560(self->Riders[j], &pos, &dir, 5, 0.0f);
+                        dir = Front_A560(Riders[j]);
+                    cRider_putAt_A560(Riders[j], &pos, &dir, 5, 0.0f);
                 }
             }
             return;
@@ -1516,14 +1517,14 @@ static inline t4Vector Front_A768(cRider* rider)
  */
 // Puts the first `n` riders back on the first path node that has a distance, staggered 1000 units apart,
 // each with a penalty of 3600 ticks per place.
-extern "C" void cAI_teleportRiderToEndInPosition(cAI* self, int n)
+void cAI::teleportRiderToEndInPosition(int n)
 {
     int count = NodeCount_A768(gPaths);
     for (int i = 0; i < count; i++) {
         void* node = cPathSys_getTrackPath(gPaths, i);
         float markerDist = cTrackPath_getFinishLineParam(node);
         if (markerDist != -1.0f) {
-            for (int j = 0; j < self->NumberOfRidersAllocated; j++) {
+            for (int j = 0; j < NumberOfRidersAllocated; j++) {
                 if (n == 0)
                     return;
                 float back = markerDist - (float)n-- * 1000.0f;
@@ -1531,16 +1532,16 @@ extern "C" void cAI_teleportRiderToEndInPosition(cAI* self, int n)
                     back = 0.0f;
                 t4Vector ahead = cPath_getPathPos_A768(node, markerDist, 0);
                 t4Vector pos = cPath_getPathPos_A768(node, back, 0);
-                cRider_setControlState_impl(self->Riders[j], 0);
-                cRider_setMotionState_impl(self->Riders[j], 0);
-                (self->Riders[j])->mPenaltyTicks = n * 3600 + 3600;
+                cRider_setControlState_impl(Riders[j], 0);
+                cRider_setMotionState_impl(Riders[j], 0);
+                (Riders[j])->mPenaltyTicks = n * 3600 + 3600;
                 t4Vector dir = vSub_A768(ahead, pos);
                 float len = vLen_A768(dir);
                 if (len > 1.0f)
                     vDivEq_A768(dir, len);
                 else
-                    dir = Front_A768(self->Riders[j]);
-                cRider_putAt_A768(self->Riders[j], &pos, &dir, 5, 0.0f);
+                    dir = Front_A768(Riders[j]);
+                cRider_putAt_A768(Riders[j], &pos, &dir, 5, 0.0f);
             }
             return;
         }
@@ -1562,15 +1563,15 @@ extern "C" int cAI_isRiderCharacterRanked(cAI*, int);
  * cAI_isRiderCharacterRanked: clears mRenderFlag and sets mSafeRenderTick to GrMan's virtual slot 114 result + 4 (a frame count a
  * few frames ahead). Nothing in the source calls it; it mirrors cAI_prepareToPurgeComputerRiders.
  */
-extern "C" void cAI_prepareToPurgeExpiredRiders(cAI* self)
+void cAI::prepareToPurgeExpiredRiders()
 {
-    for (int i = 0; i < self->NumberOfComputersAllocated; i++)
+    for (int i = 0; i < NumberOfComputersAllocated; i++)
     {
-        char** list = (char**)((char*)&self->Computers);
+        char** list = (char**)((char*)&Computers);
         cRider* rider = *(cRider**)(list[i] + 0x18);
         if (rider->mRenderFlag != 0)
         {
-            if (cAI_isRiderCharacterRanked(self, rider->getAIIndex()) != 0)
+            if (isRiderCharacterRanked(rider->getAIIndex()) != 0)
             {
                 cRider* hiddenRider = *(cRider**)(list[i] + 0x18);
                 hiddenRider->mRenderFlag = 0;
@@ -1598,14 +1599,15 @@ extern "C" int cAI_isRiderCharacterRanked(cAI*, int);
  *
  * @return 1 when every selected rider is safe to delete, else 0
  */
-extern "C" int cAI_isReadyToPurgeExpiredRiders(cAI* self) {
+int cAI::isReadyToPurgeExpiredRiders()
+{
     int i;
     int ok = 1;
-    for (i = 0; i < self->NumberOfComputersAllocated; i++) {
-        if (cRider_isSafeToDelete(self->Computers[i]->RiderHandler.GroundMotion.mRider) == 0) {
-            char* obj = (char*)&VPTR_AT(self->Computers[i]->RiderHandler.GroundMotion.mRider, sizeof(cRiderState));
+    for (i = 0; i < NumberOfComputersAllocated; i++) {
+        if (cRider_isSafeToDelete(Computers[i]->RiderHandler.GroundMotion.mRider) == 0) {
+            char* obj = (char*)&VPTR_AT(Computers[i]->RiderHandler.GroundMotion.mRider, sizeof(cRiderState));
             sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
-            if (cAI_isRiderCharacterRanked(self, vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))) != 0)
+            if (isRiderCharacterRanked(vt[kRiderVt_getAIIndex].fn(vthis(obj, vt[kRiderVt_getAIIndex]))) != 0)
                 ok = 0;
         }
     }

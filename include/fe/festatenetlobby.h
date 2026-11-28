@@ -34,6 +34,10 @@ struct cUIThing;
 struct cUIMenu;
 struct cUIListBox;
 
+struct cFEStateNetCreateRoomPopup;
+struct cFEStateNetHelpPopup;
+struct cUIState;
+
 struct cFEStateLobbyMenu : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateLobbyMenu_vtbl (32 slots), stored by cFEStateLobbyMenu_cFEStateLobbyMenu /
@@ -103,6 +107,24 @@ struct cFEStateLobbyMenu : public cFEStateNet {
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateLobbyMenu_onWidgetEvent");
     virtual int onWidgetMenu(cUIMenu* obj, unsigned int msg, unsigned int index)
         __asm__("cFEStateLobbyMenu_onWidgetMenu");
+    void handleKeyboardText() __asm__("cFEStateLobbyMenu_handleKeyboardText");
+    void joinRoomById(int roomId, const char* str) __asm__("cFEStateLobbyMenu_joinRoomById");
+    void joinRoomByName(const char* roomName, void* password) __asm__("cFEStateLobbyMenu_joinRoomByName");
+    void createRoom(const char* namePtr, char* channelName, const char* extraPtr)
+        __asm__("cFEStateLobbyMenu_createRoom");
+    void* onNetEvent(int msgId, void* data) __asm__("cFEStateLobbyMenu_onNetEvent");
+    void handleErrorEvent(int msgId, void* data) __asm__("cFEStateLobbyMenu_handleErrorEvent");
+    void handleJoinRoomError(void* msgPtr) __asm__("cFEStateLobbyMenu_handleJoinRoomError");
+    void handleCreateRoomError(void* msgPtr) __asm__("cFEStateLobbyMenu_handleCreateRoomError");
+    void onCreateRoomPopupEvent(cFEStateNetCreateRoomPopup* popup, int event)
+        __asm__("cFEStateLobbyMenu_onCreateRoomPopupEvent");
+    void onRoomPasswordPopupEvent(cUIState* popup, int event) __asm__("cFEStateLobbyMenu_onRoomPasswordPopupEvent");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateLobbyMenu_fillHelpPopup");
+    void hideChannelArrows() __asm__("cFEStateLobbyMenu_hideChannelArrows");
+    void rebuildChannelLists() __asm__("cFEStateLobbyMenu_rebuildChannelLists");
+    void redrawPlayerList() __asm__("cFEStateLobbyMenu_redrawPlayerList");
+    void fillPlayerRows(int page) __asm__("cFEStateLobbyMenu_fillPlayerRows");
+    void updatePlayerScrollArrows() __asm__("cFEStateLobbyMenu_updatePlayerScrollArrows");
 };
 
 CHECK_OFFSET(cFEStateLobbyMenu, mpMenuPlayers, 0x6D0);

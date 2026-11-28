@@ -35,6 +35,10 @@ struct tMidiBank;
 struct tCrowdEventData {
     int mNumEventData; // 0x00 [P] assert "mNumEventData < kCROWDSYS_MAXVARIATIONS_PER_CATEGORY" (Add); [R] ctor 0
     void* mpData[5];   // 0x04 [P] asserts "mpData[ mNumEventData ] == NULL", "mpData[ iCount ]"; [R] ctor zeroes 5
+
+    // Methods bound to their retail symbols by asm labels.
+    bool LoadSample(const char* name, int flags) __asm__("tCrowdEventData_LoadSample");
+    void FreeSamples() __asm__("tCrowdEventData_FreeSamples");
 };
 
 // One crowd intensity's cheer data (0x54; [P] cCrowdSys::CROWD_GetData(eCrowdIntensity) returns &mCrowdData[i]).
@@ -74,6 +78,9 @@ struct tCrowdAmbientInfo {
 // cCrowdInstance: one viewport's crowd sound (0x190 [R]: cCrowdSys::Init (cCrowdSys_Init) allocates
 // operator new[](n x 0x190, "CrowdInstances"), every cCrowdSys method indexes mpCrowdInstances with stride 0x190).
 // Class name from that tag and the preview's "pCrowdInstance" / "kCrowdInstanceTagBits". No vtable.
+struct cBankMonitor;
+struct cBankMonitorInstance;
+
 struct cCrowdInstance {
     int mViewPort;                             // 0x000 [P] "mViewPort >= 0", "mViewPort == -1", "mViewPort == pOpts->OPTS_GetViewport()"; [R] ctor -1; [U] OPTS_Viewport of its sounds (cCrowdInstance_PlayTrickCheer)
     char unk_004[0xC];                         // 0x004 no access (t4Vector alignment)
@@ -105,7 +112,20 @@ struct cCrowdInstance {
                                         //        intensity + 1 (ANTICIPATE), cCrowdInstance_PlayFallCheer = ~intensity (FALL),
                                         //        cCrowdInstance_RemoveObject / cCrowdInstance_Update 0 (none); cCrowdSys cCrowdSys_GetCurrentCheer
                                         //        returns it
+
+    // Methods bound to their retail symbols by asm labels.
+    int AddObject(cBankMonitor* objectOpts, int key) __asm__("cCrowdInstance_AddObject");
+    void RemoveObject(int idx, float fade) __asm__("cCrowdInstance_RemoveObject");
+    void RemoveAllObjects(float fade) __asm__("cCrowdInstance_RemoveAllObjects");
+    void PlayTrickCheer(int idx) __asm__("cCrowdInstance_PlayTrickCheer");
+    void PlayFallCheer(int idx) __asm__("cCrowdInstance_PlayFallCheer");
+    void RequestAnticipation() __asm__("cCrowdInstance_RequestAnticipation");
+    void CancelAnticipation() __asm__("cCrowdInstance_CancelAnticipation");
+    void StopCheer() __asm__("cCrowdInstance_StopCheer");
+    void UpdateLoopPitch(cBankMonitorInstance* obj, float dt) __asm__("cCrowdInstance_UpdateLoopPitch");
 };
+
+struct cBankMonitorInstance;
 
 struct cCrowdSys {
     // --- cBankSys (non-virtual part 0x10; sound/banksys.h)
@@ -122,6 +142,20 @@ struct cCrowdSys {
 
     // Methods bound to their retail symbols by asm labels.
     tCrowdData* CROWD_GetData(int i) __asm__("cCrowdSys_CROWD_GetData");
+    void Update() __asm__("cCrowdSys_Update");
+    void Shutdown() __asm__("cCrowdSys_Shutdown");
+    void ReadSection(void* parser) __asm__("cCrowdSys_ReadSection");
+    void UnpackHandle(int packedId, int* outInstance, int* outSlot) __asm__("cCrowdSys_UnpackHandle");
+    void RemoveObject(int id, float fade) __asm__("cCrowdSys_RemoveObject");
+    void SetObjectLoudness(int id, int value) __asm__("cCrowdSys_SetObjectLoudness");
+    void PlayTrickCheer(int slot, int i) __asm__("cCrowdSys_PlayTrickCheer");
+    void PlayFallCheer(int slot, int i) __asm__("cCrowdSys_PlayFallCheer");
+    void RequestAnticipation(int i) __asm__("cCrowdSys_RequestAnticipation");
+    void CancelAnticipation(int i) __asm__("cCrowdSys_CancelAnticipation");
+    int AddObject(int ambientPatch) __asm__("cCrowdSys_AddObject");
+    void RemoveAllObjects() __asm__("cCrowdSys_RemoveAllObjects");
+    void LoopPitchCallback(cBankMonitorInstance* obj, float dt) __asm__("cCrowdSys_LoopPitchCallback");
+    int GetCurrentCheer(int i) __asm__("cCrowdSys_GetCurrentCheer");
 };
 
 CHECK_OFFSET(tCrowdEventData, mNumEventData, 0x00);

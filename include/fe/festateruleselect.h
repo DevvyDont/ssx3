@@ -128,6 +128,8 @@ enum eBRAGRIGHTs {
 // src/fe/festatebigradio.cpp, src/fe/festateruleselect.cpp, src/fe/fepopupmisc.cpp, and the asm); [O] SSX On Tour's
 // DWARF (class cFEStateBraggingRights, cBraggingRightsMenu): names, types and order.
 
+struct cFEStateNetHelpPopup;
+
 struct cFEStateBraggingRights : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] _vt$11cFEStateNet cFEStateNet_vtbl, stored by cFEStateNet_cFEStateNet/cFEStateNet_cFEStateNet1; subclasses
@@ -170,6 +172,9 @@ struct cFEStateBraggingRights : public cFEStateNet {
     virtual int onWidgetMenu(cUIMenu* ctrl, unsigned int msg, unsigned int)
         __asm__("cFEStateBraggingRights_onWidgetMenu");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateBraggingRights_onWidgetCreate");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateBraggingRights_fillHelpPopup");
+    void onCancelChallengePopupEvent(cUIState* popup, int popupEvent)
+        __asm__("cFEStateBraggingRights_onCancelChallengePopupEvent");
 };
 
 CHECK_OFFSET(cFEStateBraggingRights, mMenuCtrl, 0x6D0);

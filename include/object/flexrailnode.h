@@ -74,6 +74,9 @@ struct cBxReplayFrame;
 
 struct t4Matrix;
 
+struct t4Vector;
+struct tIntersectInfo;
+
 struct cFlexRailNode : public cInstanceNode {
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C:
     //   [R] cFlexRailNode_cFlexRailNode / _cFlexRailNode1 / __cFlexRailNode store cFlexRailNode_vtbl (D_004900D0); the
@@ -126,6 +129,9 @@ struct cFlexRailNode : public cInstanceNode {
     virtual bool isFlexRail() const __asm__("cFlexRailNode_isFlexRail__FPv");
     virtual void applyForce(const tIntersectInfo&, const t4Vector&) __asm__("cFlexRailNode_applyForce__FPv");
     virtual void updateIntersectInfo(tIntersectInfo&) __asm__("cFlexRailNode_updateIntersectInfo__FPv");
+    void splineIntersect(const t4Vector* minBpos, const t4Vector* maxBpos, const t4Vector* bpos,
+                         unsigned int splineFilterMask, int* hit, float* dist, tIntersectInfo* intInfo)
+        __asm__("cFlexRailNode_splineIntersect");
 };
 
 CHECK_OFFSET(cFlexRailNode, unk_01C, 0x01C);

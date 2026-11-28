@@ -1571,14 +1571,13 @@ extern float D_0048E7F0[5];
  * @param dist  best distance so far; updated on a hit
  * @param intInfo  intersect info filled on a hit
  */
-extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const t4Vector* minBpos, const t4Vector* maxBpos,
-                                              const t4Vector* bpos, unsigned int splineFilterMask, int* hit,
-                                              float* dist, tIntersectInfo* intInfo)
+void cFlexRailNode::splineIntersect(const t4Vector* minBpos, const t4Vector* maxBpos, const t4Vector* bpos,
+                                    unsigned int splineFilterMask, int* hit, float* dist, tIntersectInfo* intInfo)
 {
-    if (((unsigned int)self->RailFlags & splineFilterMask) == 0) {
+    if (((unsigned int)RailFlags & splineFilterMask) == 0) {
         return;
     }
-    for (int seg = 0; seg < self->NumNodes - 1; seg++) {
+    for (int seg = 0; seg < NumNodes - 1; seg++) {
         int i;
         t4VectorCtor lastp;
         const float kTopSplit = 0.6180340051651001f;
@@ -1588,7 +1587,7 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const t4Vecto
         float x3 = 1.0f;
         t4VectorCtor nextp;
         t4VectorCtor tmp;
-        const t4Matrix& mat = (self->Mats)[seg];
+        const t4Matrix& mat = Mats[seg];
         lastp = splineEval_8290(mat, x0);
         float cd = fbLength_8290(fbSub_8290(*bpos, lastp));
         int ci = 0;
@@ -1658,8 +1657,8 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const t4Vecto
             Init_8290(intInfo);
             intInfo->Ipos = lastp;
             intInfo->Inorm = fbNormalize_8290(splineSlope_8290(mat, lastt));
-            intInfo->Inst = self->Instance;
-            intInfo->Mesh = self->getMesh(seg);
+            intInfo->Inst = Instance;
+            intInfo->Mesh = getMesh(seg);
             intInfo->Seg = seg;
             intInfo->Spline = 0;
             intInfo->T = lastt;
@@ -1667,7 +1666,7 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const t4Vecto
             if (mesh <= 0) {
                 mesh = 0;
             }
-            short* surf = &self->Instance->m_pCollideRecord->Surfaces[mesh].Stype;
+            short* surf = &Instance->m_pCollideRecord->Surfaces[mesh].Stype;
             if (*surf == eST_Undefined) {
                 intInfo->Stype = eST_Default;
             } else {

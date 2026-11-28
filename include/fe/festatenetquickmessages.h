@@ -29,6 +29,10 @@
 #include "ui/uistate.h"
 #include "fe/festatenet.h"
 
+struct cFEStateNetHelpPopup;
+struct cUIState;
+struct cUIText;
+
 struct cFEStateNetQuickMessages : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateNetQuickMessages_vtbl (vtables.tsv; 32 slots), stored by
@@ -65,6 +69,15 @@ struct cFEStateNetQuickMessages : public cFEStateNet {
     virtual void onUpdate() __asm__("cFEStateNetQuickMessages_onUpdate__FPv");
     virtual void onWidgetEvent(cUIThing* w, unsigned int msg) __asm__("cFEStateNetQuickMessages_onWidgetEvent");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateNetQuickMessages_onWidgetCreate");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateNetQuickMessages_fillHelpPopup");
+    void showAllMessageRows() __asm__("cFEStateNetQuickMessages_showAllMessageRows");
+    void setFittedText(cUIText* vtext, char* str) __asm__("cFEStateNetQuickMessages_setFittedText");
+    void handleKeyboardText() __asm__("cFEStateNetQuickMessages_handleKeyboardText");
+    void onResetMessagesPopupEvent(cUIState* popup, int event)
+        __asm__("cFEStateNetQuickMessages_onResetMessagesPopupEvent");
+    void onSaveChangesPopupEvent(cUIState* popup, int event)
+        __asm__("cFEStateNetQuickMessages_onSaveChangesPopupEvent");
+    int isChanged() __asm__("cFEStateNetQuickMessages_isChanged");
 };
 
 CHECK_OFFSET(cFEStateNetQuickMessages, mbChanged, 0x6D0);

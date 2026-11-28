@@ -763,6 +763,7 @@ struct cSSXScriptEngine {
     void DeInitOnce() __asm__("cSSXScriptEngine_DeInitOnce");
     void BuildCharacterBitRoleArray(int* flags, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
         __asm__("cSSXScriptEngine_BuildCharacterBitRoleArray");
+    void InitOnce() __asm__("cSSXScriptEngine_InitOnce");
 };
 
 CHECK_OFFSET(cSSXScriptEngine, mpObjectDatabase, 0x000);

@@ -36,6 +36,8 @@
 
 struct cUIListBox;
 
+struct cFEStateNetHelpPopup;
+
 struct cFEStateNetCreateRoomPopup : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateNetCreateRoomPopup_vtbl (32 slots), stored by
@@ -85,6 +87,8 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
     virtual void onUpdate() __asm__("cFEStateNetCreateRoomPopup_onUpdate__FPv");
     virtual int onWidgetPair(cUIPair*, unsigned int) __asm__("cFEStateNetCreateRoomPopup_onWidgetPair__FPv");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateNetCreateRoomPopup_onWidgetCreate");
+    bool checkRoomName() __asm__("cFEStateNetCreateRoomPopup_checkRoomName");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateNetCreateRoomPopup_fillHelpPopup");
 };
 
 CHECK_OFFSET(cFEStateNetCreateRoomPopup, mpTextRoomName, 0x6D0);

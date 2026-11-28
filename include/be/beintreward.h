@@ -210,6 +210,11 @@ struct cBERewardInterface : public cBEInterface {
     const cBEUserAwards* getUserAwards() __asm__("cBERewardInterface_getUserAwards__FPv");
     int getTotalNumUserAwards() __asm__("cBERewardInterface_getTotalNumUserAwards__FPv");
     int getTotalNumSongs() __asm__("cBERewardInterface_getTotalNumSongs__FPv");
+    int getRandomUnownedPeakBolt(int profileIndex, int characterId, int type)
+        __asm__("cBERewardInterface_getRandomUnownedPeakBolt");
+    int getRandomUnownedAwardBolt(int profileIndex, int characterId)
+        __asm__("cBERewardInterface_getRandomUnownedAwardBolt");
+    int isSongInPlayList(int profileIndex, int characterId, int bit) __asm__("cBERewardInterface_isSongInPlayList");
 };
 
 CHECK_OFFSET(cBERewardInterface, mLastEventCashReward, 0x10);

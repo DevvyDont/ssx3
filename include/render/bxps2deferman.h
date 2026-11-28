@@ -69,6 +69,9 @@ struct tDeferBucket {
     int mLinked;                    // 0x14 [U] cPS2DeferManager_bucketRecords: set for a continuation bucket (not hashed)
     tDeferBucket* mpLink;           // 0x18 [U] cPS2DeferManager_bucketRecords / cPS2DeferManager_buildDmaChains: the continuation chain
     tDeferBucket* mpNext;           // 0x1C [U] the hash chain (mBucketHash) Find1 walks
+
+    // Methods bound to their retail symbols by asm labels.
+    void appendPacket(int packet, int tail) __asm__("tDeferBucket_appendPacket");
 };
 
 CHECK_OFFSET(tDeferBucket, mpState, 0x00);
@@ -132,6 +135,8 @@ CHECK_OFFSET(tDeferViewPort, unk_4, 0x4);
 CHECK_OFFSET(tDeferViewPort, unk_6, 0x6);
 CHECK_SIZE(tDeferViewPort, 0x8);
 
+struct sDrawState;
+
 struct cPS2DeferManager {
     int mNumSubmitDMA;              // 0x00000 [P] "mNumSubmitDMA < kMaxSubmitDMA" reads the manager's first word;
                                     //         [U] cPS2DeferManager_resetFrame 0; cPS2DeferManager_bucketRecords loops over it (sRmBatch_2DE8::count)
@@ -180,6 +185,16 @@ struct cPS2DeferManager {
     // Methods bound to their retail symbols by asm labels.
     tDeferBucket* Find1(int stateEntry, int texKey, unsigned char hash, int matrixIndex)
         __asm__("cPS2DeferManager_Find1");
+
+    // Methods bound to their retail symbols by asm labels.
+    void buildPresetStates() __asm__("cPS2DeferManager_buildPresetStates");
+    void resetFrame() __asm__("cPS2DeferManager_resetFrame");
+    void bucketRecords() __asm__("cPS2DeferManager_bucketRecords");
+    void sortItems() __asm__("cPS2DeferManager_sortItems");
+    void writeDefaultState(ulong** pp) __asm__("cPS2DeferManager_writeDefaultState");
+    void setCurrentState(const sDrawState* src) __asm__("cPS2DeferManager_setCurrentState");
+    void writeVu1ProgramSetup(int type, int mode, unsigned int w3, ulong** pp)
+        __asm__("cPS2DeferManager_writeVu1ProgramSetup");
 };
 
 CHECK_OFFSET(cPS2DeferManager, mNumSubmitDMA, 0x00000);

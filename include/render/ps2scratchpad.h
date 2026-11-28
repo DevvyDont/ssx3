@@ -42,6 +42,14 @@ struct cPS2ScratchPad {
                                     //      block; cPS2ScratchPad_flushBuffer DMAs the block there
     int unk_2C[3];                  // 0x2C [U] cPS2ScratchPad_claimBuffer: each open block's size in quadwords; cPS2ScratchPad_flushCurrentBuffer flushes
                                     //      with it
+
+    // Methods bound to their retail symbols by asm labels.
+    void setLayout(int mode) __asm__("cPS2ScratchPad_setLayout");
+    int claimBuffer(unsigned int addr, int size, int flags) __asm__("cPS2ScratchPad_claimBuffer");
+    int claimAndLoadBuffer(unsigned int addr, int size, int flags) __asm__("cPS2ScratchPad_claimAndLoadBuffer");
+    unsigned int flushCurrentBuffer(int flags) __asm__("cPS2ScratchPad_flushCurrentBuffer");
+    unsigned int flushBuffer(int size, int flags) __asm__("cPS2ScratchPad_flushBuffer");
+    void advanceBuffer() __asm__("cPS2ScratchPad_advanceBuffer");
 };
 
 CHECK_OFFSET(cPS2ScratchPad, unk_00, 0x00);

@@ -281,8 +281,8 @@ extern "C" char* cSSXAudio_cSSXAudio(cSSXAudio* self, int inchrg, int maxBanks, 
     cSSXAudio_SetCurrVolume_4C68(self, 0, 0.9090909361839294f);
     self->mPreset = 0;
     self->SetPreset(0);
-    cSSXAudio_ReadPlayListNames(self);
-    cSSXAudio_SelectPlayList((cSSXAudio*)self, A_4C68->m60A4);
+    self->ReadPlayListNames();
+    self->SelectPlayList(A_4C68->m60A4);
     cSSXAudio_LoadMixes_4C68(self);
     cSSXAudio_InitAttachedSounds(self);
     SNDSYS_adduserdataclient(cSSXAudio_HandleUserChunk);
@@ -1712,13 +1712,13 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  * options screens, the pause options, the memory-card load and cSSXApp_initload call it. The setting is not a declared
  * parameter: it stays in $a1 for cSSXAudio_Volume2Float.
  */
-extern "C" void cSSXAudio_ApplyMusicVolume(cSSXAudio* self)
+void cSSXAudio::ApplyMusicVolume()
 {
-    float level = cSSXAudio_Volume2Float(self);
-    cSSXAudio_SetCurrVolume_if(self, 1, level);
-    cSSXAudio_SetCurrVolume_if(self, 8, level);
-    if (self->mDJSpeech != 0 && self->mRadioModeID != kRADIOMODE_MOUNTAIN) {
-        cSSXAudio_SetCurrVolume_if(self, 2, level);
+    float level = cSSXAudio_Volume2Float(this);
+    cSSXAudio_SetCurrVolume_if(this, 1, level);
+    cSSXAudio_SetCurrVolume_if(this, 8, level);
+    if (mDJSpeech != 0 && mRadioModeID != kRADIOMODE_MOUNTAIN) {
+        cSSXAudio_SetCurrVolume_if(this, 2, level);
     }
 }
 #endif
@@ -1761,9 +1761,9 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
  *
  * The setting is not a declared parameter: it stays in $a1 for cSSXAudio_Volume2Float.
  */
-extern "C" void cSSXAudio_ApplySpeechVolume(cSSXAudio* self)
+void cSSXAudio::ApplySpeechVolume()
 {
-    self->SetCurrVolume(cSSXAudio_Volume2Float(self), 4);
+    SetCurrVolume(cSSXAudio_Volume2Float(this), 4);
 }
 #endif
 
@@ -1830,9 +1830,9 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @return the setting
  */
-extern "C" int cSSXAudio_GetMusicVolumeSetting(cSSXAudio* self)
+int cSSXAudio::GetMusicVolumeSetting()
 {
-    return (int)(self->GetCurrSetVolume(1) * 11.0f);
+    return (int)(GetCurrSetVolume(1) * 11.0f);
 }
 #endif
 
@@ -1862,9 +1862,9 @@ extern "C" float cSSXAudio_GetCurrSetVolume(cSSXAudio* self, int a1);
  *
  * @return the setting
  */
-extern "C" int cSSXAudio_GetSpeechVolumeSetting(cSSXAudio* self)
+int cSSXAudio::GetSpeechVolumeSetting()
 {
-    return (int)(self->GetCurrSetVolume(4) * 11.0f);
+    return (int)(GetCurrSetVolume(4) * 11.0f);
 }
 #endif
 
@@ -3148,24 +3148,24 @@ extern char* str_x_H;
  *
  * The cSSXAudio constructor calls it.
  */
-extern "C" void cSSXAudio_ReadPlayListNames(cSSXAudio* self)
+void cSSXAudio::ReadPlayListNames()
 {
     if (BXFILE_exists(str_x_H) != 0) {
         char parser[2064];
         FileParser_FileParser(parser, str_x_H, 0x100);
-        self->mNumPlayLists = 0;
-        while (self->mNumPlayLists < 20) {
+        mNumPlayLists = 0;
+        while (mNumPlayLists < 20) {
             char* section = FileParser_FindNextSection(parser);
             if (section == 0) {
                 break;
             }
-            strcpy((self)->mPlayListName[self->mNumPlayLists], section);
-            self->mNumPlayLists = self->mNumPlayLists + 1;
+            strcpy(mPlayListName[mNumPlayLists], section);
+            mNumPlayLists = mNumPlayLists + 1;
         }
         FileParser__FileParser(parser, 2);
         return;
     }
-    self->mNumPlayLists = 0;
+    mNumPlayLists = 0;
 }
 #endif
 
@@ -3198,11 +3198,11 @@ extern char str_SONG[];
  * @param name  the play list (section) name
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
-extern "C" void cSSXAudio_SelectPlayList(cSSXAudio* self, const char* name)
+void cSSXAudio::SelectPlayList(const char* name)
 {
     char parser[2064];
     char buf[0x40];
-    cMusicSys_ClearActiveSongs((char*)&self->MusicSys);
+    cMusicSys_ClearActiveSongs((char*)&MusicSys);
     FileParser_FileParser(parser, str_x_H, 0x100);
     if (FileParser_FindPartialSection(parser, name) != 0) {
         FileParser_SkipSectionNames(parser);
@@ -3210,19 +3210,19 @@ extern "C" void cSSXAudio_SelectPlayList(cSSXAudio* self, const char* name)
             char* key = FileParser_GetName(parser);
             if (strcasecmp(str_SONG, key) == 0) {
                 FileParser_AssignString(parser, str_SONG, buf);
-                cMusicSys_AddActiveSongByName((char*)&self->MusicSys, buf);
+                cMusicSys_AddActiveSongByName((char*)&MusicSys, buf);
             }
         }
     }
-    self->mPlayListIndex = 20;
+    mPlayListIndex = 20;
     for (int i = 0; i < 20; i++) {
-        if (strcmp((self)->mPlayListName[i], name) == 0) {
-            self->mPlayListIndex = i;
+        if (strcmp(mPlayListName[i], name) == 0) {
+            mPlayListIndex = i;
             break;
         }
     }
-    func_002B4060((char*)&self->MusicSys);
-    self->MusicSys.mDefaultActiveMap = self->MusicSys.mActiveMap;
+    func_002B4060((char*)&MusicSys);
+    MusicSys.mDefaultActiveMap = MusicSys.mActiveMap;
     FileParser__FileParser(parser, 2);
 }
 #endif

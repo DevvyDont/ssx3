@@ -142,6 +142,7 @@ struct cMultiSplineModifier : public cTransformModifier {
     virtual void postUpdate() __asm__("cMultiSplineModifier_postUpdate");
     virtual const tBoundBox* getBoundBox() const __asm__("cMultiSplineModifier_getBoundBox__FPv");
     virtual void setBoundBox(const tBoundBox& boundbox) __asm__("cMultiSplineModifier_setBoundBox");
+    virtual const t4Matrix* getAnimMats(tInstanceRecord* item) __asm__("cMultiSplineModifier_getAnimMats");
 };
 
 CHECK_OFFSET(cMultiSplineModifier, NumModels, 0x04);

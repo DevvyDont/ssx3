@@ -117,6 +117,8 @@ struct cGMRaceHandler : public cGameModeHandler {
     virtual void riderGateHit(int, int) __asm__("cGMRaceHandler_riderGateHit__FPv");
     virtual void writeToReplayFrame(cReplayFramePtr* stream) __asm__("cGMRaceHandler_writeToReplayFrame");
     virtual void readFromReplayFrame(cReplayFramePtr* stream) __asm__("cGMRaceHandler_readFromReplayFrame");
+    void buildHeatLineups() __asm__("cGMRaceHandler_buildHeatLineups");
+    void applyHeatLineup() __asm__("cGMRaceHandler_applyHeatLineup");
 };
 
 CHECK_OFFSET(cGMRaceHandler, unk_04, 0x04);

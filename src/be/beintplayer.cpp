@@ -847,7 +847,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRiderName);
  * @param index  the rider
  * @param name  the new name
  */
-extern "C" void cBENewPlayerInterface_setRiderName(cBENewPlayerInterface* self, int index, const char* name)
+void cBENewPlayerInterface::setRiderName(int index, const char* name)
 {
     strncpy((char*)&cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)], name, 0xC);
 }
@@ -881,7 +881,7 @@ extern char str_JUGADOR_pct_d[];
  * @return the name string
  */
 // Returns the display name for player idx (network names in a net game, else a default "Player N").
-extern "C" char* cBENewPlayerInterface_getRiderName(cBENewPlayerInterface* self, int idx)
+char* cBENewPlayerInterface::getRiderName(int idx)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
     tBENetworkDB* net = &cBENetworkInterface_networkOpt;
@@ -1497,7 +1497,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param index  the rider
  * @return a pointer into the character record
  */
-extern "C" void* cBENewPlayerInterface_getRiderMessages(cBENewPlayerInterface* self, int index)
+void* cBENewPlayerInterface::getRiderMessages(int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1525,7 +1525,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param bit  the flag number
  * @return true when set
  */
-extern "C" bool cBENewPlayerInterface_getMessageGroupFlag(cBENewPlayerInterface* self, int index, int bit)
+bool cBENewPlayerInterface::getMessageGroupFlag(int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1553,7 +1553,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param bit  the flag number
  * @param on  nonzero sets the flag, 0 clears it
  */
-extern "C" void cBENewPlayerInterface_setMessageGroupFlag(cBENewPlayerInterface* self, int index, int bit, int on)
+void cBENewPlayerInterface::setMessageGroupFlag(int index, int bit, int on)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1586,7 +1586,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param slot  the pair index (no range check)
  * @return mPeakMainEventMedals[@p slot].uiNumRaceMedals
  */
-extern "C" int cBENewPlayerInterface_getNumPeakRaceMedals(cBENewPlayerInterface* self, int index, int slot)
+int cBENewPlayerInterface::getNumPeakRaceMedals(int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1611,7 +1611,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  * @param slot  the pair index (no range check)
  * @return mPeakMainEventMedals[@p slot].uiNumFreeStyleMedals
  */
-extern "C" int cBENewPlayerInterface_getNumPeakFreestyleMedals(cBENewPlayerInterface* self, int index, int slot)
+int cBENewPlayerInterface::getNumPeakFreestyleMedals(int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1691,7 +1691,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  *
  * @param which  picks the pair: nonzero +0x280 / +0x282, 0 +0x284 / +0x286
  */
-extern "C" void cBENewPlayerInterface_recordDifficultyWin(cBENewPlayerInterface* self, int which)
+void cBENewPlayerInterface::recordDifficultyWin(int which)
 {
     int profile = 0;
     int charId = cBELibrary_getCharacterID(0);
@@ -1741,7 +1741,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  *
  * @param which  picks the pair: nonzero +0x280 / +0x282, 0 +0x284 / +0x286
  */
-extern "C" void cBENewPlayerInterface_recordDifficultyLoss(cBENewPlayerInterface* self, int which)
+void cBENewPlayerInterface::recordDifficultyLoss(int which)
 {
     int profile = 0;
     int charId = cBELibrary_getCharacterID(0);

@@ -262,7 +262,7 @@ extern int cGameModeMan_iRanking[];
  *
  * @param i  the rider index
  */
-extern "C" void cGameModeMan_clearRanking(cGameModeMan* self, int i)
+void cGameModeMan::clearRanking(int i)
 {
     cGameModeMan_iRanking[i] = -1;
 }
@@ -1451,7 +1451,7 @@ void cGMRaceHandler::init()
         gm->iSimAI = 0;
         gm->iNumberAI = 5;
         if (gm->bIsEventDone == true) {
-            cGMRaceHandler_buildHeatLineups(this);
+            this->buildHeatLineups();
             cGMRaceHandler_applyHeatLineup(this);
         }
         memset(uiTime, 9, 0x78);
@@ -1508,7 +1508,7 @@ void cGMRaceHandler::init()
         gm->bIsLastHeat = 1;
         if (mHeat3Ready == 0) {
             if (quick != 0) {
-                cGMRaceHandler_buildHeatLineups(this);
+                this->buildHeatLineups();
                 cGameModeHandler_pManager->iHeatNum = 1;
                 cGMRaceHandler_applyHeatLineup(this);
                 cGameModeHandler_pManager->iHeatNum = state;
@@ -1566,7 +1566,7 @@ extern "C" void shuffleIntArray(int* arr, unsigned int n);
  * other than the player's and the rival's (cBENewRaceInterface_getRival), shuffles all ten with shuffleIntArray and stores the player's
  * character and the shuffled values in the line-up rows at +0x10 .. +0x54.
  */
-extern "C" void cGMRaceHandler_buildHeatLineups(cGMRaceHandler* self)
+void cGMRaceHandler::buildHeatLineups()
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1590,17 +1590,17 @@ extern "C" void cGMRaceHandler_buildHeatLineups(cGMRaceHandler* self)
         }
     }
     shuffleIntArray(arr, 10);
-    self->mLineup[0][0] = charA;
-    self->mLineup[0][1] = arr[0];
-    self->mLineup[0][2] = arr[1];
-    self->mLineup[0][3] = arr[2];
-    self->mLineup[0][4] = arr[3];
-    self->mLineup[0][5] = arr[4];
-    self->mLineup[1][3] = arr[5];
-    self->mLineup[1][4] = arr[6];
-    self->mLineup[1][5] = arr[7];
-    self->mLineup[2][4] = arr[8];
-    self->mLineup[2][5] = arr[9];
+    mLineup[0][0] = charA;
+    mLineup[0][1] = arr[0];
+    mLineup[0][2] = arr[1];
+    mLineup[0][3] = arr[2];
+    mLineup[0][4] = arr[3];
+    mLineup[0][5] = arr[4];
+    mLineup[1][3] = arr[5];
+    mLineup[1][4] = arr[6];
+    mLineup[1][5] = arr[7];
+    mLineup[2][4] = arr[8];
+    mLineup[2][5] = arr[9];
 }
 #endif
 
@@ -1628,7 +1628,7 @@ extern "C" void cGMRaceHandler_applyHeatLineup_A668(cGMRaceHandler* self) __asm_
  * go to iCheatCharacters with the player's character in iCharacters. The human rider's slot gets the player's cheat
  * character (cBENewPlayerInterface_getRiderCheatCharID).
  */
-extern "C" void cGMRaceHandler_applyHeatLineup_A668(cGMRaceHandler* self)
+void cGMRaceHandler::applyHeatLineup()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     int id = cBENewPlayerInterface_getHumanRider(iface, 0);
@@ -1637,7 +1637,7 @@ extern "C" void cGMRaceHandler_applyHeatLineup_A668(cGMRaceHandler* self)
     int k = cGameModeHandler_pManager->iHeatNum - 1;
     if (k < 0) k = 0;
     for (int i = 0; i < 6; i++) {
-        int charId = self->mLineup[k][i];
+        int charId = mLineup[k][i];
         if (charId >= 10) {
             cGameModeHandler_pManager->iCheatCharacters[i] = charId;
             charId = ch;

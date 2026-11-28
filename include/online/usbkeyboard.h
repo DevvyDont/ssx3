@@ -42,6 +42,9 @@ struct cUsbKeyboard {
     tUsbKeyboardSlot mSlots[8];     // 0x000 [R] ctor MEM_fill 0x460 bytes; [U] indexed by keyboard number (0..7)
     int mEnabled;                   // 0x460 [R] ctor: 1 when the library started (func_003F61D0 >= 0), else 0;
                                     //       dtor shuts the library down and clears it; [U] every method tests it
+
+    // Methods bound to their retail symbols by asm labels.
+    void update() __asm__("cUsbKeyboard_update");
 };
 
 CHECK_OFFSET(cUsbKeyboard, mSlots, 0x000);

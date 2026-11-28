@@ -60,6 +60,8 @@ CHECK_OFFSET(tCrowdMarker2d, mLife, 0x10);
 CHECK_OFFSET(tCrowdMarker2d, unk_14, 0x14);
 CHECK_SIZE(tCrowdMarker2d, 0x20);
 
+struct cBxReplayFrame;
+
 struct cCrowdMan2d {
     cCrowdRender2D* mpRender;       // 0x0000 [R] ctor: cCrowdRender2D_cCrowdRender2D(cMemMan_alloc(0x10,
                                     //        "cCrowdRender2D")); dtor destroys it (flags 3)
@@ -79,6 +81,22 @@ struct cCrowdMan2d {
     char unk_2218[0x8];             // 0x2218 no access (alignment of mMarker)
     tCrowdMarker2d mMarker[40];     // 0x2220 [R] ctor builds 40, reset MEM_fill's 1280 bytes; [U] cCrowdMan2d_addMarker adds,
                                     //        cCrowdMan2d_update ages, cCrowdMan2d_renderMarkers draws
+
+    // Methods bound to their retail symbols by asm labels.
+    void resetSlots() __asm__("cCrowdMan2d_resetSlots");
+    void releaseAllQuads() __asm__("cCrowdMan2d_releaseAllQuads");
+    void releaseSectionQuads(int id) __asm__("cCrowdMan2d_releaseSectionQuads");
+    void restart() __asm__("cCrowdMan2d_restart");
+    void update() __asm__("cCrowdMan2d_update");
+    void spawnMarkers() __asm__("cCrowdMan2d_spawnMarkers");
+    void addQuad(int resourceId) __asm__("cCrowdMan2d_addQuad");
+    void removeQuad(int val) __asm__("cCrowdMan2d_removeQuad");
+    void attachBoneToCrowdPose(unsigned int handle, int partIndex, int boneIndex)
+        __asm__("cCrowdMan2d_attachBoneToCrowdPose");
+    void freeQuad(int slotIndex) __asm__("cCrowdMan2d_freeQuad");
+    void renderMarkers() __asm__("cCrowdMan2d_renderMarkers");
+    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cCrowdMan2d_writeToReplayFrame");
+    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cCrowdMan2d_readFromReplayFrame");
 };
 
 CHECK_OFFSET(cCrowdMan2d, mpRender, 0x0000);

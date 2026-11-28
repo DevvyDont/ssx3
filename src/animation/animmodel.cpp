@@ -139,23 +139,23 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_enablePart);
  * @param channel  the LOD slot 0-3 to enable, or negative for all four
  */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimModel_enablePart(cAnimModel* self, int i, int channel)
+void cAnimModel::enablePart(int i, int channel)
 {
-    if (i > self->maxPartIndex)
+    if (i > maxPartIndex)
     {
         return;
     }
-    if (self->partIndex == 0)
+    if (partIndex == 0)
     {
         return;
     }
-    int idx = self->partIndex[i];
+    int idx = partIndex[i];
     if (idx < 0)
     {
         return;
     }
-    sAnimModelPart* animModelPart = &self->parts[idx];
-    self->mask |= animModelPart->mask;
+    sAnimModelPart* animModelPart = &parts[idx];
+    mask |= animModelPart->mask;
     if (channel < 0)
     {
         for (int k = 0; k < 4; k++)
@@ -184,23 +184,23 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_disablePart);
  * @param channel  the LOD slot 0-3 to disable, or negative for all four
  */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimModel_disablePart(cAnimModel* self, int i, int channel)
+void cAnimModel::disablePart(int i, int channel)
 {
-    if (i > self->maxPartIndex)
+    if (i > maxPartIndex)
     {
         return;
     }
-    if (self->partIndex == 0)
+    if (partIndex == 0)
     {
         return;
     }
-    int idx = self->partIndex[i];
+    int idx = partIndex[i];
     if (idx < 0)
     {
         return;
     }
-    sAnimModelPart* animModelPart = &self->parts[idx];
-    self->mask &= ~animModelPart->mask;
+    sAnimModelPart* animModelPart = &parts[idx];
+    mask &= ~animModelPart->mask;
     if (channel < 0)
     {
         for (int k = 0; k < 4; k++)
@@ -215,7 +215,7 @@ extern "C" void cAnimModel_disablePart(cAnimModel* self, int i, int channel)
         {
             if (animModelPart->lods[k].used)
             {
-                self->mask |= animModelPart->mask;
+                mask |= animModelPart->mask;
                 break;
             }
         }
@@ -230,16 +230,16 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_disableAllParts);
  * Disables every part of the model: clears used on all four lods[] slots of each of the numParts parts and zeroes mask.
  */
 // PORT: ulong is 64-bit here
-extern "C" void cAnimModel_disableAllParts(cAnimModel* self)
+void cAnimModel::disableAllParts()
 {
-    for (int j = 0; j < self->numParts; j++)
+    for (int j = 0; j < numParts; j++)
     {
         for (int k = 0; k < 4; k++)
         {
-            self->parts[j].lods[k].used = 0;
+            parts[j].lods[k].used = 0;
         }
     }
-    self->mask = 0;
+    mask = 0;
 }
 #endif
 

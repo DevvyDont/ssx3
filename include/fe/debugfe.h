@@ -291,6 +291,8 @@ CHECK_SIZE(cDebugMenuScreen, 0x8C48);
 // A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
 // field (src/fe/debugfe.cpp views sDebugFE17D6F0 / 17DB18 / 17D688 / 17E5C8 / sDebugFEState17E*, and the asm).
 
+struct online_Event;
+
 struct cDebugLobbyScreen {
     // --- cDebugScreen (the vptr)
     void** mVtbl;                   // 0x0000 [R] cDebugLobbyScreen_vtbl (ctor, dtor), then cDebugScreen_vtbl (dtor)
@@ -366,6 +368,22 @@ struct cDebugLobbyScreen {
     // Methods bound to their retail symbols by asm labels.
     void update() __asm__("cDebugLobbyScreen_update");
     void draw() __asm__("cDebugLobbyScreen_draw");
+    void handleLobbyEvent(online_Event* ev) __asm__("cDebugLobbyScreen_handleLobbyEvent");
+    void showLobbyError(int errorCode) __asm__("cDebugLobbyScreen_showLobbyError");
+    void runStateMachine() __asm__("cDebugLobbyScreen_runStateMachine");
+    void startOnlineRace() __asm__("cDebugLobbyScreen_startOnlineRace");
+    void createAccount(const char* userName, const char* password) __asm__("cDebugLobbyScreen_createAccount");
+    void login(const char* userName, const char* password) __asm__("cDebugLobbyScreen_login");
+    void createPersona(int persona) __asm__("cDebugLobbyScreen_createPersona");
+    void deletePersona(int persona) __asm__("cDebugLobbyScreen_deletePersona");
+    void selectPersona(int persona) __asm__("cDebugLobbyScreen_selectPersona");
+    void joinRoom(int room) __asm__("cDebugLobbyScreen_joinRoom");
+    void selectOccupant() __asm__("cDebugLobbyScreen_selectOccupant");
+    void openChatMenu() __asm__("cDebugLobbyScreen_openChatMenu");
+    void sendChatLine(int messageText) __asm__("cDebugLobbyScreen_sendChatLine");
+    void acceptChallenge() __asm__("cDebugLobbyScreen_acceptChallenge");
+    void declineChallenge() __asm__("cDebugLobbyScreen_declineChallenge");
+    void abortChallenge() __asm__("cDebugLobbyScreen_abortChallenge");
 };
 
 CHECK_OFFSET(cDebugLobbyScreen, mVtbl, 0x0000);

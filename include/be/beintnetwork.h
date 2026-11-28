@@ -115,6 +115,8 @@ struct cBENetworkInterface : public cBEInterface {
     void backupCharProfile(int idx) __asm__("cBENetworkInterface_backupCharProfile");
     void restoreCharProfile(int idx) __asm__("cBENetworkInterface_restoreCharProfile");
     int getSyncDataSize() __asm__("cBENetworkInterface_getSyncDataSize__FPv");
+    void setOpponentName(const char* src) __asm__("cBENetworkInterface_setOpponentName");
+    void setMyName(const char* src) __asm__("cBENetworkInterface_setMyName");
 };
 
 CHECK_OFFSET(tBENetworkDB, bIsNetworkGame, 0x000);

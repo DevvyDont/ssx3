@@ -314,16 +314,17 @@ void operator_delete(int*);
  * the head's next and prev to the head. The head itself is kept. The LobbyMan destructor uses it on mEventList; the
  * async-file and lobby-tag code use it on their own lists.
  */
-extern "C" void tLobbyEventList_clear(tLobbyEventList *self) {
+void tLobbyEventList::clear()
+{
     typedef _List_node<online_Event*> Node;
-    Node *node = (Node*)((Node*)self->mpHead)->_M_next;
-    while (node != ((Node*)self->mpHead)) {
+    Node *node = (Node*)((Node*)mpHead)->_M_next;
+    while (node != ((Node*)mpHead)) {
         Node *n = node;
         node = (Node*)node->_M_next;
         operator_delete((int *)n);
     }
-    ((Node*)self->mpHead)->_M_next = self->mpHead;
-    ((Node*)self->mpHead)->_M_prev = self->mpHead;
+    ((Node*)mpHead)->_M_next = mpHead;
+    ((Node*)mpHead)->_M_prev = mpHead;
 }
 #endif
 
@@ -394,28 +395,28 @@ static inline cBXString** sPtrVecDB778_copy_backward(cBXString** first, cBXStrin
  * @param pos  where to insert
  * @param x  the pointer to insert (passed by reference)
  */
-extern "C" void tFEStringPtrVector_insertAux(tFEStringPtrVector* self, cBXString** pos, cBXString* const& x)
+void tFEStringPtrVector::insertAux(cBXString** pos, cBXString* const& x)
 {
-    if (self->mpFinish != self->mpEndOfStorage) {
-        if (self->mpFinish != 0)
-            *self->mpFinish = self->mpFinish[-1];
-        ++self->mpFinish;
+    if (mpFinish != mpEndOfStorage) {
+        if (mpFinish != 0)
+            *mpFinish = mpFinish[-1];
+        ++mpFinish;
         cBXString* x_copy = x;
-        sPtrVecDB778_copy_backward(pos, self->mpFinish - 2, self->mpFinish - 1);
+        sPtrVecDB778_copy_backward(pos, mpFinish - 2, mpFinish - 1);
         *pos = x_copy;
     } else {
-        unsigned int old_size = self->mpFinish - self->mpStart;
+        unsigned int old_size = mpFinish - mpStart;
         unsigned int len = old_size != 0 ? 2 * old_size : 1;
         cBXString** new_start = sPtrVecDB778_allocate(len);
         cBXString** new_finish = new_start;
-        new_finish = sPtrVecDB778_ucopy(self->mpStart, pos, new_start);
+        new_finish = sPtrVecDB778_ucopy(mpStart, pos, new_start);
         sPtrVecDB778_construct(new_finish, x);
         ++new_finish;
-        new_finish = sPtrVecDB778_ucopy(pos, self->mpFinish, new_finish);
-        sPtrVecDB778_deallocate(self->mpStart, self->mpEndOfStorage - self->mpStart);
-        self->mpStart = new_start;
-        self->mpFinish = new_finish;
-        self->mpEndOfStorage = new_start + len;
+        new_finish = sPtrVecDB778_ucopy(pos, mpFinish, new_finish);
+        sPtrVecDB778_deallocate(mpStart, mpEndOfStorage - mpStart);
+        mpStart = new_start;
+        mpFinish = new_finish;
+        mpEndOfStorage = new_start + len;
     }
 }
 #endif
@@ -489,28 +490,28 @@ static inline cPrivateMessage** sPtrVecDB918_copy_backward(cPrivateMessage** fir
  * @param pos  where to insert
  * @param x  the pointer to insert (passed by reference)
  */
-extern "C" void tFEPrivateMessageVector_insertAux(tFEPrivateMessageVector* self, cPrivateMessage** pos, cPrivateMessage* const& x)
+void tFEPrivateMessageVector::insertAux(cPrivateMessage** pos, cPrivateMessage* const& x)
 {
-    if (self->mpFinish != self->mpEndOfStorage) {
-        if (self->mpFinish != 0)
-            *self->mpFinish = self->mpFinish[-1];
-        ++self->mpFinish;
+    if (mpFinish != mpEndOfStorage) {
+        if (mpFinish != 0)
+            *mpFinish = mpFinish[-1];
+        ++mpFinish;
         cPrivateMessage* x_copy = x;
-        sPtrVecDB918_copy_backward(pos, self->mpFinish - 2, self->mpFinish - 1);
+        sPtrVecDB918_copy_backward(pos, mpFinish - 2, mpFinish - 1);
         *pos = x_copy;
     } else {
-        unsigned int old_size = self->mpFinish - self->mpStart;
+        unsigned int old_size = mpFinish - mpStart;
         unsigned int len = old_size != 0 ? 2 * old_size : 1;
         cPrivateMessage** new_start = sPtrVecDB918_allocate(len);
         cPrivateMessage** new_finish = new_start;
-        new_finish = sPtrVecDB918_ucopy(self->mpStart, pos, new_start);
+        new_finish = sPtrVecDB918_ucopy(mpStart, pos, new_start);
         sPtrVecDB918_construct(new_finish, x);
         ++new_finish;
-        new_finish = sPtrVecDB918_ucopy(pos, self->mpFinish, new_finish);
-        sPtrVecDB918_deallocate(self->mpStart, self->mpEndOfStorage - self->mpStart);
-        self->mpStart = new_start;
-        self->mpFinish = new_finish;
-        self->mpEndOfStorage = new_start + len;
+        new_finish = sPtrVecDB918_ucopy(pos, mpFinish, new_finish);
+        sPtrVecDB918_deallocate(mpStart, mpEndOfStorage - mpStart);
+        mpStart = new_start;
+        mpFinish = new_finish;
+        mpEndOfStorage = new_start + len;
     }
 }
 #endif
@@ -3198,12 +3199,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupMessage);
 /**
  * Sets a popup's message to an ASCII string: mtMessage (+0x4) becomes type 2 with the string pointer at +0x8.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param message  the ASCII string
  */
-extern "C" void cPopupInfo_setPopupMessage(cPopupInfo* popupInfo, int message) {
-    ((int)popupInfo->mtMessage.ui) = message;
-    popupInfo->mtMessage.eType = 2;
+void cPopupInfo::setPopupMessage(int message)
+{
+    ((int)mtMessage.ui) = message;
+    mtMessage.eType = 2;
 }
 #endif
 
@@ -3213,12 +3214,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupMessage1);
 /**
  * Sets a popup's message to a Unicode string: mtMessage (+0x4) becomes type 1 with the string pointer at +0x8.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param message  the 16-bit string
  */
-extern "C" void cPopupInfo_setPopupMessage1(cPopupInfo* popupInfo, int message) {
-    ((int)popupInfo->mtMessage.ui) = message;
-    popupInfo->mtMessage.eType = 1;
+void cPopupInfo::setPopupMessage1(int message)
+{
+    ((int)mtMessage.ui) = message;
+    mtMessage.eType = 1;
 }
 #endif
 
@@ -3228,12 +3229,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupMessage2);
 /**
  * Sets a popup's message to a localised text id: mtMessage (+0x4) becomes type 3 with the id at +0x8.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param messageId  the text hash id
  */
-extern "C" void cPopupInfo_setPopupMessage2(cPopupInfo* popupInfo, int messageId) {
-    ((int)popupInfo->mtMessage.ui) = messageId;
-    popupInfo->mtMessage.eType = 3;
+void cPopupInfo::setPopupMessage2(int messageId)
+{
+    ((int)mtMessage.ui) = messageId;
+    mtMessage.eType = 3;
 }
 #endif
 
@@ -3243,11 +3244,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupMessage3);
 /**
  * Copies a whole popup element (type and value, 8 bytes) into a popup's message, mtMessage (+0x4).
  *
- * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void cPopupInfo_setPopupMessage3(cPopupInfo* dst, tPopupElement* src) {
-    dst->mtMessage = *src;
+void cPopupInfo::setPopupMessage3(tPopupElement* src)
+{
+    mtMessage = *src;
 }
 #endif
 
@@ -3271,12 +3272,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupTitle);
 /**
  * Sets a popup's title to an ASCII string: mtTitle (+0xC) becomes type 2 with the string pointer at +0x10.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param title  the ASCII string
  */
-extern "C" void cPopupInfo_setPopupTitle(cPopupInfo* popupInfo, int title) {
-    ((int)popupInfo->mtTitle.ui) = title;
-    popupInfo->mtTitle.eType = 2;
+void cPopupInfo::setPopupTitle(int title)
+{
+    ((int)mtTitle.ui) = title;
+    mtTitle.eType = 2;
 }
 #endif
 
@@ -3286,12 +3287,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupTitle1);
 /**
  * Sets a popup's title to a Unicode string: mtTitle (+0xC) becomes type 1 with the string pointer at +0x10.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param title  the 16-bit string
  */
-extern "C" void cPopupInfo_setPopupTitle1(cPopupInfo* popupInfo, int title) {
-    ((int)popupInfo->mtTitle.ui) = title;
-    popupInfo->mtTitle.eType = 1;
+void cPopupInfo::setPopupTitle1(int title)
+{
+    ((int)mtTitle.ui) = title;
+    mtTitle.eType = 1;
 }
 #endif
 
@@ -3301,12 +3302,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupTitle2);
 /**
  * Sets a popup's title to a localised text id: mtTitle (+0xC) becomes type 3 with the id at +0x10.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param titleId  the text hash id
  */
-extern "C" void cPopupInfo_setPopupTitle2(cPopupInfo* popupInfo, int titleId) {
-    ((int)popupInfo->mtTitle.ui) = titleId;
-    popupInfo->mtTitle.eType = 3;
+void cPopupInfo::setPopupTitle2(int titleId)
+{
+    ((int)mtTitle.ui) = titleId;
+    mtTitle.eType = 3;
 }
 #endif
 
@@ -3316,11 +3317,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupTitle3);
 /**
  * Copies a whole popup element (type and value) into a popup's title, mtTitle (+0xC).
  *
- * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void cPopupInfo_setPopupTitle3(cPopupInfo* dst, tPopupElement* src) {
-    dst->mtTitle = *src;
+void cPopupInfo::setPopupTitle3(tPopupElement* src)
+{
+    mtTitle = *src;
 }
 #endif
 
@@ -3344,12 +3345,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxTitle);
 /**
  * Sets a popup's entry-box title to an ASCII string: mtEntryBoxTitle (+0x14) becomes type 2 with the pointer at +0x18.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxTitle  the ASCII string
  */
-extern "C" void cPopupInfo_setPopupEntryBoxTitle(cPopupInfo* popupInfo, int entryBoxTitle) {
-    ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitle;
-    popupInfo->mtEntryBoxTitle.eType = 2;
+void cPopupInfo::setPopupEntryBoxTitle(int entryBoxTitle)
+{
+    ((int)mtEntryBoxTitle.ui) = entryBoxTitle;
+    mtEntryBoxTitle.eType = 2;
 }
 #endif
 
@@ -3359,12 +3360,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxTitle1);
 /**
  * Sets a popup's entry-box title to a Unicode string: mtEntryBoxTitle (+0x14) becomes type 1 with the pointer at +0x18.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxTitle  the 16-bit string
  */
-extern "C" void cPopupInfo_setPopupEntryBoxTitle1(cPopupInfo* popupInfo, int entryBoxTitle) {
-    ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitle;
-    popupInfo->mtEntryBoxTitle.eType = 1;
+void cPopupInfo::setPopupEntryBoxTitle1(int entryBoxTitle)
+{
+    ((int)mtEntryBoxTitle.ui) = entryBoxTitle;
+    mtEntryBoxTitle.eType = 1;
 }
 #endif
 
@@ -3374,12 +3375,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxTitle2);
 /**
  * Sets a popup's entry-box title to a localised text id: mtEntryBoxTitle (+0x14) becomes type 3 with the id at +0x18.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxTitleId  the text hash id
  */
-extern "C" void cPopupInfo_setPopupEntryBoxTitle2(cPopupInfo* popupInfo, int entryBoxTitleId) {
-    ((int)popupInfo->mtEntryBoxTitle.ui) = entryBoxTitleId;
-    popupInfo->mtEntryBoxTitle.eType = 3;
+void cPopupInfo::setPopupEntryBoxTitle2(int entryBoxTitleId)
+{
+    ((int)mtEntryBoxTitle.ui) = entryBoxTitleId;
+    mtEntryBoxTitle.eType = 3;
 }
 #endif
 
@@ -3389,11 +3390,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxTitle3);
 /**
  * Copies a whole popup element (type and value) into a popup's entry-box title, mtEntryBoxTitle (+0x14).
  *
- * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void cPopupInfo_setPopupEntryBoxTitle3(cPopupInfo* dst, tPopupElement* src) {
-    dst->mtEntryBoxTitle = *src;
+void cPopupInfo::setPopupEntryBoxTitle3(tPopupElement* src)
+{
+    mtEntryBoxTitle = *src;
 }
 #endif
 
@@ -3418,12 +3419,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxInitial);
  * Sets the text a popup's entry box starts with to an ASCII string: mtEntryBoxInitial (+0x1C) becomes type 2 with the
  * pointer at +0x20.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxInitial  the ASCII string
  */
-extern "C" void cPopupInfo_setPopupEntryBoxInitial(cPopupInfo* popupInfo, int entryBoxInitial) {
-    ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitial;
-    popupInfo->mtEntryBoxInitial.eType = 2;
+void cPopupInfo::setPopupEntryBoxInitial(int entryBoxInitial)
+{
+    ((int)mtEntryBoxInitial.ui) = entryBoxInitial;
+    mtEntryBoxInitial.eType = 2;
 }
 #endif
 
@@ -3434,12 +3435,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxInitial1);
  * Sets the text a popup's entry box starts with to a Unicode string: mtEntryBoxInitial (+0x1C) becomes type 1 with the
  * pointer at +0x20.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxInitial  the 16-bit string
  */
-extern "C" void cPopupInfo_setPopupEntryBoxInitial1(cPopupInfo* popupInfo, int entryBoxInitial) {
-    ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitial;
-    popupInfo->mtEntryBoxInitial.eType = 1;
+void cPopupInfo::setPopupEntryBoxInitial1(int entryBoxInitial)
+{
+    ((int)mtEntryBoxInitial.ui) = entryBoxInitial;
+    mtEntryBoxInitial.eType = 1;
 }
 #endif
 
@@ -3450,12 +3451,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxInitial2);
  * Sets the text a popup's entry box starts with to a localised text id: mtEntryBoxInitial (+0x1C) becomes type 3 with
  * the id at +0x20.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param entryBoxInitialId  the text hash id
  */
-extern "C" void cPopupInfo_setPopupEntryBoxInitial2(cPopupInfo* popupInfo, int entryBoxInitialId) {
-    ((int)popupInfo->mtEntryBoxInitial.ui) = entryBoxInitialId;
-    popupInfo->mtEntryBoxInitial.eType = 3;
+void cPopupInfo::setPopupEntryBoxInitial2(int entryBoxInitialId)
+{
+    ((int)mtEntryBoxInitial.ui) = entryBoxInitialId;
+    mtEntryBoxInitial.eType = 3;
 }
 #endif
 
@@ -3466,11 +3467,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupEntryBoxInitial3);
  * Copies a whole popup element (type and value) into the text a popup's entry box starts with, mtEntryBoxInitial
  * (+0x1C).
  *
- * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void cPopupInfo_setPopupEntryBoxInitial3(cPopupInfo* dst, tPopupElement* src) {
-    dst->mtEntryBoxInitial = *src;
+void cPopupInfo::setPopupEntryBoxInitial3(tPopupElement* src)
+{
+    mtEntryBoxInitial = *src;
 }
 #endif
 
@@ -3495,12 +3496,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupPostPending);
  * Sets a popup's "post pending" text to an ASCII string: mtPostPending (+0x4C) becomes type 2 with the pointer at
  * +0x50.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param postPending  the ASCII string
  */
-extern "C" void cPopupInfo_setPopupPostPending(cPopupInfo* popupInfo, int postPending) {
-    ((int)popupInfo->mtPostPending.ui) = postPending;
-    popupInfo->mtPostPending.eType = 2;
+void cPopupInfo::setPopupPostPending(int postPending)
+{
+    ((int)mtPostPending.ui) = postPending;
+    mtPostPending.eType = 2;
 }
 #endif
 
@@ -3511,12 +3512,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupPostPending1);
  * Sets a popup's "post pending" text to a Unicode string: mtPostPending (+0x4C) becomes type 1 with the pointer at
  * +0x50.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param postPending  the 16-bit string
  */
-extern "C" void cPopupInfo_setPopupPostPending1(cPopupInfo* popupInfo, int postPending) {
-    ((int)popupInfo->mtPostPending.ui) = postPending;
-    popupInfo->mtPostPending.eType = 1;
+void cPopupInfo::setPopupPostPending1(int postPending)
+{
+    ((int)mtPostPending.ui) = postPending;
+    mtPostPending.eType = 1;
 }
 #endif
 
@@ -3526,12 +3527,12 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupPostPending2);
 /**
  * Sets a popup's "post pending" text to a localised text id: mtPostPending (+0x4C) becomes type 3 with the id at +0x50.
  *
- * @param popupInfo  the popup description (cPopupInfo)
  * @param postPendingId  the text hash id
  */
-extern "C" void cPopupInfo_setPopupPostPending2(cPopupInfo* popupInfo, int postPendingId) {
-    ((int)popupInfo->mtPostPending.ui) = postPendingId;
-    popupInfo->mtPostPending.eType = 3;
+void cPopupInfo::setPopupPostPending2(int postPendingId)
+{
+    ((int)mtPostPending.ui) = postPendingId;
+    mtPostPending.eType = 3;
 }
 #endif
 
@@ -3541,11 +3542,11 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPopupPostPending3);
 /**
  * Copies a whole popup element (type and value) into a popup's "post pending" text, mtPostPending (+0x4C).
  *
- * @param dst  the popup description (cPopupInfo)
  * @param src  the element to copy (tPopupElement)
  */
-extern "C" void cPopupInfo_setPopupPostPending3(cPopupInfo* dst, tPopupElement* src) {
-    dst->mtPostPending = *src;
+void cPopupInfo::setPopupPostPending3(tPopupElement* src)
+{
+    mtPostPending = *src;
 }
 #endif
 
@@ -5469,10 +5470,10 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateNet_setLeavingOnline);
  *
  * cFEStateLogin_onNetConfigPopupEvent and cFEStateOnlineMainMenu_onLogOffPopupEvent set the same word; no read of it is known.
  *
- * @param feStateNet  the online state (cFEStateNet)
  */
-extern "C" void cFEStateNet_setLeavingOnline(cFEStateNet* feStateNet) {
-    feStateNet->mLeavingOnline = 1;
+void cFEStateNet::setLeavingOnline()
+{
+    mLeavingOnline = 1;
 }
 #endif
 
@@ -5482,11 +5483,11 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateNet_setUserPopupOpen);
 /**
  * Sets an online state's mUserPopupOpen; cFEStateNet_openPlayerMessages opens the status popup only when it and mpPopup are set.
  *
- * @param feStateNet  the online state (cFEStateNet)
  * @param value  the new value
  */
-extern "C" void cFEStateNet_setUserPopupOpen(cFEStateNet* feStateNet, int value) {
-    feStateNet->mUserPopupOpen = value;
+void cFEStateNet::setUserPopupOpen(int value)
+{
+    mUserPopupOpen = value;
 }
 #endif
 

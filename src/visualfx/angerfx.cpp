@@ -75,9 +75,9 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
  * Calls MEM_fill. The cAngerFX constructor, cRiderHandler_resetRiderFX and cRiderHandler_readFromReplayFrame call it on
  * the cAngerFX at cRiderHandler + 0xAF0.
  */
-extern "C" void cAngerFX_clearViewState(cAngerFX* self)
+void cAngerFX::clearViewState()
 {
-    MEM_fill(*(void**)((char*)self + 4), 0, 88);
+    MEM_fill(*(void**)((char*)this + 4), 0, 88);
 }
 #endif
 

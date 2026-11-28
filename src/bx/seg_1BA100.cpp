@@ -1545,10 +1545,10 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_clearSongPlaying);
 /**
  * Clears the music system's mSongPlaying flag.
  *
- * @param musicSys  the cMusicSys
  */
-extern "C" void cMusicSys_clearSongPlaying(cMusicSys* musicSys) {
-    musicSys->mSongPlaying = 0;
+void cMusicSys::clearSongPlaying()
+{
+    mSongPlaying = 0;
 }
 #endif
 
@@ -1605,11 +1605,11 @@ INCLUDE_ASM("bx/seg_1BA100", cMusicSys_getMusicState);
  *
  * cMusicSys_StartSong sets it to -1; cMusicSys_SetMusicState compares and stores it.
  *
- * @param musicSys  the cMusicSys
  * @return mMusicState
  */
-extern "C" int cMusicSys_getMusicState(cMusicSys* musicSys) {
-    return (musicSys->mMusicState);
+int cMusicSys::getMusicState()
+{
+    return (mMusicState);
 }
 #endif
 
@@ -1647,13 +1647,13 @@ INCLUDE_ASM("bx/seg_1BA100", cSpeechSys_getBigFileName);
  *
  * The constructor fills the five names ("audio/speech.big" and the four language files).
  *
- * @param speechSys  the cSpeechSys
  * @param i  the name index, 0-4
  * @return the file name
  */
-extern "C" char* cSpeechSys_getBigFileName(cSpeechSys* speechSys, int i) {
+char* cSpeechSys::getBigFileName(int i)
+{
     int off = i * 20 + 344;
-    return ((char*)speechSys) + off;
+    return ((char*)this) + off;
 }
 #endif
 
@@ -1678,12 +1678,12 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_resetPeakIntro);
 /**
  * Sets three cSSXAudio words: mPeakIntroDone to 0, mFirstTimeOnPeak to 1 and mInTransport to 1.
  *
- * @param audio  the cSSXAudio
  */
-extern "C" void cSSXAudio_resetPeakIntro(cSSXAudio* audio) {
-    audio->mPeakIntroDone = 0;
-    audio->mFirstTimeOnPeak = 1;
-    audio->mInTransport = 1;
+void cSSXAudio::resetPeakIntro()
+{
+    mPeakIntroDone = 0;
+    mFirstTimeOnPeak = 1;
+    mInTransport = 1;
 }
 #endif
 
@@ -1693,11 +1693,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_isFirstTimeOnPeak);
 /**
  * Returns cSSXAudio's mFirstTimeOnPeak (set by cSSXAudio_resetPeakIntro; cSSXAudio_SpeakDJBetweenEvents and cSSXAudio_ScheduleDJOpening use it).
  *
- * @param audio  the cSSXAudio
  * @return mFirstTimeOnPeak
  */
-extern "C" int cSSXAudio_isFirstTimeOnPeak(cSSXAudio* audio) {
-    return (audio->mFirstTimeOnPeak);
+int cSSXAudio::isFirstTimeOnPeak()
+{
+    return (mFirstTimeOnPeak);
 }
 #endif
 
@@ -1707,11 +1707,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_isPeakIntroDone);
 /**
  * Returns cSSXAudio's mPeakIntroDone (1 after construction, cleared by cSSXAudio_resetPeakIntro).
  *
- * @param audio  the cSSXAudio
  * @return mPeakIntroDone
  */
-extern "C" int cSSXAudio_isPeakIntroDone(cSSXAudio* audio) {
-    return (audio->mPeakIntroDone);
+int cSSXAudio::isPeakIntroDone()
+{
+    return (mPeakIntroDone);
 }
 #endif
 
@@ -1822,11 +1822,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_getPathfinderCanChangeVolume);
 /**
  * Returns cSSXAudio's mPathfinderCanChangeVolume.
  *
- * @param audio  the cSSXAudio
  * @return mPathfinderCanChangeVolume
  */
-extern "C" int cSSXAudio_getPathfinderCanChangeVolume(cSSXAudio* audio) {
-    return (audio->mPathfinderCanChangeVolume);
+int cSSXAudio::getPathfinderCanChangeVolume()
+{
+    return (mPathfinderCanChangeVolume);
 }
 #endif
 
@@ -1850,11 +1850,11 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetDJSpeech);
 /**
  * Returns cSSXAudio's mDJSpeech (cSSXAudio_SetDJSpeech stores 1 or 0 there).
  *
- * @param audio  the cSSXAudio
  * @return mDJSpeech
  */
-extern "C" int cSSXAudio_GetDJSpeech(cSSXAudio* audio) {
-    return (audio->mDJSpeech);
+int cSSXAudio::GetDJSpeech()
+{
+    return (mDJSpeech);
 }
 #endif
 
@@ -2104,15 +2104,15 @@ INCLUDE_ASM("bx/seg_1BA100", tWPNameField_operatorNotEqual);
 /**
  * Returns whether two world-painter name fields differ: 1 when either of the two words of m_nameId differs.
  *
- * @param wpNameField  the name field
  * @param rhs  the name field to compare with
  * @return 1 when they differ, else 0
  */
-extern "C" int tWPNameField_operatorNotEqual(tWPNameField* wpNameField, tWPNameField* rhs) {
+int tWPNameField::operatorNotEqual(tWPNameField* rhs)
+{
     int var_6;
 
     var_6 = 0;
-    if (((wpNameField->m_nameId[0]) != (rhs->m_nameId[0])) || ((wpNameField->m_nameId[1]) != (rhs->m_nameId[1]))) {
+    if (((m_nameId[0]) != (rhs->m_nameId[0])) || ((m_nameId[1]) != (rhs->m_nameId[1]))) {
         var_6 = 1;
     }
     return var_6;

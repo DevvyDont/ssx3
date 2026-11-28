@@ -899,14 +899,14 @@ extern "C" void cCrowdMan3d__cCrowdMan3d(cCrowdMan3d* self, int flags)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        tCrowdBlock3d_destroy(&self->mBlocks[i]);
+        self->mBlocks[i].destroy();
     }
     TheCrowdMan3d = 0;
     if (self->mBlocks != 0) {
         tCrowdBlock3d* blockIter = self->mBlocks + 5;
         while (self->mBlocks != blockIter) {
             blockIter--;
-            tCrowdBlock3d_destroy(blockIter);
+            blockIter->destroy();
         }
     }
     if (flags & 1) {
@@ -955,11 +955,11 @@ extern "C" void func_00344898(void* elem, void* arg);
  *
  * @param sectionId  world section id being unloaded
  */
-extern "C" void cCrowdMan3d_removeSectionMembers(cCrowdMan3d* self, void* sectionId)
+void cCrowdMan3d::removeSectionMembers(void* sectionId)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        func_00344898(&self->mBlocks[i], sectionId);
+        func_00344898(&mBlocks[i], sectionId);
     }
 }
 #endif
@@ -1093,12 +1093,12 @@ extern "C" void tCrowdBlock3d_updateAnimation(void* elem);
  * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block goes through tCrowdBlock3d_updateAnimation.
  * Called once per game update for cGame's CrowdMan3d.
  */
-extern "C" void cCrowdMan3d_update(cCrowdMan3d* self)
+void cCrowdMan3d::update()
 {
     int i;
-    tCrowdBlock3d* crowdBlock = self->mBlocks;
+    tCrowdBlock3d* crowdBlock = mBlocks;
     for (i = 0; i < 5; i++) {
-        if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
+        if (mBlocks[i].mKey != tCrowdBlock3d::kFree) {
             tCrowdBlock3d_updateAnimation(crowdBlock);
         }
         crowdBlock++;
@@ -1117,13 +1117,13 @@ extern "C" void tCrowdBlock3d_render(void* elem);
  * A block is in use while its key (+0x8) is not tCrowdBlock3d::kFree; each such block is drawn by tCrowdBlock3d_render. Called
  * from the game render pass.
  */
-extern "C" void cCrowdMan3d_render(cCrowdMan3d* self)
+void cCrowdMan3d::render()
 {
     int i;
-    tCrowdBlock3d* crowdBlock = self->mBlocks;
+    tCrowdBlock3d* crowdBlock = mBlocks;
     for (i = 0; i < 5; i++) {
-        if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
-            tCrowdBlock3d_render(crowdBlock);
+        if (mBlocks[i].mKey != tCrowdBlock3d::kFree) {
+            crowdBlock->render();
         }
         crowdBlock++;
     }
@@ -1146,13 +1146,13 @@ extern "C" void tCrowdBlock3d_writeToReplayFrame(void* self, cBxReplayFrame* s);
  *
  * @param replayStream  replay stream to write to
  */
-extern "C" void cCrowdMan3d_writeToReplayFrame(cCrowdMan3d* self, cBxReplayFrame* replayStream)
+void cCrowdMan3d::writeToReplayFrame(cBxReplayFrame* replayStream)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        replayStream->write((const char*)&self->mBlocks[i].mKey, 4);
-        if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
-            tCrowdBlock3d_writeToReplayFrame(&self->mBlocks[i], replayStream);
+        replayStream->write((const char*)&mBlocks[i].mKey, 4);
+        if (mBlocks[i].mKey != tCrowdBlock3d::kFree) {
+            mBlocks[i].writeToReplayFrame(replayStream);
         }
     }
 }
@@ -1174,14 +1174,14 @@ extern "C" void tCrowdBlock3d_readFromReplayFrame(void* self, cBxReplayFrame* s)
  *
  * @param replayStream  replay stream to read from
  */
-extern "C" void cCrowdMan3d_readFromReplayFrame(cCrowdMan3d* self, cBxReplayFrame* replayStream)
+void cCrowdMan3d::readFromReplayFrame(cBxReplayFrame* replayStream)
 {
     int i;
-    cCrowdMan3d_clearAllBlocks((sDebounceBlock*)self);
+    cCrowdMan3d_clearAllBlocks((sDebounceBlock*)this);
     for (i = 0; i < 5; i++) {
-        replayStream->read((char*)&self->mBlocks[i].mKey, 4);
-        if (self->mBlocks[i].mKey != tCrowdBlock3d::kFree) {
-            tCrowdBlock3d_readFromReplayFrame(&self->mBlocks[i], replayStream);
+        replayStream->read((char*)&mBlocks[i].mKey, 4);
+        if (mBlocks[i].mKey != tCrowdBlock3d::kFree) {
+            mBlocks[i].readFromReplayFrame(replayStream);
         }
     }
 }
@@ -1248,9 +1248,9 @@ INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_destroy__FPv);
  *
  * @return nothing meaningful: it forwards tCrowdBlock3d_freeAnimation, which returns no value
  */
-void* tCrowdBlock3d_destroy(void* self)
+void* tCrowdBlock3d::destroy()
 {
-    return tCrowdBlock3d_freeAnimation(self);
+    return tCrowdBlock3d_freeAnimation(this);
 }
 #endif
 
@@ -1267,14 +1267,14 @@ extern "C" void tCrowdBlock3d_buildAnimation(void* self);
  *
  * @param modelId  instance id (tResourceID) of the crowd model
  */
-extern "C" void tCrowdBlock3d_setModel(void* self, int modelId)
+void tCrowdBlock3d::setModel(int modelId)
 {
-    char* owner = (char*)self;
+    char* owner = (char*)this;
     cAppMan* appMan = cAppMan_TheAppMan;
     *(int*)(owner + 0x4) = modelId;
     *(int*)(owner + 0x1DC) = 0;
     *(float*)(owner + 0x1E4) = 1.0f / (float)appMan->TimerHz;
-    tCrowdBlock3d_buildAnimation(self);
+    tCrowdBlock3d_buildAnimation(this);
 }
 #endif
 
@@ -1918,10 +1918,10 @@ static inline int IsLoaded_44E18(tInstanceRecord* m)
  * slot 95 with the slot table (+0x118) and matrix buffer (+0x1E8); otherwise it draws through slot 96 with the matrix
  * buffer only.
  */
-extern "C" void tCrowdBlock3d_render(void* self)
+void tCrowdBlock3d::render()
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    unsigned int* ref = (unsigned int*)((char*)self + 0xC);
+    unsigned int* ref = (unsigned int*)((char*)this + 0xC);
     int off = 0;
     for (int i = 0; i < 32; ref += 2, i++, off += 8)
     {
@@ -1930,14 +1930,14 @@ extern "C" void tCrowdBlock3d_render(void* self)
         tInstanceRecord* model = GetModel_44E18(ref);
         if (!IsLoaded_44E18(model))
             continue;
-        if (*(int*)((char*)self + 0x114) >= 2)
+        if (*(int*)((char*)this + 0x114) >= 2)
         {
-            tCrowdBlock3d_selectVariant((sDebounce4730*)self, *(int*)((char*)self + off + 0x10));
-            ps2GraphicsMan->RenderModel(model, (const tMaterialBlockRecord*)((char*)self + 0x118), *(const t4Matrix*)&model->m_fmTransform, 1.0f, (const t4Matrix*)*(void**)((char*)self + 0x1E8), 0, 0);
+            tCrowdBlock3d_selectVariant((sDebounce4730*)this, *(int*)((char*)this + off + 0x10));
+            ps2GraphicsMan->RenderModel(model, (const tMaterialBlockRecord*)((char*)this + 0x118), *(const t4Matrix*)&model->m_fmTransform, 1.0f, (const t4Matrix*)*(void**)((char*)this + 0x1E8), 0, 0);
         }
         else
         {
-            ps2GraphicsMan->RenderModel(model, (int)*(void**)((char*)self + 0x1E8), 0, 0);
+            ps2GraphicsMan->RenderModel(model, (int)*(void**)((char*)this + 0x1E8), 0, 0);
         }
     }
 }
@@ -1958,9 +1958,9 @@ public:
  *
  * @param replayStream  replay stream to write to (vtable entry 1)
  */
-extern "C" void tCrowdBlock3d_writeToReplayFrame(void* self, cBxReplayFrame* replayStream)
+void tCrowdBlock3d::writeToReplayFrame(cBxReplayFrame* replayStream)
 {
-    replayStream->write((const char*)self, 268);
+    replayStream->write((const char*)this, 268);
 }
 #endif
 
@@ -1977,11 +1977,11 @@ extern "C" void tCrowdBlock3d_buildAnimation(void* self);
  *
  * @param replayStream  replay stream to read from
  */
-extern "C" void tCrowdBlock3d_readFromReplayFrame(void* self, cBxReplayFrame* replayStream)
+void tCrowdBlock3d::readFromReplayFrame(cBxReplayFrame* replayStream)
 {
-    replayStream->read((char*)self, 268);
-    tCrowdBlock3d_freeAnimation(self);
-    tCrowdBlock3d_buildAnimation(self);
+    replayStream->read((char*)this, 268);
+    tCrowdBlock3d_freeAnimation(this);
+    tCrowdBlock3d_buildAnimation(this);
 }
 #endif
 

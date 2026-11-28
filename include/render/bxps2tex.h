@@ -144,6 +144,19 @@ struct cTextureMan {
     void SetNewTextureData(int idx, void* data, int width, int height, int mipCount, int texelFormat, int clutFormat,
                            void* clut, int upload)
         __asm__("cTextureMan_SetNewTextureData");
+    void rearrangeMipLevels(tTexInfo* tex) __asm__("cTextureMan_rearrangeMipLevels");
+    void init() __asm__("cTextureMan_init");
+    void freeAllHeapBlocks() __asm__("cTextureMan_freeAllHeapBlocks");
+    void* initTempHeap(int start, int size) __asm__("cTextureMan_initTempHeap__FPvii");
+    void purgeAll() __asm__("cTextureMan_purgeAll");
+    int allocLockedPages(int size) __asm__("cTextureMan_allocLockedPages");
+    void unlockTexture(int i) __asm__("cTextureMan_unlockTexture");
+    void appendFixedPacketRef(ulong** pkt) __asm__("cTextureMan_appendFixedPacketRef");
+    void buildPixelUpload(int idx, ulong** dma, ulong** gif) __asm__("cTextureMan_buildPixelUpload");
+    void ensureContextTextures(int context1Tex, int context2Tex, int evictLevel, ulong** pp, void** gifOut)
+        __asm__("cTextureMan_ensureContextTextures");
+    void selectContextTexture(int idx, int slot, ulong** dma) __asm__("cTextureMan_selectContextTexture");
+    void dropVramCopy(int idx) __asm__("cTextureMan_dropVramCopy");
 };
 
 CHECK_OFFSET(tTexInfo, mMemAlloc, 0x00);

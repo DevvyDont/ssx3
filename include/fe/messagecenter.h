@@ -110,6 +110,17 @@ struct cOVState_MESSAGECENTER : public cOVState {
     virtual int onWidgetMenu(cUIMenu* widget, unsigned int event, unsigned int value)
         __asm__("cOVState_MESSAGECENTER_onWidgetMenu");
     virtual void onPopupEvent(cUIState* popup, unsigned int event) __asm__("cOVState_MESSAGECENTER_onPopupEvent");
+    void updateButtons() __asm__("cOVState_MESSAGECENTER_updateButtons");
+    void updateScrollArrows() __asm__("cOVState_MESSAGECENTER_updateScrollArrows");
+    void showMessageCounts() __asm__("cOVState_MESSAGECENTER_showMessageCounts");
+    void hideWidget(cUIThing* obj) __asm__("cOVState_MESSAGECENTER_hideWidget");
+    void showWidget(cUIThing* obj) __asm__("cOVState_MESSAGECENTER_showWidget");
+    void fillRows() __asm__("cOVState_MESSAGECENTER_fillRows");
+    unsigned char getFAQSubjectVariant(int idx) __asm__("cOVState_MESSAGECENTER_getFAQSubjectVariant");
+    void fillRow(int idx, int slot, int id, unsigned char sub) __asm__("cOVState_MESSAGECENTER_fillRow");
+    void setRowSubject(int slot, int id, unsigned char lvl) __asm__("cOVState_MESSAGECENTER_setRowSubject");
+    void openViewPopup(int messageIndex, int messageNumber) __asm__("cOVState_MESSAGECENTER_openViewPopup");
+    void deleteMessage(int idx) __asm__("cOVState_MESSAGECENTER_deleteMessage");
 };
 
 CHECK_OFFSET(cOVState_MESSAGECENTER, mpUnreadMail, 0x9C);
@@ -170,6 +181,12 @@ struct cOVState_ViewPopup : public cUIState {
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cOVState_ViewPopup_onWidgetEvent");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int)
         __asm__("cOVState_ViewPopup_onWidgetMenu");
+    void fillMessage() __asm__("cOVState_ViewPopup_fillMessage");
+    void setSubject(int idx) __asm__("cOVState_ViewPopup_setSubject");
+    void setVariantSubject(int id) __asm__("cOVState_ViewPopup_setVariantSubject");
+    void setBody(int idx) __asm__("cOVState_ViewPopup_setBody");
+    void showNextMessage() __asm__("cOVState_ViewPopup_showNextMessage");
+    unsigned char getSubjectVariant(int idx) __asm__("cOVState_ViewPopup_getSubjectVariant");
 };
 
 CHECK_OFFSET(cOVState_ViewPopup, mpNumberLabel, 0x48);

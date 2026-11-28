@@ -69,6 +69,8 @@ struct cPS2SoundManager {
     void DeallocSoundMem(int memHandle) __asm__("cPS2SoundManager_DeallocSoundMem");
     void SetSoundMemLoadLimits(int memHandle) __asm__("cPS2SoundManager_SetSoundMemLoadLimits");
     void RestoreSoundMemLoadLimits() __asm__("cPS2SoundManager_RestoreSoundMemLoadLimits");
+    tPS2SoundMemNode* TakeUnusedNode() __asm__("cPS2SoundManager_TakeUnusedNode");
+    void FreeTopBlock(tPS2SoundMemNode* memNode) __asm__("cPS2SoundManager_FreeTopBlock");
 };
 
 CHECK_OFFSET(tPS2SoundMemNode, index, 0x00);

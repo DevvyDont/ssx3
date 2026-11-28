@@ -61,6 +61,13 @@ struct cBoltOnFXInterface {
     // Methods bound to their retail symbols by asm labels.
     void* cBoltOnFXInterface1(int* charIdPtr, cAttachedEmitterFX* emitterOwner)
         __asm__("cBoltOnFXInterface_cBoltOnFXInterface1");
+
+    // Methods bound to their retail symbols by asm labels.
+    void clearEntries() __asm__("cBoltOnFXInterface_clearEntries");
+    int findOrCreateEntry(int kind, int itemId) __asm__("cBoltOnFXInterface_findOrCreateEntry");
+    int createEntry(int x, int y) __asm__("cBoltOnFXInterface_createEntry");
+    void rebuild() __asm__("cBoltOnFXInterface_rebuild");
+    void updateIfDirty() __asm__("cBoltOnFXInterface_updateIfDirty");
 };
 
 CHECK_OFFSET(tBoltOnFXEntry, mEmitter, 0x0);

@@ -307,7 +307,7 @@ static inline tBEProfileBolt* Flag_6C70(cBECharProfileDB* charRecord, tBEBoltDef
  * @param type  item type, the peak (eBEPeakID) 0 to 2 (flags 0x100, 0x200, 0x400)
  * @return the chosen item id, or -1 when there is none
  */
-extern "C" int cBERewardInterface_getRandomUnownedPeakBolt(cBERewardInterface* self, int profileIndex, int characterId, int type)
+int cBERewardInterface::getRandomUnownedPeakBolt(int profileIndex, int characterId, int type)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int n = 0;
@@ -424,7 +424,7 @@ static inline tBEProfileBolt* Flag_6EE0(cBECharProfileDB* charRecord, tBEBoltDef
  * @param characterId  character ID (On Tour iCharacterID)
  * @return the chosen item id, or -1 when there is none
  */
-extern "C" int cBERewardInterface_getRandomUnownedAwardBolt(cBERewardInterface* self, int profileIndex, int characterId)
+int cBERewardInterface::getRandomUnownedAwardBolt(int profileIndex, int characterId)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     int n = 0;
@@ -1369,7 +1369,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_isSongInPlayList);
  * @return 1 when the bit is set, else 0
  */
 // PORT: 64-bit ulong bit test (ld/dsrlv).
-extern "C" int cBERewardInterface_isSongInPlayList(void* self, int profileIndex, int characterId, int bit)
+int cBERewardInterface::isSongInPlayList(int profileIndex, int characterId, int bit)
 {
     cBECharProfileDB* charRecord = &cBELibrary_profileLib[profileIndex][characterId];
     return (int)((charRecord->mRewards.iPlayList >> bit) & 1);
@@ -3035,13 +3035,13 @@ void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
         value = 21;
         break;
     case kAWARD_PEAK1_EVENT_MEDAL:
-        item = cBERewardInterface_getRandomUnownedPeakBolt(this, profile, iCharacterID, kPEAK_1);
+        item = this->getRandomUnownedPeakBolt(profile, iCharacterID, kPEAK_1);
         break;
     case kAWARD_PEAK2_EVENT_MEDAL:
-        item = cBERewardInterface_getRandomUnownedPeakBolt(this, profile, iCharacterID, kPEAK_2);
+        item = this->getRandomUnownedPeakBolt(profile, iCharacterID, kPEAK_2);
         break;
     case kAWARD_PEAK3_EVENT_MEDAL:
-        item = cBERewardInterface_getRandomUnownedPeakBolt(this, profile, iCharacterID, kPEAK_3);
+        item = this->getRandomUnownedPeakBolt(profile, iCharacterID, kPEAK_3);
         break;
     case kAWARD_PEAK1_RIVALTIME_MEDAL:
     case kAWARD_PEAK2_RIVALTIME_MEDAL:
@@ -3055,7 +3055,7 @@ void cBERewardInterface::awardUser(int profile, int iCharacterID, int bit)
     case kAWARD_PEAK1_POINTSCHALLENGE_MEDAL:
     case kAWARD_PEAK2_POINTSCHALLENGE_MEDAL:
     case kAWARD_PEAK3_POINTSCHALLENGE_MEDAL:
-        item = cBERewardInterface_getRandomUnownedAwardBolt(this, profile, iCharacterID);
+        item = this->getRandomUnownedAwardBolt(profile, iCharacterID);
         break;
     }
 

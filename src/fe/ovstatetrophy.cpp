@@ -134,7 +134,7 @@ extern "C" void* cHUDRadar_cHUDRadar(cHUDRadar* self)
     screenRect.Y = 0.0f;
     screenRect.W = 640.0f;
     screenRect.H = 480.0f;
-    cHUDRadar_calcLayout(self, &screenRect, &screenRect);
+    self->calcLayout(&screenRect, &screenRect);
     D_004A276C++;
     return ((void*)self);
 }
@@ -201,7 +201,7 @@ extern sTex_20EB50 D_004C8C58[];
  * @param screenRect  the screen bounds (the HUD passes 0, 0, 640, 480); not used beyond being passed on
  * @param area  the rectangle (x, y, w, h) the tracker fills
  */
-extern "C" void cHUDRadar_init(cHUDRadar* self, tRect* screenRect, tRect* area)
+void cHUDRadar::init(tRect* screenRect, tRect* area)
 {
     if (D_004A2768 == 0) {
         cUIEngine* res = SSXApp->Game->UI;
@@ -213,7 +213,7 @@ extern "C" void cHUDRadar_init(cHUDRadar* self, tRect* screenRect, tRect* area)
         D_004A2764 = cUIFontInterface_getFontByHashName(bank, GetHashValue32(str_fefont));
         D_004A2768 = 1;
     }
-    cHUDRadar_calcLayout(self, screenRect, area);
+    calcLayout(screenRect, area);
 }
 #endif
 
@@ -240,7 +240,7 @@ extern float D_004C8C58_f[] __asm__("D_004C8C58");
  * @param area  the rectangle (x, y, w, h)
  */
 // PORT: D_004A2764 holds a texture pointer in an int (declared int elsewhere in the unit).
-extern "C" void cHUDRadar_calcLayout(cHUDRadar* self, tRect* screenRect, tRect* area)
+void cHUDRadar::calcLayout(tRect* screenRect, tRect* area)
 {
     float textHeight;
     if (D_004A2768 != 0) {
@@ -250,15 +250,15 @@ extern "C" void cHUDRadar_calcLayout(cHUDRadar* self, tRect* screenRect, tRect* 
         textHeight = 30.0f;
     }
     float arrowHeight = D_004C8C58_f[72 / 4];
-    (*(t2Vector*)&(self)->unk_000[0]) = t2Vector(area->X + area->W * 0.5f, (area->Y + area->H) - textHeight);
-    (self)->unk_008 = area->Y;
-    (self)->unk_00C = area->Y + area->H - textHeight - arrowHeight;
-    (self)->unk_010 = area->X + area->W * 0.5f;
-    (self)->unk_014 = area->Y + arrowHeight;
-    (self)->unk_018 = (self)->unk_00C;
-    (self)->unk_01C = ((self)->unk_00C - (self)->unk_008 - arrowHeight) * 9.999999747378752e-05f;
-    (*(&(self)->unk_020)) = *area;
-    (self)->unk_030 = (*(&(self)->unk_020)).H * 9.999999747378752e-05f;
+    (*(t2Vector*)&unk_000[0]) = t2Vector(area->X + area->W * 0.5f, (area->Y + area->H) - textHeight);
+    unk_008 = area->Y;
+    unk_00C = area->Y + area->H - textHeight - arrowHeight;
+    unk_010 = area->X + area->W * 0.5f;
+    unk_014 = area->Y + arrowHeight;
+    unk_018 = unk_00C;
+    unk_01C = (unk_00C - unk_008 - arrowHeight) * 9.999999747378752e-05f;
+    (*(&unk_020)) = *area;
+    unk_030 = (*(&unk_020)).H * 9.999999747378752e-05f;
 }
 #endif
 
@@ -508,7 +508,7 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  *
  * @param rider  the rider the panel follows (the cBeing at +0x6C0 gives its AI index)
  */
-extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
+void cHUDRadar::renderTracker(cRider* rider)
 {
     if (D_004A2760 != 0)
         return;
@@ -526,7 +526,7 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
     float myPos = D_004C8BC8_EDA0[me].pos;
     int n = race->count;
     for (int i = 0; i < 6; i++) {
-        if (self->unk_034 != me)
+        if (unk_034 != me)
             D_004C8BC8_EDA0[i].relValid = 0;
         if (i < n) {
             float d = D_004C8BC8_EDA0[i].pos - myPos;
@@ -586,7 +586,7 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
     D_004A2764_EDA0->color2 = D_004C6878;
     D_004A2764_EDA0->scale = D_004A4EC0;
     ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
-    cFont_centertext(D_004A2764_EDA0, self->unk_000[0], self->unk_000[1], buf);
+    cFont_centertext(D_004A2764_EDA0, unk_000[0], unk_000[1], buf);
     D_004A2764_EDA0->SetScale(1.0f, 1.0f);
 
     sIcon_EDA0* arrow = &D_004C8C58_EDA0[4];
@@ -597,12 +597,12 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
             continue;
         float va = atex->v1;
         float vb = atex->v0;
-        float y = self->unk_00C;
+        float y = unk_00C;
         // retail scale literal is 0x3BA3D70B, one ulp above 0.005f
-        float ax = self->unk_010 + -D_004C8BC8_EDA0[i].rel * 0.0050000004f;
+        float ax = unk_010 + -D_004C8BC8_EDA0[i].rel * 0.0050000004f;
         float hw = arrow->w * 0.5f;
         if (d > hi) {
-            y = self->unk_008;
+            y = unk_008;
             va = atex->v0;
             vb = atex->v1;
         }
@@ -641,12 +641,12 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
     }
 
     sTex_EDA0* tex = D_004C8C58_EDA0[0].tex;
-    float barTop = self->unk_018;
-    float barBottom = self->unk_014;
+    float barTop = unk_018;
+    float barBottom = unk_014;
     if (*(float*)(course + 0x10) < hi)
-        barBottom += (hi - *(float*)(course + 0x10)) * self->unk_01C;
+        barBottom += (hi - *(float*)(course + 0x10)) * unk_01C;
     if (lo < 0.0f)
-        barTop += lo * self->unk_01C;
+        barTop += lo * unk_01C;
     verts[0].u = tex->u0;
     verts[0].v = tex->v0;
     verts[1].u = tex->u1;
@@ -656,22 +656,22 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
     verts[3].u = tex->u1;
     verts[3].v = tex->v1;
     t4Vector corner;
-    corner.x = self->unk_010 - 5.499532222747803f;
+    corner.x = unk_010 - 5.499532222747803f;
     corner.y = barTop;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[0].pos = corner;
-    corner.x = self->unk_010 + 5.499532222747803f;
+    corner.x = unk_010 + 5.499532222747803f;
     corner.y = barTop;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[1].pos = corner;
-    corner.x = self->unk_010 - 5.499532222747803f;
+    corner.x = unk_010 - 5.499532222747803f;
     corner.y = barBottom;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[2].pos = corner;
-    corner.x = self->unk_010 + 5.499532222747803f;
+    corner.x = unk_010 + 5.499532222747803f;
     corner.y = barBottom;
     corner.z = 0.0f;
     corner.w = 1.0f;
@@ -681,22 +681,22 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
     GrMan->RenderTriStrip(4, (tBxVertex*)verts, 0);
 
     float markY = barTop + (barBottom - barTop) * frac;
-    corner.x = self->unk_010 - 2.7497661113739014f;
+    corner.x = unk_010 - 2.7497661113739014f;
     corner.y = barTop;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[0].pos = corner;
-    corner.x = self->unk_010 + 2.7497661113739014f;
+    corner.x = unk_010 + 2.7497661113739014f;
     corner.y = barTop;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[1].pos = corner;
-    corner.x = self->unk_010 - 2.7497661113739014f;
+    corner.x = unk_010 - 2.7497661113739014f;
     corner.y = markY;
     corner.z = 0.0f;
     corner.w = 1.0f;
     verts[2].pos = corner;
-    corner.x = self->unk_010 + 2.7497661113739014f;
+    corner.x = unk_010 + 2.7497661113739014f;
     corner.y = markY;
     corner.z = 0.0f;
     corner.w = 1.0f;
@@ -715,7 +715,7 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
         verts[i].b = 0x80;
     }
 
-    float margin = 20.0f / self->unk_01C;
+    float margin = 20.0f / unk_01C;
     float lo2 = lo - margin;
     float hi2 = hi + margin;
     for (int i = 0; i < n; i++) {
@@ -724,8 +724,8 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
             continue;
         if (d > hi2)
             continue;
-        float x = self->unk_010;
-        float y = self->unk_018 - (d - lo) * self->unk_01C;
+        float x = unk_010;
+        float y = unk_018 - (d - lo) * unk_01C;
         int prim = 0xC;
         int icon = 1;
         if (me != i) {
@@ -744,18 +744,18 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
         float hh = iconEntry->h * 0.5f;
         float y0 = y - hh;
         float y1 = y + hh;
-        if (self->unk_018 <= y0)
+        if (unk_018 <= y0)
             continue;
-        if (y1 <= self->unk_014)
+        if (y1 <= unk_014)
             continue;
         float va = iconTexture->v0;
         float vb = iconTexture->v1;
-        if (y0 < self->unk_014) {
-            va = vb + (va - vb) * (y1 - self->unk_014) / (hh * 2.0f);
-            y0 = self->unk_014;
-        } else if (self->unk_018 < y1) {
-            vb = va + (vb - va) * (self->unk_018 - y0) / (hh * 2.0f);
-            y1 = self->unk_018;
+        if (y0 < unk_014) {
+            va = vb + (va - vb) * (y1 - unk_014) / (hh * 2.0f);
+            y0 = unk_014;
+        } else if (unk_018 < y1) {
+            vb = va + (vb - va) * (unk_018 - y0) / (hh * 2.0f);
+            y1 = unk_018;
         }
         verts[0].u = iconTexture->u0;
         verts[0].v = va;
@@ -807,23 +807,23 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
                 continue;
             sIcon_EDA0* iconEntry = &D_004C8C58_EDA0[markers[i].type + 5];
             sTex_EDA0* iconTexture = iconEntry->tex;
-            float y = self->unk_018 - (d - lo) * self->unk_01C;
+            float y = unk_018 - (d - lo) * unk_01C;
             float hw = iconEntry->w * 0.5f;
             float hh = iconEntry->h * 0.5f;
             float y0 = y - hh;
             float y1 = y + hh;
-            if (self->unk_018 <= y0)
+            if (unk_018 <= y0)
                 continue;
-            if (y1 <= self->unk_014)
+            if (y1 <= unk_014)
                 continue;
             float va = iconTexture->v0;
             float vb = iconTexture->v1;
-            if (y0 < self->unk_014) {
-                va = vb + (va - vb) * (y1 - self->unk_014) / iconEntry->h;
-                y0 = self->unk_014;
-            } else if (self->unk_018 < y1) {
-                vb = va + (vb - va) * (self->unk_018 - y0) / iconEntry->h;
-                y1 = self->unk_018;
+            if (y0 < unk_014) {
+                va = vb + (va - vb) * (y1 - unk_014) / iconEntry->h;
+                y0 = unk_014;
+            } else if (unk_018 < y1) {
+                vb = va + (vb - va) * (unk_018 - y0) / iconEntry->h;
+                y1 = unk_018;
             }
             verts[0].u = iconTexture->u0;
             verts[0].v = va;
@@ -833,22 +833,22 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
             verts[2].v = vb;
             verts[3].u = iconTexture->u1;
             verts[3].v = vb;
-            corner.x = self->unk_010 - hw;
+            corner.x = unk_010 - hw;
             corner.y = y0;
             corner.z = 0.0f;
             corner.w = 1.0f;
             verts[0].pos = corner;
-            corner.x = self->unk_010 + hw;
+            corner.x = unk_010 + hw;
             corner.y = y0;
             corner.z = 0.0f;
             corner.w = 1.0f;
             verts[1].pos = corner;
-            corner.x = self->unk_010 - hw;
+            corner.x = unk_010 - hw;
             corner.y = y1;
             corner.z = 0.0f;
             corner.w = 1.0f;
             verts[2].pos = corner;
-            corner.x = self->unk_010 + hw;
+            corner.x = unk_010 + hw;
             corner.y = y1;
             corner.z = 0.0f;
             corner.w = 1.0f;
@@ -860,7 +860,7 @@ extern "C" void cHUDRadar_renderTracker(cHUDRadar* self, cRider* rider)
     }
     ((cGfx_EDA0*)GrMan)->stateTop--;
     GrMan->PopView();
-    self->unk_034 = me;
+    unk_034 = me;
 }
 #endif
 
@@ -1029,7 +1029,7 @@ static inline float limitStep_FB40(float v, float prev, float lim)
  * @param right  nonzero: line at the rectangle's left edge with the icons to its right; 0: line at the right edge,
  *               icons to the left
  */
-extern "C" void cHUDRadar_renderSplitTracker(cHUDRadar* self, cRider* rider, int right)
+void cHUDRadar::renderSplitTracker(cRider* rider, int right)
 {
     if (D_004A2760 != 0)
         return;
@@ -1047,7 +1047,7 @@ extern "C" void cHUDRadar_renderSplitTracker(cHUDRadar* self, cRider* rider, int
     float myPos = D_004C8BC8_FB40[me].pos;
     int n = race->count;
     for (int i = 0; i < 6; i++) {
-        if (self->unk_034 != me)
+        if (unk_034 != me)
             D_004C8BC8_FB40[i].relValid = 0;
         if (i < n) {
             float d = D_004C8BC8_FB40[i].pos - myPos;
@@ -1069,9 +1069,9 @@ extern "C" void cHUDRadar_renderSplitTracker(cHUDRadar* self, cRider* rider, int
         verts[i].a = 0x80;
         verts[i].q = 1.0f;
     }
-    float x = self->unk_020.X;
+    float x = unk_020.X;
     if (right == 0)
-        x += self->unk_020.W;
+        x += unk_020.W;
     GrMan->PushView();
     ((cGfx_FB40*)GrMan)->PushState();
     *((cGfx_FB40*)GrMan)->stateTop = sDrawState_s_defaultDrawState_FB40;
@@ -1082,8 +1082,8 @@ extern "C" void cHUDRadar_renderSplitTracker(cHUDRadar* self, cRider* rider, int
     GrMan->SetView1(t4mat_Identity);
 
     sTex_FB40* tex = D_004C8C58_FB40[0].tex;
-    float top = self->unk_020.Y;
-    float bottom = top + self->unk_020.H;
+    float top = unk_020.Y;
+    float bottom = top + unk_020.H;
     float lo = myDist - 5000.0f;
     float hi = lo + 10000.0f;
     sPos_FB40 corner;
@@ -1129,7 +1129,7 @@ extern "C" void cHUDRadar_renderSplitTracker(cHUDRadar* self, cRider* rider, int
             continue;
         int prim = 0xC;
         int icon = 8;
-        float y = bottom - (d - lo) * self->unk_030;
+        float y = bottom - (d - lo) * unk_030;
         if (me != i) {
             char* otherRider = race->riders[i];
             if (((cBeing_FB40*)(otherRider + 0x6C0))->isHuman()) {
@@ -1241,7 +1241,7 @@ extern "C" void cHUDRadar_renderSplitTracker(cHUDRadar* self, cRider* rider, int
             sTex_FB40* iconTexture = iconEntry->tex;
             float hw = iconEntry->w * 0.5f;
             float hh = iconEntry->h * 0.5f;
-            float y = bottom - (d - lo) * self->unk_030;
+            float y = bottom - (d - lo) * unk_030;
             float y0 = y - hh;
             float y1 = y + hh;
             if (y0 <= top)
@@ -1323,7 +1323,7 @@ extern "C" void cHUDRadar_renderSplitTracker(cHUDRadar* self, cRider* rider, int
     }
     ((cGfx_FB40*)GrMan)->stateTop--;
     GrMan->PopView();
-    self->unk_034 = me;
+    unk_034 = me;
 }
 #endif
 
@@ -1639,31 +1639,31 @@ extern sRect_210940 D_004C8D08;
  * as mpScrollBar. Ends with cOVState_onCreateScreen; returns early when the screen cannot be added. "AgreementSlider"
  * is used without a null check.
  */
-extern "C" void cOVState_PRIVATEMESSAGE_onCreateScreen(cOVState* self)
+void cOVState::PRIVATEMESSAGE_onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_282ReadPrivateMessage_b), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_282ReadPrivateMessage_b), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen == 0)
         return;
     cUIScreen_playFrame(screen, 0, 0);
-    cUIObj_210940* fromText = (cUIObj_210940*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextFromX_b));
+    cUIObj_210940* fromText = (cUIObj_210940*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextFromX_b));
     if (fromText != 0)
     {
         fromText->setVisible(1);
         cBE_getInterface_Fv(SSXApp->BE, 7);
         cUIText_setAsciiString((cUIText*)fromText, cBENetworkInterface_networkOpt.strOpponentName);
     }
-    cUIScrollBar* scrollBar = (cUIScrollBar*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider_b));
+    cUIScrollBar* scrollBar = (cUIScrollBar*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_AgreementSlider_b));
     scrollBar->mAttr |= 1;
-    void* upArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow_b));
-    void* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow_b));
-    void* sliderOutline = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2_b));
+    void* upArrow = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ChatUpArrow_b));
+    void* downArrow = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ChatDownArrow_b));
+    void* sliderOutline = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_slideroutline2_b));
     scrollBar->mpUpArrow = (cUIThing*)upArrow;
     scrollBar->mpDownArrow = (cUIThing*)downArrow;
     scrollBar->mpHideOnEmpty = (cUIThing*)sliderOutline;
     scrollBar->meHideState = 2;
-    cUIObj_210940* chatScroll = (cUIObj_210940*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b));
+    cUIObj_210940* chatScroll = (cUIObj_210940*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_textScrollChat_b));
     if (chatScroll != 0)
     {
         *(int*)((char*)chatScroll + 0x74) |= 1;
@@ -1674,7 +1674,7 @@ extern "C" void cOVState_PRIVATEMESSAGE_onCreateScreen(cOVState* self)
         *(sRect_210940*)((char*)chatScroll + 0xA8) = D_004C8D08;
         *(char**)((char*)chatScroll + 0xB8) = ((char*)scrollBar);
     }
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
 }
 #endif
 
@@ -1698,14 +1698,14 @@ extern "C" void cOVState_PRIVATEMESSAGE_openKeyboard(void* self, int a1, char* a
  * @param ok  nonzero on the first transition
  * @return 1 (the transition is done)
  */
-extern "C" int cOVState_PRIVATEMESSAGE_onGainTransition(void* self, int ok)
+int cOVState::PRIVATEMESSAGE_onGainTransition(int ok)
 {
     if (ok != 0) {
-        char* name = (char*)self + 0x9C;
+        char* name = (char*)this + 0x9C;
         if (cGameComm_getQueuedChat(cGameComm_mGameComm, name, 65) != 0) {
-            cOVState_PRIVATEMESSAGE_addChatLine((cOVState*)self, name, 0);
+            ((cOVState*)this)->PRIVATEMESSAGE_addChatLine(name, 0);
         } else {
-            cOVState_PRIVATEMESSAGE_openKeyboard(self, 0, str_empty_e, str_empty_e, 0, 0, 61);
+            cOVState_PRIVATEMESSAGE_openKeyboard(this, 0, str_empty_e, str_empty_e, 0, 0, 61);
         }
     }
     return 1;
@@ -1740,9 +1740,9 @@ extern char str_colon_sp_b[];
  * @param name  the message text
  * @param ownMessage  nonzero for our own message, 0 for the opponent's
  */
-extern "C" void cOVState_PRIVATEMESSAGE_addChatLine(cOVState* self, char* name, int ownMessage)
+void cOVState::PRIVATEMESSAGE_addChatLine(char* name, int ownMessage)
 {
-    cUITextScroll* obj = (cUITextScroll*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat_b)));
+    cUITextScroll* obj = (cUITextScroll*)((char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_textScrollChat_b)));
     if (((char*)obj) == 0) {
         return;
     }
@@ -1786,21 +1786,21 @@ extern "C" void cOVState_PRIVATEMESSAGE_addChatLine(cOVState* self, char* name, 
  * mPendingDelete. While the screen exists it then reads an incoming chat packet into +0x9C (cGameComm_getQueuedChat, up to 65
  * bytes) and appends it as the opponent's line (cOVState_PRIVATEMESSAGE_addChatLine).
  */
-extern "C" void cOVState_PRIVATEMESSAGE_onUpdate(cOVState* self)
+void cOVState::PRIVATEMESSAGE_onUpdate()
 {
-    cOVState_onUpdate(self);
+    cOVState_onUpdate(this);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
-            cUIStateStack_popToState(&self->mpEngine->mStateStack);
-            self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
+            cUIStateStack_popToState(&mpEngine->mStateStack);
+            mAttrState = (mAttrState & ~0x3F00) | 0x780;
         }
     }
-    if ((int)self->mpScreen != 0) {
-        char* name = (char*)self + 0x9C;
+    if ((int)mpScreen != 0) {
+        char* name = (char*)this + 0x9C;
         if (cGameComm_getQueuedChat(cGameComm_mGameComm, name, 65) != 0) {
-            cOVState_PRIVATEMESSAGE_addChatLine(self, name, 0);
+            PRIVATEMESSAGE_addChatLine(name, 0);
         }
     }
 }
@@ -1815,11 +1815,11 @@ INCLUDE_ASM("fe/ovstatetrophy", cOVState_PRIVATEMESSAGE_onPopupEvent);
  * @param popup  the popup that sent the event
  * @param event  the event id; only kONPOPUPDESTROY is handled
  */
-extern "C" void cOVState_PRIVATEMESSAGE_onPopupEvent(void* self, int popup, int event)
+void cOVState::PRIVATEMESSAGE_onPopupEvent(int popup, int event)
 {
     if (event == cUIState::kONPOPUPDESTROY) {
-        if (popup == *(int*)((char*)self + 0xe0)) {
-            *(int*)((char*)self + 0xe0) = 0;
+        if (popup == *(int*)((char*)this + 0xe0)) {
+            *(int*)((char*)this + 0xe0) = 0;
         }
     }
 }
@@ -1850,38 +1850,38 @@ extern "C" int strlen(const char* s);
  * @param item  the widget (not read)
  * @param key  the event id
  */
-extern "C" void cOVState_PRIVATEMESSAGE_onWidgetEvent(cOVState* self, void* item, unsigned int key)
+void cOVState::PRIVATEMESSAGE_onWidgetEvent(void* item, unsigned int key)
 {
-    if ((int)self->mpScreen == 0) {
+    if ((int)mpScreen == 0) {
         return;
     }
     switch (key) {
     case cUIState::kONPREV:
-        if (*(int*)((char*)self + 0xE0) == 0) {
-            cUIStateStack_pop_r(&self->mpEngine->mStateStack, 1);
-            self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
+        if (*(int*)((char*)this + 0xE0) == 0) {
+            cUIStateStack_pop_r(&mpEngine->mStateStack, 1);
+            mAttrState = (mAttrState & ~0x3F00) | 0x780;
         }
         break;
     case cUIState::kONNEXT:
-        if (*(int*)((char*)self + 0xE0) == 0) {
-            cOVState_PRIVATEMESSAGE_openKeyboard(self, 0, str_empty_e, str_empty_e, 0, 0, 61);
-            cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 75, 1, 2);
+        if (*(int*)((char*)this + 0xE0) == 0) {
+            PRIVATEMESSAGE_openKeyboard(0, str_empty_e, str_empty_e, 0, 0, 61);
+            cKeyboardPopup_setIncludeKey(*(void**)((char*)this + 0xE0), 75, 1, 2);
         }
         break;
     case cUIState::kONKEYBOARDEND: {
-        char* name = (char*)self + 0x9C;
+        char* name = (char*)this + 0x9C;
         if (cGameComm_getQueuedChat(cGameComm_mGameComm, name, 65) != 0) {
-            cOVState_PRIVATEMESSAGE_addChatLine(self, name, 0);
+            PRIVATEMESSAGE_addChatLine(name, 0);
         }
-        char* typedText = *(char**)((char*)self + 0xE0) + 0x74;
+        char* typedText = *(char**)((char*)this + 0xE0) + 0x74;
         if (strlen(typedText) != 0) {
             cGameComm_sendChat(cGameComm_mGameComm, typedText);
-            cOVState_PRIVATEMESSAGE_addChatLine(self, typedText, 1);
+            PRIVATEMESSAGE_addChatLine(typedText, 1);
         }
         break;
     }
     default:
-        cOVState_onWidgetEvent(self);
+        cOVState_onWidgetEvent(this);
         break;
     }
 }
@@ -1907,12 +1907,12 @@ extern "C" void cKeyboardPopup_setInputText(void* p, char* a);
  * @param miscData  the popup's miMiscData
  * @param maxChars  the text length limit
  */
-extern "C" void cOVState_PRIVATEMESSAGE_openKeyboard(void* self, int textObj, char* staticText, char* inputText, int password, int miscData,
-        int maxChars)
+void cOVState::PRIVATEMESSAGE_openKeyboard(int textObj, char* staticText, char* inputText, int password, int miscData,
+                                           int maxChars)
 {
-    cOVState_PRIVATEMESSAGE_createKeyboard((cOVState*)self, textObj, password, miscData, maxChars);
-    cKeyboardPopup_setStatic2(*(void**)((char*)self + 0xE0), staticText);
-    cKeyboardPopup_setInputText(*(void**)((char*)self + 0xE0), inputText);
+    ((cOVState*)this)->PRIVATEMESSAGE_createKeyboard(textObj, password, miscData, maxChars);
+    cKeyboardPopup_setStatic2(*(void**)((char*)this + 0xE0), staticText);
+    cKeyboardPopup_setInputText(*(void**)((char*)this + 0xE0), inputText);
 }
 #endif
 
@@ -1941,18 +1941,18 @@ extern char str_cKeyboardPopup_b[];
  * @param miscData  the popup's miMiscData
  * @param maxChars  the text length limit
  */
-extern "C" void cOVState_PRIVATEMESSAGE_createKeyboard(cOVState* self, int textObj, int password, int miscData, int maxChars)
+void cOVState::PRIVATEMESSAGE_createKeyboard(int textObj, int password, int miscData, int maxChars)
 {
-    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0), self->mpEngine, self, password, 0xF);
-    *(void**)((char*)self + 0xE0) = w;
-    cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, w);
-    *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x18) = miscData;
-    cKeyboardPopup_setMaxCharacters(*(void**)((char*)self + 0xE0), maxChars);
-    *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x43C) = 0;
-    cKeyboardPopup_setIncludeKey(*(void**)((char*)self + 0xE0), 75, 1, 2);
-    cKeyboardPopup_setIncludeQuickKeyRow(*(void**)((char*)self + 0xE0), 1);
-    *(int*)((char*)*(void**)((char*)self + 0xE0) + 0x440) = 1;
-    *(int*)((char*)self + 0xDC) = textObj;
+    void* w = cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup_b, 0x100, 0), mpEngine, this, password, 0xF);
+    *(void**)((char*)this + 0xE0) = w;
+    cUIStateStack_pushPopup((char*)*(void**)((char*)*(void**)((char*)mpScreen + 0xD0) + 0x10) + 0x18, w);
+    *(int*)((char*)*(void**)((char*)this + 0xE0) + 0x18) = miscData;
+    cKeyboardPopup_setMaxCharacters(*(void**)((char*)this + 0xE0), maxChars);
+    *(int*)((char*)*(void**)((char*)this + 0xE0) + 0x43C) = 0;
+    cKeyboardPopup_setIncludeKey(*(void**)((char*)this + 0xE0), 75, 1, 2);
+    cKeyboardPopup_setIncludeQuickKeyRow(*(void**)((char*)this + 0xE0), 1);
+    *(int*)((char*)*(void**)((char*)this + 0xE0) + 0x440) = 1;
+    *(int*)((char*)this + 0xDC) = textObj;
 }
 #endif
 

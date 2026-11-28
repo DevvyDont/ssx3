@@ -177,7 +177,8 @@ struct cUIState : public cListNode {
         __asm__("cUIState_onWidgetListBox__FPv");            // 22
     virtual void* getData(int msg)
         __asm__("cUIState_getData__FPv");                                                   // 23
-    virtual int handleEvent(int msg, void* pParam);                                   // 24
+    virtual int handleEvent(int msg, void* pParam)
+        __asm__("cUIState_handleEvent__FPv");                                   // 24
 
     // Methods bound to their retail symbols by asm labels.
     void* cUIState1(int engine, int parentState) __asm__("cUIState_cUIState1");

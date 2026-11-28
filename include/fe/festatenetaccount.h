@@ -43,6 +43,10 @@
 struct cUIThing;
 struct cUIText;
 
+struct cFEStateNetHelpPopup;
+struct cScreenPopup;
+struct cUIState;
+
 struct cFEUseExistingAccount : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEUseExistingAccount_vtbl (vtables.tsv; 32 slots), stored by cFEUseExistingAccount_cFEUseExistingAccount
@@ -92,6 +96,18 @@ struct cFEUseExistingAccount : public cFEStateNet {
         __asm__("cFEUseExistingAccount_onWidgetMenu");
     virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEUseExistingAccount_onPopupEvent");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEUseExistingAccount_onWidgetCreate");
+    bool checkPasswordEntered() __asm__("cFEUseExistingAccount_checkPasswordEntered");
+    bool checkAccountNameEntered() __asm__("cFEUseExistingAccount_checkAccountNameEntered");
+    int checkLoginFields() __asm__("cFEUseExistingAccount_checkLoginFields");
+    bool checkEmailEntered() __asm__("cFEUseExistingAccount_checkEmailEntered");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEUseExistingAccount_fillHelpPopup");
+    void onEmailEntryPopupEvent(cScreenPopup* popup, int event) __asm__("cFEUseExistingAccount_onEmailEntryPopupEvent");
+    void onVerifyingPopupEvent(cUIState* popup, int event) __asm__("cFEUseExistingAccount_onVerifyingPopupEvent");
+    void onAccountMemPopupEvent(cUIState* popup, int kind) __asm__("cFEUseExistingAccount_onAccountMemPopupEvent");
+    void onSaveAccountPopupEvent(cUIState* popup, int kind) __asm__("cFEUseExistingAccount_onSaveAccountPopupEvent");
+    void handleKeyboardText() __asm__("cFEUseExistingAccount_handleKeyboardText");
+    int onNetEvent(int id, void* data) __asm__("cFEUseExistingAccount_onNetEvent");
+    int isOnlineState() __asm__("cFEUseExistingAccount_isOnlineState__FPv");
 };
 
 CHECK_OFFSET(cFEUseExistingAccount, unk_6D0, 0x6D0);
@@ -100,6 +116,8 @@ CHECK_OFFSET(cFEUseExistingAccount, miRequest, 0x6D8);
 CHECK_OFFSET(cFEUseExistingAccount, mszEmail, 0x6DC);
 CHECK_OFFSET(cFEUseExistingAccount, mpTextForgotPassword, 0x6E0);
 CHECK_SIZE(cFEUseExistingAccount, 0x6E4);
+
+struct cFEStateNetHelpPopup;
 
 struct cFEStateSelectPersona : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
@@ -137,6 +155,14 @@ struct cFEStateSelectPersona : public cFEStateNet {
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event) __asm__("cFEStateSelectPersona_onWidgetEvent");
     virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateSelectPersona_onPopupEvent");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateSelectPersona_onWidgetCreate");
+    void createPersona(const char* name) __asm__("cFEStateSelectPersona_createPersona");
+    void fillPersonaMenu(cUIText* text) __asm__("cFEStateSelectPersona_fillPersonaMenu");
+    void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateSelectPersona_fillHelpPopup");
+    void onMessengerErrorPopupEvent(void* popup, int event) __asm__("cFEStateSelectPersona_onMessengerErrorPopupEvent");
+    void onDeletePersonaPopupEvent(void* popup, int event) __asm__("cFEStateSelectPersona_onDeletePersonaPopupEvent");
+    int onNetEvent(int msgId, void* data) __asm__("cFEStateSelectPersona_onNetEvent");
+    void handlePersonaError(void* msgPtr) __asm__("cFEStateSelectPersona_handlePersonaError");
+    int isOnlineState() __asm__("cFEStateSelectPersona_isOnlineState__FPv");
 };
 
 CHECK_OFFSET(cFEStateSelectPersona, mbExistingPersona, 0x6D0);

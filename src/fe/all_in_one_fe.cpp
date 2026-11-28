@@ -282,11 +282,11 @@ extern char cOVState_vtbl[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00474B80.
  *
- * @param ovState  the object being destroyed
  */
-extern "C" void cOVState_EMPTY__cOVState_EMPTY(cOVState* ovState) {
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    cUIState__cUIState_a(ovState);
+void cOVState::EMPTY()
+{
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    cUIState__cUIState_a(this);
 }
 #endif
 
@@ -930,11 +930,11 @@ extern char cOVState_vtbl[];
  * g++ delete flags (left untouched in the second argument register) have bit 0 set. The class tears down nothing of its
  * own. It is the destructor slot (+0xC) of D_00473ED8.
  *
- * @param ovState  the object being destroyed
  */
-extern "C" void cOVState_PEAKCHAL_RESULTS__cOVState_PEAKCHAL_RESULTS(cOVState* ovState) {
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    cUIState__cUIState_a(ovState);
+void cOVState::PEAKCHAL_RESULTS()
+{
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    cUIState__cUIState_a(this);
 }
 #endif
 
@@ -956,22 +956,22 @@ extern unsigned short str_sp_b[];
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 22 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param ovState  the object to construct
  * @param engine  the UI engine, passed through to cUIState_cUIState
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *cOVState_PEAKCHAL_RESULTS_cOVState_PEAKCHAL_RESULTS(cOVState* ovState, int engine, int overlayId) {
-    cUIState_cUIState_CE28(ovState);
-    ovState->mOVID = overlayId;
-    ovState->mDoneTransition = 0;
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    ovState->mAllowPauseMenu = 0;
-    ovState->mRemovePDA = 0;
+void * cOVState::PEAKCHAL_RESULTS_cOVState_PEAKCHAL_RESULTS(int engine, int overlayId)
+{
+    cUIState_cUIState_CE28(this);
+    mOVID = overlayId;
+    mDoneTransition = 0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, ovState) = (void**)D_00473ED8;
-    *(unsigned short*)ovState->mszChatBuff = chatInit;
-    return ((void*)ovState);
+    VPTR_OF(cListNode, this) = (void**)D_00473ED8;
+    *(unsigned short*)mszChatBuff = chatInit;
+    return ((void*)this);
 }
 #endif
 
@@ -2572,7 +2572,8 @@ extern "C" void cFont_text(void*, float, float, char*);
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos
  * @param animFrame  the counter's animation time; below 0.44 it pulses
  */
-extern "C" void cOVStateHUD1P_renderCollectibles(cOVStateHUD1P* self, char* obj, cRider* rider, int x, float animFrame) {
+void cOVStateHUD1P::renderCollectibles(char* obj, cRider* rider, int x, float animFrame)
+{
     V2_F9B0 scale;
     V2_F9B0 drawPos;
     V4_F9B0 elemPos;
@@ -2592,21 +2593,21 @@ extern "C" void cOVStateHUD1P_renderCollectibles(cOVStateHUD1P* self, char* obj,
             pulseScale = cSinCosTable_gSinCosTable[(int)(pulsePhase * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.19996199011802673f * (1.0f - pulsePhase * pulsePhase) + 1.0f;
         }
         tHUDDef_getPos(obj + 0x804, &elemPos);
-        tHUDDef_getSize(obj + 0x804, &size, (int)self->mpGenTexElem[5]);
+        tHUDDef_getSize(obj + 0x804, &size, (int)mpGenTexElem[5]);
         tHUDDef_getScale(obj + 0x804, &sc);
         size.x *= pulseScale;
         size.y *= pulseScale;
         sc.x *= pulseScale;
         sc.y *= pulseScale;
-        cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &size, &scale, obj[0x824], obj[0x825], x);
+        cOVStateHUD1P_calcElemPos(((char*)this), &drawPos, &elemPos, &size, &scale, obj[0x824], obj[0x825], x);
         int* w = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
         *w = (*w & ~0x3E0) | ((obj[0x826] << 5) & 0x3E0);
         col.x = 1.0f;
         col.y = 1.0f;
         col.z = 1.0f;
         col.w = 1.0f;
-        cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpGenTexElem[5], &drawPos, &size, &scale, &col);
-        cFont* tx = self->mpHUDFont;
+        cOVStateHUD1P_renderBitmap(((char*)this), (int)mpGenTexElem[5], &drawPos, &size, &scale, &col);
+        cFont* tx = mpHUDFont;
         drawPos.x += size.x;
         drawPos.y += (size.y - (float)tx->MaxCharHeight * tx->BaseScale[1] * sc.y) * 0.5f;
         if (animFrame > 0.4399542808532715f) {
@@ -2614,14 +2615,14 @@ extern "C" void cOVStateHUD1P_renderCollectibles(cOVStateHUD1P* self, char* obj,
         } else {
             col = D_004C8648;
         }
-        cFont* tx2 = self->mpHUDFont;
+        cFont* tx2 = mpHUDFont;
         tx2->Scale[0] = tx2->BaseScale[0] * sc.x;
         tx2->Scale[1] = tx2->BaseScale[1] * sc.y;
-        *(V4_F9B0*)&self->mpHUDFont->Color[0] = col;
+        *(V4_F9B0*)&mpHUDFont->Color[0] = col;
         Obj_F9B0* being = (Obj_F9B0*)(&VPTR_AT(rider, sizeof(cRiderState)));
         sprintf(buf, str_pct_d_pct_d_b, cBEMissionInterface_getCurrentCollectForSection(iface, being->getAIIndex(), id), cBEMissionInterface_getTotalCollectForSection(iface, id));
-        cFont_text((char*)self->mpHUDFont, drawPos.x, drawPos.y, buf);
-        tx = (cFont*)((char*)self->mpHUDFont);
+        cFont_text((char*)mpHUDFont, drawPos.x, drawPos.y, buf);
+        tx = (cFont*)((char*)mpHUDFont);
         tx->Scale[0] = tx->BaseScale[0] * scale.x;
         tx->Scale[1] = tx->BaseScale[1] * scale.y;
     }
@@ -3663,20 +3664,20 @@ extern unsigned short str_sp_b[];
  * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
- * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE1(cOVState* ovState) {
-    cUIState_cUIState(ovState, 0);
-    ovState->mOVID = 0;
-    ovState->mDoneTransition = 0;
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    ovState->mAllowPauseMenu = 0;
-    ovState->mRemovePDA = 0;
+void * cOVState::PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE1()
+{
+    cUIState_cUIState(this, 0);
+    mOVID = 0;
+    mDoneTransition = 0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, ovState) = (void**)D_00473248;
-    *(unsigned short*)ovState->mszChatBuff = chatInit;
-    return ((void*)ovState);
+    VPTR_OF(cListNode, this) = (void**)D_00473248;
+    *(unsigned short*)mszChatBuff = chatInit;
+    return ((void*)this);
 }
 #endif
 
@@ -3698,22 +3699,22 @@ extern unsigned short str_sp_b[];
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 40 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param ovState  the object to construct
  * @param engine  the UI engine, passed through to cUIState_cUIState
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE(cOVState* ovState, int engine, int overlayId) {
-    cUIState_cUIState_1468(ovState);
-    ovState->mOVID = overlayId;
-    ovState->mDoneTransition = 0;
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    ovState->mAllowPauseMenu = 0;
-    ovState->mRemovePDA = 0;
+void * cOVState::PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE(int engine, int overlayId)
+{
+    cUIState_cUIState_1468(this);
+    mOVID = overlayId;
+    mDoneTransition = 0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, ovState) = (void**)D_00473248;
-    *(unsigned short*)ovState->mszChatBuff = chatInit;
-    return ((void*)ovState);
+    VPTR_OF(cListNode, this) = (void**)D_00473248;
+    *(unsigned short*)mszChatBuff = chatInit;
+    return ((void*)this);
 }
 #endif
 
@@ -3732,9 +3733,10 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* cOVState_PRIVATEMESSAGE__cOVState_PRIVATEMESSAGE(cOVState* self) {
-    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
-    return cUIState__cUIState_x(self);
+void* cOVState::PRIVATEMESSAGE()
+{
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    return cUIState__cUIState_x(this);
 }
 #endif
 
@@ -4673,9 +4675,10 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* cOVState_FREESTYLE_PREEVENT__cOVState_FREESTYLE_PREEVENT(cOVState* self) {
-    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
-    return cUIState__cUIState_x(self);
+void* cOVState::FREESTYLE_PREEVENT()
+{
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    return cUIState__cUIState_x(this);
 }
 #endif
 
@@ -4697,22 +4700,22 @@ extern unsigned short str_sp_b[];
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 9 inline with the
  * same steps; this out-of-line copy has no callers.
  *
- * @param ovState  the object to construct
  * @param engine  the UI engine, passed through to cUIState_cUIState
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *cOVState_FREESTYLE_PREEVENT_cOVState_FREESTYLE_PREEVENT(cOVState* ovState, int engine, int overlayId) {
-    cUIState_cUIState_1EA8(ovState);
-    ovState->mOVID = overlayId;
-    ovState->mDoneTransition = 0;
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    ovState->mAllowPauseMenu = 0;
-    ovState->mRemovePDA = 0;
+void * cOVState::FREESTYLE_PREEVENT_cOVState_FREESTYLE_PREEVENT(int engine, int overlayId)
+{
+    cUIState_cUIState_1EA8(this);
+    mOVID = overlayId;
+    mDoneTransition = 0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, ovState) = (void**)D_00472778;
-    *(unsigned short*)ovState->mszChatBuff = chatInit;
-    return ((void*)ovState);
+    VPTR_OF(cListNode, this) = (void**)D_00472778;
+    *(unsigned short*)mszChatBuff = chatInit;
+    return ((void*)this);
 }
 #endif
 
@@ -4731,9 +4734,10 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* cOVState_MULTI_PREEVENT__cOVState_MULTI_PREEVENT(cOVState* self) {
-    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
-    return cUIState__cUIState_x(self);
+void* cOVState::MULTI_PREEVENT()
+{
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    return cUIState__cUIState_x(this);
 }
 #endif
 
@@ -4755,22 +4759,22 @@ extern unsigned short str_sp_b[];
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 21 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param ovState  the object to construct
  * @param engine  the UI engine, passed through to cUIState_cUIState
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *cOVState_MULTI_PREEVENT_cOVState_MULTI_PREEVENT(cOVState* ovState, int engine, int overlayId) {
-    cUIState_cUIState_1F38(ovState);
-    ovState->mOVID = overlayId;
-    ovState->mDoneTransition = 0;
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    ovState->mAllowPauseMenu = 0;
-    ovState->mRemovePDA = 0;
+void * cOVState::MULTI_PREEVENT_cOVState_MULTI_PREEVENT(int engine, int overlayId)
+{
+    cUIState_cUIState_1F38(this);
+    mOVID = overlayId;
+    mDoneTransition = 0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, ovState) = (void**)D_004726A0;
-    *(unsigned short*)ovState->mszChatBuff = chatInit;
-    return ((void*)ovState);
+    VPTR_OF(cListNode, this) = (void**)D_004726A0;
+    *(unsigned short*)mszChatBuff = chatInit;
+    return ((void*)this);
 }
 #endif
 
@@ -4789,9 +4793,10 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* cOVState_CHALLENGE_PREEVENT__cOVState_CHALLENGE_PREEVENT(cOVState* self) {
-    VPTR_OF(cListNode, self) = (void**)cOVState_vtbl;
-    return cUIState__cUIState_x(self);
+void* cOVState::CHALLENGE_PREEVENT()
+{
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    return cUIState__cUIState_x(this);
 }
 #endif
 
@@ -4813,22 +4818,22 @@ extern unsigned short str_sp_b[];
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 20 inline with
  * the same steps; this out-of-line copy has no callers.
  *
- * @param ovState  the object to construct
  * @param engine  the UI engine, passed through to cUIState_cUIState
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *cOVState_CHALLENGE_PREEVENT_cOVState_CHALLENGE_PREEVENT(cOVState* ovState, int engine, int overlayId) {
-    cUIState_cUIState_1FC8(ovState);
-    ovState->mOVID = overlayId;
-    ovState->mDoneTransition = 0;
-    VPTR_OF(cListNode, ovState) = (void**)cOVState_vtbl;
-    ovState->mAllowPauseMenu = 0;
-    ovState->mRemovePDA = 0;
+void * cOVState::CHALLENGE_PREEVENT_cOVState_CHALLENGE_PREEVENT(int engine, int overlayId)
+{
+    cUIState_cUIState_1FC8(this);
+    mOVID = overlayId;
+    mDoneTransition = 0;
+    VPTR_OF(cListNode, this) = (void**)cOVState_vtbl;
+    mAllowPauseMenu = 0;
+    mRemovePDA = 0;
     unsigned short chatInit = str_sp_b[0];
-    VPTR_OF(cListNode, ovState) = (void**)D_004725C8;
-    *(unsigned short*)ovState->mszChatBuff = chatInit;
-    return ((void*)ovState);
+    VPTR_OF(cListNode, this) = (void**)D_004725C8;
+    *(unsigned short*)mszChatBuff = chatInit;
+    return ((void*)this);
 }
 #endif
 

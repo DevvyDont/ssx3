@@ -65,6 +65,8 @@ enum eBuddyRosterError {
     kBuddyRosterSelf = 3
 };
 
+struct BuddyMan;
+
 struct BuddyMan {
     char mServerName[0x40];             // 0x000 [U] connect (BuddyMan_connect) strcpy's its host argument (LobbyMan
                                         //       passes the "BUDDYSERVERNAME" tag); BuddyMan_clearConnectSettings clears byte 0
@@ -117,6 +119,66 @@ struct BuddyMan {
     void onrosterupdate(int* msg) __asm__("BuddyMan_onrosterupdate");
     void onReceiveMessage(BuddyApiMsgT* msg) __asm__("BuddyMan_onReceiveMessage");
     void onBuddySend() __asm__("BuddyMan_onBuddySend__FPv");
+    void BuddyFunctor_onconnect_invoke(void* message, int buddyMan) __asm__("BuddyMan_BuddyFunctor_onconnect_invoke");
+    void BuddyFunctor_onReceiveMessage_invoke(void* message, int buddyMan)
+        __asm__("BuddyMan_BuddyFunctor_onReceiveMessage_invoke");
+    void BuddyFunctor_onrosterupdate_invoke(void* message, int buddyMan)
+        __asm__("BuddyMan_BuddyFunctor_onrosterupdate_invoke");
+    void BuddyFunctor_onBuddyDelete_invoke(void* message, int buddyMan)
+        __asm__("BuddyMan_BuddyFunctor_onBuddyDelete_invoke");
+    void BuddyFunctor_onBuddyAdd_invoke(void* message, int buddyMan) __asm__("BuddyMan_BuddyFunctor_onBuddyAdd_invoke");
+    void BuddyFunctor_onBuddySend_invoke(void* message, BuddyMan* buddyMan)
+        __asm__("BuddyMan_BuddyFunctor_onBuddySend_invoke");
+    void clearConnectSettings() __asm__("BuddyMan_clearConnectSettings__FPv");
+    void deleteMessages() __asm__("BuddyMan_deleteMessages");
+    void connect(void* name_, int port, void* a3_, void* a4_, int a5_) __asm__("BuddyMan_connect");
+    void reconnect() __asm__("BuddyMan_reconnect");
+    void disconnect() __asm__("BuddyMan_disconnect");
+    void update() __asm__("BuddyMan_update");
+    void createBuddyApi(void* resourceName) __asm__("BuddyMan_createBuddyApi");
+    void destroyBuddyApi() __asm__("BuddyMan_destroyBuddyApi");
+    void storeMessage(char* name, char* text, char* date) __asm__("BuddyMan_storeMessage");
+    void moveToRosterList(int rawName, int kind, void* out) __asm__("BuddyMan_moveToRosterList");
+    int addRosterEntry(char* name, int kind, int* err, char* other) __asm__("BuddyMan_addRosterEntry");
+    int countNonTempEntries() __asm__("BuddyMan_countNonTempEntries");
+    int countTempEntries() __asm__("BuddyMan_countTempEntries");
+    int isBuddyByName(int name) __asm__("BuddyMan_isBuddyByName");
+    int isBuddy() __asm__("BuddyMan_isBuddy__FPv");
+    int isBlockedByName(int name) __asm__("BuddyMan_isBlockedByName");
+    int isBlocked() __asm__("BuddyMan_isBlocked__FPv");
+    int isTempEntry(int rosterIndex) __asm__("BuddyMan_isTempEntry");
+    int isTempEntryByName(int name) __asm__("BuddyMan_isTempEntryByName");
+    int findRosterEntry(int name) __asm__("BuddyMan_findRosterEntry");
+    int findRosterEntryNoCase(void** key) __asm__("BuddyMan_findRosterEntryNoCase");
+    int getNumRosterEntries() __asm__("BuddyMan_getNumRosterEntries");
+    void* getRosterEntry(int idx) __asm__("BuddyMan_getRosterEntry");
+    void* getBuddyEntry(int idx) __asm__("BuddyMan_getBuddyEntry");
+    void* getBlockedEntry(int idx) __asm__("BuddyMan_getBlockedEntry");
+    void sendMessage(const char* name, const char* messageText) __asm__("BuddyMan_sendMessage");
+    void setPresence(int presenceState, int locationId, int detail1, int detail2, int detail3)
+        __asm__("BuddyMan_setPresence");
+    int checkPresenceState(int sel) __asm__("BuddyMan_checkPresenceState");
+    int getNumMessages() __asm__("BuddyMan_getNumMessages");
+    int countMessagesFrom(int idx) __asm__("BuddyMan_countMessagesFrom");
+    int countMessagesFromName(int name) __asm__("BuddyMan_countMessagesFromName");
+    bool hasMessageFrom(void* name) __asm__("BuddyMan_hasMessageFrom");
+    bool hasAnyMessage(void** nameStr) __asm__("BuddyMan_hasAnyMessage");
+    void addChallenge(char* name, int locationId, int gameMode, int gameEvent, int ranked, int multipliers,
+                      int powerUps, int numberAI, int pointIcons, char* messageText, int statField2, int statTotal,
+                      int statField6, int rank)
+        __asm__("BuddyMan_addChallenge");
+    int findChallenge(void* name) __asm__("BuddyMan_findChallenge");
+    void removeTempEntry(int idx) __asm__("BuddyMan_removeTempEntry");
+    void declineChallenge(void* name) __asm__("BuddyMan_declineChallenge");
+    bool hasChallengeFrom(char* name) __asm__("BuddyMan_hasChallengeFrom");
+    bool hasChallengeFromString(void** name) __asm__("BuddyMan_hasChallengeFromString");
+    void* getChallengeFrom(void* name) __asm__("BuddyMan_getChallengeFrom");
+    void* getChallenge(unsigned int i) __asm__("BuddyMan_getChallenge");
+    bool isInSameGame(int idx) __asm__("BuddyMan_isInSameGame");
+    int isInSameGameByName(int name) __asm__("BuddyMan_isInSameGameByName");
+    void removeMessage(void* obj) __asm__("BuddyMan_removeMessage");
+    void removeMessageAt(int idx) __asm__("BuddyMan_removeMessageAt");
+    void* getMessage(unsigned int i) __asm__("BuddyMan_getMessage");
 };
 
 CHECK_OFFSET(BuddyMan, mServerName, 0x000);

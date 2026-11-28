@@ -447,7 +447,7 @@ void cPlaybackMan::saveFrame()
         desc.Type = one;
         desc.Highlights = 0;
         desc.Chapter = 0;
-        cReplay_saveFrame1(Game->Replay, &SaveFramePtr, &desc);
+        Game->Replay->saveFrame1(&SaveFramePtr, &desc);
         SaveFrame = one;
     }
 }
@@ -1259,11 +1259,11 @@ extern "C" void cReplay_saveFrame(cReplay* self, cBxReplayFrame* out);
  * @param out  the replay frame to fill
  * @param src  the 4-byte frame type descriptor
  */
-extern "C" void cReplay_saveFrame1(cReplay* self, cReplayFrame* out, tReplayFrameType* src)
+void cReplay::saveFrame1(cReplayFrame* out, tReplayFrameType* src)
 {
     out->FrameType = *src;
-    self->saveFrame((cBxReplayFrame*)out);
-    out->FrameStartTick = self->RecordTick;
+    saveFrame((cBxReplayFrame*)out);
+    out->FrameStartTick = RecordTick;
 }
 #endif
 

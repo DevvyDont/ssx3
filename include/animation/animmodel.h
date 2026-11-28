@@ -120,6 +120,9 @@ struct cAnimModel {
     void writeToReplayFrame(cBxReplayFrame* data) __asm__("cAnimModel_writeToReplayFrame");
     void init(int count, int maxVariants) __asm__("cAnimModel_init");
     void addTextureFile(int item) __asm__("cAnimModel_addTextureFile__FPvi");
+    void enablePart(int i, int channel) __asm__("cAnimModel_enablePart");
+    void disablePart(int i, int channel) __asm__("cAnimModel_disablePart");
+    void disableAllParts() __asm__("cAnimModel_disableAllParts");
 };
 
 CHECK_OFFSET(sAnimModelPart, mask, 0x10);

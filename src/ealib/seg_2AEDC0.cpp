@@ -36,7 +36,7 @@ extern "C" RCMP_AV_PLAYER* RCMP_AV_PLAYER_AV_PLAYER(RCMP_AV_PLAYER* self, char* 
                                          int noAudio)
 {
     self->mStreamer.m_Streamer = 0;
-    RCMP_AV_PLAYER_Init(self, videoSource, 0, videoBufferSize, 0, 0, 0, sourceType, noAudio);
+    self->Init(videoSource, 0, videoBufferSize, 0, 0, 0, sourceType, noAudio);
     return self;
 }
 #endif
@@ -65,12 +65,12 @@ extern "C" void RCMP_AV_PLAYER_Init(RCMP_AV_PLAYER* self, char* videoSource, int
  * @param noAudio  nonzero to play without sound
  * @return self
  */
-extern "C" RCMP_AV_PLAYER* RCMP_AV_PLAYER_AV_PLAYER1(RCMP_AV_PLAYER* self, char* videoSource, int videoBufferSize,
-                                         char* audioSource, int audioBufferSize, int sourceType, int noAudio)
+RCMP_AV_PLAYER* RCMP_AV_PLAYER::AV_PLAYER1(char* videoSource, int videoBufferSize, char* audioSource,
+                                           int audioBufferSize, int sourceType, int noAudio)
 {
-    self->mStreamer.m_Streamer = 0;
-    RCMP_AV_PLAYER_Init(self, videoSource, 0, videoBufferSize, audioSource, 0, audioBufferSize, sourceType, noAudio);
-    return self;
+    mStreamer.m_Streamer = 0;
+    Init(videoSource, 0, videoBufferSize, audioSource, 0, audioBufferSize, sourceType, noAudio);
+    return this;
 }
 #endif
 
@@ -99,14 +99,14 @@ extern "C" void RCMP_AV_PLAYER_Init(RCMP_AV_PLAYER* self, char* videoSource, int
  * @param noAudio  nonzero to play without sound
  * @return self
  */
-extern "C" RCMP_AV_PLAYER* RCMP_AV_PLAYER_AV_PLAYER2(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize,
-                                         int videoBufferSize, char* audioSource, int audioDataSize,
-                                         int audioBufferSize, int sourceType, int noAudio)
+RCMP_AV_PLAYER* RCMP_AV_PLAYER::AV_PLAYER2(char* videoSource, int videoDataSize, int videoBufferSize,
+                                           char* audioSource, int audioDataSize, int audioBufferSize, int sourceType,
+                                           int noAudio)
 {
-    self->mStreamer.m_Streamer = 0;
-    RCMP_AV_PLAYER_Init(self, videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize,
+    mStreamer.m_Streamer = 0;
+    Init(videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize,
                   sourceType, noAudio);
-    return self;
+    return this;
 }
 #endif
 //100%
@@ -129,14 +129,13 @@ extern "C" void RCMP_AV_PLAYER_Init(RCMP_AV_PLAYER* self, char* videoSource, int
  * @param noAudio  nonzero to play without sound
  * @return self
  */
-extern "C" RCMP_AV_PLAYER* RCMP_AV_PLAYER_AV_PLAYER3(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize,
-                                         int videoBufferSize, char* audioSource, int audioDataSize,
-                                         int audioBufferSize, int noAudio)
+RCMP_AV_PLAYER* RCMP_AV_PLAYER::AV_PLAYER3(char* videoSource, int videoDataSize, int videoBufferSize,
+                                           char* audioSource, int audioDataSize, int audioBufferSize, int noAudio)
 {
-    self->mStreamer.m_Streamer = 0;
-    RCMP_AV_PLAYER_Init(self, videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize, 2,
+    mStreamer.m_Streamer = 0;
+    Init(videoSource, videoDataSize, videoBufferSize, audioSource, audioDataSize, audioBufferSize, 2,
                   noAudio);
-    return self;
+    return this;
 }
 #endif
 
@@ -185,83 +184,83 @@ static inline bool wsCanAlloc_ADEC8(RCMP_RCMP_SYSTEM* a)
  * @param sourceType  source type: 0 stream, 1 async load, 2 memory
  * @param noAudio  nonzero to play without sound
  */
-extern "C" void RCMP_AV_PLAYER_Init(RCMP_AV_PLAYER* self, char* videoSource, int videoDataSize, int videoBufferSize,
-                              char* audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio)
+void RCMP_AV_PLAYER::Init(char* videoSource, int videoDataSize, int videoBufferSize, char* audioSource,
+                          int audioDataSize, int audioBufferSize, int sourceType, int noAudio)
 {
     if (SNDSYS_isInstalled() == 0) {
         noAudio = 1;
     }
-    MEM_fill(self, 0, sizeof(RCMP_AV_PLAYER));
-    self->mSourceType = sourceType;
-    self->mbNoAudio = noAudio;
-    self->mpVideoFileData = 0;
-    self->mpAudioFileData = 0;
-    self->mVideoLoad = 0;
-    self->mAudioLoad = 0;
-    self->mCurrentFrameNumber = 0;
-    self->mpTimer = 0;
-    self->mpDecoder = 0;
-    self->mpAudio = 0;
-    self->mSubtitles = 0;
-    self->mCurrFrame = 0;
-    self->mVideoSource = videoSource;
-    self->mAudioSource = audioSource;
+    MEM_fill(this, 0, sizeof(RCMP_AV_PLAYER));
+    mSourceType = sourceType;
+    mbNoAudio = noAudio;
+    mpVideoFileData = 0;
+    mpAudioFileData = 0;
+    mVideoLoad = 0;
+    mAudioLoad = 0;
+    mCurrentFrameNumber = 0;
+    mpTimer = 0;
+    mpDecoder = 0;
+    mpAudio = 0;
+    mSubtitles = 0;
+    mCurrFrame = 0;
+    mVideoSource = videoSource;
+    mAudioSource = audioSource;
     if (!wsCanAlloc_ADEC8(&RCMP_rcmp_sys)) {
         DEBUG_breakIfEnabled();
         return;
     }
     if (audioSource != 0) {
-        self->mbSeparateAudio = 1;
-        self->mpVideoStreamBuffer =
+        mbSeparateAudio = 1;
+        mpVideoStreamBuffer =
             RCMP_rcmp_sys.AllocMemFunc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
-        self->mpAudioStreamBuffer =
+        mpAudioStreamBuffer =
             RCMP_rcmp_sys.AllocMemFunc(str_AV_AudioStreamBuffer, audioBufferSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
-        self->mVideoStream = STREAM_create(2, 2, 1, self->mpVideoStreamBuffer, videoBufferSize);
-        self->mAudioStream = STREAM_create(2, 2, 1, self->mpAudioStreamBuffer, audioBufferSize);
-        STREAM_setpriority(self->mAudioStream, 152, 52);
-        STREAM_setpriority(self->mVideoStream, 152, 52);
-        STREAM_setfilter(self->mVideoStream, 1, 0xFF, 77, 1);
-        STREAM_setfilter(self->mVideoStream, 2, 0, 0, -2);
-        if (self->mbNoAudio == 0) {
-            STREAM_setfilter(self->mAudioStream, 1, 0xFFFF, 17235, 1);
+        mVideoStream = STREAM_create(2, 2, 1, mpVideoStreamBuffer, videoBufferSize);
+        mAudioStream = STREAM_create(2, 2, 1, mpAudioStreamBuffer, audioBufferSize);
+        STREAM_setpriority(mAudioStream, 152, 52);
+        STREAM_setpriority(mVideoStream, 152, 52);
+        STREAM_setfilter(mVideoStream, 1, 0xFF, 77, 1);
+        STREAM_setfilter(mVideoStream, 2, 0, 0, -2);
+        if (mbNoAudio == 0) {
+            STREAM_setfilter(mAudioStream, 1, 0xFFFF, 17235, 1);
         } else {
-            STREAM_setfilter(self->mAudioStream, 1, 0xFFFF, 17235, -1);
+            STREAM_setfilter(mAudioStream, 1, 0xFFFF, 17235, -1);
         }
-        STREAM_setfilter(self->mAudioStream, 2, 0, 0, -2);
-        int type = self->mSourceType;
+        STREAM_setfilter(mAudioStream, 2, 0, 0, -2);
+        int type = mSourceType;
         if (type == 1) {
-            self->mAudioLoad = ASYNCFILE_load(audioSource, RCMP_rcmp_sys.m_DefaultMemDir);
-            self->mVideoLoad = ASYNCFILE_load(videoSource, RCMP_rcmp_sys.m_DefaultMemDir);
+            mAudioLoad = ASYNCFILE_load(audioSource, RCMP_rcmp_sys.m_DefaultMemDir);
+            mVideoLoad = ASYNCFILE_load(videoSource, RCMP_rcmp_sys.m_DefaultMemDir);
         } else if (type == 0) {
-            self->mAudioQueue = STREAM_queuefile(self->mAudioStream, audioSource, 0, 0);
-            self->mVideoQueue = STREAM_queuefile(self->mVideoStream, videoSource, 0, 0);
+            mAudioQueue = STREAM_queuefile(mAudioStream, audioSource, 0, 0);
+            mVideoQueue = STREAM_queuefile(mVideoStream, videoSource, 0, 0);
         } else if (type == 2) {
-            self->mVideoQueue = STREAM_queuemem(self->mVideoStream, self->mVideoSource, videoDataSize, 0);
-            self->mAudioQueue = STREAM_queuemem(self->mAudioStream, self->mAudioSource, audioDataSize, 0);
+            mVideoQueue = STREAM_queuemem(mVideoStream, mVideoSource, videoDataSize, 0);
+            mAudioQueue = STREAM_queuemem(mAudioStream, mAudioSource, audioDataSize, 0);
         }
     } else {
-        self->mbSeparateAudio = 0;
-        self->mpVideoStreamBuffer =
+        mbSeparateAudio = 0;
+        mpVideoStreamBuffer =
             RCMP_rcmp_sys.AllocMemFunc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, RCMP_rcmp_sys.m_DefaultMemDir);
-        self->mpAudioStreamBuffer = 0;
-        self->mVideoStream = STREAM_create(2, 3, 2, self->mpVideoStreamBuffer, videoBufferSize);
-        self->mAudioStream = STREAM_taphandle(self->mVideoStream, 2);
-        STREAM_setpriority(self->mAudioStream, 152, 52);
-        STREAM_setpriority(self->mVideoStream, 152, 52);
-        STREAM_setfilter(self->mVideoStream, 1, 0xFF, 77, 1);
-        STREAM_setfilter(self->mVideoStream, 3, 0, 0, -2);
-        if (self->mbNoAudio == 0) {
-            STREAM_setfilter(self->mVideoStream, 2, 0xFFFF, 17235, 2);
+        mpAudioStreamBuffer = 0;
+        mVideoStream = STREAM_create(2, 3, 2, mpVideoStreamBuffer, videoBufferSize);
+        mAudioStream = STREAM_taphandle(mVideoStream, 2);
+        STREAM_setpriority(mAudioStream, 152, 52);
+        STREAM_setpriority(mVideoStream, 152, 52);
+        STREAM_setfilter(mVideoStream, 1, 0xFF, 77, 1);
+        STREAM_setfilter(mVideoStream, 3, 0, 0, -2);
+        if (mbNoAudio == 0) {
+            STREAM_setfilter(mVideoStream, 2, 0xFFFF, 17235, 2);
         } else {
-            STREAM_setfilter(self->mVideoStream, 2, 0xFFFF, 17235, -1);
+            STREAM_setfilter(mVideoStream, 2, 0xFFFF, 17235, -1);
         }
-        int type = self->mSourceType;
+        int type = mSourceType;
         if (type == 1) {
-            self->mVideoLoad = ASYNCFILE_load(videoSource, RCMP_rcmp_sys.m_DefaultMemDir);
+            mVideoLoad = ASYNCFILE_load(videoSource, RCMP_rcmp_sys.m_DefaultMemDir);
         } else if (type == 0) {
-            self->mVideoQueue = STREAM_queuefile(self->mVideoStream, videoSource, 0, 0);
+            mVideoQueue = STREAM_queuefile(mVideoStream, videoSource, 0, 0);
         } else if (type == 2) {
-            self->mVideoQueue = STREAM_queuemem(self->mVideoStream, self->mVideoSource, videoDataSize, 0);
+            mVideoQueue = STREAM_queuemem(mVideoStream, mVideoSource, videoDataSize, 0);
         }
     }
 }
@@ -275,11 +274,11 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_PLAYER_SetSubtitle);
  *
  * RCMP_AV_PLAYER_GetSubtitle looks subtitles up in it with RCMP_AV_SUBTITLE_ARRAY_FindSubtitle. Nothing in the code or data calls it.
  *
- * @param player  the movie player
  * @param table  the subtitle array (two words: entries, count), or 0 for none
  */
-extern "C" void RCMP_AV_PLAYER_SetSubtitle(RCMP_AV_PLAYER* player, RCMP_AV_SUBTITLE_ARRAY* table) {
-    player->mSubtitles = table;
+void RCMP_AV_PLAYER::SetSubtitle(RCMP_AV_SUBTITLE_ARRAY* table)
+{
+    mSubtitles = table;
 }
 #endif
 
@@ -422,57 +421,57 @@ static inline bool wsCanAlloc_AE450(RCMP_RCMP_SYSTEM* a)
  * @return the first decoded frame (+0x74)
  */
 // PORT: 64-bit long tick counter
-extern "C" int RCMP_AV_PLAYER_GetFirstFrame(RCMP_AV_PLAYER* self, int framesToBuffer, int timeOffsetMs)
+int RCMP_AV_PLAYER::GetFirstFrame(int framesToBuffer, int timeOffsetMs)
 {
-    STREAM_setpriority(self->mAudioStream, 151, 51);
-    STREAM_setpriority(self->mVideoStream, 151, 51);
-    if (self->mVideoLoad != 0) {
+    STREAM_setpriority(mAudioStream, 151, 51);
+    STREAM_setpriority(mVideoStream, 151, 51);
+    if (mVideoLoad != 0) {
         int size;
-        ASYNCFILE_release(self->mVideoLoad, &self->mpVideoFileData, &size);
-        self->mVideoQueue = STREAM_queuemem(self->mVideoStream, self->mpVideoFileData, size, 0);
+        ASYNCFILE_release(mVideoLoad, &mpVideoFileData, &size);
+        mVideoQueue = STREAM_queuemem(mVideoStream, mpVideoFileData, size, 0);
     }
-    if (self->mAudioLoad != 0) {
+    if (mAudioLoad != 0) {
         int size;
-        ASYNCFILE_release(self->mAudioLoad, &self->mpAudioFileData, &size);
-        self->mAudioQueue = STREAM_queuemem(self->mAudioStream, self->mpAudioFileData, size, 0);
+        ASYNCFILE_release(mAudioLoad, &mpAudioFileData, &size);
+        mAudioQueue = STREAM_queuemem(mAudioStream, mpAudioFileData, size, 0);
     }
-    if (self->mbSeparateAudio == 0) {
-        self->mAudioQueue = self->mVideoQueue;
+    if (mbSeparateAudio == 0) {
+        mAudioQueue = mVideoQueue;
     }
-    if (self->mbNoAudio == 0) {
+    if (mbNoAudio == 0) {
         RCMP_AV_AUDIO* audio = RCMP_AV_AUDIO_AV_AUDIO((RCMP_AV_AUDIO*)wsAlloc_AE450(&RCMP_rcmp_sys, sizeof(RCMP_AV_AUDIO)),
-                                             self->mAudioStream, self->mAudioQueue);
-        self->mpAudio = audio;
-        self->mbTrackingAudio = audio->mStream >= 0;
+                                             mAudioStream, mAudioQueue);
+        mpAudio = audio;
+        mbTrackingAudio = audio->mStream >= 0;
     } else {
-        self->mbTrackingAudio = 0;
+        mbTrackingAudio = 0;
     }
-    self->mpDecoder = 0;
+    mpDecoder = 0;
     if (wsCanAlloc_AE450(&RCMP_rcmp_sys)) {
         RCMP_CODEC_IDATA idata;
-        self->mStreamer.m_Streamer = self;
-        RCMP_CODEC_IDATA_CODEC_IDATA1(&idata, &self->mStreamer, (RCMP_GetDataFn)RCMP_avGetDataCallback,
+        mStreamer.m_Streamer = this;
+        RCMP_CODEC_IDATA_CODEC_IDATA1(&idata, &mStreamer, (RCMP_GetDataFn)RCMP_avGetDataCallback,
                                       (RCMP_ReleaseDataFn)RCMP_avReleaseDataCallback, framesToBuffer);
-        self->mpDecoder =
+        mpDecoder =
             ((RCMP_DECODER*)wsAlloc_AE450(&RCMP_rcmp_sys, sizeof(RCMP_DECODER)))->DECODER(&idata);
     }
-    self->mCurrFrame = RCMP_DECODER_GetFrame(self->mpDecoder, 0);
+    mCurrFrame = RCMP_DECODER_GetFrame(mpDecoder, 0);
     RCMP_AV_MS_TIMER* msTimer = (RCMP_AV_MS_TIMER*)wsAlloc_AE450(&RCMP_rcmp_sys, sizeof(RCMP_AV_MS_TIMER));
     msTimer->m_AccTime = 0;
     msTimer->m_OldTime = TIMER_gettick();
     msTimer->m_Speed = 0x1000;
-    self->mpTimer = msTimer;
+    mpTimer = msTimer;
     RCMP_AV_MS_TIMER_Update(msTimer);
     unsigned int ms = (unsigned int)(msTimer->m_AccTime * 1000) / TIMER_getfrequency();
-    self->mTimeOffsetMs = timeOffsetMs;
-    self->mOldAudioTime = 0;
-    self->mFilteredError = 0;
-    self->mStartTimeMs = ms;
-    if (self->mpAudio != 0) {
-        RCMP_AV_AUDIO_StartSound(self->mpAudio);
+    mTimeOffsetMs = timeOffsetMs;
+    mOldAudioTime = 0;
+    mFilteredError = 0;
+    mStartTimeMs = ms;
+    if (mpAudio != 0) {
+        mpAudio->StartSound();
     }
-    RCMP_AV_PLAYER_SetSpeed(self, 0x1000);
-    return self->mCurrFrame;
+    SetSpeed(0x1000);
+    return mCurrFrame;
 }
 #endif
 
@@ -492,12 +491,12 @@ extern "C" int RCMP_DECODER_GetCurrentFrameNumber(RCMP_DECODER* self);
  * @param position  the goal frame number
  * @return the frame object (+0x74), or 0
  */
-extern "C" int RCMP_AV_PLAYER_GetFrame(RCMP_AV_PLAYER* self, float position)
+int RCMP_AV_PLAYER::GetFrame(float position)
 {
-    self->mGoalFrame = position;
-    self->mCurrFrame = RCMP_DECODER_GetFrame(self->mpDecoder, fptoui(position));
-    self->mCurrentFrameNumber = self->mpDecoder->GetCurrentFrameNumber();
-    return self->mCurrFrame;
+    mGoalFrame = position;
+    mCurrFrame = RCMP_DECODER_GetFrame(mpDecoder, fptoui(position));
+    mCurrentFrameNumber = mpDecoder->GetCurrentFrameNumber();
+    return mCurrFrame;
 }
 #endif
 
@@ -513,12 +512,13 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_PLAYER_GetSubtitle);
  *
  * @return the subtitle entry, or 0 without a table
  */
-extern "C" RCMP_AV_SUBTITLE* RCMP_AV_PLAYER_GetSubtitle(RCMP_AV_PLAYER* self) {
-    if (self->mSubtitles != 0) {
-        if (self->mCurrFrame != 0) {
-            return self->mSubtitles->FindSubtitle(self->mCurrentFrameNumber);
+RCMP_AV_SUBTITLE* RCMP_AV_PLAYER::GetSubtitle()
+{
+    if (mSubtitles != 0) {
+        if (mCurrFrame != 0) {
+            return mSubtitles->FindSubtitle(mCurrentFrameNumber);
         }
-        return self->mSubtitles->FindSubtitle(fptoui(self->mGoalFrame));
+        return mSubtitles->FindSubtitle(fptoui(mGoalFrame));
     }
     return 0;
 }
@@ -540,12 +540,12 @@ extern "C" float RCMP_DECODER_GetFrameRate(RCMP_DECODER*);
  *
  * @return true when the goal frame has reached the next frame
  */
-extern "C" bool RCMP_AV_PLAYER_IsTimeForDecode(RCMP_AV_PLAYER* self)
+bool RCMP_AV_PLAYER::IsTimeForDecode()
 {
-    unsigned int elapsed = RCMP_AV_PLAYER_SyncedAudioTime(self);
-    float rate = self->mpDecoder->GetFrameRate();
-    self->mGoalFrame = (float)(elapsed + self->mTimeOffsetMs) * 0.001f * rate;
-    if (self->mGoalFrame < (float)self->mCurrentFrameNumber + 1.0f)
+    unsigned int elapsed = SyncedAudioTime();
+    float rate = mpDecoder->GetFrameRate();
+    mGoalFrame = (float)(elapsed + mTimeOffsetMs) * 0.001f * rate;
+    if (mGoalFrame < (float)mCurrentFrameNumber + 1.0f)
         return false;
     return true;
 }
@@ -563,12 +563,12 @@ extern "C" bool RCMP_AV_AUDIO_IsAudioFinished(RCMP_AV_AUDIO* audio);
  *
  * @return RCMP_AV_AUDIO_IsAudioFinished's answer, or 1 when there is no audio object
  */
-extern "C" int RCMP_AV_PLAYER_IsAudioFinished(RCMP_AV_PLAYER* self)
+int RCMP_AV_PLAYER::IsAudioFinished()
 {
-    RCMP_AV_AUDIO* audio = self->mpAudio;
+    RCMP_AV_AUDIO* audio = mpAudio;
     int result = 1;
     if (audio != 0) {
-        result = RCMP_AV_AUDIO_IsAudioFinished(audio);
+        result = audio->IsAudioFinished();
     }
     return result;
 }
@@ -591,16 +591,16 @@ extern "C" unsigned int TIMER_gettick();
  * @return 0
  */
 // PORT: accum is a 64-bit ulong
-extern "C" void* RCMP_AV_PLAYER_SetSpeed(RCMP_AV_PLAYER* self, int speed)
+void* RCMP_AV_PLAYER::SetSpeed(int speed)
 {
     if ((unsigned int)speed > 0x4000) {
         speed = 0x4000;
     }
     int newRate = speed;
-    if (self->mpAudio != 0) {
-        RCMP_AV_AUDIO_SetSpeed(self->mpAudio, newRate);
+    if (mpAudio != 0) {
+        mpAudio->SetSpeed(newRate);
     }
-    RCMP_AV_MS_TIMER* timer = self->mpTimer;
+    RCMP_AV_MS_TIMER* timer = mpTimer;
     unsigned int now = TIMER_gettick();
     if (timer->m_Speed == 0x1000) {
         timer->m_AccTime += (ulong)(now - timer->m_OldTime);
@@ -625,9 +625,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_PLAYER_Pause__FPv);
  *
  * @return RCMP_AV_PLAYER_SetSpeed's result (0)
  */
-void* RCMP_AV_PLAYER_Pause(void* self)
+void* RCMP_AV_PLAYER::Pause()
 {
-    return RCMP_AV_PLAYER_SetSpeed((RCMP_AV_PLAYER*)self, 0);
+    return ((RCMP_AV_PLAYER*)this)->SetSpeed(0);
 }
 #endif
 
@@ -643,9 +643,9 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_PLAYER_UnPause__FPv);
  *
  * @return RCMP_AV_PLAYER_SetSpeed's result (0)
  */
-void* RCMP_AV_PLAYER_UnPause(void* self)
+void* RCMP_AV_PLAYER::UnPause()
 {
-    return RCMP_AV_PLAYER_SetSpeed((RCMP_AV_PLAYER*)self, 0x1000);
+    return ((RCMP_AV_PLAYER*)this)->SetSpeed(0x1000);
 }
 #endif
 
@@ -659,18 +659,18 @@ extern "C" int RCMP_AV_AUDIO_SetVol(RCMP_AV_AUDIO* audio, int volume);
  *
  * Forwards the volume to the audio object (+0x0) with RCMP_AV_AUDIO_SetVol. Nothing in the code or data calls it.
  *
- * @param player  the movie player
  * @param volume  the new volume
  * @return RCMP_AV_AUDIO_SetVol's result, or 0 without audio
  */
-extern "C" int RCMP_AV_PLAYER_SetVol(RCMP_AV_PLAYER* player, int volume) {
+int RCMP_AV_PLAYER::SetVol(int volume)
+{
     RCMP_AV_AUDIO* audio;
     int result;
 
-    audio = player->mpAudio;
+    audio = mpAudio;
     result = 0;
     if (audio != 0) {
-        result = RCMP_AV_AUDIO_SetVol(audio, volume);
+        result = audio->SetVol(volume);
     }
     return result;
 }
@@ -700,29 +700,29 @@ extern "C" void RCMP_AV_MS_TIMER_Update(RCMP_AV_MS_TIMER* timer);
  *
  * @return the playback time in ms
  */
-extern "C" unsigned int RCMP_AV_PLAYER_SyncedAudioTime(RCMP_AV_PLAYER* self)
+unsigned int RCMP_AV_PLAYER::SyncedAudioTime()
 {
     SNDREQUESTSTATUS requestStatus;
     SNDSTREAMSTATUS streamStatus;
-    RCMP_AV_MS_TIMER* msTimer = self->mpTimer;
+    RCMP_AV_MS_TIMER* msTimer = mpTimer;
     RCMP_AV_MS_TIMER_Update(msTimer);
     unsigned int ms = (unsigned int)(msTimer->m_AccTime * 1000) / TIMER_getfrequency();
-    int res = ms - self->mStartTimeMs;
-    if (self->mbTrackingAudio != 0) {
+    int res = ms - mStartTimeMs;
+    if (mbTrackingAudio != 0) {
         SNDSYS_entercritical();
-        SNDSTRM_status(self->mpAudio->mStream, &streamStatus);
+        SNDSTRM_status(mpAudio->mStream, &streamStatus);
         SNDSTRM_requeststatus(streamStatus.currentrequest, &requestStatus);
         SNDSYS_leavecritical();
         int audioMs = requestStatus.currenttime - SNDPROFILE_outputlatency();
-        if (self->mOldAudioTime < audioMs) {
-            self->mOldAudioTime = audioMs;
-            self->mFilteredError = self->mFilteredError - self->mFilteredError / 8 + (audioMs - res);
-            int av = -self->mFilteredError;
-            if (av < self->mFilteredError) av = self->mFilteredError;
+        if (mOldAudioTime < audioMs) {
+            mOldAudioTime = audioMs;
+            mFilteredError = mFilteredError - mFilteredError / 8 + (audioMs - res);
+            int av = -mFilteredError;
+            if (av < mFilteredError) av = mFilteredError;
             if (av > 264) {
-                self->mStartTimeMs -= self->mFilteredError / 8;
-                self->mFilteredError = 0;
-                res = ms - self->mStartTimeMs;
+                mStartTimeMs -= mFilteredError / 8;
+                mFilteredError = 0;
+                res = ms - mStartTimeMs;
             }
         }
     }
@@ -771,10 +771,10 @@ extern "C" void RCMP_AV_PLAYER_getVideoChunk_impl(RCMP_AV_PLAYER* self, RCMP_DEC
  * @param decoder  the RCMP DECODER asking for data
  * @param out  receives the new CHUNK, or 0
  */
-extern "C" void RCMP_AV_PLAYER_getVideoChunk_impl(RCMP_AV_PLAYER* self, RCMP_DECODER* decoder, RCMP_CHUNK** out)
+void RCMP_AV_PLAYER::getVideoChunk(RCMP_DECODER* decoder, RCMP_CHUNK** out)
 {
     int kind = 0;
-    int videoStream = self->mVideoStream;
+    int videoStream = mVideoStream;
     *out = 0;
     for (;;) {
         unsigned char* blockData = STREAM_get(videoStream);
@@ -854,9 +854,9 @@ extern "C" void* STREAM_release(int handle, void* chunk);
  * @param chunk  the CHUNK
  * @return the free function's result
  */
-extern "C" void* RCMP_AV_PLAYER_releaseVideoChunk(RCMP_AV_PLAYER* self, RCMP_CHUNK* chunk)
+void* RCMP_AV_PLAYER::releaseVideoChunk(RCMP_CHUNK* chunk)
 {
-    void* lastResult = STREAM_release(self->mVideoStream, chunk->m_UserChunkData);
+    void* lastResult = STREAM_release(mVideoStream, chunk->m_UserChunkData);
     if (chunk != 0) {
         lastResult = RCMP_rcmp_sys.FreeMemFunc(chunk);
     }
@@ -882,7 +882,7 @@ void* RCMP_avReleaseDataCallback(void* self, void* context, int chunk)
 {
     // ORIGINAL-PTR: the retail symbol RCMP_avReleaseDataCallback__FPvT0i mangles the chunk parameter as int, so the original
     // converted it back to the CHUNK pointer too
-    return RCMP_AV_PLAYER_releaseVideoChunk((RCMP_AV_PLAYER*)((RCMP_STREAMER*)context)->m_Streamer, (RCMP_CHUNK*)chunk);
+    return ((RCMP_AV_PLAYER*)((RCMP_STREAMER*)context)->m_Streamer)->releaseVideoChunk((RCMP_CHUNK*)chunk);
 }
 #endif
 
@@ -973,12 +973,12 @@ extern "C" int SNDSTRM_pitchmult(int h, int v);
  * @param speed  the speed in 1/0x1000 units
  * @return SNDSTRM_pitchmult's result, or 0 without a stream
  */
-extern "C" int RCMP_AV_AUDIO_SetSpeed(RCMP_AV_AUDIO* self, int speed)
+int RCMP_AV_AUDIO::SetSpeed(int speed)
 {
     int result;
-    if (self->mStream != -1) {
+    if (mStream != -1) {
         SNDSYS_entercritical();
-        result = SNDSTRM_pitchmult(self->mStream, speed);
+        result = SNDSTRM_pitchmult(mStream, speed);
         SNDSYS_leavecritical();
         return result;
     }
@@ -1000,12 +1000,12 @@ extern "C" int SNDSTRM_modifyhold(int h, int a1);
  *
  * @return SNDSTRM_modifyhold's result, or 0 without a request
  */
-extern "C" int RCMP_AV_AUDIO_StartSound(RCMP_AV_AUDIO* self)
+int RCMP_AV_AUDIO::StartSound()
 {
     int result;
-    if (self->mRequest != -1) {
+    if (mRequest != -1) {
         SNDSYS_entercritical();
-        result = SNDSTRM_modifyhold(self->mRequest, 0);
+        result = SNDSTRM_modifyhold(mRequest, 0);
         SNDSYS_leavecritical();
         return result;
     }
@@ -1028,12 +1028,13 @@ extern "C" int SNDSTRM_setVolume(int, int);
  * @param volume  the new volume
  * @return SNDSTRM_setVolume's result, or 0 without a stream
  */
-extern "C" int RCMP_AV_AUDIO_SetVol(RCMP_AV_AUDIO* self, int volume) {
+int RCMP_AV_AUDIO::SetVol(int volume)
+{
     int result;
 
-    if (self->mStream != -1) {
+    if (mStream != -1) {
         SNDSYS_entercritical();
-        result = SNDSTRM_setVolume(self->mStream, volume);
+        result = SNDSTRM_setVolume(mStream, volume);
         SNDSYS_leavecritical();
         return result;
     }
@@ -1057,12 +1058,12 @@ extern "C" int SNDSTRM_requeststatus(int id, SNDREQUESTSTATUS* out);
  *
  * @return true when the request has no time left (third status word 0), false otherwise or when a query fails
  */
-extern "C" bool RCMP_AV_AUDIO_IsAudioFinished(RCMP_AV_AUDIO* self)
+bool RCMP_AV_AUDIO::IsAudioFinished()
 {
     SNDREQUESTSTATUS b;
     SNDSTREAMSTATUS a;
     SNDSYS_entercritical();
-    if (SNDSTRM_status(self->mStream, &a) >= 0 && SNDSTRM_requeststatus(a.currentrequest, &b) >= 0) {
+    if (SNDSTRM_status(mStream, &a) >= 0 && SNDSTRM_requeststatus(a.currentrequest, &b) >= 0) {
         SNDSYS_leavecritical();
         return b.timetoend == 0;
     }
@@ -2302,7 +2303,7 @@ extern "C" void PS2_SONY_CODEC_INTERNAL_feedChunk(PS2_SONY_CODEC_INTERNAL* sourc
  */
 extern "C" int RCMP_mpegNoDataCallback(void* self, void* callbackArg, PS2_SONY_CODEC_INTERNAL* source)
 {
-    PS2_SONY_CODEC_INTERNAL_feedChunk(source, self, callbackArg);
+    source->feedChunk(self, callbackArg);
     return 1;
 }
 #endif
@@ -2324,10 +2325,10 @@ extern "C" void sceMpegAddBs(void* dst, void* src, int size);
  * @param consumer  the MPEG decoder state passed to sceMpegAddBs
  * @param callbackArg  the callback argument (unused)
  */
-extern "C" void PS2_SONY_CODEC_INTERNAL_feedChunk(PS2_SONY_CODEC_INTERNAL* self, void* consumer, void* callbackArg)
+void PS2_SONY_CODEC_INTERNAL::feedChunk(void* consumer, void* callbackArg)
 {
     void* data = 0;
-    RCMP_CHUNK* blk = self->mpDecoder->GetChunk();
+    RCMP_CHUNK* blk = mpDecoder->GetChunk();
     if (blk != 0) {
         data = blk->m_DataToDecode;
     }
@@ -2337,21 +2338,21 @@ extern "C" void PS2_SONY_CODEC_INTERNAL_feedChunk(PS2_SONY_CODEC_INTERNAL* self,
         i = blk->m_DataToDecodeSize;
         total = (i + 7) & ~0xF;
         i -= 8;
-        MEM_copy(self->mpChunkBufferUncached, data, i);
+        MEM_copy(mpChunkBufferUncached, data, i);
         for (; i < total + 0x10; i += 4) {
-            *(int*)(self->mpChunkBufferUncached + i) = 0;
+            *(int*)(mpChunkBufferUncached + i) = 0;
         }
     } else {
         total = 0x10;
         for (i = 0; i < 0x10; i += 4) {
-            *(int*)(self->mpChunkBufferUncached + i) = 0xB7010000;
+            *(int*)(mpChunkBufferUncached + i) = 0xB7010000;
         }
     }
     if (blk != 0) {
-        self->mpDecoder->ReleaseChunk(blk);
+        mpDecoder->ReleaseChunk(blk);
     }
-    self->mChunksFed++;
-    sceMpegAddBs(consumer, self->mpChunkBuffer, total);
+    mChunksFed++;
+    sceMpegAddBs(consumer, mpChunkBuffer, total);
 }
 #endif
 
@@ -2523,7 +2524,7 @@ extern "C" void sceMpegGetPicture(void* dma, void* data, int qwc);
  */
 void* PS2_SONY_CODEC_INTERNAL::DecodeFrame()
 {
-    PS2_SONY_FRAME* frame = PS2_SONY_CODEC_INTERNAL_takeFreeFrame(this);
+    PS2_SONY_FRAME* frame = this->takeFreeFrame();
     // the frame's SHAPE, read as SHAPEIMAGE (same layout; retail tests the 0xC word whole)
     SHAPEIMAGE* shp = (SHAPEIMAGE*)frame->m_Shp;
     char* data;
@@ -2591,14 +2592,14 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_takeFreeFrame);
  *
  * @return the frame, or 0 when the free list (+0x20) is empty
  */
-extern "C" PS2_SONY_FRAME* PS2_SONY_CODEC_INTERNAL_takeFreeFrame(PS2_SONY_CODEC_INTERNAL* self)
+PS2_SONY_FRAME* PS2_SONY_CODEC_INTERNAL::takeFreeFrame()
 {
-    RCON_DLNode* n = self->mFreeFrames.HeadNode.Next;
-    if (n != &self->mFreeFrames.HeadNode) {
+    RCON_DLNode* n = mFreeFrames.HeadNode.Next;
+    if (n != &mFreeFrames.HeadNode) {
         PS2_SONY_FRAME* item;
         n->Remove();
         item = static_cast<PS2_SONY_FRAME*>(n);
-        self->mUsedFrames.AddTail(item);
+        mUsedFrames.AddTail(item);
         item->mReferenceCount = 1;
         return item;
     }

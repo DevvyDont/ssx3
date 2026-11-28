@@ -50,6 +50,8 @@ enum tOVStateEnum {
     kOVSTATE_PAUSE_ONLINE_ERROR = 39, kOVSTATE_PRIVATEMESSAGE = 40
 };
 
+struct cUIThing;
+
 struct cOVState : public cUIState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] _vt$8cOVState cOVState_vtbl, stored by cOVState_cOVState after the base ctor
@@ -82,6 +84,48 @@ struct cOVState : public cUIState {
     void* SAVEOPTIONS_onDestroyScreen() __asm__("cOVState_SAVEOPTIONS_onDestroyScreen__FPv");
     int AUTOSAVE_onInputBegin() __asm__("cOVState_AUTOSAVE_onInputBegin__FPv");
     void* ViewPopup_onUpdate() __asm__("cOVState_ViewPopup_onUpdate__FPv");
+    void EMPTY() __asm__("cOVState_EMPTY__cOVState_EMPTY");
+    void PEAKCHAL_RESULTS() __asm__("cOVState_PEAKCHAL_RESULTS__cOVState_PEAKCHAL_RESULTS");
+    void * PEAKCHAL_RESULTS_cOVState_PEAKCHAL_RESULTS(int engine, int overlayId)
+        __asm__("cOVState_PEAKCHAL_RESULTS_cOVState_PEAKCHAL_RESULTS");
+    void * PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE1() __asm__("cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE1");
+    void * PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE(int engine, int overlayId)
+        __asm__("cOVState_PRIVATEMESSAGE_cOVState_PRIVATEMESSAGE");
+    void* PRIVATEMESSAGE() __asm__("cOVState_PRIVATEMESSAGE__cOVState_PRIVATEMESSAGE");
+    void* FREESTYLE_PREEVENT() __asm__("cOVState_FREESTYLE_PREEVENT__cOVState_FREESTYLE_PREEVENT");
+    void * FREESTYLE_PREEVENT_cOVState_FREESTYLE_PREEVENT(int engine, int overlayId)
+        __asm__("cOVState_FREESTYLE_PREEVENT_cOVState_FREESTYLE_PREEVENT");
+    void* MULTI_PREEVENT() __asm__("cOVState_MULTI_PREEVENT__cOVState_MULTI_PREEVENT");
+    void * MULTI_PREEVENT_cOVState_MULTI_PREEVENT(int engine, int overlayId)
+        __asm__("cOVState_MULTI_PREEVENT_cOVState_MULTI_PREEVENT");
+    void* CHALLENGE_PREEVENT() __asm__("cOVState_CHALLENGE_PREEVENT__cOVState_CHALLENGE_PREEVENT");
+    void * CHALLENGE_PREEVENT_cOVState_CHALLENGE_PREEVENT(int engine, int overlayId)
+        __asm__("cOVState_CHALLENGE_PREEVENT_cOVState_CHALLENGE_PREEVENT");
+    void PEAKCHAL_RESULTS_onCreateScreen() __asm__("cOVState_PEAKCHAL_RESULTS_onCreateScreen");
+    void* PEAKCHAL_RESULTS_onUpdate() __asm__("cOVState_PEAKCHAL_RESULTS_onUpdate__FPv");
+    int PEAKCHAL_RESULTS_onInputBegin() __asm__("cOVState_PEAKCHAL_RESULTS_onInputBegin__FPv");
+    int PEAKCHAL_RESULTS_onWidgetMenu(int widget, int event) __asm__("cOVState_PEAKCHAL_RESULTS_onWidgetMenu");
+    void PEAKCHAL_RESULTS_onWidgetEvent(cUIThing* popup, int event) __asm__("cOVState_PEAKCHAL_RESULTS_onWidgetEvent");
+    void PEAKCHAL_RESULTS_onGainFocus() __asm__("cOVState_PEAKCHAL_RESULTS_onGainFocus");
+    void FREESTYLE_PREEVENT_onCreateScreen() __asm__("cOVState_FREESTYLE_PREEVENT_onCreateScreen");
+    void FREESTYLE_PREEVENT_onGainFocus() __asm__("cOVState_FREESTYLE_PREEVENT_onGainFocus");
+    void MULTI_PREEVENT_onCreateScreen() __asm__("cOVState_MULTI_PREEVENT_onCreateScreen");
+    int MULTI_PREEVENT_onGainTransition(void* msg) __asm__("cOVState_MULTI_PREEVENT_onGainTransition");
+    void MULTI_PREEVENT_onGainFocus() __asm__("cOVState_MULTI_PREEVENT_onGainFocus");
+    void MULTI_PREEVENT_onUpdate() __asm__("cOVState_MULTI_PREEVENT_onUpdate");
+    void CHALLENGE_PREEVENT_onCreateScreen() __asm__("cOVState_CHALLENGE_PREEVENT_onCreateScreen");
+    int CHALLENGE_PREEVENT_onWidgetMenu(int menu, int event) __asm__("cOVState_CHALLENGE_PREEVENT_onWidgetMenu");
+    void PRIVATEMESSAGE_onCreateScreen() __asm__("cOVState_PRIVATEMESSAGE_onCreateScreen");
+    int PRIVATEMESSAGE_onGainTransition(int ok) __asm__("cOVState_PRIVATEMESSAGE_onGainTransition");
+    void PRIVATEMESSAGE_addChatLine(char* name, int ownMessage) __asm__("cOVState_PRIVATEMESSAGE_addChatLine");
+    void PRIVATEMESSAGE_onUpdate() __asm__("cOVState_PRIVATEMESSAGE_onUpdate");
+    void PRIVATEMESSAGE_onPopupEvent(int popup, int event) __asm__("cOVState_PRIVATEMESSAGE_onPopupEvent");
+    void PRIVATEMESSAGE_onWidgetEvent(void* item, unsigned int key) __asm__("cOVState_PRIVATEMESSAGE_onWidgetEvent");
+    void PRIVATEMESSAGE_openKeyboard(int textObj, char* staticText, char* inputText, int password, int miscData,
+                                     int maxChars)
+        __asm__("cOVState_PRIVATEMESSAGE_openKeyboard");
+    void PRIVATEMESSAGE_createKeyboard(int textObj, int password, int miscData, int maxChars)
+        __asm__("cOVState_PRIVATEMESSAGE_createKeyboard");
 };
 
 CHECK_OFFSET(cOVState, mDoneTransition, 0x48);

@@ -115,6 +115,8 @@ struct PS2_SONY_CODEC_INTERNAL {
     int Init(RCMP_DECODER* script, RCMP_CHUNK* firstChunk) __asm__("PS2_SONY_CODEC_INTERNAL_Init");
     void ReleaseFrame(PS2_SONY_FRAME* item) __asm__("PS2_SONY_CODEC_INTERNAL_ReleaseFrame");
     int GetCurrentFrameNumber() __asm__("PS2_SONY_CODEC_INTERNAL_GetCurrentFrameNumber__FPv");
+    void feedChunk(void* consumer, void* callbackArg) __asm__("PS2_SONY_CODEC_INTERNAL_feedChunk");
+    PS2_SONY_FRAME* takeFreeFrame() __asm__("PS2_SONY_CODEC_INTERNAL_takeFreeFrame");
 };
 
 // The MPEG-2 video constants the unit's mpeg2decode header parser tests: start codes, extension ids, scalable modes,

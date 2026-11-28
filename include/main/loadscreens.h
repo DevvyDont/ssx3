@@ -349,6 +349,7 @@ struct cGameLoadState : public cUIState {
     virtual ~cGameLoadState();
     virtual void onCreateScreen() __asm__("cGameLoadState_onCreateScreen");
     virtual bool onGainTransition(int refresh) __asm__("cGameLoadState_onGainTransition");
+    void showPlayerStats(char player) __asm__("cGameLoadState_showPlayerStats");
 };
 
 CHECK_OFFSET(cGameLoadState, mpParentModule, 0x048);
@@ -405,6 +406,13 @@ struct cGameLoadStateConquer : public cUIState {
     //   [R] D_0047C7A8 (cGameLoadScreen_load, dtor cGameLoadStateConquer__cGameLoadStateConquer)
     // cGameLoadStateConquer's notes on cUIState's fields:
     //   mpScreen: [U] onGainTransition (cGameLoadStateConquer_onGainTransition) looks "%" up on it
+
+    // Methods bound to their retail symbols by asm labels.
+    // retail's destructor cGameLoadStateConquer__cGameLoadStateConquer stays a C function (g++ 2.95 takes no asm label
+    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    virtual ~cGameLoadStateConquer();
+    virtual void onWidgetCreate(cUIThing*) __asm__("cGameLoadStateConquer_onWidgetCreate__FPv");
+    virtual bool onGainTransition(int) __asm__("cGameLoadStateConquer_onGainTransition");
 };
 
 CHECK_SIZE(cGameLoadStateConquer, 0x48);

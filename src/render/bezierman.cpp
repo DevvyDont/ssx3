@@ -190,19 +190,18 @@ struct sBezMan_B190 {
  * edge LODs copied into mEdgeLods. Each entry stores @p patchRec in mpPatch and @p extra in unk_04. A full list drops
  * the patch silently. This is slot 22 of the cPS2BezierMan vtable (cPSPBezierMan_vtbl).
  *
- * @param bezierMan  the patch manager (this)
  * @param patchRec  the patch record
  * @param edgeLods  the four edge LODs (ePatchGrid each)
  * @param ignoredArg  ignored
  * @param extra  stored in the entry's unk_04 (used as the patch's program/table index when the patch is drawn)
  */
-extern "C" void cPS2BezierMan_queuePatch(cPS2BezierMan* bezierMan, tPatchRecord* patchRec, unsigned char* edgeLods, int ignoredArg, int extra)
+void cPS2BezierMan::queuePatch(tPatchRecord* patchRec, unsigned char* edgeLods, int ignoredArg, int extra)
 {
     if (edgeLods[0] == edgeLods[2] && edgeLods[1] == edgeLods[3] && edgeLods[0] == edgeLods[1]) {
         switch (edgeLods[0]) {
         case kPatchGrid_4x4:
-            if (bezierMan->mNum4x4Patches < 900) {
-                tBezierPatchEntry* patchEntry = &((&bezierMan->m4x4Patches[0]))[bezierMan->mNum4x4Patches++];
+            if (mNum4x4Patches < 900) {
+                tBezierPatchEntry* patchEntry = &((&m4x4Patches[0]))[mNum4x4Patches++];
                 patchEntry->unk_04 = extra;
                 patchEntry->mpPatch = patchRec;
                 patchEntry->mLod = kPatchLod_4x4;
@@ -210,8 +209,8 @@ extern "C" void cPS2BezierMan_queuePatch(cPS2BezierMan* bezierMan, tPatchRecord*
             }
             break;
         case kPatchGrid_6x6:
-            if (bezierMan->mNum6x6Patches < 220) {
-                tBezierPatchEntry* patchEntry = &((&bezierMan->m6x6Patches[0]))[bezierMan->mNum6x6Patches++];
+            if (mNum6x6Patches < 220) {
+                tBezierPatchEntry* patchEntry = &((&m6x6Patches[0]))[mNum6x6Patches++];
                 patchEntry->unk_04 = extra;
                 patchEntry->mLod = kPatchLod_6x6;
                 patchEntry->mpPatch = patchRec;
@@ -219,8 +218,8 @@ extern "C" void cPS2BezierMan_queuePatch(cPS2BezierMan* bezierMan, tPatchRecord*
             }
             break;
         case kPatchGrid_8x8:
-            if (bezierMan->mNum8x8Patches < 50) {
-                tBezierPatchEntry* patchEntry = &((&bezierMan->m8x8Patches[0]))[bezierMan->mNum8x8Patches++];
+            if (mNum8x8Patches < 50) {
+                tBezierPatchEntry* patchEntry = &((&m8x8Patches[0]))[mNum8x8Patches++];
                 patchEntry->unk_04 = extra;
                 patchEntry->mLod = kPatchLod_8x8;
                 patchEntry->mpPatch = patchRec;
@@ -230,8 +229,8 @@ extern "C" void cPS2BezierMan_queuePatch(cPS2BezierMan* bezierMan, tPatchRecord*
         }
         return;
     }
-    if (bezierMan->mNumMixedPatches < 75) {
-        tBezierMixedPatchEntry* patchEntry = &((&bezierMan->mMixedPatches[0]))[bezierMan->mNumMixedPatches++];
+    if (mNumMixedPatches < 75) {
+        tBezierMixedPatchEntry* patchEntry = &((&mMixedPatches[0]))[mNumMixedPatches++];
         patchEntry->unk_04 = extra;
         patchEntry->mpPatch = patchRec;
         int* pk = &patchEntry->mLod;
@@ -936,9 +935,9 @@ INCLUDE_ASM("render/bezierman", cPS2BezierMan_buildVifCachePacket);
  * @param idx  the cache entry index
  */
 // PORT: builds a DMA/VIF/GIF packet in uncached (0x30000000) memory; addresses held in int and packed into 64-bit words.
-extern "C" void cPS2BezierMan_buildVifCachePacket(void* self, int type, int idx)
+void cPS2BezierMan::buildVifCachePacket(int type, int idx)
 {
-    char* manager = (char*)self;
+    char* manager = (char*)this;
     int n = type * 2 + 4;
     int v3Addr;
     switch (type) {
@@ -1036,7 +1035,7 @@ struct sBezVec4_CA08 {
  *
  * @param obj  the patch record (a scratchpad copy)
  */
-extern "C" void cPS2BezierMan_testProjectiveTextureHits(void* self, void* obj)
+void cPS2BezierMan::testProjectiveTextureHits(void* obj)
 {
     tPatchRecord* objData = (tPatchRecord*)obj;
     sBezVec4_CA08 boxMin;
@@ -1589,7 +1588,7 @@ static inline void QueueRecord_D448(cPS2GraphicsMan* gfx, unsigned int buf, unsi
  */
 // PORT: uncached (0x30000000) pointers held in int; PS2-only VU0 asm.
 // One projector pass per light whose bit is set in mask: UNPACK the light matrix, then MSCAL the patch program.
-extern "C" void cPS2BezierMan_addProjectorPasses(void* self, int kind, void* tbl, void* patch, int mask, unsigned int* handle)
+void cPS2BezierMan::addProjectorPasses(int kind, void* tbl, void* patch, int mask, unsigned int* handle)
 {
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan_D448;
     sTex_D448* programTable = (sTex_D448*)tbl;
@@ -1745,9 +1744,9 @@ static inline void CopyQuads_D690(char** pp, sQuad_D690* src, int n)
  * @param handle  the packet write cursor, set to the end of the packet plus 0x10
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int.
-extern "C" void cPS2BezierMan_addSnowSparklePass(cPS2BezierMan* self, void* obj, tBezierPatchEntry* patch, unsigned int* handle)
+void cPS2BezierMan::addSnowSparklePass(void* obj, tBezierPatchEntry* patch, unsigned int* handle)
 {
-    cPS2BezierMan* manager = (cPS2BezierMan*)self;
+    cPS2BezierMan* manager = (cPS2BezierMan*)this;
     tPatchRecord* patchRec = (tPatchRecord*)obj;
     if ((patchRec->m_iFlags & 0x800000) == 0) {
         return;
@@ -1815,7 +1814,7 @@ extern "C" void cPS2BezierMan_addSnowSparklePass(cPS2BezierMan* self, void* obj,
  *
  * @param packetHandle  the packet write cursor
  */
-extern "C" void cPS2BezierMan_drawSnowSparkles(cPS2BezierMan* self, unsigned int* packetHandle)
+void cPS2BezierMan::drawSnowSparkles(unsigned int* packetHandle)
 {
     if (cRenderToggles_m_DisableSparkles != 0) {
         return;
@@ -1839,14 +1838,15 @@ extern "C" void cPS2BezierMan_drawSnowSparkles(cPS2BezierMan* self, unsigned int
     ctx->m_pCurrentDrawState->m_bitGroups[3] = ((int)ctx->m_pCurrentDrawState->m_bitGroups[3]) & 0xC0000000;
     ctx->m_pCurrentDrawState->m_bitGroups[1] = (((int)ctx->m_pCurrentDrawState->m_bitGroups[1]) & ~3) | 2;
     ctx->m_pCurrentDrawState->m_bitGroups[2] = ((int)ctx->m_pCurrentDrawState->m_bitGroups[2]) & 0xE00003FF;
-    for (int i = 0; i < self->mNum8x8Patches; i++) {
-        tBezierPatchEntry* patchEntry = &((&self->m8x8Patches[0]))[i];
-        cPS2BezierMan_addSnowSparklePass(self, scratchpad_loadSpareArea(patchEntry->mpPatch, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
+    for (int i = 0; i < mNum8x8Patches; i++) {
+        tBezierPatchEntry* patchEntry = &((&m8x8Patches[0]))[i];
+        addSnowSparklePass(
+                scratchpad_loadSpareArea(patchEntry->mpPatch, 432, 2), (tBezierPatchEntry*)patchEntry, packetHandle);
     }
-    for (int i = 0; i < self->mNumMixedPatches; i++) {
-        tBezierMixedPatchEntry* patchEntry = &self->mMixedPatches[i];
+    for (int i = 0; i < mNumMixedPatches; i++) {
+        tBezierMixedPatchEntry* patchEntry = &mMixedPatches[i];
         if (patchEntry->mLod > 0) {
-            cPS2BezierMan_addSnowSparklePass(self, scratchpad_loadSpareArea(patchEntry->mpPatch, 432, 2), (tBezierPatchEntry*)patchEntry,
+            addSnowSparklePass(scratchpad_loadSpareArea(patchEntry->mpPatch, 432, 2), (tBezierPatchEntry*)patchEntry,
                           packetHandle);
         }
     }
