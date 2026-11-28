@@ -272,7 +272,7 @@ extern void* cAppModule_vtbl[];
 extern "C" void cGame__cGame(cGame* self, int flags)
 {
     void** gameStateVtbl = cGameState_vtbl;
-    self->mVtbl = cAppModule_vtbl;
+    VPTR_OF(cAppModule, self) = cAppModule_vtbl;
     VPTR_OF(cGameState, &self->mReplayStartState) = gameStateVtbl;
     VPTR_OF(cGameState, &self->mSessionTeleportState) = gameStateVtbl;
     VPTR_OF(cGameState, &self->mUserSelectState) = gameStateVtbl;

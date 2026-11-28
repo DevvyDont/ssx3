@@ -326,7 +326,7 @@ extern "C" void FILESYS_delbigsync(void* h, int a);
 extern "C" void cController__cController(void* self, int flags);
 extern "C" void cStreamSys__cStreamSys(void* self, int flags);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
-extern "C" void cSoundSys__cSoundSys(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags) __asm__("_$_9cSoundSys");
 extern void* D_00483688[];
 extern void* cSSXAudio_vtbl[];
 extern void* D_004836D8[];

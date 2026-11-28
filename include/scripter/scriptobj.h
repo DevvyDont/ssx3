@@ -1,5 +1,6 @@
 #ifndef SCRIPTER_SCRIPTOBJ_H
 #define SCRIPTER_SCRIPTOBJ_H
+#pragma interface
 
 // cScriptObject: the base of every NIS script object, i.e. anything a cut-scene script can take over. The object type
 // (mObjType) says which: 0 cScriptObjCameraManager, 1 cScriptObjCamera, 2 cScriptObjTransition (and cTransitionMan),
@@ -24,7 +25,8 @@
 // scripter/scriptobjrider.h (+0xC), scripter/scriptobjevent.h (+0xC), scripter/scriptobjtransition.h (+0x0),
 // visualfx/transitionman.h (+0x10; mScriptVtbl there), scripter/scriptobjcamera.h (+0x0).
 //
-// A FLAT layout, like main/game.h. Evidence tags:
+// A real C++ class (`#pragma interface`: no unit emits its vtable; the equate after the class binds g++'s name to the
+// retail table), the virtuals in the retail slot order; the derived classes still write it out inline. Evidence tags:
 //   [R] retail ctor cScriptObject_cScriptObject__FPvi and dtor cScriptObject__cScriptObject;
 //   [P] the July 2003 preview's inline accessors (tools/layout_xlate.py): GetObjectID lw 0x4 ("seen": the paired
 //       dtor shows 0x4 and 0xC unchanged), GetObjectType lw 0x0;
@@ -32,6 +34,8 @@
 //   [O] SSX On Tour's DWARF (class cScriptObject 0x10: mObjType 0x0, mObjID 0x4, mInUse 0x8).
 
 #include "layout.h"
+
+struct cScriptEntity;
 
 // mObjID of an object the script database has not registered (name ours). [R] the ctor and DeInitScriptObject store
 // it; the dtor deinitialises an object whose mObjID is neither this nor 0.
@@ -56,19 +60,22 @@ struct cScriptObject {
                      //     deinitialises when it is neither -1 nor 0; cScriptObject_GetObjectID
     int mInUse;      // 0x8 [O] (int there: a use count); [R] ctor 0; [U] OnStartObjectUse +1, OnEndObjectUse -1,
                      //     cScriptObject_IsInUse (> 0)
-    void** mVtbl;    // 0xC [R] cScriptObject_vtbl (ctor and dtor); [P] the paired dtor stores it at 0xC in both builds;
-                     //     [U] PauseObjScript / ResumeObjScript call slots 6 and 7 through it
+    //   the vptr 0xC [R] cScriptObject_vtbl (ctor and dtor); [P] the paired dtor stores it at 0xC in both builds; [U]
+    //       PauseObjScript / ResumeObjScript call slots 6 and 7 through it
 
-    // Methods ([O] On Tour's names), each bound to its retail symbol by an asm label. The virtual ones are declared as
-    // plain members, since the layout above is flat. OnStartObjectUse / OnEndObjectUse return the new use count (On
-    // Tour: void, with an unused playerID).
+    // Methods ([O] On Tour's names), each bound to its retail symbol by an asm label; the virtuals in
+    // cScriptObject_vtbl's slot order. OnStartObjectUse / OnEndObjectUse return the new use count (On Tour: void, with
+    // an unused playerID).
     cScriptObject(int objType) __asm__("cScriptObject_cScriptObject__FPvi");
+    virtual ~cScriptObject();                                                   // 1 (_$_13cScriptObject)
+    virtual void PauseObjScript() __asm__("cScriptObject_PauseObjScript");     // 2
+    virtual void ResumeObjScript() __asm__("cScriptObject_ResumeObjScript");   // 3
+    virtual int OnStartObjectUse() __asm__("cScriptObject_OnStartObjectUse__FPv"); // 4
+    virtual int OnEndObjectUse() __asm__("cScriptObject_OnEndObjectUse__FPv");     // 5
+    virtual int GetNumScriptEntities() = 0;                                     // 6
+    virtual cScriptEntity* GetScriptEntity(int index) = 0;                      // 7
     void InitScriptObject() __asm__("cScriptObject_InitScriptObject");
     void DeInitScriptObject() __asm__("cScriptObject_DeInitScriptObject");
-    void PauseObjScript() __asm__("cScriptObject_PauseObjScript");
-    void ResumeObjScript() __asm__("cScriptObject_ResumeObjScript");
-    int OnStartObjectUse() __asm__("cScriptObject_OnStartObjectUse__FPv");
-    int OnEndObjectUse() __asm__("cScriptObject_OnEndObjectUse__FPv");
     int GetObjectID() __asm__("cScriptObject_GetObjectID");
     bool IsInUse() __asm__("cScriptObject_IsInUse");
 };
@@ -76,7 +83,7 @@ struct cScriptObject {
 CHECK_OFFSET(cScriptObject, mObjType, 0x0);
 CHECK_OFFSET(cScriptObject, mObjID, 0x4);
 CHECK_OFFSET(cScriptObject, mInUse, 0x8);
-CHECK_OFFSET(cScriptObject, mVtbl, 0xC);
 CHECK_SIZE(cScriptObject, 0x10);
+__asm__("_vt$13cScriptObject = cScriptObject_vtbl");   // g++'s name for the retail vtable
 
 #endif /* SCRIPTER_SCRIPTOBJ_H */

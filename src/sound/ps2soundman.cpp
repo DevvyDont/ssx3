@@ -142,7 +142,7 @@ INCLUDE_ASM("sound/ps2soundman", cSndPlayOpts__cSndPlayOpts);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
-extern "C" void cSoundSys__cSoundSys(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags) __asm__("_$_9cSoundSys");
 
 struct sSmVEntry97C0 {
     short delta;

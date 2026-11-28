@@ -3064,21 +3064,20 @@ extern "C" void cGame_postUpdateOnline(void) {
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGame_updateScreenFade);
 #ifdef SKIP_ASM
-extern "C" void cFadeScreen_update(void *);
-
 /**
  * Advances the game's screen fade and reports whether the game may update.
  *
- * Calls cFadeScreen_update (cGame's base). When the application's word at +0x4 (its cAppMan base) is set, it sets the
- * fade's ending flag (+0x8) and returns false. cGame_update has the same code inline.
+ * Runs its fade's update (cFadeScreen::update, cGame's base). When the application's next module (LoadingModule, its
+ * cAppMan base) is set, it sets the fade's ending flag (IsEnding) and returns false. cGame_update has the same code
+ * inline.
  *
  * @return true when the game may update, false when it is ending
  */
 bool cGame::updateScreenFade()
 {
-    cFadeScreen_update(this);
+    cFadeScreen::update();
     if (SSXApp->LoadingModule != 0) {
-        unk_08 = 1;
+        IsEnding = 1;
         return false;
     }
     return true;

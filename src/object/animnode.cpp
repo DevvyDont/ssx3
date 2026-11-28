@@ -16,26 +16,9 @@ INCLUDE_ASM("object/animnode", cAnimNode_setAnimMeshCache);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern "C" void cAnimFrame_init(void* self);
-extern "C" void cMeshAnimFrame_init(void* self);
 extern "C" void cAnimFrame_setAnimRecord(void* self, void* src);
 extern char str_IntersectInfo[];
 extern char str_MeshVelocity[];
-extern void* cMeshAnimFrame_vtbl[];
-extern void* cAnimFrame_vtbl[];
-
-// cMeshAnimFrame's constructor as new[] inlines it per element: the cAnimFrame part first, then its own. Ctor only;
-// the sized operator delete[] makes new[] store the element count.
-struct cMeshAnimFrameCtor : cMeshAnimFrame {
-    cMeshAnimFrameCtor()
-    {
-        mVtbl = cAnimFrame_vtbl;
-        cAnimFrame_init(this);
-        mVtbl = cMeshAnimFrame_vtbl;
-        cMeshAnimFrame_init(this);
-    }
-    void operator delete[](void* p, unsigned int size);
-};
 
 
 
@@ -62,7 +45,7 @@ void cAnimNode::setAnimMeshCache()
     }
     if (NumAnimMeshes != 0) {
         cMeshAnimFrame*& frames = AnimFrames;
-        frames = new (str_IntersectInfo, 0x20000000, 0) cMeshAnimFrameCtor[NumAnimMeshes];
+        frames = new (str_IntersectInfo, 0x20000000, 0) cMeshAnimFrame[NumAnimMeshes];
     } else {
         AnimFrames = 0;
     }

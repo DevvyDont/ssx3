@@ -768,10 +768,8 @@ unsigned char cFECustom::getPlayerCtrlMask(int index)
 //100%
 INCLUDE_ASM("fe/fereal", cRealFE_cRealFE);
 #ifdef SKIP_ASM
-extern "C" void* cFE_cFE(void* self);
 void cConnMan_cConnMan(void* p);
 void cGameConnMan_cGameConnMan(void* p);
-extern void* cRealFE_vtbl[];
 
 /**
  * Constructs the front-end module.
@@ -781,26 +779,21 @@ extern void* cRealFE_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cRealFE_cRealFE(cRealFE* self)
+cRealFE::cRealFE()
 {
-    cFE_cFE(self);
-    *(void***)self = cRealFE_vtbl;
-    cConnMan_cConnMan(&self->mConnMan);
-    cGameConnMan_cGameConnMan(&self->mGameConnMan);
-    self->mpMoviePlayer = 0;
-    self->mMovieSkippable = 0;
-    self->mWaitRenderNum = 0;
-    return ((void*)self);
+    cConnMan_cConnMan(&mConnMan);
+    cGameConnMan_cGameConnMan(&mGameConnMan);
+    mpMoviePlayer = 0;
+    mMovieSkippable = 0;
+    mWaitRenderNum = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fereal", cRealFE__cRealFE);
+INCLUDE_ASM("fe/fereal", _$_7cRealFE);
 #ifdef SKIP_ASM
-extern void* cRealFE_vtbl[];
 extern "C" void cGameConnMan__cGameConnMan(void* self, int flags);
 extern "C" void cConnMan__cConnMan(void* self, int flags);
-extern "C" void cFE__cFE(void* self, int flags);
 
 /**
  * Destroys the front-end module.
@@ -811,12 +804,10 @@ extern "C" void cFE__cFE(void* self, int flags);
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
-extern "C" void cRealFE__cRealFE(cRealFE* self, int flags)
+cRealFE::~cRealFE()
 {
-    *(void***)self = cRealFE_vtbl;
-    cGameConnMan__cGameConnMan(&self->mGameConnMan, 2);
-    cConnMan__cConnMan(&self->mConnMan, 2);
-    cFE__cFE(self, flags);
+    cGameConnMan__cGameConnMan(&mGameConnMan, 2);
+    cConnMan__cConnMan(&mConnMan, 2);
 }
 #endif
 
@@ -881,9 +872,7 @@ void cRealFE::gainFocus()
     tClearColourFn** fn = &vt[15].fn;
     (*fn)(vthis(graphicsMan, *delta), tRGBInit(0.0f, 0.0f, 0.0f));
     cFEFlowState_setNumStates(&gFlowState, 86);
-    // slot 8: loadStartState (cRealFE_loadStartState)
-    sVEntry<void(void*)>* selfVt = (sVEntry<void(void*)>*)mVtbl;
-    selfVt[8].fn(vthis(this, selfVt[8]));
+    loadStartState();
 }
 #endif
 

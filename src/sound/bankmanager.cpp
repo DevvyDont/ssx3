@@ -398,11 +398,11 @@ extern "C" cBankManager* cBankManager_cBankManager(cBankManager* self, int embed
     }
     cAsyncSys_cAsyncSys(self);
     cBankMonitor_cBankMonitor(&self->BankMonitor, 0, heap);
-    *(const sBmVtbl**)&self->BankMonitor.mpVSoundSys->mVtbl = &cBankManager_cSoundSys_vtbl;
+    *(const sBmVtbl**)&VPTR_OF(cSoundSys, self->BankMonitor.mpVSoundSys) = &cBankManager_cSoundSys_vtbl;
     if (!embedded) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtbl vt = cBankManager_cSoundSys_vtbl;
-        *(sBmVtbl**)&self->BankMonitor.mpVSoundSys->mVtbl = &vt;
+        *(sBmVtbl**)&VPTR_OF(cSoundSys, self->BankMonitor.mpVSoundSys) = &vt;
         int base = (int)self->BankMonitor.mpVSoundSys - sizeof(cBankManager);
         int thisDelta = (int)self - base;
         vt.e[1].delta = cBankManager_cSoundSys_vtbl.e[1].delta + thisDelta;
@@ -425,7 +425,7 @@ void operator_delete(int* ptr);
 extern "C" void cAsyncSys__cAsyncSys(void* self, int flags);
 extern "C" void _$_13cBankInstance(void* self, int flags);
 extern "C" void cBankMonitor__cBankMonitor(void* self, int flags);
-extern "C" void cSoundSys__cSoundSys(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags) __asm__("_$_9cSoundSys");
 extern cBankManager* gpBankManager;
 extern void* cBankMonitor_vtbl[];
 extern void* cBankManager_vtbl[];
@@ -458,11 +458,11 @@ extern "C" void cBankManager__cBankManager(cBankManager* self, int flags)
 {
     self->BankMonitor.mVtbl = cBankMonitor_vtbl;
     self->mVtbl = cBankManager_vtbl;
-    self->BankMonitor.mpVSoundSys->mVtbl = (void**)&cBankManager_cSoundSys_vtbl_BB10;
+    VPTR_OF(cSoundSys, self->BankMonitor.mpVSoundSys) = (void**)&cBankManager_cSoundSys_vtbl_BB10;
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtblBB10 vt = cBankManager_cSoundSys_vtbl_BB10;
-        self->BankMonitor.mpVSoundSys->mVtbl = (void**)&vt;
+        VPTR_OF(cSoundSys, self->BankMonitor.mpVSoundSys) = (void**)&vt;
         char* base = (char*)self->BankMonitor.mpVSoundSys - sizeof(cBankManager);
         int soundSysAdjust = (char*)self - base;
         vt.e[1].delta = cBankManager_cSoundSys_vtbl_BB10.e[1].delta + soundSysAdjust;

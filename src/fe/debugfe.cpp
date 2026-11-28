@@ -425,10 +425,8 @@ extern "C" void dispatchLobbyEvent(LobbyMan* self, void* ev)
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_cDebugLobbyScreen);
 #ifdef SKIP_ASM
-extern void* cDebugLobbyScreen_vtbl[];
 extern int cBXString_EmptyString;
 extern void* cDebugLobbyScreen_instance;
-extern "C" void* __8cMenuSys(void* self);
 extern "C" void* AccountMenu_AccountMenu(void* self, void* a, void* b);
 extern "C" void* PersonaMenu_PersonaMenu(void* self, void* a, void* b, void* c);
 extern "C" void* LobbyMenu_LobbyMenu(void* self, void* a);
@@ -441,8 +439,9 @@ extern "C" void* AbortMenu_AbortMenu(void* self, void* a);
 /**
  * Constructs the debug front end's lobby screen (cDebugLobbyScreen in the July 2003 preview) with its eight menus.
  *
- * Stores the vtable cDebugLobbyScreen_vtbl (slots: destructor cDebugLobbyScreen__cDebugLobbyScreen, update cDebugLobbyScreen_update, draw cDebugLobbyScreen_draw), zeroes the
- * state at +0x4 and builds the menu system at +0x8 (cMenuSys::cMenuSys). Each menu gets a one-pointer functor holding
+ * Stores the vtable cDebugLobbyScreen_vtbl (slots: destructor cDebugLobbyScreen__cDebugLobbyScreen, update
+ * cDebugLobbyScreen_update, draw cDebugLobbyScreen_draw), zeroes the state mState and builds the menu system mMenuSys
+ * (its constructor, cMenuSys::cMenuSys). Each menu gets a one-pointer functor holding
  * this screen, which its command handler calls back: the account menu "Login Method" at +0x70 (AccountMenu_AccountMenu, Create
  * Account and Login), the "Continue" menu at +0x604 (ContinueMenu_ContinueMenu), "Select Persona" at +0x74C (PersonaMenu_PersonaMenu, with
  * Create Persona and Delete Persona), "Select Room" at +0xD2C (LobbyMenu_LobbyMenu), "Room Occupants" at +0x1044
@@ -454,55 +453,51 @@ extern "C" void* AbortMenu_AbortMenu(void* self, void* a);
  * cDebugLobbyScreen_instance, which dispatchLobbyEvent uses to deliver lobby events. cDebugFE_load allocates it (7192 bytes, "LobbyMenu") as
  * its second screen.
  *
- * @return @p self
  */
-extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
+cDebugLobbyScreen::cDebugLobbyScreen()
+    : mState(0)
 {
-    *(void***)self = cDebugLobbyScreen_vtbl;
-    self->mState = 0;
-    __8cMenuSys(&self->mMenuSys);
     cDebugLobbyScreen::OnCreate onCreate;
-    onCreate.unk_0 = (cDebugLobbyScreen*)((char*)self);
+    onCreate.unk_0 = this;
     cDebugLobbyScreen::OnCreate onLogin;
-    onLogin.unk_0 = (cDebugLobbyScreen*)((char*)self);
-    AccountMenu_AccountMenu(&self->mLoginMenu, &onCreate, &onLogin);
-    ContinueMenu_ContinueMenu(&self->mContinueMenu);
+    onLogin.unk_0 = this;
+    AccountMenu_AccountMenu(&mLoginMenu, &onCreate, &onLogin);
+    ContinueMenu_ContinueMenu(&mContinueMenu);
     cDebugLobbyScreen::OnCreate onSelectPersona;
-    onSelectPersona.unk_0 = (cDebugLobbyScreen*)((char*)self);
+    onSelectPersona.unk_0 = this;
     cDebugLobbyScreen::OnCreate onCreatePersona;
-    onCreatePersona.unk_0 = (cDebugLobbyScreen*)((char*)self);
+    onCreatePersona.unk_0 = this;
     cDebugLobbyScreen::OnCreate onDeletePersona;
-    onDeletePersona.unk_0 = (cDebugLobbyScreen*)((char*)self);
-    PersonaMenu_PersonaMenu(&self->mPersonaMenu, &onSelectPersona, &onCreatePersona, &onDeletePersona);
+    onDeletePersona.unk_0 = this;
+    PersonaMenu_PersonaMenu(&mPersonaMenu, &onSelectPersona, &onCreatePersona, &onDeletePersona);
     cDebugLobbyScreen::OnCreate onSelectRoom;
-    onSelectRoom.unk_0 = (cDebugLobbyScreen*)((char*)self);
-    LobbyMenu_LobbyMenu(&self->mRoomMenu, &onSelectRoom);
+    onSelectRoom.unk_0 = this;
+    LobbyMenu_LobbyMenu(&mRoomMenu, &onSelectRoom);
     cDebugLobbyScreen::OnCreate onSelectUser;
-    onSelectUser.unk_0 = (cDebugLobbyScreen*)((char*)self);
+    onSelectUser.unk_0 = this;
     cDebugLobbyScreen::OnCreate onChat;
-    onChat.unk_0 = (cDebugLobbyScreen*)((char*)self);
-    RoomMenu_RoomMenu(&self->mOccupantsMenu, &onSelectUser, &onChat);
+    onChat.unk_0 = this;
+    RoomMenu_RoomMenu(&mOccupantsMenu, &onSelectUser, &onChat);
     cDebugLobbyScreen::OnCreate onMessage;
-    onMessage.unk_0 = (cDebugLobbyScreen*)((char*)self);
-    ChatMenu_ChatMenu(&self->mChatMenu, &onMessage);
+    onMessage.unk_0 = this;
+    ChatMenu_ChatMenu(&mChatMenu, &onMessage);
     cDebugLobbyScreen::OnCreate onAcceptChallenge;
-    onAcceptChallenge.unk_0 = (cDebugLobbyScreen*)((char*)self);
+    onAcceptChallenge.unk_0 = this;
     cDebugLobbyScreen::OnCreate onDeclineChallenge;
-    onDeclineChallenge.unk_0 = (cDebugLobbyScreen*)((char*)self);
-    ChallengeResponseMenu_ChallengeResponseMenu(&self->mChallengedMenu, &onAcceptChallenge, &onDeclineChallenge);
+    onDeclineChallenge.unk_0 = this;
+    ChallengeResponseMenu_ChallengeResponseMenu(&mChallengedMenu, &onAcceptChallenge, &onDeclineChallenge);
     cDebugLobbyScreen::OnCreate onAbortChallenge;
-    onAbortChallenge.unk_0 = (cDebugLobbyScreen*)((char*)self);
-    AbortMenu_AbortMenu(&self->mAbortMenu, &onAbortChallenge);
+    onAbortChallenge.unk_0 = this;
+    AbortMenu_AbortMenu(&mAbortMenu, &onAbortChallenge);
     int emptyText = cBXString_EmptyString;
     cSSXApp* app = SSXApp;
-    self->mUserName = (char*)emptyText;
-    self->mPassword = (char*)emptyText;
-    self->mChallenger = (char*)emptyText;
-    self->mMenuSys.Font = (cFont*)((int)app->DebugFE->Font);
-    self->mMenuSys.Input = (cInput*)((int)app->Inputs[0]);
-    self->mMenuSys.BoxTexture = app->DebugFE->BoxTID;
-    cDebugLobbyScreen_instance = ((char*)self);
-    return ((char*)self);
+    mUserName = (char*)emptyText;
+    mPassword = (char*)emptyText;
+    mChallenger = (char*)emptyText;
+    mMenuSys.Font = (cFont*)((int)app->DebugFE->Font);
+    mMenuSys.Input = (cInput*)((int)app->Inputs[0]);
+    mMenuSys.BoxTexture = app->DebugFE->BoxTID;
+    cDebugLobbyScreen_instance = this;
 }
 #endif
 
@@ -600,7 +595,7 @@ static inline void dtorF_17D3B0(char* sub)
  */
 extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(cDebugLobbyScreen* self, int flags)
 {
-    *(void***)self = cDebugLobbyScreen_vtbl;
+    VPTR_OF(cDebugScreen, self) = cDebugLobbyScreen_vtbl;
     cDebugLobbyScreen_instance = 0;
     cBXString__cBXString(&self->mChallenger, 2);
     cBXString__cBXString(&self->mPassword, 2);
@@ -614,7 +609,7 @@ extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(cDebugLobbyScreen* self, in
     dtorF_17D3B0((char*)&self->mContinueMenu);
     AccountMenu__AccountMenu(&self->mLoginMenu, 2);
     _$_8cMenuSys(&self->mMenuSys, 2);
-    *(void***)self = cDebugScreen_vtbl;
+    VPTR_OF(cDebugScreen, self) = cDebugScreen_vtbl;
     if (flags & 1)
         operator_delete((int*)self);
 }
@@ -1896,9 +1891,7 @@ void cHeartBeat::draw(int tex)
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugFE_cDebugFE);
 #ifdef SKIP_ASM
-extern "C" void cFadeScreen_cFadeScreen(void* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
-extern char cDebugFE_vtbl[];
 
 
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -1907,47 +1900,33 @@ inline void* operator new[](unsigned int, void* p) { return p; }
 /**
  * Constructs the debug front end: the cFadeScreen base, cDebugFE's vtable and a zeroed heartbeat.
  *
- * Runs cFadeScreen_cFadeScreen, stores cDebugFE_vtbl, zeroes the heartbeat at +0x24 (its two vectors at +0x24..+0x30,
- * the 64-point trail at +0x34 through MEM_fill and the head index at +0x234). The screens, font and textures are set
- * later by cDebugFE_load. cSSXApp_startFELoad builds the 0x238-byte DebugFE with it.
- *
- * @return @p self
+ * After the base constructor (cFadeScreen) and the vtable cDebugFE_vtbl, zeroes the heartbeat (its two vectors, the
+ * 64-point trail through MEM_fill and the head index). The screens, font and textures are set later by
+ * cDebugFE_load. cSSXApp_startFELoad builds the 0x238-byte DebugFE with it.
  */
-extern "C" void* cDebugFE_cDebugFE(cDebugFE* self)
+cDebugFE::cDebugFE()
 {
-    cFadeScreen_cFadeScreen(self);
-    *(void**)self = cDebugFE_vtbl;
-    *(int*)&self->HeartBeat = 0;
-    self->HeartBeat.Angle[1] = 0.0f;
-    self->HeartBeat.Phase[0] = 0.0f;
-    self->HeartBeat.Phase[1] = 0.0f;
-    cHeartBeat* list = ((&self->HeartBeat));
+    *(int*)&HeartBeat = 0;
+    HeartBeat.Angle[1] = 0.0f;
+    HeartBeat.Phase[0] = 0.0f;
+    HeartBeat.Phase[1] = 0.0f;
+    cHeartBeat* list = ((&HeartBeat));
     new (((t2Vector*)&list->History[0][0])) t2Vector[64];
     list->HistoryIdx = 0;
     MEM_fill(((t2Vector*)&list->History[0][0]), 0, 0x200);
-    return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/debugfe", cDebugFE__cDebugFE);
+INCLUDE_ASM("fe/debugfe", _$_8cDebugFE);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-extern char cAppModule_vtbl[];
-
 /**
- * Destroys the debug front end: stores the base vtable cAppModule_vtbl at +0x0 and, if asked, frees the object.
+ * Destroys the debug front end: nothing of its own (the inline base destructors store cAppModule's vtable).
  *
  * It does not free the screens, font or textures; cDebugFE_purge does that.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cDebugFE__cDebugFE(cDebugFE* self, int flags)
+cDebugFE::~cDebugFE()
 {
-    *(void**)self = cAppModule_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -2082,21 +2061,16 @@ struct sDebugFE_0017FAD0 {
 /**
  * Releases the debug front end's screens, textures and font, and unregisters both front ends from the app.
  *
- * Deletes the two screens (+0xC, +0x10: debug menu and lobby menu) through their destructor virtual (slot 1, flags
- * 3), zeroes SSXApp->RealFE and SSXApp->DebugFE, frees the two texture ids loaded by cDebugFE_load (+0x20, +0x1C,
- * when >= 0) through GrMan slot 50, and deletes the font (+0x18) with cFont::~cFont(font, 3). The local view calls
+ * Deletes the two screens (Screens: debug menu and lobby menu) through their virtual destructors, zeroes
+ * SSXApp->RealFE and SSXApp->DebugFE, frees the two texture ids loaded by cDebugFE_load (+0x20, +0x1C, when >= 0)
+ * through GrMan slot 50, and deletes the font (+0x18) with cFont::~cFont(font, 3). The local view calls
  * the texture ids snd1C/snd20; they are On Tour's ParticleTID and BoxTID.
  */
 void cDebugFE::purge()
 {
     for (int i = 0; i < 2; i++)
     {
-        char* screen = ((char*)Screens[i]);
-        if (screen != 0)
-        {
-            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)screen;
-            vt[1].fn(vthis(screen, vt[1]), 3);
-        }
+        delete Screens[i];
     }
     cSSXApp* app = SSXApp;
     app->RealFE = 0;
@@ -2118,25 +2092,19 @@ void cDebugFE::purge()
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/debugfe", cDebugFE_update);
 #ifdef SKIP_ASM
-class cFEObjK17FB98 {
-public:
-    virtual void v01();
-    virtual void v02();
-};
-extern "C" void cFadeScreen_update(void* self);
 extern "C" void cHeartBeat_update(cHeartBeat* p);
 
 /**
  * Runs one frame of the debug front end: the fade, the active screen and the heartbeat.
  *
- * Calls cFadeScreen_update (On Tour cFadeScreen::update); while the app's word +0x4 is 0 it updates the active screen
- * (+0x14, virtual slot 2); then cHeartBeat_update (On Tour cHeartBeat::update) on the heartbeat at +0x24.
+ * Runs the fade (cFadeScreen::update); while the app has no module loading it updates the active screen (its
+ * virtual update); then cHeartBeat_update (On Tour cHeartBeat::update) on the heartbeat.
  */
 void cDebugFE::update()
 {
-    cFadeScreen_update(this);
+    cFadeScreen::update();
     if ((int)SSXApp->LoadingModule == 0)
-        ((cFEObjK17FB98*)ActiveScreen)->v02();
+        ActiveScreen->update();
     HeartBeat.update();
 }
 #endif
@@ -2226,9 +2194,7 @@ bool cDebugFE::render()
         setB22_17FBF0(rs_17FBF0((char*)graphicsMan4), 1);
         HeartBeat.draw(ParticleTID);
         setC5_17FBF0(rs_17FBF0((char*)GrMan), 9);
-        void* menu = ActiveScreen;
-        sVEntry<void>* mvt = *(sVEntry<void>**)menu;
-        ((FnV_17FBF0)mvt[3].fn)((char*)menu + mvt[3].delta);
+        ActiveScreen->draw();
     }
     cPS2GraphicsMan* graphicsMan5 = GrMan;
     sVEntry<void>* vt5 = (sVEntry<void>*)VPTR_OF(cGraphicsMan, graphicsMan5);

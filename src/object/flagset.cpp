@@ -1743,7 +1743,7 @@ extern "C" void cAnimNode__cAnimNode(cAnimNode* self, int flags)
         cMeshAnimFrame* frameIter = items + ((int*)items)[-4];
         while (self->AnimFrames != frameIter) {
             frameIter--;
-            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)frameIter->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)VPTR_OF(cAnimFrame, frameIter);
             vt[1].fn(vthis(frameIter, vt[1]), 0);
         }
         cMemMan_free((char*)self->AnimFrames - 0x10);
@@ -2014,8 +2014,7 @@ void cAnimNode::cacheFrame()
         for (i = 0; i < NumAnimMeshes; i++) {
             // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
             cMeshAnimFrame* animFrame = (cMeshAnimFrame*)(i * 0xD0 + (int)AnimFrames);
-            sVEntry<void(void*, float)>* vt = (sVEntry<void(void*, float)>*)animFrame->mVtbl;
-            vt[2].fn(vthis(animFrame, vt[2]), CacheTime);
+            animFrame->update(CacheTime);
         }
     }
     MeshVelocityDirty = 1;

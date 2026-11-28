@@ -1278,8 +1278,6 @@ extern "C" void tMissionMenuQueue_getNextEntry(void* p);
 extern "C" void cSSXAudio_StopRiderLoops(void* p);
 // PORT: the unit defines cGame_activatePauseMenu(char* self); this caller passes a second argument (a1 = 0).
 extern "C" int cGame_activatePauseMenu_pi(void* self, int a) __asm__("cGame_activatePauseMenu");
-// cFadeScreen_update returns nothing (its body has no return value); the unit declares it void*.
-extern "C" void cFadeScreen_update_v(void* self) __asm__("cFadeScreen_update");
 extern "C" int cOVStateManager_allowPauseMenu(void);
 extern "C" void cPadCache_clearAllVibrations(void* p);
 extern "C" void cOVStateManager_triggerPauseMenu(void);
@@ -1383,7 +1381,7 @@ static inline cRider* Rider_2306B8(cAI* ai, int i)
 static inline int canUpdate_2306B8(cGame* self)
 {
     if ((int)SSXApp->LoadingModule != 0) {
-        self->unk_08 = 1;
+        self->IsEnding = 1;
         return 0;
     }
     return 1;
@@ -1509,7 +1507,7 @@ void cGame::update()
         cGameComm_update(cGameComm_mGameComm);
     }
     cSSXScriptEngine_UpdateLoad(ScriptEngine);
-    cFadeScreen_update_v((this));
+    cFadeScreen::update();
     if (canUpdate_2306B8((this)) && updatePause_2306B8((this))) {
         if ((char*)InputSync != 0) {
             cInputSync_preupdate((char*)InputSync);
@@ -1627,7 +1625,6 @@ extern "C" void func_00230E90(void) {
 //100%
 INCLUDE_ASM("main/gameload", cGame_loseFocus);
 #ifdef SKIP_ASM
-extern "C" int cFadeScreen_loseFocus(cFadeScreen* self);
 void cSSXScriptEngine_DeInit(void* self);
 void cBXLoadIndicator_DeInit(void* self);
 
@@ -1652,7 +1649,7 @@ bool cGame::loseFocus()
     if (vt[3].fn(vthis(obj, vt[3])) == 0) {
         return false;
     }
-    if (((cFadeScreen*)this)->cFadeScreen::loseFocus() == 0) {
+    if (!cFadeScreen::loseFocus()) {
         return false;
     }
     GrMan->SetScreenClearColour(tRGBInit(0.0f, 0.0f, 0.0f));

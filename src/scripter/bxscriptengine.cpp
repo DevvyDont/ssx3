@@ -1433,22 +1433,19 @@ bool cScriptEntityCamera::IsMatchingEntity(cScriptPlayerEntity* pEntity, int typ
 }
 #endif
 
-extern void* cScriptObject_vtbl[];
-
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_cScriptObject__FPvi);
 #ifdef SKIP_ASM
 /**
  * Constructs a script object of a given type that is not yet registered in the script database.
  *
- * Stores cScriptObject's vtable (mVtbl), @p objType (mObjType), no database handle (kScriptObjectID_None) and a use
+ * After cScriptObject's vtable, stores @p objType (mObjType), no database handle (kScriptObjectID_None) and a use
  * count (mInUse) of 0.
  *
  * @param objType  the object's script type
  */
 cScriptObject::cScriptObject(int objType)
 {
-    mVtbl = cScriptObject_vtbl;
     mObjType = objType;
     mObjID = kScriptObjectID_None;
     mInUse = 0;
@@ -1456,27 +1453,19 @@ cScriptObject::cScriptObject(int objType)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/bxscriptengine", cScriptObject__cScriptObject);
+INCLUDE_ASM("scripter/bxscriptengine", _$_13cScriptObject);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
 /**
  * Destroys a script object, first removing it from the script database if it is still registered.
  *
  * Restores cScriptObject's vtable. When the database handle (mObjID) is neither -1 nor 0 it calls
  * DeInitScriptObject() and sets the handle to -1.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScriptObject__cScriptObject(cScriptObject* self, int flags)
+cScriptObject::~cScriptObject()
 {
-    self->mVtbl = cScriptObject_vtbl;
-    if (self->mObjID != kScriptObjectID_None && self->mObjID != 0) {
-        self->DeInitScriptObject();
-        self->mObjID = kScriptObjectID_None;
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
+    if (mObjID != kScriptObjectID_None && mObjID != 0) {
+        DeInitScriptObject();
+        mObjID = kScriptObjectID_None;
     }
 }
 #endif
@@ -1534,13 +1523,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_PauseObjScript);
 void cScriptObject::PauseObjScript()
 {
     int i = 0;
-    // vtable slot 6: GetNumScriptEntities
-    sVEntry<int(void*)>* countVtable = (sVEntry<int(void*)>*)mVtbl;
-    int n = countVtable[6].fn(vthis(this, countVtable[6]));
+    int n = GetNumScriptEntities();
     for (; i < n; i++) {
-        // vtable slot 7: GetScriptEntity
-        sVEntry<cScriptEntity*(void*, int)>* entityVtable = (sVEntry<cScriptEntity*(void*, int)>*)mVtbl;
-        entityVtable[7].fn(vthis(this, entityVtable[7]), i)->PauseEntityScript();
+        GetScriptEntity(i)->PauseEntityScript();
     }
 }
 #endif
@@ -1558,13 +1543,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_ResumeObjScript);
 void cScriptObject::ResumeObjScript()
 {
     int i = 0;
-    // vtable slot 6: GetNumScriptEntities
-    sVEntry<int(void*)>* countVtable = (sVEntry<int(void*)>*)mVtbl;
-    int n = countVtable[6].fn(vthis(this, countVtable[6]));
+    int n = GetNumScriptEntities();
     for (; i < n; i++) {
-        // vtable slot 7: GetScriptEntity
-        sVEntry<cScriptEntity*(void*, int)>* entityVtable = (sVEntry<cScriptEntity*(void*, int)>*)mVtbl;
-        entityVtable[7].fn(vthis(this, entityVtable[7]), i)->ResumeEntityScript();
+        GetScriptEntity(i)->ResumeEntityScript();
     }
 }
 #endif

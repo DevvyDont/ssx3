@@ -220,10 +220,7 @@ void cGameViewMan::snapAll()
 {
     unsigned int i;
     for (i = 0; i < m_uiNumView; i++) {
-        cCamera* camera = PlayerCamera[i];
-        cCameraController* controller = camera->Controller;
-        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)controller->mVtbl;
-        vt[4].fn(vthis(controller, vt[4]));
+        PlayerCamera[i]->Controller->snapCurrent();
     }
 }
 #endif
@@ -355,7 +352,7 @@ extern "C" char* cGame_cGame(cGame* self)
     cFadeScreen_cFadeScreen(((char*)self));
     *(int*)&self->AI = 0;
     *(int*)&self->DebugFont = 0;
-    *(void**)&self->mVtbl = cGame_vtbl;
+    VPTR_OF(cAppModule, self) = (void**)cGame_vtbl;
     *(int*)&self->UI = 0;
     *(int*)&self->InputSync = 0;
     cPauseState_StackIdx = 0;

@@ -2347,7 +2347,7 @@ extern void* cScriptObjGS_cScriptObject_vtbl[];
 extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self);
 extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(void* self, int flags);
 extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(void* self, int flags);
-extern "C" void cScriptObject__cScriptObject(void* self, int flags);
+extern "C" void cScriptObject__cScriptObject(void* self, int flags) __asm__("_$_13cScriptObject");
 extern "C" void cDataManager__cDataManager(cDataManager* self, int flags);
 extern "C" void cVidEngine__cVidEngine(void* self, int flags);
 extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags);

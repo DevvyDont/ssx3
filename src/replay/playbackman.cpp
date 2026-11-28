@@ -1313,9 +1313,7 @@ void cReplay::saveFrame(cBxReplayFrame* stream)
     id = cSortObjNode_ObjNodeNoSortIndex;
     out->write((const char*)&id, 4);
     cBE_writeToReplayFrame(cBE_getBE(), out);
-    cGame* game = SSXApp->Game;
-    tSaveSlot* gameVt = (tSaveSlot*)game->mVtbl;
-    gameVt[8].fn(vthis(game, gameVt[8]), out);
+    SSXApp->Game->writeToReplayFrame(out);
     cAI* ai = SSXApp->Game->AI;
     tSaveSlot* aiVt = (tSaveSlot*)ai->mVtbl;
     aiVt[7].fn(vthis(ai, aiVt[7]), out);

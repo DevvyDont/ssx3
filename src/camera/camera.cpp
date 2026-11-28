@@ -257,9 +257,7 @@ extern "C" void* cCamera_updateCamMat(void* self);
  */
 void cCamera::update()
 {
-    cCameraController* controller = Controller;
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)controller->mVtbl;
-    vt[2].fn(vthis(controller, vt[2]));
+    Controller->update();
     cCamera_updateCamMat(this);
 }
 #endif
@@ -3747,7 +3745,7 @@ INCLUDE_ASM("camera/camera", cChaseCameraController__cChaseCameraController);
 #ifdef SKIP_ASM
 extern void* cChaseCameraController_vtbl[];
 void operator_delete(int* ptr);
-extern "C" void cCameraController__cCameraController(void* self, int flags);
+extern "C" void cCameraController__cCameraController(void* self, int flags) __asm__("_$_17cCameraController");
 
 /**
  * Destroys the chase camera controller: frees its rider camera target, then runs the base controller destructor.

@@ -1,11 +1,17 @@
 #ifndef MAIN_GAME_H
 #define MAIN_GAME_H
+#pragma interface
 
 // cGame: the in-game module (one instance, `new (0x22C, "GameModule") cGame` in ssxapp; reached as SSXApp->Game).
 // It owns the subsystems of a running event: AI, world, replay, UI, cameras, streaming, and the game-flow states.
 //
-// A FLAT layout, like ai/rider.h and main/ssxapp.h: every field at its retail offset, no C++ inheritance yet.
-// Member names are EA's, from SSX On Tour's PSP dev-build DWARF (class cGame), placed at retail offsets by:
+// A real C++ class (`#pragma interface`: no unit emits its vtable or inline functions; the equate after the class binds
+// g++'s name to the retail table cGame_vtbl): a cFadeScreen (main/fadescreen.h) : cAppModule, with its overrides
+// virtual in cAppModule's slot order plus slots 8 / 9 writeToReplayFrame / readFromReplayFrame. Its destructor is
+// implicit, as in retail (a declared one, even empty, allocates `this` differently): its out-of-line copy
+// cGame__cGame (main/streampause) is a C function, and so is the constructor cGame_cGame (main/gamerender), which
+// inlines eleven state constructors that are out of line here (main/gamestate.h). Member names are EA's, from SSX
+// On Tour's PSP dev-build DWARF (class cGame), placed at retail offsets by:
 //   [P] the July 2003 preview's inline accessors (getAI = lw 0x18 ... getMenuSys = lw 0xA4), which retail moved by a
 //       constant per block (-0xC up to CrowdMan3d, -0x8 from SurfPropCache to SnowFall, -0xC from SectionMan,
 //       +0x40 in the tail);
@@ -17,6 +23,7 @@
 // words, and has 0x10 more bytes of state objects. Unnamed fields are unk_XXX; rename only with evidence.
 
 #include "layout.h"
+#include "main/fadescreen.h"
 #include "main/gamestate.h"
 
 struct cAI;
@@ -60,10 +67,9 @@ struct FrustumIntersector;
 
 struct cBxReplayFrame;
 
-struct cGame {
-    void** mVtbl;                                // 0x000 [R] _vt$5cGame, stored after the base ctor cFadeScreen_cFadeScreen
-    int unk_04;                                  // 0x004 base class data
-    int unk_08;                                  // 0x008 base class data
+struct cGame : public cFadeScreen {
+    //   the vptr 0x000 [R] cGame_vtbl (_vt$5cGame), stored after the base ctor cFadeScreen_cFadeScreen
+    //   FadeTimer 0x004, IsEnding 0x008: cFadeScreen's (the "base class data")
     cAI* AI;                                     // 0x00C [P] getAI; [R] "AI"
     cWorld* World;                               // 0x010 [P] getWorld; [R] "World"
     cSkyBox* SkyBox;                             // 0x014 [P] getSkyBox
@@ -134,15 +140,21 @@ struct cGame {
     int ControllerUnplugged;                     // 0x224 [P] getControllerUnplugged
     int PauseOwner;                              // 0x228 [O]; [R] the constructor sets it to -1
 
-    // Methods bound to their retail symbols by asm labels.
+    // Methods bound to their retail symbols by asm labels; the virtuals in cGame_vtbl's slot order (slot 1 is the
+    // implicit destructor).
+    virtual void load() __asm__("cGame_load");                                          // 2
+    virtual void purge() __asm__("cGame_purge");                                        // 3
+    virtual bool loseFocus() __asm__("cGame_loseFocus");                                // 4
+    virtual void gainFocus() __asm__("cGame_gainFocus");                                // 5
+    virtual void update() __asm__("cGame_update");                                      // 6
+    virtual bool render() __asm__("cGame_render");                                      // 7
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGame_writeToReplayFrame");    // 8
+    virtual void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGame_readFromReplayFrame");  // 9
     void renderModels(FrustumIntersector* world) __asm__("cGame_renderModels");
     void renderPatches(FrustumIntersector* world) __asm__("cGame_renderPatches");
     void renderFogVolumes(FrustumIntersector* world) __asm__("cGame_renderFogVolumes");
     void renderLightHalos(FrustumIntersector* world, int ViewID) __asm__("cGame_renderLightHalos");
-    void load() __asm__("cGame_load");
     void loadTrack() __asm__("cGame_loadTrack");
-    void purge() __asm__("cGame_purge");
-    void gainFocus() __asm__("cGame_gainFocus");
     void resetWorld() __asm__("cGame_resetWorld");
     void partialRestart() __asm__("cGame_partialRestart");
     void restart() __asm__("cGame_restart");
@@ -154,19 +166,14 @@ struct cGame {
     void stopReplay() __asm__("cGame_stopReplay");
     cTransitionMan* getTransitionMan(int i) __asm__("cGame_getTransitionMan__FPvi");
     cSplashManager* getSplashManager(int i) __asm__("cGame_getSplashManager__FPvi");
-    void update() __asm__("cGame_update");
-    bool loseFocus() __asm__("cGame_loseFocus");
     void updateState() __asm__("cGame_updateState");
     void setState(int iNextState, int startupFlag, int refresh) __asm__("cGame_setState");
     void setPreloadState(int val) __asm__("cGame_setPreloadState__FPvi");
     void cancelPreloadingState() __asm__("cGame_cancelPreloadingState");
     int isPreloadedStateReady() __asm__("cGame_isPreloadedStateReady");
     void doNextState() __asm__("cGame_doNextState");
-    void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGame_writeToReplayFrame");
-    void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGame_readFromReplayFrame");
     bool activatePauseMenu() __asm__("cGame_activatePauseMenu");
     int canUserActivatePauseMenu() __asm__("cGame_canUserActivatePauseMenu");
-    bool render() __asm__("cGame_render");
     int getCurrentState() __asm__("cGame_getCurrentState");
     int getPreviousState() __asm__("cGame_getPreviousState");
     cGameState* getCurrentStateInstance() __asm__("cGame_getCurrentStateInstance");
@@ -237,5 +244,6 @@ CHECK_OFFSET(cGame, mPrevState, 0x1FC);
 CHECK_OFFSET(cGame, mCurrentStateID, 0x214);
 CHECK_OFFSET(cGame, PauseOwner, 0x228);
 CHECK_SIZE(cGame, 0x22C);
+__asm__("_vt$5cGame = cGame_vtbl");   // g++'s name for the retail vtable
 
 #endif /* MAIN_GAME_H */

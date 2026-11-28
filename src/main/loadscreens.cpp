@@ -237,7 +237,6 @@ INCLUDE_ASM("main/loadscreens", cDebugMenuScreen_cDebugMenuScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char cDebugMenuScreen_vtbl[];
 extern char str_mc0[];
 extern int EnableOnline;
 extern int cBENewRaceInterface_bIsBamLocation;
@@ -323,28 +322,26 @@ static inline char* lsEntryName_B1B0(sLSSub_B1B0* s, int i)
  * (kTrackItem), sets the network defaults (port 3658, latency 1/60 s, not host), picks default riders for both players
  * and starts the menu sound.
  *
- * @return @p self
  */
 // Load-screen constructor: sets up the race/player interfaces, picks the active entry and the sound entry.
-extern "C" cDebugMenuScreen* cDebugMenuScreen_cDebugMenuScreen(cDebugMenuScreen* self)
+cDebugMenuScreen::cDebugMenuScreen()
 {
-    (*(void**)&self->mVtbl) = cDebugMenuScreen_vtbl;
-    cBackgroundMan_cBackgroundMan(((char*)&self->BackgroundMan));
-    cTrackFileMan_scanLocations(&(*(sLSSub_B1B0*)&self->TrackFileMan));
-    self->BackgroundMan.loadImages();
+    cBackgroundMan_cBackgroundMan(((char*)&BackgroundMan));
+    cTrackFileMan_scanLocations(&(*(sLSSub_B1B0*)&TrackFileMan));
+    BackgroundMan.loadImages();
     cBEInterface* iface0 = cBE_getInterface_B1B0(cBE_getBE(), 0);
     cBEInterface* iface7 = cBE_getInterface_B1B0(SSXApp->BE, 7);
-    self->CurrentBoard = 0;
-    *(int*)cBE_getBE() = self->CurrentBoard;
-    self->CurrentBoard = 0;
+    CurrentBoard = 0;
+    *(int*)cBE_getBE() = CurrentBoard;
+    CurrentBoard = 0;
     cBENewRaceInterface_setNumberHumans(iface0, 1);
     for (int i = 0; i < 3; i++) {
-        self->LastGamePathGameMode[i] = 4;
+        LastGamePathGameMode[i] = 4;
     }
     cBENewRaceInterface_setGamePath(iface0, 0);
     cBENewRaceInterface_setGameMode(iface0, 4);
     cBENewRaceInterface_setGameEvent(iface0, 0xC);
-    self->currentLocation = 0;
+    currentLocation = 0;
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
     if (EnableOnline != 0) {
         cVoipMan_destroyInstance();
@@ -357,42 +354,43 @@ extern "C" cDebugMenuScreen* cDebugMenuScreen_cDebugMenuScreen(cDebugMenuScreen*
         BuddyMan_createInstance();
         cVoipMan_createInstance();
     }
-    if (lsSubLoaded_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan)) != 0) {
-        if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].active == 0) {
-            self->currentLocation = cTrackFileMan_getNextWCBAMStartLocation_ls(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation);
+    if (lsSubLoaded_B1B0(&(*(sLSSub_B1B0*)&TrackFileMan)) != 0) {
+        if ((*(sLSSub_B1B0*)&TrackFileMan).e[currentLocation].active == 0) {
+            currentLocation =
+                cTrackFileMan_getNextWCBAMStartLocation_ls(&(*(sLSSub_B1B0*)&TrackFileMan), currentLocation);
         }
     } else {
-        cDebugMenuScreen_setGamePath(self, 1);
+        cDebugMenuScreen_setGamePath(this, 1);
     }
-    int idx = self->currentLocation;
-    int kind = (*(sLSSub_B1B0*)&self->TrackFileMan).e[idx].kind;
+    int idx = currentLocation;
+    int kind = (*(sLSSub_B1B0*)&TrackFileMan).e[idx].kind;
     cBENewRaceInterface_bIsBamLocation = 1;
     cBENewRaceInterface_newRace.iLocationIdx = kind;
-    if ((*(sLSSub_B1B0*)&self->TrackFileMan).e[self->currentLocation].f84 == 0) {
+    if ((*(sLSSub_B1B0*)&TrackFileMan).e[currentLocation].f84 == 0) {
         cBENewRaceInterface_bIsBamLocation = 0;
     }
     if (kind == kLOCATION_DEBUG) {
-        cBENewRaceInterface_setDebugLocationFile(iface0, lsEntryName_B1B0(&(*(sLSSub_B1B0*)&self->TrackFileMan), self->currentLocation));
+        cBENewRaceInterface_setDebugLocationFile(iface0,
+                                                 lsEntryName_B1B0(&(*(sLSSub_B1B0*)&TrackFileMan), currentLocation));
     }
-    self->SelectedItem = cDebugMenuScreen::kTrackItem;
+    SelectedItem = cDebugMenuScreen::kTrackItem;
     cBENetworkInterface_networkOpt.fLatency = 0.016666668f;
     cBENetworkInterface_networkOpt.iPort = 3658;
     cBENetworkInterface_networkOpt.bIsHost = 0;
     iface7->submit();
-    self->NetworkMode = 0;
-    self->CurrentPlaylist = 0;
-    self->CurrentBack = -1;
+    NetworkMode = 0;
+    CurrentPlaylist = 0;
+    CurrentBack = -1;
     cBEInterface* iface1 = cBE_getInterface_B1B0(cBE_getBE(), 1);
     cBENewPlayerInterface_setPlayerCtrlID(iface1, 0, 0);
     cBENewPlayerInterface_setPlayerCtrlID(iface1, 1, 1);
-    self->CurrentChar = 2;
+    CurrentChar = 2;
     cBENewPlayerInterface_setPlayerCharID(iface1, 0, 2);
-    self->CurrentMap = cBENewPlayerInterface_getControllerMapping(iface1, 0);
+    CurrentMap = cBENewPlayerInterface_getControllerMapping(iface1, 0);
     void* snd = cAudioInterface_bxAudio();
-    cSSXAudio_SelectPlayList(snd, (char*)cAudioInterface_bxAudio() + (self->CurrentPlaylist * 0x14 + 0x60A4));
+    cSSXAudio_SelectPlayList(snd, (char*)cAudioInterface_bxAudio() + (CurrentPlaylist * 0x14 + 0x60A4));
     iface1->submit();
     iface0->submit();
-    return self;
 }
 #endif
 

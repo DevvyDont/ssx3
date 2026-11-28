@@ -1,5 +1,6 @@
 #ifndef SOUND_SOUNDSYS_H
 #define SOUND_SOUNDSYS_H
+#pragma interface
 
 // cSoundSys: the root of the EA sound classes: owns the platform sound manager (cPS2SoundManager) and sets the audio
 // mode. It is a VIRTUAL base of cSndPlayOpts / cMonitor / cBankMonitor / cBankManager / cBankSys / cStreamSys / ...,
@@ -10,12 +11,14 @@
 // Size 0x8 [R]: in a complete cBankSys it occupies this + 0x10 .. + 0x18 (cBankManager follows at + 0x18); [O] 0x8.
 // The ctor cSoundSys_cSoundSys stores cSoundSys_vtbl (0x483C00: dtor, SetMode) at 0x4 and itself in SoundSys.
 //
-// A FLAT layout, like main/game.h. Evidence tags:
+// A real C++ class (`#pragma interface`: no unit emits its vtable; the equate after the class binds g++'s name to the
+// retail table); the classes that have it as a virtual base still reach it through their flat views. Evidence tags:
 //   [R] the constructor cSoundSys_cSoundSys / destructor cSoundSys__cSoundSys;
 //   [O] SSX On Tour's DWARF (class cSoundSys: cSoundManager* pManager at 0x0, size 0x8);
 //   [U] how the retail methods use the field.
 
 #include "layout.h"
+#include "bx/memman.h"     // the destructor's delete (__builtin_delete)
 
 struct cPS2SoundManager;
 
@@ -34,15 +37,18 @@ enum eSOUNDMANAGER_SETMODE {
 
 struct cSoundSys {
     cPS2SoundManager* pManager; // 0x0 [O] cSoundSys::pManager (On Tour type cSoundManager*); [R] ctor = cSoundManager::Construct() (cSoundManager_Construct, a cPS2SoundManager) and calls its Init; dtor calls its Shutdown and deletes it; [U] SetMode (cSoundSys_SetMode) calls its slot 2
-    void** mVtbl;               // 0x4 [R] cSoundSys_vtbl (ctor/dtor); the classes that have it as a virtual base point it at their own copies (e.g. D_00483A60 in cBankSys)
+    //   the vptr 0x4 [R] cSoundSys_vtbl (ctor/dtor); the classes that have it as a virtual base point it at their own
+    //       copies (e.g. D_00483A60 in cBankSys)
 
-    // Methods bound to their retail symbols by asm labels.
-    int SetMode(int mode) __asm__("cSoundSys_SetMode");
+    // Methods bound to their retail symbols by asm labels; the virtuals in cSoundSys_vtbl's slot order.
+    cSoundSys(int audioMode) __asm__("cSoundSys_cSoundSys");
+    virtual ~cSoundSys();                                           // 1 (_$_9cSoundSys)
+    virtual int SetMode(int mode) __asm__("cSoundSys_SetMode");     // 2
 };
 
 CHECK_OFFSET(cSoundSys, pManager, 0x0);
-CHECK_OFFSET(cSoundSys, mVtbl, 0x4);
 CHECK_SIZE(cSoundSys, 0x8);
+__asm__("_vt$9cSoundSys = cSoundSys_vtbl");   // g++'s name for the retail vtable
 
 // The current sound system: cSoundSys_cSoundSys stores itself here, cSoundSys__cSoundSys clears it. EA name unknown.
 // [U] SndRand (cSoundSys_SndRand) is called with it.

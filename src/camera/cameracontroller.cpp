@@ -7,7 +7,6 @@
 //100%
 INCLUDE_ASM("camera/cameracontroller", cCameraController_cCameraController);
 #ifdef SKIP_ASM
-extern void* cCameraController_vtbl[];
 extern char str_Algorithm_List[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cCameraAlgoList_cCameraAlgoList(void* self);
@@ -15,47 +14,37 @@ void* cCameraAlgoList_cCameraAlgoList(void* self);
 /**
  * Constructs the camera controller base for a camera, with an empty algorithm list and no input.
  *
- * Stores cCameraController's vtable at +0x14, allocates the 8-byte "Algorithm List" (AlgorithmList, +0x8),
- * stores @p camera at +0x10 and zeroes Input (+0xC), Type (+0x0) and BlendType (+0x4).
+ * After cCameraController's vtable, allocates the 8-byte "Algorithm List" (AlgorithmList), stores @p camera and
+ * zeroes Input, Type and BlendType.
  *
  * @param camera  the owning cCamera
- * @return @p self
  */
-extern "C" void* cCameraController_cCameraController(cCameraController* self, int camera)
+cCameraController::cCameraController(cCamera* camera)
 {
-    self->mVtbl = cCameraController_vtbl;
-    self->AlgorithmList = (cCameraAlgoList*)cCameraAlgoList_cCameraAlgoList(cMemMan_alloc(8, str_Algorithm_List, 0x20000000, 0));
-    self->Camera = (cCamera*)camera;
-    self->Input = 0;
-    self->Type = 0;
-    self->BlendType = 0;
-    return ((void*)self);
+    AlgorithmList =
+        (cCameraAlgoList*)cCameraAlgoList_cCameraAlgoList(cMemMan_alloc(8, str_Algorithm_List, 0x20000000, 0));
+    Camera = camera;
+    Input = 0;
+    Type = 0;
+    BlendType = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameracontroller", cCameraController__cCameraController);
+INCLUDE_ASM("camera/cameracontroller", _$_17cCameraController);
 #ifdef SKIP_ASM
-extern void* cCameraController_vtbl[];
 extern "C" void _$_15cCameraAlgoList(void* p, int mode);
-void operator_delete(int* ptr);
 
 /**
  * Destroys a camera controller: deletes its algorithm list, then frees the controller when asked to.
  *
- * Restores cCameraController's vtable at +0x14 and destroys AlgorithmList (+0x8) with flags 3 when it is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Restores cCameraController's vtable and destroys AlgorithmList (flags 3) when it is set.
  */
-extern "C" void cCameraController__cCameraController(cCameraController* self, int flags)
+cCameraController::~cCameraController()
 {
-    self->mVtbl = cCameraController_vtbl;
-    void* algoList = self->AlgorithmList;
+    void* algoList = AlgorithmList;
     if (algoList != 0) {
         delete (cCameraAlgoList*)algoList;
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
     }
 }
 #endif
@@ -148,11 +137,9 @@ void* cCameraController::clearAlgorithms()
 //100%
 INCLUDE_ASM("camera/cameracontroller", cManualCameraController_cManualCameraController);
 #ifdef SKIP_ASM
-extern void* cManualCameraController_vtbl[];
 extern char str_Manual_Cam_Algo[];
 extern char str_Editor_Cam_Algo[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cCameraController_cCameraController(cCameraController* self, int a1);
 extern "C" void* cManualCameraAlgorithm_cManualCameraAlgorithm(void* self);
 extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(void* self);
 extern "C" void cManualCameraController_setCurrentAlgorithmType(cManualCameraController* self, int msg);
@@ -161,69 +148,60 @@ extern "C" void cManualCameraController_setCurrentAlgorithmType(cManualCameraCon
  * Constructs a manual camera controller with its own manual and editor camera algorithms, starting in the
  * manual one.
  *
- * Runs the cCameraController constructor, installs cManualCameraController's vtable (+0x14), sets Type to 1,
- * allocates the 0x40-byte "Manual Cam Algo" (+0x18) and "Editor Cam Algo" (+0x1C) and selects algorithm type
- * 0x51 with cManualCameraController_setCurrentAlgorithmType().
+ * After the cCameraController constructor and cManualCameraController's vtable, sets Type to 1, allocates the
+ * 0x40-byte "Manual Cam Algo" (ManualAlgo) and "Editor Cam Algo" (EditorAlgo) and selects algorithm type 0x51 with
+ * setCurrentAlgorithmType().
  *
  * @param camera  the owning cCamera
- * @return @p self
  */
-extern "C" void* cManualCameraController_cManualCameraController(cManualCameraController* self, int camera)
+cManualCameraController::cManualCameraController(cCamera* camera)
+    : cCameraController(camera)
 {
-    cCameraController_cCameraController((cCameraController*)self, camera);
-    self->mVtbl = cManualCameraController_vtbl;
-    self->Type = 1;
-    self->ManualAlgo = (cManualCameraAlgorithm*)cManualCameraAlgorithm_cManualCameraAlgorithm(cMemMan_alloc(0x40, str_Manual_Cam_Algo, 0x20000000, 0));
-    self->EditorAlgo = (cEditorCameraAlgorithm*)cEditorCameraAlgorithm_cEditorCameraAlgorithm(cMemMan_alloc(0x40, str_Editor_Cam_Algo, 0x20000000, 0));
-    self->setCurrentAlgorithmType(81);
-    return ((void*)self);
+    Type = 1;
+    ManualAlgo = (cManualCameraAlgorithm*)cManualCameraAlgorithm_cManualCameraAlgorithm(
+        cMemMan_alloc(0x40, str_Manual_Cam_Algo, 0x20000000, 0));
+    EditorAlgo = (cEditorCameraAlgorithm*)cEditorCameraAlgorithm_cEditorCameraAlgorithm(
+        cMemMan_alloc(0x40, str_Editor_Cam_Algo, 0x20000000, 0));
+    setCurrentAlgorithmType(81);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameracontroller", cManualCameraController__cManualCameraController);
+INCLUDE_ASM("camera/cameracontroller", _$_23cManualCameraController);
 #ifdef SKIP_ASM
-extern void* cManualCameraController_vtbl[];
-extern "C" void cCameraController__cCameraController(cCameraController* self, int flags);
 
 /**
  * Destroys the manual camera controller: deletes its manual and editor algorithms, then runs the base destructor.
  *
- * Restores cManualCameraController_vtbl, deletes ManualAlgo and EditorAlgo (their virtual destructor, slot 1, flags 3)
- * when set, and passes @p flags on to cCameraController__cCameraController.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
+ * Restores cManualCameraController_vtbl and deletes ManualAlgo and EditorAlgo (their virtual destructors) when set;
+ * the base destructor ~cCameraController follows.
  */
-extern "C" void cManualCameraController__cManualCameraController(cManualCameraController* self, int flags)
+cManualCameraController::~cManualCameraController()
 {
-    self->mVtbl = cManualCameraController_vtbl;
-    cCameraAlgorithm* manualAlgo = self->ManualAlgo;
+    cCameraAlgorithm* manualAlgo = ManualAlgo;
     if (manualAlgo != 0) {
         delete manualAlgo;
     }
-    cCameraAlgorithm* editorAlgo = self->EditorAlgo;
+    cCameraAlgorithm* editorAlgo = EditorAlgo;
     if (editorAlgo != 0) {
         delete editorAlgo;
     }
-    cCameraController__cCameraController((cCameraController*)self, flags);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/cameracontroller", cManualCameraController_snap);
 #ifdef SKIP_ASM
-extern "C" void cCameraController_snap(void* self);
-
 /**
  * Snaps the camera to a subject: the base controller's snap, then the manual algorithm's.
  *
- * Calls cCameraController_snap (On Tour cCameraController::snap) and the snap virtual (slot 3) of ManualAlgo.
+ * Calls cCameraController::snap and the snap virtual (slot 3) of ManualAlgo.
  *
  * @param subjectID  the subject to snap to (On Tour subjectID), passed only to the manual algorithm
  */
 void cManualCameraController::snap(int subjectID)
 {
-    cCameraController_snap(this);
+    cCameraController::snap(subjectID);
     ManualAlgo->snap(subjectID);
 }
 #endif
@@ -242,17 +220,15 @@ public:
     virtual void update();
 };
 
-extern "C" void cCameraController_snapCurrent(cCameraController* self);
-
 /**
  * Snaps the camera to its current subject: the base controller's snapCurrent, then the manual algorithm's.
  *
- * Calls cCameraController_snapCurrent (On Tour cCameraController::snapCurrent) and the snapCurrent virtual (slot 4) of ManualAlgo
+ * Calls cCameraController::snapCurrent and the snapCurrent virtual (slot 4) of ManualAlgo
  * (+0x18).
  */
 void cManualCameraController::snapCurrent()
 {
-    ((cCameraController*)this)->snapCurrent();
+    cCameraController::snapCurrent();
     ((cCamCtrlVObj*)ManualAlgo)->snapCurrent();
 }
 #endif

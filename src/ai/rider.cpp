@@ -192,7 +192,7 @@ extern "C" cSSXAudio* cAudioInterface_bxAudio();
 // PORT: cSSXAudio_RiderDeleted takes (mgr, rider); the mangled name says one void* param.
 void cSSXAudio_RiderDeleted_impl(void* mgr, void* rider) __asm__("cSSXAudio_RiderDeleted__FPv");
 extern "C" void cScriptObject_DeInitScriptObject(void* p);
-extern "C" void cScriptObject__cScriptObject(void* p, int flags);
+extern "C" void cScriptObject__cScriptObject(void* p, int flags) __asm__("_$_13cScriptObject");
 extern "C" void cAnimModel__cAnimModel(void* p, int flags);
 extern "C" void cRiderSphereTree__cRiderSphereTree(void* p, int flags);
 extern "C" void _$_13cAirPredictor(void* p, int flags);
@@ -1372,7 +1372,7 @@ void cRider::cleanupAfterPutAt(int notify)
         char* sub = (char*)&VPTR_AT(this, sizeof(cRiderState));
         sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
         cCameraController* ctrl = SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
-        sVEntry<void(void*, int)>* vtB = (sVEntry<void(void*, int)>*)ctrl->mVtbl; // slot 3: snap(subjectID)
+        sVEntry<void(void*, int)>* vtB = (sVEntry<void(void*, int)>*)VPTR_OF(cCameraController, ctrl); // slot 3: snap
         void* objB = vthis(ctrl, vtB[3]);
         vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
     }
@@ -4854,7 +4854,7 @@ void cRider::transport(t4Matrix* mat)
     char* sub = (char*)&VPTR_AT(this, sizeof(cRiderState));
     sVEntry<int(void*)>* vtA = *(sVEntry<int(void*)>**)sub;
     cCameraController* ctrl = SSXApp->Game->ViewMan->PlayerCamera[0]->Controller;
-    sVEntry<void(void*, int)>* vtB = (sVEntry<void(void*, int)>*)ctrl->mVtbl; // slot 3: snap(subjectID)
+    sVEntry<void(void*, int)>* vtB = (sVEntry<void(void*, int)>*)VPTR_OF(cCameraController, ctrl); // slot 3: snap
     void* objB = vthis(ctrl, vtB[3]);
     vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
     float len = Length_3210(*(sVec4*)&mVelocity);

@@ -98,12 +98,12 @@ extern "C" char* cBankSys_cBankSys(cBankSys* self, int embedded, int count, int 
         cSoundSys_cSoundSys(soundSys, heap);
         cBankManager_cBankManager(self->mpVBankManager, 0, count, heap);
     }
-    self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_00483A60_bs;
+    VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_00483A60_bs;
     self->mpVBankManager->BankMonitor.mVtbl = (void**)cBankMonitor_vtbl;
     self->mpVBankManager->mVtbl = (void**)&D_00483A80_bs;
     if (!embedded) {
         sSndBsVt4 vtbl1 = D_00483A60_bs;
-        self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&vtbl1;
+        VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&vtbl1;
         char* base1 = (char*)self->mpVBankManager->BankMonitor.mpVSoundSys - 0x10;
         int adj1 = ((char*)self) - base1;
         vtbl1.e[1].delta = D_00483A60_bs.e[1].delta + adj1;
@@ -127,7 +127,7 @@ INCLUDE_ASM("sound/soundsys", cBankSys__cBankSys);
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
-extern "C" void cSoundSys__cSoundSys(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags) __asm__("_$_9cSoundSys");
 
 struct sSndDtVtEnt {
     short delta;
@@ -160,12 +160,12 @@ extern char cBankMonitor_vtbl[];
 extern "C" void cBankSys__cBankSys(cBankSys* self, int flags)
 {
     self->mVtbl = (void**)cBankSys_vtbl;
-    self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_00483A60;
+    VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_00483A60;
     self->mpVBankManager->BankMonitor.mVtbl = (void**)cBankMonitor_vtbl;
     self->mpVBankManager->mVtbl = (void**)&D_00483A80;
     if (flags == 0) {
         sSndDtVt4 soundSysVtbl = D_00483A60;
-        self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&soundSysVtbl;
+        VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&soundSysVtbl;
         char* soundSysBase = (char*)self->mpVBankManager->BankMonitor.mpVSoundSys - 0x10;
         int adj1 = ((char*)self) - soundSysBase;
         soundSysVtbl.e[1].delta = D_00483A60.e[1].delta + adj1;
@@ -12119,12 +12119,12 @@ extern "C" char* cCrowdSys_cCrowdSys(cCrowdSys* self, int embedded, int count, i
         cBankManager_cBankManager(self->mpVBankManager, 0, count, heap);
     }
     cMidiSys_cMidiSys((cMidiSys*)self, 0, count, heap);
-    self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_00483818_69;
+    VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_00483818_69;
     self->mpVBankManager->BankMonitor.mVtbl = (void**)cBankMonitor_vtbl;
     self->mpVBankManager->mVtbl = (void**)&D_00483838_69;
     if (!embedded) {
         sSnd69Vt4 soundSysVtbl = D_00483818_69;
-        self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&soundSysVtbl;
+        VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&soundSysVtbl;
         char* soundSysBase = (char*)self->mpVBankManager->BankMonitor.mpVSoundSys - 0x118;
         int adj1 = ((char*)self) - soundSysBase;
         soundSysVtbl.e[1].delta = D_00483818_69.e[1].delta + adj1;
@@ -12147,7 +12147,7 @@ extern "C" char* cCrowdSys_cCrowdSys(cCrowdSys* self, int embedded, int count, i
 INCLUDE_ASM("sound/soundsys", cCrowdSys__cCrowdSys);
 #ifdef SKIP_ASM
 extern "C" void cBankManager__cBankManager(void* self, int flags);
-extern "C" void cSoundSys__cSoundSys(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags) __asm__("_$_9cSoundSys");
 void operator_delete(int*);
 extern "C" void _$_15tCrowdEventData(tCrowdEventData* self, int flags);
 extern "C" void cCrowdSys_Shutdown(cCrowdSys* self);
@@ -12184,12 +12184,12 @@ extern const sSnd6BVt7 D_00483838_6B __asm__("D_00483838");
 extern "C" void cCrowdSys__cCrowdSys(cCrowdSys* self, int flags)
 {
     self->mVtbl = (void**)cCrowdSys_vtbl;
-    self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_00483818_6B;
+    VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_00483818_6B;
     self->mpVBankManager->BankMonitor.mVtbl = (void**)cBankMonitor_vtbl;
     self->mpVBankManager->mVtbl = (void**)&D_00483838_6B;
     if (flags == 0) {
         sSnd6BVt4 soundSysVtbl = D_00483818_6B;
-        self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&soundSysVtbl;
+        VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&soundSysVtbl;
         char* soundSysBase = (char*)self->mpVBankManager->BankMonitor.mpVSoundSys - 0x118;
         int adj1 = ((char*)self) - soundSysBase;
         soundSysVtbl.e[1].delta = D_00483818_6B.e[1].delta + adj1;
@@ -13291,12 +13291,12 @@ extern "C" char* cMidiSys_cMidiSys(cMidiSys* self, int embedded, int count, int 
         cBankManager_cBankManager(self->mpVBankManager, 0, count, heap);
     }
     cBankSys_cBankSys((cBankSys*)self, 0, count, heap);
-    self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_004839F0_ct;
+    VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_004839F0_ct;
     self->mpVBankManager->BankMonitor.mVtbl = (void**)cBankMonitor_vtbl;
     self->mpVBankManager->mVtbl = (void**)&D_00483A10_ct;
     if (!embedded) {
         sSndCtVt4 vtbl1 = D_004839F0_ct;
-        self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&vtbl1;
+        VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&vtbl1;
         char* base1 = (char*)self->mpVBankManager->BankMonitor.mpVSoundSys - 0x14;
         int adj1 = ((char*)self) - base1;
         vtbl1.e[1].delta = D_004839F0_ct.e[1].delta + adj1;
@@ -13320,7 +13320,7 @@ INCLUDE_ASM("sound/soundsys", cMidiSys__cMidiSys);
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
-extern "C" void cSoundSys__cSoundSys(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags) __asm__("_$_9cSoundSys");
 extern "C" void cBankSys__cBankSys(cBankSys* self, int flags);
 extern "C" void SNDmidirestore();
 
@@ -13355,12 +13355,12 @@ extern char cBankMonitor_vtbl[];
 extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags)
 {
     self->mVtbl = (void**)cBankSys_vtbl;
-    self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_004839F0;
+    VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_004839F0;
     self->mpVBankManager->BankMonitor.mVtbl = (void**)cBankMonitor_vtbl;
     self->mpVBankManager->mVtbl = (void**)&D_00483A10;
     if (flags == 0) {
         sSndDtBVt4 soundSysVtbl = D_004839F0;
-        self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&soundSysVtbl;
+        VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&soundSysVtbl;
         char* soundSysBase = (char*)self->mpVBankManager->BankMonitor.mpVSoundSys - 0x14;
         int adj1 = ((char*)self) - soundSysBase;
         soundSysVtbl.e[1].delta = D_004839F0.e[1].delta + adj1;

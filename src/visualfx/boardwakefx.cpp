@@ -4855,7 +4855,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan__cTransitionMan);
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
 extern "C" void cScriptObject_DeInitScriptObject(void* self);
-extern "C" void cScriptObject__cScriptObject(void* self, int flags);
+extern "C" void cScriptObject__cScriptObject(void* self, int flags) __asm__("_$_13cScriptObject");
 extern "C" void cObjNode__cObjNode(void* self, int flags) __asm__("_$_8cObjNode");
 
 /**

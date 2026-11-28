@@ -75,7 +75,7 @@ extern "C" void* cScriptCameraController_cScriptCameraController(cScriptCameraCo
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController__cScriptCameraController);
 #ifdef SKIP_ASM
 extern "C" void cScriptObject_DeInitScriptObject(void* p);
-extern "C" void cCameraController__cCameraController(void* self, int flags);
+extern "C" void cCameraController__cCameraController(void* self, int flags) __asm__("_$_17cCameraController");
 void cMemMan_free(void* p);
 extern void* cScriptCameraController_vtbl[];
 

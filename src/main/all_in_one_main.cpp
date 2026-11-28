@@ -1295,7 +1295,7 @@ extern void* cDebugScreen_vtbl[];
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cDebugScreen__cDebugScreen(cDebugScreen* self, int flags) {
-    self->mVtbl = cDebugScreen_vtbl;
+    VPTR_OF(cDebugScreen, self) = cDebugScreen_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1903,13 +1903,14 @@ extern void* cDebugScreen_vtbl[];
  * Destroys a debug menu screen: tears down its id list member, then runs the cDebugScreen part.
  *
  * cBackgroundMan::~cBackgroundMan(self + 0x8C10, 2) releases each non-negative id in that list through the graphics manager's
- * virtual slot 50 and frees the array; then cDebugScreen's vtable is stored at +0x0.
+ * virtual slot 50 and frees the array; then cDebugScreen's vtable is stored at +0x0. A C function: as
+ * cDebugMenuScreen::~cDebugMenuScreen(), g++ would store cDebugMenuScreen's own vtable first, which retail does not.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cDebugMenuScreen__cDebugMenuScreen(cDebugMenuScreen* self, int flags) {
     cBackgroundMan__cBackgroundMan_CD00(&self->BackgroundMan, 2);
-    *(void ***)self = cDebugScreen_vtbl;
+    VPTR_OF(cDebugScreen, self) = cDebugScreen_vtbl;
     if (flags & 1) {
         operator_delete((int *)self);
     }

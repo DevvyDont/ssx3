@@ -75,9 +75,7 @@ void cReplay::restoreFrame(cBxReplayFrame* stream)
     cSortObjNode_ObjNodeNoSortIndex = savedValue;
     cWorldPainterMan_reset_0();
     cBE_readFromReplayFrame(cBE_getBE(), stream);
-    char* game = (char*)SSXApp->Game;
-    sVtS_DBF0* vt = *(sVtS_DBF0**)game;
-    vt[9].fn(vthis(game, vt[9]), stream);
+    SSXApp->Game->readFromReplayFrame(stream);
     cAI* aiObj = SSXApp->Game->AI;
     sVtS_DBF0* vt2 = (sVtS_DBF0*)aiObj->mVtbl;
     vt2[8].fn(vthis(aiObj, vt2[8]), stream);

@@ -1,5 +1,6 @@
 #ifndef FE_DEBUGFE_H
 #define FE_DEBUGFE_H
+#pragma interface
 
 // cDebugFE: the debug front end, the app module SSXApp runs instead of the real front end on debug boots: a debug menu
 // screen and a debug lobby screen (one active), the debug font, two textures and a heartbeat doodle. SSXApp keeps it
@@ -14,7 +15,9 @@
 // cFadeScreen_cFadeScreen and stores cDebugFE_vtbl (0x0046D900, 7 slots: 1 dtor, 2 load, 3 purge, 4 loseFocus,
 // 5 gainFocus, 6 update, 7 render); the dtor stores cAppModule's vtable cAppModule_vtbl.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
+// Real C++ classes (`#pragma interface`: no unit emits their vtables; the equates bind g++'s names to the retail
+// tables): cDebugFE : cFadeScreen with cAppModule's virtuals, and the screens cDebugMenuScreen / cDebugLobbyScreen :
+// cDebugScreen (virtual update / draw). Every field at its retail offset.
 // Evidence tags:
 //   [R] retail's constructor / destructor and the allocation size;
 //   [P] the July 2003 preview's inline accessors getFont / getBoxTID (lw 0x24 / 0x2C there; tools/layout_xlate.py
@@ -23,6 +26,7 @@
 //   [O] SSX On Tour's DWARF (class cDebugFE, cFadeScreen, cHeartBeat): names, types and order.
 
 #include "layout.h"
+#include "main/fadescreen.h"
 #include "fe/heartbeat.h"
 #include "util/menusys.h" // cMenuSys (cDebugLobbyScreen::mMenuSys)
 #include "fe/backgroundman.h" // cBackgroundMan (cDebugMenuScreen)
@@ -34,21 +38,24 @@ struct cFont;
 // cDebugLobbyScreen below derive from it. Size 0x4: [O] On Tour class cDebugScreen (0x4: the vptr only; virtual ~,
 // update() = 0, draw() = 0); [R] cDebugScreen_vtbl (D_0046D948, 3 slots: 1 dtor, 2 / 3 the pure-virtual stub
 // func_00411530), stored back by the derived destructors; cDebugFE_update calls slot 2 (update) on ActiveScreen.
-// A FLAT layout (the vptr only).
+// The destructor is inline (the derived ones store cDebugScreen_vtbl themselves); its out-of-line copy
+// cDebugScreen__cDebugScreen (main/all_in_one_main) is a C function.
 struct cDebugScreen {
-    void** mVtbl;                   // 0x000 [R] cDebugScreen_vtbl (the derived dtors), cDebugMenuScreen_vtbl /
-                                    //       cDebugLobbyScreen_vtbl (the derived ctors)
+    //   the vptr 0x000 [R] cDebugScreen_vtbl (the derived dtors), cDebugMenuScreen_vtbl / cDebugLobbyScreen_vtbl (the
+    //       derived ctors)
+    virtual ~cDebugScreen() {}                                      // 1 inline (copy: cDebugScreen__cDebugScreen)
+    virtual void update() = 0;                                      // 2
+    virtual void draw() = 0;                                        // 3
 };
 
-CHECK_OFFSET(cDebugScreen, mVtbl, 0x000);
 CHECK_SIZE(cDebugScreen, 0x4);
+__asm__("_vt$12cDebugScreen = cDebugScreen_vtbl");   // g++'s name for the retail vtable
 
-struct cDebugFE {
-    // --- cAppModule / cFadeScreen (0xC; main/fadescreen.h)
-    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cDebugFE_vtbl (ctor); cAppModule_vtbl (dtor);
-                                    //       [P] same offset (slot 1)
-    float FadeTimer;                // 0x004 [O] cFadeScreen::FadeTimer; [R] cFadeScreen_cFadeScreen 0.2
-    int IsEnding;                   // 0x008 [O] cFadeScreen::IsEnding (bool, a word in retail)
+struct cDebugFE : public cFadeScreen {
+    //   the vptr 0x000 [R] cFadeScreen_vtbl, then cDebugFE_vtbl (ctor); cAppModule_vtbl (dtor); [P] same offset (slot
+    //   1)
+    //   FadeTimer 0x004 [O] cFadeScreen::FadeTimer; [R] cFadeScreen_cFadeScreen 0.2
+    //   IsEnding 0x008 [O] cFadeScreen::IsEnding (bool, a word in retail)
     // --- cDebugFE
     cDebugScreen* Screens[2];       // 0x00C [O] (On Tour Screens[1]); [P] (preview 0x18, 0x1C); [U] load zeroes both,
                                     //       then stores the debug menu screen (cDebugMenuScreen, "DebugMenu") and the
@@ -68,21 +75,21 @@ struct cDebugFE {
                                     //       History (MEM_fill 0x200 at +0x34) and HistoryIdx (+0x234); [U] update
                                     //       (cHeartBeat_update) and render (cHeartBeat_draw) pass &HeartBeat
 
-    // Methods bound to their retail symbols by asm labels.
-    void load() __asm__("cDebugFE_load");
-    void gainFocus() __asm__("cDebugFE_gainFocus");
-    void purge() __asm__("cDebugFE_purge");
-    void update() __asm__("cDebugFE_update");
-    bool render() __asm__("cDebugFE_render");
+    // Methods bound to their retail symbols by asm labels; the virtuals in cDebugFE_vtbl's slot order (slot 1 is the
+    // destructor, _$_8cDebugFE).
+    cDebugFE() __asm__("cDebugFE_cDebugFE");
+    ~cDebugFE();
+    virtual void load() __asm__("cDebugFE_load");                   // 2
+    virtual void purge() __asm__("cDebugFE_purge");                 // 3
+    virtual bool loseFocus() __asm__("cDebugFE_loseFocus__FPv");    // 4
+    virtual void gainFocus() __asm__("cDebugFE_gainFocus");         // 5
+    virtual void update() __asm__("cDebugFE_update");               // 6
+    virtual bool render() __asm__("cDebugFE_render");               // 7
     cFont* getFont() __asm__("cDebugFE_getFont");
     int getBoxTID() __asm__("cDebugFE_getBoxTID");
     void startlobby() __asm__("cDebugFE_startlobby");
-    bool loseFocus() __asm__("cDebugFE_loseFocus__FPv");
 };
 
-CHECK_OFFSET(cDebugFE, mVtbl, 0x000);
-CHECK_OFFSET(cDebugFE, FadeTimer, 0x004);
-CHECK_OFFSET(cDebugFE, IsEnding, 0x008);
 CHECK_OFFSET(cDebugFE, Screens, 0x00C);
 CHECK_OFFSET(cDebugFE, ActiveScreen, 0x014);
 CHECK_OFFSET(cDebugFE, Font, 0x018);
@@ -90,6 +97,7 @@ CHECK_OFFSET(cDebugFE, ParticleTID, 0x01C);
 CHECK_OFFSET(cDebugFE, BoxTID, 0x020);
 CHECK_OFFSET(cDebugFE, HeartBeat, 0x024);
 CHECK_SIZE(cDebugFE, 0x238);
+__asm__("_vt$8cDebugFE = cDebugFE_vtbl");   // g++'s name for the retail vtable
 
 // cTrackFileMan: the debug front end's track list - up to 256 track locations ("data/worlds/<tag>.big" entries) with
 // their location id and whether each is a BAM location and a world-circuit start. scanLocations fills it from the
@@ -190,15 +198,14 @@ CHECK_SIZE(cTrackFileMan, 0x8C0C);
 //       after LastGamePathGameMode. Retail fields are placed by their use, not by On Tour's offsets.
 // Base: cDebugScreen (On Tour 0x4: the vptr only; vtable cDebugScreen_vtbl D_0046D948, slots 2 / 3 the pure-virtual
 // stub). Vtable cDebugMenuScreen_vtbl (0x0046D798, 3 slots: 1 dtor, 2 update, 3 draw); the dtor destroys BackgroundMan
-// and stores cDebugScreen_vtbl.
-// A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
-// field (src/main/loadscreens.cpp views sLS_B1B0 / sLSSub_B1B0, src/fe/debugfe.cpp views sDebugMenuScreen /
+// and stores cDebugScreen_vtbl. A real C++ class (update / draw virtual). Evidence tags: [R] retail's ctor / dtor /
+// allocation; [U] how retail code uses the field (src/main/loadscreens.cpp views sLS_B1B0 / sLSSub_B1B0,
+// src/fe/debugfe.cpp views sDebugMenuScreen /
 // sDbgFE17D008, and the asm); [O] SSX On Tour's DWARF (class cDebugMenuScreen, cDebugScreen): names, types and order.
 
-struct cDebugMenuScreen {
-    // --- cDebugScreen (On Tour 0x4: the vptr)
-    void** mVtbl;                   // 0x0000 [R] cDebugMenuScreen_vtbl (ctor); cDebugScreen_vtbl (dtor); [U]
-                                    //       cDebugFE_update / render call slots 2 / 3
+struct cDebugMenuScreen : public cDebugScreen {
+    //   the vptr 0x0000 (cDebugScreen's, On Tour 0x4) [R] cDebugMenuScreen_vtbl (ctor); cDebugScreen_vtbl (dtor); [U]
+    //       cDebugFE_update / render call slots 2 / 3
     // --- cDebugMenuScreen
     cTrackFileMan TrackFileMan;     // 0x0004 [O] (0x8C0C, above); [R] the ctor runs cTrackFileMan_scanLocations(this +
                                     //       0x4); [U] the ctor / update step the track row through it
@@ -251,14 +258,16 @@ struct cDebugMenuScreen {
                                     //       networkOpt.bIsNetworkGame / bIsHost (1 = host) from it; draw prints
                                     //       D_0045CFB8's name for it
 
-    // Methods bound to their retail symbols by asm labels.
-    void draw() __asm__("cDebugMenuScreen_draw");
+    // Methods bound to their retail symbols by asm labels; the virtuals in cDebugMenuScreen_vtbl's slot order (slot 1
+    // is the destructor, the C function cDebugMenuScreen__cDebugMenuScreen in main/all_in_one_main: it does not store
+    // its own vtable).
+    cDebugMenuScreen() __asm__("cDebugMenuScreen_cDebugMenuScreen");
+    virtual void update() __asm__("cDebugMenuScreen_update");      // 2
+    virtual void draw() __asm__("cDebugMenuScreen_draw");          // 3
     void setGamePath(int idx) __asm__("cDebugMenuScreen_setGamePath");
     int getMaxAIRiders(int path, int mode) __asm__("cDebugMenuScreen_getMaxAIRiders");
-    void update() __asm__("cDebugMenuScreen_update");
 };
 
-CHECK_OFFSET(cDebugMenuScreen, mVtbl, 0x0000);
 CHECK_OFFSET(cDebugMenuScreen, TrackFileMan, 0x0004);
 CHECK_OFFSET(cDebugMenuScreen, BackgroundMan, 0x8C10);
 CHECK_OFFSET(cDebugMenuScreen, SelectedItem, 0x8C1C);
@@ -271,6 +280,7 @@ CHECK_OFFSET(cDebugMenuScreen, CurrentPlaylist, 0x8C34);
 CHECK_OFFSET(cDebugMenuScreen, LastGamePathGameMode, 0x8C38);
 CHECK_OFFSET(cDebugMenuScreen, NetworkMode, 0x8C44);
 CHECK_SIZE(cDebugMenuScreen, 0x8C48);
+__asm__("_vt$16cDebugMenuScreen = cDebugMenuScreen_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cDebugLobbyScreen: the debug front end's online lobby screen (cDebugFE::Screens[1], "LobbyMenu"; the July 2003
@@ -288,14 +298,15 @@ CHECK_SIZE(cDebugMenuScreen, 0x8C48);
 // the dtor clears the screen pointer cDebugLobbyScreen_instance (the ctor sets it; dispatchLobbyEvent sends lobby events through it),
 // destroys the strings, menus and menu system and stores cDebugScreen_vtbl. The menus are raw regions: their classes
 // (cMenu / cMenuItem subclasses built by AccountMenu_AccountMenu ... AbortMenu_AbortMenu) are not laid out here.
-// A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
+// A real C++ class (update / draw virtual); its ctor and dtor are C functions (they build and destroy the menus by
+// hand, and the dtor inlines cDebugScreen's). Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code
+// uses the
 // field (src/fe/debugfe.cpp views sDebugFE17D6F0 / 17DB18 / 17D688 / 17E5C8 / sDebugFEState17E*, and the asm).
 
 struct online_Event;
 
-struct cDebugLobbyScreen {
-    // --- cDebugScreen (the vptr)
-    void** mVtbl;                   // 0x0000 [R] cDebugLobbyScreen_vtbl (ctor, dtor), then cDebugScreen_vtbl (dtor)
+struct cDebugLobbyScreen : public cDebugScreen {
+    //   the vptr 0x0000 (cDebugScreen's) [R] cDebugLobbyScreen_vtbl (ctor, dtor), then cDebugScreen_vtbl (dtor)
     // --- cDebugLobbyScreen
     int mState;                     // 0x0004 [R] ctor 0; [U] the lobby state (0 / 1 connecting, 2 lobby, 3 login menu,
                                     //       4 creating account, 5 authenticating, 6 / 7 persona, 8 / 9 create / delete
@@ -367,8 +378,9 @@ struct cDebugLobbyScreen {
 #endif
 
     // Methods bound to their retail symbols by asm labels.
-    void update() __asm__("cDebugLobbyScreen_update");
-    void draw() __asm__("cDebugLobbyScreen_draw");
+    cDebugLobbyScreen() __asm__("cDebugLobbyScreen_cDebugLobbyScreen");
+    virtual void update() __asm__("cDebugLobbyScreen_update");     // 2
+    virtual void draw() __asm__("cDebugLobbyScreen_draw");         // 3
     void handleLobbyEvent(online_Event* ev) __asm__("cDebugLobbyScreen_handleLobbyEvent");
     void showLobbyError(int errorCode) __asm__("cDebugLobbyScreen_showLobbyError");
     void runStateMachine() __asm__("cDebugLobbyScreen_runStateMachine");
@@ -387,7 +399,6 @@ struct cDebugLobbyScreen {
     void abortChallenge() __asm__("cDebugLobbyScreen_abortChallenge");
 };
 
-CHECK_OFFSET(cDebugLobbyScreen, mVtbl, 0x0000);
 CHECK_OFFSET(cDebugLobbyScreen, mState, 0x0004);
 CHECK_OFFSET(cDebugLobbyScreen, mMenuSys, 0x0008);
 CHECK_OFFSET(cDebugLobbyScreen, mLoginMenu, 0x0070);
@@ -404,6 +415,7 @@ CHECK_OFFSET(cDebugLobbyScreen, mChallenger, 0x1C0C);
 CHECK_OFFSET(cDebugLobbyScreen, mGameChannel, 0x1C10);
 CHECK_OFFSET(cDebugLobbyScreen, mErrorCode, 0x1C14);
 CHECK_SIZE(cDebugLobbyScreen, 0x1C18);
+__asm__("_vt$17cDebugLobbyScreen = cDebugLobbyScreen_vtbl");   // g++'s name for the retail vtable
 // CHECK_SIZE cannot paste a qualified name, so the functor checks are spelled out.
 #if defined(__cplusplus) && !defined(DECOMP_NO_LAYOUT_CHECKS)
 typedef char check_cDebugLobbyScreen_OnCreate_size[(sizeof(cDebugLobbyScreen::OnCreate) == 0x4) ? 1 : -1];

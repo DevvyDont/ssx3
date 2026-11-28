@@ -437,7 +437,7 @@ int cScriptEntityCamera::GetSubType()
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCameraManager__cScriptObjCameraManager);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cScriptObject__cScriptObject_48A0(void *) __asm__("cScriptObject__cScriptObject");
+extern "C" void cScriptObject__cScriptObject_48A0(void *) __asm__("_$_13cScriptObject");
 extern char cScriptObjCameraManager_cScriptEntity_vtbl[];
 extern char cScriptObjCameraManager_vtbl[];
 
@@ -476,7 +476,7 @@ int cScriptObjCameraManager::GetViewIndex()
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjGS__cScriptObjGS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cScriptObject__cScriptObject_48D8(void *, int) __asm__("cScriptObject__cScriptObject");
+extern "C" void cScriptObject__cScriptObject_48D8(void *, int) __asm__("_$_13cScriptObject");
 void operator_delete(int *);
 extern char cScriptObjGS_vtbl[];
 extern char cScriptObjGS_cScriptObject_vtbl[];
@@ -536,7 +536,7 @@ extern "C" int cScriptObjGS_GetScriptEntity(int gsObject) {
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjEvent__cScriptObjEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cScriptObject__cScriptObject_4950(void *, int) __asm__("cScriptObject__cScriptObject");
+extern "C" void cScriptObject__cScriptObject_4950(void *, int) __asm__("_$_13cScriptObject");
 void operator_delete(int *);
 extern char cScriptObjEvent_vtbl[];
 extern char cScriptObjEvent_cScriptObject_vtbl[];
@@ -675,7 +675,7 @@ bool cSSXScriptEngine::IsBankAvailable(int idx)
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera__cScriptObjCamera);
 #ifdef SKIP_ASM
-extern "C" void cScriptObject__cScriptObject();
+extern "C" void cScriptObject__cScriptObject() __asm__("_$_13cScriptObject");
 
 /**
  * Destroys a script camera object by handing it straight to the cScriptObject destructor.
@@ -865,7 +865,7 @@ cScriptAlgorithm* cScriptObjCamera::GetCameraAlgorithm()
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition__cScriptObjTransition);
 #ifdef SKIP_ASM
-extern "C" void cScriptObject__cScriptObject();
+extern "C" void cScriptObject__cScriptObject() __asm__("_$_13cScriptObject");
 
 /**
  * Destroys a script transition object through the script-object destructor cScriptObject__cScriptObject().
@@ -937,7 +937,7 @@ extern "C" int cScriptObjTransition_GetScriptEntity(void) {
 INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider__cScriptObjRider);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cScriptObject__cScriptObject_4AE8(void *, int) __asm__("cScriptObject__cScriptObject");
+extern "C" void cScriptObject__cScriptObject_4AE8(void *, int) __asm__("_$_13cScriptObject");
 void operator_delete(int *);
 extern char cScriptObjRider_vtbl[];
 extern char cScriptObjRider_cScriptObject_vtbl[];

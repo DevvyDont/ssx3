@@ -5427,7 +5427,7 @@ extern "C" void cAnimFrame_init(void*);
  */
 void* cAnimFrame::cAnimFrame1()
 {
-    mVtbl = cAnimFrame_vtbl;
+    VPTR_OF(cAnimFrame, this) = cAnimFrame_vtbl;
     cAnimFrame_init(this);
     return ((void*)this);
 }
@@ -5446,7 +5446,7 @@ void operator_delete(int*);
  */
 extern "C" void cAnimFrame__cAnimFrame(cAnimFrame* self, int flags)
 {
-    self->mVtbl = cAnimFrame_vtbl;
+    VPTR_OF(cAnimFrame, self) = cAnimFrame_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -5490,34 +5490,23 @@ extern "C" void cMeshAnimFrame_init(cMeshAnimFrame*);
  */
 void* cMeshAnimFrame::cMeshAnimFrame1()
 {
-    mVtbl = cAnimFrame_vtbl;
+    VPTR_OF(cAnimFrame, this) = cAnimFrame_vtbl;
     cAnimFrame_init(this);
-    mVtbl = cMeshAnimFrame_vtbl;
+    VPTR_OF(cAnimFrame, this) = cMeshAnimFrame_vtbl;
     init();
     return ((void*)this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cMeshAnimFrame__cMeshAnimFrame);
+INCLUDE_ASM("object/railmodifier", _$_14cMeshAnimFrame);
 #ifdef SKIP_ASM
-extern void* cAnimFrame_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys a mesh animation frame: stores the base cAnimFrame vtable at +0x84, then frees the object when asked
- * to.
- *
- * The cMeshAnimFrame part has nothing to destroy; the vtable store is the inlined cAnimFrame destructor.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a mesh animation frame: the cMeshAnimFrame part has nothing to destroy; the inline ~cAnimFrame stores the
+ * base cAnimFrame vtable.
  */
-extern "C" void cMeshAnimFrame__cMeshAnimFrame(cMeshAnimFrame* self, int flags)
+cMeshAnimFrame::~cMeshAnimFrame()
 {
-    self->mVtbl = cAnimFrame_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -5576,30 +5565,21 @@ extern "C" void cAnimFrame_init(void*);
  */
 void* cCamAnimFrame::cCamAnimFrame1()
 {
-    mVtbl = cAnimFrame_vtbl;
+    VPTR_OF(cAnimFrame, this) = cAnimFrame_vtbl;
     cAnimFrame_init(this);
-    mVtbl = cCamAnimFrame_vtbl;
+    VPTR_OF(cAnimFrame, this) = cCamAnimFrame_vtbl;
     return ((void*)this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cCamAnimFrame__cCamAnimFrame);
+INCLUDE_ASM("object/railmodifier", _$_13cCamAnimFrame);
 #ifdef SKIP_ASM
-extern void* cAnimFrame_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys a camera animation frame: reinstalls cAnimFrame_vtbl and frees the frame when bit 0 of flags is set.
- *
- * @param flags  destructor flags
+ * Destroys a camera animation frame: nothing of its own (the inline ~cAnimFrame reinstalls cAnimFrame_vtbl).
  */
-extern "C" void cCamAnimFrame__cCamAnimFrame(cCamAnimFrame* self, int flags)
+cCamAnimFrame::~cCamAnimFrame()
 {
-    self->mVtbl = cAnimFrame_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

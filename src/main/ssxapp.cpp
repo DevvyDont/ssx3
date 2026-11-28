@@ -3307,7 +3307,6 @@ INCLUDE_ASM("main/ssxapp", cGame_render);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cGameViewMan_updateStreamFocus(void* views);
 extern "C" int cGameViewMan_isStreamReady(void* views);
-extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cGame_renderVideo(void* self);
 extern "C" void cGarbageMan_Update();
 extern "C" void t4mat_invert(void* m);
@@ -3589,7 +3588,7 @@ static inline int IsReady_22B008(cGame* self)
  * Draws one game frame: every camera view of the world, then the 2D overlays, UI and audio tick.
  *
  * Returns false when GrMan's slot 17 returns 0; returns true early while StreamPause (slot 2) holds the frame, while
- * the fade screen is fully faded (cFadeScreen_drawFade) or while a script plays (cGame_renderVideo draws the cut scene).
+ * the fade screen is fully faded (drawFade) or while a script plays (cGame_renderVideo draws the cut scene).
  * For each ViewMan view: sets the view, viewport (slot 24), camera matrix (slot 34) and projection (slot 25), draws
  * SkyBox (slot 4) with a near plane of 1.0, then the real near / far planes and render states; builds the world-space
  * box of the view frustum's eight corners (each corner sum, camera position included, is scaled by the near or far
@@ -3618,7 +3617,7 @@ bool cGame::render()
             return true;
         }
     }
-    if (cFadeScreen_drawFade(this) != 0) {
+    if (drawFade()) {
         return true;
     }
     if (ScriptEngine->mIsPlaying != 0) {

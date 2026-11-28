@@ -105,32 +105,21 @@ extern "C" sInstSlot* cInstanceMan_getInstanceRecord(sInstPool* self, unsigned i
 //100%
 INCLUDE_ASM("object/instanceman", cAnimFrame_cAnimFrame);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void cAnimFrame_init(cAnimFrame* self);
-extern "C" void cAnimFrame_setAnimRecord(cAnimFrame* self, float* src);
-void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
-extern char cAnimFrame_vtbl[];
-
-extern "C" void* cAnimFrame_cAnimFrame_impl(char* self, float* src, float f) __asm__("cAnimFrame_cAnimFrame");
 /**
  * Constructs an animation frame for an anim record at a start time.
  *
- * Installs cAnimFrame_vtbl (+0x84), clears the frame (cAnimFrame_init), attaches the record (cAnimFrame_setAnimRecord) and evaluates
- * it at time (cAnimFrame_update).
+ * After the vtable cAnimFrame_vtbl, clears the frame (init), attaches the record (setAnimRecord) and evaluates it at
+ * time (cAnimFrame::update).
  *
  * @param src  anim record (tAnimRecord)
  * @param time  time to evaluate at
- * @return self
  */
-extern "C" void* cAnimFrame_cAnimFrame_impl(char* vself, float* src, float time)
+cAnimFrame::cAnimFrame(float* src, float time)
 {
-    cAnimFrame* self = (cAnimFrame*)vself;
-    self->mVtbl = (void**)cAnimFrame_vtbl;
-    self->init();
-    self->setAnimRecord(src);
-    cAnimFrame_update_impl(((char*)self), time);
-    return ((char*)self);
+    init();
+    setAnimRecord(src);
+    cAnimFrame::update(time);
 }
 #endif
 
@@ -225,30 +214,23 @@ static inline void vu0CopyMat_351480(t4Matrix* d, const t4Matrix* s)
         : "memory");
 }
 
-extern void* cMeshAnimFrame_vtbl[];
 extern t4Matrix t4mat_Identity;
-extern "C" void* cAnimFrame_cAnimFrame(void* self, float* src, float f);
-// PORT: cMeshAnimFrame_update is defined later in the unit with a typed self; bound by asm label.
-void cMeshAnimFrame_update_vf(void* self, float f) __asm__("cMeshAnimFrame_update");
 
 /**
  * Constructs a mesh animation frame for an anim record at a start time.
  *
- * Runs the cAnimFrame constructor cAnimFrame_cAnimFrame, installs cMeshAnimFrame_vtbl, sets the frame matrix (+0x90) to
- * identity, stores the record at +0x40 again and evaluates it (cMeshAnimFrame_update).
+ * After the cAnimFrame constructor and the vtable cMeshAnimFrame_vtbl, sets the frame matrix to identity, stores the
+ * record again and evaluates it (cMeshAnimFrame::update).
  *
  * @param src  anim record
  * @param time  time to evaluate at
- * @return self
  */
-extern "C" void* cMeshAnimFrame_cMeshAnimFrame(cMeshAnimFrame* self, float* src, float time)
+cMeshAnimFrame::cMeshAnimFrame(float* src, float time)
+    : cAnimFrame(src, time)
 {
-    cAnimFrame_cAnimFrame(self, src, time);
-    self->mVtbl = cMeshAnimFrame_vtbl;
-    vu0CopyMat_351480(((&self->FrameMatrix)), &t4mat_Identity);
-    self->AnimRecord = (const tAnimRecord*)src;
-    cMeshAnimFrame_update_vf(self, time);
-    return ((void*)self);
+    vu0CopyMat_351480(&FrameMatrix, &t4mat_Identity);
+    AnimRecord = (const tAnimRecord*)src;
+    cMeshAnimFrame::update(time);
 }
 #endif
 
@@ -293,9 +275,6 @@ static inline bool inRange_351538(tSegmentRecord* e, float x)
 {
     return e->m_fStart <= x && x < e->m_fEnd;
 }
-
-// PORT: the unit declares cAnimFrame_update(void*) for its caller; the body also reads t from $f12
-void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 
 /**
  * Evaluates the animation's channels at a time into the frame's 16 values.
@@ -384,19 +363,20 @@ void cAnimFrame::getDeriv(t4Vector* vel, t4Vector* rotVel, float time)
 INCLUDE_ASM("object/instanceman", cMeshAnimFrame_update);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" void* cAnimFrame_update(void* self);
 
 
 /**
  * Evaluates a mesh animation frame and rebuilds its transform from the rotation (degrees) and translation channels.
  *
- * Calls cAnimFrame_update(self) without a time: On Tour's update(float time) passes it on, and here it reaches
- * cAnimFrame_update untouched in $f12 (a port must pass it). The matrix is the X-Y-Z Euler rotation of minus the
- * rotation values (converted to radians, fSinCos sine / cosine) with the translation in row 3.
+ * Evaluates the channels first (cAnimFrame::update with the same time, as On Tour's update(float time)). The matrix
+ * is the X-Y-Z Euler rotation of minus the rotation values (converted to radians, fSinCos sine / cosine) with the
+ * translation in row 3.
+ *
+ * @param time  the time to evaluate at
  */
-void cMeshAnimFrame::update()
+void cMeshAnimFrame::update(float time)
 {
-    cAnimFrame_update(this);
+    cAnimFrame::update(time);
     float rotRad[3];
     float sc[3][2];
     rotRad[0] = -Vals[3] * 0.01745329424738884f;
@@ -512,31 +492,22 @@ extern "C" void cMeshAnimFrame_transform(cMeshAnimFrame* self, sImMat44* xform)
 }
 #endif
 
-extern "C" void* cAnimFrame_update(void* self);
-
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/instanceman", cCamAnimFrame_cCamAnimFrame);
 #ifdef SKIP_ASM
-extern void* cCamAnimFrame_vtbl[];
-// PORT: cCamAnimFrame_update is defined later in the unit as (void*); bound by asm label with its real float argument.
-void cCamAnimFrame_update_vf(void* self, float f) __asm__("cCamAnimFrame_update__FPv");
-
 /**
  * Constructs a camera animation frame for an anim record at a start time.
  *
- * Runs the cAnimFrame constructor cAnimFrame_cAnimFrame, installs the camera-frame vtable cCamAnimFrame_vtbl and evaluates the frame
- * (cCamAnimFrame_update).
+ * After the cAnimFrame constructor and the camera-frame vtable cCamAnimFrame_vtbl, evaluates the frame
+ * (cCamAnimFrame::update).
  *
  * @param src  anim record
  * @param animTime  time to evaluate at
- * @return self
  */
-extern "C" void* cCamAnimFrame_cCamAnimFrame(cCamAnimFrame* self, float* src, float animTime)
+cCamAnimFrame::cCamAnimFrame(float* src, float animTime)
+    : cAnimFrame(src, animTime)
 {
-    cAnimFrame_cAnimFrame(self, src, animTime);
-    self->mVtbl = cCamAnimFrame_vtbl;
-    cCamAnimFrame_update_vf(self, animTime);
-    return ((void*)self);
+    cCamAnimFrame::update(animTime);
 }
 #endif
 
@@ -544,13 +515,13 @@ extern "C" void* cCamAnimFrame_cCamAnimFrame(cCamAnimFrame* self, float* src, fl
 INCLUDE_ASM("object/instanceman", cCamAnimFrame_update__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates a camera animation frame by forwarding to cAnimFrame_update.
+ * Updates a camera animation frame by forwarding to cAnimFrame::update.
  *
- * @return whatever cAnimFrame_update leaves (callers ignore it)
+ * @param time  the time to evaluate at
  */
-void* cCamAnimFrame::update()
+void cCamAnimFrame::update(float time)
 {
-    return cAnimFrame_update(this);
+    cAnimFrame::update(time);
 }
 #endif
 

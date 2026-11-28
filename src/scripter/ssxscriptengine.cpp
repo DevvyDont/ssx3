@@ -4232,15 +4232,13 @@ extern "C" int cScriptDatabaseObject_RemoveEntity(cScriptDatabaseObject* self, v
 // cScriptObject's virtual GetNumScriptEntities (slot 6; a pure virtual in cScriptObject).
 static inline int scriptObjNumEntities(cScriptObject* obj)
 {
-    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)obj->mVtbl;
-    return vt[6].fn(vthis(obj, vt[6]));
+    return obj->GetNumScriptEntities();
 }
 
 // cScriptObject's virtual GetScriptEntity (slot 7; a pure virtual in cScriptObject).
 static inline cScriptEntity* scriptObjEntity(cScriptObject* obj, int i)
 {
-    sVEntry<cScriptEntity*(void*, int)>* vt = (sVEntry<cScriptEntity*(void*, int)>*)obj->mVtbl;
-    return vt[7].fn(vthis(obj, vt[7]), i);
+    return obj->GetScriptEntity(i);
 }
 
 /**
@@ -4537,7 +4535,7 @@ void cScriptDatabaseObject::MarkEntityAsUsed(cScriptEntity* key, int value)
     tScriptEntityRecord* record = &mEntityDatabase[key->mDBID];
     if (vt[4].fn(vthis(this, vt[4]), record->objID, value) == 0) {
         cScriptObject* obj = mpObjectDatabase[record->objID];
-        sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)obj->mVtbl;
+        sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cScriptObject, obj);
         vt2[4].fn(vthis(obj, vt2[4]), value);
     }
     record->playerID = value;
@@ -4566,7 +4564,7 @@ void cScriptDatabaseObject::MarkEntityAsFree(cScriptEntity* key)
     sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)mVtbl;
     if (vt[4].fn(vthis(this, vt[4]), record->objID, old) == 0) {
         cScriptObject* obj = mpObjectDatabase[record->objID];
-        sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)obj->mVtbl;
+        sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)VPTR_OF(cScriptObject, obj);
         vt2[5].fn(vthis(obj, vt2[5]), old);
     }
 }
@@ -4886,9 +4884,7 @@ void cScriptObjCamera::OnEndObjectUse()
         if (camera->ScriptController->IsActive == 0) {
             cCamera_setCurrentController(camera, 2);
             cChaseCameraController_switchCamera_Restart(camera->ChaseController);
-            cCameraController* controller = camera->Controller;
-            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)controller->mVtbl;
-            vt[4].fn(vthis(controller, vt[4]));  // snapCurrent
+            camera->Controller->snapCurrent();
         }
     }
 }

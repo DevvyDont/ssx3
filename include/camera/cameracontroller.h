@@ -1,5 +1,6 @@
 #ifndef CAMERA_CAMERACONTROLLER_H
 #define CAMERA_CAMERACONTROLLER_H
+#pragma interface
 
 // cManualCameraController: the free-camera controller of a cCamera (debug / editor camera). It owns a manual and an
 // editor camera algorithm (camera/cameraalgorithms.h: cManualCameraAlgorithm and cEditorCameraAlgorithm, 0x40 each)
@@ -14,7 +15,9 @@
 // Base class cCameraController (0x18; camera/cameracontroller.cpp: cCameraController_cCameraController), written out
 // inline as in camera/race/racecontroller.h (cChaseCameraController); cScriptCameraController (0x20) derives from it too.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance. Evidence tags:
+// Real C++ classes (`#pragma interface`: no unit emits their vtables; the equates bind g++'s names to the retail
+// tables): cManualCameraController : cCameraController, the virtuals in the retail slot order. cChaseCameraController
+// and cScriptCameraController still write the base out inline. Evidence tags:
 //   [R] retail ctors cCameraController_cCameraController and cManualCameraController_cManualCameraController, the dtor
 //       cManualCameraController__cManualCameraController, the allocation size;
 //   [P] the preview's inline accessors via tools/layout_xlate.py: getManualAlgo (lw 0x18), getEditorAlgo (lw 0x1C); the
@@ -55,15 +58,17 @@ struct cCameraController {
     cInput* Input;                  // 0x0C [O]; [P] getInput (lw) / setInput (sw), bracketed; [R] ctor 0
     cCamera* Camera;                // 0x10 [O]; [R] the ctor's camera argument (sw); [U] snap / snapCurrent pass it to
                                     //      cCamera_snapResultAlgorithm and cSplashManager_CameraSnapped (lw)
-    void** mVtbl;                   // 0x14 [R] cCameraController_vtbl (ctor and dtor); [P] vptr at 0x14 in both builds
+    //   the vptr 0x14 [R] cCameraController_vtbl (ctor and dtor); [P] vptr at 0x14 in both builds
 
-    // Methods bound to their retail symbols by asm labels.
-    void update() __asm__("cCameraController_update__FPv");
+    // Methods bound to their retail symbols by asm labels; the virtuals in cCameraController_vtbl's slot order.
+    cCameraController(cCamera* camera) __asm__("cCameraController_cCameraController");
+    virtual ~cCameraController();                                           // 1 (_$_17cCameraController)
+    virtual void update() __asm__("cCameraController_update__FPv");         // 2
+    virtual void snap(int subjectID) __asm__("cCameraController_snap");     // 3
+    virtual void snapCurrent() __asm__("cCameraController_snapCurrent");    // 4
     int getBlendType() __asm__("cCameraController_getBlendType");
     cCameraAlgoList* getAlgorithmList() __asm__("cCameraController_getAlgorithmList");
-    void snapCurrent() __asm__("cCameraController_snapCurrent");
     void* clearAlgorithms() __asm__("cCameraController_clearAlgorithms__FPv");
-    void snap(int subjectID) __asm__("cCameraController_snap");
 };
 
 CHECK_OFFSET(cCameraController, Type, 0x00);
@@ -71,19 +76,19 @@ CHECK_OFFSET(cCameraController, BlendType, 0x04);
 CHECK_OFFSET(cCameraController, AlgorithmList, 0x08);
 CHECK_OFFSET(cCameraController, Input, 0x0C);
 CHECK_OFFSET(cCameraController, Camera, 0x10);
-CHECK_OFFSET(cCameraController, mVtbl, 0x14);
 CHECK_SIZE(cCameraController, 0x18);
+__asm__("_vt$17cCameraController = cCameraController_vtbl");   // g++'s name for the retail vtable
 
-struct cManualCameraController {
-    // --- cCameraController (On Tour: 0x18)
-    int Type;                       // 0x00 [O] eCamControllerType; [R] base ctor 0, then 1 (manual)
-    int BlendType;                  // 0x04 [O] eCamBlendType; [R] base ctor 0
-    cCameraAlgoList* AlgorithmList; // 0x08 [O]; [R] base ctor: cMemMan_alloc(8, "Algorithm List") + cCameraAlgoList ctor;
-                                    //      [U] cManualCameraController_addAlgorithm inserts into it, cManualCameraController_update and
-                                    //      cManualCameraController_getCurrentAlgorithmType read its first algorithm
-    cInput* Input;                  // 0x0C [O]; [R] base ctor 0
-    cCamera* Camera;                // 0x10 [O]; [R] the ctor's camera argument (cCamera_cCamera passes itself)
-    void** mVtbl;                   // 0x14 [R] cManualCameraController_vtbl (ctor and dtor); [P] vptr at 0x14 in both builds
+struct cManualCameraController : public cCameraController {
+    // --- cCameraController's members (On Tour: 0x18), with notes:
+    //   Type 0x00 [O] eCamControllerType; [R] base ctor 0, then 1 (manual)
+    //   BlendType 0x04 [O] eCamBlendType; [R] base ctor 0
+    //   AlgorithmList 0x08 [O]; [R] base ctor: cMemMan_alloc(8, "Algorithm List") + cCameraAlgoList ctor; [U]
+    //       cManualCameraController_addAlgorithm inserts into it, cManualCameraController_update and
+    //       cManualCameraController_getCurrentAlgorithmType read its first algorithm
+    //   Input 0x0C [O]; [R] base ctor 0
+    //   Camera 0x10 [O]; [R] the ctor's camera argument (cCamera_cCamera passes itself)
+    //   the vptr 0x14 [R] cManualCameraController_vtbl (ctor and dtor); [P] vptr at 0x14 in both builds
     // --- cManualCameraController
     cManualCameraAlgorithm* ManualAlgo; // 0x18 [O]; [P] getManualAlgo (lw); [R] ctor: cMemMan_alloc(0x40, "Manual Cam Algo") +
                                     //      cManualCameraAlgorithm ctor; [U] the dtor deletes it (slot 1), snap / snapCurrent call
@@ -92,25 +97,22 @@ struct cManualCameraController {
                                     //      cEditorCameraAlgorithm ctor; [U] the dtor deletes it, setCurrentAlgorithmType(0x50)
                                     //      inserts it
 
-    // Methods bound to their retail symbols by asm labels.
+    // Methods bound to their retail symbols by asm labels; the virtuals in cManualCameraController_vtbl's slot order.
+    cManualCameraController(cCamera* camera) __asm__("cManualCameraController_cManualCameraController");
+    ~cManualCameraController();                                             // 1 (_$_23cManualCameraController)
+    virtual void update() __asm__("cManualCameraController_update");        // 2
+    virtual void snap(int subjectID) __asm__("cManualCameraController_snap");   // 3
+    virtual void snapCurrent() __asm__("cManualCameraController_snapCurrent");  // 4
     cManualCameraAlgorithm* getManualAlgo() __asm__("cManualCameraController_getManualAlgo");
     cEditorCameraAlgorithm* getEditorAlgo() __asm__("cManualCameraController_getEditorAlgo");
-    void snap(int subjectID) __asm__("cManualCameraController_snap");
-    void snapCurrent() __asm__("cManualCameraController_snapCurrent");
     void addAlgorithm(int algo, int deleteAlgorithmOnDestruction) __asm__("cManualCameraController_addAlgorithm");
     void setCurrentAlgorithmType(int msg) __asm__("cManualCameraController_setCurrentAlgorithmType");
     int getCurrentAlgorithmType() __asm__("cManualCameraController_getCurrentAlgorithmType");
-    void update() __asm__("cManualCameraController_update");
 };
 
-CHECK_OFFSET(cManualCameraController, Type, 0x00);
-CHECK_OFFSET(cManualCameraController, BlendType, 0x04);
-CHECK_OFFSET(cManualCameraController, AlgorithmList, 0x08);
-CHECK_OFFSET(cManualCameraController, Input, 0x0C);
-CHECK_OFFSET(cManualCameraController, Camera, 0x10);
-CHECK_OFFSET(cManualCameraController, mVtbl, 0x14);
 CHECK_OFFSET(cManualCameraController, ManualAlgo, 0x18);
 CHECK_OFFSET(cManualCameraController, EditorAlgo, 0x1C);
 CHECK_SIZE(cManualCameraController, 0x20);
+__asm__("_vt$23cManualCameraController = cManualCameraController_vtbl");   // g++'s name for the retail vtable
 
 #endif /* CAMERA_CAMERACONTROLLER_H */

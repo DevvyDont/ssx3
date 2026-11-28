@@ -1274,34 +1274,10 @@ INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_buildAnimation);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern "C" cWorld* cObjectInterface_getWorld();
-extern "C" void cAnimFrame_init(void* self);
-extern "C" void cMeshAnimFrame_init(void* self);
 extern "C" void cAnimFrame_setAnimRecord(void* self, void* src);
 extern "C" void MEM_fill(void* p, int v, int n);
 extern char str_AnimMats[];
 extern char str_CrowdAnimMesh[];
-extern void* cMeshAnimFrame_vtbl[];
-extern void* cAnimFrame_vtbl[];
-
-struct sDbVEntry_43A8 {
-    short delta;
-    short index;
-    void (*fn)(void*, float);
-};
-
-struct sDbMesh_43A8 {
-    char pad_0x0[0x84];
-    void** vtable;                  // 0x84
-    char pad_0x88[0x48];
-    sDbMesh_43A8()
-    {
-        vtable = cAnimFrame_vtbl;
-        cAnimFrame_init(this);
-        vtable = cMeshAnimFrame_vtbl;
-        cMeshAnimFrame_init(this);
-    }
-    void operator delete[](void* p, unsigned int size);
-};
 
 struct sDbPad_43A8 {
     char data[0x40];
@@ -1381,7 +1357,7 @@ struct sDbOwner_43A8 {
     float period;                   // 0x1E0
     float step;                     // 0x1E4
     sDbPad_43A8* buf;               // 0x1E8
-    sDbMesh_43A8* meshes;           // 0x1EC
+    cMeshAnimFrame* meshes;         // 0x1EC
     tModelRecord* def;               // 0x1F0
 };
 
@@ -1419,8 +1395,8 @@ extern "C" void tCrowdBlock3d_buildAnimation_impl(sDbOwner_43A8* self)
             self->nActive++;
     }
     if (self->nActive != 0) {
-        sDbMesh_43A8*& meshes = self->meshes;
-        meshes = new (str_CrowdAnimMesh, 0x20000000, 0) sDbMesh_43A8[self->nActive];
+        cMeshAnimFrame*& meshes = self->meshes;
+        meshes = new (str_CrowdAnimMesh, 0x20000000, 0) cMeshAnimFrame[self->nActive];
     } else {
         self->meshes = 0;
     }
@@ -1432,8 +1408,8 @@ extern "C" void tCrowdBlock3d_buildAnimation_impl(sDbOwner_43A8* self)
         }
     }
     for (i = 0; i < self->nActive; i++) {
-        sDbMesh_43A8* slotIds = (sDbMesh_43A8*)(i * 0xD0 + (int)self->meshes);
-        ((sDbVEntry_43A8*)slotIds->vtable)[2].fn(vthis(slotIds, ((sDbVEntry_43A8*)slotIds->vtable)[2]), self->time);
+        cMeshAnimFrame* frame = (cMeshAnimFrame*)(i * 0xD0 + (int)self->meshes);
+        frame->update(self->time);
     }
     tCrowdBlock3d_buildPartMatrices_43A8(self);
     self->first = 0;
@@ -1588,7 +1564,8 @@ void tCrowdBlock3d_freeAnimation_v(sDebounceOwner4800* self)
         cMeshAnimFrame* item = items + ((int*)items)[-4];
         while (self->items != item) {
             item--;
-            ((sDebounceVEntry4800*)item->mVtbl)[1].fn(vthis(item, ((sDebounceVEntry4800*)item->mVtbl)[1]), 0);
+            sDebounceVEntry4800* vt = (sDebounceVEntry4800*)VPTR_OF(cAnimFrame, item);
+            vt[1].fn(vthis(item, vt[1]), 0);
         }
         cMemMan_free((char*)self->items - 0x10);
     }
@@ -1605,13 +1582,6 @@ INCLUDE_ASM("object/debouncenode", func_00344898);
 //100%
 INCLUDE_ASM("object/debouncenode", tCrowdBlock3d_updateAnimation);
 #ifdef SKIP_ASM
-struct sDebounceVEntry49F0 {
-    short delta;
-    short index;
-    void (*fn)(void*, float);
-};
-
-
 struct sDebounceOwner49F0 {
     char pad_0x0[0x10C];
     int count;                  // 0x10C
@@ -1642,8 +1612,7 @@ extern "C" void tCrowdBlock3d_updateAnimation(void* elem)
         self->time = newTime - self->period;
     }
     for (int i = 0; i < self->count; i++) {
-        sDebounceVEntry49F0* vt = (sDebounceVEntry49F0*)self->items[i].mVtbl;
-        vt[2].fn(vthis(&self->items[i], vt[2]), self->time);
+        self->items[i].update(self->time);
     }
     tCrowdBlock3d_buildPartMatrices(self);
 }

@@ -707,13 +707,13 @@ extern "C" cStreamSys* cStreamSys_cStreamSys(cStreamSys* self, int inchrg, int b
         cSoundSys_cSoundSys(&complete->mSoundSys, heap);
         cBankManager_cBankManager(self->mpVBankManager, 0, banks, heap);
     }
-    self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_00483998;
+    VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_00483998;
     self->mpVBankManager->BankMonitor.mVtbl = cBankMonitor_vtbl;
     self->mpVBankManager->mVtbl = (void**)&D_004839B8;
     if (!inchrg) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-ups (copied vtables on the stack), written out by hand.
         sSsVtblAA490 vtCopyA = D_00483998;
-        self->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&vtCopyA;
+        VPTR_OF(cSoundSys, self->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&vtCopyA;
         char* base1 = (char*)self->mpVBankManager->BankMonitor.mpVSoundSys - 0xC;
         int adjustA = (char*)self - base1;
         vtCopyA.e[1].delta = D_00483998.e[1].delta + adjustA;
@@ -738,7 +738,7 @@ void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void _$_15cStreamInstance(cStreamInstance* e, int a1);
-extern "C" void cSoundSys__cSoundSys(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags) __asm__("_$_9cSoundSys");
 extern void* cBankMonitor_vtbl[];
 
 struct sSsVEntryA648 {
@@ -769,12 +769,12 @@ extern const sSsVtblBA648 D_004839B8_A648 __asm__("D_004839B8");
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
 extern "C" void cStreamSys__cStreamSys(cStreamSys* streamSysObj, int flags)
 {
-    streamSysObj->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_00483998_A648;
+    VPTR_OF(cSoundSys, streamSysObj->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_00483998_A648;
     streamSysObj->mpVBankManager->BankMonitor.mVtbl = cBankMonitor_vtbl;
     streamSysObj->mpVBankManager->mVtbl = (void**)&D_004839B8_A648;
     if (flags == 0) {
         sSsVtblAA648 soundSysVtbl = D_00483998_A648;
-        streamSysObj->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&soundSysVtbl;
+        VPTR_OF(cSoundSys, streamSysObj->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&soundSysVtbl;
         char* base1 = (char*)streamSysObj->mpVBankManager->BankMonitor.mpVSoundSys - 0xC;
         int soundSysDelta = ((char*)streamSysObj) - base1;
         soundSysVtbl.e[1].delta = D_00483998_A648.e[1].delta + soundSysDelta;
@@ -1458,12 +1458,13 @@ extern "C" char* cController_cController(cController* self, int embedded, int ma
     cCrowdSys_cCrowdSys(((char*)self), 0, maxBanks, maxStreams, heap);
     cMusicSys_cMusicSys(&self->MusicSys, 0, maxBanks, maxStreams, heap);
     cSpeechSys_cSpeechSys(&self->SpeechSys, 0, maxBanks, maxStreams, heap);
-    self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_004837D8_B200;
+    VPTR_OF(cSoundSys, self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_004837D8_B200;
     self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mVtbl = (void**)&D_00483760_B200;
     self->MusicSys.mpVStreamSys->mpVBankManager->mVtbl = (void**)&D_004837A0_B200;
     if (embedded == 0) {
         sSsVtblAB200 soundSysVtbl = D_004837D8_B200;
-        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&soundSysVtbl;
+        VPTR_OF(cSoundSys, self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) =
+            (void**)&soundSysVtbl;
         char* base1 = (char*)self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys - 0x5728;
         int soundSysDelta = ((char*)self) - base1;
         soundSysVtbl.e[1].delta = D_004837D8_B200.e[1].delta + soundSysDelta;
@@ -1492,7 +1493,7 @@ void operator_delete(int* ptr);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cCrowdSys__cCrowdSys(void* self, int flags);
 extern "C" void cStreamSys__cStreamSys(cStreamSys* self, int flags);
-extern "C" void cSoundSys__cSoundSys(void* self, int flags);
+extern "C" void cSoundSys__cSoundSys(void* self, int flags) __asm__("_$_9cSoundSys");
 extern "C" void cSpeechSys__cSpeechSys(char* self, int flags);
 extern "C" void cMusicSys__cMusicSys(char* self, int flags);
 extern void* cMusicSys_vtbl[];
@@ -1523,7 +1524,7 @@ extern const sSsVtblCB478 D_004837A0;
  * Hand-written g++ 2.95 virtual-base destruction: installs the cController vtables in MusicSys.mVtbl, SpeechSys.mVtbl
  * and mVtbl and in the shared virtual bases (reached through MusicSys.mpVStreamSys), then runs the sub-object
  * destructors (cSpeechSys__cSpeechSys, cMusicSys__cMusicSys, cCrowdSys__cCrowdSys,
- * cStreamSys__cStreamSys, cBankManager__cBankManager, cSoundSys__cSoundSys) with this-adjusted temporary vtables, and deletes the object when
+ * cStreamSys__cStreamSys, cBankManager__cBankManager, _$_9cSoundSys) with this-adjusted temporary vtables, and deletes the object when
  * bit 0 of @p flags is set.
  *
  * @param flags  g++ 2.95 in-charge flags; bit 0 deletes the object
@@ -1536,12 +1537,13 @@ extern "C" void cController__cController(cController* self, int flags)
     self->MusicSys.mVtbl = cMusicSys_vtbl;
     self->SpeechSys.mVtbl = cSpeechSys_vtbl;
     self->mVtbl = cCrowdSys_vtbl;
-    self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&D_004837D8;
+    VPTR_OF(cSoundSys, self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) = (void**)&D_004837D8;
     self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mVtbl = (void**)&D_00483760;
     self->MusicSys.mpVStreamSys->mpVBankManager->mVtbl = (void**)&D_004837A0;
     if (flags == 0) {
         sSsVtblAB478 soundSysVtbl = D_004837D8;
-        self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys->mVtbl = (void**)&soundSysVtbl;
+        VPTR_OF(cSoundSys, self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys) =
+            (void**)&soundSysVtbl;
         char* base1 = (char*)self->MusicSys.mpVStreamSys->mpVBankManager->BankMonitor.mpVSoundSys - 0x5728;
         int soundSysAdjust = ((char*)self) - base1;
         soundSysVtbl.e[1].delta = D_004837D8.e[1].delta + soundSysAdjust;
@@ -1825,7 +1827,6 @@ extern "C" void cBankMonitorInstance_StopSound(cBankMonitorInstance*);
 
 /**
  * Stops an instance's sound and returns it to the free state.
- *
  * Calls cBankMonitorInstance_StopSound, then sets the cached pitch (+0xB0) to 0x8000, the cached volume (+0xB4) to -1, the cached
  * position (+0xB8) to 0xFFFF and clears the type (+0), the stopping flag (+0x54) and +0x58.
  */
@@ -1946,7 +1947,6 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Doppler);
 #ifdef SKIP_ASM
 /**
  * Returns the Doppler pitch factor for a change in distance over a time step.
- *
  * The speed @p delta / @p time is clamped to +-894.08 and mapped to (speed + 8000) / 8000. The object pointer is not used, so
  * the C definition omits it.
  *
