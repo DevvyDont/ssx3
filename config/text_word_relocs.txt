@@ -2,24 +2,24 @@
 // after splitting, so obj/target carries the R_MIPS_32 relocations that retail's linker resolved. Columns: vram, symbol,
 // expected word (checked against the split .s; the full-ELF checksum checks the symbol). Built from the linked ELF's
 // symbol table, 2026-11-15.
-// func_003FD810: a C function whose body is an asm table of 59 pointers (gcc's `jr $31; nop` follows); the loader
-// func_003FCFD8 passes it with its end marker func_003FD908 to func_003FD660.
-0x003FD810 func_00425C28 0x00425C28
+// DirtyDnas_importTable: a C function whose body is an asm table of 59 pointers (gcc's `jr $31; nop` follows); the loader
+// DirtyDnas_loadModule passes it with its end marker DirtyDnas_importTableEnd to elfModule_relocate.
+0x003FD810 kprintf 0x00425C28
 0x003FD814 scePrintf 0x00425C60
 0x003FD818 sceSifMCallRpc 0x0040B6D0
-0x003FD81C func_0040B400 0x0040B400
-0x003FD820 func_0040B5B0 0x0040B5B0
+0x003FD81C sceSifMBindRpcParam 0x0040B400
+0x003FD820 sceSifMUnBindRpc 0x0040B5B0
 0x003FD824 sceCdInit 0x00401718
 0x003FD828 sceCdGetDiskType 0x00402268
 0x003FD82C sceCdReadClock 0x00402520
 0x003FD830 sceCdMmode 0x00402450
-0x003FD834 func_00401350 0x00401350
+0x003FD834 sceCdNcmdDiskReady 0x00401350
 0x003FD838 sceCdDiskReady 0x00401BF0
-0x003FD83C func_004014F8 0x004014F8
+0x003FD83C _sceCd_scmd_prechk 0x004014F8
 0x003FD840 D_00451680 0x00451680
 0x003FD844 D_00451628 0x00451628
 0x003FD848 D_004527D0 0x004527D0
-0x003FD84C func_004011E0 0x004011E0
+0x003FD84C _sceCd_ncmd_prechk 0x004011E0
 0x003FD850 D_00452800 0x00452800
 0x003FD854 D_00453180 0x00453180
 0x003FD858 D_0045162C 0x0045162C
@@ -42,8 +42,8 @@
 0x003FD89C sceRead 0x004283A0
 0x003FD8A0 sceWrite 0x00428600
 0x003FD8A4 sceLseek 0x00428168
-0x003FD8A8 func_00424570 0x00424570
-0x003FD8AC func_004245A0 0x004245A0
+0x003FD8A8 _getpid 0x00424570
+0x003FD8AC _stat 0x004245A0
 0x003FD8B0 sceSifBindRpc 0x00426B48
 0x003FD8B4 iSignalSema 0x00423DD0
 0x003FD8B8 iSetAlarm 0x00423B80
@@ -54,7 +54,7 @@
 0x003FD8CC GsPutIMR 0x004240E0
 0x003FD8D0 SetGsCrt 0x004239A0
 0x003FD8D4 _fstat 0x00424558
-0x003FD8D8 func_00424550 0x00424550
+0x003FD8D8 isatty 0x00424550
 0x003FD8DC _open 0x00424460
 0x003FD8E0 _write 0x00424368
 0x003FD8E4 _close 0x00424488

@@ -3,7 +3,7 @@
 #include "seg/buddyapi.h"
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003EFF40);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_logPacket);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -12,14 +12,14 @@ extern char D_00496B70_FF40[] __asm__("D_00496B70");
 extern char D_00496B80_FF40[] __asm__("D_00496B80");
 extern char D_00496B90_FF40[] __asm__("D_00496B90");
 extern char D_004A4AD0_FF40[] __asm__("D_004A4AD0");
-extern void func_003EFED0(char *, const char *, ...);
+extern void BuddyApi_debugPrintf(char *, const char *, ...);
 struct I_FF40 { int f0; int f4; int f8; char *fC; };
 
-void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) __asm__("func_003EFF40");
+void BuddyApi_logPacket_impl(char *self, char *x, struct I_FF40 *info) __asm__("BuddyApi_logPacket");
 /**
  * Logs a buddy packet: its tags and a summary of its text.
  *
- * Prints @p x and two four-letter tags ("%s%c%c%c%c/%c%c%c%c", via func_003EFED0): @p info's [1] and [2]; a [1] of -1
+ * Prints @p x and two four-letter tags ("%s%c%c%c%c/%c%c%c%c", via BuddyApi_debugPrintf): @p info's [1] and [2]; a [1] of -1
  * prints "****" with [2] shown as "conn" (-1), "disc" (0xFEFEFEFE) or "----", and a [2] of 0 prints "----". Then the
  * text at @p info [3]: " [null data]" when empty, " [binary data]" when it has a control character other than tab, line
  * feed or carriage return, " [long data]" at 513 characters or more, else the text itself.
@@ -27,7 +27,7 @@ void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) __asm__("func_
  * @param x  the line prefix (such as "send: ")
  * @param info  the packet: [1] command tag, [2] kind, [3] text
  */
-void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) {
+void BuddyApi_logPacket_impl(char *self, char *x, struct I_FF40 *info) {
     int cmdTag, kindTag;
     int n, flag;
     int cr;
@@ -47,7 +47,7 @@ void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) {
             kindTag = 0x2D2D2D2D;
         }
     }
-    func_003EFED0(self, D_00496B58_FF40, x, cmdTag >> 24, cmdTag >> 16, cmdTag >> 8, cmdTag, kindTag >> 24, kindTag >> 16, kindTag >> 8, kindTag);
+    BuddyApi_debugPrintf(self, D_00496B58_FF40, x, cmdTag >> 24, cmdTag >> 16, cmdTag >> 8, cmdTag, kindTag >> 24, kindTag >> 16, kindTag >> 8, kindTag);
     n = 0;
     flag = 0;
     if (*bodyText != 0 && *bodyText < 0x7F) {
@@ -65,60 +65,60 @@ void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) {
         } while (scanPos++, n++, *scanPos != 0 && *scanPos < 0x7F);
     }
     if (n == 0) {
-        func_003EFED0(self, D_00496B70_FF40);
+        BuddyApi_debugPrintf(self, D_00496B70_FF40);
     } else if (flag == 1) {
-        func_003EFED0(self, D_00496B80_FF40);
+        BuddyApi_debugPrintf(self, D_00496B80_FF40);
     } else if (n >= 513) {
-        func_003EFED0(self, D_00496B90_FF40);
+        BuddyApi_debugPrintf(self, D_00496B90_FF40);
     } else {
-        func_003EFED0(self, D_004A4AD0_FF40, bodyText);
+        BuddyApi_debugPrintf(self, D_004A4AD0_FF40, bodyText);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F00D8);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_sendCommand);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_send[];
-extern int func_003F5910(int, int, int, int, int);
-extern void func_003EFF40(int*, char*, int*);
+extern int NetSession_send(int, int, int, int, int);
+extern void BuddyApi_logPacket(int*, char*, int*);
 /**
  * Sends a buddy command packet and logs it.
  *
- * Calls func_003F5910 on the connection at @p buddyApi [1] with the command tag and message, then, when a log callback
- * is set (+0x508), logs it with func_003EFF40 and the prefix "send: ".
+ * Calls NetSession_send on the connection at @p buddyApi [1] with the command tag and message, then, when a log callback
+ * is set (+0x508), logs it with BuddyApi_logPacket and the prefix "send: ".
  *
  * @param buddyApi  the buddy-API object
  * @param cmdTag  the four-letter command tag
  * @param message  the message text
  */
-void func_003F00D8(int* buddyApi, int cmdTag, int message) {
+void BuddyApi_sendCommand(int* buddyApi, int cmdTag, int message) {
     int logInfo[4];
-    func_003F5910(buddyApi[1], cmdTag, 0, message, -1);
+    NetSession_send(buddyApi[1], cmdTag, 0, message, -1);
     if (buddyApi[1288 / 4]) {
         logInfo[1] = cmdTag;
         logInfo[3] = message;
         logInfo[2] = 0;
         logInfo[0] = 0;
-        func_003EFF40(buddyApi, str_send, logInfo);
+        BuddyApi_logPacket(buddyApi, str_send, logInfo);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0150);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_stripNameSuffix);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char* strchr(const char* s, int c);
 /**
  * Cuts a buddy name at the first '@' and then at the first '/', in place.
  *
- * func_003F17D8 calls it.
+ * BuddyApi_update calls it.
  *
  * @param name  the name to shorten
  */
-void func_003F0150(char* name) {
+void BuddyApi_stripNameSuffix(char* name) {
     char* sep = strchr(name, '@');
     if (sep) *sep = 0;
     sep = strchr(name, '/');
@@ -127,7 +127,7 @@ void func_003F0150(char* name) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0198);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_deliverChatMessage);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_USER_b[];
@@ -147,12 +147,12 @@ extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key,
  * Copies the message's tag text (@p ev[3]) into a 0x800-byte local buffer, reads its USER field, and rewrites it:
  * "user@domain/resource" becomes USER=user, DOMN=domain and RSRC=resource (each part only when its separator is
  * present). Then points ev[3] at the rewritten buffer, sets the message kind ev[0] to 'chat' and calls the receive
- * callback at +0x4B0 with the user data at +0x4AC (both set by func_003F17C8). func_003F17D8 calls it for a 'RECV'
+ * callback at +0x4B0 with the user data at +0x4AC (both set by BuddyApi_setReceiveCallback). BuddyApi_update calls it for a 'RECV'
  * packet when that callback is set.
  *
  * @param ev  the message being dispatched: kind at [0], tag text at [3] (replaced by a pointer to a stack buffer)
  */
-void func_003F0198(char* self, int* ev) {
+void BuddyApi_deliverChatMessage(char* self, int* ev) {
     char tag[0x800];
     char name[0x100];
     char* nm;
@@ -181,7 +181,7 @@ void func_003F0198(char* self, int* ev) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F02D0);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_parsePresence);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Fills the output record from the event tag fields.
@@ -195,23 +195,23 @@ extern char* cDirtysock_tag_TagFieldFind(const char* tag, const char* key);
 extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
 extern int cDirtysock_tag_TagFieldGetFourCC(const char* data, int def);
 extern int strcmp_a(const char*, const char*) __asm__("strcmp");
-extern int func_003EFE20(char*, int, short*, int, char*, int);
+extern int LobbyUtil_findCodeName(char*, int, short*, int, char*, int);
 /**
  * Fills a roster entry's presence (show state, product, presence text, language) from a 'PGET' presence packet.
  *
  * Entry layout used here: +0x40 product name (20 bytes), +0x54 presence text (80), +0xA4 two-letter language code plus
  * NUL, +0xA7 show index, +0xA8 flags. The show index is the position of the packet's SHOW text in D_004512C0 ("DISC",
  * "CHAT", "AWAY", "XA", "DND", "PASS"; 0 when none matches, via strcmp strcmp). A PROD field sets flag 0x2000
- * and its text is the presence text; then the product name comes from func_003EFE20 (the product-key/language string
+ * and its text is the presence text; then the product name comes from LobbyUtil_findCodeName (the product-key/language string
  * table, empty in retail) and the language is our own first language (+0x30C). Without PROD, it reads the STAT field,
  * takes its 'P' sub-field as the product key, and looks for a sub-field named by each of our languages (+0x308 codes at
  * +0x30C) in turn: the first found gives the presence text and the language. When none is found the language is
- * whatever func_003EFE20 matches for all our languages (0 in retail).
+ * whatever LobbyUtil_findCodeName matches for all our languages (0 in retail).
  *
  * @param ev  the received packet (tag text at +0xC)
  * @param out  the roster entry to fill
  */
-void func_003F02D0(BuddyApiRefT* self, char* ev, char* out) {
+void BuddyApi_parsePresence(BuddyApiRefT* self, char* ev, char* out) {
     char key[3];
     char buf[0x100];
     short langCode;
@@ -238,7 +238,7 @@ void func_003F02D0(BuddyApiRefT* self, char* ev, char* out) {
     }
     cDirtysock_tag_TagFieldGetString(foundField, out + 0x54, 80, (char*)D_004A4AE8);
     if (out[0x54] != 0) {
-        func_003EFE20(((char*)self), self->mProductKey, (short*)(&self->mLangs[0]), 1, out + 0x40, 20);
+        LobbyUtil_findCodeName(((char*)self), self->mProductKey, (short*)(&self->mLangs[0]), 1, out + 0x40, 20);
         out[0xA4] = *(unsigned short*)&self->mLangs[0] >> 8;
         w = self->mLangs[0];
         out[0xA6] = 0;
@@ -264,13 +264,13 @@ void func_003F02D0(BuddyApiRefT* self, char* ev, char* out) {
                     out[0xA5] = langLow;
                     out[0xA6] = 0;
                     langCode = (short)((((int)(langLow << 24) >> 8) | (langHigh << 24)) >> 16);
-                    func_003EFE20(((char*)self), fourcc, &langCode, 1, out + 0x40, 20);
+                    LobbyUtil_findCodeName(((char*)self), fourcc, &langCode, 1, out + 0x40, 20);
                     break;
                 }
             }
         }
         if (out[0xA4] == 0) {
-            int matchedCode = func_003EFE20(((char*)self), fourcc, (short*)(&self->mLangs[0]), self->mNumLangs, out + 0x40, 20);
+            int matchedCode = LobbyUtil_findCodeName(((char*)self), fourcc, (short*)(&self->mLangs[0]), self->mNumLangs, out + 0x40, 20);
             short matchedShort = matchedCode;
             out[0xA6] = 0;
             langCode = matchedCode;
@@ -282,7 +282,7 @@ void func_003F02D0(BuddyApiRefT* self, char* ev, char* out) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0568);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_sendPresence);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_004A4B18[];
@@ -294,12 +294,12 @@ extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key,
  * Sends the buddy client's presence to the server as a 'PSET' packet.
  *
  * When a product key is set (+0x1C) it is stored as the 'P' field of the status text at +0x140. The packet is the base
- * presence at +0x240 (RSRC and SHOW, built by func_003F15C8) plus STAT (+0x140) and PROD (+0x40) when those are
- * non-empty, sent with func_003F00D8. Clears the pending-send time at +0x2C0.
+ * presence at +0x240 (RSRC and SHOW, built by BuddyApi_setPresence) plus STAT (+0x140) and PROD (+0x40) when those are
+ * non-empty, sent with BuddyApi_sendCommand. Clears the pending-send time at +0x2C0.
  *
  * @param buddyRef  the BuddyApi state
  */
-void func_003F0568(BuddyApiRefT* buddyRef) {
+void BuddyApi_sendPresence(BuddyApiRefT* buddyRef) {
     char buf[0x200];
     if (buddyRef->mProductKey) {
         cDirtysock_tag_TagFieldSetFourCC(buddyRef->mStatText, 0x100, D_004A4B18, buddyRef->mProductKey);
@@ -311,13 +311,13 @@ void func_003F0568(BuddyApiRefT* buddyRef) {
     if (buddyRef->mProdText[0]) {
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PROD_b, buddyRef->mProdText);
     }
-    func_003F00D8((int*)buddyRef, 0x50534554, (int)buf);
+    BuddyApi_sendCommand((int*)buddyRef, 0x50534554, (int)buf);
     buddyRef->mPresenceSendTime = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0610);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_setState);
 #ifdef SKIP_ASM
 /**
  * Sets the buddy client's connection state and reports it to the connect callback.
@@ -330,7 +330,7 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0610);
  * @param state  the new state
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003F0610(int* buddyApi, int state) {
+void BuddyApi_setState(int* buddyApi, int state) {
     int event[4];
     buddyApi[2] = state;
     if (buddyApi[1220 / 4]) {
@@ -344,20 +344,20 @@ void func_003F0610(int* buddyApi, int state) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0658);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_armRequest);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct S0658E { int f0, f4, f8, fC, f10; };
 struct S0658 { int pad[5]; int f14; int pad2[(0x4C8-0x18)/4]; struct S0658E e[1]; };
 extern int D_004512B0[];
-extern int func_003F5D88(int);
+extern int NetSession_getTick(int);
 /**
  * Arms one of the buddy client's three pending-request slots (0 add, 1 delete, 2 send).
  *
  * The slot is the 0x14-byte record at +0x4C8 + @p idx * 0x14: its kind becomes D_004512B0[idx] ('addu', 'delu',
  * 'send'), its sequence number the next value of the request counter at +0x14 (which starts at 100), and it keeps the
- * callback, its user data and a deadline of now (func_003F5D88) + @p ms * 1000 (0 when @p ms is not positive).
- * func_003F17D8 drops the connection when a deadline passes while the callback is still set. Callers pass 600, so
+ * callback, its user data and a deadline of now (NetSession_getTick) + @p ms * 1000 (0 when @p ms is not positive).
+ * BuddyApi_update drops the connection when a deadline passes while the callback is still set. Callers pass 600, so
  * @p ms is in seconds.
  *
  * @param buddyRef  the BuddyApi state
@@ -366,10 +366,10 @@ extern int func_003F5D88(int);
  * @param userData  user data passed to the callback
  * @param ms  timeout in seconds
  */
-void func_003F0658(struct S0658* buddyRef, int idx, int callback, int userData, int ms) {
+void BuddyApi_armRequest(struct S0658* buddyRef, int idx, int callback, int userData, int ms) {
     int deadline = 0;
     if (ms > 0) {
-        deadline = func_003F5D88(((int*)buddyRef)[1]) + ms * 1000;
+        deadline = NetSession_getTick(((int*)buddyRef)[1]) + ms * 1000;
     }
     buddyRef->e[idx].f0 = D_004512B0[idx];
     buddyRef->f14++;
@@ -381,31 +381,31 @@ void func_003F0658(struct S0658* buddyRef, int idx, int callback, int userData, 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0710);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_create);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void* func_002591E8(int);
+extern void* lobbyman_alloc(int);
 extern void memset_a(void*, int, int) __asm__("memset");
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
-extern int func_003F5478(int);
+extern int NetSession_create(int);
 /**
  * Creates a buddy client (BuddyApi) state block.
  *
- * Allocates 0x50C bytes with func_002591E8 and zero-fills them, copies @p product to +0x314 and @p version to +0x354
- * (both sent in the 'AUTH' login), creates the packet session with func_003F5478(0x8000) at +0x4 and starts the request
+ * Allocates 0x50C bytes with lobbyman_alloc and zero-fills them, copies @p product to +0x314 and @p version to +0x354
+ * (both sent in the 'AUTH' login), creates the packet session with NetSession_create(0x8000) at +0x4 and starts the request
  * counter (+0x14) at 100. BuddyMan's BuddyMan_createBuddyApi calls it with version "2003-10-20".
  *
  * @param product  product name sent as PROD
  * @param version  version text sent as VERS
  * @return the new state, or 0 when the allocation fails
  */
-int* func_003F0710(const char* product, const char* version) {
-    BuddyApiRefT* buddyApi = (BuddyApiRefT*)func_002591E8(1292);
+int* BuddyApi_create(const char* product, const char* version) {
+    BuddyApiRefT* buddyApi = (BuddyApiRefT*)lobbyman_alloc(1292);
     if (buddyApi) {
         memset_a(buddyApi, 0, 1292);
         cDirtysock_tag_TagFieldDupl(buddyApi->mProduct, 0x40, product);
         cDirtysock_tag_TagFieldDupl(buddyApi->mVersion, 0x40, version);
-        buddyApi->mpSession = (void*)func_003F5478(0x8000);
+        buddyApi->mpSession = (void*)NetSession_create(0x8000);
         buddyApi->mRequestSeq = 100;
     }
     return (int*)buddyApi;
@@ -413,54 +413,54 @@ int* func_003F0710(const char* product, const char* version) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F07A0);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_destroy);
 #ifdef SKIP_ASM
-extern int func_003F0B50(struct BuddyApiRefT*);
-extern void func_003F0BE0(struct BuddyApiRefT*);
-extern void func_003F55B8(int);
-extern void func_00259210(void*);
+extern int BuddyApi_disconnect(struct BuddyApiRefT*);
+extern void BuddyApi_freeRoster(struct BuddyApiRefT*);
+extern void NetSession_destroy(int);
+extern void lobbyman_free(void*);
 /**
  * Destroys a buddy client.
  *
- * Destroys a pending host lookup (the object at +0x0, through its slot +0xC), disconnects (func_003F0B50), frees the
- * roster (func_003F0BE0), destroys the packet session at +0x4 (func_003F55B8) and frees the state with func_00259210.
+ * Destroys a pending host lookup (the object at +0x0, through its slot +0xC), disconnects (BuddyApi_disconnect), frees the
+ * roster (BuddyApi_freeRoster), destroys the packet session at +0x4 (NetSession_destroy) and frees the state with lobbyman_free.
  *
  * @param buddyRef  the BuddyApi state
  */
-void func_003F07A0(struct BuddyApiRefT* buddyRef) {
+void BuddyApi_destroy(struct BuddyApiRefT* buddyRef) {
     if (((struct HostentT*)buddyRef->mpHostLookup)) {
         ((void (*)(struct S07A0Obj*))((struct HostentT*)buddyRef->mpHostLookup)->Free)(((struct HostentT*)buddyRef->mpHostLookup));
         (*(struct HostentT**)&buddyRef->mpHostLookup) = 0;
     }
-    func_003F0B50(buddyRef);
-    func_003F0BE0(buddyRef);
-    func_003F55B8(((int)buddyRef->mpSession));
-    func_00259210(buddyRef);
+    BuddyApi_disconnect(buddyRef);
+    BuddyApi_freeRoster(buddyRef);
+    NetSession_destroy(((int)buddyRef->mpSession));
+    lobbyman_free(buddyRef);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0800);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_getState);
 #ifdef SKIP_ASM
 /**
- * Returns the buddy client's connection state (+0x8; see func_003F0610).
+ * Returns the buddy client's connection state (+0x8; see BuddyApi_setState).
  *
  * @param buddyApi  the BuddyApi state
  * @return the state
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F0800(int* buddyApi) {
+int BuddyApi_getState(int* buddyApi) {
     return buddyApi[2];
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0808);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_setDebugHook);
 #ifdef SKIP_ASM
 /**
  * Installs the buddy client's debug-print hook.
  *
- * Stores the context at +0x504 and the print function at +0x508; func_003EFED0 and the "send: "/"recv: " traces call it
+ * Stores the context at +0x504 and the print function at +0x508; BuddyApi_debugPrintf and the "send: "/"recv: " traces call it
  * with the context and the formatted text when it is set. Nothing in retail calls this.
  *
  * @param buddyApi  the BuddyApi state
@@ -468,14 +468,14 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0808);
  * @param debugFunc  the print function (0 disables tracing)
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003F0808(int* buddyApi, int debugContext, int debugFunc) {
+void BuddyApi_setDebugHook(int* buddyApi, int debugContext, int debugFunc) {
     buddyApi[1284 / 4] = debugContext;
     buddyApi[1288 / 4] = debugFunc;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0818);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_configure);
 #ifdef SKIP_ASM
 /**
  * Sets the buddy client's presence text, product key, languages and name policy before connecting.
@@ -483,7 +483,7 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0818);
  * Copies @p src to +0x2C8 (0x40 bytes, sent as PRES at login) and stores @p key at +0x1C (the product key; BuddyMan
  * passes 'ssx3'). Parses up to four two-letter language codes from @p langCodes into the 16-bit codes at +0x30C,
  * stopping at the first character below 'a', and stores their count at +0x308. Stores @p x at +0x18: when it is 0,
- * buddy names containing '.' are rejected (func_003F0E38, func_003F11F8) or skipped (roster updates).
+ * buddy names containing '.' are rejected (BuddyApi_addUser, BuddyApi_removeUser) or skipped (roster updates).
  *
  * @param buddyApi  the BuddyApi state
  * @param src  presence text
@@ -493,7 +493,7 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0818);
  * @return 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F0818(BuddyApiRefT* buddyApi, const char* src, int key, char* langCodes, int x) {
+int BuddyApi_configure(BuddyApiRefT* buddyApi, const char* src, int key, char* langCodes, int x) {
     short* langSlot;
     int j;
     cDirtysock_tag_TagFieldDupl(buddyApi->mPresText, 0x40, src);
@@ -518,7 +518,7 @@ int func_003F0818(BuddyApiRefT* buddyApi, const char* src, int key, char* langCo
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F08E8);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_connect);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_PASS_c[];
@@ -535,18 +535,18 @@ extern char* strcat(char*, const char*);
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int SocketLookup(int, int);
-extern int func_003F5D88(int);
+extern int NetSession_getTick(int);
 /**
  * Starts connecting the buddy client to a buddy server and prepares the login packet.
  *
- * Disconnects first (func_003F0B50), stores the connect callback (+0x4C4), its user data (+0x4C0) and the port (+0x10),
+ * Disconnects first (BuddyApi_disconnect), stores the connect callback (+0x4C4), its user data (+0x4C0) and the port (+0x10),
  * and builds the 'AUTH' tag text at +0x394: PROD (+0x314), VERS (+0x354), PRES (+0x2C8), then the login. A login
  * without ':' is a login key: USER = @p nick, LKEY = login. Otherwise "user:secret" gives USER = user followed by
  * @p nick (when it fits in 0x100), and LKEY = secret without its leading '$' or PASS = secret. Copies @p nick into
  * +0x494 (0x10 bytes, the resource sent as LRSC), dropping a leading '/' (an overlapping strcpy) and cutting at the
  * next '/'. Then starts the host lookup (+0x0 = SocketLookup(@p serverName, @p ms * 1000)), reports state 1
  * (connecting), sets the connect deadline +0xC to now + @p ms * 1000 and the last show state +0x2C4 to -1.
- * func_003F17D8 finishes the connection.
+ * BuddyApi_update finishes the connection.
  *
  * @param serverName  buddy server host name
  * @param port  buddy server port
@@ -557,13 +557,13 @@ extern int func_003F5D88(int);
  * @param ctx  user data for the callback
  * @return 0
  */
-int func_003F08E8(BuddyApiRefT* self, int serverName, int port, int ms, char* host, char* nick, int cb, int ctx) {
+int BuddyApi_connect(BuddyApiRefT* self, int serverName, int port, int ms, char* host, char* nick, int cb, int ctx) {
     char tag[0x100];
     char loginCopy[0x100];
     char* sep;
     char* buf = self->mAuthText;
     char* nickBuf;
-    func_003F0B50((struct BuddyApiRefT*)self);
+    BuddyApi_disconnect((struct BuddyApiRefT*)self);
     self->mpConnectData = (void*)ctx;
     self->mpConnectProc = (void (*)())cb;
     self->mPort = port;
@@ -601,78 +601,78 @@ int func_003F08E8(BuddyApiRefT* self, int serverName, int port, int ms, char* ho
     sep = strchr(nickBuf, '/');
     if (sep) *sep = 0;
     *(int*)self = SocketLookup(serverName, ms * 1000);
-    func_003F0610((int*)self, 1);
-    self->mConnectDeadline = func_003F5D88((int)self->mpSession) + ms * 1000;
+    BuddyApi_setState((int*)self, 1);
+    self->mConnectDeadline = NetSession_getTick((int)self->mpSession) + ms * 1000;
     self->mLastShow = -1;
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0B50);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_disconnect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 // (prototype from their definition at line 249)
-void func_003F0610_0B50(int* p, int a) __asm__("func_003F0610");
+void BuddyApi_setState_0B50(int* p, int a) __asm__("BuddyApi_setState");
 
 // (prototype from their definition at line 70)
-void func_003F00D8_0B50(int* p, int a, int b) __asm__("func_003F00D8");
+void BuddyApi_sendCommand_0B50(int* p, int a, int b) __asm__("BuddyApi_sendCommand");
 
 extern int D_004A4AE8[];
-extern int func_003F5738(int);
+extern int NetSession_disconnect(int);
 /**
  * Disconnects the buddy client.
  *
- * Destroys a pending host lookup object (+0x0), sends 'DISC' with empty data (func_003F00D8), closes the packet session
- * (func_003F5738 on +0x4), reports state 6 when the client was online (5) and then state 0, clears the connect callback
- * (+0x4C4) and frees the roster (func_003F0BE0).
+ * Destroys a pending host lookup object (+0x0), sends 'DISC' with empty data (BuddyApi_sendCommand), closes the packet session
+ * (NetSession_disconnect on +0x4), reports state 6 when the client was online (5) and then state 0, clears the connect callback
+ * (+0x4C4) and frees the roster (BuddyApi_freeRoster).
  *
  * @param buddyRef  the BuddyApi state
  * @return 0
  */
-int func_003F0B50(struct BuddyApiRefT* buddyRef) {
+int BuddyApi_disconnect(struct BuddyApiRefT* buddyRef) {
     if (((struct HostentT*)buddyRef->mpHostLookup)) {
         ((void (*)(struct S07A0Obj*))((struct HostentT*)buddyRef->mpHostLookup)->Free)(((struct HostentT*)buddyRef->mpHostLookup));
         (*(struct HostentT**)&buddyRef->mpHostLookup) = 0;
     }
-    func_003F00D8_0B50((int*)buddyRef, 0x44495343, (int)D_004A4AE8);
-    func_003F5738(((int)buddyRef->mpSession));
+    BuddyApi_sendCommand_0B50((int*)buddyRef, 0x44495343, (int)D_004A4AE8);
+    NetSession_disconnect(((int)buddyRef->mpSession));
     if (buddyRef->mState == 5) {
-        func_003F0610_0B50((int*)buddyRef, 6);
+        BuddyApi_setState_0B50((int*)buddyRef, 6);
     }
-    func_003F0610_0B50((int*)buddyRef, 0);
+    BuddyApi_setState_0B50((int*)buddyRef, 0);
     buddyRef->mpConnectProc = 0;
-    func_003F0BE0(buddyRef);
+    BuddyApi_freeRoster(buddyRef);
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0BE0);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_freeRoster);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EE9A0(int);
-extern void* func_003EE480(int, int);
-extern void func_003EE820(int);
-extern void func_003EE260(int);
+extern int HashTable_takeAny(int);
+extern void* SortList_remove(int, int);
+extern void HashTable_destroy(int);
+extern void SortList_destroy(int);
 /**
  * Frees the buddy client's roster.
  *
- * When a roster list exists (+0x4A8), frees every entry (taking ids out of the name table +0x4A4 with func_003EE9A0 and
- * removing the entries from the list with func_003EE480), calls the roster callback (+0x4B8, user data +0x4B4) with a
- * {'rost', 0, 0, roster} message, destroys the name table (func_003EE820) and the list (func_003EE260), and clears both
+ * When a roster list exists (+0x4A8), frees every entry (taking ids out of the name table +0x4A4 with HashTable_takeAny and
+ * removing the entries from the list with SortList_remove), calls the roster callback (+0x4B8, user data +0x4B4) with a
+ * {'rost', 0, 0, roster} message, destroys the name table (HashTable_destroy) and the list (SortList_destroy), and clears both
  * pointers and the roster callback and its user data.
  *
  * @param sp  the BuddyApi state
  */
-void func_003F0BE0(struct BuddyApiRefT* sp) {
+void BuddyApi_freeRoster(struct BuddyApiRefT* sp) {
     int* buddyApi = (int*)sp;
     int event[4];
     int x;
     if (buddyApi[1192 / 4]) {
-        while ((x = func_003EE9A0(buddyApi[1188 / 4]))) {
-            func_00259210(func_003EE480(buddyApi[1192 / 4], x));
+        while ((x = HashTable_takeAny(buddyApi[1188 / 4]))) {
+            lobbyman_free(SortList_remove(buddyApi[1192 / 4], x));
         }
         if (buddyApi[1208 / 4]) {
             event[0] = 0x726F7374;
@@ -681,9 +681,9 @@ void func_003F0BE0(struct BuddyApiRefT* sp) {
             event[3] = buddyApi[1192 / 4];
             ((void (*)(int*, int*, int))buddyApi[1208 / 4])(buddyApi, event, buddyApi[1204 / 4]);
         }
-        func_003EE820(buddyApi[1188 / 4]);
+        HashTable_destroy(buddyApi[1188 / 4]);
         buddyApi[1188 / 4] = 0;
-        func_003EE260(buddyApi[1192 / 4]);
+        SortList_destroy(buddyApi[1192 / 4]);
         buddyApi[1192 / 4] = 0;
         buddyApi[1192 / 4] = 0;
         buddyApi[1204 / 4] = 0;
@@ -693,7 +693,7 @@ void func_003F0BE0(struct BuddyApiRefT* sp) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0C90);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_requestRoster);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_PRES[];
@@ -705,72 +705,72 @@ extern char str_ID[];
 extern char D_004A4B60[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int cDirtysock_tag_TagFieldSetNumber(char* dst, int len, const char* key, int val);
-extern int func_003EE778(int, int);
-extern int func_003EE1E8(int, int, int);
-extern int func_003EE600(int, int);
+extern int HashTable_create(int, int);
+extern int SortList_create(int, int, int);
+extern int SortList_bumpChanged(int, int);
 /**
  * Creates the buddy roster and requests the buddy and ignore lists, once.
  *
  * When no roster exists (+0x4A8): stores the roster callback at +0x4B8 and its user data at +0x4B4, creates the name
- * table +0x4A4 (func_003EE778(1000, 2000)) and the roster list (func_003EE1E8(100, 100, 0)), and sends two 'RGET'
+ * table +0x4A4 (HashTable_create(1000, 2000)) and the roster list (SortList_create(100, 100, 0)), and sends two 'RGET'
  * packets with LRSC = the resource (+0x494) and PRES = "Y": LIST "B" (buddies) as ID 1 and LIST "I" (ignored users) as
- * ID 2. Marks the roster changed (func_003EE600). BuddyMan's onconnect calls it after a successful 'auth'.
+ * ID 2. Marks the roster changed (SortList_bumpChanged). BuddyMan's onconnect calls it after a successful 'auth'.
  *
  * @param rosterCallback  roster callback ('rost' changes, 'endr' when the lists are complete)
  * @param rosterUserData  user data for the callback
  * @return the roster list
  */
-void* func_003F0C90(BuddyApiRefT* self, int rosterCallback, int rosterUserData) {
+void* BuddyApi_requestRoster(BuddyApiRefT* self, int rosterCallback, int rosterUserData) {
     char buf[0x100];
     if ((int)self->mpRoster == 0) {
         char* resourceName = self->mResource;
         self->mpRosterProc = (void (*)())rosterCallback;
         self->mpRosterData = (void*)rosterUserData;
-        self->mpNameTable = (void*)func_003EE778(1000, 2000);
-        self->mpRoster = (void*)func_003EE1E8(100, 100, 0);
+        self->mpNameTable = (void*)HashTable_create(1000, 2000);
+        self->mpRoster = (void*)SortList_create(100, 100, 0);
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, resourceName);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, 1);
-        func_003F00D8((int*)self, 0x52474554, (int)buf);
+        BuddyApi_sendCommand((int*)self, 0x52474554, (int)buf);
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, resourceName);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, 2);
-        func_003F00D8((int*)self, 0x52474554, (int)buf);
-        func_003EE600((int)self->mpRoster, 1);
+        BuddyApi_sendCommand((int*)self, 0x52474554, (int)buf);
+        SortList_bumpChanged((int)self->mpRoster, 1);
     }
     return self->mpRoster;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0E30);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_getRoster);
 #ifdef SKIP_ASM
 /**
- * Returns the buddy client's roster list (+0x4A8; 0 before func_003F0C90).
+ * Returns the buddy client's roster list (+0x4A8; 0 before BuddyApi_requestRoster).
  *
  * @param buddyApi  the BuddyApi state
  * @return the roster list
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F0E30(int* buddyApi) {
+int BuddyApi_getRoster(int* buddyApi) {
     return buddyApi[1192 / 4];
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F0E38);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_addUser);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char* strchr(const char* s, int c);
-extern void* func_002591E8(int);
-extern int func_003EEC88(int, int);
-extern int func_003EE468(int, int);
-extern int func_003EE320(int, int);
-extern int func_003EEB30(int, int, int);
+extern void* lobbyman_alloc(int);
+extern int HashTable_findString(int, int);
+extern int SortList_getValue(int, int);
+extern int SortList_add(int, int);
+extern int HashTable_addString(int, int, int);
 extern char str_USER_b[];
 extern char str_PRES[];
 extern char str_LRSC[];
@@ -787,8 +787,8 @@ typedef struct { char b[0xB8]; } Ent_0E38;
  * Adds a user to the buddy list, the ignore list and/or the presence subscriptions.
  *
  * Returns -3 for a missing record, no flags (+0xA8), an empty name or a name containing '/' or '@' (or '.', unless
- * +0x18 allows it). Arms request slot 0 ('addu') with func_003F0658. Without a roster it stops there (returns 0).
- * Otherwise finds the entry by name (func_003EEC88) or adds a 0xB8-byte copy of @p buddyRecord to the roster and name table, ORs
+ * +0x18 allows it). Arms request slot 0 ('addu') with BuddyApi_armRequest. Without a roster it stops there (returns 0).
+ * Otherwise finds the entry by name (HashTable_findString) or adds a 0xB8-byte copy of @p buddyRecord to the roster and name table, ORs
  * the flags in and clears +0xAC. Flag 4 sends 'RADD' with LIST "B", PRES "Y", USER and GROUP (+0x20); flag 0x200 sends
  * 'RADD' with LIST "I"; both carry LRSC and ID = the slot's sequence number (+0x4CC), mark the entry pending (flag
  * 0x10000) and store that number in +0xAC for the reply. Flag 0x800000 sends 'PADD' with USER.
@@ -799,7 +799,7 @@ typedef struct { char b[0xB8]; } Ent_0E38;
  * @param timeoutSecs  timeout in seconds
  * @return 0, or -3 when the record is refused
  */
-int func_003F0E38(BuddyApiRefT* self, char* buddyRecord, int callback, int userData, int timeoutSecs) {
+int BuddyApi_addUser(BuddyApiRefT* self, char* buddyRecord, int callback, int userData, int timeoutSecs) {
     char buf[0x100];
     char* ent;
     int x;
@@ -811,16 +811,16 @@ int func_003F0E38(BuddyApiRefT* self, char* buddyRecord, int callback, int userD
         if (strchr(buddyRecord, '.') != 0)
             return -3;
     }
-    func_003F0658((struct S0658*)self, 0, callback, userData, timeoutSecs);
+    BuddyApi_armRequest((struct S0658*)self, 0, callback, userData, timeoutSecs);
     if ((int)self->mpRoster == 0)
         return 0;
-    x = func_003EEC88((int)self->mpNameTable, (int)buddyRecord);
+    x = HashTable_findString((int)self->mpNameTable, (int)buddyRecord);
     if (x == 0) {
-        ent = (char*)func_002591E8(184);
+        ent = (char*)lobbyman_alloc(184);
         *(Ent_0E38*)ent = *(Ent_0E38*)buddyRecord;
-        func_003EEB30((int)self->mpNameTable, (int)ent, func_003EE320((int)self->mpRoster, (int)ent));
+        HashTable_addString((int)self->mpNameTable, (int)ent, SortList_add((int)self->mpRoster, (int)ent));
     } else {
-        ent = (char*)func_003EE468((int)self->mpRoster, x);
+        ent = (char*)SortList_getValue((int)self->mpRoster, x);
         *(int*)(ent + 0xA8) |= *(int*)(buddyRecord + 0xA8);
     }
     *(int*)(ent + 0xAC) = 0;
@@ -832,7 +832,7 @@ int func_003F0E38(BuddyApiRefT* self, char* buddyRecord, int callback, int userD
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, buddyRecord);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_GROUP, buddyRecord + 0x20);
-        func_003F00D8((int*)self, 0x52414444, (int)buf);
+        BuddyApi_sendCommand((int*)self, 0x52414444, (int)buf);
         *(int*)(ent + 0xA8) |= 0x10000;
         *(int*)(ent + 0xAC) = self->mRequestSeq;
     }
@@ -842,21 +842,21 @@ int func_003F0E38(BuddyApiRefT* self, char* buddyRecord, int callback, int userD
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, self->mRequests[0][1]);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, buddyRecord);
-        func_003F00D8((int*)self, 0x52414444, (int)buf);
+        BuddyApi_sendCommand((int*)self, 0x52414444, (int)buf);
         *(int*)(ent + 0xA8) |= 0x10000;
         *(int*)(ent + 0xAC) = self->mRequestSeq;
     }
     if (*(int*)(buddyRecord + 0xA8) & 0x800000) {
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, buddyRecord);
-        func_003F00D8((int*)self, 0x50414444, (int)buf);
+        BuddyApi_sendCommand((int*)self, 0x50414444, (int)buf);
     }
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F11F8);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_removeUser);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_USER_b[];
@@ -871,15 +871,15 @@ extern char str_GROUP[];
 extern char* strchr(const char* s, int c);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int cDirtysock_tag_TagFieldSetNumber(char* dst, int len, const char* key, int val);
-extern int func_003EEC88(int, int);
-extern int func_003EE468(int, int);
-extern void func_003EED08(int, char*);
-extern void* func_003EE480(int, int);
+extern int HashTable_findString(int, int);
+extern int SortList_getValue(int, int);
+extern void HashTable_removeString(int, char*);
+extern void* SortList_remove(int, int);
 /**
  * Removes a user from the buddy list, the ignore list and/or the presence subscriptions.
  *
  * Returns -2 without a record or a roster, -3 for a name containing '/' or '@' (or '.', unless +0x18 allows it). Arms
- * request slot 1 ('delu') with func_003F0658. When the name is in the roster, clears from its entry the flags that
+ * request slot 1 ('delu') with BuddyApi_armRequest. When the name is in the roster, clears from its entry the flags that
  * @p name's +0xA8 also has: flag 4 sends 'RDEL' with ID = the slot's sequence number (+0x4E0), LRSC, LIST "B", PRES
  * "Y", USER and GROUP; flag 0x200 sends 'RDEL' with LIST "I"; flag 0x800000 sends 'PDEL'. An entry left without any of
  * the flags 0x100204 is taken out of the name table and freed.
@@ -890,7 +890,7 @@ extern void* func_003EE480(int, int);
  * @param ms  timeout in seconds
  * @return 0 when the entry was found, else -2 or -3
  */
-int func_003F11F8(BuddyApiRefT* self, char* name, int callback, int userData, int ms) {
+int BuddyApi_removeUser(BuddyApiRefT* self, char* name, int callback, int userData, int ms) {
     char buf[0x100];
     int ret = -2;
     int id;
@@ -903,10 +903,10 @@ int func_003F11F8(BuddyApiRefT* self, char* name, int callback, int userData, in
             if (self->unk_018 == 0) {
                 if (strchr(name, '.')) return -3;
             }
-            func_003F0658((struct S0658*)self, 1, callback, userData, ms);
-            id = func_003EEC88((int)self->mpNameTable, (int)name);
+            BuddyApi_armRequest((struct S0658*)self, 1, callback, userData, ms);
+            id = HashTable_findString((int)self->mpNameTable, (int)name);
             if (id != 0) {
-                ent = (char*)func_003EE468((int)self->mpRoster, id);
+                ent = (char*)SortList_getValue((int)self->mpRoster, id);
                 removedFlags = *(int*)(ent + 0xA8) & *(int*)(name + 0xA8);
                 *(int*)(ent + 0xA8) ^= removedFlags;
                 if (removedFlags & 4) {
@@ -917,7 +917,7 @@ int func_003F11F8(BuddyApiRefT* self, char* name, int callback, int userData, in
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_GROUP, name + 0x20);
-                    func_003F00D8((int*)self, 0x5244454C, (int)buf);
+                    BuddyApi_sendCommand((int*)self, 0x5244454C, (int)buf);
                 }
                 if (removedFlags & 0x200) {
                     buf[0] = 0;
@@ -925,17 +925,17 @@ int func_003F11F8(BuddyApiRefT* self, char* name, int callback, int userData, in
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self->mResource);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
-                    func_003F00D8((int*)self, 0x5244454C, (int)buf);
+                    BuddyApi_sendCommand((int*)self, 0x5244454C, (int)buf);
                 }
                 if (removedFlags & 0x800000) {
                     buf[0] = 0;
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self->mResource);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
-                    func_003F00D8((int*)self, 0x5044454C, (int)buf);
+                    BuddyApi_sendCommand((int*)self, 0x5044454C, (int)buf);
                 }
                 if ((*(int*)(ent + 0xA8) & 0x100204) == 0) {
-                    func_003EED08((int)self->mpNameTable, name);
-                    func_00259210(func_003EE480((int)self->mpRoster, id));
+                    HashTable_removeString((int)self->mpNameTable, name);
+                    lobbyman_free(SortList_remove((int)self->mpRoster, id));
                 }
                 ret = 0;
             }
@@ -946,11 +946,11 @@ int func_003F11F8(BuddyApiRefT* self, char* name, int callback, int userData, in
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F14D8);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_findRosterEntry);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EEC88(int, int);
-extern int func_003EE468(int, int);
+extern int HashTable_findString(int, int);
+extern int SortList_getValue(int, int);
 /**
  * Finds a roster entry by user name.
  *
@@ -958,12 +958,12 @@ extern int func_003EE468(int, int);
  * @param buddyName  the user name
  * @return the entry (0xB8 bytes), or 0 when there is no roster or no such name
  */
-int func_003F14D8(int* buddyApi, int buddyName) {
+int BuddyApi_findRosterEntry(int* buddyApi, int buddyName) {
     int rosterEntry = 0;
     if (buddyApi[1188 / 4] && buddyName) {
-        int x = func_003EEC88(buddyApi[1188 / 4], buddyName);
+        int x = HashTable_findString(buddyApi[1188 / 4], buddyName);
         if (x) {
-            rosterEntry = func_003EE468(buddyApi[1192 / 4], x);
+            rosterEntry = SortList_getValue(buddyApi[1192 / 4], x);
         }
     }
     return rosterEntry;
@@ -971,7 +971,7 @@ int func_003F14D8(int* buddyApi, int buddyName) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F1538);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_clearPresenceTexts);
 #ifdef SKIP_ASM
 /**
  * Clears the buddy client's presence product text (+0x40) and status text (+0x140).
@@ -979,14 +979,14 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F1538);
  * @param buddyApi  the BuddyApi state
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003F1538(char* buddyApi) {
+void BuddyApi_clearPresenceTexts(char* buddyApi) {
     buddyApi[0x40] = 0;
     buddyApi[0x140] = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F1548);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_setProductText);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
@@ -996,7 +996,7 @@ extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
  * @param buddyApi  the BuddyApi state
  * @param src  the product text
  */
-void func_003F1548(char* buddyApi, const char* src) {
+void BuddyApi_setProductText(char* buddyApi, const char* src) {
     if (buddyApi[0x2C8]) {
         cDirtysock_tag_TagFieldDupl(buddyApi + 0x40, 0x100, src);
     }
@@ -1004,7 +1004,7 @@ void func_003F1548(char* buddyApi, const char* src) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F1578);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_setStatusText);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
@@ -1017,7 +1017,7 @@ extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key,
  * @param val  the status text
  * @param key  two-letter language code
  */
-void func_003F1578(char* buddyApi, const char* val, const char* key) {
+void BuddyApi_setStatusText(char* buddyApi, const char* val, const char* key) {
     if (key[0] && key[1] && !key[2] && val[0]) {
         cDirtysock_tag_TagFieldSetString(buddyApi + 0x140, 0x100, key, val);
     }
@@ -1025,31 +1025,31 @@ void func_003F1578(char* buddyApi, const char* val, const char* key) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F15C8);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_setPresence);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004512C0[];
 extern char str_RSRC[];
 extern char str_SHOW[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
-extern int func_003F5D88(int);
-extern void func_003F0568(BuddyApiRefT*);
+extern int NetSession_getTick(int);
+extern void BuddyApi_sendPresence(BuddyApiRefT*);
 /**
  * Sets the buddy client's resource and show state and sends the presence now or after a delay.
  *
  * Rebuilds the base presence at +0x240 (0x80 bytes): RSRC = @p resourceText and SHOW = D_004512C0[@p st] ("CHAT", "AWAY", "XA",
  * "DND", "PASS" for 1..5, else "DISC"). With no send pending (+0x2C0 == 0) schedules one at now + @p sendDelay; a show state
- * different from the last one (+0x2C4) is recorded and sent at once. Sends with func_003F0568 when the time has come;
- * otherwise func_003F17D8 sends it later.
+ * different from the last one (+0x2C4) is recorded and sent at once. Sends with BuddyApi_sendPresence when the time has come;
+ * otherwise BuddyApi_update sends it later.
  *
  * @param buddyRef  the BuddyApi state
  * @param resourceText  resource text
  * @param st  show state index
- * @param sendDelay  delay in ticks of func_003F5D88 (BuddyMan passes 2000)
+ * @param sendDelay  delay in ticks of NetSession_getTick (BuddyMan passes 2000)
  * @return 0
  */
-int func_003F15C8(BuddyApiRefT* buddyRef, char* resourceText, int st, int sendDelay) {
-    unsigned int now = func_003F5D88((int)buddyRef->mpSession);
+int BuddyApi_setPresence(BuddyApiRefT* buddyRef, char* resourceText, int st, int sendDelay) {
+    unsigned int now = NetSession_getTick((int)buddyRef->mpSession);
     int showName;
     char* buf;
     if ((unsigned int)(st - 1) < 5) {
@@ -1069,14 +1069,14 @@ int func_003F15C8(BuddyApiRefT* buddyRef, char* resourceText, int st, int sendDe
         buddyRef->mPresenceSendTime = now;
     }
     if (now >= (unsigned int)buddyRef->mPresenceSendTime) {
-        func_003F0568(buddyRef);
+        BuddyApi_sendPresence(buddyRef);
     }
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F16D8);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_sendMessage);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_BODY_b[];
@@ -1088,7 +1088,7 @@ extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len
  * Sends a private message to the buddy server ('SEND').
  *
  * Refused (-3) when the BODY field is 0x40 characters or longer or a SUBJ field has text. Otherwise arms request slot 2
- * ('send') with func_003F0658 and sends @p tag as a 'SEND' packet.
+ * ('send') with BuddyApi_armRequest and sends @p tag as a 'SEND' packet.
  *
  * @param buddyRef  the BuddyApi state
  * @param tag  the message tag text (BODY, USER, ...)
@@ -1097,11 +1097,11 @@ extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len
  * @param timeoutSecs  timeout in seconds
  * @return 0, or -3 when refused
  */
-int func_003F16D8(int* buddyRef, char* tag, int callback, int userData, int timeoutSecs) {
+int BuddyApi_sendMessage(int* buddyRef, char* tag, int callback, int userData, int timeoutSecs) {
     if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_BODY_b), 0, 0, (char*)D_004A4AE8) < 0x40) {
         if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_SUBJ_b), 0, 0, (char*)D_004A4AE8) <= 0) {
-            func_003F0658(buddyRef, 2, callback, userData, timeoutSecs);
-            func_003F00D8(buddyRef, 0x53454E44, (int)tag);
+            BuddyApi_armRequest(buddyRef, 2, callback, userData, timeoutSecs);
+            BuddyApi_sendCommand(buddyRef, 0x53454E44, (int)tag);
             return 0;
         }
     }
@@ -1110,26 +1110,26 @@ int func_003F16D8(int* buddyRef, char* tag, int callback, int userData, int time
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F17C8);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_setReceiveCallback);
 #ifdef SKIP_ASM
 /**
  * Installs the buddy client's receive callback (+0x4B0) and its user data (+0x4AC).
  *
- * The callback gets 'chat' messages (func_003F0198) and 'admn' messages from func_003F17D8.
+ * The callback gets 'chat' messages (BuddyApi_deliverChatMessage) and 'admn' messages from BuddyApi_update.
  *
  * @param buddyApi  the BuddyApi state
  * @param callback  the callback
  * @param userData  its user data
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003F17C8(int* buddyApi, int callback, int userData) {
+void BuddyApi_setReceiveCallback(int* buddyApi, int callback, int userData) {
     buddyApi[1200 / 4] = callback;
     buddyApi[1196 / 4] = userData;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F17D8);
+INCLUDE_ASM("seg/seg_2F0F40", BuddyApi_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -1142,16 +1142,16 @@ extern char str_USER_b[];
 extern int D_004A4AE8[];
 extern char str_GROUP[];
 extern char str_FUSR[];
-extern int func_003F5D88(int);
-extern void f17_5908(int) __asm__("func_003F5908");
-extern int func_003F5638(int, int, int);
-extern int func_003F5A70(int, int*, int*, char**);
-extern int func_003F5C38(int, int, int, int, int);
-extern int func_003F5738(int);
-extern int func_003F5910(int, int, int, int, int);
-extern int func_003EE560(int, int);
-extern int func_003EE620(int);
-extern int f17_EED08(int, char*) __asm__("func_003EED08");
+extern int NetSession_getTick(int);
+extern void f17_5908(int) __asm__("NetSession_update");
+extern int NetSession_connect(int, int, int);
+extern int NetSession_peek(int, int*, int*, char**);
+extern int NetSession_recv(int, int, int, int, int);
+extern int NetSession_disconnect(int);
+extern int NetSession_send(int, int, int, int, int);
+extern int SortList_getAt(int, int);
+extern int SortList_update(int);
+extern int f17_EED08(int, char*) __asm__("HashTable_removeString");
 extern int memcmp_a(void*, void*, int) __asm__("memcmp");
 extern int cDirtysock_tag_TagFieldGetNumber(const char* data, int defval);
 extern char* strcpy(char* d, const char* s);
@@ -1207,23 +1207,23 @@ typedef struct { char b[0xB8]; } Ent_17D8;
 /**
  * Runs the buddy client: finishes connecting, enforces timeouts, and dispatches every received packet.
  *
- * While connecting, polls the host lookup object (+0x0): on success connects the session (func_003F5638 with its
+ * While connecting, polls the host lookup object (+0x0): on success connects the session (NetSession_connect with its
  * address and the port), traces "connecting to %08x:%d" and sends the 'AUTH' login (+0x394); on failure reports state
  * 2; either way destroys the object. A passed connect deadline (+0xC) reports state 3. Online (state 5) it sends a
- * delayed presence when due (+0x2C0, func_003F0568) and drops the connection (func_003F5738, state 6) when a pending
+ * delayed presence when due (+0x2C0, BuddyApi_sendPresence) and drops the connection (NetSession_disconnect, state 6) when a pending
  * request's deadline passes. In states 3 and 6 every pending request's callback gets its kind with result -4.
  *
- * Then reads packets with func_003F5A70 until none is left (each released with func_003F5C38): type -1 reports state 5
+ * Then reads packets with NetSession_peek until none is left (each released with NetSession_recv): type -1 reports state 5
  * (result -1) or 6 (0xFEFEFEFE); 'PING' is echoed; 'AUTH' goes to the connect callback as 'auth' (clearing the
- * deadline; an error disconnects with func_003F0B50); 'RECV' goes to func_003F0198 and 'ADMN' to the receive callback
+ * deadline; an error disconnects with BuddyApi_disconnect); 'RECV' goes to BuddyApi_deliverChatMessage and 'ADMN' to the receive callback
  * as 'admn'; 'SEND' completes request slot 2. 'RGET' with ID 2 gives the expected ignore-list size; 'ROST' adds or
  * updates a roster entry (ID 1 flag 4, ID 2 flag 0x200, clears 0x100000, copies GROUP), counting down the ignore list
- * to send 'endr' to the roster callback. 'PGET' refreshes an entry's presence (func_003F02D0) and traces "PRES: ..."
+ * to send 'endr' to the roster callback. 'PGET' refreshes an entry's presence (BuddyApi_parsePresence) and traces "PRES: ..."
  * when it changed. 'RADD' completes the pending add whose ID matches the entry's +0xAC: an error frees the entry, else
  * the name is replaced by FUSR when given; the slot 0 callback gets 'addu' either way. 'RDEL' with slot 1's ID
- * completes it as 'delu'. Finally, when the roster changed (func_003EE620), the roster callback gets 'rost'.
+ * completes it as 'delu'. Finally, when the roster changed (SortList_update), the roster callback gets 'rost'.
  */
-void func_003F17D8(struct Conn_17D8* self) {
+void BuddyApi_update(struct Conn_17D8* self) {
     char name[0x20];
     struct Ev_17D8 ev;
     Ent_17D8 old;
@@ -1235,19 +1235,19 @@ void func_003F17D8(struct Conn_17D8* self) {
     int id;
     char* ent;
 
-    now = func_003F5D88(self->sess);
+    now = NetSession_getTick(self->sess);
     f17_5908(self->sess);
     memset(&ev, 0, sizeof(ev));
     if (self->stateCb != 0 && self->obj != 0) {
         i = self->obj->poll(self->obj);
         if (i != 0) {
             if (i > 0) {
-                func_003F5638(self->sess, self->obj->addr, self->port);
-                func_003EFED0((char*)self, D_00496BA0, self->obj->addr, self->port);
-                func_003F00D8((int*)self, 0x41555448, (int)self->auth);
+                NetSession_connect(self->sess, self->obj->addr, self->port);
+                BuddyApi_debugPrintf((char*)self, D_00496BA0, self->obj->addr, self->port);
+                BuddyApi_sendCommand((int*)self, 0x41555448, (int)self->auth);
             }
             if (i < 0) {
-                func_003F0610((int*)self, 2);
+                BuddyApi_setState((int*)self, 2);
                 self->stateCb = 0;
             }
             self->obj->destroy(self->obj);
@@ -1255,19 +1255,19 @@ void func_003F17D8(struct Conn_17D8* self) {
         }
     }
     if (self->timeout != 0 && self->timeout < now) {
-        func_003F0610((int*)self, 3);
+        BuddyApi_setState((int*)self, 3);
         self->stateCb = 0;
     }
     if (self->state == 5) {
         if (self->f2C0 != 0 && now >= self->f2C0) {
-            func_003F0568((BuddyApiRefT*)((char*)self));
+            BuddyApi_sendPresence((BuddyApiRefT*)((char*)self));
         }
     }
     if (self->state == 5) {
         for (i = 0; i < 3; i++) {
             if (self->req[i].cb != 0 && self->req[i].timeout != 0 && self->req[i].timeout < now) {
-                func_003F5738(self->sess);
-                func_003F0610((int*)self, 6);
+                NetSession_disconnect(self->sess);
+                BuddyApi_setState((int*)self, 6);
                 break;
             }
         }
@@ -1282,33 +1282,33 @@ void func_003F17D8(struct Conn_17D8* self) {
             }
         }
     }
-    while (func_003F5A70(self->sess, &ev.type, &ev.arg, &data) >= 0) {
+    while (NetSession_peek(self->sess, &ev.type, &ev.arg, &data) >= 0) {
         done = 0;
         ev.data = data;
         if (self->f508 != 0) {
-            func_003EFF40((int*)self, str_recv, (int*)&ev);
+            BuddyApi_logPacket((int*)self, str_recv, (int*)&ev);
         }
         if (ev.type == -1) {
             if (ev.arg == -1) {
-                func_003F0610((int*)self, 5);
+                BuddyApi_setState((int*)self, 5);
             }
             if (ev.type == -1 && ev.arg == (int)0xFEFEFEFE) {
-                func_003F0610((int*)self, 6);
+                BuddyApi_setState((int*)self, 6);
             }
         }
         if (ev.type == 0x50494E47) {
-            func_003F5910(self->sess, 0x50494E47, ev.arg, (int)ev.data, -1);
+            NetSession_send(self->sess, 0x50494E47, ev.arg, (int)ev.data, -1);
         }
         if (ev.type == 0x41555448) {
             ev.kind = 0x61757468;
             self->stateCb(self, &ev, self->stateCtx);
             self->timeout = 0;
             if (ev.arg != 0) {
-                func_003F0B50((struct BuddyApiRefT*)self);
+                BuddyApi_disconnect((struct BuddyApiRefT*)self);
             }
         }
         if (ev.type == 0x52454356 && self->admnCb != 0) {
-            func_003F0198((char*)self, (int*)&ev);
+            BuddyApi_deliverChatMessage((char*)self, (int*)&ev);
         }
         if (ev.type == 0x53454E44 && self->req[2].cb != 0) {
             ev.kind = 0x73656E64;
@@ -1334,20 +1334,20 @@ void func_003F17D8(struct Conn_17D8* self) {
                 if (--self->rostCount == 0) done = 1;
             }
             cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_USER_b), name, 0x20, (char*)D_004A4AE8);
-            func_003F0150(name);
+            BuddyApi_stripNameSuffix(name);
             if (self->f18 != 0 || strchr(name, '.') == 0) {
-                id = func_003EEC88(self->names, (int)name);
+                id = HashTable_findString(self->names, (int)name);
                 if (id == 0) {
                     if ((unsigned int)strlen(name) < 0x20) {
-                        ent = (char*)func_002591E8(184);
+                        ent = (char*)lobbyman_alloc(184);
                         memset_a(ent, 0, 184);
                         strcpy(ent, name);
-                        id = func_003EE320(self->roster, (int)ent);
-                        func_003EEB30(self->names, (int)ent, id);
+                        id = SortList_add(self->roster, (int)ent);
+                        HashTable_addString(self->names, (int)ent, id);
                     }
                 }
                 if (id != 0) {
-                    ent = (char*)func_003EE468(self->roster, id);
+                    ent = (char*)SortList_getValue(self->roster, id);
                     if (ent != 0) {
                         cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_GROUP), ent + 0x20, 0x20, (char*)D_004A4AE8);
                         if (flags != 0) {
@@ -1359,22 +1359,22 @@ void func_003F17D8(struct Conn_17D8* self) {
         }
         if (ev.type == 0x50474554 && self->roster != 0) {
             cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_USER_b), name, 0x20, (char*)D_004A4AE8);
-            func_003F0150(name);
-            id = func_003EEC88(self->names, (int)name);
+            BuddyApi_stripNameSuffix(name);
+            id = HashTable_findString(self->names, (int)name);
             if (id != 0) {
-                ent = (char*)func_003EE468(self->roster, id);
+                ent = (char*)SortList_getValue(self->roster, id);
                 old = *(Ent_17D8*)ent;
-                func_003F02D0((BuddyApiRefT*)((char*)self), (char*)&ev, ent);
+                BuddyApi_parsePresence((BuddyApiRefT*)((char*)self), (char*)&ev, ent);
                 if (memcmp_a(&old, ent, 184) != 0) {
-                    func_003EE600(self->roster, 1);
-                    func_003EFED0((char*)self, D_00496BB8, ent, ent[0xA7], ent + 0x40, ent + 0x54, ent + 0xA4);
+                    SortList_bumpChanged(self->roster, 1);
+                    BuddyApi_debugPrintf((char*)self, D_00496BB8, ent, ent[0xA7], ent + 0x40, ent + 0x54, ent + 0xA4);
                 }
             }
         }
         if (ev.type == 0x52414444 && self->roster != 0) {
             ev.kind = 0x61646475;
             id = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, str_ID), 0);
-            for (i = 0; (ent = (char*)func_003EE560(self->roster, i)) != 0; i++) {
+            for (i = 0; (ent = (char*)SortList_getAt(self->roster, i)) != 0; i++) {
                 if ((*(int*)(ent + 0xA8) & 0x10000) && *(int*)(ent + 0xAC) == id) {
                     if (ev.arg != 0) {
                         if (self->req[0].cb != 0) {
@@ -1382,15 +1382,15 @@ void func_003F17D8(struct Conn_17D8* self) {
                             ev.data = ent;
                             self->req[0].cb(self, &ev, self->req[0].ctx);
                         }
-                        func_003EE480(self->roster, f17_EED08(self->names, ent));
-                        func_00259210(ent);
+                        SortList_remove(self->roster, f17_EED08(self->names, ent));
+                        lobbyman_free(ent);
                     } else {
                         cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(ev.data, str_FUSR), name, 0x20, (char*)D_004A4AE8);
-                        func_003F0150(name);
+                        BuddyApi_stripNameSuffix(name);
                         if (name[0] != 0 && (unsigned int)strlen(name) < 0x20) {
                             int k = f17_EED08(self->names, ent);
                             cDirtysock_tag_TagFieldDupl(ent, 0x20, name);
-                            func_003EEB30(self->names, (int)ent, k);
+                            HashTable_addString(self->names, (int)ent, k);
                         }
                         if (self->req[0].cb != 0) {
                             ev.arg = 0;
@@ -1403,7 +1403,7 @@ void func_003F17D8(struct Conn_17D8* self) {
                     break;
                 }
             }
-            func_003EE600(self->roster, 1);
+            SortList_bumpChanged(self->roster, 1);
         }
         if (ev.type == 0x5244454C && self->req[1].cb != 0) {
             if (cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(ev.data, str_ID), 0) == self->req[1].seq) {
@@ -1421,9 +1421,9 @@ void func_003F17D8(struct Conn_17D8* self) {
                 self->rostCb(self, &ev, self->rostCtx);
             }
         }
-        func_003F5C38(self->sess, 0, 0, 0, 0);
+        NetSession_recv(self->sess, 0, 0, 0, 0);
     }
-    if (self->rostCb != 0 && func_003EE620(self->roster) > 0) {
+    if (self->rostCb != 0 && SortList_update(self->roster) > 0) {
         ev.kind = 0x726F7374;
         ev.type = 0;
         ev.arg = 0;
@@ -1434,7 +1434,7 @@ void func_003F17D8(struct Conn_17D8* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F2220);
+INCLUDE_ASM("seg/seg_2F0F40", LobbyMd5_transform);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
@@ -1448,12 +1448,12 @@ struct Md5Ctx { unsigned int count; unsigned int state[4]; unsigned char buf[64]
  * Runs the MD5 compression function on the 64-byte block buffered in an MD5 context.
  *
  * Loads the block (+0x14) as sixteen little-endian words, runs the four MD5 rounds of sixteen steps with the standard
- * constants and shifts, and adds the result into the state words (+0x4..+0x10). func_003F3128 calls it each time the
+ * constants and shifts, and adds the result into the state words (+0x4..+0x10). LobbyMd5_update calls it each time the
  * buffer fills.
  *
  * @param ctx  the MD5 context: byte count, four state words, 64-byte block
  */
-void func_003F2220(struct Md5Ctx* ctx) {
+void LobbyMd5_transform(struct Md5Ctx* ctx) {
     struct Md5Ctx* st = ctx;
     unsigned int x[16];
     unsigned int a, b, c, d;
@@ -1547,7 +1547,7 @@ void func_003F2220(struct Md5Ctx* ctx) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F30F0);
+INCLUDE_ASM("seg/seg_2F0F40", LobbyMd5_init);
 #ifdef SKIP_ASM
 /**
  * Initialises an MD5 context: byte count 0 and the standard state words 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476.
@@ -1555,7 +1555,7 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F30F0);
  * @param md5Ctx  the context
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003F30F0(unsigned int* md5Ctx) {
+void LobbyMd5_init(unsigned int* md5Ctx) {
     md5Ctx[0] = 0;
     md5Ctx[1] = 0x67452301;
     md5Ctx[2] = 0xEFCDAB89;
@@ -1565,7 +1565,7 @@ void func_003F30F0(unsigned int* md5Ctx) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F0F40", func_003F3128);
+INCLUDE_ASM("seg/seg_2F0F40", LobbyMd5_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
@@ -1573,18 +1573,18 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F3128);
 
 
 
-extern void func_003F2220(struct Md5Ctx*);
+extern void LobbyMd5_transform(struct Md5Ctx*);
 /**
  * Feeds bytes into an MD5 context.
  *
  * A negative @p len means @p data is NUL-terminated (its length is counted). Bytes are appended to the block buffer one
- * at a time, counting them in +0x0, and func_003F2220 hashes each full 64-byte block.
+ * at a time, counting them in +0x0, and LobbyMd5_transform hashes each full 64-byte block.
  *
  * @param ctx  the MD5 context
  * @param data  bytes to hash
  * @param len  byte count, or negative for a C string
  */
-void func_003F3128(struct Md5Ctx* ctx, unsigned char* data, int len) {
+void LobbyMd5_update(struct Md5Ctx* ctx, unsigned char* data, int len) {
     unsigned int idx;
     unsigned char* cursor;
     cursor = data;
@@ -1600,7 +1600,7 @@ void func_003F3128(struct Md5Ctx* ctx, unsigned char* data, int len) {
         ctx->count++;
         idx++;
         if (idx == 0x40) {
-            func_003F2220(ctx);
+            LobbyMd5_transform(ctx);
             idx = 0;
         }
         len--;

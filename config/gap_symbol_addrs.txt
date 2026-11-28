@@ -3567,7 +3567,6 @@ lbl_003E5130 = 0x003E5130; //type:label
 lbl_003E5138 = 0x003E5138; //type:label
 
 // --- src/seg/seg_21A1C0.cpp ---
-func_00319910 = 0x00319910; //type:func
 
 // --- jump-table targets in seg/seg_21A1C0 (split 2026-10-18): local .L labels referenced from the shared rodata (type:label)
 lbl_00319354 = 0x00319354; //type:label

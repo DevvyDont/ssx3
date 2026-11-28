@@ -4,7 +4,7 @@
 /* The Lobby library's sorted list and hash table (names ours, from use). */
 
 /* A sorted list's node: one word, the item's value while in use and the free-list link while free. Nodes come in
-   chunks (func_003EE028): a chunk's first word links the chunks and a -1 word ends it. */
+   chunks (SortList_grow): a chunk's first word links the chunks and a -1 word ends it. */
 typedef union SortListNodeT {
     union SortListNodeT *pNext;
     int value;
@@ -13,11 +13,11 @@ typedef union SortListNodeT {
 typedef int (*SortListFilterT)(int context, int param, int value);
 typedef int (*SortListSortT)(int context, int param, int lhs, int rhs);
 
-/* A sorted list: 68 bytes (func_003EE1E8). Items that pass the filter come first in pItems, sorted (func_003EE620). */
+/* A sorted list: 68 bytes (SortList_create). Items that pass the filter come first in pItems, sorted (SortList_update). */
 typedef struct SortListT {
     int growCount;                  /* 0x00 nodes per grow (with growPercent, averaged with it) */
     int growPercent;                /* 0x04 when positive, a grow adds items * 100 / growPercent nodes */
-    int resort;                     /* 0x08 nonzero: filter and sort again (func_003EE620) */
+    int resort;                     /* 0x08 nonzero: filter and sort again (SortList_update) */
     int changed;                    /* 0x0C */
     int freeCount;                  /* 0x10 */
     int passCount;                  /* 0x14 the items that pass the filter */
@@ -28,39 +28,39 @@ typedef struct SortListT {
     int sortParam;                  /* 0x28 */
     int sortContext;                /* 0x2C */
     SortListSortT sortFn;           /* 0x30 */
-    int user;                       /* 0x34 a word for the owner (func_003EE768) */
+    int user;                       /* 0x34 a word for the owner (SortList_setUserWord) */
     SortListNodeT *pFree;           /* 0x38 */
     SortListNodeT *pChunks;         /* 0x3C */
     SortListNodeT **pItems;         /* 0x40 */
 } SortListT;
 
 /* A hash table entry (12 bytes). Its key is a string or an integer, by the functions used. Entries come in chunks
-   (func_003EE900) whose first entry links the chunks. */
+   (HashTable_addNodes) whose first entry links the chunks. */
 typedef struct HashNodeT {
     struct HashNodeT *pNext;        /* 0x0 */
     int value;                      /* 0x4 */
     union {
-        char *name;                 /* the string tables' key (func_003EEB30) */
-        int id;                     /* the integer tables' key (func_003EEDA0) */
+        char *name;                 /* the string tables' key (HashTable_addString) */
+        int id;                     /* the integer tables' key (HashTable_addInt) */
     } key;                          /* 0x8 */
 } HashNodeT;
 
 typedef int (*HashCompareT)(char *lhs, char *rhs);
 
-/* A hash table: 36 bytes (func_003EE778). */
+/* A hash table: 36 bytes (HashTable_create). */
 typedef struct HashTableT {
     int count;                      /* 0x00 */
-    int drainBucket;                /* 0x04 func_003EE9A0's bucket cursor */
-    int iterBucket;                 /* 0x08 func_003EEFC8's bucket cursor (func_003EEFB8 resets it) */
-    HashNodeT *pIterNode;           /* 0x0C func_003EEFC8's next entry */
+    int drainBucket;                /* 0x04 HashTable_takeAny's bucket cursor */
+    int iterBucket;                 /* 0x08 HashTable_next's bucket cursor (HashTable_rewind resets it) */
+    HashNodeT *pIterNode;           /* 0x0C HashTable_next's next entry */
     int bucketCount;                /* 0x10 */
     HashNodeT **pBuckets;           /* 0x14 */
     HashNodeT *pChunks;             /* 0x18 */
     HashNodeT *pFree;               /* 0x1C */
-    HashCompareT compareFn;         /* 0x20 the string key compare (func_003EEAB8 by default) */
+    HashCompareT compareFn;         /* 0x20 the string key compare (HashTable_compareKeys by default) */
 } HashTableT;
 
-/* A code point range of an 8-bit translation table (func_003EFBA0 walks a list of them, ended by last == 0). */
+/* A code point range of an 8-bit translation table (Utf8_toByteString walks a list of them, ended by last == 0). */
 typedef struct Utf8RangeT {
     unsigned int first;             /* 0x0 */
     unsigned int last;              /* 0x4 */
@@ -68,7 +68,7 @@ typedef struct Utf8RangeT {
 } Utf8RangeT;
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EDF50);
+INCLUDE_ASM("seg/seg_2EEF50", LobbyUtil_compareTagText);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned char D_004963C0[];
@@ -82,7 +82,7 @@ extern unsigned char D_004963C0[];
  * @param rightText  the second string (not checked for null)
  * @return -1 when @p leftText is null or empty, else the difference of the first differing characters (0 when equal)
  */
-int func_003EDF50(char *leftText, char *rightText) {
+int LobbyUtil_compareTagText(char *leftText, char *rightText) {
     unsigned qa, qb;
     unsigned ca, cb;
     if (leftText == 0 || *leftText == 0) return -1;
@@ -111,13 +111,13 @@ int func_003EDF50(char *leftText, char *rightText) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE028);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_grow);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int* func_002591E8(int);
+extern int* lobbyman_alloc(int);
 extern void memset(void*, int, int);
 extern void func_0041605C(void*, void*, int);
-extern void func_00259210(void*);
+extern void lobbyman_free(void*);
 /**
  * Grows a sorted list's node pool and item array.
  *
@@ -126,14 +126,14 @@ extern void func_00259210(void*);
  * param, context and function, [13] a user word, [14] free-node list, [15] chunk list, [16] item array.
  *
  * The number of new nodes is the grow count when the grow percent is not positive, else items * 100 / grow percent
- * (averaged with the grow count when that is set), at least 2. A "Lobby" heap chunk (func_002591E8) of nodes + 2 words
+ * (averaged with the grow count when that is set), at least 2. A "Lobby" heap chunk (lobbyman_alloc) of nodes + 2 words
  * is zeroed and linked into the chunk list ([15]); its first word is the link, its last -1, and the words between
  * become free nodes ([14], [4]). The item array is reallocated at (items + free) * 8 bytes, keeping the old pointers.
  *
  * @param list  the sorted list
  * @return the number of nodes added, or 0 when the allocation fails
  */
-int func_003EE028(SortListT* list) {
+int SortList_grow(SortListT* list) {
     int k;
     int bytes;
     SortListNodeT* chunk;
@@ -149,7 +149,7 @@ int func_003EE028(SortListT* list) {
     k = k > 1 ? k : 2;
     k += 2;
     bytes = k * 4;
-    chunk = (SortListNodeT*)func_002591E8(bytes);
+    chunk = (SortListNodeT*)lobbyman_alloc(bytes);
     if (!chunk) {
         return 0;
     }
@@ -170,10 +170,10 @@ int func_003EE028(SortListT* list) {
         } while (entry->value == 0);
     }
     list->freeCount += k - 1;
-    itemArray = (SortListNodeT**)func_002591E8((list->itemCount + list->freeCount) * 8);
+    itemArray = (SortListNodeT**)lobbyman_alloc((list->itemCount + list->freeCount) * 8);
     if (list->pItems) {
         func_0041605C(itemArray, list->pItems, list->itemCount * 4);
-        func_00259210(list->pItems);
+        lobbyman_free(list->pItems);
     }
     list->pItems = itemArray;
     return k - 1;
@@ -182,10 +182,10 @@ int func_003EE028(SortListT* list) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE1B0);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_compareItems);
 #ifdef SKIP_ASM
 /**
- * Compares two list items with the list's sort function (the adapter func_003EE620 sorts with).
+ * Compares two list items with the list's sort function (the adapter SortList_update sorts with).
  *
  * Calls sort function [12] with sort context [11], sort param [10] and the two items' values.
  *
@@ -195,19 +195,19 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE1B0);
  * @return the sort function's result
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE1B0(SortListT* list, SortListNodeT** lhs, SortListNodeT** rhs) {
+int SortList_compareItems(SortListT* list, SortListNodeT** lhs, SortListNodeT** rhs) {
     return list->sortFn(list->sortContext, list->sortParam, (*lhs)->value, (*rhs)->value);
 }
 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE1E8);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_create);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int* func_002591E8(int);
+extern int* lobbyman_alloc(int);
 extern void memset(void*, int, int);
-extern int func_003EE028(SortListT*);
+extern int SortList_grow(SortListT*);
 /**
  * Creates an empty sorted list with a first pool of nodes.
  *
@@ -215,7 +215,7 @@ extern int func_003EE028(SortListT*);
  * free nodes, [5] items passing the filter, [6] items, [7]-[9] filter param, context and function, [10]-[12] sort
  * param, context and function, [13] a user word, [14] free-node list, [15] chunk list, [16] item array.
  *
- * Allocates and zeroes the 68-byte block ("Lobby" heap), grows it once for @p initialSize items (func_003EE028), then
+ * Allocates and zeroes the 68-byte block ("Lobby" heap), grows it once for @p initialSize items (SortList_grow), then
  * stores the grow count and grow percent for later growth.
  *
  * @param initialSize  the number of nodes to preallocate
@@ -223,11 +223,11 @@ extern int func_003EE028(SortListT*);
  * @param growPercent  growth as a percentage, or 0 to use the count
  * @return the new list, or 0 when out of memory
  */
-SortListT* func_003EE1E8(int initialSize, int growCount, int growPercent) {
-    SortListT* list = (SortListT*)func_002591E8(sizeof(SortListT));
+SortListT* SortList_create(int initialSize, int growCount, int growPercent) {
+    SortListT* list = (SortListT*)lobbyman_alloc(sizeof(SortListT));
     memset(list, 0, sizeof(SortListT));
     list->growCount = initialSize;
-    func_003EE028(list);
+    SortList_grow(list);
     list->growCount = growCount;
     list->growPercent = growPercent;
     return list;
@@ -236,31 +236,31 @@ SortListT* func_003EE1E8(int initialSize, int growCount, int growPercent) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE260);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_destroy);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void func_00259210(void*);
+extern void lobbyman_free(void*);
 /**
  * Destroys a sorted list: frees its node chunks, its item array and the list itself.
  *
  * @param list  the sorted list
  */
-void func_003EE260(SortListT* list) {
+void SortList_destroy(SortListT* list) {
     if (list->pChunks) {
         do {
             SortListNodeT* chunk = list->pChunks;
             list->pChunks = chunk->pNext;
-            func_00259210(chunk);
+            lobbyman_free(chunk);
         } while (list->pChunks);
     }
-    func_00259210(list->pItems);
-    func_00259210(list);
+    lobbyman_free(list->pItems);
+    lobbyman_free(list);
 }
 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE2B8);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_clear);
 #ifdef SKIP_ASM
 /**
  * Removes every item from a sorted list.
@@ -271,7 +271,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE2B8);
  * @param list  the sorted list
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003EE2B8(SortListT* list) {
+void SortList_clear(SortListT* list) {
     int i;
     for (i = 0; i < list->itemCount; i++) {
         SortListNodeT* item = list->pItems[i];
@@ -287,13 +287,13 @@ void func_003EE2B8(SortListT* list) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE320);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_add);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /**
  * Adds a value to a sorted list as a new item.
  *
- * Takes a free node (growing the pool with func_003EE028 when none is left), stores @p value in it and appends it to
+ * Takes a free node (growing the pool with SortList_grow when none is left), stores @p value in it and appends it to
  * the item array. The re-sort counter goes up when the value passes the filter (no filter function, or filter(context,
  * param, value) > 0).
  *
@@ -301,9 +301,9 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE320);
  * @param value  the item value
  * @return the new item, or 0 when the pool cannot grow
  */
-SortListNodeT* func_003EE320(SortListT* list, int value) {
+SortListNodeT* SortList_add(SortListT* list, int value) {
     SortListNodeT* n;
-    if (!list->pFree && func_003EE028(list) <= 0) {
+    if (!list->pFree && SortList_grow(list) <= 0) {
         return 0;
     }
     n = list->pFree;
@@ -321,7 +321,7 @@ SortListNodeT* func_003EE320(SortListT* list, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE3E0);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_setValue);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /**
@@ -334,7 +334,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE3E0);
  * @param item  the item
  * @param value  its new value
  */
-void func_003EE3E0(SortListT* list, SortListNodeT* item, int value) {
+void SortList_setValue(SortListT* list, SortListNodeT* item, int value) {
     if (!list->filterFn || list->filterFn(list->filterContext, list->filterParam, item->value) > 0 ||
         list->filterFn(list->filterContext, list->filterParam, value) > 0) {
         list->resort++;
@@ -345,7 +345,7 @@ void func_003EE3E0(SortListT* list, SortListNodeT* item, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE468);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_getValue);
 #ifdef SKIP_ASM
 /**
  * Returns a list item's value, or 0 for a null item.
@@ -355,14 +355,14 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE468);
  * @return the value
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE468(SortListT* list, SortListNodeT* item) {
+int SortList_getValue(SortListT* list, SortListNodeT* item) {
     return item ? item->value : 0;
 }
 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE480);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_remove);
 #ifdef SKIP_ASM
 /**
  * Removes an item from a sorted list.
@@ -375,7 +375,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE480);
  * @return the item's value, or 0 when it is not in the list
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE480(SortListT* list, SortListNodeT* item) {
+int SortList_remove(SortListT* list, SortListNodeT* item) {
     int i;
     int value;
     for (i = 0; i < list->itemCount; i++) {
@@ -404,7 +404,7 @@ int func_003EE480(SortListT* list, SortListNodeT* item) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE550);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_getCount);
 #ifdef SKIP_ASM
 /**
  * Returns the number of items in a sorted list (word [6]).
@@ -413,14 +413,14 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE550);
  * @return the item count
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE550(SortListT* list) {
+int SortList_getCount(SortListT* list) {
     return list->itemCount;
 }
 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE558);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_getPassCount);
 #ifdef SKIP_ASM
 /**
  * Returns the number of list items that passed the filter at the last update (word [5]).
@@ -429,14 +429,14 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE558);
  * @return the passing count
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE558(SortListT* list) {
+int SortList_getPassCount(SortListT* list) {
     return list->passCount;
 }
 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE560);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_getAt);
 #ifdef SKIP_ASM
 /**
  * Returns the value of the item at an index of a sorted list.
@@ -446,7 +446,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE560);
  * @return the value, or 0 for a null list or an index out of range
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE560(SortListT* list, int i) {
+int SortList_getAt(SortListT* list, int i) {
     if (!list || i < 0 || i >= list->itemCount) {
         return 0;
     }
@@ -456,7 +456,7 @@ int func_003EE560(SortListT* list, int i) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE5A0);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_setSort);
 #ifdef SKIP_ASM
 /**
  * Sets a sorted list's sort function, context and parameter.
@@ -469,7 +469,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE5A0);
  * @param sortFunc  the compare function (context, param, value, value)
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003EE5A0(SortListT* list, int sortContext, int sortParam, SortListSortT sortFunc) {
+void SortList_setSort(SortListT* list, int sortContext, int sortParam, SortListSortT sortFunc) {
     if (list->itemCount > 0) {
         list->resort = 1;
     }
@@ -481,7 +481,7 @@ void func_003EE5A0(SortListT* list, int sortContext, int sortParam, SortListSort
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE5C0);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_setFilter);
 #ifdef SKIP_ASM
 /**
  * Sets a sorted list's filter function, context and parameter.
@@ -494,7 +494,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE5C0);
  * @param filterFunc  the filter (context, param, value); above 0 keeps the item
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003EE5C0(SortListT* list, int filterContext, int filterParam, SortListFilterT filterFunc) {
+void SortList_setFilter(SortListT* list, int filterContext, int filterParam, SortListFilterT filterFunc) {
     if (list->itemCount > 0) {
         list->resort = 1;
     }
@@ -506,7 +506,7 @@ void func_003EE5C0(SortListT* list, int filterContext, int filterParam, SortList
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE5E0);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_bumpResort);
 #ifdef SKIP_ASM
 /**
  * Optionally bumps a sorted list's re-sort counter and returns whether it is set.
@@ -518,7 +518,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE5E0);
  * @return 1 when the counter is above 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE5E0(SortListT* list, int inc) {
+int SortList_bumpResort(SortListT* list, int inc) {
     if (inc) {
         list->resort++;
     }
@@ -528,7 +528,7 @@ int func_003EE5E0(SortListT* list, int inc) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE600);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_bumpChanged);
 #ifdef SKIP_ASM
 /**
  * Optionally bumps a sorted list's change counter and returns whether it is set.
@@ -538,7 +538,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE600);
  * @return 1 when the counter is above 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE600(SortListT* list, int inc) {
+int SortList_bumpChanged(SortListT* list, int inc) {
     if (inc) {
         list->changed++;
     }
@@ -548,12 +548,12 @@ int func_003EE600(SortListT* list, int inc) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE620);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 // (prototype from their definition at line 90)
-int func_003EE1B0_E620(SortListT* p, SortListNodeT** a, SortListNodeT** b) __asm__("func_003EE1B0");
+int SortList_compareItems_E620(SortListT* p, SortListNodeT** a, SortListNodeT** b) __asm__("SortList_compareItems");
 
 extern void func_003EF210(SortListT*, SortListNodeT**, int, int,
                           int (*)(SortListT*, SortListNodeT**, SortListNodeT**));
@@ -562,13 +562,13 @@ extern void func_003EF210(SortListT*, SortListNodeT**, int, int,
  *
  * With both counters clear it returns 0. With only the change counter set it clears it and returns 1. Otherwise it
  * moves the items that pass the filter (no filter function, or filter(context, param, value) > 0) to the front of the
- * item array (the rest after them), stores their count in [5], sorts them with func_003EF210 and func_003EE1B0 when a
+ * item array (the rest after them), stores their count in [5], sorts them with func_003EF210 and SortList_compareItems when a
  * sort function is set, clears both counters and returns 2.
  *
  * @param list  the sorted list
  * @return 0 nothing changed, 1 changed without re-sorting, 2 re-filtered and sorted
  */
-int func_003EE620(SortListT* list) {
+int SortList_update(SortListT* list) {
     SortListNodeT** keepOut;
     SortListNodeT** rejectOut;
     SortListNodeT** scan;
@@ -601,7 +601,7 @@ int func_003EE620(SortListT* list) {
     }
     list->itemCount = keepOut - list->pItems;
     if (list->sortFn) {
-        func_003EF210(list, list->pItems, list->passCount, 4, func_003EE1B0_E620);
+        func_003EF210(list, list->pItems, list->passCount, 4, SortList_compareItems_E620);
     }
     list->resort = 0;
     list->changed = 0;
@@ -611,7 +611,7 @@ int func_003EE620(SortListT* list) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE768);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_setUserWord);
 #ifdef SKIP_ASM
 /**
  * Stores a user word in a sorted list (word [13]).
@@ -620,14 +620,14 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE768);
  * @param value  the word
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003EE768(SortListT* list, int value) {
+void SortList_setUserWord(SortListT* list, int value) {
     list->user = value;
 }
 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE770);
+INCLUDE_ASM("seg/seg_2EEF50", SortList_getUserWord);
 #ifdef SKIP_ASM
 /**
  * Returns the user word of a sorted list (word [13]).
@@ -636,21 +636,21 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE770);
  * @return the word
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE770(SortListT* list) {
+int SortList_getUserWord(SortListT* list) {
     return list->user;
 }
 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE778);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_create);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int* func_002591E8(int);
+extern int* lobbyman_alloc(int);
 extern void* memset_p(void*, int, int) __asm__("memset");
-extern int func_003EE900(HashTableT*, int);
-extern int func_003EEAB8();
+extern int HashTable_addNodes(HashTableT*, int);
+extern int HashTable_compareKeys();
 /**
  * Creates a string-keyed hash table.
  *
@@ -659,24 +659,24 @@ extern int func_003EEAB8();
  * (next, value, key).
  *
  * Allocates and zeroes the table and its bucket array ("Lobby" heap) with at least 16 buckets, sets the compare
- * function to func_003EEAB8 (case- and space-insensitive) and preallocates the nodes (func_003EE900).
+ * function to HashTable_compareKeys (case- and space-insensitive) and preallocates the nodes (HashTable_addNodes).
  *
  * @param n  the number of nodes to preallocate (at least 1)
  * @param bucketCount  the number of buckets (at least 16)
  * @return the new table
  */
-HashTableT* func_003EE778(int n, int bucketCount) {
+HashTableT* HashTable_create(int n, int bucketCount) {
     int cnt = n > 0 ? n : 1;
     int nb = bucketCount > 15 ? bucketCount : 16;
     HashTableT* table;
-    table = (HashTableT*)func_002591E8(sizeof(HashTableT));
+    table = (HashTableT*)lobbyman_alloc(sizeof(HashTableT));
     memset_p(table, 0, sizeof(HashTableT));
     table->bucketCount = nb;
-    table->pBuckets = (HashNodeT**)func_002591E8(nb * 4);
+    table->pBuckets = (HashNodeT**)lobbyman_alloc(nb * 4);
     memset_p(table->pBuckets, 0, table->bucketCount * 4);
-    table->compareFn = func_003EEAB8;
+    table->compareFn = HashTable_compareKeys;
     if (cnt > 0) {
-        func_003EE900(table, cnt);
+        HashTable_addNodes(table, cnt);
     }
     return table;
 }
@@ -684,31 +684,31 @@ HashTableT* func_003EE778(int n, int bucketCount) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE820);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_destroy);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void func_00259210(void*);
+extern void lobbyman_free(void*);
 /**
  * Destroys a hash table: frees its node chunks, its bucket array and the table itself.
  *
  * @param table  the hash table
  */
-void func_003EE820(HashTableT* table) {
+void HashTable_destroy(HashTableT* table) {
     if (table->pChunks) {
         do {
             HashNodeT* chunk = table->pChunks;
             table->pChunks = chunk->pNext;
-            func_00259210(chunk);
+            lobbyman_free(chunk);
         } while (table->pChunks);
     }
-    func_00259210(table->pBuckets);
-    func_00259210(table);
+    lobbyman_free(table->pBuckets);
+    lobbyman_free(table);
 }
 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE878);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_setCompare);
 #ifdef SKIP_ASM
 /**
  * Sets a hash table's key compare function (word [8]).
@@ -719,14 +719,14 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE878);
  * @param compareFunc  the compare function (key, key); 0 means equal
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003EE878(HashTableT* table, HashCompareT compareFunc) {
+void HashTable_setCompare(HashTableT* table, HashCompareT compareFunc) {
     table->compareFn = compareFunc;
 }
 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE880);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_clear);
 #ifdef SKIP_ASM
 /**
  * Empties a hash table, returning every node to the free list.
@@ -736,7 +736,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE880);
  * @param table  the hash table
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003EE880(HashTableT* table) {
+void HashTable_clear(HashTableT* table) {
     int i;
     table->count = 0;
     for (i = 0; i < table->bucketCount; i++) {
@@ -752,10 +752,10 @@ void func_003EE880(HashTableT* table) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE900);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_addNodes);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int* func_002591E8(int);
+extern int* lobbyman_alloc(int);
 /**
  * Adds a chunk of free nodes to a hash table.
  *
@@ -766,7 +766,7 @@ extern int* func_002591E8(int);
  * @param n  the number of nodes (at least 1)
  * @return the number of nodes added, or -1 when out of memory
  */
-int func_003EE900(HashTableT* table, int n) {
+int HashTable_addNodes(HashTableT* table, int n) {
     int hasCount = n > 0;
     int cnt = 1;
     int size;
@@ -778,7 +778,7 @@ int func_003EE900(HashTableT* table, int n) {
     }
     cnt++;
     size = cnt * 12;
-    mem = (HashNodeT*)func_002591E8(size);
+    mem = (HashNodeT*)lobbyman_alloc(size);
     if (!mem) {
         return -1;
     }
@@ -797,7 +797,7 @@ int func_003EE900(HashTableT* table, int n) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EE9A0);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_takeAny);
 #ifdef SKIP_ASM
 /**
  * Removes one entry from a hash table and returns its value.
@@ -808,7 +808,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EE9A0);
  * @return the removed value, or 0 when the table is empty
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EE9A0(HashTableT* table) {
+int HashTable_takeAny(HashTableT* table) {
     HashNodeT* n;
     if (!table->count) {
         return 0;
@@ -829,7 +829,7 @@ int func_003EE9A0(HashTableT* table) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEA48);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_hashString);
 #ifdef SKIP_ASM
 /**
  * Hashes a string key to a bucket of a hash table.
@@ -842,7 +842,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EEA48);
  * @return the bucket index
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EEA48(HashTableT* table, char* key) {
+int HashTable_hashString(HashTableT* table, char* key) {
     char* cursor = key;
     int hash = 0;
     while (*cursor) {
@@ -858,7 +858,7 @@ int func_003EEA48(HashTableT* table, char* key) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEAB8);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_compareKeys);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned char D_00496A58[];
@@ -872,7 +872,7 @@ extern unsigned char D_00496A58[];
  * @param rightText  the second string
  * @return the difference of the first differing characters, or 0 when equal
  */
-int func_003EEAB8(unsigned char* leftText, unsigned char* rightText) {
+int HashTable_compareKeys(unsigned char* leftText, unsigned char* rightText) {
     int leftChar, rightChar, charDiff;
     do {
         do {
@@ -891,26 +891,26 @@ int func_003EEAB8(unsigned char* leftText, unsigned char* rightText) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEB30);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_addString);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EEA48(HashTableT*, char*);
-extern int func_003EE900(HashTableT*, int);
+extern int HashTable_hashString(HashTableT*, char*);
+extern int HashTable_addNodes(HashTableT*, int);
 /**
  * Adds a string-keyed entry to a hash table.
  *
  * Takes a free node (growing the pool by (entries * 3 + 10) / 2 when none is left), stores the key pointer and value
- * and puts it at the head of the key's bucket (func_003EEA48). Duplicate keys are not checked.
+ * and puts it at the head of the key's bucket (HashTable_hashString). Duplicate keys are not checked.
  *
  * @param table  the hash table
  * @param key  the key string (kept, not copied)
  * @param value  the value
  * @return 1, or -1 when the pool cannot grow
  */
-int func_003EEB30(HashTableT* table, char* key, int value) {
-    int bucket = func_003EEA48(table, key);
+int HashTable_addString(HashTableT* table, char* key, int value) {
+    int bucket = HashTable_hashString(table, key);
     HashNodeT* n;
-    if (!table->pFree && func_003EE900(table, (table->count * 3 + 10) / 2) <= 0) {
+    if (!table->pFree && HashTable_addNodes(table, (table->count * 3 + 10) / 2) <= 0) {
         return -1;
     }
     n = table->pFree;
@@ -926,10 +926,10 @@ int func_003EEB30(HashTableT* table, char* key, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEBF8);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_replaceString);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EEA48(HashTableT*, char*);
+extern int HashTable_hashString(HashTableT*, char*);
 /**
  * Replaces the value of a string-keyed hash table entry.
  *
@@ -940,8 +940,8 @@ extern int func_003EEA48(HashTableT*, char*);
  * @param val  the new value
  * @return the old value, or 0 when the key is not found
  */
-int func_003EEBF8(HashTableT* table, char* key, int val) {
-    HashNodeT* n = table->pBuckets[func_003EEA48(table, key)];
+int HashTable_replaceString(HashTableT* table, char* key, int val) {
+    HashNodeT* n = table->pBuckets[HashTable_hashString(table, key)];
     while (n) {
         if (!table->compareFn(n->key.name, key)) {
             int old = n->value;
@@ -956,10 +956,10 @@ int func_003EEBF8(HashTableT* table, char* key, int val) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEC88);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_findString);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EEA48(HashTableT*, char*);
+extern int HashTable_hashString(HashTableT*, char*);
 /**
  * Looks up a string key in a hash table.
  *
@@ -967,8 +967,8 @@ extern int func_003EEA48(HashTableT*, char*);
  * @param key  the key string
  * @return the value, or 0 when the key is not found
  */
-int func_003EEC88(HashTableT* table, char* key) {
-    HashNodeT* n = table->pBuckets[func_003EEA48(table, key)];
+int HashTable_findString(HashTableT* table, char* key) {
+    HashNodeT* n = table->pBuckets[HashTable_hashString(table, key)];
     while (n) {
         if (!table->compareFn(n->key.name, key)) {
             return n->value;
@@ -981,10 +981,10 @@ int func_003EEC88(HashTableT* table, char* key) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EED08);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_removeString);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EEA48(HashTableT*, char*);
+extern int HashTable_hashString(HashTableT*, char*);
 /**
  * Removes a string-keyed entry from a hash table.
  *
@@ -994,9 +994,9 @@ extern int func_003EEA48(HashTableT*, char*);
  * @param key  the key string
  * @return the removed value, or 0 when the key is not found
  */
-int func_003EED08(HashTableT* table, char* key) {
+int HashTable_removeString(HashTableT* table, char* key) {
     HashNodeT* n;
-    HashNodeT** prev = &table->pBuckets[func_003EEA48(table, key)];
+    HashNodeT** prev = &table->pBuckets[HashTable_hashString(table, key)];
     for (;;) {
         n = *prev;
         if (!n) {
@@ -1017,25 +1017,25 @@ int func_003EED08(HashTableT* table, char* key) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEDA0);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_addInt);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EE900(HashTableT*, int);
+extern int HashTable_addNodes(HashTableT*, int);
 /**
  * Adds an integer-keyed entry to a hash table.
  *
- * The bucket is |key| modulo the bucket count; otherwise like func_003EEB30. Duplicate keys are not checked.
+ * The bucket is |key| modulo the bucket count; otherwise like HashTable_addString. Duplicate keys are not checked.
  *
  * @param table  the hash table
  * @param key  the integer key
  * @param value  the value
  * @return 1, or -1 when the pool cannot grow
  */
-int func_003EEDA0(HashTableT* table, int key, int value) {
+int HashTable_addInt(HashTableT* table, int key, int value) {
     int bucket;
     HashNodeT* n;
     bucket = (key < 0 ? -key : key) % table->bucketCount;
-    if (!table->pFree && func_003EE900(table, (table->count * 3 + 10) / 2) <= 0) {
+    if (!table->pFree && HashTable_addNodes(table, (table->count * 3 + 10) / 2) <= 0) {
         return -1;
     }
     n = table->pFree;
@@ -1051,7 +1051,7 @@ int func_003EEDA0(HashTableT* table, int key, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEE80);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_replaceInt);
 #ifdef SKIP_ASM
 /**
  * Replaces the value of an integer-keyed hash table entry.
@@ -1064,7 +1064,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EEE80);
  * @return the old value, or 0 when the key is not found
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EEE80(HashTableT* table, int key, int val) {
+int HashTable_replaceInt(HashTableT* table, int key, int val) {
     int k = key >= 0 ? key : -key;
     HashNodeT* n = table->pBuckets[k % table->bucketCount];
     while (n) {
@@ -1081,7 +1081,7 @@ int func_003EEE80(HashTableT* table, int key, int val) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEEE8);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_findInt);
 #ifdef SKIP_ASM
 /**
  * Looks up an integer key in a hash table.
@@ -1091,7 +1091,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EEEE8);
  * @return the value, or 0 when the key is not found
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EEEE8(HashTableT* table, int key) {
+int HashTable_findInt(HashTableT* table, int key) {
     int k = key >= 0 ? key : -key;
     HashNodeT* n = table->pBuckets[k % table->bucketCount];
     while (n) {
@@ -1106,7 +1106,7 @@ int func_003EEEE8(HashTableT* table, int key) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEF40);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_removeInt);
 #ifdef SKIP_ASM
 /**
  * Removes an integer-keyed entry from a hash table.
@@ -1116,7 +1116,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EEF40);
  * @return the removed value, or 0 when the key is not found
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EEF40(HashTableT* table, int key) {
+int HashTable_removeInt(HashTableT* table, int key) {
     int k = key >= 0 ? key : -key;
     HashNodeT** prev = &table->pBuckets[k % table->bucketCount];
     HashNodeT* n;
@@ -1140,7 +1140,7 @@ int func_003EEF40(HashTableT* table, int key) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEFB8);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_rewind);
 #ifdef SKIP_ASM
 /**
  * Restarts iteration over a hash table (clears words [2] and [3]).
@@ -1150,7 +1150,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EEFB8);
  * @param table  the hash table
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003EEFB8(HashTableT* table) {
+void HashTable_rewind(HashTableT* table) {
     table->iterBucket = 0;
     table->pIterNode = 0;
 }
@@ -1158,19 +1158,19 @@ void func_003EEFB8(HashTableT* table) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EEFC8);
+INCLUDE_ASM("seg/seg_2EEF50", HashTable_next);
 #ifdef SKIP_ASM
 /**
  * Returns the next entry of a hash table iteration.
  *
- * Walks the buckets from the iteration bucket [2] and node [3]; func_003EEFB8 restarts it. An entry whose value is 0
+ * Walks the buckets from the iteration bucket [2] and node [3]; HashTable_rewind restarts it. An entry whose value is 0
  * cannot be told from the end. No retail code calls it.
  *
  * @param table  the hash table
  * @param key  receives the entry key; may be null
  * @return the entry value, or 0 at the end or for an empty table
  */
-int func_003EEFC8(HashTableT* table, int* key) {
+int HashTable_next(HashTableT* table, int* key) {
     HashNodeT* n;
     if (table->count == 0) {
         return 0;
@@ -1197,7 +1197,7 @@ int func_003EEFC8(HashTableT* table, int* key) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF088);
+INCLUDE_ASM("seg/seg_2EEF50", LobbyUtil_getCurrentTime);
 #ifdef SKIP_ASM
 /**
  * Returns 0.
@@ -1207,13 +1207,13 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EF088);
  * @return 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EF088(void) {
+int LobbyUtil_getCurrentTime(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF090);
+INCLUDE_ASM("seg/seg_2EEF50", LobbyUtil_getTimeZoneOffset);
 #ifdef SKIP_ASM
 // FAKEMATCH: `*&c.bits = 0` clears the 8-byte clock through its address; plain form 73.79%.
 // Byte-identical and behaves like the plain form; landed marked under the 2026-11-14 ruling (portable,
@@ -1245,7 +1245,7 @@ extern void sceScfGetLocalTimefromRTC(void*);
  *
  * @return the cached difference in seconds
  */
-int func_003EF090(void) {
+int LobbyUtil_getTimeZoneOffset(void) {
     union {
         sceCdCLOCK clock;
         long bits;                  /* the 8 bytes at once, to clear them */
@@ -1277,7 +1277,7 @@ int func_003EF090(void) {
 INCLUDE_ASM("seg/seg_2EEF50", func_003EF210);
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF600);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_getLeadLength);
 #ifdef SKIP_ASM
 /**
  * Returns the length a UTF-8 lead byte announces, plus one for multi-byte leads.
@@ -1291,7 +1291,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EF600);
  * @return the leading-one count + 1
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EF600(unsigned char x) {
+int Utf8_getLeadLength(unsigned char x) {
     int n;
     for (n = 1; n < 7 && (x & 0x80); n++) {
         x <<= 1;
@@ -1301,20 +1301,20 @@ int func_003EF600(unsigned char x) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF640);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_decodeChar);
 #ifdef SKIP_ASM
 /**
  * Decodes one UTF-8 character (up to three bytes) into UCS-2.
  *
  * One-, two- and three-byte sequences are decoded into @p out; for a longer sequence nothing is written and
- * func_003EF600's count is returned.
+ * Utf8_getLeadLength's count is returned.
  *
  * @param out  receives the UCS-2 character
  * @param src  the UTF-8 text
  * @return the bytes consumed
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EF640(unsigned short* out, char* src) {
+int Utf8_decodeChar(unsigned short* out, char* src) {
     unsigned char* in = (unsigned char*)src;
     int n;
     if (!(in[0] & 0x80)) {
@@ -1327,14 +1327,14 @@ int func_003EF640(unsigned short* out, char* src) {
         n = 3;
         *out = ((in[0] & ~0xF0) << 12) | ((in[1] & ~0xC0) << 6) | (in[2] & ~0xC0);
     } else {
-        n = func_003EF600(in[0]);
+        n = Utf8_getLeadLength(in[0]);
     }
     return n;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF6F8);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_encodeChar);
 #ifdef SKIP_ASM
 /**
  * Encodes a UCS-2 character as one to three UTF-8 bytes.
@@ -1343,7 +1343,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EF6F8);
  * @param ch  the character (its low 16 bits)
  * @return the number of bytes written
  */
-int func_003EF6F8(char* dst, int ch) {
+int Utf8_encodeChar(char* dst, int ch) {
     unsigned short codePoint = ch;
     int n;
     if (codePoint < 0x80) {
@@ -1364,7 +1364,7 @@ int func_003EF6F8(char* dst, int ch) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF770);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_translateChar);
 #ifdef SKIP_ASM
 /**
  * Translates a UCS-2 character to an 8-bit character through a table of ranges.
@@ -1380,7 +1380,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EF770);
  * @return the bytes written (0 or 1)
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EF770(unsigned char* dst, Utf8RangeT* range, unsigned short codePoint, signed char ch) {
+int Utf8_translateChar(unsigned char* dst, Utf8RangeT* range, unsigned short codePoint, signed char ch) {
     int found = 0;
     unsigned char* dstStart = dst;
     for (; range->last; range++) {
@@ -1414,12 +1414,12 @@ int func_003EF770(unsigned char* dst, Utf8RangeT* range, unsigned short codePoin
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF808);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_stripNonAscii);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EF828(char*, int, char*, signed char);
+extern int Utf8_replaceNonAscii(char*, int, char*, signed char);
 /**
- * Strips the non-ASCII characters from a UTF-8 string (func_003EF828 with no replacement byte).
+ * Strips the non-ASCII characters from a UTF-8 string (Utf8_replaceNonAscii with no replacement byte).
  *
  * No retail code calls it.
  *
@@ -1427,13 +1427,13 @@ extern int func_003EF828(char*, int, char*, signed char);
  * @param maxLen  the output size
  * @param src  the UTF-8 string
  */
-void func_003EF808(char* dst, int maxLen, char* src) {
-    func_003EF828(dst, maxLen, src, 0);
+void Utf8_stripNonAscii(char* dst, int maxLen, char* src) {
+    Utf8_replaceNonAscii(dst, maxLen, src, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF828);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_replaceNonAscii);
 #ifdef SKIP_ASM
 /**
  * Replaces each non-ASCII character of a UTF-8 string with a byte, or drops it.
@@ -1442,7 +1442,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EF828);
  * returns 0. From the first multi-byte character on, ASCII bytes are copied and each multi-byte sequence becomes @p ch
  * (or nothing) while fewer than @p max bytes are written; then a terminator follows (possibly at index @p max).
  *
- * Quirk: func_003EF600 returns one more than the sequence length (3 for a two-byte sequence), so every multi-byte
+ * Quirk: Utf8_getLeadLength returns one more than the sequence length (3 for a two-byte sequence), so every multi-byte
  * character skips one byte too many, and a multi-byte character at the end skips the terminator.
  *
  * @param dst  the output (normally the input itself)
@@ -1452,7 +1452,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EF828);
  * @return the output length including the terminator, or 0 when the string is pure ASCII
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003EF828(char* dst, int max, char* src, signed char ch) {
+int Utf8_replaceNonAscii(char* dst, int max, char* src, signed char ch) {
     int i = 0;
     int j = 0;
     while (!(src[i] & 0x80) && src[i]) {
@@ -1462,7 +1462,7 @@ int func_003EF828(char* dst, int max, char* src, signed char ch) {
         j = i;
         while (src[i] && j < max) {
             if (src[i] & 0x80) {
-                i += func_003EF600(src[i]);
+                i += Utf8_getLeadLength(src[i]);
                 if (ch) {
                     dst[j++] = ch;
                 }
@@ -1477,27 +1477,27 @@ int func_003EF828(char* dst, int max, char* src, signed char ch) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF940);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_countChars);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EF600(unsigned char);
+extern int Utf8_getLeadLength(unsigned char);
 /**
  * Counts the characters of a UTF-8 string.
  *
- * Quirk: func_003EF600 returns one more than the sequence length (3 for a two-byte sequence), so every multi-byte
+ * Quirk: Utf8_getLeadLength returns one more than the sequence length (3 for a two-byte sequence), so every multi-byte
  * character skips one byte too many, and a multi-byte character at the end skips the terminator. No retail code calls
  * it.
  *
  * @param utf8  the UTF-8 string
  * @return the character count
  */
-int func_003EF940(char* utf8) {
+int Utf8_countChars(char* utf8) {
     int i = 0;
     int count = 0;
     if (utf8[0]) {
         do {
             if (utf8[i] & 0x80) {
-                i += func_003EF600(utf8[i]);
+                i += Utf8_getLeadLength(utf8[i]);
             } else {
                 i++;
             }
@@ -1509,10 +1509,10 @@ int func_003EF940(char* utf8) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_2EEF50", func_003EF9B8);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_encodeString);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EF6F8(char*, int);
+extern int Utf8_encodeChar(char*, int);
 /**
  * Encodes a UCS-2 string as UTF-8.
  *
@@ -1524,12 +1524,12 @@ extern int func_003EF6F8(char*, int);
  * @param src  the UCS-2 string
  * @return the bytes written including the terminator
  */
-int func_003EF9B8(char* dst, int size, unsigned short* src) {
+int Utf8_encodeString(char* dst, int size, unsigned short* src) {
     int i = 0;
     int lim = size - 2;
     if (*src && lim > 0) {
         do {
-            i += func_003EF6F8(dst + i, *src++);
+            i += Utf8_encodeChar(dst + i, *src++);
         } while (*src && i < lim);
     }
     dst[i] = 0;
@@ -1538,14 +1538,14 @@ int func_003EF9B8(char* dst, int size, unsigned short* src) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EFA48);
+INCLUDE_ASM("seg/seg_2EEF50", _Utf8DecodeStringToUCS2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EF640(unsigned short*, char*);
+extern int Utf8_decodeChar(unsigned short*, char*);
 /**
  * Decodes a UTF-8 string into UCS-2.
  *
- * Decodes with func_003EF640 while fewer than @p size - 1 characters are written; sequences longer than three bytes are
+ * Decodes with Utf8_decodeChar while fewer than @p size - 1 characters are written; sequences longer than three bytes are
  * skipped. cFEStateNet_showBuddyPresence and cFEStateNetConfig_loadConfigs call it.
  *
  * @param dst  the UCS-2 output
@@ -1553,13 +1553,13 @@ extern int func_003EF640(unsigned short*, char*);
  * @param src  the UTF-8 string
  * @return the characters written including the terminator
  */
-int func_003EFA48(unsigned short* dst, int size, char* src) {
+int _Utf8DecodeStringToUCS2(unsigned short* dst, int size, char* src) {
     int di = 0;
     int si = 0;
     int lim = size - 1;
     if (*src && lim > 0) {
         do {
-            int consumed = func_003EF640(dst + di, src + si);
+            int consumed = Utf8_decodeChar(dst + di, src + si);
             si += consumed;
             if (consumed <= 3) {
                 di++;
@@ -1572,14 +1572,14 @@ int func_003EFA48(unsigned short* dst, int size, char* src) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_2EEF50", func_003EFAF8);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_fromByteString);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EF6F8(char*, int);
+extern int Utf8_encodeChar(char*, int);
 /**
  * Converts an 8-bit string to UTF-8 through a 256-entry UCS-2 table.
  *
- * Each byte is looked up in @p tbl and encoded with func_003EF6F8 while the output is below @p size - 2. No retail code
+ * Each byte is looked up in @p tbl and encoded with Utf8_encodeChar while the output is below @p size - 2. No retail code
  * calls it.
  *
  * @param dst  the output
@@ -1588,13 +1588,13 @@ extern int func_003EF6F8(char*, int);
  * @param tbl  the byte-to-UCS-2 table
  * @return the bytes written including the terminator
  */
-int func_003EFAF8(char* dst, int size, char* src, unsigned short* tbl) {
+int Utf8_fromByteString(char* dst, int size, char* src, unsigned short* tbl) {
     int i = 0;
     int lim = size - 2;
     if (*src && lim > 0) {
         do {
             unsigned short* tblEntry = &tbl[(unsigned char)*src++];
-            i += func_003EF6F8(dst + i, *tblEntry);
+            i += Utf8_encodeChar(dst + i, *tblEntry);
         } while (*src && i < lim);
     }
     dst[i] = 0;
@@ -1603,15 +1603,15 @@ int func_003EFAF8(char* dst, int size, char* src, unsigned short* tbl) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EFBA0);
+INCLUDE_ASM("seg/seg_2EEF50", Utf8_toByteString);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003EF640(unsigned short*, char*);
-extern int func_003EF770(unsigned char*, Utf8RangeT*, unsigned short, signed char);
+extern int Utf8_decodeChar(unsigned short*, char*);
+extern int Utf8_translateChar(unsigned char*, Utf8RangeT*, unsigned short, signed char);
 /**
  * Converts a UTF-8 string to 8-bit characters through range tables.
  *
- * Decodes each character (func_003EF640) and translates it with func_003EF770 while fewer than @p size - 1 bytes are
+ * Decodes each character (Utf8_decodeChar) and translates it with Utf8_translateChar while fewer than @p size - 1 bytes are
  * written. No retail code calls it.
  *
  * @param dst  the output
@@ -1621,15 +1621,15 @@ extern int func_003EF770(unsigned char*, Utf8RangeT*, unsigned short, signed cha
  * @param ranges  the range table
  * @return the bytes written including the terminator
  */
-int func_003EFBA0(unsigned char* dst, int size, char* src, signed char ch, Utf8RangeT* ranges) {
+int Utf8_toByteString(unsigned char* dst, int size, char* src, signed char ch, Utf8RangeT* ranges) {
     int di = 0;
     int si = 0;
     int lim = size - 1;
     if (*src && lim > 0) {
         unsigned short codePoint;
         do {
-            si += func_003EF640(&codePoint, src + si);
-            di += func_003EF770(dst + di, ranges, codePoint, ch);
+            si += Utf8_decodeChar(&codePoint, src + si);
+            di += Utf8_translateChar(dst + di, ranges, codePoint, ch);
         } while (src[si] && di < lim);
     }
     dst[di] = 0;
@@ -1638,7 +1638,7 @@ int func_003EFBA0(unsigned char* dst, int size, char* src, signed char ch, Utf8R
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EFC68);
+INCLUDE_ASM("seg/seg_2EEF50", LobbyUtil_parseHex);
 #ifdef SKIP_ASM
 /**
  * Parses a hexadecimal number (digits 0-9, a-f, A-F) from text.
@@ -1650,7 +1650,7 @@ INCLUDE_ASM("seg/seg_2EEF50", func_003EFC68);
  * @return the position after the digits
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-char* func_003EFC68(char* cursor, int* out) {
+char* LobbyUtil_parseHex(char* cursor, int* out) {
     int value = 0;
     int digit;
     for (;; cursor++) {
@@ -1670,11 +1670,11 @@ char* func_003EFC68(char* cursor, int* out) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EFCD8);
+INCLUDE_ASM("seg/seg_2EEF50", LobbyUtil_parseHexRange);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-char* func_003EFCD8_p(char* s, int* lo, int* hi) __asm__("func_003EFCD8");
+char* LobbyUtil_parseHexRange_p(char* s, int* lo, int* hi) __asm__("LobbyUtil_parseHexRange");
 /**
  * Parses one "lo:hi" hexadecimal range from a list, skipping a following comma.
  *
@@ -1683,31 +1683,31 @@ char* func_003EFCD8_p(char* s, int* lo, int* hi) __asm__("func_003EFCD8");
  * @param hi  receives the end
  * @return the position after the range, or 0 when the ':' is missing
  */
-char* func_003EFCD8_p(char* rangeText, int* lo, int* hi) {
-    rangeText = func_003EFC68(rangeText, lo);
+char* LobbyUtil_parseHexRange_p(char* rangeText, int* lo, int* hi) {
+    rangeText = LobbyUtil_parseHex(rangeText, lo);
     if (*rangeText++ != ':') return 0;
-    rangeText = func_003EFC68(rangeText, hi);
+    rangeText = LobbyUtil_parseHex(rangeText, hi);
     if (*rangeText == ',') rangeText++;
     return rangeText;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_2EEF50", func_003EFD30);
+INCLUDE_ASM("seg/seg_2EEF50", LobbyUtil_hashMemoryRanges);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern unsigned int func_003EFCD8(unsigned int, unsigned int*, unsigned int*);
-extern void func_003F30F0(void*);
-extern void func_003F3128(void*, unsigned int, int);
-extern void func_003F31F8(void*, int, int);
+extern unsigned int LobbyUtil_parseHexRange(unsigned int, unsigned int*, unsigned int*);
+extern void LobbyMd5_init(void*);
+extern void LobbyMd5_update(void*, unsigned int, int);
+extern void LobbyMd5_final(void*, int, int);
 extern unsigned int D_004A4A98;
 extern unsigned int D_004A4A9C;
 /**
  * Computes an MD5 digest over a range list and the memory ranges it names (a memory check).
  *
- * Starts an MD5 context (func_003F30F0, the 0x67452301... constants), adds the range-list text (func_003F3128), then
- * parses its "lo:hi," entries (func_003EFCD8) until one is empty and adds every range with lo < hi inside [D_004A4A98,
- * D_004A4A9C) (0x00100000 to 0x02000000); then adds the text again and finishes into @p digestOut (func_003F31F8).
+ * Starts an MD5 context (LobbyMd5_init, the 0x67452301... constants), adds the range-list text (LobbyMd5_update), then
+ * parses its "lo:hi," entries (LobbyUtil_parseHexRange) until one is empty and adds every range with lo < hi inside [D_004A4A98,
+ * D_004A4A9C) (0x00100000 to 0x02000000); then adds the text again and finishes into @p digestOut (LobbyMd5_final).
  * LobbyMan_onauthentication calls it.
  *
  * @param rangeSpec  the range-list text
@@ -1715,31 +1715,31 @@ extern unsigned int D_004A4A9C;
  * @param digestOut  the digest output
  * @param digestLen  the digest output size
  */
-void func_003EFD30(unsigned int rangeSpec, int specLen, int digestOut, int digestLen) {
+void LobbyUtil_hashMemoryRanges(unsigned int rangeSpec, int specLen, int digestOut, int digestLen) {
     char buf[96];
     unsigned int lo, hi;
     unsigned int orig;
-    func_003F30F0(buf);
+    LobbyMd5_init(buf);
     orig = rangeSpec;
-    func_003F3128(buf, orig, specLen);
+    LobbyMd5_update(buf, orig, specLen);
     if (orig) {
         do {
-            rangeSpec = func_003EFCD8(rangeSpec, &lo, &hi);
+            rangeSpec = LobbyUtil_parseHexRange(rangeSpec, &lo, &hi);
             if (!lo || !hi) {
                 break;
             }
             if (lo >= D_004A4A98 && hi < D_004A4A9C && lo < hi) {
-                func_003F3128(buf, lo, hi - lo);
+                LobbyMd5_update(buf, lo, hi - lo);
             }
         } while (rangeSpec);
     }
-    func_003F3128(buf, orig, specLen);
-    func_003F31F8(buf, digestOut, digestLen);
+    LobbyMd5_update(buf, orig, specLen);
+    LobbyMd5_final(buf, digestOut, digestLen);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EFE20);
+INCLUDE_ASM("seg/seg_2EEF50", LobbyUtil_findCodeName);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sE { int key; short code; short pad; char* name; };
@@ -1749,7 +1749,7 @@ extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
  * Finds the first table entry for a key whose code is in a list, and copies its name.
  *
  * Scans D_004512D8 (12-byte entries: key, code, name; ended by key 0) for entries with @p key; for the first whose code
- * is among the @p n codes of @p list, copies its name into @p x with cDirtysock_tag_TagFieldDupl. func_003F02D0 calls
+ * is among the @p n codes of @p list, copies its name into @p x with cDirtysock_tag_TagFieldDupl. BuddyApi_parsePresence calls
  * it; @p self is not used.
  *
  * @param key  the key to match
@@ -1759,7 +1759,7 @@ extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
  * @param y  the output size
  * @return the matched code, or 0
  */
-short func_003EFE20(void* self, int key, short* list, int n, char* x, int y) {
+short LobbyUtil_findCodeName(void* self, int key, short* list, int n, char* x, int y) {
     int i, j;
     if (D_004512D8[0].key) {
         for (i = 0; D_004512D8[i].key; i++) {
@@ -1778,7 +1778,7 @@ short func_003EFE20(void* self, int key, short* list, int n, char* x, int y) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2EEF50", func_003EFED0);
+INCLUDE_ASM("seg/seg_2EEF50", BuddyApi_debugPrintf);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int vsprintf(char* dst, const char* fmt, char* ap);
@@ -1796,7 +1796,7 @@ extern int vsprintf(char* dst, const char* fmt, char* ap);
  * @param buddyApi  the buddy-API object
  * @param fmt  the printf format, followed by its arguments
  */
-void func_003EFED0(BuddyApiRefT* buddyApi, const char* fmt, ...) {
+void BuddyApi_debugPrintf(BuddyApiRefT* buddyApi, const char* fmt, ...) {
     char buf[0x1000];
     char* ap;
     BuddyApi_trace_va_start(ap);

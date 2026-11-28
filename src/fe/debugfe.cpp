@@ -400,14 +400,14 @@ INCLUDE_ASM("fe/debugfe", dispatchLobbyEvent);
 #ifdef SKIP_ASM
 extern void* D_004A4E90;
 extern "C" void cDebugLobbyScreen_handleLobbyEvent(cDebugLobbyScreen* self, online_Event* ev);
-extern "C" void func_00259230(void* ev);
+extern "C" void lobbyman_postEventToTopScreen(void* ev);
 
 /**
  * Passes one lobby event to the debug lobby screen, when one exists, and then to the real front end.
  *
  * The lobby manager's update (LobbyMan_update) calls it for every event it pops from mEventList, with itself as @p self
  * (unused here). When the debug lobby screen pointer D_004A4E90 is set (cDebugLobbyScreen_cDebugLobbyScreen sets it, cDebugLobbyScreen__cDebugLobbyScreen clears it)
- * the event goes to cDebugLobbyScreen_handleLobbyEvent; func_00259230 then hands it to the real front end's top UI state.
+ * the event goes to cDebugLobbyScreen_handleLobbyEvent; lobbyman_postEventToTopScreen then hands it to the real front end's top UI state.
  *
  * @param ev  the event (its type at +0x0)
  */
@@ -415,7 +415,7 @@ extern "C" void dispatchLobbyEvent(LobbyMan* self, void* ev)
 {
     if (D_004A4E90 != 0)
         ((cDebugLobbyScreen*)D_004A4E90)->handleLobbyEvent((online_Event*)ev);
-    func_00259230(ev);
+    lobbyman_postEventToTopScreen(ev);
 }
 #endif
 

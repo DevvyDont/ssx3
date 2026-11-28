@@ -2622,7 +2622,7 @@ extern "C" void sprintf1_1A7390(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" unsigned short* cFont_textSmartLimit1(void* f, float sx, float width, const unsigned short* str, unsigned short* dst, int max);
 extern "C" char* cUIText_getFont(void* text);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
-extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
+extern "C" void _Utf8DecodeStringToUCS2(unsigned short* dst, int n, const char* src);
 extern "C" char* strcat(char*, const char*);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char str_sp[];
@@ -2705,7 +2705,7 @@ void cFEStateNet::showBuddyPresence(const char* name, int mode)
         strcpy(buf, name);
         strcat(buf, str_sp);
         strcat(buf, tags);
-        func_003EFA48(wide, 0x60, buf);
+        _Utf8DecodeStringToUCS2(wide, 0x60, buf);
         sVEntry<int(void*, float*)>* vt = (sVEntry<int(void*, float*)>*)VPTR_OF(cListNode, uiText);
         vt[20].fn(vthis(uiText, vt[20]), size);
         t3Vector scale = *(&uiText->mScale);
@@ -4160,7 +4160,7 @@ extern "C" int BuddyMan_isLoggedIn(void* self);
 extern "C" void BuddyMan_reconnect(void* self);
 extern "C" void LobbyMan_disconnect(void* self);
 extern "C" void BuddyMan_disconnect(void* self);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" void cConnMan_disconnect(void* p, int a1);
 extern char str_kT_BTNOK[];
 extern char str_kT_POPUPCMNNetInterrupted[];
@@ -4184,7 +4184,7 @@ static inline void* GetSession_001A8F98()
  *
  * One OK button, message "kT_POPUPCMNNetInterrupted", layer 6, id 2110 (closing it opens cFEStateNetConfig,
  * cFEStateNet_onNetInterruptedPopupEvent); then disconnects BuddyMan (BuddyMan_disconnect) and the lobby (LobbyMan_disconnect, LobbyMan_mLobbyMan) and shuts
- * the online session down (cConnMan_disconnect(func_002591B8(), 0)).
+ * the online session down (cConnMan_disconnect(lobbyman_getConnMan(), 0)).
  */
 void cFEStateNet::showNetInterruptedAndLogOut()
 {
@@ -4199,7 +4199,7 @@ void cFEStateNet::showNetInterruptedAndLogOut()
     showPopup(popup);
     BuddyMan_disconnect(GetSession_001A8F98());
     LobbyMan_disconnect(LobbyMan_mLobbyMan);
-    cConnMan_disconnect(func_002591B8(), 0);
+    cConnMan_disconnect(lobbyman_getConnMan(), 0);
 }
 #endif
 
@@ -4813,7 +4813,7 @@ int GetHashValue32(char* str);
 extern "C" void cFEStateNet_showPopup(cFEStateNet* self, cScreenPopup* popup);
 extern "C" void* cFEStateNet_createPopup(cFEStateNet* self);
 void cPopupInfo_setPopupOptionNames2(void* self, int a1, int a2);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" int cUIStateStack_popToState(void* p);
 extern char str_kT_BTNOK[];
 extern char str_kT_POPUPCMNNetInterrupted[];
@@ -4824,7 +4824,7 @@ extern char str_kT_POPUPCMNDisconnected[];
  *
  * Only while mDisconnectPopupOpen is clear; sets it, closes the stack's popups (cUIStateStack_popToState) and shows a
  * one-OK popup (mbDeferEventsFlag 1, mbReceivePrev 0, layer 6): "kT_POPUPCMNNetInterrupted" with id 2110 when the word
- * at func_002591B8() is 0, else "kT_POPUPCMNDisconnected" with id 2109.
+ * at lobbyman_getConnMan() is 0, else "kT_POPUPCMNDisconnected" with id 2109.
  */
 void cFEStateNet::showDisconnectPopup()
 {
@@ -4839,7 +4839,7 @@ void cFEStateNet::showDisconnectPopup()
         popup->info.mbDeferEventsFlag = one;
         popup->info.mbReceivePrev = 0;
         popup->info.miLayerOffset = 6;
-        if (*func_002591B8() == 0) {
+        if (*lobbyman_getConnMan() == 0) {
             popup->info.miMiscData = 2110;
             popup->info.mtMessage.ui = GetHashValue32(str_kT_POPUPCMNNetInterrupted);
             popup->info.mtMessage.eType = 3;
@@ -5017,7 +5017,7 @@ extern "C" int BuddyMan_isLoggedIn(void* self);
 extern "C" void BuddyMan_reconnect(void* self);
 extern "C" void BuddyMan_disconnect(void* self);
 extern "C" void LobbyMan_disconnect(void* self);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" void cConnMan_disconnect(void* p, int a1);
 extern char str_kT_BTNOK[];
 extern char str_kT_POPUPCMNNetInterrupted[];
@@ -5156,7 +5156,7 @@ static inline void* GetSession_1A9CC0()
  * "kT_POPUP200Maintenance2". 'maut' only changes the id to 2109. Unknown codes and 'dnsf' also reset cCommSystem
  * (cCommSystem_netConnDisconnect) and get id 2110, 'cdev' id 2109; for these three cases it then disconnects BuddyMan
  * (BuddyMan_disconnect) and the lobby (LobbyMan_disconnect, LobbyMan_mLobbyMan) and shuts the online session down
- * (cConnMan_disconnect(func_002591B8(), 0)). Quirk: 'ipas' (invalid password) and 'inam' both show
+ * (cConnMan_disconnect(lobbyman_getConnMan(), 0)). Quirk: 'ipas' (invalid password) and 'inam' both show
  * "kT_POPUP210AccountNameLength".
  *
  * @param popup  receives mpPopup
@@ -5486,7 +5486,7 @@ void cFEStateNet::buildErrorPopup(void** popup, void* owner, online_ErrorEvent* 
     }
     BuddyMan_disconnect(GetSession_1A9CC0());
     LobbyMan_disconnect(LobbyMan_mLobbyMan);
-    cConnMan_disconnect(func_002591B8(), 0);
+    cConnMan_disconnect(lobbyman_getConnMan(), 0);
 }
 #endif
 
@@ -9967,7 +9967,7 @@ extern "C" void BuddyMan_reconnect(void* self);
 extern "C" void LobbyMan_disconnect(void* self);
 extern "C" void LobbyMan_leaveGame(void* self, int a1);
 extern "C" void BuddyMan_declineChallenge(void* self, void* a1);
-extern "C" void* func_002591D0();
+extern "C" void* lobbyman_getGameConnMan();
 extern "C" void cGameConnMan_shutdown(void* p, int a1);
 
 static inline void* GetSession_001B0E10()
@@ -9990,7 +9990,7 @@ static inline void* GetSession_001B0E10()
  *
  * Calls cFEStateChallengeReceivedPopup_setAccepted first, which sets mbAccepted, so the test that follows is always true (likely bug; the else
  * branch is dead): it cancels the accepted game (LobbyMan_leaveGame(LobbyMan, 0)), removes LobbyMan's mOpponent's challenge
- * from BuddyMan (BuddyMan_declineChallenge) and calls cGameConnMan_shutdown(func_002591D0(), 2). Then calls mpParentState's onPopupEvent
+ * from BuddyMan (BuddyMan_declineChallenge) and calls cGameConnMan_shutdown(lobbyman_getGameConnMan(), 2). Then calls mpParentState's onPopupEvent
  * (vtable entry 17) with this state and 20.
  */
 void cFEStateChallengeReceivedPopup::declineChallenge()
@@ -9999,7 +9999,7 @@ void cFEStateChallengeReceivedPopup::declineChallenge()
     if (mbAccepted != 0) {
         LobbyMan_leaveGame(LobbyMan_mLobbyMan, 0);
         BuddyMan_declineChallenge(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
-        cGameConnMan_shutdown(func_002591D0(), 2);
+        cGameConnMan_shutdown(lobbyman_getGameConnMan(), 2);
     } else {
         BuddyMan_declineChallenge(GetSession_001B0E10(), LobbyMan_mLobbyMan->mOpponent);
     }
@@ -12747,7 +12747,7 @@ extern "C" void cFEStateNet_showPopup(cFEStateNet* self, cScreenPopup* popup);
 extern "C" void* cFEStateNet_createPopup(cFEStateNet* self);
 extern "C" void cFEStateNetConfig_showConfigLists(cFEStateNetConfig* self, int a1);
 void cPopupInfo_setPopupOptionNames2(void* self, int a1, int a2);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" void cConnMan_connect(void* self, int a1);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
 extern "C" void sprintf1_1B45E8(void* str, int fmt, ...) __asm__("sprintf1");
@@ -12838,7 +12838,7 @@ public:
  * No card available (the memory card object D_004A1B78 (cMemCard_CreateInstance, cMemCard::CreateInstance), vtable entry 53):
  * miState 0, the no-configuration view (cFEStateNetConfig_showConfigLists(.., -1)) and a one-option popup ("kT_CMNContinue", id 2115, no
  * back) with "kT_MEMFENotDetectedFile" for slot D_004A1B80 + 1. Otherwise shows "kT_POPUP200ConnectingISP" with Cancel
- * (id 2062), starts the connection with configuration miSelectedSetting (cConnMan_connect on func_002591B8()) and sets
+ * (id 2062), starts the connection with configuration miSelectedSetting (cConnMan_connect on lobbyman_getConnMan()) and sets
  * miState 0.
  */
 void cFEStateNetConfig::connectWithSelectedConfig()
@@ -12866,7 +12866,7 @@ void cFEStateNetConfig::connectWithSelectedConfig()
         popup->info.miMiscData = 2062;
         sub->setPopupOptionNames2(0, GetHashValue32(str_kT_BTNCancel));
         this->showPopup(popup);
-        cConnMan_connect(func_002591B8(), miSelectedSetting);
+        cConnMan_connect(lobbyman_getConnMan(), miSelectedSetting);
         miState = 0;
     }
 }
@@ -13093,11 +13093,11 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cFEStateNetConfig_showCheckingCardPopup(cFEStateNetConfig* self, int a1);
 extern "C" void cFEStateNetConfig_reportLoadResult(cFEStateNetConfig* self, int err);
 extern "C" void cFEStateNetConfig_showConfigLists(cFEStateNetConfig* self, int a1);
-extern "C" int func_00255F20(void* self, int a1);
+extern "C" int cCommSystem_netConnQuery(void* self, int a1);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" void* cUIListBox_getFont(void* box);
 extern "C" void cUIListBox_addEntryByUnicodeString(void* box, unsigned short* str, int id);
-extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
+extern "C" void _Utf8DecodeStringToUCS2(unsigned short* dst, int n, const char* src);
 extern "C" int strcmp(const char* a, const char* b);
 extern int D_004A1B80;
 extern int D_004A1B90[2];
@@ -13105,7 +13105,7 @@ extern int cCommSystem_mNumNetConn;
 extern char* D_004A1B7C;
 extern char str_LBSettings[];
 extern char str_pct_d_c[];
-// the 'netw'/'list' reply buffer filled by func_00255F20 (10 entries of 0x100 bytes, count in cCommSystem_mNumNetConn)
+// the 'netw'/'list' reply buffer filled by cCommSystem_netConnQuery (10 entries of 0x100 bytes, count in cCommSystem_mNumNetConn)
 struct sNetEntry_4CD8 { int f0; char name4[0x3E]; char name42[0xBE]; };
 extern sNetEntry_4CD8 cCommSystem_mNetConns[10];
 
@@ -13114,7 +13114,7 @@ extern sNetEntry_4CD8 cCommSystem_mNetConns[10];
 /**
  * Loads the network configurations from the memory card in the current slot and lists them.
  *
- * Reads "mc0:" or "mc1:" (D_004A1B90[D_004A1B80]) with func_00255F20 into cCommSystem_mNetConns; miNumSettings is the
+ * Reads "mc0:" or "mc1:" (D_004A1B90[D_004A1B80]) with cCommSystem_netConnQuery into cCommSystem_mNetConns; miNumSettings is the
  * count, at most 4. None or an error on slot 1: tries slot 2 ("checking" popup, miState 1, miResult = the count). On
  * slot 2 an error goes to cFEStateNetConfig_reportLoadResult (miState 0), or, when slot 1 found none (miResult 0), the slot is reset to 0.
  * With configurations each one gets a row in mpLBSettings ("%d: " plus its name fitted to the box width when there are
@@ -13129,7 +13129,7 @@ void cFEStateNetConfig::loadConfigs()
     tRect size;
     t3Vector scale;
     tRect pos;
-    func_00255F20(cCommSystem_mCommSystem, D_004A1B90[D_004A1B80]);
+    cCommSystem_netConnQuery(cCommSystem_mCommSystem, D_004A1B90[D_004A1B80]);
     miNumSettings = cCommSystem_mNumNetConn;
     if (miNumSettings > 4) {
         miNumSettings = 4;
@@ -13173,7 +13173,7 @@ void cFEStateNetConfig::loadConfigs()
                 buf[0] = 0;
             }
             char* rec = cCommSystem_mNetConns[i].name4;
-            func_003EFA48(name, 0x40, nm);
+            _Utf8DecodeStringToUCS2(name, 0x40, nm);
             UIAsciiToUnicode(line, buf);
             cFont_textSmartLimit1(cUIListBox_getFont(mpLBSettings), scale.x, w, name, line + len, 0x40 - len);
             cUIListBox_addEntryByUnicodeString(mpLBSettings, line, i + 20);
@@ -13439,7 +13439,7 @@ extern "C" int BuddyMan_isLoggedIn(void* self);
 extern "C" void BuddyMan_reconnect(void* self);
 extern "C" void LobbyMan_disconnect(void* self);
 extern "C" void BuddyMan_disconnect(void* self);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" void cConnMan_disconnect(void* p, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 struct sFEObj_001B6288;
@@ -13464,7 +13464,7 @@ static inline void* GetSession_001B55B0()
  * Handles the "connecting to ISP" popup (id 2062): Cancel disconnects; otherwise starts DNAS authentication.
  *
  * kONSCREENPOPUPOPTION0 or kONSCREENPOPUPPREV: sets mbCancelled, clears mpPairSettings' static flag, disconnects
- * BuddyMan (BuddyMan_disconnect), the lobby (LobbyMan_disconnect) and the whole online session (cConnMan_disconnect(func_002591B8(), 0))
+ * BuddyMan (BuddyMan_disconnect), the lobby (LobbyMan_disconnect) and the whole online session (cConnMan_disconnect(lobbyman_getConnMan(), 0))
  * and closes the popup. kONPOPUPDESTROY: unless it was cancelled (mbCancelled), pushes a cFEStateAuthDNAS popup (tag
  * "NetConfigAuthPopup", id 2074) on the screen's state stack; then clears mbCancelled. Every other event goes to
  * cFEStateNet_onPopupEvent.
@@ -13482,7 +13482,7 @@ void cFEStateNetConfig::onConnectingPopupEvent(cUIState* popup, unsigned int kin
         pairSettings->setStatic(0);
         BuddyMan_disconnect(GetSession_001B55B0());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
-        cConnMan_disconnect(func_002591B8(), 0);
+        cConnMan_disconnect(lobbyman_getConnMan(), 0);
         cFEStateNet_onPopupEvent(this, popup, kind);
         break;
     }
@@ -13511,7 +13511,7 @@ extern "C" void BuddyMan_reconnect(void* self);
 extern "C" void LobbyMan_disconnect(void* self);
 extern "C" void BuddyMan_disconnect(void* self);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" void cConnMan_disconnect(void* p, int a1);
 
 static inline void* GetSession_001B5740()
@@ -13532,7 +13532,7 @@ static inline void* GetSession_001B5740()
  * Handles the DNAS error popup (id 2075): OK or back disconnects everything.
  *
  * On kONSCREENPOPUPOPTION0 or kONSCREENPOPUPPREV disconnects BuddyMan (BuddyMan_disconnect), the lobby (LobbyMan_disconnect) and
- * the whole online session (cConnMan_disconnect(func_002591B8(), 0)) and clears mpPairSettings' static flag; every event goes
+ * the whole online session (cConnMan_disconnect(lobbyman_getConnMan(), 0)) and clears mpPairSettings' static flag; every event goes
  * to cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup state
@@ -13543,7 +13543,7 @@ void cFEStateNetConfig::onDNASErrorPopupEvent(cUIState* popup, int event)
     if (event == cUIState::kONSCREENPOPUPOPTION0 || event == cUIState::kONSCREENPOPUPPREV) {
         BuddyMan_disconnect(GetSession_001B5740());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
-        cConnMan_disconnect(func_002591B8(), 0);
+        cConnMan_disconnect(lobbyman_getConnMan(), 0);
         mpPairSettings->setStatic(0);
         cFEStateNet_onPopupEvent(this, popup, event);
     } else {
@@ -13563,7 +13563,7 @@ extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError(cFEStateAuthDNASErr
         cFEStateNet* a2, unsigned short* a3, unsigned short* a4, unsigned short* a5);
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* mem, cUIEngine* a1, void* owner,
         int a3, const char* a4, const char* a5);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" void cConnMan_disconnect(void* p, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void BuddyMan_createInstance();
@@ -13593,7 +13593,7 @@ static inline void* GetSession_001B5830()
  * error popup.
  *
  * kONSCREENPOPUPOPTION0 clears mbAuthFailed and OPTION1 sets it (authentication failed). kONSCREENPOPUPPREV disconnects
- * BuddyMan (BuddyMan_disconnect), the lobby (LobbyMan_disconnect) and the whole online session (cConnMan_disconnect(func_002591B8(), 0)),
+ * BuddyMan (BuddyMan_disconnect), the lobby (LobbyMan_disconnect) and the whole online session (cConnMan_disconnect(lobbyman_getConnMan(), 0)),
  * sets mbCancelled and clears mpPairSettings' static flag. On kONPOPUPDESTROY it pushes a cFEStateAuthDNASError
  * (mpustrAuthError [1], [2], [0]; id 2075) when mbAuthFailed is set, else, unless cancelled, a cFEStateNetAccountMem
  * popup (mode 0, id 2092); both flags are then cleared. Every event also goes to cFEStateNet_onPopupEvent.
@@ -13615,7 +13615,7 @@ void cFEStateNetConfig::onDNASAuthPopupEvent(cUIState* popup, unsigned int kind)
     case cUIState::kONSCREENPOPUPPREV:
         BuddyMan_disconnect(GetSession_001B5830());
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
-        cConnMan_disconnect(func_002591B8(), 0);
+        cConnMan_disconnect(lobbyman_getConnMan(), 0);
         mbCancelled = 1;
         mpPairSettings->setStatic(0);
         cFEStateNet_onPopupEvent_v(this, popup, cUIState::kONSCREENPOPUPPREV);
@@ -13660,7 +13660,7 @@ extern "C" int BuddyMan_isLoggedIn(void* self);
 extern "C" void BuddyMan_reconnect(void* self);
 extern "C" void LobbyMan_disconnect(void* self);
 extern "C" void BuddyMan_disconnect(void* self);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" void cConnMan_disconnect(void* p, int a1);
 extern const char str_cFEStateLogin[];
 
@@ -13670,7 +13670,7 @@ extern const char str_cFEStateLogin[];
  * disconnect.
  *
  * kONSCREENPOPUPOPTION0 sets mbPushLogin and kONPOPUPCREATE clears it. OPTION1 or kONSCREENPOPUPPREV disconnect
- * BuddyMan (BuddyMan_disconnect), the lobby (LobbyMan_disconnect) and the whole online session (cConnMan_disconnect(func_002591B8(), 0))
+ * BuddyMan (BuddyMan_disconnect), the lobby (LobbyMan_disconnect) and the whole online session (cConnMan_disconnect(lobbyman_getConnMan(), 0))
  * and clear mpPairSettings' static flag. On kONPOPUPDESTROY, when mbPushLogin is set, pushes a new cFEStateLogin. Every
  * event also goes to cFEStateNet_onPopupEvent. The existing comment ("restarts the memory-card task") does not match
  * the body.
@@ -13702,7 +13702,7 @@ void cFEStateNetConfig::onAccountMemPopupEvent(cUIState* popup, int event)
         }
         BuddyMan_disconnect(BuddyMan_mBuddyMan);
         LobbyMan_disconnect(LobbyMan_mLobbyMan);
-        cConnMan_disconnect(func_002591B8(), 0);
+        cConnMan_disconnect(lobbyman_getConnMan(), 0);
         cUIThing* obj = mpPairSettings;
         obj->setStatic(0);
         break;
@@ -13730,7 +13730,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_FrontEndPurge(void* p);
-extern "C" void func_00256088();
+extern "C" void netConfig_launchGui();
 extern char str_TextCreateConfig[];
 
 struct sColor1B5BD8 {
@@ -13764,7 +13764,7 @@ struct sFlags1B5BD8 {
 /**
  * Handles the "create configuration" popup (id 2116): Yes launches the network configuration program.
  *
- * On kONSCREENPOPUPOPTION0 closes the popup, purges the front end's audio (cSSXAudio_FrontEndPurge), runs func_00256088
+ * On kONSCREENPOPUPOPTION0 closes the popup, purges the front end's audio (cSSXAudio_FrontEndPurge), runs netConfig_launchGui
  * (cdrom0:\NETGUI\NTGUI.ELF), disables "TextCreateConfig" (vtable entry 6) and greys it, and sets its own state-stack
  * mode (bits 8-13 of mAttrState) to 7, as cUIStateStack_popToState does to the popups it closes. Other events go to cFEStateNet_onPopupEvent.
  *
@@ -13777,7 +13777,7 @@ void cFEStateNetConfig::onCreateConfigPopupEvent(cUIState* popup, unsigned int k
     case cUIState::kONSCREENPOPUPOPTION0: {
         cFEStateNet_onPopupEvent(((cFEStateNet*)this), popup, cUIState::kONSCREENPOPUPOPTION0);
         cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
-        func_00256088();
+        netConfig_launchGui();
         cFEVObj_001B5BD8* createConfigText = (cFEVObj_001B5BD8*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextCreateConfig));
         if (createConfigText != 0) {
             createConfigText->setEnabled(0);
@@ -14160,7 +14160,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS__cFEStateAuthDNAS);
 #ifdef SKIP_ASM
 extern void* cFEStateAuthDNAS_vtbl[];
 void cMemMan_free(void* p);
-extern "C" void func_002563A8(void* p);
+extern "C" void DNASMan_freeBuffers(void* p);
 extern "C" void DNASMan__DNASMan(void* p, int flags);
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
 extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
@@ -14168,7 +14168,7 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 /**
  * Destroys the DNAS authentication state: shuts down and deletes the DNAS object and frees mpustrText.
  *
- * The DNAS object (mpAuth) is shut down with func_002563A8 and deleted through DNASMan__DNASMan(.., 3); then the
+ * The DNAS object (mpAuth) is shut down with DNASMan_freeBuffers and deleted through DNASMan__DNASMan(.., 3); then the
  * cFEStateNet destructor (cFEStateNet__cFEStateNet) runs with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
@@ -14177,7 +14177,7 @@ extern "C" void cFEStateAuthDNAS__cFEStateAuthDNAS(cFEStateAuthDNAS* self, int f
 {
     VPTR_OF(cListNode, self) = cFEStateAuthDNAS_vtbl;
     if (self->mpAuth != 0) {
-        func_002563A8(self->mpAuth);
+        DNASMan_freeBuffers(self->mpAuth);
         if (self->mpAuth != 0) {
             DNASMan__DNASMan(self->mpAuth, 3);
         }
@@ -14203,7 +14203,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* DNASMan_DNASMan(void* mem);
-extern "C" void func_00256258(void* self, int mode);
+extern "C" void DNASMan_start(void* self, int mode);
 extern char str_205AuthenticatingDNAS[];
 extern char str_dnasGroup[];
 extern char str_cFEStateAuthDNASCreate[];
@@ -14218,7 +14218,7 @@ static inline tBEOptionDB GetOptions() { return cBEOptionInterface_mOption; }
  * Creates the "205AuthenticatingDNAS" screen and starts the DNAS authentication object.
  *
  * Hides "dnasGroup", creates mpAuth (DNASMan_DNASMan on a 0xA50-byte "cFEStateAuthDNASCreate" block), sets miState 1
- * and starts it (func_00256258) in the mode given by the options' iLanguage (bits 22-24 of cBEOptionInterface_mOption,
+ * and starts it (DNASMan_start) in the mode given by the options' iLanguage (bits 22-24 of cBEOptionInterface_mOption,
  * read from a copy of the block; 0-3, other values use 0).
  */
 void cFEStateAuthDNAS::onCreateScreen()
@@ -14251,7 +14251,7 @@ void cFEStateAuthDNAS::onCreateScreen()
         mode = 3;
         break;
     }
-    func_00256258(mpAuth, mode);
+    DNASMan_start(mpAuth, mode);
 }
 #endif
 
@@ -14398,8 +14398,8 @@ extern "C" void USTR_copy(void* dst, void* src);
 extern "C" int USTR_length(void* s);
 void cMemMan_free(void* p);
 extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
-extern "C" void func_002562D0(void* self);
-extern "C" void func_002563F8(void* self);
+extern "C" void DNASMan_startCheck(void* self);
+extern "C" void DNASMan_update(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d)
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_kT_205Authenticating[];
@@ -14413,11 +14413,11 @@ static inline int IsDone_001B6798(DNASMan* d) { return d->State == 5; }
  * Steps the DNAS authentication and reports the result to the parent state.
  *
  * miState 1: once the DNAS object is ready, shows the cancel text, X button, submit rect and "dnasGroup", changes the
- * text to "kT_205Authenticating", starts the check (func_002562D0) and moves to 2. 2: once done, moves to 3. 3: on an
+ * text to "kT_205Authenticating", starts the check (DNASMan_startCheck) and moves to 2. 2: once done, moves to 3. 3: on an
  * error (AuthError) copies the object's three error texts (ErrorText1, ErrorText2, ErrorText3) into fresh buffers in
  * the parent cFEStateNetConfig's mpustrAuthError[0..2] and sends the parent event 0x10 (slot 17), else 0xF; the state
  * is not advanced, so this repeats each frame until the parent removes the popup. 4 (cancelled): once done, sends 0x14.
- * Every frame then updates the DNAS object (func_002563F8) and runs the cFEStateNet update.
+ * Every frame then updates the DNAS object (DNASMan_update) and runs the cFEStateNet update.
  */
 void cFEStateAuthDNAS::onUpdate()
 {
@@ -14434,7 +14434,7 @@ void cFEStateAuthDNAS::onUpdate()
                 widget->setVisible(1);
             }
             miState = 2;
-            func_002562D0(mpAuth);
+            DNASMan_startCheck(mpAuth);
         }
         break;
     case 2:
@@ -14482,7 +14482,7 @@ void cFEStateAuthDNAS::onUpdate()
         }
         break;
     }
-    func_002563F8(mpAuth);
+    DNASMan_update(mpAuth);
     cFEStateNet_onUpdate((cFEStateNet*)this);
 }
 #endif
@@ -21574,7 +21574,7 @@ extern "C" int BuddyMan_isLoggedIn(void* self);
 extern "C" void BuddyMan_reconnect(void* self);
 extern "C" void LobbyMan_disconnect(void* self);
 extern "C" void BuddyMan_disconnect(void* self);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" void cConnMan_disconnect(void* p, int a1);
 extern const char str_cFEStateNetConfig[];
 
@@ -21597,7 +21597,7 @@ static inline void* GetSession_001BF5A8()
  *
  * On kONSCREENPOPUPOPTION0 it sets mLeavingOnline and switches to a new cFEStateNetConfig (cMemMan_alloc 0x91C,
  * cFEStateNet_pushState); when the switch is accepted it makes sure BuddyMan exists and is started, logs it out
- * (BuddyMan_disconnect), disconnects the lobby (LobbyMan_disconnect) and calls cConnMan_disconnect(func_002591B8(), 0).
+ * (BuddyMan_disconnect), disconnects the lobby (LobbyMan_disconnect) and calls cConnMan_disconnect(lobbyman_getConnMan(), 0).
  * cFEStateNet_onPopupEvent is not run for kONSCREENPOPUPOPTION0. Every other event only runs cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup that sent the event
@@ -21613,7 +21613,7 @@ void cFEStateLogin::onNetConfigPopupEvent(cUIState* popup, int kind)
                 0), mpEngine)) != 0) {
             BuddyMan_disconnect(GetSession_001BF5A8());
             LobbyMan_disconnect(LobbyMan_mLobbyMan);
-            cConnMan_disconnect(func_002591B8(), 0);
+            cConnMan_disconnect(lobbyman_getConnMan(), 0);
         }
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
@@ -22109,7 +22109,7 @@ extern "C" void cFEStateNet_onPopupEvent_v(void* self, void* a1, int a2) __asm__
 extern "C" int cFEStateNet_pushState_r(void* self, void* obj) __asm__("cFEStateNet_pushState");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(void* mem, cUIEngine* a1);
-extern "C" int* func_002591B8();
+extern "C" int* lobbyman_getConnMan();
 extern "C" void cConnMan_disconnect(void* p, int a1);
 extern const char str_cFEStateMainMenu[];
 
@@ -22134,7 +22134,7 @@ static inline void* GetSession_001C0138()
  * On kONSCREENPOPUPOPTION0 it runs cFEStateNet_onPopupEvent, sets mLeavingOnline and switches to a new cFEStateMainMenu
  * (cMemMan_alloc(0x58) + cFEStateMainMenu_cFEStateMainMenu1, handed to cFEStateNet_pushState); when the switch is accepted it
  * makes sure BuddyMan exists and is started, logs it out (BuddyMan_disconnect), disconnects the lobby (LobbyMan_disconnect) and
- * calls cConnMan_disconnect(func_002591B8(), 0). Other events only run cFEStateNet_onPopupEvent.
+ * calls cConnMan_disconnect(lobbyman_getConnMan(), 0). Other events only run cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup that sent the event
  * @param event  the popup event
@@ -22148,7 +22148,7 @@ extern "C" void cFEStateOnlineMainMenu_onLogOffPopupEvent(cFEStateNet* self, cUI
                 self->mpEngine)) != 0) {
             BuddyMan_disconnect(GetSession_001C0138());
             LobbyMan_disconnect(LobbyMan_mLobbyMan);
-            cConnMan_disconnect(func_002591B8(), 0);
+            cConnMan_disconnect(lobbyman_getConnMan(), 0);
         }
     } else {
         cFEStateNet_onPopupEvent_v(self, popup, event);

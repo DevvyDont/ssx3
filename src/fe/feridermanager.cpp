@@ -136,11 +136,11 @@ extern "C" void* cBEBoltInterface_getCharProfile(void* self, int a1, int a2);
 extern "C" void cFERider_purge(cFERider* self);
 extern "C" void cFERider_queueLoadExtraTextures(cFERider* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002F1890(void* mem, void* owner);
+extern "C" void* cAttachedEmitterFX_cAttachedEmitterFX1(void* mem, void* owner);
 extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface1(void* mem, void* owner, void* a2);
 extern "C" void* cAnimModel_cAnimModel(void* mem);
 extern "C" void cAnimModel_init(void* pool, int a1, int a2);
-extern "C" void func_002F19F0(void* a, void* b);
+extern "C" void cAttachedEmitterFX_setModel(void* a, void* b);
 // PORT: these are defined later in the unit with struct-typed params; bind void* views by asm label
 extern "C" void cFERider_loadModels_E980(int* self, void* list, void* prev, int force, int a4) __asm__("cFERider_loadModels");
 extern "C" void cFERider_loadTextures_E980(int* self, void* list, int a2, int a3) __asm__("cFERider_loadTextures");
@@ -186,11 +186,11 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     self[3264 / 4] = 0;
     self[3108 / 4] = -1;
     self[3268 / 4] = dirty;
-    *(void**)&self[3184 / 4] = func_002F1890(cMemMan_alloc(168, str_AttachedEmitterFX_b, 0, 0), self);
+    *(void**)&self[3184 / 4] = cAttachedEmitterFX_cAttachedEmitterFX1(cMemMan_alloc(168, str_AttachedEmitterFX_b, 0, 0), self);
     *(void**)&self[3188 / 4] = cBoltOnFXInterface_cBoltOnFXInterface1(cMemMan_alloc(200, str_cBoltOnFXInterface_b, 0, 0), self, *(void**)&self[3184 / 4]);
     *(void**)&self[2] = cAnimModel_cAnimModel(cMemMan_alloc(352, str_AnimModel, 0, 0));
     cAnimModel_init(*(void**)&self[2], 100, 15);
-    func_002F19F0(*(void**)&self[3184 / 4], *(void**)&self[2]);
+    cAttachedEmitterFX_setModel(*(void**)&self[3184 / 4], *(void**)&self[2]);
     void* list = cBEBoltInterface_getCharProfile(iface, profile, character);
     cFERider_loadModels_E980(self, list, 0, self[4], 1);
     if (self[4] != 0) {
@@ -403,7 +403,7 @@ extern "C" void* cIrradianceDataBase_Get1(char* tbl, char* name);
 extern "C" void cIrradiance_addTinted(sMtx_EE88* m, void* a, char* b, float s);
 extern "C" void cIrradiance_addSunTerm(sMtx_EE88* m, t4Vector* v, float s);
 extern "C" void cAnimModel_render(void* model, int a, int b, int c);
-extern "C" void func_002F2088(void* p);
+extern "C" void cAttachedEmitterFX_render(void* p);
 
 struct sModel_EE88 {
     char pad0[0x2C];
@@ -424,7 +424,7 @@ struct sVE_EE88 {
  * the character's locator in cIrradianceDataBase_TheDataBase ("moby" .. "viggo", "fe_map" for others; characters 7 and 8, and 0 when +0xCD0
  * is set, use "elise", so the "nate" and "psymon" cases are never reached), moved by the model's hips bone; it is set
  * on the graphics manager (vtable entry 69). The draw state's layer bits (5-9) take the rider's draw layer when it is
- * not negative while the model (cAnimModel_render) and the attached-emitter FX (func_002F2088) render, then are put
+ * not negative while the model (cAnimModel_render) and the attached-emitter FX (cAttachedEmitterFX_render) render, then are put
  * back.
  *
  */
@@ -503,7 +503,7 @@ void cFERider::render()
     if (self->mDrawLayer >= 0)
         *fl = (*fl & ~0x3E0) | ((self->mDrawLayer << 5) & 0x3E0);
     cAnimModel_render(((sModel_EE88*)self->mpAnimModel), 0, 0, 0);
-    func_002F2088(self->mpAttachedEmitterFX);
+    cAttachedEmitterFX_render(self->mpAttachedEmitterFX);
     fl = (int*)(&GrMan->m_pCurrentDrawState->m_bitGroups[2]);
     *fl = (*fl & ~0x3E0) | (old << 5);
 }
@@ -519,7 +519,7 @@ extern "C" void cFERider_updateAnimModelParts(cFERider* self);
 extern "C" void cFERider_updateModelPose(cFERider* self);
 extern "C" void cRiderAnimBase_updateAnimation(void* anim, int a1, float blend);
 extern "C" void cRiderAnimBase_expireAnimation(void* anim);
-extern "C" void func_002F1A08(void* p);
+extern "C" void cAttachedEmitterFX_update(void* p);
 extern "C" void cBoltOnFXInterface_updateIfDirty(void* p);
 
 
@@ -571,7 +571,7 @@ void cFERider::update()
             cRiderAnimBase_expireAnimation(((void*)self->mpRiderAnim));
         }
         self->updateModelPose();
-        func_002F1A08(self->mpAttachedEmitterFX);
+        cAttachedEmitterFX_update(self->mpAttachedEmitterFX);
         cBoltOnFXInterface_updateIfDirty(self->mpBoltOnFX);
     }
 }

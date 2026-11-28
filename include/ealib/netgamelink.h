@@ -6,7 +6,7 @@
 // the 0x180-byte header below, then three 64-byte-aligned areas the IOP writes: the receive buffer (n bytes), the
 // 336-byte status area and a 4-byte word with the IOP's read position in the sent data. The EE reads all three through
 // the uncached alias of their addresses ((address & 0x0FFFFFFF) | 0x20000000). Requests go to the IOP as 'gmlk'
-// commands (func_003F4C98 / func_003F4C68): 'crea', 'dest', 'stat', 'recv', 'send', 'ctrl'. Retail code: unit
+// commands (NetLib_resolveService / NetLib_callService): 'crea', 'dest', 'stat', 'recv', 'send', 'ctrl'. Retail code: unit
 // ealib/seg_2DCAE8 (NetGameLinkCreate .. NetGameLinkControl, NetGameLink_completeStatus). Owner: cDSockChannel::mGameLink
 // (online/dsockchannel.h).
 //

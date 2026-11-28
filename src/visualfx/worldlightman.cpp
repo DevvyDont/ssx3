@@ -3587,8 +3587,8 @@ extern sAttachedEmitterType_83B0* cAttachedEmitterFX_mEmitterDataArray;
 /**
  * Fills attached-emitter types 0 to 9 of the table cAttachedEmitterFX_mEmitterDataArray (0x110-byte particle data records).
  *
- * func_002F17D0 allocates the 20-record table (5440 bytes, "AttachedEmitterTypeData") and then calls this and
- * cAttachedEmitterFX_fillEmitterTypes10To19 (types 10 to 19). func_002F2130 creates attached emitters from it by kind.
+ * cAttachedEmitterFX_loadEmitterTypes allocates the 20-record table (5440 bytes, "AttachedEmitterTypeData") and then calls this and
+ * cAttachedEmitterFX_fillEmitterTypes10To19 (types 10 to 19). cAttachedEmitterFX_createEmitter creates attached emitters from it by kind.
  */
 extern "C" void cAttachedEmitterFX_fillEmitterTypes0To9(void)
 {
@@ -4282,7 +4282,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8FF8__FPv);
 /**
  * Does nothing.
  *
- * func_002F1810 calls it, with func_002FA5F8__FPv, before freeing the attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
+ * cAttachedEmitterFX_freeEmitterTypes calls it, with func_002FA5F8__FPv, before freeing the attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
  */
 void func_002F8FF8(void* self)
 {
@@ -4544,7 +4544,7 @@ extern sAttachedEmitterType_9838* cAttachedEmitterFX_mEmitterDataArray_9838 __as
 /**
  * Fills attached-emitter types 10 to 19 of the table cAttachedEmitterFX_mEmitterDataArray (0x110-byte particle data records).
  *
- * func_002F17D0 calls it right after cAttachedEmitterFX_fillEmitterTypes0To9 (types 0 to 9).
+ * cAttachedEmitterFX_loadEmitterTypes calls it right after cAttachedEmitterFX_fillEmitterTypes0To9 (types 0 to 9).
  */
 extern "C" void cAttachedEmitterFX_fillEmitterTypes10To19(void)
 {
@@ -5238,7 +5238,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002FA5F8__FPv);
 /**
  * Does nothing.
  *
- * func_002F1810 calls it after func_002F8FF8__FPv, before freeing the attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
+ * cAttachedEmitterFX_freeEmitterTypes calls it after func_002F8FF8__FPv, before freeing the attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
  */
 void func_002FA5F8(void* self)
 {

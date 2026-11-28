@@ -4,7 +4,7 @@
 // LobbyApiRefT: the state of DirtySock's LobbyApi (C), the client for EA's online lobby server: the login / account /
 // persona commands, the room / user / rank lists, the request queue, server pings and the event routines LobbyMan
 // installs. LobbyMan (online/lobbyman.h) owns one as mpLobbyApi: LobbyMan_createLobbyApi creates it with LobbyApi_create (0x550
-// bytes from func_002591E8, zero-filled) and registers its handlers with LobbyApi_setEventRoutine. Retail code: unit
+// bytes from lobbyman_alloc, zero-filled) and registers its handlers with LobbyApi_setEventRoutine. Retail code: unit
 // ealib/seg_2DCAE8, NetGameUtil_queryStatus .. LobbyApi_secondsToCalendar (the LobbyApi part of the unit). EA source: DirtySock lobbyapi.c
 // (retail's "lobbyapi" label); no On Tour / preview layout.
 //
@@ -25,10 +25,10 @@ typedef struct LobbyApiRefT LobbyApiRefT;
 #endif
 
 struct LobbyApiRefT {
-    void* mpSession;                    // 0x000 [R] create: func_003F5478(0x8000) (the packet session, as in
+    void* mpSession;                    // 0x000 [R] create: NetSession_create(0x8000) (the packet session, as in
                                         //       BuddyApiRefT); [U] LobbyApi_disconnect and LobbyApi_connect disconnect it
-                                        //       (func_003F5738), LobbyApi_connect connects it (func_003F5638),
-                                        //       LobbyApi_sendCommand / LobbyApi_ping send on it (func_003F5910); LobbyApi_handlePings
+                                        //       (NetSession_disconnect), LobbyApi_connect connects it (NetSession_connect),
+                                        //       LobbyApi_sendCommand / LobbyApi_ping send on it (NetSession_send); LobbyApi_handlePings
                                         //       reads it
     void* mpPing;                       // 0x004 (name ours) [R] create: PingRpc_create() (the ping block,
                                         //       PingRpc_pollResponse's view); [U] LobbyApi_handlePings / LobbyApi_ping read it

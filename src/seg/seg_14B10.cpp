@@ -2498,7 +2498,7 @@ void cHUDFX::set1(int id, int displayInt, float fparg0, int data)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00117138);
+INCLUDE_ASM("seg/seg_14B10", cHUDFX_setAsync1);
 #ifdef SKIP_ASM
 extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
 
@@ -2515,7 +2515,7 @@ extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
  * @param data  the effect's data
  * @param fparg0  the animation position (stored negated)
  */
-extern "C" void func_00117138(cHUDFX* hudFx, int fxId, signed char *displayStr, int data, float fparg0) {
+extern "C" void cHUDFX_setAsync1(cHUDFX* hudFx, int fxId, signed char *displayStr, int data, float fparg0) {
     hudFx->copyDispStr(displayStr);
     hudFx->ID = fxId;
     hudFx->Data = data;
@@ -2547,7 +2547,7 @@ extern char str_pct_d[];
  * @param fparg0  the animation position (stored negated)
  * @param fxData  the effect's data
  */
-// Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
+// Variant of cHUDFX_setAsync1 that names the entry from a number (formatted into a shared buffer).
 void cHUDFX::setAsync(int fxId, int displayInt, float fparg0, int fxData)
 {
     sprintf((char*)gGenIntStr_gQuickBuf, str_pct_d, displayInt);

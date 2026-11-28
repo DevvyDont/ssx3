@@ -4215,7 +4215,7 @@ strstr (const char *searchee, const char *lookfor)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041AE00);
+INCLUDE_ASM("seg/seg_316FB8", strround);
 #ifdef SKIP_ASM
 /**
  * Rounds a decimal digit string at its last digit and returns 0 when the carry runs out of digits.
@@ -4227,7 +4227,7 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041AE00);
  * @param n       the digit count
  * @return 1 normally, 0 when the carry propagated past the first digit
  */
-int func_0041AE00(char *digits, int n)
+int strround(char *digits, int n)
 {
     if (n > 0) {
         n--;
@@ -4245,17 +4245,17 @@ int func_0041AE00(char *digits, int n)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041AE70);
+INCLUDE_ASM("seg/seg_316FB8", strrev);
 #ifdef SKIP_ASM
 /**
  * Reverses a string in place and returns it.
  *
- * func_0041AEE8 calls it.
+ * itoa calls it.
  *
  * @param str  the string
  * @return str
  */
-char *func_0041AE70(char *str) {
+char *strrev(char *str) {
     int i, j;
     char swapChar;
     j = 0;
@@ -4272,17 +4272,17 @@ char *func_0041AE70(char *str) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041AEE8);
+INCLUDE_ASM("seg/seg_316FB8", itoa);
 #ifdef SKIP_ASM
 /* Sony's libc addition itoa (not in newlib 1.9.0): digits from the .data table, then reversed in place by
-   func_0041AE70 (strrev). */
+   strrev (strrev). */
 extern char D_00454CB0[];
-extern char *func_0041AE70(char *s);
+extern char *strrev(char *s);
 
 /**
  * Writes an int as text in the given base and returns the buffer.
  *
- * Digits come from the table D_00454CB0, low digit first, then a - for a negative value, and func_0041AE70 reverses the
+ * Digits come from the table D_00454CB0, low digit first, then a - for a negative value, and strrev reverses the
  * result.
  *
  * Likely bug: only base 10 negates the value, so a negative value in another base prints its 32-bit two's complement
@@ -4293,7 +4293,7 @@ extern char *func_0041AE70(char *s);
  * @param base   the base
  * @return buf
  */
-char *func_0041AEE8(int value, char *buf, unsigned int base)
+char *itoa(int value, char *buf, unsigned int base)
 {
     int i;
     int neg = value < 0;
@@ -4310,7 +4310,7 @@ char *func_0041AEE8(int value, char *buf, unsigned int base)
     if (neg)
         buf[i++] = '-';
     buf[i] = 0;
-    return func_0041AE70(buf);
+    return strrev(buf);
 }
 #endif
 
@@ -4325,7 +4325,7 @@ enum print_buffer_mode
 };
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041B528);
+INCLUDE_ASM("seg/seg_316FB8", _vfflush);
 #ifdef SKIP_ASM
 extern void func_0041B550(int, int, int, int);
 /**
@@ -4335,7 +4335,7 @@ extern void func_0041B550(int, int, int, int);
  *
  * @param stream  the stream (descriptor at +0xE)
  */
-void func_0041B528(short *stream) {
+void _vfflush(short *stream) {
     func_0041B550(stream[7], 0, 0, 2);
 }
 #endif
@@ -4430,10 +4430,10 @@ int vfprintf(struct __sFILE *stream, const char *fmt, char *ap) {
 INCLUDE_ASM("seg/seg_316FB8", func_0041B728);
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_0041C788);
+INCLUDE_ASM("seg/seg_316FB8", add_separators);
 #ifdef SKIP_ASM
 extern void *g_c788_memcpy(void *, const void *, unsigned) __asm__("func_0041605C");
-char *func_0041C788_impl(char *dest, char *start, char *end, int *outlen) __asm__("func_0041C788");
+char *add_separators_impl(char *dest, char *start, char *end, int *outlen) __asm__("add_separators");
 /* What the scan has seen so far ([U] a . moves 0 to 1, an e or E gives 2 and ends the scan). Names ours. */
 enum number_scan_state
 {
@@ -4454,7 +4454,7 @@ enum number_scan_state
  * @param outlen  receives the output length
  * @return dest, start for an exponent number, or null when an argument is null
  */
-char *func_0041C788_impl(char *dest, char *start, char *end, int *outlen) {
+char *add_separators_impl(char *dest, char *start, char *end, int *outlen) {
     int len = end - start + 10;
     char *buf = __builtin_alloca(len);
     char *w = buf + len - 1;
@@ -6545,7 +6545,7 @@ __sflags_0180 (struct _reent *ptr, register char *mode, int *optr)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_316FB8", func_00420228);
+INCLUDE_ASM("seg/seg_316FB8", memcpyalpha);
 #ifdef SKIP_ASM
 /**
  * Copies n bytes from src to dst, one byte at a time.
@@ -6556,7 +6556,7 @@ INCLUDE_ASM("seg/seg_316FB8", func_00420228);
  * @param src  the source
  * @param n    the byte count
  */
-void func_00420228(char *dst, char *src, unsigned n) {
+void memcpyalpha(char *dst, char *src, unsigned n) {
     while (n--)
         *dst++ = *src++;
 }
@@ -6565,12 +6565,12 @@ void func_00420228(char *dst, char *src, unsigned n) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", fread);
 #ifdef SKIP_ASM
-extern void func_00420228(char *, char *, unsigned);
+extern void memcpyalpha(char *, char *, unsigned);
 extern int __srefill(struct __sFILE *);
 /**
  * Reads count items of size bytes from a stream into a buffer and returns the number of whole items read.
  *
- * Copies what is buffered with func_00420228, refilling with __srefill while more is wanted; a failed refill
+ * Copies what is buffered with memcpyalpha, refilling with __srefill while more is wanted; a failed refill
  * returns the whole items read so far. A negative read count is treated as 0.
  *
  * @param buf     the destination
@@ -6589,14 +6589,14 @@ unsigned fread(char *buf, unsigned size, unsigned count, struct __sFILE *stream)
     total = resid;
     dst = buf;
     while (resid > (avail = stream->_r)) {
-        func_00420228(dst, (char *)stream->_p, avail);
+        memcpyalpha(dst, (char *)stream->_p, avail);
         dst += avail;
         stream->_p = stream->_p + avail;
         resid -= avail;
         if (__srefill(stream))
             return (total - resid) / size;
     }
-    func_00420228(dst, (char *)stream->_p, resid);
+    memcpyalpha(dst, (char *)stream->_p, resid);
     stream->_r -= resid;
     stream->_p += resid;
     return count;

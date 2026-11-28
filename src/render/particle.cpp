@@ -254,7 +254,7 @@ static inline float randUnit10D0()
  * m_subEmitterId then steps down, wrapping to m_numSubEmitters - 1, and mCurrentFlipTexture advances by
  * mFlipTextureRate * @p dt, back to 0 at mNumFlipTextures.
  *
- * Callers: cDynamicColourEmitter_update, cDynamicParticleModifier_update and func_002F1A08.
+ * Callers: cDynamicColourEmitter_update, cDynamicParticleModifier_update and cAttachedEmitterFX_update.
  *
  * @param pos  the new position, or null to reuse m_currPosition
  * @param vel  the new velocity, or null to reuse m_currVelocity

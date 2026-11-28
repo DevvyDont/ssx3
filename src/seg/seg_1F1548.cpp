@@ -314,7 +314,7 @@ extern "C" int tEventFlags_isSet1(void*, int);
 extern int D_004A3AFC;
 
 
-// A bone matrix as func_002F1A08 (below) reads it; cPunchFX_update uses t4Matrix.
+// A bone matrix as cAttachedEmitterFX_update (below) reads it; cPunchFX_update uses t4Matrix.
 struct sMat_1150 {
     t4Vector r[4];
 };
@@ -338,7 +338,7 @@ static inline void CopyMat_1150(t4Matrix* dst, const t4Matrix* src)
         : "memory");
 }
 
-// The same copy on func_002F1A08's matrix view.
+// The same copy on cAttachedEmitterFX_update's matrix view.
 static inline void CopyMat_1150(sMat_1150* dst, sMat_1150* src) { CopyMat_1150((t4Matrix*)dst, (t4Matrix*)src); }
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
@@ -539,7 +539,7 @@ extern char cAttachedDynamicEmitter_vtbl[];
  *
  * Runs the cBaseClass_DynamicEmitter constructor, then installs the subclass vtable cAttachedDynamicEmitter_vtbl
  * (mVtbl) and zeroes the attach-bone index (mBoneIndex), the stopped flag (mStopped) and the pulse phase (mPhase).
- * func_002F2130 is its only caller.
+ * cAttachedEmitterFX_createEmitter is its only caller.
  *
  * @param emitter  the memory to construct in
  * @return the constructed emitter (@p emitter)
@@ -576,7 +576,7 @@ extern "C" void cAttachedDynamicEmitter__cAttachedDynamicEmitter(cBaseClass_Dyna
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F17D0);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_loadEmitterTypes);
 #ifdef SKIP_ASM
 extern "C" void cAttachedEmitterFX_fillEmitterTypes0To9();
 extern "C" void cAttachedEmitterFX_fillEmitterTypes10To19();
@@ -589,10 +589,10 @@ extern char* cAttachedEmitterFX_mEmitterDataArray;  /* the 20 attached-emitter t
  * Allocates and fills the shared attached-emitter type table cAttachedEmitterFX_mEmitterDataArray.
  *
  * Takes 5440 bytes (20 records of 0x110) through operator new[] tagged "AttachedEmitterTypeData", then fills types 0 to
- * 9 (cAttachedEmitterFX_fillEmitterTypes0To9) and 10 to 19 (cAttachedEmitterFX_fillEmitterTypes10To19). func_002F18D8 calls it when the first attached-emitter FX object is
+ * 9 (cAttachedEmitterFX_fillEmitterTypes0To9) and 10 to 19 (cAttachedEmitterFX_fillEmitterTypes10To19). cAttachedEmitterFX_init calls it when the first attached-emitter FX object is
  * set up.
  */
-extern "C" void func_002F17D0(void) {
+extern "C" void cAttachedEmitterFX_loadEmitterTypes(void) {
     cAttachedEmitterFX_mEmitterDataArray = (char*)operator_new__FUi_17D0(5440, str_AttachedEmitterTypeData, 0, 0);
     cAttachedEmitterFX_fillEmitterTypes0To9();
     cAttachedEmitterFX_fillEmitterTypes10To19();
@@ -600,7 +600,7 @@ extern "C" void func_002F17D0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1810);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_freeEmitterTypes);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv(void*);
 extern "C" void func_002F8FF8__FPv();
@@ -613,7 +613,7 @@ extern char* cAttachedEmitterFX_mEmitterDataArray;  /* the 20 attached-emitter t
  * Calls the two empty hooks func_002F8FF8__FPv and func_002FA5F8__FPv first and frees only a non-null table.
  * cAttachedEmitterFX__cAttachedEmitterFX calls it when the last attached-emitter FX object is destroyed.
  */
-extern "C" void func_002F1810(void) {
+extern "C" void cAttachedEmitterFX_freeEmitterTypes(void) {
     func_002F8FF8__FPv();
     func_002FA5F8__FPv();
     if (cAttachedEmitterFX_mEmitterDataArray != 0) {
@@ -624,9 +624,9 @@ extern "C" void func_002F1810(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1850);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_cAttachedEmitterFX);
 #ifdef SKIP_ASM
-extern "C" void func_002F18D8(cAttachedEmitterFX*);
+extern "C" void cAttachedEmitterFX_init(cAttachedEmitterFX*);
 extern char cAttachedEmitterFX_vtbl[];
 
 /**
@@ -636,67 +636,67 @@ extern char cAttachedEmitterFX_vtbl[];
  * 10 emitter slots, model, cRider or front-end rider, the spread flag and the vtable cAttachedEmitterFX_vtbl.
  *
  * Clears mModel and mFERider, stores @p rider as mRider and the vtable, then sets the object up with
- * func_002F18D8. The cRider constructor builds one into mAttachedEmitterFX.
+ * cAttachedEmitterFX_init. The cRider constructor builds one into mAttachedEmitterFX.
  *
  * @param emitterFx  the memory to construct in (0xA8 bytes)
  * @param rider  the owning cRider
  * @return the constructed object (@p emitterFx)
  */
-extern "C" void *func_002F1850(cAttachedEmitterFX* emitterFx, cRider* rider) {
+extern "C" void *cAttachedEmitterFX_cAttachedEmitterFX(cAttachedEmitterFX* emitterFx, cRider* rider) {
     emitterFx->mModel = 0;
     emitterFx->mFERider = 0;
     emitterFx->mVtbl = (void**)cAttachedEmitterFX_vtbl;
     emitterFx->mRider = rider;
-    func_002F18D8(emitterFx);
+    cAttachedEmitterFX_init(emitterFx);
     return emitterFx;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1890);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_cAttachedEmitterFX1);
 #ifdef SKIP_ASM
-extern "C" void func_002F18D8(cAttachedEmitterFX*);
-extern "C" void func_002F1A00(cAttachedEmitterFX*);
+extern "C" void cAttachedEmitterFX_init(cAttachedEmitterFX*);
+extern "C" void cAttachedEmitterFX_clearDisableSnowTrailSpray(cAttachedEmitterFX*);
 extern char cAttachedEmitterFX_vtbl[];
 
 /**
  * Constructs an attached-emitter FX object for a front-end rider and returns it.
  *
- * Like func_002F1850, but mRider stays 0 and @p feRider goes to mFERider; after the set-up (func_002F18D8)
- * it also clears the spread flag (func_002F1A00). The front-end rider builds one at its +0xC70.
+ * Like cAttachedEmitterFX_cAttachedEmitterFX, but mRider stays 0 and @p feRider goes to mFERider; after the set-up (cAttachedEmitterFX_init)
+ * it also clears the spread flag (cAttachedEmitterFX_clearDisableSnowTrailSpray). The front-end rider builds one at its +0xC70.
  *
  * @param emitterFx  the memory to construct in (0xA8 bytes)
  * @param feRider  the owning front-end rider
  * @return the constructed object (@p emitterFx)
  */
-extern "C" void *func_002F1890(cAttachedEmitterFX* emitterFx, cFERider* feRider) {
+extern "C" void *cAttachedEmitterFX_cAttachedEmitterFX1(cAttachedEmitterFX* emitterFx, cFERider* feRider) {
     emitterFx->mModel = 0;
     emitterFx->mRider = 0;
     emitterFx->mFERider = feRider;
     emitterFx->mVtbl = (void**)cAttachedEmitterFX_vtbl;
-    func_002F18D8(emitterFx);
-    func_002F1A00(emitterFx);
+    cAttachedEmitterFX_init(emitterFx);
+    cAttachedEmitterFX_clearDisableSnowTrailSpray(emitterFx);
     return emitterFx;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F18D8);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_init);
 #ifdef SKIP_ASM
-extern "C" void func_002F17D0();
+extern "C" void cAttachedEmitterFX_loadEmitterTypes();
 extern int D_004A3BB4;
 
 /**
  * Sets up an attached-emitter FX object: counts it in and empties its 10 emitter slots (mEmitters).
  *
- * The first instance (the count D_004A3BB4 still 0) loads the shared type table with func_002F17D0; the count then goes
+ * The first instance (the count D_004A3BB4 still 0) loads the shared type table with cAttachedEmitterFX_loadEmitterTypes; the count then goes
  * up by one.
  *
  * @param emitterFx  the attached-emitter FX object
  */
-extern "C" void func_002F18D8(cAttachedEmitterFX* emitterFx) {
+extern "C" void cAttachedEmitterFX_init(cAttachedEmitterFX* emitterFx) {
     if (D_004A3BB4 == 0) {
-        func_002F17D0();
+        cAttachedEmitterFX_loadEmitterTypes();
     }
     D_004A3BB4 += 1;
     for (int i = 9; i >= 0; i--)
@@ -707,7 +707,7 @@ extern "C" void func_002F18D8(cAttachedEmitterFX* emitterFx) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX__cAttachedEmitterFX);
 #ifdef SKIP_ASM
-extern "C" void func_002F1810();
+extern "C" void cAttachedEmitterFX_freeEmitterTypes();
 void operator_delete(int *);
 extern char cAttachedEmitterFX_vtbl[];
 extern int D_004A3BB4;
@@ -723,7 +723,7 @@ struct Obj1940 : Base1940 {
  * Destroys an attached-emitter FX object: deletes its emitters and, with the last instance, the type table.
  *
  * Slot 1 of the vtable cAttachedEmitterFX_vtbl (restored in mVtbl first). Drops the instance count D_004A3BB4 and
- * calls func_002F1810 when it reaches 0, then deletes every emitter in mEmitters through its virtual destructor
+ * calls cAttachedEmitterFX_freeEmitterTypes when it reaches 0, then deletes every emitter in mEmitters through its virtual destructor
  * and clears the slot. Frees the object when bit 0 of @p flags is set.
  *
  * @param emitterFx  the attached-emitter FX object
@@ -734,7 +734,7 @@ extern "C" void cAttachedEmitterFX__cAttachedEmitterFX(cAttachedEmitterFX* emitt
     emitterFx->mVtbl = (void**)cAttachedEmitterFX_vtbl;
     D_004A3BB4 = remaining;
     if (remaining == 0) {
-        func_002F1810();
+        cAttachedEmitterFX_freeEmitterTypes();
     }
     Obj1940 **slot = (Obj1940 **)emitterFx->mEmitters;
     int n = 9;
@@ -753,48 +753,48 @@ extern "C" void cAttachedEmitterFX__cAttachedEmitterFX(cAttachedEmitterFX* emitt
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F19F0);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_setModel);
 #ifdef SKIP_ASM
 /**
  * Gives an attached-emitter FX object its model (mModel) and clears mBonesLookedUp.
  *
- * The next update (func_002F1A08) then finds the bones again in the new model (func_002F22C8). The front-end rider
+ * The next update (cAttachedEmitterFX_update) then finds the bones again in the new model (cAttachedEmitterFX_lookUpBones). The front-end rider
  * calls it with its new cAnimModel.
  *
  * @param emitterFx  the attached-emitter FX object
  * @param model  the cAnimModel the emitters follow
  */
-extern "C" void func_002F19F0(cAttachedEmitterFX* emitterFx, cAnimModel* model) {
+extern "C" void cAttachedEmitterFX_setModel(cAttachedEmitterFX* emitterFx, cAnimModel* model) {
     emitterFx->mModel = model;
     emitterFx->mBonesLookedUp = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1A00);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_clearDisableSnowTrailSpray);
 #ifdef SKIP_ASM
 /**
  * Clears an attached-emitter FX object's spread flag (mDisableSnowTrailSpray).
  *
- * func_002F1A08 clears the flag at the start of every update and sets it while an emitter sits on attach point 25.
- * cRider's reset paths and func_002F1890 call this.
+ * cAttachedEmitterFX_update clears the flag at the start of every update and sets it while an emitter sits on attach point 25.
+ * cRider's reset paths and cAttachedEmitterFX_cAttachedEmitterFX1 call this.
  *
  * @param emitterFx  the attached-emitter FX object
  */
-extern "C" void func_002F1A00(cAttachedEmitterFX* emitterFx) {
+extern "C" void cAttachedEmitterFX_clearDisableSnowTrailSpray(cAttachedEmitterFX* emitterFx) {
     emitterFx->mDisableSnowTrailSpray = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F1A08);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_update);
 #ifdef SKIP_ASM
 // FAKEMATCH: one local `side` carries 75.0f into both bone-23/24 arms (assigned in each, so loop.c never treats it as a
 // movable and each arm loads the constant inline, as retail does); plain form (`ox + 75.0f` / `ox - 75.0f`) 95.54
 // UNPOSITIONED. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14 ruling (portable,
 // behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sObj_22C8;
-extern "C" void func_002F22C8(sObj_22C8* self);
+extern "C" void cAttachedEmitterFX_lookUpBones(sObj_22C8* self);
 extern "C" float perlinNoise(int n, float x);
 extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* fx, t4Vector* pos, t4Vector* vel, int withVel, float dt);
 
@@ -831,7 +831,7 @@ struct sFxVE_1A08 {
     t4Vector* (*fn)(void*);
 };
 
-// Same object as sObj_22C8 (func_002F22C8 fills ready/h).
+// Same object as sObj_22C8 (cAttachedEmitterFX_lookUpBones fills ready/h).
 struct sFxMgr_1A08 {
     int ready;              // 0x00
     int h[26];              // 0x04: bone handles
@@ -942,7 +942,7 @@ static inline t4Vector bonePos_1A08(char* model, int i)
 /**
  * Updates an attached-emitter FX object's emitters: moves each to its bone and decides whether it emits.
  *
- * Looks the bones up first if needed (func_002F22C8). The rider's velocity (cRider virtual getVelocity) and
+ * Looks the bones up first if needed (cAttachedEmitterFX_lookUpBones). The rider's velocity (cRider virtual getVelocity) and
  * mGroundNormal give the motion (zero velocity and +Z without a rider); speed is the velocity's length. For each used
  * slot of the 10, the emitter (type record at its +0x20C) emits only when it is not stopped (+0x204) and the speed lies
  * between the record's minimum and maximum (km/h times 27.78); a chance below 0.99 can veto it at random, and a pulse
@@ -956,10 +956,10 @@ static inline t4Vector bonePos_1A08(char* model, int i)
  * turned by the bone; cBaseClass_DynamicEmitter_updateBASE runs with dt 1/60 either way (no velocity and enable 0 when
  * not emitting).
  */
-extern "C" void func_002F1A08(sFxMgr_1A08* self)
+extern "C" void cAttachedEmitterFX_update(sFxMgr_1A08* self)
 {
     if (self->ready == 0)
-        func_002F22C8((sObj_22C8*)self);
+        cAttachedEmitterFX_lookUpBones((sObj_22C8*)self);
     t4Vector vel = t4vect_Zero;
     self->fA0 = 0;
     t4Vector nrm;
@@ -1053,7 +1053,7 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2088);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_render);
 #ifdef SKIP_ASM
 extern "C" void cDynamicEmitter_render(void* obj, int level);
 
@@ -1064,7 +1064,7 @@ extern "C" void cDynamicEmitter_render(void* obj, int level);
  * (mVisible). The draw layer is 7, or for a front-end rider its mDrawLayer + 1, or 22 when that layer is negative.
  * cRider's cRider_renderAttachedEmitterFX and cFERider_render call it.
  */
-extern "C" void func_002F2088(cAttachedEmitterFX* self)
+extern "C" void cAttachedEmitterFX_render(cAttachedEmitterFX* self)
 {
     int i;
     for (i = 0; i < 10; i++) {
@@ -1081,7 +1081,7 @@ extern "C" void func_002F2088(cAttachedEmitterFX* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2130);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_createEmitter);
 #ifdef SKIP_ASM
 struct Base2130 { char pad[0x1F8]; };
 struct Obj2130 : Base2130 {
@@ -1107,7 +1107,7 @@ extern char* cAttachedEmitterFX_mEmitterDataArray;  /* the 20 attached-emitter t
  * @param boneIndex  the attach point (index into the 26 bone indices)
  * @return the slot index (0-9), or -1 when all 10 slots are used
  */
-extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int boneIndex) {
+extern "C" int cAttachedEmitterFX_createEmitter(cAttachedEmitterFX* emitterFx, int typeIndex, int boneIndex) {
     Obj2130 **slot = (Obj2130 **)emitterFx->mEmitters;
     int i;
     for (i = 0; i < 10; i++, slot++) {
@@ -1131,7 +1131,7 @@ extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int b
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2218);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_deleteEmitter);
 #ifdef SKIP_ASM
 struct sVE_2F2218 {
     short delta;
@@ -1147,7 +1147,7 @@ struct sVE_2F2218 {
  *
  * @param idx  the slot index (0-9)
  */
-extern "C" void func_002F2218(char* self, int idx)
+extern "C" void cAttachedEmitterFX_deleteEmitter(char* self, int idx)
 {
     // retail adds 0x6C (mEmitters) to self before the scaled index; the typed &self->mEmitters[idx] folds them
     int off = idx * 4;
@@ -1163,41 +1163,41 @@ extern "C" void func_002F2218(char* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2268);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_stopEmitter);
 #ifdef SKIP_ASM
 /**
  * Stops the emitter in one slot from emitting: sets its stopped flag (mStopped) to 1.
  *
- * func_002F1A08 then updates it with emission off. No retail code calls it.
+ * cAttachedEmitterFX_update then updates it with emission off. No retail code calls it.
  *
  * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void func_002F2268(cAttachedEmitterFX* emitterFx, int emitterIndex) {
-    // the slots hold cAttachedDynamicEmitters (func_002F2130)
+extern "C" void cAttachedEmitterFX_stopEmitter(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+    // the slots hold cAttachedDynamicEmitters (cAttachedEmitterFX_createEmitter)
     ((cAttachedDynamicEmitter*)emitterFx->mEmitters[emitterIndex])->mStopped = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2280);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_resumeEmitter);
 #ifdef SKIP_ASM
 /**
  * Lets the emitter in one slot emit again: clears its stopped flag (mStopped).
  *
- * The counterpart of func_002F2268. No retail code calls it.
+ * The counterpart of cAttachedEmitterFX_stopEmitter. No retail code calls it.
  *
  * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void func_002F2280(cAttachedEmitterFX* emitterFx, int emitterIndex) {
-    // the slots hold cAttachedDynamicEmitters (func_002F2130)
+extern "C" void cAttachedEmitterFX_resumeEmitter(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+    // the slots hold cAttachedDynamicEmitters (cAttachedEmitterFX_createEmitter)
     ((cAttachedDynamicEmitter*)emitterFx->mEmitters[emitterIndex])->mStopped = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2298);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_disableEmitter);
 #ifdef SKIP_ASM
 /**
  * Disables the emitter in one slot: clears its m_enabled.
@@ -1207,29 +1207,29 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F2298);
  * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void func_002F2298(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+extern "C" void cAttachedEmitterFX_disableEmitter(cAttachedEmitterFX* emitterFx, int emitterIndex) {
     emitterFx->mEmitters[emitterIndex]->m_enabled = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F22B0);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_enableEmitter);
 #ifdef SKIP_ASM
 /**
  * Enables the emitter in one slot: sets its m_enabled to 1.
  *
- * The counterpart of func_002F2298. No retail code calls it.
+ * The counterpart of cAttachedEmitterFX_disableEmitter. No retail code calls it.
  *
  * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void func_002F22B0(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+extern "C" void cAttachedEmitterFX_enableEmitter(cAttachedEmitterFX* emitterFx, int emitterIndex) {
     emitterFx->mEmitters[emitterIndex]->m_enabled = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F22C8);
+INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_lookUpBones);
 #ifdef SKIP_ASM
 extern "C" int cAnimModel_getBoneSkelIndex(void*, int, const char*);
 extern char str_shinleft_b[];
@@ -1270,9 +1270,9 @@ struct sObj_22C8 {
  * Indices 0-21 come from model part 0 with cAnimModel_getBoneSkelIndex: head, neck, upper/middle/lower spine, hips,
  * then the left arm (clavicle, bicep, bicep twist, forearm, hand), the right arm, the left leg (thigh, shin, foot) and
  * the right leg. Indices 22-25 are all "board_childg" in part 1 (the board); the update offsets 23 and 24 along x and
- * spreads 25 at random. Sets the found flag (+0x0) to 1; func_002F1A08 calls it on demand.
+ * spreads 25 at random. Sets the found flag (+0x0) to 1; cAttachedEmitterFX_update calls it on demand.
  */
-extern "C" void func_002F22C8(sObj_22C8* self)
+extern "C" void cAttachedEmitterFX_lookUpBones(sObj_22C8* self)
 {
     self->h[0] = cAnimModel_getBoneSkelIndex(self->model, 0, str_head_b);
     self->h[1] = cAnimModel_getBoneSkelIndex(self->model, 0, str_neck);

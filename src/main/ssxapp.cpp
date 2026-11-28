@@ -994,7 +994,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_initload);
 extern "C" void initOnline();
 extern "C" int BXFILE_exists(const char* name);
 extern "C" int FILESYS_addbigsync(const char* name, int a1, int a2, void* out);
-extern "C" void func_00256188();
+extern "C" void dnas_addOverlayArchive();
 extern "C" void* cSSXScriptEngine_cSSXScriptEngine(void* self);
 extern "C" void cSSXScriptEngine_InitOnce(void* self);
 extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* name);
@@ -1132,7 +1132,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     if (BXFILE_exists(str_data_audio_music2_big)) FILESYS_addbigsync(str_data_audio_music2_big, 0, 100, &self->fDC);
     if (BXFILE_exists(str_data_audio_audio_big)) FILESYS_addbigsync(str_data_audio_audio_big, 0, 100, &self->fD4);
     if (BXFILE_exists(str_data_audio_speech_big)) FILESYS_addbigsync(str_data_audio_speech_big, 0, 100, &self->fE0);
-    func_00256188();
+    dnas_addOverlayArchive();
     FILESYS_addbigsync(str_data_scripts_scdat_big, 0, 100, &self->fE4);
     FILESYS_addbigsync(D_004A29C8, 0, 100, &self->fE8);
     for (int i = 0; i < 11; i++) {
@@ -1317,62 +1317,62 @@ extern char str_DRTYSCKF_IRX[];
 extern char str_LGAUD_IRX[];
 extern char str_rpc_0[];
 extern char str_VOIPF_IRX[];
-extern "C" int func_00319718(int loader, const char* name, int flags, int argLen, const char* args);
-extern "C" void func_00319930(int loader);
-extern "C" void func_003197D0(int loader);
+extern "C" int bxIop_loadModule(int loader, const char* name, int flags, int argLen, const char* args);
+extern "C" void bxIop_installPowerOffHandler(int loader);
+extern "C" void bxIop_loadMsifrpc(int loader);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void THREAD_yieldticks(int ticks);
 extern "C" void func_0040B130(int a);
-extern "C" void func_003F6A40();
-extern "C" void func_003F6AB0();
+extern "C" void voipRpc_bind();
+extern "C" void voipRpc_unbind();
 extern "C" void cUsbKeyboard_createInstance();
 
 /**
  * Loads the IOP modules for USB, the keyboard, the network adapter, the modem and voice chat.
  *
- * Loads USBD, USBKB, DEV9, INET, NETCNF (with icon paths), INETCTL, SMAP and PPP through func_00319718.
+ * Loads USBD, USBKB, DEV9, INET, NETCNF (with icon paths), INETCTL, SMAP and PPP through bxIop_loadModule.
  * EnableOnline (network hardware present) is set when SMAP (network adapter) or SPDUART (modem) loads, and
  * PPPOE is loaded only after SMAP.
  *
  * With network hardware it then loads MSIFRPC, LIBNET, DRTYSCKF (DirtySock) and LGAUD; when VOIPF loads it
- * binds a SIF RPC client, probably VOIPF's (func_003F6A40), else marks it unbound (func_003F6AB0).
+ * binds a SIF RPC client, probably VOIPF's (voipRpc_bind), else marks it unbound (voipRpc_unbind).
  */
 extern "C" void initOnline()
 {
     char buf[0x100];
-    func_00319718(D_004A3E94, str_USBD_IRX, 0, 43, str_hub_1);
+    bxIop_loadModule(D_004A3E94, str_USBD_IRX, 0, 43, str_hub_1);
     int ok = 0;
-    func_00319718(D_004A3E94, str_USBKB_IRX, 0, 0x10, str_keybd_2);
-    func_00319718(D_004A3E94, str_DEV9_IRX, 0, 0, 0);
-    func_00319930(D_004A3E94);
-    func_00319718(D_004A3E94, str_INET_IRX, 1, 18, str_mem_96KB);
+    bxIop_loadModule(D_004A3E94, str_USBKB_IRX, 0, 0x10, str_keybd_2);
+    bxIop_loadModule(D_004A3E94, str_DEV9_IRX, 0, 0, 0);
+    bxIop_installPowerOffHandler(D_004A3E94);
+    bxIop_loadModule(D_004A3E94, str_INET_IRX, 1, 18, str_mem_96KB);
     int n = sprintf(buf, str_icon_pct_sCNF_SYS_NET_ICOpct_spct_cicons, str_cdrom0, str_1, 0, str_cdrom0, str_1);
-    func_00319718(D_004A3E94, str_NETCNF_IRX, 1, n + 1, buf);
-    func_00319718(D_004A3E94, str_INETCTL_IRX, 1, 20, str_no_auto);
+    bxIop_loadModule(D_004A3E94, str_NETCNF_IRX, 1, n + 1, buf);
+    bxIop_loadModule(D_004A3E94, str_INETCTL_IRX, 1, 20, str_no_auto);
     EnableOnline = 0;
-    if (func_00319718(D_004A3E94, str_SMAP_IRX, 0, 0, 0) >= 0) {
+    if (bxIop_loadModule(D_004A3E94, str_SMAP_IRX, 0, 0, 0) >= 0) {
         EnableOnline = 1;
         ok = 1;
     }
-    func_00319718(D_004A3E94, str_PPP_IRX, 1, 0, 0);
+    bxIop_loadModule(D_004A3E94, str_PPP_IRX, 1, 0, 0);
     n = sprintf(buf, str_dial_pct_sCNF_DIAL_SPD_CNFpct_spct_c_nog, str_cdrom0, str_1, 0);
-    if (func_00319718(D_004A3E94, str_SPDUART_IRX, 0, n + 1, buf) >= 0) {
+    if (bxIop_loadModule(D_004A3E94, str_SPDUART_IRX, 0, n + 1, buf) >= 0) {
         EnableOnline = 1;
     }
     if (EnableOnline && ok) {
-        func_00319718(D_004A3E94, str_PPPOE_IRX, 1, 0, 0);
+        bxIop_loadModule(D_004A3E94, str_PPPOE_IRX, 1, 0, 0);
     }
     THREAD_yieldticks(10);
     if (EnableOnline) {
-        func_003197D0(D_004A3E94);
-        func_00319718(D_004A3E94, str_LIBNET_IRX, 1, 0, 0);
+        bxIop_loadMsifrpc(D_004A3E94);
+        bxIop_loadModule(D_004A3E94, str_LIBNET_IRX, 1, 0, 0);
         func_0040B130(0);
-        func_00319718(D_004A3E94, str_DRTYSCKF_IRX, 1, 0, 0);
-        func_00319718(D_004A3E94, str_LGAUD_IRX, 0, 18, str_rpc_0);
-        if (func_00319718(D_004A3E94, str_VOIPF_IRX, 0, 0, 0) >= 0) {
-            func_003F6A40();
+        bxIop_loadModule(D_004A3E94, str_DRTYSCKF_IRX, 1, 0, 0);
+        bxIop_loadModule(D_004A3E94, str_LGAUD_IRX, 0, 18, str_rpc_0);
+        if (bxIop_loadModule(D_004A3E94, str_VOIPF_IRX, 0, 0, 0) >= 0) {
+            voipRpc_bind();
         } else {
-            func_003F6AB0();
+            voipRpc_unbind();
         }
     }
     cUsbKeyboard_createInstance();

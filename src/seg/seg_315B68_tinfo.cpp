@@ -13,7 +13,7 @@
 
 extern "C" {
 
-int func_00414B98(int *a, int *b);
+int type_info_operatorEqual(int *a, int *b);
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", type_info__type_info);
@@ -37,7 +37,7 @@ int type_info__type_info(int *typeInfo, int flag) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414B98);
+INCLUDE_ASM("seg/seg_315B68_tinfo", type_info_operatorEqual);
 #ifdef SKIP_ASM
 extern int strcmp(int, int);
 /**
@@ -50,7 +50,7 @@ extern int strcmp(int, int);
  * @param rhs  second type_info
  * @return 1 when equal, else 0
  */
-int func_00414B98(int *lhs, int *rhs) {
+int type_info_operatorEqual(int *lhs, int *rhs) {
     int equal = 0;
     if (rhs == lhs || strcmp(*lhs, *rhs) == 0)
         equal = 1;
@@ -132,7 +132,7 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __user_type_info_dcast);
 /**
  * dynamic_cast step for a class without bases: returns the object pointer when the class is the desired type.
  *
- * Compares the type_infos with func_00414B98; fills the dcast slot (2) of the __user_type_info vtable D_00499A00.
+ * Compares the type_infos with type_info_operatorEqual; fills the dcast slot (2) of the __user_type_info vtable D_00499A00.
  *
  * @param thisType  this class's type_info
  * @param desired   the type_info cast to
@@ -141,7 +141,7 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __user_type_info_dcast);
  * @return objPtr on a match, else 0
  */
 int __user_type_info_dcast(int *thisType, int *desired, int isPublic, int objPtr) {
-    if (func_00414B98(thisType, desired) == 0) objPtr = 0;
+    if (type_info_operatorEqual(thisType, desired) == 0) objPtr = 0;
     return objPtr;
 }
 #endif
@@ -155,7 +155,7 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __si_type_info_dcast);
 /**
  * dynamic_cast step for a single-inheritance class: matches this class or recurses into the base.
  *
- * Returns addr when this class is the desired type (type_info::operator==, func_00414B98); otherwise the base's
+ * Returns addr when this class is the desired type (type_info::operator==, type_info_operatorEqual); otherwise the base's
  * dcast (a virtual call: vtable slot 2) with the same arguments. Fills the dcast slot of the __si_type_info vtable
  * D_004999E8.
  *
@@ -186,7 +186,7 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", __class_type_info_dcast);
    g++ calls these under fixed names (type_info::operator==, the typeinfo functions typeid and dynamic_cast use,
    __dynamic_cast); bind each to the retail symbol (assembler assignments: the relocations then name the retail
    symbols). All of them are defined in this unit. */
-__asm__("__eq__C9type_infoRC9type_info = func_00414B98");
+__asm__("__eq__C9type_infoRC9type_info = type_info_operatorEqual");
 
 /* tinfo.cc __class_type_info::dcast (GCC runtime, GPL v2+ with the runtime linking exception) */
 }  // extern "C"  (a member function definition cannot have C linkage)
@@ -567,17 +567,17 @@ int *__tf8bad_cast(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_315B68_tinfo", func_004151B8);
+INCLUDE_ASM("seg/seg_315B68_tinfo", type_info_operatorNotEqual);
 #ifdef SKIP_ASM
 /**
- * Returns whether two type_info objects describe different types (the negation of func_00414B98).
+ * Returns whether two type_info objects describe different types (the negation of type_info_operatorEqual).
  *
  * @param lhs  first type_info
  * @param rhs  second type_info
  * @return 1 when the types differ, else 0
  */
-int func_004151B8(int *lhs, int *rhs) {
-    return func_00414B98(lhs, rhs) ^ 1;
+int type_info_operatorNotEqual(int *lhs, int *rhs) {
+    return type_info_operatorEqual(lhs, rhs) ^ 1;
 }
 #endif
 
@@ -664,7 +664,7 @@ __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
 /**
  * Tests whether a thrown object can be caught by a handler of another type and returns the object pointer to bind.
  *
- * Equal types (func_00414B98) match as is. A class throw type is cast with its type_info's dcast, public bases only. A
+ * Equal types (type_info_operatorEqual) match as is. A class throw type is cast with its type_info's dcast, public bases only. A
  * pointer throw type needs a pointer catch type: cv-qualifiers (attr type_infos) are stripped from both pointees and
  * the catch side may not drop const or volatile; equal pointees match, a void pointee catches any non-function pointee,
  * a class pointee is cast with dcast, and multi-level pointers are compared level by level with the

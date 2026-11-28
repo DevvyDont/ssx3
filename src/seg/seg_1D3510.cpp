@@ -1736,7 +1736,7 @@ extern "C" void cPS2ConsoleConfig__cPS2ConsoleConfig(cPS2ConsoleConfig* self, in
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D4008);
+INCLUDE_ASM("seg/seg_1D3510", cMenu_compareSortItems);
 #ifdef SKIP_ASM
 extern int (*D_004A54BC)(int, int);
 
@@ -1749,7 +1749,7 @@ extern int (*D_004A54BC)(int, int);
  * @param lhsItem  points to the first item pointer
  * @param rhsItem  points to the second item pointer
  */
-extern "C" void func_002D4008(int *lhsItem, int *rhsItem) {
+extern "C" void cMenu_compareSortItems(int *lhsItem, int *rhsItem) {
     D_004A54BC(*lhsItem, *rhsItem);
 }
 #endif

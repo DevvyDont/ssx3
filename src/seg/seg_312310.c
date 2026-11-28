@@ -240,7 +240,7 @@ DItype __muldi3 (DItype u, DItype v) __asm__("__muldi3");
  * Multiplies two 64-bit integers (GCC runtime helper; the R5900 has no 64-bit multiply).
  *
  * Multiplies the low words to 64 bits (multu) and adds the two cross products into the high word. Callers include
- * cDynamicMemMan_sYSTRIm, func_00408530 and the soft-float multiply dpmul.
+ * cDynamicMemMan_sYSTRIm, libmpeg_computeTimeStamps and the soft-float multiply dpmul.
  *
  * @param lhs  the first factor
  * @param rhs  the second factor
@@ -476,7 +476,7 @@ UDItype __udivmoddi4 ();
  *
  * Uses the inlined unsigned divider (__udivmoddi4): divisors that fit in 32 bits are normalised with the leading-zero
  * table D_004997A0 and divided in 32-bit steps; larger ones need at most one quotient word. Callers include the printf
- * core (func_00425638), strtol and the heap trim.
+ * core (libkernl_formatOutput), strtol and the heap trim.
  *
  * @param n  the number divided
  * @param divisor  the number to divide by

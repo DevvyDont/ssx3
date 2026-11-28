@@ -59,7 +59,7 @@ struct cFERider {
                                     //       sets -1
     tPose mPose;                    // 0xC30 [O]; [R] tPose_Identity (lq/sq); [U] setPose / translate / rotate
     tPose mBoardPose;               // 0xC50 [O]; [R] tPose_Identity; [U] setBoardPose / translateBoard / rotateBoard
-    void* mpAttachedEmitterFX;      // 0xC70 [R] 0; init: func_002F1890(cMemMan_alloc(168, "AttachedEmitterFX"), this);
+    void* mpAttachedEmitterFX;      // 0xC70 [R] 0; init: cAttachedEmitterFX_cAttachedEmitterFX1(cMemMan_alloc(168, "AttachedEmitterFX"), this);
                                     //       purge destroys it (no On Tour member; named after the allocation tag)
     void* mpBoltOnFX;               // 0xC74 [R] 0; init: cBoltOnFXInterface_cBoltOnFXInterface1(cMemMan_alloc(200, "cBoltOnFXInterface"), this,
                                     //       mpAttachedEmitterFX); [U] updateAnimModelParts sets its first word

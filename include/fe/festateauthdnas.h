@@ -70,7 +70,7 @@ struct cFEStateAuthDNAS : public cFEStateNet {
                                     //       profile bits cBEOptionInterface_mOption; onUpdate cFEStateAuthDNAS_onUpdate polls it (its first word:
                                     //       >= 3 ready, 5 done; + 0x1C error; error texts at + 0x450/0x650/0x850),
                                     //       cFEStateAuthDNAS_onInputBegin cancels it (+ 0x14 = 1); the destructor shuts it down
-                                    //       (func_002563A8) and deletes it
+                                    //       (DNASMan_freeBuffers) and deletes it
     cUIText* mpTextAuth;            // 0x6D4 [R] 0; [U] onWidgetCreate cFEStateAuthDNAS_onWidgetCreate: widget "TextAuth"
                                     //       ("kT_ovrcmnloading", then "kT_205Authenticating" in onUpdate)
     cUIText* mpTextCancel;          // 0x6D8 [U] onWidgetCreate: widget "TextCancel" (hidden; onUpdate shows it with

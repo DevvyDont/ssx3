@@ -25,7 +25,7 @@ struct cSharedLoginMan {
     int mState;                     // 0x0 [R] init 1, shutdown 0; [U] the state machine above; the front end's
                                     //     cFEStateNetAccountMem tests it (*SharedLoginMan == state)
     int mError;                     // 0x4 [R] init 0; [U] each request step clears it, cSharedLoginMan_update stores the
-                                    //     library poll's error (func_003F80E0)
+                                    //     library poll's error (slogin_update)
 
     // Methods bound to their retail symbols by asm labels.
     void init() __asm__("cSharedLoginMan_init");

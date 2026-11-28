@@ -242,7 +242,7 @@ struct cDebugMenuScreen {
                                     //       the current path and restores the new path's
     // The network row's modes (names ours, from their labels): [R] draw prints D_0045CFB8's names "Disabled", "Host",
     // "Join", "NetGui" and "DNAS" for 0..4; [U] update makes Host and Join network games (Host the host) and skips
-    // them without a net connection, and kMenuKeySelect runs func_00256088 in NetGui and func_002560B0 in DNAS.
+    // them without a net connection, and kMenuKeySelect runs netConfig_launchGui in NetGui and dnasDebug_runAuth in DNAS.
     enum tNetworkMode {
         kNetwork_Disabled = 0, kNetwork_Host = 1, kNetwork_Join = 2, kNetwork_NetGui = 3, kNetwork_DNAS = 4
     };

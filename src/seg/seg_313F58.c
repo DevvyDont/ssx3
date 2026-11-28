@@ -1931,7 +1931,7 @@ extern void abort_a() __asm__("abort");
  *
  * Unlinks the object whose fde_begin (+8) equals key from the list D_0052ADE8 and frees its sorted FDE array
  * (free) when the object was initialised (pc_begin nonzero). Aborts (abort) when no object matches.
- * The crt teardown func_00100218 calls it with D_0043CE00.
+ * The crt teardown crt_deregisterFrameInfo calls it with D_0043CE00.
  *
  * @param key  the section (or table) the object was registered with
  * @return the unlinked object record

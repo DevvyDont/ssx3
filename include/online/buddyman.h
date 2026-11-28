@@ -90,10 +90,10 @@ struct BuddyMan {
     cChallenger** mChallengersStart;    // 0x0BC [R] ctor 0; [U] BuddyMan_getChallenge / BuddyMan_findChallenge; FE states read it
     cChallenger** mChallengersFinish;   // 0x0C0 [R] ctor 0; [U] push_back in BuddyMan_addChallenge, erase in BuddyMan_declineChallenge
     cChallenger** mChallengersEnd;      // 0x0C4 [R] ctor 0; [U] BuddyMan_addChallenge compares finish with it
-    BuddyApiRefT* mpBuddyApi;           // 0x0C8 [R] ctor 0; [U] BuddyMan_createBuddyApi stores the handle func_003F0710 creates
+    BuddyApiRefT* mpBuddyApi;           // 0x0C8 [R] ctor 0; [U] BuddyMan_createBuddyApi stores the handle BuddyApi_create creates
                                         //       (version "2003-10-20"); every BuddyApi call passes it;
                                         //       [P] preview 0x18 (same role)
-    void* mpRoster;                     // 0x0CC [R] ctor 0; [U] onconnect ('auth' ok) stores func_003F0C90's roster;
+    void* mpRoster;                     // 0x0CC [R] ctor 0; [U] onconnect ('auth' ok) stores BuddyApi_requestRoster's roster;
                                         //       BuddyMan_getNumRosterEntries counts it, BuddyMan_getRosterEntry indexes it; [P] preview 0x1C
     int miError;                        // 0x0D0 [R] ctor 0; [U] onconnect stores the auth error / 1 on a lost
                                         //       connection, connect and disconnect clear it, LobbyMan LobbyMan_update

@@ -37,7 +37,7 @@ struct tBoltOnFXEntry {
     // cBoltOnFXInterface_rebuild treat it as no emitter.
     enum { kNoEmitter = -1 };
     int mEmitter;   // 0x0 (our name) the cAttachedEmitterFX emitter index, -1 = free: [U] cBoltOnFXInterface_createEntry stores
-                    //     func_002F2130's result; cBoltOnFXInterface__cBoltOnFXInterface / cBoltOnFXInterface_rebuild release it with func_002F2218
+                    //     cAttachedEmitterFX_createEmitter's result; cBoltOnFXInterface__cBoltOnFXInterface / cBoltOnFXInterface_rebuild release it with cAttachedEmitterFX_deleteEmitter
     int mItem;      // 0x4 (our name) the item (attach point) id: [U] cBoltOnFXInterface_createEntry stores, cBoltOnFXInterface_findOrCreateEntry matches
     int mKind;      // 0x8 (our name) the particle effect kind: [U] cBoltOnFXInterface_createEntry stores, cBoltOnFXInterface_findOrCreateEntry matches
 };
@@ -52,7 +52,7 @@ struct cBoltOnFXInterface {
                                             //      character id, cBoltOnFXInterface_cBoltOnFXInterface 0; [U] cBoltOnFXInterface_rebuild uses it without a rider
     cAttachedEmitterFX* mAttachedEmitterFX; // 0x0C [P] "mAttachedEmitterFX!=NULL"; [R] both ctors store their third
                                             //      argument (cRider::mAttachedEmitterFX / cFERider's emitter owner);
-                                            //      [U] passed to func_002F2130 / func_002F2218 (create / release)
+                                            //      [U] passed to cAttachedEmitterFX_createEmitter / cAttachedEmitterFX_deleteEmitter (create / release)
     tBoltOnFXEntry mEntries[15];            // 0x10 (our name) [R] ctors construct 15 (tBoltOnFXEntry_tBoltOnFXEntry) and free them
                                             //      (cBoltOnFXInterface_clearEntries); [U] cBoltOnFXInterface_findOrCreateEntry / cBoltOnFXInterface_createEntry / cBoltOnFXInterface_rebuild /
                                             //      cBoltOnFXInterface__cBoltOnFXInterface walk 15; [P] "Ran out of bolt on emitters"

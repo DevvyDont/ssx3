@@ -221,12 +221,12 @@ void cBXString::trimLeft()
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_00319610);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_initIop);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00426408(int a);
 extern "C" void sceSifInitIopHeap(void);
-extern "C" void func_00319820(void* self);
+extern "C" void bxIop_rebootWithDnasImage(void* self);
 extern "C" void sceCdInit(int a);
 extern "C" void sceCdMmode(int a);
 extern "C" void sceFsReset(void);
@@ -234,14 +234,14 @@ extern "C" void sceFsReset(void);
 /**
  * Prepares the IOP at start-up, rebooting it with the DNAS image.
  *
- * Calls func_00426408(0) and sceSifInitIopHeap, reboots the IOP with DNAS271.IMG (func_00319820), then calls
+ * Calls func_00426408(0) and sceSifInitIopHeap, reboots the IOP with DNAS271.IMG (bxIop_rebootWithDnasImage), then calls
  * sceCdInit(0), sceCdMmode(2) and sceFsReset. systemInit calls it; @p self is not used.
  */
-extern "C" void func_00319610(void* self)
+extern "C" void bxIop_initIop(void* self)
 {
     func_00426408(0);
     sceSifInitIopHeap();
-    func_00319820(self);
+    bxIop_rebootWithDnasImage(self);
     sceCdInit(0);
     sceCdMmode(2);
     sceFsReset();
@@ -249,7 +249,7 @@ extern "C" void func_00319610(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_00319660);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_getModuleDir);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -264,20 +264,20 @@ extern char str_cdrom0_b[];
  * @param out  the buffer
  */
 // Builds the IOP module directory ("cdrom0:\DATA\MODULES\").
-extern "C" void func_00319660(void* self, char* out)
+extern "C" void bxIop_getModuleDir(void* self, char* out)
 {
     sprintf(out, str_pct_sDATA_MODULES, str_cdrom0_b);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_00319690);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_buildModulePath);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* strchr(const char* s, int c);
 extern "C" char* strcpy(char* d, const char* s);
-extern "C" void func_00319660(void* self, char* out);
+extern "C" void bxIop_getModuleDir(void* self, char* out);
 extern char str_pct_spct_spct_s_c[];
 extern char str_1_b[];
 
@@ -285,36 +285,36 @@ extern char str_1_b[];
  * Builds the full path of an IOP module.
  *
  * A @p name that contains ':' (it names a device) is copied as is; otherwise the path is the module directory
- * (func_00319660), @p name and the ISO version suffix ";1". @p self is not used.
+ * (bxIop_getModuleDir), @p name and the ISO version suffix ";1". @p self is not used.
  *
  * @param out  the buffer for the path
  * @param name  the module file name
  */
 // Full path of an IOP module: names with a device prefix are used as is, others get
 // the module directory and the ";1" ISO version suffix.
-extern "C" void func_00319690(void* self, char* out, const char* name)
+extern "C" void bxIop_buildModulePath(void* self, char* out, const char* name)
 {
     if (strchr(name, ':') != 0) {
         strcpy(out, name);
     } else {
         char dir[256];
-        func_00319660(self, dir);
+        bxIop_getModuleDir(self, dir);
         sprintf(out, str_pct_spct_spct_s_c, dir, name, str_1_b);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_00319718);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_loadModule);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00319690(void* self, char* out, const char* name);
+extern "C" void bxIop_buildModulePath(void* self, char* out, const char* name);
 extern "C" int sceSifLoadModule(const char* path, int argLen, const char* args);
 
 /**
  * Loads an IOP module, retrying while the load fails.
  *
- * Builds the path (func_00319690) and calls sceSifLoadModule(path, @p argLen, @p args) until it returns a non-negative
+ * Builds the path (bxIop_buildModulePath) and calls sceSifLoadModule(path, @p argLen, @p args) until it returns a non-negative
  * result; a failure is retried when it is -204 (IOP busy) or when @p retry is set, otherwise returned.
  *
  * @param name  the module file name
@@ -324,11 +324,11 @@ extern "C" int sceSifLoadModule(const char* path, int argLen, const char* args);
  * @return the module id, or the error code
  */
 // Loads an IOP module, retrying while the IOP is busy (-204) or always when 'retry' is set.
-extern "C" int func_00319718(void* self, const char* name, int retry, int argLen, const char* args)
+extern "C" int bxIop_loadModule(void* self, const char* name, int retry, int argLen, const char* args)
 {
     char path[256];
     int result;
-    func_00319690(self, path, name);
+    bxIop_buildModulePath(self, path, name);
     do {
         result = sceSifLoadModule(path, argLen, args);
     } while (result < 0 && (retry != 0 || result == -204));
@@ -337,7 +337,7 @@ extern "C" int func_00319718(void* self, const char* name, int retry, int argLen
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_00319790);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_unloadModule);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void sceSifStopModule(int fd, int a, int b, void* out);
@@ -350,7 +350,7 @@ extern "C" void sceSifUnloadModule(int fd);
  *
  * @param fd  the id passed to both calls
  */
-extern "C" void func_00319790(void* self, int fd)
+extern "C" void bxIop_unloadModule(void* self, int fd)
 {
     char scratch[16];
     sceSifStopModule(fd, 0, 0, scratch);
@@ -359,22 +359,22 @@ extern "C" void func_00319790(void* self, int fd)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_003197D0);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_loadMsifrpc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_00319718(void* self, const char* name, int retry, int argLen, const char* args);
+extern "C" int bxIop_loadModule(void* self, const char* name, int retry, int argLen, const char* args);
 extern void* D_004A3E94;
 extern char str_MSIFRPC_IRX[];
 
 /**
  * Loads the IOP module MSIFRPC.IRX.
  *
- * Calls func_00319718(D_004A3E94, "MSIFRPC.IRX", retry 1, no arguments). initOnline calls it; @p self is not used.
+ * Calls bxIop_loadModule(D_004A3E94, "MSIFRPC.IRX", retry 1, no arguments). initOnline calls it; @p self is not used.
  */
 // Loads MSIFRPC.IRX.
-extern "C" void func_003197D0(void* self)
+extern "C" void bxIop_loadMsifrpc(void* self)
 {
-    func_00319718(D_004A3E94, str_MSIFRPC_IRX, 1, 0, 0);
+    bxIop_loadModule(D_004A3E94, str_MSIFRPC_IRX, 1, 0, 0);
 }
 #endif
 
@@ -396,13 +396,13 @@ extern "C" void func_00319800(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_00319820);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_rebootWithDnasImage);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00426408(int a);
 extern "C" void sceCdInit(int a);
 extern "C" void sceCdMmode(int a);
-extern "C" void func_00319690(void* self, char* out, const char* name);
+extern "C" void bxIop_buildModulePath(void* self, char* out, const char* name);
 extern "C" int sceSifRebootIop(const char* path);
 extern "C" int sceSifSyncIop(void);
 extern "C" void sceSifInitIopHeap(void);
@@ -411,18 +411,18 @@ extern char str_DNAS271_IMG[];
 /**
  * Reboots the IOP with the DNAS image DNAS271.IMG and waits until it is done.
  *
- * Calls func_00426408(0), sceCdInit(0) and sceCdMmode(2), builds the image path (func_00319690), retries
+ * Calls func_00426408(0), sceCdInit(0) and sceCdMmode(2), builds the image path (bxIop_buildModulePath), retries
  * sceSifRebootIop (the IOP reboot through rom0:UDNL) until it succeeds, polls sceSifSyncIop until it reports done, then
- * calls func_00426408(0) and sceSifInitIopHeap again. func_00319610 calls it; @p self is not used.
+ * calls func_00426408(0) and sceSifInitIopHeap again. bxIop_initIop calls it; @p self is not used.
  */
 // Loads the DNAS image (DNAS271.IMG) and waits for it to finish.
-extern "C" void func_00319820(void* self)
+extern "C" void bxIop_rebootWithDnasImage(void* self)
 {
     char path[256];
     func_00426408(0);
     sceCdInit(0);
     sceCdMmode(2);
-    func_00319690(self, path, str_DNAS271_IMG);
+    bxIop_buildModulePath(self, path, str_DNAS271_IMG);
     while (sceSifRebootIop(path) == 0)
         ;
     while (sceSifSyncIop() == 0)
@@ -433,7 +433,7 @@ extern "C" void func_00319820(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_003198A0);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_powerOffThread);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void WaitSema(int sema);
@@ -446,14 +446,14 @@ extern char str_dev9x[];
  * until both succeed.
  *
  * Loops forever: waits on @p sema (WaitSema), retries sceDevctl("dev9x", 0x4402, ...) until it succeeds, then
- * retries sceCdPowerOff(&status) until it returns non-zero with status 0. func_00319930 starts it as a thread;
- * func_00319910 signals the semaphore. The shape is that of the usual PS2 power-off handler (dev9 shutdown, then
+ * retries sceCdPowerOff(&status) until it returns non-zero with status 0. bxIop_installPowerOffHandler starts it as a thread;
+ * bxIop_onPowerOff signals the semaphore. The shape is that of the usual PS2 power-off handler (dev9 shutdown, then
  * console power-off), but the callees are not named in this build.
  *
  * @param sema  the semaphore id to wait on
  */
 // IOP poll thread: waits for its semaphore, then issues RPC 0x4402 and waits for completion.
-extern "C" void func_003198A0(int sema)
+extern "C" void bxIop_powerOffThread(int sema)
 {
     for (;;) {
         WaitSema(sema);
@@ -467,7 +467,7 @@ extern "C" void func_003198A0(int sema)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_00319910);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_onPowerOff);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void iSignalSema(void);
@@ -475,17 +475,17 @@ extern "C" void iSignalSema(void);
 /**
  * Signals the power-off thread's semaphore (iSignalSema).
  *
- * func_00319930 installs it as the power-off callback (sceCdPOffCallback); the semaphore id arrives as the callback
+ * bxIop_installPowerOffHandler installs it as the power-off callback (sceCdPOffCallback); the semaphore id arrives as the callback
  * argument.
  */
-extern "C" void func_00319910(void)
+extern "C" void bxIop_onPowerOff(void)
 {
     iSignalSema();
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_00319930);
+INCLUDE_ASM("seg/seg_21A1C0", bxIop_installPowerOffHandler);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Sony EE kernel ThreadParam / SemaParam.
@@ -517,8 +517,8 @@ extern "C" int CreateSema(sSemaParam_9930* p);
 extern "C" int CreateThread(sThreadParam_9930* p);
 extern "C" int StartThread(int thread, int arg);
 extern "C" void sceCdPOffCallback(void (*fn)(void), int arg);
-extern "C" void func_003198A0(int sema);
-extern "C" void func_00319910(void);
+extern "C" void bxIop_powerOffThread(int sema);
+extern "C" void bxIop_onPowerOff(void);
 extern int _gp;
 extern char str_dev9[];
 extern char D_00538B10[];
@@ -526,14 +526,14 @@ extern int D_004A5B54;
 extern int D_004A5B70;
 
 /**
- * Sets up a semaphore, a worker thread running func_003198A0 and a callback (func_00319910) that wakes it.
+ * Sets up a semaphore, a worker thread running bxIop_powerOffThread and a callback (bxIop_onPowerOff) that wakes it.
  *
  * Only when sceSifSearchModuleByName("dev9") succeeds: creates a semaphore (initial count 0, maximum 1; D_004A5B54), creates and
- * starts a thread (priority 1, 0x2000-byte stack D_00538B10, _gp; id in D_004A5B70) on func_003198A0 with the semaphore
- * as its argument, and registers func_00319910 with sceCdPOffCallback as the callback, with the same argument. initOnline
+ * starts a thread (priority 1, 0x2000-byte stack D_00538B10, _gp; id in D_004A5B70) on bxIop_powerOffThread with the semaphore
+ * as its argument, and registers bxIop_onPowerOff with sceCdPOffCallback as the callback, with the same argument. initOnline
  * calls it.
  */
-extern "C" void func_00319930(void)
+extern "C" void bxIop_installPowerOffHandler(void)
 {
     sThreadParam_9930 tp;
     sSemaParam_9930 sema;
@@ -544,12 +544,12 @@ extern "C" void func_00319930(void)
         D_004A5B54 = CreateSema(&sema);
         tp.stackSize = 0x2000;
         tp.gpReg = &_gp;
-        tp.entry = func_003198A0;
+        tp.entry = bxIop_powerOffThread;
         tp.stack = D_00538B10;
         tp.initPriority = 1;
         D_004A5B70 = CreateThread(&tp);
         StartThread(D_004A5B70, D_004A5B54);
-        sceCdPOffCallback(func_00319910, D_004A5B54);
+        sceCdPOffCallback(bxIop_onPowerOff, D_004A5B54);
     }
 }
 #endif

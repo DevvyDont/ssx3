@@ -673,7 +673,7 @@ extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(cOVState_PAUSE_ONLINE_ERROR* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(cOVState_PAUSE_ONLINE_ERROR* self, int visible);
-extern "C" void func_002583A8(void* self, int a1, int a2);
+extern "C" void cGameComm_startServerPing(void* self, int a1, int a2);
 extern char str_265InGameError[];
 extern char str_SubTitle[];
 extern char str_kT_OVROnlineError[];
@@ -701,7 +701,7 @@ extern char str_kT_PauseErrorCheckingServer[];
  * ConnectionLost; mRemoteEndGame or mRemoteDisconnected OpponentQuit. Every case but the first clears
  * mbShouldDisplayAuxInfo, the flag that gates the ping texts. TextError's attribute bit 0x80 (mAttr) is set.
  * Text_CancelGame reads kT_BTNOK after the local finish, else kT_OVRCancelEvent (choice 0); it, the four button
- * graphics and the continue option start hidden. With a cGameComm it pings the lobby server for 3 s (func_002583A8),
+ * graphics and the continue option start hidden. With a cGameComm it pings the lobby server for 3 s (cGameComm_startServerPing),
  * stores the start time in miStartPingTick, hides Cancel (cOVState_PAUSE_ONLINE_ERROR_enableCancelButton) and shows
  * kT_PauseErrorCheckingServer; without one it shows Cancel. The TextError branch reads cGameComm_mGameComm before that
  * null check.
@@ -787,7 +787,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE
         self->setContinueOptionVisible(0);
     }
     if (cGameComm_mGameComm != 0) {
-        func_002583A8(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
+        cGameComm_startServerPing(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
         self->miStartPingTick = (unsigned int)(cAppMan_TheAppMan->TimerTick);
         self->enableCancelButton(0);
         cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo));

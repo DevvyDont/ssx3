@@ -853,7 +853,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_onVerifyPopupEvent);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" int cUIStateStack_popToState(void* p);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
-extern "C" void* func_002591B8();
+extern "C" void* lobbyman_getConnMan();
 extern "C" void cConnMan_disconnect(void* p, int a1);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateNetConfig_cFEStateNetConfig(void* mem, void* owner);
@@ -865,7 +865,7 @@ extern char str_cFEStateNetConfig[];
  *
  * Every event goes to cFEStateNet_onPopupEvent first. On 0xF (first option) or 20 (back) it then runs cUIStateStack_popToState on
  * the state stack (mpEngine + 0x18), sets bit 0x80 in the current state's mAttrState (+0x1C,
- * cUIStateStack_getCurrentState), logs out of the online services (cConnMan_disconnect on func_002591B8(), no error) and
+ * cUIStateStack_getCurrentState), logs out of the online services (cConnMan_disconnect on lobbyman_getConnMan(), no error) and
  * pushes a new cFEStateNetConfig (2332 bytes) through cFEStateNet_pushState. Popup handler slot (+0x10C) of
  * cFEStateRelogin_vtbl.
  *
@@ -879,7 +879,7 @@ extern "C" void cFEStateRelogin_onVerifyPopupEvent(cFEStateLogin* self, void* it
         cUIStateStack_popToState(&self->mpEngine->mStateStack);
         cUIState* state = (cUIState*)cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
         state->mAttrState |= 0x80;
-        cConnMan_disconnect(func_002591B8(), 0);
+        cConnMan_disconnect(lobbyman_getConnMan(), 0);
         cFEStateNet_pushState(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), self->mpEngine));
     } else {
         cFEStateNet_onPopupEvent(self, item, msg);

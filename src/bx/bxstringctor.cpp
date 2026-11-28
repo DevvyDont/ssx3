@@ -926,7 +926,7 @@ extern "C" void BuddyMan_onBuddyAdd(int);
  *
  * A functor thunk: the third argument is the object registered with the callback; D_004A3388 holds the short
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
- * argument, and the first is not used. BuddyMan_addRosterEntry registers it with the add call func_003F0E38.
+ * argument, and the first is not used. BuddyMan_addRosterEntry registers it with the add call BuddyApi_addUser.
  *
  * @param message  the callback's message, passed through to the handler
  * @param buddyMan  the buddy manager the callback was registered with

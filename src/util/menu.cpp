@@ -1328,21 +1328,21 @@ INCLUDE_ASM("util/menu", cMenu_sortItems);
 #ifdef SKIP_ASM
 extern int (*D_004A54BC)(int, int);
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const void*));
-extern "C" int func_002D4008(const void*, const void*);
+extern "C" int cMenu_compareSortItems(const void*, const void*);
 
 /**
  * Sorts a menu's items with @p cmp, then re-checks the focus.
  *
- * Stores @p cmp in D_004A54BC for the trampoline func_002D4008, sorts the NumItems pointers of Items (+0xC) with
+ * Stores @p cmp in D_004A54BC for the trampoline cMenu_compareSortItems, sorts the NumItems pointers of Items (+0xC) with
  * qsort (a qsort: base, count, element size 4, compare), clears D_004A54BC and calls cMenu_checkFocus.
  * FocusItem keeps its index, so the focus moves to whichever item lands there.
  *
- * @param cmp  compares two items; called through func_002D4008
+ * @param cmp  compares two items; called through cMenu_compareSortItems
  */
 void cMenu::sortItems(int (*cmp)(int, int))
 {
     D_004A54BC = cmp;
-    qsort(&Items[0], *(int*)this, 4, func_002D4008);
+    qsort(&Items[0], *(int*)this, 4, cMenu_compareSortItems);
     D_004A54BC = 0;
     checkFocus();
 }

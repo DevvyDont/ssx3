@@ -164,7 +164,7 @@ extern "C" int NetConnStatus_5A20(int sel, int a, int b) __asm__("NetConnStatus"
 extern "C" int NetConnConnect(void* params, int a);
 extern "C" void cCommSystem_netConnFailed(cCommSystem* self, int reason);
 extern "C" void cCommSystem_netConnLocalAddr(cCommSystem* self, int* out);
-// cCommSystem_mNetConns: the 'netw'/'list' reply buffer (func_00255F20), 10 entries of 0x100 bytes; +0x80 is an entry's name field
+// cCommSystem_mNetConns: the 'netw'/'list' reply buffer (cCommSystem_netConnQuery), 10 entries of 0x100 bytes; +0x80 is an entry's name field
 extern char cCommSystem_mNetConns[];
 
 /**
@@ -477,7 +477,7 @@ void cCommSystem::freeCommMsgElem(tCommMsgElem* node)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00255F20);
+INCLUDE_ASM("seg/seg_156860", cCommSystem_netConnQuery);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int NetConnQuery_5F20(int, void *, int) __asm__("NetConnQuery");
@@ -494,7 +494,7 @@ extern int cCommSystem_mNumNetConn;
  * @param listParam  passed to NetConnQuery first
  * @return 1
  */
-extern "C" int func_00255F20(void *commSystem, int listParam) {
+extern "C" int cCommSystem_netConnQuery(void *commSystem, int listParam) {
     cCommSystem_mNumNetConn = NetConnQuery_5F20(listParam, cCommSystem_mNetConns, 10);
     return 1;
 }
@@ -600,7 +600,7 @@ void cCommSystem::netConnLocalAddr(int *localAddr)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256088);
+INCLUDE_ASM("seg/seg_156860", netConfig_launchGui);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void shutdownAndLoadExec_6088(void *, int, void *) __asm__("shutdownAndLoadExec");
@@ -612,22 +612,22 @@ extern int D_004A2EC0;
  *
  * cFEStateNetConfig_onCreateConfigPopupEvent and the debug menu screen call it.
  */
-extern "C" void func_00256088(void) {
+extern "C" void netConfig_launchGui(void) {
     shutdownAndLoadExec_6088(str_cdrom0_NETGUI_NTGUI_ELF_1, 1, &D_004A2EC0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002560B0);
+INCLUDE_ASM("seg/seg_156860", dnasDebug_runAuth);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cMemMan_alloc_60B0(int, char *, int, int) __asm__("cMemMan_alloc");
 extern "C" int *DNASMan_DNASMan_60B0(void *) __asm__("DNASMan_DNASMan");
 extern "C" void DNASMan__DNASMan_60B0(int *, int) __asm__("DNASMan__DNASMan");
-extern "C" void func_00256258_60B0(int *, int) __asm__("func_00256258");
-extern "C" void func_002562D0_60B0(int *) __asm__("func_002562D0");
-extern "C" void func_002563A8_60B0(int *) __asm__("func_002563A8");
-extern "C" void func_002563F8_60B0(int *) __asm__("func_002563F8");
+extern "C" void DNASMan_start_60B0(int *, int) __asm__("DNASMan_start");
+extern "C" void DNASMan_startCheck_60B0(int *) __asm__("DNASMan_startCheck");
+extern "C" void DNASMan_freeBuffers_60B0(int *) __asm__("DNASMan_freeBuffers");
+extern "C" void DNASMan_update_60B0(int *) __asm__("DNASMan_update");
 extern "C" void SYNCTASK_run_60B0(int) __asm__("SYNCTASK_run");
 extern "C" void THREAD_yieldticks_60B0(int) __asm__("THREAD_yieldticks");
 extern char str_DNASMAN[];
@@ -637,25 +637,25 @@ static inline int ge3_60B0(int *o) { return *o >= 3; }
 /**
  * Runs a DNAS authentication to the end, waiting in a loop (debug menu).
  *
- * Creates a 2640-byte "DNASMAN" object (DNASMan_DNASMan), starts it (func_00256258 with 0) and updates it (func_002563F8,
- * SYNCTASK_run, THREAD_yieldticks(1)) until its state reaches 3, then starts the check (func_002562D0) and updates it
- * until state 5. Then it frees the buffers (func_002563A8) and deletes the object. cDebugMenuScreen_update calls it.
+ * Creates a 2640-byte "DNASMAN" object (DNASMan_DNASMan), starts it (DNASMan_start with 0) and updates it (DNASMan_update,
+ * SYNCTASK_run, THREAD_yieldticks(1)) until its state reaches 3, then starts the check (DNASMan_startCheck) and updates it
+ * until state 5. Then it frees the buffers (DNASMan_freeBuffers) and deletes the object. cDebugMenuScreen_update calls it.
  */
-extern "C" void func_002560B0(void) {
+extern "C" void dnasDebug_runAuth(void) {
     int *dnasMan = DNASMan_DNASMan_60B0(cMemMan_alloc_60B0(2640, str_DNASMAN, 0x20000000, 0));
-    func_00256258_60B0(dnasMan, 0);
+    DNASMan_start_60B0(dnasMan, 0);
     while (!ge3_60B0(dnasMan)) {
-        func_002563F8_60B0(dnasMan);
+        DNASMan_update_60B0(dnasMan);
         SYNCTASK_run_60B0(0);
         THREAD_yieldticks_60B0(1);
     }
-    func_002562D0_60B0(dnasMan);
+    DNASMan_startCheck_60B0(dnasMan);
     while ((*dnasMan ^ 5) != 0) {
-        func_002563F8_60B0(dnasMan);
+        DNASMan_update_60B0(dnasMan);
         SYNCTASK_run_60B0(0);
         THREAD_yieldticks_60B0(1);
     }
-    func_002563A8_60B0(dnasMan);
+    DNASMan_freeBuffers_60B0(dnasMan);
     if (dnasMan != 0) {
         DNASMan__DNASMan_60B0(dnasMan, 3);
     }
@@ -663,7 +663,7 @@ extern "C" void func_002560B0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256188);
+INCLUDE_ASM("seg/seg_156860", dnas_addOverlayArchive);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void FILESYS_addbigsync_6188(void *, int, int, void *) __asm__("FILESYS_addbigsync");
@@ -675,7 +675,7 @@ extern int D_004A2ED4;
  *
  * cSSXApp_initload calls it.
  */
-extern "C" void func_00256188(void) {
+extern "C" void dnas_addOverlayArchive(void) {
     FILESYS_addbigsync_6188(str_data_config_slusovf_big, 0, 100, &D_004A2ED4);
 }
 #endif
@@ -683,18 +683,18 @@ extern "C" void func_00256188(void) {
 //100%
 INCLUDE_ASM("seg/seg_156860", DNASMan_DNASMan);
 #ifdef SKIP_ASM
-extern "C" void func_00256228();
+extern "C" void DNASMan_clear();
 
 /**
- * Constructs a DNAS authentication object (func_00256228 clears it) and returns it.
+ * Constructs a DNAS authentication object (DNASMan_clear clears it) and returns it.
  *
- * cFEStateAuthDNAS_onCreateScreen and func_002560B0 call it on a 2640-byte block.
+ * cFEStateAuthDNAS_onCreateScreen and dnasDebug_runAuth call it on a 2640-byte block.
  *
  * @param dnasMan  the object
  * @return @p dnasMan
  */
 extern "C" int DNASMan_DNASMan(int dnasMan) {
-    func_00256228();
+    DNASMan_clear();
     return dnasMan;
 }
 #endif
@@ -721,14 +721,14 @@ extern "C" void DNASMan__DNASMan(int *dnasMan, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256228);
+INCLUDE_ASM("seg/seg_156860", DNASMan_clear);
 #ifdef SKIP_ASM
 /**
  * Clears a DNAS authentication object: state (+0) and the words +4 to +0x14 become 0, the file handle (+0x18) -1.
  *
  * @param dnasMan  the object
  */
-extern "C" void func_00256228(DNASMan *dnasMan) {
+extern "C" void DNASMan_clear(DNASMan *dnasMan) {
     dnasMan->ElfData = 0;
     dnasMan->ElfSize = 0;
     dnasMan->AuthData = 0;
@@ -746,7 +746,7 @@ extern "C" void func_00256250(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256258);
+INCLUDE_ASM("seg/seg_156860", DNASMan_start);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int ASYNCFILE_loadat(int *, void *, int);
@@ -758,11 +758,11 @@ extern "C" void *operator_new__FUi_6258(unsigned int, int *, int, int) __asm__("
  * Starts a DNAS authentication: begins loading its program file.
  *
  * Stores @p authMode at +0x20, clears +0x14 and +0x1C, sets the state (+0) to 1, allocates a 0x195000-byte "ElfData" buffer
- * (+4) and starts loading "OVERLAY.DAT" into it (ASYNCFILE_loadat; handle at +0x18). func_002563F8 continues.
+ * (+4) and starts loading "OVERLAY.DAT" into it (ASYNCFILE_loadat; handle at +0x18). DNASMan_update continues.
  *
  * @param authMode  the mode, passed on to the authentication (+0x20)
  */
-extern "C" void func_00256258(DNASMan* self, int authMode) {
+extern "C" void DNASMan_start(DNASMan* self, int authMode) {
     self->AuthMode = authMode;
     self->CancelRequest = 0;
     self->AuthError = 0;
@@ -774,14 +774,14 @@ extern "C" void func_00256258(DNASMan* self, int authMode) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002562D0);
+INCLUDE_ASM("seg/seg_156860", DNASMan_startCheck);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern tDNASKey D_004A2ED8;
 extern "C" void MEM_fill_62D0(void *, int, int) __asm__("MEM_fill");
 extern "C" char *NetConnMAC();
-extern "C" void func_003FD0D8(void *);
+extern "C" void DirtyDnas_init(void *);
 extern "C" char *strcpy(char *, const char *);
 
 /**
@@ -789,9 +789,9 @@ extern "C" char *strcpy(char *, const char *);
  *
  * Clears +0x1C and the 160-byte parameter block at +0x24, then fills it: the data buffer (+0xC) and size (+0x10), the
  * key D_004A2ED8, 8, the text from NetConnMAC, "SLUS_20772", the mode (+0x20) and 1. Sets the state (+0) to 4 and
- * starts the module (func_003FD0D8, the DirtyDnasRelInit entry). func_002563F8 continues.
+ * starts the module (DirtyDnas_init, the DirtyDnasRelInit entry). DNASMan_update continues.
  */
-extern "C" void func_002562D0(DNASMan *self)
+extern "C" void DNASMan_startCheck(DNASMan *self)
 {
     self->AuthError = 0;
     MEM_fill_62D0(self->unk_024, 0, 160);
@@ -807,12 +807,12 @@ extern "C" void func_002562D0(DNASMan *self)
     self->unk_0BC = self->AuthMode;
     self->unk_0C0 = 1;
     self->State = 4;
-    func_003FD0D8(self->unk_024);
+    DirtyDnas_init(self->unk_024);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002563A8);
+INCLUDE_ASM("seg/seg_156860", DNASMan_freeBuffers);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void cMemMan_free__FPv_63A8(void *) __asm__("cMemMan_free__FPv");
@@ -822,7 +822,7 @@ extern void cMemMan_free__FPv_63A8(void *) __asm__("cMemMan_free__FPv");
  *
  * @param dnasMan  the object
  */
-extern "C" void func_002563A8(DNASMan *dnasMan) {
+extern "C" void DNASMan_freeBuffers(DNASMan *dnasMan) {
     char *authData = dnasMan->AuthData;
     if (authData != 0) {
         cMemMan_free__FPv_63A8(authData);
@@ -837,29 +837,29 @@ extern "C" void func_002563A8(DNASMan *dnasMan) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002563F8);
+INCLUDE_ASM("seg/seg_156860", DNASMan_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00256460(DNASMan* self);
-extern "C" void func_00256510(DNASMan* self);
-extern "C" void func_002565E0(DNASMan* self);
+extern "C" void DNASMan_updateLoadProgram(DNASMan* self);
+extern "C" void DNASMan_updateLoadConfig(DNASMan* self);
+extern "C" void DNASMan_updateResult(DNASMan* self);
 
 /**
  * Advances a DNAS authentication by its state (+0).
  *
- * State 1 runs func_00256460, 2 runs func_00256510, 4 runs func_002565E0; states 0, 3 and 5 wait.
+ * State 1 runs DNASMan_updateLoadProgram, 2 runs DNASMan_updateLoadConfig, 4 runs DNASMan_updateResult; states 0, 3 and 5 wait.
  */
-extern "C" void func_002563F8(DNASMan* self)
+extern "C" void DNASMan_update(DNASMan* self)
 {
     switch (*(int*)self) {
     case 1:
-        func_00256460((DNASMan*)self);
+        DNASMan_updateLoadProgram((DNASMan*)self);
         break;
     case 2:
-        func_00256510((DNASMan*)self);
+        DNASMan_updateLoadConfig((DNASMan*)self);
         break;
     case 4:
-        func_002565E0((DNASMan*)self);
+        DNASMan_updateResult((DNASMan*)self);
         break;
     case 0:
     case 3:
@@ -870,12 +870,12 @@ extern "C" void func_002563F8(DNASMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256460);
+INCLUDE_ASM("seg/seg_156860", DNASMan_updateLoadProgram);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int ASYNCFILE_getstatus_6460(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void ASYNCFILE_release_6460(int, int, void *) __asm__("ASYNCFILE_release");
-extern "C" int func_003FCFD8_6460(char *, int) __asm__("func_003FCFD8");
+extern "C" int DirtyDnas_loadModule_6460(char *, int) __asm__("DirtyDnas_loadModule");
 extern "C" void *operator_new__FUi_6460(unsigned int, char *, int, int) __asm__("operator_new__FUi");
 extern "C" int ASYNCFILE_loadat_6460(char *, void *, int) __asm__("ASYNCFILE_loadat");
 extern char str_AuthData[];
@@ -885,17 +885,17 @@ extern char str_CONFIG_DAT[];
  * DNAS state 1: once "OVERLAY.DAT" has loaded, links it and starts loading "CONFIG.DAT".
  *
  * When the load (+0x18) is done it releases it with the size in +8 and, for a nonzero size, links the program
- * (func_003FCFD8, which resolves DirtyDnasRelInit / Updt / Exit). On success it allocates a 64 KB "AuthData" buffer
+ * (DirtyDnas_loadModule, which resolves DirtyDnasRelInit / Updt / Exit). On success it allocates a 64 KB "AuthData" buffer
  * (+0xC), starts loading "CONFIG.DAT" into it and sets the state to 2.
  */
-extern "C" void func_00256460(DNASMan* self) {
+extern "C" void DNASMan_updateLoadProgram(DNASMan* self) {
     if (ASYNCFILE_getstatus_6460(self->FileHandle) == 1) {
         self->ElfSize = 0;
         ASYNCFILE_release_6460(self->FileHandle, 0, &self->ElfSize);
         char *readBuffer = self->ElfData;
         if (readBuffer != 0) {
             int readSize = self->ElfSize;
-            if (readSize > 0 && func_003FCFD8_6460(readBuffer, readSize) >= 0) {
+            if (readSize > 0 && DirtyDnas_loadModule_6460(readBuffer, readSize) >= 0) {
                 void *authData = operator_new__FUi_6460(0x10000, str_AuthData, 0x04000100, 0);
                 self->AuthData = (char*)authData;
                 self->FileHandle = ASYNCFILE_loadat_6460(str_CONFIG_DAT, authData, 0x10000);
@@ -907,7 +907,7 @@ extern "C" void func_00256460(DNASMan* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00256510);
+INCLUDE_ASM("seg/seg_156860", DNASMan_updateLoadConfig);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int ASYNCFILE_getstatus_6510(int) __asm__("ASYNCFILE_getstatus");
@@ -920,7 +920,7 @@ extern tDNASFileKey D_004A2EE8[];
  * When the load (+0x18) is done it releases it with the size in +0x10; for a nonzero size it sets the state to 3 and
  * XORs every byte of the data (+0xC) with the 4-byte key D_004A2EE8, repeating.
  */
-extern "C" void func_00256510(DNASMan* self) {
+extern "C" void DNASMan_updateLoadConfig(DNASMan* self) {
     if (ASYNCFILE_getstatus_6510(self->FileHandle) == 1) {
         self->AuthSize = 0;
         ASYNCFILE_release_6510(self->FileHandle, 0, &self->AuthSize);
@@ -942,28 +942,28 @@ extern "C" void func_00256510(DNASMan* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002565E0);
+INCLUDE_ASM("seg/seg_156860", DNASMan_updateResult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003FD100_65E0(int) __asm__("func_003FD100");
+extern "C" int DirtyDnas_update_65E0(int) __asm__("DirtyDnas_update");
 extern "C" void MEM_fill_65E0(void *, int, int) __asm__("MEM_fill");
-extern "C" int func_003FD128_65E0(tDNASResult *) __asm__("func_003FD128");
+extern "C" int DirtyDnas_exit_65E0(tDNASResult *) __asm__("DirtyDnas_exit");
 extern "C" void USTR_copy_65E0(unsigned short *, unsigned short *) __asm__("USTR_copy");
 
 /**
  * DNAS state 4: once the check is finished, collects its result.
  *
- * When func_003FD100 (the module's update) returns 0 it clears the 908-byte result block at +0xC4, gets the result
- * (func_003FD128), copies three wide strings of it (+0xCC, +0x10C, +0x20C) to ErrorText1, ErrorText2 and ErrorText3
+ * When DirtyDnas_update (the module's update) returns 0 it clears the 908-byte result block at +0xC4, gets the result
+ * (DirtyDnas_exit), copies three wide strings of it (+0xCC, +0x10C, +0x20C) to ErrorText1, ErrorText2 and ErrorText3
  * (USTR_copy), stores whether the result was 0 in AuthError and sets the state to 5.
  */
-extern "C" void func_002565E0(DNASMan* self) {
-    if (func_003FD100_65E0(self->CancelRequest) == 0) {
+extern "C" void DNASMan_updateResult(DNASMan* self) {
+    if (DirtyDnas_update_65E0(self->CancelRequest) == 0) {
         tDNASResult *infoBuf = &self->Result;
         MEM_fill_65E0(infoBuf, 0, sizeof(self->Result));
         unsigned short *secondText = self->ErrorText2;
         unsigned short *thirdText = self->ErrorText3;
-        int result = func_003FD128_65E0(infoBuf);
+        int result = DirtyDnas_exit_65E0(infoBuf);
         self->ErrorText1[0] = 0;
         secondText[0] = 0;
         thirdText[0] = 0;
@@ -1355,7 +1355,7 @@ extern "C" void cMemMan_free__FPv();
 /**
  * Frees a buffer from RpcAlloc (cMemMan_free) unless it is null.
  *
- * The DirtySock code (NetGameLinkDestroy, PingRpc_destroy, func_003F55B8 and others) frees its blocks with it. The C
+ * The DirtySock code (NetGameLinkDestroy, PingRpc_destroy, NetSession_destroy and others) frees its blocks with it. The C
  * declares cMemMan_free without arguments; the buffer passes through in its register.
  *
  * @param buffer  the buffer, or 0
@@ -1574,14 +1574,14 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_setState);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cGameComm_calcLatency(cGameComm* arg0);
-extern "C" void func_00258870(cGameComm*, int, int);
+extern "C" void cGameComm_armLinkTimeout(cGameComm*, int, int);
 extern "C" void clearDiscTrayOpened(void);
 /**
  * Switches the handshake and race state machine (mState) to a new tGameComm state.
  *
  * Entering GameActive (14) computes the latency (cGameComm_calcLatency), arms a 3600-frame link timeout and clears the
  * flag D_004A3ED0 (clearDiscTrayOpened); GameOver (15) clears the waiting message and the peer's pause; the states 1, 3, ...,
- * 13 (each step's start, not its Wait) arm an 1800-frame timeout. func_00258870 skips arming while either side is
+ * 13 (each step's start, not its Wait) arm an 1800-frame timeout. cGameComm_armLinkTimeout skips arming while either side is
  * paused before the start gate.
  *
  * @param mode  the new tGameComm state
@@ -1592,7 +1592,7 @@ void cGameComm::setState(int mode)
     switch (mode) {
     case kGameComm_GameActive:
         calcLatency();
-        func_00258870(this, 3600, 0);
+        cGameComm_armLinkTimeout(this, 3600, 0);
         clearDiscTrayOpened();
         mState = mode;
         return;
@@ -1607,7 +1607,7 @@ void cGameComm::setState(int mode)
     case kGameComm_SendLatency:
     case kGameComm_RecvLatency:
     case kGameComm_InitGameActive:
-        func_00258870(this, 1800, 0);
+        cGameComm_armLinkTimeout(this, 1800, 0);
         break;
     case kGameComm_SendSettingsWait:
     case kGameComm_RecvSettingsWait:
@@ -2172,7 +2172,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_readPacket);
 
 extern "C" void cGameComm_updateReadQueue(cGameComm* c);
 extern "C" void cGameComm_freePacket(cGameComm* arg0, int *arg1);
-extern "C" void func_00258870(cGameComm*, int, int);
+extern "C" void cGameComm_armLinkTimeout(cGameComm*, int, int);
 extern "C" void MEM_copy_7BD8(void* dst, const void* src, int n) __asm__("MEM_copy");
 
 /**
@@ -2205,7 +2205,7 @@ int cGameComm::readPacket(int ch, void* dst, int maxsize)
             gameComm->mStallThreshold = 0;
             gameComm->mWaitingMessage = 0;
         }
-        if (gameComm->mLinkTimeout > 0) func_00258870((cGameComm*)gameComm, 1800, 0);
+        if (gameComm->mLinkTimeout > 0) cGameComm_armLinkTimeout((cGameComm*)gameComm, 1800, 0);
         return len;
     }
     return 0;
@@ -2347,7 +2347,7 @@ extern "C" void cGameComm_setUnPauseTimer_7F98(void* self) __asm__("cGameComm_se
  * Handles the command packets received from the peer.
  *
  * Reads 12-byte packets of type 3 (cGameComm_readPacket) and by the command byte: 0 (pause) arms the link timeout
- * (func_00258870, 3660, forced) unless locally paused, marks the peer paused and counts its pauses (mPauseCount[1]);
+ * (cGameComm_armLinkTimeout, 3660, forced) unless locally paused, marks the peer paused and counts its pauses (mPauseCount[1]);
  * 1 (unpause) clears the peer's pause, resets the overlay timeout to 1200 when running and arms 1800 frames or
  * cGameComm_setUnPauseTimer; 2 counts mRemoteUnplugCount; 3 sets mSyncWaitComplete; 4 stores the peer's tick
  * (mAITick[1]) and checksum in its ring (mCheckSumBuffer[1]); 5 marks the peer as exited (mRemoteExitGame,
@@ -2360,7 +2360,7 @@ void cGameComm::updateCmdQueue()
         switch (msg.Cmd) {
         case 0:
             if (mGameStartGate == 0) {
-                func_00258870(this, 3660, 1);
+                cGameComm_armLinkTimeout(this, 3660, 1);
             } else {
                 mUnPauseFlag = 1;
             }
@@ -2379,7 +2379,7 @@ void cGameComm::updateCmdQueue()
             mWaitingTimer = 0;
             mWaitingMessage = 0;
             if (mGameStartGate == 0) {
-                func_00258870(this, 1800, 0);
+                cGameComm_armLinkTimeout(this, 1800, 0);
             } else {
                 cGameComm_setUnPauseTimer_7F98(this);
             }
@@ -2641,7 +2641,7 @@ float cGameComm::getLatency()
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002583A8);
+INCLUDE_ASM("seg/seg_156860", cGameComm_startServerPing);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int PingRpc_request_83A8(void *, int, char *, int) __asm__("PingRpc_request");
@@ -2658,7 +2658,7 @@ extern char str_SSXPingServer[];
  * @param serverAddr  the server address
  * @param durationSecs  how long to ping, in seconds
  */
-extern "C" void func_002583A8(cGameComm* self, int serverAddr, int durationSecs) {
+extern "C" void cGameComm_startServerPing(cGameComm* self, int serverAddr, int durationSecs) {
     if (self->mPingTimer <= 0) {
         self->mPingCount = 0;
         self->mPingAddr = serverAddr;
@@ -2768,7 +2768,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_syncWait);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cBE_getInterface_86B0(void*, int) __asm__("cBE_getInterface__Fv");
 extern "C" void cGameComm_writePacket(void *, int, const void *, int);
-extern "C" void func_00258870(cGameComm*, int, int);
+extern "C" void cGameComm_armLinkTimeout(cGameComm*, int, int);
 extern "C" void cGameComm_update(cGameComm*);
 extern "C" void THREAD_yieldticks(int);
 /**
@@ -2786,7 +2786,7 @@ void cGameComm::syncWait()
         buf[0] = 3;
         cGameComm_writePacket(this, 3, buf, 0xC);
     }
-    func_00258870(this, 3600, 0);
+    cGameComm_armLinkTimeout(this, 3600, 0);
     while (mSyncWaitComplete == 0 && mError == 0) {
         update();
         THREAD_yieldticks(1);
@@ -2805,7 +2805,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_sendPauseCmd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cGameComm_writePacket(void *, int, const void *, int);
-extern "C" void func_00258870(cGameComm*, int, int);
+extern "C" void cGameComm_armLinkTimeout(cGameComm*, int, int);
 extern void cGameComm_setUnPauseTimer_8790(void *) __asm__("cGameComm_setUnPauseTimer");
 /**
  * Tells the peer that this machine paused or unpaused, and updates the local pause bookkeeping.
@@ -2823,7 +2823,7 @@ void cGameComm::sendPauseCmd(int pause)
     if (mError == 0 && mConnected != 0) {
         if (pause != 0) {
             if (mGameStartGate == 0) {
-                func_00258870(this, 3660, 1);
+                cGameComm_armLinkTimeout(this, 3660, 1);
             } else {
                 mUnPauseFlag = 1;
             }
@@ -2840,7 +2840,7 @@ void cGameComm::sendPauseCmd(int pause)
             mWaitingMessage = 0;
             mSyncInputDelay = 0;
             if (mGameStartGate == 0) {
-                func_00258870(this, 1800, 0);
+                cGameComm_armLinkTimeout(this, 1800, 0);
             } else {
                 cGameComm_setUnPauseTimer_8790(this);
             }
@@ -2851,7 +2851,7 @@ void cGameComm::sendPauseCmd(int pause)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00258870);
+INCLUDE_ASM("seg/seg_156860", cGameComm_armLinkTimeout);
 #ifdef SKIP_ASM
 /**
  * Arms the game link's link timeout (+0x94, which cGameComm_checkErrors counts down).
@@ -2862,7 +2862,7 @@ INCLUDE_ASM("seg/seg_156860", func_00258870);
  * @param timeoutFrames  the timeout in frames (1800, 3600 or 3660)
  * @param forceArm  nonzero to store it in any case
  */
-extern "C" void func_00258870(cGameComm* gameComm, int timeoutFrames, int forceArm) {
+extern "C" void cGameComm_armLinkTimeout(cGameComm* gameComm, int timeoutFrames, int forceArm) {
     if ((forceArm != 0) || ((gameComm->mPauseMenu[1] == 0) && (gameComm->mPauseMenu[0] == 0)) || (gameComm->mGameStartGate != 0)) {
         gameComm->mLinkTimeout = timeoutFrames;
     }
@@ -3290,7 +3290,7 @@ void cGameComm::updateSyncPacket(int frame, int value)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00259098);
+INCLUDE_ASM("seg/seg_156860", lobbyman_startRaceConnection);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -3306,13 +3306,13 @@ extern "C" void cGameConnMan_connect(int a, int b, int c, int d, int e);
  * Takes the peer's address from LobbyMan (the opponent's when hosting, else the host's), stores player 0's character
  * (BE interface 1) in cBENetworkInterface_networkOpt.MyCharacterID[0], gives BE interface 7 the opponent and the
  * persona (cBENetworkInterface_setOpponentName, cBENetworkInterface_setMyName) and calls its submit (virtual slot 1). Then it calls cGameConnMan_connect with the
- * peer address and the host flag. LobbyMan_onplaymsg calls it with func_002591D0's object.
+ * peer address and the host flag. LobbyMan_onplaymsg calls it with lobbyman_getGameConnMan's object.
  *
  * @param peerSession  the game-connection object
  * @param ctrlId  passed to cGameConnMan_connect as the controller id
  * @param cancelFlag  passed to cGameConnMan_connect as its cancel flag
  */
-extern "C" void func_00259098(int peerSession, int ctrlId, int cancelFlag)
+extern "C" void lobbyman_startRaceConnection(int peerSession, int ctrlId, int cancelFlag)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int peerAddr;
@@ -3329,7 +3329,7 @@ extern "C" void func_00259098(int peerSession, int ctrlId, int cancelFlag)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00259198);
+INCLUDE_ASM("seg/seg_156860", lobbyman_getLanguageCode);
 #ifdef SKIP_ASM
 extern char str_en[];
 
@@ -3338,13 +3338,13 @@ extern char str_en[];
  *
  * @return "en"
  */
-extern "C" char *func_00259198(void) {
+extern "C" char *lobbyman_getLanguageCode(void) {
     return str_en;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002591A8);
+INCLUDE_ASM("seg/seg_156860", lobbyman_getCountryCode);
 #ifdef SKIP_ASM
 extern char str_US[];
 
@@ -3353,13 +3353,13 @@ extern char str_US[];
  *
  * @return "US"
  */
-extern "C" char *func_002591A8(void) {
+extern "C" char *lobbyman_getCountryCode(void) {
     return str_US;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002591B8);
+INCLUDE_ASM("seg/seg_156860", lobbyman_getConnMan);
 #ifdef SKIP_ASM
 
 /**
@@ -3367,13 +3367,13 @@ INCLUDE_ASM("seg/seg_156860", func_002591B8);
  *
  * @return the connection manager
  */
-extern "C" cConnMan* func_002591B8(void) {
+extern "C" cConnMan* lobbyman_getConnMan(void) {
     return &((cRealFE*)SSXApp->RealFE)->mConnMan;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002591D0);
+INCLUDE_ASM("seg/seg_156860", lobbyman_getGameConnMan);
 #ifdef SKIP_ASM
 
 /**
@@ -3382,13 +3382,13 @@ INCLUDE_ASM("seg/seg_156860", func_002591D0);
  *
  * @return the game-connection manager
  */
-extern "C" cGameConnMan* func_002591D0(void) {
+extern "C" cGameConnMan* lobbyman_getGameConnMan(void) {
     return &((cRealFE*)SSXApp->RealFE)->mGameConnMan;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_002591E8);
+INCLUDE_ASM("seg/seg_156860", lobbyman_alloc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *operator_new_91E8(unsigned int, void *, unsigned int, int) __asm__("operator_new__FUi");
@@ -3397,29 +3397,29 @@ extern char str_Lobby_b[];
 /**
  * Allocates a block for the lobby code (operator new with the name "Lobby" and type 0x20000000).
  *
- * The LobbyApi, buddy and list code allocate with it; func_00259210 frees.
+ * The LobbyApi, buddy and list code allocate with it; lobbyman_free frees.
  *
  * @param size  bytes to allocate
  * @return the block
  */
-extern "C" void *func_002591E8(unsigned int size) {
+extern "C" void *lobbyman_alloc(unsigned int size) {
     return operator_new_91E8(size, str_Lobby_b, 0x20000000, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00259210);
+INCLUDE_ASM("seg/seg_156860", lobbyman_free);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv();
 
 /**
- * Frees a block from func_002591E8 (cMemMan_free) unless it is null.
+ * Frees a block from lobbyman_alloc (cMemMan_free) unless it is null.
  *
  * The C declares cMemMan_free without arguments; the block passes through in its register.
  *
  * @param buffer  the block, or 0
  */
-extern "C" void func_00259210(int buffer) {
+extern "C" void lobbyman_free(int buffer) {
     if (buffer != 0) {
         cMemMan_free__FPv();
     }
@@ -3427,7 +3427,7 @@ extern "C" void func_00259210(int buffer) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", func_00259230);
+INCLUDE_ASM("seg/seg_156860", lobbyman_postEventToTopScreen);
 #ifdef SKIP_ASM
 /**
  * Passes an event to the front end's top screen.
@@ -3437,7 +3437,7 @@ INCLUDE_ASM("seg/seg_156860", func_00259230);
  *
  * @param event  the event (first word: its id)
  */
-extern "C" void func_00259230(int *event) {
+extern "C" void lobbyman_postEventToTopScreen(int *event) {
     cFE *fe = SSXApp->RealFE;
     if (fe != 0) {
         cUIState *topState = (cUIState *)fe->mpUI->mStateStack.getTopState();

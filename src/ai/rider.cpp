@@ -54,7 +54,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cRiderState_cRiderState(void* self);
 extern "C" void* cScriptObjRider_cScriptObjRider(void* self);
-extern "C" void* func_002F1850(void* mem, void* rider);
+extern "C" void* cAttachedEmitterFX_cAttachedEmitterFX(void* mem, void* rider);
 extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(void* self, cRider* rider, void* emitterOwner);
 void* cPlayerShadow_cPlayerShadow(void* self);
 extern "C" void cScriptObject_InitScriptObject(void* rig);
@@ -132,7 +132,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     aux->numpatches = none;
     aux->numtyped = none;
     self->mOverlapList = aux;
-    self->mAttachedEmitterFX = func_002F1850(cMemMan_alloc(168, str_AttachedEmitterFX, 0, 0), self);
+    self->mAttachedEmitterFX = cAttachedEmitterFX_cAttachedEmitterFX(cMemMan_alloc(168, str_AttachedEmitterFX, 0, 0), self);
     self->mBoltOnFX = cBoltOnFXInterface_cBoltOnFXInterface(cMemMan_alloc(200, str_cBoltOnFXInterface, 0, 0), self,
                                                             self->mAttachedEmitterFX);
     self->mLineHint = (tIntHint*)cMemMan_alloc(0x10, str_Line_Intersect_Hint, 0, 0);
@@ -3007,15 +3007,15 @@ void cRider::updateOverlapList()
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateSplitMiscFX);
 #ifdef SKIP_ASM
-extern "C" void func_002F1A08(void*);
+extern "C" void cAttachedEmitterFX_update(void*);
 extern "C" void cBoltOnFXInterface_updateIfDirty(void*);
 
 /**
- * Updates the rider's attached-emitter FX (func_002F1A08) and bolt-on FX (cBoltOnFXInterface_updateIfDirty).
+ * Updates the rider's attached-emitter FX (cAttachedEmitterFX_update) and bolt-on FX (cBoltOnFXInterface_updateIfDirty).
  */
 void cRider::updateSplitMiscFX()
 {
-    func_002F1A08(mAttachedEmitterFX);
+    cAttachedEmitterFX_update(mAttachedEmitterFX);
     cBoltOnFXInterface_updateIfDirty(mBoltOnFX);
 }
 #endif
@@ -4053,7 +4053,7 @@ void cRider::renderShadow()
 }
 #endif
 
-extern "C" void* func_002F2088(void* obj);
+extern "C" void* cAttachedEmitterFX_render(void* obj);
 
 //100%
 INCLUDE_ASM("ai/rider", cRider_renderFX);
@@ -4074,15 +4074,15 @@ void cRider::renderFX()
 INCLUDE_ASM("ai/rider", cRider_renderAttachedEmitterFX__FPv);
 #ifdef SKIP_ASM
 /**
- * Renders the rider's attached emitter FX: func_002F2088 on mAttachedEmitterFX.
+ * Renders the rider's attached emitter FX: cAttachedEmitterFX_render on mAttachedEmitterFX.
  *
  * cAI_render calls it for every rider last.
  *
- * @return func_002F2088's result
+ * @return cAttachedEmitterFX_render's result
  */
 void* cRider::renderAttachedEmitterFX()
 {
-    return func_002F2088(mAttachedEmitterFX);
+    return cAttachedEmitterFX_render(mAttachedEmitterFX);
 }
 #endif
 
@@ -4726,7 +4726,7 @@ extern t4Vector t4vect_XAxis;
 extern "C" void cReplay_eventReset(cReplay* replay, int riderIndex);
 extern "C" void cRider_cancelRiderTransitions(cRider* self);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
-extern "C" void func_002F1A00(void* a);
+extern "C" void cAttachedEmitterFX_clearDisableSnowTrailSpray(void* a);
 extern "C" void cRiderMetrix_evReset(void* metrix, int flag);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
@@ -4860,7 +4860,7 @@ void cRider::transport(t4Matrix* mat)
     SetPath_3210(this, &pos, &dir);
     mVelocity = Scale_3210(sVec4(*(sVec4*)&mMatrix.row[1]), len);
     cRiderHandler_resetRiderFX(mRiderHandler);
-    func_002F1A00(mAttachedEmitterFX);
+    cAttachedEmitterFX_clearDisableSnowTrailSpray(mAttachedEmitterFX);
 }
 #endif
 
@@ -4874,7 +4874,7 @@ INCLUDE_ASM("ai/rider", cRider_initForMission);
 extern t4Vector t4vect_XAxis;
 extern "C" void cReplay_eventReset(cReplay* replay, int riderIndex);
 extern "C" void cRider_cancelRiderTransitions(cRider* self);
-extern "C" void func_002F1A00(void* a);
+extern "C" void cAttachedEmitterFX_clearDisableSnowTrailSpray(void* a);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
@@ -4926,7 +4926,7 @@ void cRider::initForMission(t4Matrix* mat)
     cRider_setControlState_impl(this, 6);
     cancelRiderTransitions();
     cRiderHandler_resetRiderFX(mRiderHandler);
-    func_002F1A00(mAttachedEmitterFX);
+    cAttachedEmitterFX_clearDisableSnowTrailSpray(mAttachedEmitterFX);
     if ((unsigned int)mViewIndex < 2) {
         cChaseCameraController* obj = SSXApp->Game->ViewMan->PlayerCamera[mViewIndex]->ChaseController;
         sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)obj->mVtbl;

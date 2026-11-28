@@ -12148,3 +12148,647 @@ names5c	0x003E95C8	LobbyApi_update	func_003E95C8	[desc] runs the lobby client: t
 names5c	0x003EAE68	LobbyApi_parseDecimal	func_003EAE68	[desc] reads the leading decimal digits of a string into a number and returns the position after them (the tag time parser uses it)
 names5c	0x003EAEB8	LobbyApi_secondsToCalendar	func_003EAEB8	[desc] converts seconds since 1970 into UTC calendar fields (struct tm without the weekday)
 names5c	0x003EB090	LobbyApi_calendarToSeconds	func_003EB090	[desc] converts calendar fields back into seconds since 1970 by binary search with LobbyApi_secondsToCalendar
+names5d	0x00100218	crt_deregisterFrameInfo	func_00100218	[desc] at exit passes crt0's frame-info key D_0043CE00 to __deregister_frame_info; the last entry of the global destructor table
+names5d	0x00117138	cHUDFX_setAsync1	func_00117138	[a] (this, effect id, const char *text, int data, float) like On Tour's cHUDFX::setAsync(eHUDFXID, const char *displayStr, float animPercent, int data); [b] copyDispStr, then id, data, the negated float as the current decay, -1 as the decay limit and 0 as the number, the stores of On Tour's text setAsync; [d] between the named cHUDFX_set1 and cHUDFX_setAsync (the number overload), as cHUDFX_set / cHUDFX_set1 pair the text and number set overloads
+names5d	0x00255F20	cCommSystem_netConnQuery	func_00255F20	[desc] reads up to 10 network configurations into cCommSystem_mNetConns with NetConnQuery and stores the count in cCommSystem_mNumNetConn (next to the named cCommSystem_netConnConnect / Disconnect wrappers)
+names5d	0x00256088	netConfig_launchGui	func_00256088	[desc] starts the network configuration program "cdrom0:\NETGUI\NTGUI.ELF;1" through shutdownAndLoadExec
+names5d	0x002560B0	dnasDebug_runAuth	func_002560B0	[desc] debug menu: creates a DNASMan, starts it and updates it (SYNCTASK_run, THREAD_yieldticks) until the check finishes, then frees and destroys it
+names5d	0x00256188	dnas_addOverlayArchive	func_00256188	[desc] adds "data/config/slusovf.big" (the DNAS overlay archive) to the file system with FILESYS_addbigsync; cSSXApp_initload's call
+names5d	0x00256228	DNASMan_clear	func_00256228	[desc] zeroes a DNASMan's state and buffer words and sets its file handle (+0x18) to -1; DNASMan_DNASMan's body
+names5d	0x00256258	DNASMan_start	func_00256258	[desc] stores the auth mode, sets state 1, allocates the 0x195000-byte "ElfData" buffer and starts loading "OVERLAY.DAT" into it
+names5d	0x002562D0	DNASMan_startCheck	func_002562D0	[desc] fills the 160-byte DNAS parameter block (data buffer, key, NetConnMAC text, title id) and starts the module (func_003FD0D8)
+names5d	0x002563A8	DNASMan_freeBuffers	func_002563A8	[desc] frees a DNASMan's data (+0xC) and program (+4) buffers and clears the pointers
+names5d	0x002563F8	DNASMan_update	func_002563F8	[desc] advances a DNASMan by state: 1 func_00256460, 2 func_00256510, 4 func_002565E0; 0, 3 and 5 wait
+names5d	0x00256460	DNASMan_updateLoadProgram	func_00256460	[desc] state 1: once "OVERLAY.DAT" has loaded, links it (func_003FCFD8) and starts loading "CONFIG.DAT" into a 64 KB "AuthData" buffer
+names5d	0x00256510	DNASMan_updateLoadConfig	func_00256510	[desc] state 2: once "CONFIG.DAT" has loaded, XORs it with the 4-byte key and moves to state 3
+names5d	0x002565E0	DNASMan_updateResult	func_002565E0	[desc] state 4: when the module's update (func_003FD100) reports done, gets the result (func_003FD128) and copies its texts into the object
+names5d	0x002583A8	cGameComm_startServerPing	func_002583A8	[desc] when no ping is running, clears the ping count, stores the server address and sends the first "SSXPingServer" ping (PingRpc_request) for a duration
+names5d	0x00258870	cGameComm_armLinkTimeout	func_00258870	[desc] stores the link timeout (+0x94, counted down by cGameComm_checkErrors) when forced, when neither player is paused, or once the start gate is up
+names5d	0x00259098	lobbyman_startRaceConnection	func_00259098	[desc] takes the peer's address from LobbyMan (opponent when hosting, else host), sets both player names and characters in the BE network options and connects the game (cGameConnMan_connect); LobbyMan_onplaymsg's call
+names5d	0x00259198	lobbyman_getLanguageCode	func_00259198	[desc] returns the language code "en" for the lobby tags (BuddyMan_connect, LobbyMan_createAccount...)
+names5d	0x002591A8	lobbyman_getCountryCode	func_002591A8	[desc] returns the country code "US" (no callers)
+names5d	0x002591B8	lobbyman_getConnMan	func_002591B8	[desc] returns the front end's connection manager (cRealFE::mConnMan at +0xB5AB0)
+names5d	0x002591D0	lobbyman_getGameConnMan	func_002591D0	[desc] returns the front end's game-connection manager (cRealFE::mGameConnMan at +0xB5ABC)
+names5d	0x002591E8	lobbyman_alloc	func_002591E8	[desc] allocates a block for the lobby code (operator new with the name "Lobby", type 0x20000000); the LobbyApi, buddy, list and hash code allocate with it
+names5d	0x00259210	lobbyman_free	func_00259210	[desc] frees a block from lobbyman_alloc (cMemMan_free) unless it is null
+names5d	0x00259230	lobbyman_postEventToTopScreen	func_00259230	[desc] passes an event to the front end's top UI state (cUIStateStack_getTopState, virtual handleEvent); dispatchLobbyEvent's call
+names5d	0x002D4008	cMenu_compareSortItems	func_002D4008	[desc] qsort adapter of cMenu_sortItems: calls the comparison function it stored in D_004A54BC with the two items
+names5d	0x002F17D0	cAttachedEmitterFX_loadEmitterTypes	func_002F17D0	[desc] allocates the shared 20-record type table cAttachedEmitterFX_mEmitterDataArray ("AttachedEmitterTypeData") and fills it (fillEmitterTypes0To9 / 10To19)
+names5d	0x002F1810	cAttachedEmitterFX_freeEmitterTypes	func_002F1810	[desc] frees the shared type table cAttachedEmitterFX_mEmitterDataArray and clears the pointer; the destructor's call for the last instance
+names5d	0x002F1850	cAttachedEmitterFX_cAttachedEmitterFX	func_002F1850	[b] stores cAttachedEmitterFX_vtbl, sets mRider and runs the common set-up (func_002F18D8), returning this; [c] cRider_cRider constructs its attached-emitter member with it
+names5d	0x002F1890	cAttachedEmitterFX_cAttachedEmitterFX1	func_002F1890	[b] the front-end overload: stores cAttachedEmitterFX_vtbl, leaves mRider 0, sets mFERider, runs the set-up and clears the spray flag, returning this; [c] cFERider_init constructs its member with it (the Class_Class1 overload convention, as cScreenKeyboard_cScreenKeyboard1)
+names5d	0x002F18D8	cAttachedEmitterFX_init	func_002F18D8	[desc] counts the instance in (loading the shared type table for the first one, func_002F17D0) and empties the 10 emitter slots
+names5d	0x002F19F0	cAttachedEmitterFX_setModel	func_002F19F0	[desc] sets mModel and clears mBonesLookedUp so the next update looks the bones up again
+names5d	0x002F1A00	cAttachedEmitterFX_clearDisableSnowTrailSpray	func_002F1A00	[desc] clears mDisableSnowTrailSpray (read by the named cAttachedEmitterFX_ShouldDisableSnowTrailSpray)
+names5d	0x002F1A08	cAttachedEmitterFX_update	func_002F1A08	[desc] looks the bones up when needed, moves each emitter to its bone with the rider's velocity and ground normal, decides whether it emits and updates it
+names5d	0x002F2088	cAttachedEmitterFX_render	func_002F2088	[desc] renders each used emitter slot with cDynamicEmitter_render when the rider is on screen or the front-end rider is shown
+names5d	0x002F2130	cAttachedEmitterFX_createEmitter	func_002F2130	[desc] builds a cAttachedDynamicEmitter of a type on a bone in the first free slot and returns the slot (cBoltOnFXInterface_createEntry's call)
+names5d	0x002F2218	cAttachedEmitterFX_deleteEmitter	func_002F2218	[desc] destroys the emitter in a slot through its virtual destructor and clears the slot
+names5d	0x002F2268	cAttachedEmitterFX_stopEmitter	func_002F2268	[desc] sets the slot emitter's mStopped so it updates with emission off
+names5d	0x002F2280	cAttachedEmitterFX_resumeEmitter	func_002F2280	[desc] clears the slot emitter's mStopped
+names5d	0x002F2298	cAttachedEmitterFX_disableEmitter	func_002F2298	[desc] clears the slot emitter's m_enabled
+names5d	0x002F22B0	cAttachedEmitterFX_enableEmitter	func_002F22B0	[desc] sets the slot emitter's m_enabled to 1
+names5d	0x002F22C8	cAttachedEmitterFX_lookUpBones	func_002F22C8	[desc] looks up the 26 attach-point bone indices (head, neck, spine, limbs, board) of the model with cAnimModel_getBoneSkelIndex and marks them found
+names5d	0x00319610	bxIop_initIop	func_00319610	[desc] start-up IOP preparation: sceSifInitIopHeap, reboot with DNAS271.IMG (func_00319820), sceCdInit, sceCdMmode(2), sceFsReset; systemInit's call
+names5d	0x00319660	bxIop_getModuleDir	func_00319660	[desc] sprintf's the IOP module directory "cdrom0:\DATA\MODULES\" into a buffer
+names5d	0x00319690	bxIop_buildModulePath	func_00319690	[desc] builds an IOP module path: a name with ':' as is, else the module directory, the name and ";1"
+names5d	0x00319718	bxIop_loadModule	func_00319718	[desc] builds the module path and calls sceSifLoadModule until it succeeds, retrying on -204 (IOP busy) or when asked
+names5d	0x00319790	bxIop_unloadModule	func_00319790	[desc] sceSifStopModule then sceSifUnloadModule on a module id (no callers)
+names5d	0x003197D0	bxIop_loadMsifrpc	func_003197D0	[desc] loads MSIFRPC.IRX through bxIop_loadModule with retry; initOnline's call
+names5d	0x00319820	bxIop_rebootWithDnasImage	func_00319820	[desc] reboots the IOP with DNAS271.IMG (sceSifRebootIop, retried) and waits for sceSifSyncIop, then re-inits the heap
+names5d	0x003198A0	bxIop_powerOffThread	func_003198A0	[desc] worker thread: on each semaphore signal sends the "dev9x" 0x4402 request (sceDevctl) and then sceCdPowerOff, each retried until it succeeds
+names5d	0x00319910	bxIop_onPowerOff	func_00319910	[desc] power-off callback (sceCdPOffCallback): signals the power-off thread's semaphore (iSignalSema)
+names5d	0x00319930	bxIop_installPowerOffHandler	func_00319930	[desc] when dev9 is loaded, creates the power-off semaphore and worker thread (bxIop_powerOffThread) and installs bxIop_onPowerOff with sceCdPOffCallback; initOnline's call
+names5d	0x003EDF50	LobbyUtil_compareTagText	func_003EDF50	[desc] compares two tag strings case-insensitively (table D_004963C0), each ending at its closing quote when quoted or at a control character
+names5d	0x003EE028	SortList_grow	func_003EE028	[desc] grows a sorted list's node pool by a chunk and reallocates its item array
+names5d	0x003EE1B0	SortList_compareItems	func_003EE1B0	[desc] calls the list's sort function with its context, parameter and the two items' values (the compare adapter func_003EE620 sorts with)
+names5d	0x003EE1E8	SortList_create	func_003EE1E8	[desc] allocates and zeroes a 68-byte sorted list with its grow settings and a first node pool (func_003EE028)
+names5d	0x003EE260	SortList_destroy	func_003EE260	[desc] frees a sorted list's node chunks, its item array and the list
+names5d	0x003EE2B8	SortList_clear	func_003EE2B8	[desc] returns every item node to the free list, clears the item and passing counts and sets the re-sort counter
+names5d	0x003EE320	SortList_add	func_003EE320	[desc] takes a free node (growing the pool when none is left), stores the value and appends it to the item array, bumping the re-sort counter when it passes the filter
+names5d	0x003EE3E0	SortList_setValue	func_003EE3E0	[desc] changes an item's value, bumping the re-sort counter when the old or new value passes the filter
+names5d	0x003EE468	SortList_getValue	func_003EE468	[desc] returns an item's value, or 0 for a null item
+names5d	0x003EE480	SortList_remove	func_003EE480	[desc] removes an item from the item array (moving the later ones down) and returns its node to the free list; returns its value
+names5d	0x003EE550	SortList_getCount	func_003EE550	[desc] returns the number of items (word [6])
+names5d	0x003EE558	SortList_getPassCount	func_003EE558	[desc] returns the number of items that passed the filter at the last update (word [5])
+names5d	0x003EE560	SortList_getAt	func_003EE560	[desc] returns the value of the item at an index, or 0 for a null list or an index out of range
+names5d	0x003EE5A0	SortList_setSort	func_003EE5A0	[desc] sets the sort function, context and parameter and requests a re-sort when the list has items
+names5d	0x003EE5C0	SortList_setFilter	func_003EE5C0	[desc] sets the filter function, context and parameter and requests a re-sort when the list has items
+names5d	0x003EE5E0	SortList_bumpResort	func_003EE5E0	[desc] optionally adds 1 to the re-sort counter and returns whether it is above 0
+names5d	0x003EE600	SortList_bumpChanged	func_003EE600	[desc] optionally adds 1 to the change counter and returns whether it is above 0
+names5d	0x003EE620	SortList_update	func_003EE620	[desc] when the items changed, moves those passing the filter to the front and sorts them (func_003EF210 with func_003EE1B0)
+names5d	0x003EE768	SortList_setUserWord	func_003EE768	[desc] stores a user word in the list (word [13])
+names5d	0x003EE770	SortList_getUserWord	func_003EE770	[desc] returns the list's user word (word [13])
+names5d	0x003EE778	HashTable_create	func_003EE778	[desc] allocates a 36-byte string-keyed hash table with its bucket array and a first node chunk, using func_003EEAB8 as the key compare
+names5d	0x003EE820	HashTable_destroy	func_003EE820	[desc] frees a hash table's node chunks, its bucket array and the table
+names5d	0x003EE878	HashTable_setCompare	func_003EE878	[desc] sets the key compare function (word [8])
+names5d	0x003EE880	HashTable_clear	func_003EE880	[desc] returns every node of every bucket to the free list
+names5d	0x003EE900	HashTable_addNodes	func_003EE900	[desc] allocates a chunk of n 12-byte nodes ("Lobby" heap), links it into the chunk list and puts the nodes on the free list
+names5d	0x003EE9A0	HashTable_takeAny	func_003EE9A0	[desc] frees the first node of the next non-empty bucket from the drain cursor and returns its value (0 when empty)
+names5d	0x003EEA48	HashTable_hashString	func_003EEA48	[desc] hashes a string key (hash * 131 + case-folded character, skipping spaces and controls) to a bucket index
+names5d	0x003EEAB8	HashTable_compareKeys	func_003EEAB8	[desc] compares two strings case-insensitively, skipping spaces and control characters (table D_00496A58); the tables' default key compare
+names5d	0x003EEB30	HashTable_addString	func_003EEB30	[desc] puts a string-keyed node at the head of its bucket, growing the node pool when none is free
+names5d	0x003EEBF8	HashTable_replaceString	func_003EEBF8	[desc] replaces the value of a string-keyed entry and returns the old one
+names5d	0x003EEC88	HashTable_findString	func_003EEC88	[desc] returns the value of a string key, or 0
+names5d	0x003EED08	HashTable_removeString	func_003EED08	[desc] unlinks the first node with a string key, frees it and returns its value
+names5d	0x003EEDA0	HashTable_addInt	func_003EEDA0	[desc] puts an integer-keyed node at the head of bucket |key| mod the bucket count, growing the pool when none is free
+names5d	0x003EEE80	HashTable_replaceInt	func_003EEE80	[desc] replaces the value of an integer-keyed entry and returns the old one
+names5d	0x003EEEE8	HashTable_findInt	func_003EEEE8	[desc] returns the value of an integer key, or 0
+names5d	0x003EEF40	HashTable_removeInt	func_003EEF40	[desc] unlinks the node with an integer key, frees it and returns its value
+names5d	0x003EEFB8	HashTable_rewind	func_003EEFB8	[desc] restarts iteration (clears the iteration bucket and node words)
+names5d	0x003EEFC8	HashTable_next	func_003EEFC8	[desc] returns the next entry of an iteration and optionally its key
+names5d	0x003EF088	LobbyUtil_getCurrentTime	func_003EF088	[desc] returns 0: the current-time source cDirtysock_tag_TagFieldGetTime and TagFieldSetEpoch fall back to
+names5d	0x003EF090	LobbyUtil_getTimeZoneOffset	func_003EF090	[desc] computes once (sceScfGetGMTfromRTC vs sceScfGetLocalTimefromRTC on the same date) and caches the difference in seconds between local time and GMT
+names5d	0x003EF600	Utf8_getLeadLength	func_003EF600	[desc] counts a UTF-8 lead byte's leading 1 bits plus one (1 for ASCII)
+names5d	0x003EF640	Utf8_decodeChar	func_003EF640	[desc] decodes one UTF-8 character of up to three bytes into UCS-2 and returns the bytes consumed
+names5d	0x003EF6F8	Utf8_encodeChar	func_003EF6F8	[desc] encodes a UCS-2 character as one to three UTF-8 bytes
+names5d	0x003EF770	Utf8_translateChar	func_003EF770	[desc] translates a UCS-2 character to an 8-bit one through a list of (low, high, byte map) ranges
+names5d	0x003EF808	Utf8_stripNonAscii	func_003EF808	[desc] func_003EF828 with no replacement byte (drops the non-ASCII characters)
+names5d	0x003EF828	Utf8_replaceNonAscii	func_003EF828	[desc] replaces each multi-byte UTF-8 character with a byte (or drops it), written for in-place use
+names5d	0x003EF940	Utf8_countChars	func_003EF940	[desc] counts the characters of a UTF-8 string
+names5d	0x003EF9B8	Utf8_encodeString	func_003EF9B8	[desc] encodes a UCS-2 string as UTF-8 within a size and terminates it
+names5d	0x003EFA48	_Utf8DecodeStringToUCS2	func_003EFA48	[b] relocation-masked byte-identical (176 bytes) to the DNAS overlay's _Utf8DecodeStringToUCS2; [e] that name in the overlay's symbol table (a LOCAL copy there); decodes a UTF-8 string into UCS-2 within a size
+names5d	0x003EFAF8	Utf8_fromByteString	func_003EFAF8	[desc] converts an 8-bit string to UTF-8 through a 256-entry UCS-2 table
+names5d	0x003EFBA0	Utf8_toByteString	func_003EFBA0	[desc] converts a UTF-8 string to 8-bit characters through range tables (func_003EF640, func_003EF770)
+names5d	0x003EFC68	LobbyUtil_parseHex	func_003EFC68	[desc] parses hexadecimal digits from text into a value and returns the position after them
+names5d	0x003EFCD8	LobbyUtil_parseHexRange	func_003EFCD8	[desc] parses one "lo:hi" hexadecimal range and skips a following comma
+names5d	0x003EFD30	LobbyUtil_hashMemoryRanges	func_003EFD30	[desc] MD5 of a "lo:hi," range-list text and the memory ranges it names (func_003F30F0 / func_003F3128 / func_003F31F8); LobbyMan_onauthentication's memory check
+names5d	0x003EFE20	LobbyUtil_findCodeName	func_003EFE20	[desc] scans the (key, code, name) table D_004512D8 for the first entry with a key whose code is in a list and copies its name
+names5d	0x003EFED0	BuddyApi_debugPrintf	func_003EFED0	[desc] formats a printf-style line into a 4 KB buffer and passes it to the BuddyApi debug hook (+0x508) with its context
+names5d	0x003EFF40	BuddyApi_logPacket	func_003EFF40	[desc] formats a buddy packet's two four-letter tags and a summary of its text (null / binary / text) and passes it to the debug hook (func_003EFED0)
+names5d	0x003F00D8	BuddyApi_sendCommand	func_003F00D8	[desc] sends a command tag and message on the session (func_003F5910) and logs it with "send: " when a debug hook is set
+names5d	0x003F0150	BuddyApi_stripNameSuffix	func_003F0150	[desc] cuts a buddy name in place at the first '@' and then at the first '/'
+names5d	0x003F0198	BuddyApi_deliverChatMessage	func_003F0198	[desc] splits a received message's USER "user@domain/resource" into USER / DOMN / RSRC fields and hands it to the receive callback as a 'chat' message
+names5d	0x003F02D0	BuddyApi_parsePresence	func_003F02D0	[desc] fills a roster entry's show index, product, presence text and language from a 'PGET' packet's SHOW / PROD / STAT fields
+names5d	0x003F0568	BuddyApi_sendPresence	func_003F0568	[desc] sends the presence as a 'PSET' packet (base RSRC / SHOW plus STAT with the product key and PROD) and clears the pending send time
+names5d	0x003F0610	BuddyApi_setState	func_003F0610	[desc] stores the connection state (+0x8) and reports it to the connect callback as a {'conn', state} message
+names5d	0x003F0658	BuddyApi_armRequest	func_003F0658	[desc] arms pending-request slot 0 / 1 / 2 ('addu', 'delu', 'send') with the next sequence number, callback, user data and a deadline
+names5d	0x003F0710	BuddyApi_create	func_003F0710	[desc] allocates and zeroes the 0x50C-byte BuddyApiRefT, copies product and version, creates the packet session (func_003F5478(0x8000)); BuddyMan_createBuddyApi's call
+names5d	0x003F07A0	BuddyApi_destroy	func_003F07A0	[desc] frees a pending host lookup, disconnects, frees the roster, destroys the session and frees the state; BuddyMan_destroyBuddyApi's call
+names5d	0x003F0800	BuddyApi_getState	func_003F0800	[desc] returns the connection state (+0x8)
+names5d	0x003F0808	BuddyApi_setDebugHook	func_003F0808	[desc] stores the debug print function (+0x508) and its context (+0x504)
+names5d	0x003F0818	BuddyApi_configure	func_003F0818	[desc] sets the PRES text, product key, up to four language codes and the '.'-in-names policy before connecting; BuddyMan_connect's call
+names5d	0x003F08E8	BuddyApi_connect	func_003F08E8	[desc] disconnects, stores the callback and port, builds the 'AUTH' login (PROD, VERS, PRES, USER with LKEY or PASS) and starts the server lookup (SocketLookup)
+names5d	0x003F0B50	BuddyApi_disconnect	func_003F0B50	[desc] frees a pending lookup, sends 'DISC', closes the session, reports state 6 / 0, clears the connect callback and frees the roster
+names5d	0x003F0BE0	BuddyApi_freeRoster	func_003F0BE0	[desc] frees every roster entry, reports an empty 'rost' message, and destroys the name table and the roster list
+names5d	0x003F0C90	BuddyApi_requestRoster	func_003F0C90	[desc] once, creates the name table and roster list and sends 'RGET' for the buddy (LIST "B") and ignore (LIST "I") lists
+names5d	0x003F0E30	BuddyApi_getRoster	func_003F0E30	[desc] returns the roster list (+0x4A8)
+names5d	0x003F0E38	BuddyApi_addUser	func_003F0E38	[desc] validates the name, arms the 'addu' slot and adds the user to the buddy list, ignore list and / or presence subscriptions ('RADD' ...)
+names5d	0x003F11F8	BuddyApi_removeUser	func_003F11F8	[desc] validates the name, arms the 'delu' slot and removes the user from the buddy list, ignore list and / or presence subscriptions ('RDEL' ...)
+names5d	0x003F14D8	BuddyApi_findRosterEntry	func_003F14D8	[desc] looks a user name up in the roster's name table and returns its 0xB8-byte entry, or 0
+names5d	0x003F1538	BuddyApi_clearPresenceTexts	func_003F1538	[desc] clears the PROD (+0x40) and STAT (+0x140) presence texts
+names5d	0x003F1548	BuddyApi_setProductText	func_003F1548	[desc] copies the PROD presence text (+0x40) when a PRES text was set
+names5d	0x003F1578	BuddyApi_setStatusText	func_003F1578	[desc] sets one two-letter language's text in the STAT presence status (+0x140)
+names5d	0x003F15C8	BuddyApi_setPresence	func_003F15C8	[desc] rebuilds the base presence (RSRC, SHOW) and sends it now or schedules a delayed send; BuddyMan_setPresence's call
+names5d	0x003F16D8	BuddyApi_sendMessage	func_003F16D8	[desc] checks BODY (under 0x40 characters) and SUBJ (empty), arms the 'send' slot and sends the tag text as a 'SEND' packet; BuddyMan_sendMessage's call
+names5d	0x003F17C8	BuddyApi_setReceiveCallback	func_003F17C8	[desc] stores the receive callback (+0x4B0) and its user data (+0x4AC)
+names5d	0x003F17D8	BuddyApi_update	func_003F17D8	[desc] runs the buddy client: finishes the lookup and connect, sends the login, enforces timeouts and dispatches every received packet; BuddyMan_update's call
+names5d	0x003F2220	LobbyMd5_transform	func_003F2220	[desc] runs the MD5 compression function (four rounds of sixteen steps) on the context's buffered 64-byte block
+names5d	0x003F30F0	LobbyMd5_init	func_003F30F0	[desc] sets an MD5 context's byte count to 0 and its state to 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476
+names5d	0x003F3128	LobbyMd5_update	func_003F3128	[desc] appends bytes (or a C string for a negative length) to an MD5 context, hashing each full 64-byte block (func_003F2220)
+names5d	0x003F31F8	LobbyMd5_final	func_003F31F8	[desc] pads the buffered block with 0x80 and zeros, appends the bit length, hashes the last block (func_003F2220) and writes the digest as 16 raw bytes or as hex text
+names5d	0x003F33B0	LobbyCrypt_setKey	func_003F33B0	[desc] keys a 256-byte permutation stream cipher state from a key, mixing key and permutation bytes through CRC-32 (first use also keys the shared state with "hello world")
+names5d	0x003F3530	LobbyCrypt_apply	func_003F3530	[desc] XORs n bytes of a buffer with the cipher state's keystream, advancing its index and CRC words
+names5d	0x003F35D0	LobbyCrypt_encodeText	func_003F35D0	[desc] encrypts a text into a fixed-length printable string (keystream shift mod 96, random padding after the end); LobbyApi_sendCommand's PASS encoding
+names5d	0x003F3748	LobbyCrypt_decodeText	func_003F3748	[desc] decodes a string made by func_003F35D0: shifts each character back by a keystream byte mod 96 up to the end marker
+names5d	0x003F39C8	DirtyNet_startHostLookup	func_003F39C8	[desc] allocates a zeroed 92-byte HostentT (RpcAlloc), installs _SocketLookupDone / _SocketLookupFree and sends the IOP 'name'/'look' request; SocketLookup forwards to it
+names5d	0x003F3AB8	DirtyNet_lookupHostBlocking	func_003F3AB8	[desc] starts a host lookup (func_003F39C8), spins on its Done slot, frees it and returns the resolved address
+names5d	0x003F4410	NetLib_onCountInterrupt	func_003F4410	[desc] interrupt handler adding the COP0 Count cycles since the last update to the request queue's 64-bit cycle total (NetTick's time base)
+names5d	0x003F4448	NetLib_onPollAlarm	func_003F4448	[desc] alarm handler: wakes the request-queue thread when the oldest request's reply has arrived and re-arms itself while requests are pending
+names5d	0x003F44F8	NetLib_queueThread	func_003F44F8	[desc] entry of the request-queue thread: forever completes arrived replies (func_003F4A78) and sleeps
+names5d	0x003F4528	NetLib_queueRequest	func_003F4528	[desc] queues a request to an IOP service (payload copy, completion record, request record) and sends it over SIF DMA, optionally blocking for the reply
+names5d	0x003F4A78	NetLib_completeReplies	func_003F4A78	[desc] completes every queued IOP request whose reply has arrived, in order (blocking waiters woken, callbacks called), freeing their payload space
+names5d	0x003F4C68	NetLib_callService	func_003F4C68	[desc] forwards its ten arguments to func_003F4528 (the call argument twice); the request call of every NetConn / NetGameLink / NetGameUtil stub
+names5d	0x003F4C98	NetLib_resolveService	func_003F4C98	[desc] resolves an IOP service by module and function tags ('sess'/'send' ...) into a cached 16-byte handle by searching the service directory
+names5d	0x003F4D68	NetLib_fetchServiceDirectory	func_003F4D68	[desc] fetches the IOP's service directory into the request queue with a blocking request, then pumps replies until the ring is empty; NetConnStartup's call
+names5d	0x003F4E80	NetLib_writeBackRange	func_003F4E80	[desc] SyncDCache over start .. start + size (writes a memory range back from the data cache)
+names5d	0x003F4EA0	NetLib_checkSharedBlock	func_003F4EA0	[desc] validates a 16-byte block header in IOP-written shared memory (link, tag, size, back link) and returns its tag and payload size
+names5d	0x003F4F40	NetLib_pingIop	func_003F4F40	[desc] clears a flag byte, sends SIF command 1 with its address and spins until the IOP sets it or about 170 ms pass
+names5d	0x003F5000	NetLib_startQueue	func_003F5000	[desc] lays out and starts the EE-IOP request queue D_0051F0C0: IOP heap copy, SIF commands, semaphore, queue thread and Count interrupt handler
+names5d	0x003F53F8	NetLib_stopQueue	func_003F53F8	[desc] stops the EE-IOP request queue: releases its alarms, removes the interrupt handler, deletes the thread and semaphore, clears the started flag
+names5d	0x003F5470	NetLib_isQueueStarted	func_003F5470	[desc] returns the request queue's started flag D_004A4BB0
+names5d	0x003F5478	NetSession_create	func_003F5478	[desc] creates a packet session on the IOP ('sess'/'crea'): RpcAlloc of the header, address block and a receive buffer clamped to 0x1000..0x2000 bytes; LobbyApi_create and BuddyApi's create call it
+names5d	0x003F55B8	NetSession_destroy	func_003F55B8	[desc] sends 'sess'/'dest' for the session id, waits, then frees the session (RpcFree)
+names5d	0x003F5638	NetSession_connect	func_003F5638	[desc] fills the session's address block as a sockaddr_in (IPv4 address, port) and sends 'sess'/'conn'; -1 when already connected
+names5d	0x003F5738	NetSession_disconnect	func_003F5738	[desc] sends 'sess'/'disc', zeroes the session's address block and clears its received-byte count
+names5d	0x003F57C8	NetSession_getStatus	func_003F57C8	[desc] fetches the session status ('sess'/'stat') and returns the field a key selects: 'port', 'addr', 'lprt', 'ladr' or 'ibuf' (unread bytes)
+names5d	0x003F5908	NetSession_update	func_003F5908	[desc] empty body: the per-session update hook BuddyApi's update (func_003F17D8) and NetSession_send call
+names5d	0x003F5910	NetSession_send	func_003F5910	[desc] sends one packet ('sess'/'send'): a 12-byte big-endian header (kind, argument, length) and the data as a two-piece gather list
+names5d	0x003F5A50	NetSession_onRecvDone	func_003F5A50	[desc] completion callback of the 'sess'/'recv' request: stores the received length and clears the read offset and the receive-pending flag
+names5d	0x003F5A70	NetSession_peek	func_003F5A70	[desc] returns the next received packet's kind, argument and data without consuming it, starting a new 'sess'/'recv' when everything has been read
+names5d	0x003F5C38	NetSession_recv	func_003F5C38	[desc] reads and consumes the next received packet (func_003F5A70), copying up to max data bytes, and restarts the receive when the buffer empties
+names5d	0x003F5D88	NetSession_getTick	func_003F5D88	[desc] returns NetTick(); the LobbyApi and BuddyApi code call it with their session, which it ignores
+names5d	0x003F5DA8	kbReader_loadModules	func_003F5DA8	[desc] loads USBD.IRX and USBKB.IRX from a directory prefix (sceSifLoadModule), keeping both module ids
+names5d	0x003F5E90	kbReader_unloadModule	func_003F5E90	[desc] sceSifStopModule then sceSifUnloadModule of a module id, returning an error value on failure
+names5d	0x003F5F08	kbReader_startInfoQuery	func_003F5F08	[desc] saves each keyboard's connected flag and starts an asynchronous sceUsbKbGetInfo connection query (state 1)
+names5d	0x003F5F88	kbReader_finishInfoQuery	func_003F5F88	[desc] polls the connection query (sceUsbKbSync mode 1) and, once done, calls the connect callback for every keyboard whose connected flag changed
+names5d	0x003F6040	kbReader_findFreeKeyboard	func_003F6040	[desc] finds the next connected keyboard, from an index and wrapping, whose read buffer holds no unread data
+names5d	0x003F60B8	kbReader_startRead	func_003F60B8	[desc] makes the next keyboard with a free buffer current, remembers its LED / modifier words and starts an asynchronous sceUsbKbRead (state 2)
+names5d	0x003F6138	kbReader_finishRead	func_003F6138	[desc] waits for the keyboard read (sceUsbKbSync mode 0) and marks the buffer ready when it holds keys or its LED / modifier words changed
+names5d	0x003F61C8	kbReader_defaultIdleHook	func_003F61C8	[desc] returns 0: the idle hook func_003F61D0 installs when the caller gives none
+names5d	0x003F61D0	kbReader_init	func_003F61D0	[desc] starts the USB keyboard reader: loads the USB modules, sceUsbKbInit, clears the keyboard flags, installs the callbacks and runs one connection query; cUsbKeyboard_cUsbKeyboard's call
+names5d	0x003F62F8	kbReader_shutdown	func_003F62F8	[desc] sceUsbKbEnd, then unloads USBKB.IRX and USBD.IRX (func_003F5E90); cUsbKeyboard__cUsbKeyboard's call
+names5d	0x003F6348	kbReader_getMaxKeyboards	func_003F6348	[desc] returns the max-connect word D_00526010 (the number of keyboards the reader handles)
+names5d	0x003F6358	kbReader_defaultOnConnect	func_003F6358	[desc] default connect callback: on connect sets LED status / mode, clears the key buffer and sets key repeat and code type
+names5d	0x003F63E0	kbReader_setQueryPeriod	func_003F63E0	[desc] stores the number of reader updates between connection queries (D_00525F80 +0xB8)
+names5d	0x003F63F0	kbReader_update	func_003F63F0	[desc] one step of the reader state machine: finishes a query (state 1) or read (state 2), polls the idle hook (3), or starts the next query or read
+names5d	0x003F64E0	kbReader_takeReadBuffer	func_003F64E0	[desc] returns keyboard n's read buffer and clears its ready flag when it holds unread data, else 0
+names5d	0x003F6520	kbReader_isConnected	func_003F6520	[desc] returns whether keyboard n's connected flag (D_00525F80 +0x10) is set
+names5d	0x003F6538	kbReader_updateAnyConnected	func_003F6538	[desc] runs the reader once (func_003F63F0) and returns 1 when any keyboard is connected
+names5d	0x003F65A0	kbReader_getAltKeyMapEntry	func_003F65A0	[desc] returns the 2-byte key-map entry of a USB key code in the alternate layout (two override ranges, else the default map)
+names5d	0x003F65F8	kbReader_getVirtualKey	func_003F65F8	[desc] translates a USB key code to its virtual-key byte through the Num Lock keypad map, the default map or the alternate one
+names5d	0x003F6670	kbReader_getKeyChar	func_003F6670	[desc] translates a USB key code to its character (keypad table with Num Lock, else sceUsbKbCnvRawCode)
+names5d	0x003F6700	kbReader_testModifierKey	func_003F6700	[desc] tests a modifier key given as a Windows virtual-key code (VK_SHIFT, VK_CONTROL, VK_MENU, VK_LWIN ...) in a modifier word
+names5d	0x003F67E0	kbReader_testLockKey	func_003F67E0	[desc] tests a lock key given as a Windows virtual-key code (VK_NUMLOCK, VK_CAPITAL, VK_SCROLL) in an LED word
+names5d	0x003F6838	kbReader_isKeyDown	func_003F6838	[desc] returns whether a virtual key is down in a read buffer: modifier word, LED word, or the virtual-key byte of a key code
+names5d	0x003F68F0	kbReader_translateKey	func_003F68F0	[desc] translates one key code of a read buffer into the static pair D_004A5B10 (virtual-key byte, character)
+names5d	0x003F6960	voipRpc_call	func_003F6960	[desc] when the voice-chat RPC client is bound, waits for the previous call and sends two argument words to an RPC function (sceSifCallRpc), retrying until accepted
+names5d	0x003F6A40	voipRpc_bind	func_003F6A40	[desc] binds the voice-chat SIF RPC client (server id 567) and registers the uncached status word with RPC function 0; initOnline's call
+names5d	0x003F6AB0	voipRpc_unbind	func_003F6AB0	[desc] clears the bound flag D_004A5B14, turning later calls into no-ops
+names5d	0x003F6AB8	voipRpc_connect	func_003F6AB8	[desc] RPC function 2 with the peer address and two 16-bit ports packed in one word; cVoipMan_connect's call
+names5d	0x003F6AF0	voipRpc_disconnect	func_003F6AF0	[desc] RPC function 3; cVoipMan_disconnect's call
+names5d	0x003F6B20	voipRpc_turnVoiceOn	func_003F6B20	[desc] RPC function 4; cVoipMan_turnVoiceOn's call
+names5d	0x003F6B50	voipRpc_turnVoiceOff	func_003F6B50	[desc] RPC function 5; cVoipMan_turnVoiceOff's call
+names5d	0x003F6B80	voipRpc_getStatusBit0	func_003F6B80	[desc] returns bit 0 of the voice module's status word (func_003F6C40)
+names5d	0x003F6BA0	voipRpc_getVoiceLevel	func_003F6BA0	[desc] RPC function 7, then copies the level and maximum from the receive buffer; cVoipMan_getVoiceLevel's call
+names5d	0x003F6C10	voipRpc_setVoiceLevel	func_003F6C10	[desc] RPC function 6 with the level and maximum; cVoipMan_setVoiceLevel's call
+names5d	0x003F6C40	voipRpc_getStatusWord	func_003F6C40	[desc] returns the voice module's status word through its uncached pointer D_004A5B18
+names5d	0x003F6C50	slogin_setStarted	func_003F6C50	[desc] sets the account library's started flag D_004A4BC0 and returns 0
+names5d	0x003F6C60	slogin_clearStarted	func_003F6C60	[desc] clears the account library's started flag D_004A4BC0 and returns 0
+names5d	0x003F6C70	slogin_createSession	func_003F6C70	[desc] allocates (TibExtMemAlloc) and zeroes the 0x14C-byte account session, copies the 17 card callbacks and sets it idle
+names5d	0x003F6D98	slogin_freeSession	func_003F6D98	[desc] frees the account session D_004A4BC4 (TibExtMemFree) and clears the pointer
+names5d	0x003F6DC8	slogin_openSaveRecords	func_003F6DC8	[desc] opens the save-record manager (func_003FC0E8) with 2 records, port 0, the card callbacks, the key "Copyright Electronic Arts" and the XOR cipher interface
+names5d	0x003F6E70	slogin_closeSaveRecords	func_003F6E70	[desc] closes the save-record manager (func_003FC260) and returns the error mapped by func_003F8178
+names5d	0x003F6E98	slogin_startOperation	func_003F6E98	[desc] starts an account operation (0 create, 1 save, 2 load, 3 delete) through func_003F7990 when the session is idle; 22 when one is running
+names5d	0x003F6EE0	slogin_advanceOperation	func_003F6EE0	[desc] the operation poll func_003F7990 installs: runs the current card mode's step or, in mode 9, the first-mode dispatcher
+names5d	0x003F6F68	slogin_runModeStep	func_003F6F68	[desc] runs one phase of the current card mode (begin, start, poll, finish) and calls the mode's next or error handler
+names5d	0x003F71B8	slogin_onCardModeError	func_003F71B8	[desc] error handler of card modes 0..5: keeps the error and switches to mode 7 (close the save) so it is reported after closing
+names5d	0x003F71F8	slogin_onCloseModeError	func_003F71F8	[desc] error handler of modes 6 and 8: returns the session to idle (func_003F7BD0)
+names5d	0x003F7218	slogin_enterNextCardMode	func_003F7218	[desc] next-mode handler of modes 0..5: picks the operation's following card step (open, write / read ACCT, PASS, close) and enters it
+names5d	0x003F72C8	slogin_onCloseModeDone	func_003F72C8	[desc] next-mode handler of modes 6 and 8: returns the session to idle and reports the operation finished
+names5d	0x003F72F8	slogin_reportKeptError	func_003F72F8	[desc] handler of mode 7: hands back the error kept in +0x148, clears it and returns the session to idle
+names5d	0x003F7328	slogin_enterFirstMode	func_003F7328	[desc] mode-9 dispatcher: enters the operation's first card mode (0 create, 1 open, 8 delete)
+names5d	0x003F73A8	slogin_startCreateSave	func_003F73A8	[desc] start function of mode 0: creates the "slogin" save on any port (func_003FC390)
+names5d	0x003F73F0	slogin_startOpenSave	func_003F73F0	[desc] start function of mode 1: opens the "slogin" save on any port (func_003FC4C8)
+names5d	0x003F7438	slogin_startDeleteSave	func_003F7438	[desc] start function of mode 8: deletes the "slogin" save on any port (func_003FC3C0)
+names5d	0x003F7478	slogin_startWriteName	func_003F7478	[desc] start function of mode 2: copies the user name into a new 17-byte record buffer and writes it as the save's 'ACCT' record (func_003FC548)
+names5d	0x003F7528	slogin_startWritePassword	func_003F7528	[desc] start function of mode 3: copies the password into a new 17-byte record buffer and writes it as the save's 'PASS' record (func_003FC548)
+names5d	0x003F75D8	slogin_startReadName	func_003F75D8	[desc] start function of mode 4: reads the save's 'ACCT' record into a new 17-byte buffer (func_003FC708)
+names5d	0x003F7658	slogin_startReadPassword	func_003F7658	[desc] start function of mode 5: reads the save's 'PASS' record into a new 17-byte buffer (func_003FC708)
+names5d	0x003F76D8	slogin_startCloseSave	func_003F76D8	[desc] start function of modes 6 and 7: closes the open save (func_003FC4E8 with the stored parameters)
+names5d	0x003F7708	slogin_pollCardMode	func_003F7708	[desc] poll function of every card mode: polls the save-record manager (func_003FCA40), running the mode's completion on done or its cleanup on failure
+names5d	0x003F77F0	slogin_defaultPhase2	func_003F77F0	[desc] returns 0: the phase-2 function func_003F7C00 installs for every card mode
+names5d	0x003F77F8	slogin_onSaveCreated	func_003F77F8	[desc] completion of mode 0: copies the save-record manager's open-save parameters (func_003FC990) into the session
+names5d	0x003F7820	slogin_onSaveOpened	func_003F7820	[desc] completion of mode 1: calls func_003F77F8 (stores the open-save parameters)
+names5d	0x003F7840	slogin_onNameRead	func_003F7840	[desc] completion of mode 4: copies the 17 bytes read for 'ACCT' to the caller's output and frees the record buffer
+names5d	0x003F7890	slogin_onPasswordRead	func_003F7890	[desc] completion of mode 5: copies the 17 bytes read for 'PASS' to the caller's output + 0x11 and frees the record buffer
+names5d	0x003F78E0	slogin_onNameWritten	func_003F78E0	[desc] completion of mode 2: frees the 'ACCT' record buffer (func_003F7920)
+names5d	0x003F7900	slogin_onPasswordWritten	func_003F7900	[desc] completion of mode 3: frees the 'PASS' record buffer (func_003F7958)
+names5d	0x003F7920	slogin_freeNameBuffer	func_003F7920	[desc] frees the 17-byte record buffer (+0x144) with func_003FCF00; the 'ACCT' modes' completion and cleanup
+names5d	0x003F7958	slogin_freePasswordBuffer	func_003F7958	[desc] frees the 17-byte record buffer (+0x144) with func_003FCF00; the 'PASS' modes' completion and cleanup
+names5d	0x003F7990	slogin_beginOperation	func_003F7990	[desc] stores the operation, installs the operation poll (func_003F6EE0) and the first-mode dispatcher (func_003F7328) and sets mode 9
+names5d	0x003F7A30	slogin_endOperation	func_003F7A30	[desc] marks the session idle (operation 4), removes the operation poll and the dispatcher and returns to mode 10 (func_003F7BD0)
+names5d	0x003F7A60	slogin_enterCardMode	func_003F7A60	[desc] sets a card mode, optionally saving the phase block, installs the step, next-mode and error handlers for it and its card functions (func_003F7C00)
+names5d	0x003F7BD0	slogin_returnToIdle	func_003F7BD0	[desc] sets mode 10 with no step, next-mode or error handler and finishes the phase (func_003F7D98)
+names5d	0x003F7C00	slogin_installCardFunctions	func_003F7C00	[desc] installs the current card mode's start, poll and phase-2 functions, clears completion and cleanup, and resets the phase to 4
+names5d	0x003F7D98	slogin_finishPhase	func_003F7D98	[desc] sets phase 5 and clears the start, poll, phase-2, completion and cleanup functions
+names5d	0x003F7DE0	slogin_checkIconCrc	func_003F7DE0	[desc] runs the CRC interface over the 10606-byte save icon and compares the digest with 0x0836C71D
+names5d	0x003F7E90	slogin_copyStringBounded	func_003F7E90	[desc] copies a C string into an n-byte buffer, always NUL-terminating (strncpy bounded by n - 1); no-op for null, empty or same buffers
+names5d	0x003F7EE0	slogin_init	func_003F7EE0	[desc] sets the started flag, creates the session (func_003F6C70) and opens the save-record manager (func_003F6DC8); cSharedLoginMan_init's call
+names5d	0x003F7F18	slogin_shutdown	func_003F7F18	[desc] closes the save-record manager, frees the session and clears the started flag; cSharedLoginMan_shutdown's call
+names5d	0x003F7F48	slogin_startCreateAccount	func_003F7F48	[desc] copies the name and password, checks the icon CRC, builds the save description and starts operation 0; cSharedLoginMan_startCreateAccount's call
+names5d	0x003F8000	slogin_startReadAccount	func_003F8000	[desc] starts operation 2 (load the name and password into a 34-byte buffer); cSharedLoginMan_startReadAccount's call
+names5d	0x003F8048	slogin_startSaveAccount	func_003F8048	[desc] copies the name and password into the session and starts operation 1; cSharedLoginMan_startSaveAccount's call
+names5d	0x003F80C0	slogin_startDeleteAccount	func_003F80C0	[desc] starts operation 3 (delete the account save): func_003F6E98(3)
+names5d	0x003F80E0	slogin_update	func_003F80E0	[desc] polls the running operation (+0xD4) and returns the session to idle when it finishes or fails; cSharedLoginMan_update's per-frame call
+names5d	0x003F8178	slogin_mapSaveRecordError	func_003F8178	[desc] maps a save-record manager error code (card errors offset by 100) to an account error code
+names5d	0x003F8200	slogin_getLastOperation	func_003F8200	[desc] stores the last operation started (+0x104) through the output pointer
+names5d	0x003F8218	slogin_getSavedMode	func_003F8218	[desc] stores the mode of the saved phase block (+0x10C) through the output pointer
+names5d	0x003F8230	slogin_getAccountRecordSize	func_003F8230	[desc] stores the on-card size of a 34-byte account record (func_003FCF98) through the output pointer
+names5d	0x003F8258	slogin_buildSaveDescription	func_003F8258	[desc] fills the icon.sys header ("PS2D", Shift-JIS "EA Login", colours, lights, "view.ico") and hands the save description to func_003FCDC8
+names5d	0x003F8550	mcReq_findLowestSlot	func_003F8550	[desc] returns the index of the lowest set bit among the low 8 of a slot mask (8 when none)
+names5d	0x003F8588	mcReq_findHighestSlot	func_003F8588	[desc] returns the index of the highest set bit among the low 8 of a slot mask (-1 when none)
+names5d	0x003F85C0	mcReq_findNextSlot	func_003F85C0	[desc] returns the next usable slot after the request's current one, searching up or down a slot mask
+names5d	0x003F86B8	mcReq_countUnits	func_003F86B8	[desc] counts the set bits among the low 8 of a usable-unit mask
+names5d	0x003F86F0	mcReq_setError	func_003F86F0	[desc] records the request's error (D_004A4BD8 +0x8) unless a cleanup operation (11..13) is running
+names5d	0x003F8710	mcReq_getError	func_003F8710	[desc] returns the request's recorded error (D_004A4BD8 +0x8)
+names5d	0x003F8720	mcReq_startFlushCleanup	func_003F8720	[desc] starts the cleanup of a failed request with a file open: operation 11, state 24, flushes the file (driver callback +0x38)
+names5d	0x003F8768	mcReq_startCloseCleanup	func_003F8768	[desc] starts the cleanup of a failed request at the close step: operation 12, state 25, closes the file (driver callback +0x1C)
+names5d	0x003F87B0	mcReq_startReleaseCleanup	func_003F87B0	[desc] starts the last cleanup step of a failed request: operation 13, state 26, releases the card unit (driver callback +0x14)
+names5d	0x003F87F8	mcReq_acceptAnyResult	func_003F87F8	[desc] result check of state 0 (entry 0 of D_004514A0): returns the card result unchanged
+names5d	0x003F8800	mcReq_checkUnitResult	func_003F8800	[desc] result check of state 1 (unit check): accepts results 0, 3 and 17
+names5d	0x003F8838	mcReq_checkSearchResult	func_003F8838	[desc] result check of state 2 (directory search): accepts results 0, 3, 4, 9 and 17
+names5d	0x003F8880	mcReq_checkTransferResult	func_003F8880	[desc] result check of the read, write and seek states: accepts results 0, 3, 4, 9, 10, 13, 14 and 17
+names5d	0x003F8908	mcReq_checkFlushResult	func_003F8908	[desc] result check of the flush states (8, 12, 16, 24): accepts results 0, 3, 4, 9 and 17
+names5d	0x003F8968	mcReq_checkCloseResult	func_003F8968	[desc] result check of the close states (9, 13, 17, 25): accepts results 0, 3, 4, 9 and 17
+names5d	0x003F89C8	mcReq_checkReleaseResult	func_003F89C8	[desc] result check of state 26 (unit released): accepts results 0, 3, 9 and 17
+names5d	0x003F8A08	mcReq_checkMkdirResult	func_003F8A08	[desc] result check of state 5 (directory created): accepts results 0, 3, 8, 9, 14 and 17
+names5d	0x003F8A58	mcReq_checkOpenResult	func_003F8A58	[desc] result check of the file-open states (6, 10, 14, 22): accepts results 0, 3, 4, 9, 13 and 17
+names5d	0x003F8AC0	mcReq_checkDeleteResult	func_003F8AC0	[desc] result check of the file-delete states (19..21): accepts results 0, 3, 4, 5, 6, 9, 13 and 17
+names5d	0x003F8B28	mcReq_checkRmdirResult	func_003F8B28	[desc] result check of state 18 (directory deleted): accepts results 0, 3, 4, 9, 13 and 17
+names5d	0x003F8B78	mcReq_checkFreeSpaceResult	func_003F8B78	[desc] result check of state 3 (free space read): accepts results 0, 3 and 17
+names5d	0x003F8BB0	mcReq_checkSpaceQueryResult	func_003F8BB0	[desc] result check of state 4 (the second space query): accepts results 0, 3 and 17
+names5d	0x003F8BE8	mcReq_checkState23Result	func_003F8BE8	[desc] result check of state 23, which no step enters: accepts results 0, 3, 4, 9 and 17
+names5d	0x003F8C30	mcReq_stepNoOperation	func_003F8C30	[desc] returns the checked result: entry 0 (no operation) of the per-operation step table D_00451468
+names5d	0x003F8C38	mcReq_stepOpen	func_003F8C38	[desc] step handler of the open operations (3, 6): unit check, search for "*" + name, then opens dir/file ("PSCD10088" + name), trying the next unit when one has no card
+names5d	0x003F8EF8	mcReq_stepTransfer	func_003F8EF8	[desc] step handler of the seek, write and read operations (8..10): finishes when the byte count matches, else records the error and starts the flush cleanup
+names5d	0x003F8FF0	mcReq_stepClose	func_003F8FF0	[desc] step handler of the close operation (7): flush, close, release the unit, with the matching cleanup on a failed step
+names5d	0x003F9130	mcReq_stepCleanup	func_003F9130	[desc] step handler of the cleanup operations (11..13): flush, close, release, then finishes with the recorded error
+names5d	0x003F9208	mcReq_isOpen	func_003F9208	[desc] returns whether the request layer's driver block D_004A4BDC exists
+names5d	0x003F9218	mcReq_open	func_003F9218	[desc] opens the request layer: checks the 17 callbacks, allocates the driver block and request (TibExtMemAlloc), builds the usable-unit mask and installs the step / result tables
+names5d	0x003F9530	mcReq_close	func_003F9530	[desc] clears the callbacks and the request, frees the request and the driver block (TibExtMemFree) and clears both pointers
+names5d	0x003F95E8	mcReq_copyRequestBody	func_003F95E8	[desc] copies the current request body (0x60 bytes: descriptor, unit, directory, file and save names) to a buffer
+names5d	0x003F9698	mcReq_startDelete	func_003F9698	[desc] starts a request deleting a save on one unit or searching the usable units (operations 5 / 2)
+names5d	0x003F9818	mcReq_startCreate	func_003F9818	[desc] starts a request creating a save on one unit or searching the usable units (operations 4 / 1); names of 0x18 characters or more fail
+names5d	0x003F99B8	mcReq_startOpen	func_003F99B8	[desc] starts a request opening a save on one unit or searching the usable units (operations 6 / 3)
+names5d	0x003F9B38	mcReq_startClose	func_003F9B38	[desc] starts closing an open save file (operation 7): copies its request body and flushes the file (state 24)
+names5d	0x003F9C48	mcReq_startSeek	func_003F9C48	[desc] starts a seek in an open save file (operation 8, state 27), adding the base offset for seeks from the start
+names5d	0x003F9DC0	mcReq_startRead	func_003F9DC0	[desc] starts a read from an open save file (operation 10, state 29), keeping the byte count as the expected count
+names5d	0x003F9F00	mcReq_startWrite	func_003F9F00	[desc] starts a write to an open save file (operation 9, state 28), keeping the byte count as the expected count
+names5d	0x003FA040	mcReq_update	func_003FA040	[desc] polls the card call (driver +0x40), checks a finished call's result with the state's check and runs the operation's step handler
+names5d	0x003FA1D0	mcReq_getPortSlot	func_003FA1D0	[desc] decodes a unit code 0..7 into port and slot bytes (func_003FA708); the shared-login card callbacks call it
+names5d	0x003FA240	mcReq_setSaveDescription	func_003FA240	[desc] stores the 976-byte save description in the driver block and computes the space a new save needs (func_003FA6A8)
+names5d	0x003FA360	mcReq_filterDirEntry	func_003FA360	[desc] directory-entry filter of the shared-login search callback: returns func_003FB278() (accepts every entry)
+names5d	0x003FA380	mcReq_asciiToSjis	func_003FA380	[desc] converts an ASCII string to byte-swapped full-width Shift-JIS for an icon.sys title (no terminator written)
+names5d	0x003FA4F0	mcReq_sjisToAscii	func_003FA4F0	[desc] converts a byte-swapped full-width Shift-JIS string back to ASCII, NUL-terminated, stopping at an unmapped character
+names5d	0x003FA6A8	mcReq_computeNewSaveSize	func_003FA6A8	[desc] forwards to func_003FB280 (the space a new save needs) with the caller's arguments
+names5d	0x003FA6C8	mcReq_getCrcInterface	func_003FA6C8	[desc] forwards to func_003FB2C8 (store the CRC interface) with the caller's argument
+names5d	0x003FA6E8	mcReq_getSeekBase	func_003FA6E8	[desc] returns func_003FB300() (0), the base offset of seeks in a save file
+names5d	0x003FA708	mcReq_splitUnitCode	func_003FA708	[desc] splits a unit code into port and slot bytes: 0..3 port 0, 4..7 port 1
+names5d	0x003FA7A0	mcReq_buildSearchPattern	func_003FA7A0	[desc] writes "*" followed by the save name into a zeroed 32-byte buffer
+names5d	0x003FA818	mcReq_buildSaveNames	func_003FA818	[desc] writes the directory and file names, both "PSCD10088" + the save name, into zeroed 32-byte buffers
+names5d	0x003FA8F8	mcReq_stepCreate	func_003FA8F8	[desc] step handler of the create operations (1, 4): unit check, search, space checks, mkdir, then creates the main file, icon.sys and view.ico
+names5d	0x003FAE50	mcReq_stepDelete	func_003FAE50	[desc] step handler of the delete operations (2, 5): unit check, search, deletes icon.sys, view.ico and the main file, then the directory
+names5d	0x003FB278	mcHook_acceptDirEntry	func_003FB278	[desc] returns 1: the directory-entry filter behind func_003FA360 accepts everything
+names5d	0x003FB280	mcHook_computeNewSaveSize	func_003FB280	[desc] returns the space a new save needs: record and icon sizes each rounded up to 1 KB plus 5120 bytes, and kind 3
+names5d	0x003FB2C8	mcHook_getCrcInterface	func_003FB2C8	[desc] stores the CRC interface (func_003FB5E8) through a non-null output pointer
+names5d	0x003FB2F8	mcHook_notifyBusy	func_003FB2F8	[desc] empty body: the request layer calls it with 1 when a request starts and 0 when some finish
+names5d	0x003FB300	mcHook_getSeekBase	func_003FB300	[desc] returns 0, the base offset of seeks in a save file
+names5d	0x003FB308	mcHook_checkSaveDescription	func_003FB308	[desc] returns 0 for a non-null save description, 12 for null
+names5d	0x003FB318	crcIface_makeTableEntry	func_003FB318	[desc] computes one CRC-32 table entry: eight shifts with the reflected polynomial 0xEDB88320
+names5d	0x003FB358	crcIface_fillTable	func_003FB358	[desc] fills a 256-entry CRC-32 table with func_003FB318
+names5d	0x003FB3A0	crcIface_start	func_003FB3A0	[desc] slot 0 of the CRC interface: allocates and fills the 1 KB table (TibExtMemAlloc) and resets the digest
+names5d	0x003FB430	crcIface_stop	func_003FB430	[desc] slot 1 of the CRC interface: frees the table (TibExtMemFree)
+names5d	0x003FB480	crcIface_isStarted	func_003FB480	[desc] slot 2 of the CRC interface: returns whether the table exists
+names5d	0x003FB490	crcIface_reset	func_003FB490	[desc] slot 3 of the CRC interface: resets the CRC-32 digest to all ones
+names5d	0x003FB4C0	crcIface_update	func_003FB4C0	[desc] slot 4 of the CRC interface: adds n bytes to the CRC-32 digest (table-driven, reflected)
+names5d	0x003FB558	crcIface_finish	func_003FB558	[desc] slot 5 of the CRC interface: stores the inverted digest and points the output block (size 4) at it
+names5d	0x003FB5B0	crcIface_getDigestSize	func_003FB5B0	[desc] slot 6 of the CRC interface: stores the digest size, 4
+names5d	0x003FB5E8	crcIface_get	func_003FB5E8	[desc] returns the CRC interface table D_00497508
+names5d	0x003FB5F8	xorIface_start	func_003FB5F8	[desc] slot 0 of the XOR cipher interface: moves it from stopped (state 4) to started without a key (6)
+names5d	0x003FB620	xorIface_stop	func_003FB620	[desc] slot 1 of the XOR cipher interface: forgets the key and returns to state 4
+names5d	0x003FB640	xorIface_isStarted	func_003FB640	[desc] slot 2 of the XOR cipher interface: returns whether its state is not 4
+names5d	0x003FB650	xorIface_setKey	func_003FB650	[desc] slot 3 of the XOR cipher interface: keeps the key pointer and length and restarts at its first byte (state 5)
+names5d	0x003FB6A0	xorIface_encrypt	func_003FB6A0	[desc] slot 4 of the XOR cipher interface: XORs n bytes in place with the repeating key, continuing from the last position (state 7)
+names5d	0x003FB730	xorIface_decrypt	func_003FB730	[desc] slot 5 of the XOR cipher interface: the same XOR, allowed when keyed or decrypting (state 8)
+names5d	0x003FB7C0	xorIface_rewind	func_003FB7C0	[desc] slot 6 of the XOR cipher interface: restarts at the key's first byte (state 5) when a key is set
+names5d	0x003FB800	xorIface_get	func_003FB800	[desc] returns the XOR cipher interface table D_00497528
+names5d	0x003FB810	saveRec_offsetCardError	func_003FB810	[desc] adds 100 to a nonzero request-layer error code (the save-record manager's error range)
+names5d	0x003FB828	saveRec_offsetCipherError	func_003FB828	[desc] adds 200 to a nonzero XOR cipher error code (the save-record manager's error range)
+names5d	0x003FB840	saveRec_offsetCrcError	func_003FB840	[desc] adds 300 to a nonzero CRC interface error code (the save-record manager's error range)
+names5d	0x003FB858	saveRec_getMemTypeAlignment	func_003FB858	[desc] returns the allocation alignment (4) and size granularity (1) of a record memory type (the same for all five)
+names5d	0x003FB898	saveRec_getBlockSize	func_003FB898	[desc] returns a record's block size: its size plus the 12-byte header, rounded up to the type's granularity
+names5d	0x003FB910	saveRec_getHeader	func_003FB910	[desc] returns the 12-byte header in front of a record buffer, optionally requiring it to still hold "TAG_SENTINEL"
+names5d	0x003FB958	saveRec_fillHeader	func_003FB958	[desc] fills a 12-byte record header: key word, size word, then the 4 CRC bytes
+names5d	0x003FB9A0	saveRec_restoreSentinel	func_003FB9A0	[desc] writes "TAG_SENTINEL" (12 bytes) back into a record header area
+names5d	0x003FB9D0	saveRec_splitHeader	func_003FB9D0	[desc] splits a 12-byte record header into its key, size and CRC words (outputs may be 0)
+names5d	0x003FBA20	saveRec_findTableEntry	func_003FBA20	[desc] finds the n-th entry with a key in the open save's record table
+names5d	0x003FBA78	saveRec_setEntryCrc	func_003FBA78	[desc] sets the CRC of the n-th record-table entry with a key
+names5d	0x003FBAD0	saveRec_appendTableEntry	func_003FBAD0	[desc] appends a record-table entry (next file offset, key, size, CRC) and advances the next offset past its header and data
+names5d	0x003FBB50	saveRec_computeCrc	func_003FBB50	[desc] computes a buffer's CRC-32 through the CRC interface (+0x70): reset, update, finish
+names5d	0x003FBBE0	saveRec_computeTableCrc	func_003FBBE0	[desc] computes the CRC-32 of the open save's record table (16 bytes per entry), 0 for an empty table
+names5d	0x003FBC40	saveRec_encrypt	func_003FBC40	[desc] encrypts a buffer with the save cipher (+0x6C): set the stored key, encrypt, rewind
+names5d	0x003FBCD8	saveRec_decrypt	func_003FBCD8	[desc] decrypts a buffer with the save cipher: set the stored key, decrypt, rewind
+names5d	0x003FBD70	saveRec_beginOpen	func_003FBD70	[desc] starts a request opening a save (func_003F99B8) as save-record operation 4 or 5 at step 4 with an empty record table
+names5d	0x003FBDB8	saveRec_seekToStart	func_003FBDB8	[desc] save-record step 9: seeks to the start of the open file to read its record headers
+names5d	0x003FBDF0	saveRec_readNextHeader	func_003FBDF0	[desc] save-record step 7: reads the next 12-byte record header of the open file into the header buffer
+names5d	0x003FBE40	saveRec_addReadHeader	func_003FBE40	[desc] save-record step 11: decrypts the header just read, adds the record to the table and seeks past its data
+names5d	0x003FBED0	saveRec_writeRecord	func_003FBED0	[desc] save-record step 6: fills and encrypts the record's header and data and writes both (func_003F9F00)
+names5d	0x003FBF80	saveRec_readRecord	func_003FBF80	[desc] save-record step 10: reads a record's header and data into the buffer behind its header
+names5d	0x003FBFE0	saveRec_verifyRecord	func_003FBFE0	[desc] decrypts a record just read, checks its key and size and compares its data CRC-32 with the header's
+names5d	0x003FC0D8	saveRec_isOpen	func_003FC0D8	[desc] returns whether the save-record manager state D_004A5B20 exists
+names5d	0x003FC0E8	saveRec_open	func_003FC0E8	[desc] opens the save-record manager: request layer, 172-byte state, CRC interface, cipher and key, record table and header buffer
+names5d	0x003FC260	saveRec_close	func_003FC260	[desc] frees the header buffer, record table and key, stops the cipher and CRC interface, closes the request layer and frees the state
+names5d	0x003FC390	saveRec_startCreate	func_003FC390	[desc] starts creating a save (operation 1): func_003F9818, its error offset by 100
+names5d	0x003FC3C0	saveRec_startDelete	func_003FC3C0	[desc] starts deleting a save (operation 2): func_003F9698, its error offset by 100
+names5d	0x003FC3F0	saveRec_startReopen	func_003FC3F0	[desc] starts reopening a save from kept parameters (operation 5), to be checked against the kept record-table CRC
+names5d	0x003FC4C8	saveRec_startOpen	func_003FC4C8	[desc] func_003FBD70 with operation 4 (open a save and read its record table)
+names5d	0x003FC4E8	saveRec_startClose	func_003FC4E8	[desc] starts closing an open save (operation 3): stores the record table's CRC, clears the table and closes the file
+names5d	0x003FC548	saveRec_startWriteRecord	func_003FC548	[desc] starts writing a record (operation 6): updates or appends its table entry with the data CRC and seeks to its offset
+names5d	0x003FC708	saveRec_startReadRecord	func_003FC708	[desc] starts reading a record (operation 8): finds the n-th record with a key and seeks to it
+names5d	0x003FC850	saveRec_countRecords	func_003FC850	[desc] counts the records with a key in the open save
+names5d	0x003FC8F8	saveRec_getRecordSize	func_003FC8F8	[desc] returns the size of the n-th record with a key in the open save
+names5d	0x003FC990	saveRec_copySaveParams	func_003FC990	[desc] copies the open save's 100-byte parameters (request body and table CRC) to a buffer
+names5d	0x003FCA40	saveRec_update	func_003FCA40	[desc] polls the request layer (func_003FA040) and runs the next step of the save-record operation (write, read, open, reopen, close)
+names5d	0x003FCDC8	saveRec_setSaveDescription	func_003FCDC8	[desc] hands the 976-byte save description to the request layer (func_003FA240), its error offset by 100
+names5d	0x003FCE10	saveRec_allocBuffer	func_003FCE10	[desc] allocates (TibExtMemAlloc) a zeroed record buffer of size bytes behind a 12-byte "TAG_SENTINEL" header and returns the address past the header
+names5d	0x003FCF00	saveRec_freeBuffer	func_003FCF00	[desc] frees a record buffer from func_003FCE10, header included (TibExtMemFree)
+names5d	0x003FCF98	saveRec_getStoredSize	func_003FCF98	[desc] stores a record's stored size (data plus the 12-byte header, func_003FB898 type 2) through the output pointer
+names5d	0x003FCFD8	DirtyDnas_loadModule	func_003FCFD8	[desc] checks the DNAS ELF relocatable image, relocates it against the import table func_003FD810 and looks up DirtyDnasRelInit / Updt / Exit
+names5d	0x003FD0D8	DirtyDnas_init	func_003FD0D8	[desc] calls the loaded DNAS module's DirtyDnasRelInit with the parameters and 0x1020000
+names5d	0x003FD100	DirtyDnas_update	func_003FD100	[desc] calls the loaded DNAS module's DirtyDnasRelUpdt and returns its result
+names5d	0x003FD128	DirtyDnas_exit	func_003FD128	[desc] calls the loaded DNAS module's DirtyDnasRelExit with an info buffer and returns its result
+names5d	0x003FD150	DirtyDnas_run	func_003FD150	[desc] runs the DNAS module to completion: Init, Updt while a polled callback allows and it returns 1, then Exit
+names5d	0x003FD1D8	elfModule_hasElfMagic	func_003FD1D8	[desc] returns whether an image starts with "\x7FELF"
+names5d	0x003FD1F0	elfModule_getSectionHeader	func_003FD1F0	[desc] returns the address of section header n of a loaded ELF image (40 bytes each from e_shoff)
+names5d	0x003FD210	elfModule_findSection	func_003FD210	[desc] finds a section of a loaded ELF image by name through the section-name string table
+names5d	0x003FD2B8	elfModule_getSectionBase	func_003FD2B8	[desc] returns the image offset for a section index: its file offset, 0xFFF00000 for SHN_ABS, 0 for other reserved indexes
+names5d	0x003FD2F8	elfModule_applyRelSection	func_003FD2F8	[desc] applies one REL section in place (R_MIPS_32 / 26 / HI16 / LO16), redirecting symbols inside the context range to the import table's words
+names5d	0x003FD558	elfModule_open	func_003FD558	[desc] checks for a MIPS ELF relocatable (e_type 1, e_machine 8) and fills a module descriptor with its .text, .symtab and .strtab
+names5d	0x003FD660	elfModule_relocate	func_003FD660	[desc] relocates .text, .data and .rodata with their .rel.* sections (func_003FD2F8)
+names5d	0x003FD6E0	elfModule_getSymbolAddress	func_003FD6E0	[desc] returns symbol idx's address (image + section offset + value) and copies its name
+names5d	0x003FD758	elfModule_findSymbol	func_003FD758	[desc] finds a symbol by name and returns its address (image + section offset + value)
+names5d	0x003FD810	DirtyDnas_importTable	func_003FD810	[desc] not code: the body is the DNAS module's 59-word import table of game function and data addresses, ending at func_003FD908
+names5d	0x003FD908	DirtyDnas_importTableEnd	func_003FD908	[desc] empty function marking the end of the DNAS import table (func_003FCFD8 takes the distance as the table size)
+names5d	0x003FDE30	libdma_waitChannel	func_003FDE30	[desc] libdma internal: waits for a DMA channel's CHCR STR bit to clear, printing "libdma: sync timeout" and force-stopping it after the poll limit
+names5d	0x003FDEA0	libdma_waitMadr	func_003FDEA0	[desc] libdma internal: waits until a DMA channel's MADR reaches an address, printing "libdma: sync timeout" past the poll limit; sceDmaWatch's callee
+names5d	0x003FDF28	libdma_toDmaAddress	func_003FDF28	[desc] libdma internal: converts a scratchpad address (0x7xxxxxxx) to its DMA form (low 28 bits, bit 31 set); others pass through
+names5d	0x003FDF50	libdma_zeroBytes	func_003FDF50	[desc] libdma internal: zeroes n bytes at an address; sceDmaReset's callee
+names5d	0x003FE678	libdev_isVu0Running	func_003FE678	[desc] libdev internal: returns whether VPU-STAT's VU0 nibble is 1 (running with no stop condition); sceDevVu0GetCnd / PutCnd's check
+names5d	0x003FE7D8	libdev_getVu0State	func_003FE7D8	[desc] libdev internal: returns VU0's state from VPU-STAT (1 D-bit stop, 2 T-bit stop, 3 forced break, 4 running, 0 idle); sceDevVu0Pause / Continue's callee
+names5d	0x003FEB08	libdev_isAnyVuRunning	func_003FEB08	[desc] libdev internal: returns 1 when VU0 or VU1 is running with no stop condition (VPU-STAT nibbles 0 and 2)
+names5d	0x003FEB38	libdev_writeVu0Quad	func_003FEB38	[desc] libdev internal: writes one quadword to VU0 memory at a quadword address (VU1 registers mapped from 0x400), restoring VI01 and VF01
+names5d	0x003FEB78	libdev_readVu0Quad	func_003FEB78	[desc] libdev internal: reads one quadword from VU0 memory at a quadword address, restoring VI01 and VF01
+names5d	0x003FED08	libdev_getVu1State	func_003FED08	[desc] libdev internal: returns VU1's state from VPU-STAT (1 D-bit stop, 2 T-bit stop, 3 forced break, 4 running, 0 idle); sceDevVu1Pause / Continue's callee
+names5d	0x003FF160	libdev_getVif0State	func_003FF160	[desc] libdev internal: returns VIF0's state from VIF0_STAT (0 idle, 1 stopped, 2 waiting, 3 error, 4 running)
+names5d	0x003FF390	libpad_sendCommandBlock	func_003FF390	[desc] libpad internal: bumps a port/slot's 32-byte command block counter and DMAs it to the IOP pad driver (sceSifSetDma), unless the last transfer is pending
+names5d	0x003FF5E8	libpad_initDriver	func_003FF5E8	[desc] libpad internal: marks every port/slot closed and sends pad RPC command 16; scePadInit's callee
+names5d	0x003FF9A8	libpad_getNewestFrame	func_003FF9A8	[desc] libpad internal: returns the newer (higher frame counter) of a port/slot's two 0x80-byte DMA frames after SyncDCache
+names5d	0x003FFA08	libpad_getFrameCount	func_003FFA08	[desc] libpad internal: returns the frame counter of a port/slot's newest pad frame (0 when not open)
+names5d	0x004007A8	libpad_callRpc20	func_004007A8	[desc] libpad internal: sends pad RPC command 20 with one argument word and returns the reply word
+names5d	0x00400810	libcdvd_onDelayAlarm	func_00400810	[desc] libcdvd internal: alarm handler of func_00400838, signals its semaphore (iSignalSema)
+names5d	0x00400838	libcdvd_sleepTicks	func_00400838	[desc] libcdvd internal: sleeps for n alarm ticks on a fresh semaphore signalled by an alarm (func_00400810); sceCdSync / sceCdSyncS's wait
+names5d	0x00400908	libcdvd_finishNcmd	func_00400908	[desc] libcdvd internal: ends an asynchronous N-command: hands its code to the callback, releases the command semaphore and wakes the callback thread
+names5d	0x004009A8	libcdvd_callbackThread	func_004009A8	[desc] libcdvd internal: body of the callback thread: waits on its semaphore and runs the user callback for each ended command, exiting on the shutdown code
+names5d	0x00400B48	libcdvd_onReadDone	func_00400B48	[desc] libcdvd internal: RPC end handler of a CD read: patches the unaligned head and tail bytes from the IOP's fixup block, then func_00400908
+names5d	0x00400C00	libcdvd_createSemas	func_00400C00	[desc] libcdvd internal: creates the N-command, S-command, third and callback semaphores the first time they are needed
+names5d	0x00400CB8	libcdvd_shutdown	func_00400CB8	[desc] libcdvd internal: stops the callback thread, deletes the semaphores and removes the power-off handler (sceCdInit's exit mode)
+names5d	0x00400DD8	libcdvd_onPowerOffCmd	func_00400DD8	[desc] libcdvd internal: SIF command handler of the IOP's power-off notice (0x80000012): calls the power-off callback under its $gp
+names5d	0x00400E30	libcdvd_installPowerOffHandler	func_00400E30	[desc] libcdvd internal: installs func_00400DD8 for SIF command 0x80000012 (sceSifAddCmdHandler); sceCdInit / sceCdPOffCallback's callee
+names5d	0x00400EA8	libcdvd_searchFileRpc	func_00400EA8	[desc] libcdvd internal: binds the search-file RPC server (0x80000597) and fills a 0x24-byte file record for a path; sceCdSearchFile's body
+names5d	0x004011E0	_sceCd_ncmd_prechk	func_004011E0	[e] the DNAS overlay's _reloctable names import slot 15, which holds this function, _sceCd_ncmd_prechk; [b] the N-command pre-check: takes the N-command semaphore and binds the server ("Ncmd fail sema", "Libcdvd bind err N CMD")
+names5d	0x00401350	sceCdNcmdDiskReady	func_00401350	[e] the DNAS overlay's _reloctable names import slot 9, which holds this function, sceCdNcmdDiskReady (neighbour slots 8 and 10 are the named sceCdMmode and sceCdDiskReady); [b] asks the N-command server for the drive's ready state (RPC function 14)
+names5d	0x004014F8	_sceCd_scmd_prechk	func_004014F8	[e] the DNAS overlay's _reloctable names import slot 11, which holds this function, _sceCd_scmd_prechk; [b] the S-command pre-check: takes the S-command semaphore and binds the server ("Scmd fail sema", "Libcdvd bind err S cmd")
+names5d	0x00401668	libcdvd_getInternalObject	func_00401668	[desc] libcdvd internal: returns the address or id of a libcdvd semaphore, buffer or RPC client chosen by a code (0x8001.., 0x8011..)
+names5d	0x004019F8	libcdvd_oldDiskReady	func_004019F8	[desc] libcdvd internal: "OLD DiskReady Call": asks the disk-ready RPC server (0x8000059A) whether a disc is ready; sceCdDiskReady's callee
+names5d	0x00402C30	libmpeg_dispatchCallback	func_00402C30	[desc] libmpeg internal: calls the installed decoder callback for an event block's type (see sceMpegAddCallback)
+names5d	0x00402C80	libmpeg_raiseNeedData	func_00402C80	[desc] libmpeg internal: raises the type-1 "needs data" callback (func_00402C30)
+names5d	0x00402CA8	libmpeg_enableTimeStampStep	func_00402CA8	[desc] libmpeg internal: turns on time-stamp interpolation with a 64-bit step (flag +0x70, step +0x78)
+names5d	0x00402CC0	libmpeg_disableTimeStampStep	func_00402CC0	[desc] libmpeg internal: turns off time-stamp interpolation (clears +0x70 and +0x78)
+names5d	0x00402CD8	libmpeg_setOutputAddress	func_00402CD8	[desc] libmpeg internal: sets the output picture address (internal +0xD8)
+names5d	0x00402D38	libmpeg_queueTimeStamp	func_00402D38	[desc] libmpeg internal: queues a 64-bit time stamp for the next decoded picture (+0xF0, state +0xF8 = 1)
+names5d	0x00402D50	libmpeg_initPool	func_00402D50	[desc] libmpeg internal: sets a memory pool's base, size, current and mark over a block
+names5d	0x00402D68	libmpeg_markPool	func_00402D68	[desc] libmpeg internal: records the pool's current position as its mark
+names5d	0x00402D78	libmpeg_rewindPool	func_00402D78	[desc] libmpeg internal: rewinds the pool to its mark (current = mark)
+names5d	0x00402D88	libmpeg_allocFromPool	func_00402D88	[desc] libmpeg internal: takes an aligned block from a memory pool, reporting "work area size is too small" when it does not fit
+names5d	0x00402DF8	libmpeg_getPoolFree	func_00402DF8	[desc] libmpeg internal: returns base + size - current of a memory pool
+names5d	0x00402E10	libmpeg_decodeUntilPicture	func_00402E10	[desc] libmpeg internal: checks the 64-byte output alignment and decodes pictures until one is output or the stream ends; the sceMpegGetPicture* body
+names5d	0x00402F80	libmpeg_decodeFramePicture	func_00402F80	[desc] libmpeg internal: decodes (or skips past the type's limit) one frame picture and advances the picture counters
+names5d	0x00403098	libmpeg_decodePicture	func_00403098	[desc] libmpeg internal: decodes one picture: field pictures through func_004030E0, frame pictures through func_00402F80
+names5d	0x004030E0	libmpeg_decodeFieldPair	func_004030E0	[desc] libmpeg internal: decodes (or skips) a field-picture pair, the first field then the matching second field
+names5d	0x00403240	libmpeg_flushHeldPicture	func_00403240	[desc] libmpeg internal: outputs the reference picture still held at the end of the stream (func_004032B8) and clears the held flag
+names5d	0x004032A8	libmpeg_resetToMpeg1	func_004032A8	[desc] libmpeg internal: clears the MPEG-2 flag (+0x848) and sets the IPU's MPEG-1 bit (func_00405B48(1)); sceMpegReset's callee
+names5d	0x004032B8	libmpeg_outputHeldPicture	func_004032B8	[desc] libmpeg internal: converts the held reference picture into the caller's buffer (func_004086C0 / func_004087D0), or reports "the second field is missing"
+names5d	0x00403338	libmpeg_setupScratchpad	func_00403338	[desc] libmpeg internal: sets the IPU MPEG-1 bit and points the two macroblock buffer pairs into scratchpad; sceMpegCreate's callee
+names5d	0x00403398	libmpeg_stopIpu	func_00403398	[desc] libmpeg internal: with the DMA controller held, stops IPU DMA channels 3 and 4 and the to-scratchpad channel, then resets the IPU; sceMpegReset's callee
+names5d	0x00403460	libmpeg_printError	func_00403460	[desc] libmpeg internal: prints a decoder error message as "[MPEG ERROR]%s" (scePrintf)
+names5d	0x00403470	libmpeg_reportErrorf	func_00403470	[desc] libmpeg internal: sprintf's an error message into a 256-byte buffer and reports it (func_004034A8)
+names5d	0x004034A8	libmpeg_reportError	func_004034A8	[desc] libmpeg internal: passes an error message to the type-0 error callback, or prints it (func_00403460)
+names5d	0x00403500	libmpeg_startInputDma	func_00403500	[desc] libmpeg internal: builds DMA ref / refe tags over a bitstream block and starts the to-IPU DMA (channel 4, chain mode); sceMpegAddBs's callee
+names5d	0x00403600	libmpeg_setPictureSize	func_00403600	[desc] libmpeg internal: fills a picture-size record: width, height and both in macroblocks (>> 4)
+names5d	0x00403620	libmpeg_parseSequenceHeader	func_00403620	[desc] libmpeg internal: parses an MPEG sequence header (sizes, bit rate, VBV) and loads its quantiser matrices into the IPU
+names5d	0x004039F0	libmpeg_computePlaneAddresses	func_004039F0	[desc] libmpeg internal: computes the uncached Y, U and V plane addresses of three picture slots
+names5d	0x00403AD0	libmpeg_loadDefaultMatrix	func_00403AD0	[desc] libmpeg internal: DMAs a default quantiser matrix into the IPU between the stop-DMA and restart-DMA callbacks
+names5d	0x00403BB0	libmpeg_parseSequenceExtension	func_00403BB0	[desc] libmpeg internal: parses an MPEG-2 sequence extension (table D_00497FE0 id 1) and marks the stream MPEG-2
+names5d	0x00403CE0	libmpeg_parseSequenceDisplayExtension	func_00403CE0	[desc] libmpeg internal: parses an MPEG-2 sequence display extension (id 2): matrix coefficients and display size
+names5d	0x00403D80	libmpeg_onUnknownExtension	func_00403D80	[desc] libmpeg internal: reports "Unknown Extension" (entries 0 and 6 of the extension table D_00497FE0)
+names5d	0x00403DB0	libmpeg_defaultStopDma	func_00403DB0	[desc] libmpeg internal: default type-2 callback: sceIpuStopDMA on the save block at +0x4C
+names5d	0x00403DD8	libmpeg_defaultRestartDma	func_00403DD8	[desc] libmpeg internal: default type-3 callback: sceIpuRestartDMA on the save block at +0x4C
+names5d	0x00404050	libmpeg_formPredictions	func_00404050	[desc] libmpeg internal: forms a macroblock's motion-compensated prediction for its forward / backward vectors (the MSSG mpeg2decode form_predictions step)
+names5d	0x00404B78	libmpeg_finishMacroblock	func_00404B78	[desc] libmpeg internal: runs a decoded macroblock's block copy routines and merges prediction and residual (func_00405A88 / func_00405AE8)
+names5d	0x00404D98	libmpeg_mcLumaCopy	func_00404D98	[desc] libmpeg internal: motion compensation routine D_00453280[0]: widens a 16-pixel-wide luma reference block to 16-bit
+names5d	0x00404E10	libmpeg_mcChromaCopy	func_00404E10	[desc] libmpeg internal: motion compensation routine D_004532A0[0]: widens an 8-pixel-wide chroma reference block to 16-bit
+names5d	0x00404EA8	libmpeg_mcLumaHalfV	func_00404EA8	[desc] libmpeg internal: motion compensation routine D_00453280[1]: luma vertical half-pixel (rounded average with the pixel below)
+names5d	0x00404F60	libmpeg_mcChromaHalfV	func_00404F60	[desc] libmpeg internal: motion compensation routine D_004532A0[1]: chroma vertical half-pixel
+names5d	0x00405030	libmpeg_mcLumaHalfH	func_00405030	[desc] libmpeg internal: motion compensation routine D_00453280[2]: luma horizontal half-pixel (rounded average with the right neighbour)
+names5d	0x004050E0	libmpeg_mcChromaHalfH	func_004050E0	[desc] libmpeg internal: motion compensation routine D_004532A0[2]: chroma horizontal half-pixel
+names5d	0x00405198	libmpeg_mcLumaHalfHV	func_00405198	[desc] libmpeg internal: motion compensation routine D_00453280[3]: luma half-pixel in both directions ((2x2 sum + 2) >> 2)
+names5d	0x00405290	libmpeg_mcChromaHalfHV	func_00405290	[desc] libmpeg internal: motion compensation routine D_004532A0[3]: chroma half-pixel in both directions
+names5d	0x00405390	libmpeg_mcLumaCopyAvg	func_00405390	[desc] libmpeg internal: motion compensation routine D_00453280[4]: averages a full-pixel luma reference block into the prediction
+names5d	0x00405430	libmpeg_mcChromaCopyAvg	func_00405430	[desc] libmpeg internal: motion compensation routine D_004532A0[4]: averages a full-pixel chroma reference block into the prediction
+names5d	0x004054E0	libmpeg_mcLumaHalfVAvg	func_004054E0	[desc] libmpeg internal: motion compensation routine D_00453280[5]: luma vertical half-pixel averaged into the prediction
+names5d	0x004055C0	libmpeg_mcChromaHalfVAvg	func_004055C0	[desc] libmpeg internal: motion compensation routine D_004532A0[5]: chroma vertical half-pixel averaged into the prediction
+names5d	0x004056A8	libmpeg_mcLumaHalfHAvg	func_004056A8	[desc] libmpeg internal: motion compensation routine D_00453280[6]: luma horizontal half-pixel averaged into the prediction
+names5d	0x00405780	libmpeg_mcChromaHalfHAvg	func_00405780	[desc] libmpeg internal: motion compensation routine D_004532A0[6]: chroma horizontal half-pixel averaged into the prediction
+names5d	0x00405850	libmpeg_mcLumaHalfHVAvg	func_00405850	[desc] libmpeg internal: motion compensation routine D_00453280[7]: luma two-way half-pixel averaged into the prediction
+names5d	0x00405970	libmpeg_mcChromaHalfHVAvg	func_00405970	[desc] libmpeg internal: motion compensation routine D_004532A0[7]: chroma two-way half-pixel averaged into the prediction
+names5d	0x00405A88	libmpeg_addResidual	func_00405A88	[desc] libmpeg internal: adds a macroblock's 16-bit residual to its prediction and stores 384 clamped 8-bit pixels (ppacb)
+names5d	0x00405AE8	libmpeg_storeClamped	func_00405AE8	[desc] libmpeg internal: stores 384 16-bit samples of a macroblock as 8-bit pixels clamped to 0..255 (ppacb)
+names5d	0x00405B48	libmpeg_setIpuMpeg1	func_00405B48	[desc] libmpeg internal: sets or clears the IPU's MPEG-1 mode bit (IPU_CTRL bit 23)
+names5d	0x00405B70	libmpeg_waitMacroblock	func_00405B70	[desc] libmpeg internal: waits for the IPU to finish a macroblock, refilling input through the needs-data callback, and recovers from decode errors
+names5d	0x00405E10	libmpeg_decodeDualPrimeVector	func_00405E10	[desc] libmpeg internal: decodes a dual-prime differential motion vector (func_00406F78 with VDEC table 3)
+names5d	0x00405E30	libmpeg_calcDualPrimeVectors	func_00405E30	[desc] libmpeg internal: computes the dual-prime derived motion vectors (the MSSG mpeg2decode calc_DMV step)
+names5d	0x00405FB8	libmpeg_decodeAddressIncrement	func_00405FB8	[desc] libmpeg internal: decodes a macroblock_address_increment with the IPU (VDEC table 0), handling stuffing and escape codes
+names5d	0x004060C8	libmpeg_decodeSlices	func_004060C8	[desc] libmpeg internal: computes the picture's macroblock count and decodes its slices (func_00406318), then finishes the last macroblock
+names5d	0x00406318	libmpeg_decodeSlice	func_00406318	[desc] libmpeg internal: decodes one slice: its header (_sliceA0), then each macroblock until the next start code
+names5d	0x00406510	libmpeg_setupSkippedMacroblock	func_00406510	[desc] libmpeg internal: sets up a skipped macroblock: resets P-picture vectors and the motion type (the MSSG skipped_macroblock step)
+names5d	0x004065D0	libmpeg_decodeMacroblock	func_004065D0	[desc] libmpeg internal: decodes a macroblock's type, motion type, DCT type and vectors and starts the IPU block decode (the MSSG decode_macroblock step)
+names5d	0x00406A78	libmpeg_applyMotionCode	func_00406A78	[desc] libmpeg internal: applies a motion code and residual to a vector predictor, wrapping to its range (the MSSG decode_motion_vector step)
+names5d	0x00406B00	libmpeg_decodeMotionVectors	func_00406B00	[desc] libmpeg internal: decodes one or two MPEG-2 motion vectors with their field selects (the MSSG motion_vectors step)
+names5d	0x00406CA0	libmpeg_decodeMotionVector	func_00406CA0	[desc] libmpeg internal: decodes one motion vector, horizontal then vertical (the MSSG motion_vector step)
+names5d	0x00406DF0	libmpeg_issueIpuCommand	func_00406DF0	[desc] libmpeg internal: writes IPU_CMD and records the command's table entry (+0x818) for the bit readers
+names5d	0x00406E20	libmpeg_waitIpuIdle	func_00406E20	[desc] libmpeg internal: spins while IPU_CTRL is busy without an error, raising the needs-data callback every 5001 polls
+names5d	0x00406EC8	libmpeg_waitIpuResult	func_00406EC8	[desc] libmpeg internal: spins while IPU_CMD's busy bit is set without an error and returns IPU_CMD
+names5d	0x00406F78	libmpeg_decodeVlc	func_00406F78	[desc] libmpeg internal: decodes one variable-length code with IPU VDEC (table 0..3) and refreshes the cached bit-buffer state
+names5d	0x004070F0	libmpeg_peekBits	func_004070F0	[desc] libmpeg internal: returns the next n bits of the bitstream without consuming them (FDEC refresh when stale)
+names5d	0x004071F8	libmpeg_skipBits	func_004071F8	[desc] libmpeg internal: skips n bits of the bitstream (IPU FDEC with a bit step) and caches the next top word
+names5d	0x004072E8	libmpeg_readBits	func_004072E8	[desc] libmpeg internal: reads and consumes the next n bits of the bitstream
+names5d	0x00407438	libmpeg_nextStartCode	func_00407438	[desc] libmpeg internal: moves the bitstream to a byte boundary and on to the next 0x000001 start code prefix (the MSSG next_start_code step)
+names5d	0x004074B8	libmpeg_readSliceHeaderRest	func_004074B8	[desc] libmpeg internal: reads a slice header's quantiser_scale_code and skips intra_slice and the extra information; _sliceA0's callee
+names5d	0x00407520	libmpeg_findNextPicture	func_00407520	[desc] libmpeg internal: reads sequence, GOP and picture headers up to the next picture and returns its coding type (0 at sequence end)
+names5d	0x00407630	libmpeg_parsePictureHeader	func_00407630	[desc] libmpeg internal: parses an MPEG picture header (temporal reference, coding type, f_codes) and its extensions
+names5d	0x004076F8	libmpeg_readExtensions	func_004076F8	[desc] libmpeg internal: reads the extension and user-data blocks after a header, dispatching extensions through table D_00497FE0 (the MSSG extension_and_user_data step)
+names5d	0x00407820	libmpeg_parsePictureCodingExtension	func_00407820	[desc] libmpeg internal: parses an MPEG-2 picture coding extension (id 8): f_codes, DC precision, picture structure and flags
+names5d	0x00407A10	libmpeg_skipExtraInfo	func_00407A10	[desc] libmpeg internal: while the next bit is 1, skips it and the 8 bits after it
+names5d	0x00407A58	libmpeg_numberPicture	func_00407A58	[desc] libmpeg internal: numbers a picture from the GOP base plus its temporal reference and returns the highest number seen in the GOP
+names5d	0x00407AD0	libmpeg_parseGopHeader	func_00407AD0	[desc] libmpeg internal: parses a group-of-pictures header (time code skipped, closed_gop, broken_link) and its extensions
+names5d	0x00407B70	libmpeg_parseQuantMatrixExtension	func_00407B70	[desc] libmpeg internal: parses an MPEG-2 quant matrix extension (id 3), having the IPU load the intra / non-intra matrices (SETIQ)
+names5d	0x00407C38	libmpeg_parsePictureDisplayExtension	func_00407C38	[desc] libmpeg internal: parses an MPEG-2 picture display extension (id 7): one to three frame centre offsets
+names5d	0x00407D30	libmpeg_skipCopyrightExtension	func_00407D30	[desc] libmpeg internal: reads and drops every field of an MPEG-2 copyright extension (id 4)
+names5d	0x00407DC0	libmpeg_decodePictureSlices	func_00407DC0	[desc] libmpeg internal: decodes the current picture's slices (func_004060C8) and marks its frame or field record decoded
+names5d	0x00407E90	libmpeg_outputDuePicture	func_00407E90	[desc] libmpeg internal: outputs the picture due for display after a decode (func_004086C0 / func_004087D0) and advances the queued time stamp state
+names5d	0x00407F20	libmpeg_selectPictureRecord	func_00407F20	[desc] libmpeg internal: picks the picture record the next decode writes (B: next records; I/P: swaps the references) and fills it from the headers
+names5d	0x004081D8	libmpeg_checkOutputSize	func_004081D8	[desc] libmpeg internal: checks the caller's output buffer covers the picture, reporting "Too small buffer size for %dx%d picture"
+names5d	0x00408278	libmpeg_copyRaw8Picture	func_00408278	[desc] libmpeg internal: copies a decoded picture's macroblock rows to the RAW8 output through scratchpad (DMA channels 9 and 8)
+names5d	0x00408508	libmpeg_markPictureOutput	func_00408508	[desc] libmpeg internal: sets the reference state to 2 and the output flag (+0x820) so the decode loop returns
+names5d	0x00408530	libmpeg_computeTimeStamps	func_00408530	[desc] libmpeg internal: computes a picture's presentation and decode time stamps (interpolated from the step when it has none) and its display flags
+names5d	0x004086C0	libmpeg_outputFramePicture	func_004086C0	[desc] libmpeg internal: writes a frame picture's time stamps and display fields into the handle, then its pixels (RAW8 copy or RGB conversion)
+names5d	0x004087D0	libmpeg_outputFieldPair	func_004087D0	[desc] libmpeg internal: writes a field pair's time stamps in display order into the handle, then its pixels
+names5d	0x00408988	libmpeg_startPredictionDma	func_00408988	[desc] libmpeg internal: builds ref tags for the current macroblock's prediction blocks and starts the to-scratchpad DMA (channel 9, chain mode)
+names5d	0x00408AF8	libmpeg_startFromIpuDma	func_00408AF8	[desc] libmpeg internal: starts the from-IPU DMA (channel 3) into scratchpad for a byte count
+names5d	0x00408B80	libmpeg_convertMacroblocks	func_00408B80	[desc] libmpeg internal: colour-converts up to 1023 macroblocks with IPU CSC straight into the output through channel 3
+names5d	0x00408CA8	libmpeg_onCscChunkDone	func_00408CA8	[desc] libmpeg internal: DMA channel 3 interrupt handler of a long CSC conversion: queues the next 1023-macroblock chunk
+names5d	0x00408DF0	libmpeg_convertLargePicture	func_00408DF0	[desc] libmpeg internal: colour-converts 1024 macroblocks or more with IPU CSC, 1023 at a time through func_00408CA8 (AddDmacHandler2)
+names5d	0x00408FB0	libmpeg_onIpuInputChunkDone	func_00408FB0	[desc] libmpeg internal: DMA channel 4 interrupt handler: starts the next chunk (at most 0xFFFF quadwords) of a long transfer to the IPU
+names5d	0x00409088	libmpeg_convertToRgb32	func_00409088	[desc] libmpeg internal: feeds a decoded picture to the IPU on channel 4 and converts it to RGB32 into the output (func_00408B80 / func_00408DF0)
+names5d	0x00409310	libipu_setFromIpuChcr	func_00409310	[desc] libipu internal: writes D3_CHCR (from-IPU DMA) with the DMA controller held and interrupts off
+names5d	0x00409388	libipu_setToIpuChcr	func_00409388	[desc] libipu internal: writes D4_CHCR (to-IPU DMA) with the DMA controller held and interrupts off
+names5d	0x004096A0	libipu_initToIpuChcr	func_004096A0	[desc] libipu internal: writes D4_CHCR with the DMA controller held (DIntr / EIntr); sceIpuInit's callee
+names5d	0x00409B60	libmc_getClientState	func_00409B60	[desc] libmc internal: returns the memory-card RPC client block and the addresses of its result buffer and pending-call word
+names5d	0x0040A000	libmc_onReadDone	func_0040A000	[desc] libmc internal: end callback of sceMcRead: copies the unaligned head and tail bytes from the uncached fixup block
+names5d	0x0040A320	libmc_onSleepAlarm	func_0040A320	[desc] libmc internal: alarm handler of func_0040A328, signals its semaphore (iSignalSema)
+names5d	0x0040A328	libmc_sleepTicks	func_0040A328	[desc] libmc internal: sleeps n alarm ticks on the sleep semaphore D_004533C8 (SetAlarm, WaitSema); sceMcSync's wait
+names5d	0x0040A440	libmc_onGetInfoDone	func_0040A440	[desc] libmc internal: end callback of sceMcGetInfo: copies the type, free-space and format words to the caller's variables
+names5d	0x0040A7D0	libmc_onChdirDone	func_0040A7D0	[desc] libmc internal: end callback of sceMcChdir: copies the returned current directory into the caller's buffer
+names5d	0x0040B208	libmrpc_takePacket	func_0040B208	[desc] libmrpc internal: with interrupts off takes the first free request packet of a pool and gives it the next serial number
+names5d	0x0040B2B0	libmrpc_freePacket	func_0040B2B0	[desc] libmrpc internal: frees a request packet (clears its serial and in-use bit)
+names5d	0x0040B2D0	libmrpc_onReplyCmd	func_0040B2D0	[desc] libmrpc internal: SIF command handler of the multi-client RPC replies: call done runs the end function and signals the lock, bind done stores the server
+names5d	0x0040B400	sceSifMBindRpcParam	func_0040B400	[e] the DNAS overlay's _reloctable names import slot 3, which holds this function, sceSifMBindRpcParam (slot 2 is the named sceSifMCallRpc); [a] (client, rpc number, mode, three bind parameters); [b] binds a multi-client RPC client to an IOP server and waits for the answer
+names5d	0x0040B5B0	sceSifMUnBindRpc	func_0040B5B0	[e] the DNAS overlay's _reloctable names import slot 4, which holds this function, sceSifMUnBindRpc; [b] ends a multi-client RPC client's binding ("mode must be 0 in this version.")
+names5d	0x0040B938	libscf_readRomVersion	func_0040B938	[desc] libscf internal: reads the 14-byte "rom0:ROMVER" string once (sceOpen / sceRead / sceClose) and returns its buffer
+names5d	0x0040B9A8	libscf_isT10000	func_0040B9A8	[desc] libscf internal: returns whether the ROM version's region character (byte 4) is 'T'; the sceScfGet* setting getters' development-kit test
+names5d	0x0040BC70	libscf_toBcd	func_0040BC70	[desc] libscf internal: converts a number 0..99 into packed BCD
+names5d	0x0040BCA0	libscf_fromBcd	func_0040BCA0	[desc] libscf internal: converts a packed BCD byte into binary
+names5d	0x0040BCC0	libscf_clockFromBcd	func_0040BCC0	[desc] libscf internal: converts a clock record's second / minute / hour and day / month / year BCD bytes to binary in place
+names5d	0x0040BD28	libscf_clockToBcd	func_0040BD28	[desc] libscf internal: converts a clock record's binary fields back to BCD in place
+names5d	0x0040BD90	libscf_clockNextDay	func_0040BD90	[desc] libscf internal: advances a binary clock record by one day (month lengths D_00498230, leap years divisible by 4)
+names5d	0x0040BE48	libscf_clockPrevDay	func_0040BE48	[desc] libscf internal: moves a binary clock record back by one day
+names5d	0x0040BEF0	libscf_clockNextHour	func_0040BEF0	[desc] libscf internal: advances a binary clock record by one hour, wrapping into the next day
+names5d	0x0040BF20	libscf_clockPrevHour	func_0040BF20	[desc] libscf internal: moves a binary clock record back by one hour, wrapping into the previous day
+names5d	0x0040BF48	libscf_addMinutes	func_0040BF48	[desc] libscf internal: adds a signed number of minutes to a BCD clock record, carrying into hours and days; sceScfGetGMTfromRTC / GetLocalTimefromRTC's callee
+names5d	0x0040C8B0	libusbkb_onRpcDone	func_0040C8B0	[desc] libusbkb internal: end callback of every USB keyboard RPC: signals D_00453438 (iSignalSema)
+names5d	0x0040C8C0	libusbkb_finishPendingCall	func_0040C8C0	[desc] libusbkb internal: runs the result handler D_00453420[code] of the pending call (codes 1..5) and clears it; sceUsbKbSync's callee
+names5d	0x0040C928	libusbkb_onGetInfoResult	func_0040C928	[desc] libusbkb internal: result handler of call 1: copies the maximum / connected counts and per-keyboard status into the caller's block
+names5d	0x0040C980	libusbkb_onReadResult	func_0040C980	[desc] libusbkb internal: result handler of call 2: turns the keyboard report into new key codes with key repeat
+names5d	0x0040CEF8	libusbkb_onGetLocationResult	func_0040CEF8	[desc] libusbkb internal: result handler of call 3: copies the 7-byte location reply into the caller's buffer
+names5d	0x0040CF48	libusbkb_onSetLedStatusResult	func_0040CF48	[desc] libusbkb internal: result handler of call 4: checks the reply echoes the keyboard number sent
+names5d	0x0040CF68	libusbkb_onSetLedModeResult	func_0040CF68	[desc] libusbkb internal: result handler of call 5: checks the reply echoes the keyboard number sent
+names5d	0x0040CF88	libusbkb_onVblank	func_0040CF88	[desc] libusbkb internal: vertical-blank interrupt handler counting each repeating keyboard's repeat time; installed by sceUsbKbInit
+names5d	0x0040D010	libusbkb_clearKeyRing	func_0040D010	[desc] libusbkb internal: empties a keyboard's 4-entry key ring and clears its repeat count
+names5d	0x0040D040	libusbkb_pushKey	func_0040D040	[desc] libusbkb internal: queues a key code in a keyboard's 4-entry key ring (-1 when full)
+names5d	0x0040D0B0	libusbkb_popKey	func_0040D0B0	[desc] libusbkb internal: takes the oldest key code from a keyboard's 4-entry key ring (-1 when empty)
+names5d	0x0040D118	libusbkb_copyKeyCodes	func_0040D118	[desc] libusbkb internal: copies a keyboard's raw key codes to an output list, converting them with sceUsbKbCnvRawCode for code type 1
+names5d	0x0040D3C0	libusbkb_convertKeypadCode	func_0040D3C0	[desc] libusbkb internal: converts a keypad raw code for the Num Lock state through table D_00498FC8 (bit 0x4000 set); sceUsbKbCnvRawCode's callee
+names5d	0x00414B98	type_info_operatorEqual	func_00414B98	[a] (const type_info *, const type_info &) returning bool; [b] the body is gcc 2.95.3 cp/tinfo.cc type_info::operator== (&arg == this or strcmp of the two names == 0); [c] the named __class_type_info_dcast / __si_type_info_dcast / __user_type_info_dcast / __throw_type_match_rtti call it (named like the existing tWPNameField_operatorNotEqual)
+names5d	0x004151B8	type_info_operatorNotEqual	func_004151B8	[a] (const type_info *, const type_info &) returning bool; [b] the body is <typeinfo>'s inline operator!= (!operator== (arg)), emitted out of line in the tinfo unit like the named type_info_name; [c] its only callee is type_info_operatorEqual
+names5d	0x0041AE00	strround	func_0041AE00	[b] relocation-masked byte-identical (112 bytes) to the DNAS overlay's strround; [e] that GLOBAL name in the overlay's symbol table; [c] called by the formatter func_0041AF88 with itoa
+names5d	0x0041AE70	strrev	func_0041AE70	[b] relocation-masked byte-identical (120 bytes) to the DNAS overlay's strrev; [e] that GLOBAL name in the overlay's symbol table; [c] its caller func_0041AEE8 matches the overlay's itoa, which calls strrev
+names5d	0x0041AEE8	itoa	func_0041AEE8	[b] relocation-masked byte-identical (156 bytes) to the DNAS overlay's itoa; [e] that GLOBAL name in the overlay's symbol table; [a] (int value, char *buf, unsigned base) returning buf
+names5d	0x0041B528	_vfflush	func_0041B528	[b] relocation-masked byte-identical (40 bytes) to the DNAS overlay's _vfflush; [e] that GLOBAL name in the overlay's symbol table; calls the console buffer func_0041B550 (the overlay's _vfwrite) with mode 2
+names5d	0x0041C788	add_separators	func_0041C788	[b] relocation-masked byte-identical (432 bytes) to the DNAS overlay's add_separators; [e] that GLOBAL name in the overlay's symbol table; inserts commas every three digits before the decimal point
+names5d	0x00420228	memcpyalpha	func_00420228	[b] relocation-masked byte-identical (52 bytes) to the DNAS overlay's memcpyalpha; [e] that GLOBAL name in the overlay's symbol table; [c] fread uses it as a byte copy
+names5d	0x00424220	libkernl_closeTtyChannel	func_00424220	[desc] libkernl internal: clears the DECI2 console-channel open flag D_00455168 so the next _read / _write reopens it; sceSifSyncIop's callee
+names5d	0x00424230	libkernl_waitVblankStart	func_00424230	[desc] libkernl internal: clears the VBLANK-start bit of INTC_STAT (0x1000F000) and polls until it is set again
+names5d	0x004242C0	libkernl_waitVblankGetCsr	func_004242C0	[desc] libkernl internal: waits for the next VBLANK start through SetVSyncFlag and returns the GS CSR value the kernel recorded
+names5d	0x00424550	isatty	func_00424550	[e] the DNAS overlay (data/config/slusovf.big, overlay.dat) names slot 50 of the import table func_003FD810, which holds this function, isatty in its _reloctable symbol table; [b] returns 1 as newlib 1.9 libgloss/isatty.c does (newlib's stdio calls it by this name)
+names5d	0x00424570	_getpid	func_00424570	[e] the DNAS overlay's _reloctable names import slot 38, which holds this function, getpid (the overlay's plain fstat / open / write / close / lseek / read slots hold retail's _fstat / _open / _write / _close / _lseek / _read); [b] returns __MYPID (1) as libgloss getpid.c; newlib 1.9 reent/signalr.c calls it as _getpid
+names5d	0x00424578	_kill	func_00424578	[a] (int pid, int sig) returning int, as libgloss kill.c; [b] exits with the signal as status when pid is __MYPID (1), else returns 0, as libgloss kill.c (newlib 1.9 reent/signalr.c and syscalls/syskill.c call it as _kill)
+names5d	0x004245A0	_stat	func_004245A0	[e] the DNAS overlay's _reloctable names import slot 39, which holds this function, stat (the plain names of the neighbouring glue slots map to retail's underscore implementations, as for _fstat); [b] sets errno EIO and returns -1, the console-only back end's answer as in the named _open; newlib 1.9 reent/statr.c calls it as _stat
+names5d	0x004245F0	libkernl_writebackDCacheRange	func_004245F0	[desc] libkernl internal: walks both data-cache ways and writes back and invalidates every line whose address lies in [lo, hi]; SyncDCache / iSyncDCache's body
+names5d	0x00424730	libkernl_invalidateDCacheRange	func_00424730	[desc] libkernl internal: walks both data-cache ways and invalidates, without write-back, every line in [lo, hi]; InvalidDCache / iInvalidDCache's body
+names5d	0x00424870	libkernl_isIntrDisabled	func_00424870	[desc] libkernl internal: returns 1 when the COP0 Status IE bit is clear
+names5d	0x00424AA0	libkernl_requestThread	func_00424AA0	[desc] libkernl internal: helper thread that carries out the thread requests (wakeup, suspend, rotate) interrupt handlers queue in a 512-entry ring
+names5d	0x00424E00	libkernl_initTtyRing	func_00424E00	[desc] libkernl internal: initialises the console input ring D_0052B7C0 (size, count, read / write pointers) and returns it
+names5d	0x00424E28	libkernl_ringAdvanceWrite	func_00424E28	[desc] libkernl internal: counts one byte written into a ring and advances its write pointer with wrap-around
+names5d	0x00424E68	libkernl_ringAdvanceRead	func_00424E68	[desc] libkernl internal: counts one byte read from a ring and advances its read pointer with wrap-around
+names5d	0x00424EA8	libkernl_onTtyDeci2Event	func_00424EA8	[desc] libkernl internal: DECI2 event callback of the console channel: receives input into the ring (sceDeci2ExRecv) and continues pending sends
+names5d	0x00425040	libkernl_ttySend	func_00425040	[desc] libkernl internal: builds a DECI2 console packet in an uncached buffer and requests its send (sceDeci2ReqSend); _write's back end
+names5d	0x00425190	libkernl_ttyReadLine	func_00425190	[desc] libkernl internal: busy-waits for console input and copies bytes from the ring up to n or the first line end; _read's back end
+names5d	0x00425260	libkernl_openTtyChannel	func_00425260	[desc] libkernl internal: opens DECI2 protocol 0x210 with the event callback func_00424EA8 and sets up the input ring; returns 1 on success
+names5d	0x00425320	libkernl_sioPutc	func_00425320	[desc] libkernl internal: waits for room in the SIO transmit FIFO and writes one character to 0x1000F180
+names5d	0x00425358	libkernl_bufferPrintChar	func_00425358	[desc] libkernl internal: scePrintf's character sink: collects characters in a 128-byte line buffer and prints it at a newline or when full
+names5d	0x00425408	libkernl_sioPutcCrlf	func_00425408	[desc] libkernl internal: writes a character to the SIO port, a newline as "\r\n"; the default output routine D_00455178
+names5d	0x00425440	libkernl_doubleBitsToInt	func_00425440	[desc] libkernl internal: converts a non-negative double's 64-bit pattern to an integer for the formatter (9999 for large values)
+names5d	0x004254D0	libkernl_printDouble	func_004254D0	[desc] libkernl internal: prints a double in "0.dddddd" plus exponent form through the output routine D_00455178
+names5d	0x00425638	libkernl_formatOutput	func_00425638	[desc] libkernl internal: the formatter of kprintf: %d %u %x %o %c %s %e %f with sizes and widths, each character sent to the output routine D_00455178
+names5d	0x00425C28	kprintf	func_00425C28	[e] the DNAS overlay's _reloctable names import slot 0, which holds this function, kprintf (its slots 1 and 2 are the named scePrintf and sceSifMCallRpc, and the other named slots agree one-to-one); [b] a printf through the kernel library's output routine (SIO by default) via the formatter func_00425638
+names5d	0x00425CC0	sifcmd_onSetSregCmd	func_00425CC0	[desc] SIF command internal: system command handler that stores a value into a SIF software register (index packet word 4, value word 5); installed by sceSifInitCmd
+names5d	0x00425CE0	sifcmd_onChangeAddrCmd	func_00425CE0	[desc] SIF command internal: system command 0 handler that records the IOP's command receive address; installed by sceSifInitCmd
+names5d	0x00426078	sifcmd_sendPacket	func_00426078	[desc] SIF command internal: queues an optional extra-data DMA and the command packet (0x10..0x70 bytes) to the IOP and returns the DMA id; sceSifSendCmd / isceSifSendCmd's body
+names5d	0x004265D0	sifrpc_takePacket	func_004265D0	[desc] SIF RPC internal: with interrupts off takes a free RPC packet from the packet table and gives it an id
+names5d	0x00426678	sifrpc_freePacket	func_00426678	[desc] SIF RPC internal: clears an RPC packet's id and in-use bit
+names5d	0x00426698	sifrpc_nextRecvPacket	func_00426698	[desc] SIF RPC internal: returns the next 64-byte receive packet of the RPC state, round robin
+names5d	0x004266C8	sifrpc_getDataPacket	func_004266C8	[desc] SIF RPC internal: returns the numbered 64-byte data packet, or the next round-robin one when the number is out of range
+names5d	0x00426708	sifrpc_onEndCmd	func_00426708	[desc] SIF RPC internal: handler of the IOP's RPC end command: runs a call's end function or stores a bind's server, then signals the client
+names5d	0x004267C0	sifrpc_onRetryReplyAlarm	func_004267C0	[desc] SIF RPC internal: alarm handler that resends an RPC reply (command 0x80000008) until the command DMA accepts it
+names5d	0x00426820	sifrpc_onGetOtherDataCmd	func_00426820	[desc] SIF RPC internal: handler of the IOP's get-other-data command: copies the requested block and sends the end reply
+names5d	0x00426A48	sifrpc_findServer	func_00426A48	[desc] SIF RPC internal: walks every queue's server list for the server registered under an id
+names5d	0x00426A98	sifrpc_onBindCmd	func_00426A98	[desc] SIF RPC internal: handler of the IOP's RPC bind command: looks the server up (func_00426A48) and sends the end reply
+names5d	0x00426C88	sifrpc_onCallCmd	func_00426C88	[desc] SIF RPC internal: handler of the IOP's RPC call command: queues the call on its server and wakes the server thread
+names5d	0x00427438	fileio_createSemas	func_00427438	[desc] EE file library internal: creates the descriptor-table and second semaphore the first time it is called
+names5d	0x00427498	fileio_allocDescriptor	func_00427498	[desc] EE file library internal: under the table semaphore takes the first free entry of the 32-entry descriptor table; sceOpen / sceDopen's callee
+names5d	0x00427520	fileio_getDescriptor	func_00427520	[desc] EE file library internal: returns the descriptor-table entry of a descriptor number (bounds checked under the semaphore)
+names5d	0x00427590	fileio_onCompletionCmd	func_00427590	[desc] EE file library internal: handler of SIF command 0x80000011: copies the file server's result to the caller and signals it
+names5d	0x00427938	fileio_createCallLock	func_00427938	[desc] EE file library internal: creates the call lock semaphore D_00455214 the first time it is called
+names5d	0x00427988	fileio_lockCall	func_00427988	[desc] EE file library internal: takes the call lock D_00455214 (WaitSema), creating it first; every file call wraps its RPC in it
+names5d	0x004279B8	fileio_unlockCall	func_004279B8	[desc] EE file library internal: releases the call lock D_00455214 (SignalSema)
+names5d	0x004279C8	fileio_setCallback	func_004279C8	[desc] EE file library internal: under the call lock sets the user callback D_0052EE80 (function and argument) and returns the previous function
+names5d	0x00427A60	fileio_onCallbackCmd	func_00427A60	[desc] EE file library internal: handler of SIF command 0x80000013: runs the user callback with its argument
+names5d	0x00427A90	fileio_init	func_00427A90	[desc] EE file library internal: installs the completion and callback command handlers, binds the file server and reads its version
+names5d	0x00427C98	fileio_isServerRejected	func_00427C98	[desc] EE file library internal: compares the bound file server's 4-byte version tag with the accepted ones (memcmp); sceOpen's check
+names5d	0x00428E18	fileio_callPathRequest	func_00428E18	[desc] EE file library internal: sends a file-server request that takes only a path (sceChdir, sceRemove, sceRmdir...) and waits for the result
+names5d	0x0042B068	sifload_bindLoader	func_0042B068	[desc] IOP module-loader client internal: binds RPC server 0x80000006 once (spinning between attempts) and reads its version
+names5d	0x0042B168	sifload_isServerRejected	func_0042B168	[desc] IOP module-loader client internal: compares the bound loader's version tag with the accepted ones (memcmp), as fileio_isServerRejected does
+names5d	0x0042B230	sifload_callBufferRequest	func_0042B230	[desc] IOP module-loader client internal: sends a request naming an IOP memory address plus an argument block and returns its results; sceSifLoadModuleBuffer / sceSifLoadStartModuleBuffer's body
+names5d	0x0042B840	sifload_callFileRequest	func_0042B840	[desc] IOP module-loader client internal: sends a request naming a module file plus an argument block and returns its results; sceSifLoadModule / sceSifLoadStartModule's body
+names5d	0x0042BAA8	sifload_callElfRequest	func_0042BAA8	[desc] IOP module-loader client internal: has the IOP loader read (part of) an ELF file into EE memory and returns its entry point and gp; sceSifLoadElf / sceSifLoadElfPart's body
+names5d	0x0042C0D8	libkernl_createMallocSemas	func_0042C0D8	[desc] libkernl internal: creates the two semaphores (D_00455248 for __malloc_lock / __malloc_unlock, D_0045524C); called by _InitSys
+names5d	0x0042C130	sysTable_kernelCopyWords	func_0042C130	[desc] kernel-mode word copy that sysTable_init installs as syscall 90 to read kernel memory
+names5d	0x0042C168	sysTable_kernelFindWord	func_0042C168	[desc] kernel-mode search for the first word equal to a value in a range, installed by sysTable_init as syscall 131
+names5d	0x0042C1B8	sysTable_getEntry	func_0042C1B8	[desc] returns an entry of the kernel's syscall table (base D_00455230) read with the syscall-90 copy
+names5d	0x0042C1F0	sysTable_init	func_0042C1F0	[desc] installs the kernel-mode copy and search helpers (SetSyscall) and locates the kernel's syscall table (FindAddress), storing its base in D_00455230; called by _InitSys
+names5d	0x0042C360	osdPatch_kernelCopyWords	func_0042C360	[desc] kernel-mode word copy that osdPatch_install installs as syscall 90
+names5d	0x0042C3A8	osdPatch_isNeeded	func_0042C3A8	[desc] returns whether the kernel drops bits 13-15 of the OSD configuration word (GetOsdConfigParam / SetOsdConfigParam round trip)
+names5d	0x0042C410	osdPatch_install	func_0042C410	[desc] when osdPatch_isNeeded says so, copies patch code into the kernel to replace the OSD configuration syscalls; called by _InitSys
+names5d	0x0042C4D0	execArgs_kernelCopyBytes	func_0042C4D0	[desc] kernel-mode byte copy that execArgs_copyToKernel installs as syscall 90
+names5d	0x0042C510	execArgs_copyToKernel	func_0042C510	[desc] copies a program name and up to 15 arguments into the kernel's argument area for ExecPS2 / LoadExecPS2 / ExecOSD
+names5d	0x0042C780	alarmPatch_kernelCopyWords	func_0042C780	[desc] kernel-mode word copy that alarmPatch_install installs as syscall 90
+names5d	0x0042C7C8	alarmPatch_install	func_0042C7C8	[desc] when timer 3 is not already set up for alarms, copies patch code into the kernel for the alarm syscalls; called by _InitSys
+names5d	0x0042CA58	libkernl_deci2Puts	func_0042CA58	[desc] libkernl internal: prints a string through the DECI2 kernel console (Deci2Call 0x10); the line sink of libkernl_bufferPrintChar
+names5d	0x0042CA80	libkernl_setTlbExceptionHandler	func_0042CA80	[desc] stores a user handler for TLB exceptions (codes 1-3) and points their refill vectors at the stub func_0042CFC0 (SetVTLBRefillHandler)
+names5d	0x0042CAE0	libkernl_setExceptionHandler	func_0042CAE0	[desc] records a handler for one exception code (1-13) and points the kernel vector at the dispatch stub (SetVCommonHandler / SetVTLBRefillHandler), returning the previous handler
+names5d	0x0042CB78	tlbPatch_kernelCopyWords	func_0042CB78	[desc] kernel-mode word copy that tlbPatch_install installs as syscall 90
+names5d	0x0042CBD0	tlbPatch_install	func_0042CBD0	[desc] copies the TLB syscall patch code into the kernel at 0x80075000 and finds the kernel's exec-argument area; called by _InitSys
+names5d	0x0042CD58	tlbPatch_restoreLayout	func_0042CD58	[desc] restores the boot TLB layout before the program exits: tlbPatch_programTlb on a 32 MB console, else the kernel's _InitTLB
+names5d	0x0042CD98	tlbPatch_programTlb	func_0042CD98	[desc] programs the TLB from the layout table D_004567F0 ("# TLB spad=0 kernel=1:%d ...") and fills the remaining entries with unmapped pages
+names5d	0x0042CFC0	libkernl_tlbExceptionEntry	func_0042CFC0	[desc] hand-written TLB exception entry stub that saves the registers and calls the handler stored by libkernl_setTlbExceptionHandler

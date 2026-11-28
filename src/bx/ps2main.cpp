@@ -13,8 +13,8 @@ extern char str_SNDDRV_IRX[];
 extern char str_MCMAN_IRX[];
 extern char str_MCSERV_IRX[];
 extern char str_cd[];
-extern "C" void func_00319610(void* io);
-extern "C" void func_00319718(void* io, const char* module, int a, int b, int c);
+extern "C" void bxIop_initIop(void* io);
+extern "C" void bxIop_loadModule(void* io, const char* module, int a, int b, int c);
 extern "C" void sceMcInit(void);
 extern "C" void scePadInit(int a);
 extern "C" void sceCdReadClock(int* clock);
@@ -58,13 +58,13 @@ struct sIoCfg_SysInit {
 // Boot-time setup: IOP modules, timers, random seed, heap, file system and the per-frame sync task.
 extern "C" void systemInit(void)
 {
-    func_00319610(D_004A3E94);
-    func_00319718(D_004A3E94, str_SIO2MAN_IRX, 1, 0, 0);
-    func_00319718(D_004A3E94, str_PADMAN_IRX, 1, 0, 0);
-    func_00319718(D_004A3E94, str_LIBSD_IRX, 1, 0, 0);
-    func_00319718(D_004A3E94, str_SNDDRV_IRX, 1, 0, 0);
-    func_00319718(D_004A3E94, str_MCMAN_IRX, 1, 0, 0);
-    func_00319718(D_004A3E94, str_MCSERV_IRX, 1, 0, 0);
+    bxIop_initIop(D_004A3E94);
+    bxIop_loadModule(D_004A3E94, str_SIO2MAN_IRX, 1, 0, 0);
+    bxIop_loadModule(D_004A3E94, str_PADMAN_IRX, 1, 0, 0);
+    bxIop_loadModule(D_004A3E94, str_LIBSD_IRX, 1, 0, 0);
+    bxIop_loadModule(D_004A3E94, str_SNDDRV_IRX, 1, 0, 0);
+    bxIop_loadModule(D_004A3E94, str_MCMAN_IRX, 1, 0, 0);
+    bxIop_loadModule(D_004A3E94, str_MCSERV_IRX, 1, 0, 0);
     sceMcInit();
     scePadInit(0);
     int clock[2];
@@ -158,7 +158,7 @@ extern "C" void LoadExecPS2(int, int, int);
  * Calls virtual slot 2 of cAppMan_TheAppMan (cAppMan_loadexecpurge in cAppMan_vtbl, which purges the execution
  * manager), then sceCdMmode(2), sceCdInit(0) and sceCdInit(5) (sceCdInit has the shape of libcdvd's
  * sceCdInit; mode 5 shuts the CD client down), sceSifExitCmd (removes the DMAC 5 handler), and finally passes the
- * arguments to LoadExecPS2, which packs them with func_0042C510 and calls _LoadExecPS2.
+ * arguments to LoadExecPS2, which packs them with execArgs_copyToKernel and calls _LoadExecPS2.
  *
  * @param path  path of the executable to load
  * @param argc  argument count

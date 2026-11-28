@@ -17,10 +17,10 @@
 #include "layout.h"
 
 struct cVoipMan {
-    int mConnected;                 // 0x0 [R] ctor 0; [U] cVoipMan_connect sets 1 after func_003F6AB8 (connect),
+    int mConnected;                 // 0x0 [R] ctor 0; [U] cVoipMan_connect sets 1 after voipRpc_connect (connect),
                                     //     cVoipMan_disconnect clears it; every other method tests it first
-    int mVoiceOn;                   // 0x4 [R] ctor 0; [U] cVoipMan_turnVoiceOn sets 1 (func_003F6B20), cVoipMan_turnVoiceOff clears
-                                    //     it (func_003F6B50), cVoipMan_toggleVoice toggles on it
+    int mVoiceOn;                   // 0x4 [R] ctor 0; [U] cVoipMan_turnVoiceOn sets 1 (voipRpc_turnVoiceOn), cVoipMan_turnVoiceOff clears
+                                    //     it (voipRpc_turnVoiceOff), cVoipMan_toggleVoice toggles on it
 
     // Methods bound to their retail symbols by asm labels.
     void connect(void* peerAddr) __asm__("cVoipMan_connect");

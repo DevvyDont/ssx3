@@ -612,7 +612,7 @@ INCLUDE_ASM("ui/uistatestack", cUIStateStack_getTopState);
 /**
  * Returns the top state of a state stack (the first node of its main list).
  *
- * func_00259230 and a file-screen function use it on an engine's +0x18.
+ * lobbyman_postEventToTopScreen and a file-screen function use it on an engine's +0x18.
  *
  * @return the top state, or null
  */

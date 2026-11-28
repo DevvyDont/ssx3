@@ -255,7 +255,7 @@ extern "C" void BuddyMan_destroyInstance();
 extern "C" void LobbyMan_destroyInstance();
 extern "C" void cCommSystem_destroy();
 extern "C" void cCommSystem_construct();
-extern "C" void func_00255F20_ls(int a, const char* b) __asm__("func_00255F20");
+extern "C" void cCommSystem_netConnQuery_ls(int a, const char* b) __asm__("cCommSystem_netConnQuery");
 extern "C" void LobbyMan_createInstance();
 extern "C" void BuddyMan_createInstance();
 extern "C" void cVoipMan_createInstance();
@@ -352,7 +352,7 @@ extern "C" cDebugMenuScreen* cDebugMenuScreen_cDebugMenuScreen(cDebugMenuScreen*
         LobbyMan_destroyInstance();
         cCommSystem_destroy();
         cCommSystem_construct();
-        func_00255F20_ls((int)cCommSystem_mCommSystem, str_mc0);
+        cCommSystem_netConnQuery_ls((int)cCommSystem_mCommSystem, str_mc0);
         LobbyMan_createInstance();
         BuddyMan_createInstance();
         cVoipMan_createInstance();
@@ -440,8 +440,8 @@ extern "C" void cBENewPlayerInterface_setIsFirstTimeWC(void* self, int a1, int a
 extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(void* self, int a1, int a2, int a3);
 extern "C" void cBENewPlayerInterface_setControllerMapping(void* self, int a1, int a2);
 extern "C" void cBackgroundMan_setActiveImage(void* bg, int idx);
-extern "C" void func_00256088();
-extern "C" void func_002560B0();
+extern "C" void netConfig_launchGui();
+extern "C" void dnasDebug_runAuth();
 extern "C" void cCommSystem_netConnDisconnect(void* comm);
 extern "C" void cCommSystem_netConnConnect(void* comm, int a1);
 extern "C" void cCommSystem_update(void* comm);
@@ -886,10 +886,10 @@ void cDebugMenuScreen::update()
     case kNetworkItem: {
         if (dir == kMenuKeySelect) {
             if (NetworkMode == kNetwork_NetGui) {
-                func_00256088();
+                netConfig_launchGui();
             }
             if (NetworkMode == kNetwork_DNAS) {
-                func_002560B0();
+                dnasDebug_runAuth();
             }
         }
         if (cCommSystem_mCommSystem == 0) {

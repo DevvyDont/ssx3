@@ -26,9 +26,9 @@ struct tUsbKeyboardSlot {
                                     //      increments; cUsbKeyboard_clearKeys clears it
     int mRead;                      // 0x04 [U] keys taken: cUsbKeyboard_readKey reads mKeys[mRead % 64] while mRead < mCount;
                                     //      cUsbKeyboard_update drops the oldest (mRead + 1) once 64 are waiting
-    unsigned char mKeys[64][2];     // 0x08 [U] the translated key pair (func_003F68F0's two result bytes)
-    unsigned int mFlags;            // 0x88 [U] bit 0 a keyboard is connected (func_003F6520), bits 1..3 bit 0 of the
-                                    //      read block's first word, bit 4 func_003F6838(.., 0x10); the whole word is
+    unsigned char mKeys[64][2];     // 0x08 [U] the translated key pair (kbReader_translateKey's two result bytes)
+    unsigned int mFlags;            // 0x88 [U] bit 0 a keyboard is connected (kbReader_isConnected), bits 1..3 bit 0 of the
+                                    //      read block's first word, bit 4 kbReader_isKeyDown(.., 0x10); the whole word is
                                     //      cleared when no keyboard is present (the C view uses bit-fields)
 };
 
@@ -40,7 +40,7 @@ CHECK_SIZE(tUsbKeyboardSlot, 0x8C);
 
 struct cUsbKeyboard {
     tUsbKeyboardSlot mSlots[8];     // 0x000 [R] ctor MEM_fill 0x460 bytes; [U] indexed by keyboard number (0..7)
-    int mEnabled;                   // 0x460 [R] ctor: 1 when the library started (func_003F61D0 >= 0), else 0;
+    int mEnabled;                   // 0x460 [R] ctor: 1 when the library started (kbReader_init >= 0), else 0;
                                     //       dtor shuts the library down and clears it; [U] every method tests it
 
     // Methods bound to their retail symbols by asm labels.

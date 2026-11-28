@@ -74,7 +74,7 @@ struct tBENetworkDB {
     tRiderStats OpponentStats;       // 0x3DC [P] get/setOpponentStats; [R] cBENetworkInterface_setOpponentStats / cBENetworkInterface_getOpponentStats (D_00534F0C)
     char strMyName[0x10];            // 0x488 (name ours, after MyStats) [R] cBENetworkInterface_setMyName (strcpy) / cBENetworkInterface_getMyName
                                      //       (D_00534FB8); [U] this player's name (from the lobby session +0x80,
-                                     //       func_00259098); prefixes our own chat lines (ovstatetrophy cOVState_PRIVATEMESSAGE_addChatLine)
+                                     //       lobbyman_startRaceConnection); prefixes our own chat lines (ovstatetrophy cOVState_PRIVATEMESSAGE_addChatLine)
     char strOpponentName[0x10];      // 0x498 (name ours, after OpponentStats) [R] cBENetworkInterface_setOpponentName / cBENetworkInterface_getOpponentName
                                      //       (D_00534FC8); [U] the opponent's name (lobby session +0x98); prefixes
                                      //       received chat (cOVState_onUpdate_HandleIncomingChat), shown by
@@ -93,7 +93,7 @@ struct cBENetworkInterface : public cBEInterface {
     //       instance->bIsActive = arg); set 0/1 with every BE interface
     //       (cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
     //   the vptr (0x0C): [R] cBENetworkInterface_vtbl (getThis, ctor cBENetworkInterface_cBENetworkInterface); [P] the
-    //       preview ctor __19cBENetworkInterface stores _vt$19cBENetworkInterface at 0xC; [U] func_00259098 calls slot
+    //       preview ctor __19cBENetworkInterface stores _vt$19cBENetworkInterface at 0xC; [U] lobbyman_startRaceConnection calls slot
     //       1 (submit) through it
 
     // Methods bound to their retail symbols by asm labels.

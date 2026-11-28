@@ -1,22 +1,22 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FCDC8);
+INCLUDE_ASM("seg/seg_2FDDC8", saveRec_setSaveDescription);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003FC0D8(void);
-extern int func_003FA240(int);
-extern int func_003FB810(int);
+extern int saveRec_isOpen(void);
+extern int mcReq_setSaveDescription(int);
+extern int saveRec_offsetCardError(int);
 /**
- * Hands the save description to the request layer (func_003FA240).
+ * Hands the save description to the request layer (mcReq_setSaveDescription).
  *
  * @param saveDesc  the 976-byte save description
  * @return 0; 2 when the manager is not open, or the request error + 100
  */
-int func_003FCDC8(int saveDesc) {
+int saveRec_setSaveDescription(int saveDesc) {
     int result;
-    if (func_003FC0D8()) {
-        result = func_003FB810(func_003FA240(saveDesc));
+    if (saveRec_isOpen()) {
+        result = saveRec_offsetCardError(mcReq_setSaveDescription(saveDesc));
     } else {
         result = 2;
     }
@@ -25,11 +25,11 @@ int func_003FCDC8(int saveDesc) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FCE10);
+INCLUDE_ASM("seg/seg_2FDDC8", saveRec_allocBuffer);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void func_003FB858(int, int*, int*);
-extern int func_003FB898(int, int);
+extern void saveRec_getMemTypeAlignment(int, int*, int*);
+extern int saveRec_getBlockSize(int, int);
 extern char* TibExtMemAlloc(int, int, int);
 extern void memset(char*, int, int);
 extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
@@ -39,16 +39,16 @@ extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
  * @param out  receives the address just past the header
  * @param allocator  heap
  * @param size  data size
- * @param memType  memory type (func_003FB858)
+ * @param memType  memory type (saveRec_getMemTypeAlignment)
  * @return 0; 4 when @p out is 0, 6 when the allocation fails
  */
-int func_003FCE10(char** out, int allocator, int size, int memType) {
+int saveRec_allocBuffer(char** out, int allocator, int size, int memType) {
     int allocInfo[2];
     int n;
     allocInfo[0] = 4;
     allocInfo[1] = 1;
-    func_003FB858(memType, allocInfo, &allocInfo[1]);
-    n = func_003FB898(size, memType);
+    saveRec_getMemTypeAlignment(memType, allocInfo, &allocInfo[1]);
+    n = saveRec_getBlockSize(size, memType);
     if (out == 0) {
         return 4;
     }
@@ -64,14 +64,14 @@ int func_003FCE10(char** out, int allocator, int size, int memType) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FCF00);
+INCLUDE_ASM("seg/seg_2FDDC8", saveRec_freeBuffer);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void func_003FB858(int, int*, int*);
-extern int func_003FB898(int, int);
+extern void saveRec_getMemTypeAlignment(int, int*, int*);
+extern int saveRec_getBlockSize(int, int);
 extern void TibExtMemFree(int, int, int, int);
 /**
- * Frees a save-record buffer from func_003FCE10 (header included).
+ * Frees a save-record buffer from saveRec_allocBuffer (header included).
  *
  * @param userPtr  the buffer
  * @param allocator  heap
@@ -79,13 +79,13 @@ extern void TibExtMemFree(int, int, int, int);
  * @param memType  memory type
  * @return 0, or 4 when @p userPtr is 0
  */
-int func_003FCF00(int userPtr, int allocator, int size, int memType) {
+int saveRec_freeBuffer(int userPtr, int allocator, int size, int memType) {
     int allocInfo[2];
     int result;
     allocInfo[0] = 4;
     allocInfo[1] = 1;
-    func_003FB858(memType, allocInfo, &allocInfo[1]);
-    result = func_003FB898(size, memType);
+    saveRec_getMemTypeAlignment(memType, allocInfo, &allocInfo[1]);
+    result = saveRec_getBlockSize(size, memType);
     if (userPtr) {
         TibExtMemFree(allocator, userPtr - 0xC, result, allocInfo[0]);
         result = 0;
@@ -97,21 +97,21 @@ int func_003FCF00(int userPtr, int allocator, int size, int memType) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FCF98);
+INCLUDE_ASM("seg/seg_2FDDC8", saveRec_getStoredSize);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003FB898(int, int);
+extern int saveRec_getBlockSize(int, int);
 /**
- * Returns the stored size of a save record: @p size plus its 12-byte header (func_003FB898, type 2).
+ * Returns the stored size of a save record: @p size plus its 12-byte header (saveRec_getBlockSize, type 2).
  *
  * @param size  data size
  * @param out  receives the stored size
  * @return 0, or 4 when @p out is 0
  */
-int func_003FCF98(int size, int *out) {
+int saveRec_getStoredSize(int size, int *out) {
     int result;
     if (out) {
-        *out = func_003FB898(size, 2);
+        *out = saveRec_getBlockSize(size, 2);
         result = 0;
     } else {
         result = 4;
@@ -121,7 +121,7 @@ int func_003FCF98(int size, int *out) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FCFD8);
+INCLUDE_ASM("seg/seg_2FDDC8", DirtyDnas_loadModule);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -132,11 +132,11 @@ extern char str_DirtyDnasRelExit[];
 extern int D_0045152C_i[] __asm__("D_0045152C");
 extern int D_00451530_i[] __asm__("D_00451530");
 extern int D_00451534_i[] __asm__("D_00451534");
-extern char func_003FD810[];
-extern char func_003FD908[];
+extern char DirtyDnas_importTable[];
+extern char DirtyDnas_importTableEnd[];
 struct sSym;
-/* A loaded ELF relocatable module (name ours): func_003FD558 fills it from the image; the section, symbol and
- * relocation routines below read it. 0x30 bytes ([U] func_003FCFD8 keeps one on its stack). */
+/* A loaded ELF relocatable module (name ours): elfModule_open fills it from the image; the section, symbol and
+ * relocation routines below read it. 0x30 bytes ([U] DirtyDnas_loadModule keeps one on its stack). */
 struct sElfModule {
     char* image;                /* 0x00 the ELF image */
     int imageSize;              /* 0x04 */
@@ -148,61 +148,61 @@ struct sElfModule {
     char* strtab;               /* 0x20 the .strtab section in the image */
     int pad24[3];
 };
-/* The relocation context (name ours; [U] func_003FCFD8 builds it, func_003FD2F8 reads it): a reference into the
+/* The relocation context (name ours; [U] DirtyDnas_loadModule builds it, elfModule_applyRelSection reads it): a reference into the
  * module's [start, start + size) is redirected to the word at the same offset of table. The addresses are kept as
- * integers, like the symbol addresses func_003FD758 returns. */
+ * integers, like the symbol addresses elfModule_findSymbol returns. */
 struct sRelocCtx {
     int size;                   /* 0x0 the table's size */
     int start;                  /* 0x4 the address of the module's "reloctable" symbol */
-    int table;                  /* 0x8 the address of the game's import table (func_003FD810) */
+    int table;                  /* 0x8 the address of the game's import table (DirtyDnas_importTable) */
 };
-extern int func_003FD558(struct sElfModule*, char*, int);
-extern void func_003FD660(struct sElfModule*, struct sRelocCtx*);
-extern int func_003FD758(struct sElfModule*, char*);
+extern int elfModule_open(struct sElfModule*, char*, int);
+extern void elfModule_relocate(struct sElfModule*, struct sRelocCtx*);
+extern int elfModule_findSymbol(struct sElfModule*, char*);
 extern void FlushCache(int);
 /**
  * Loads the DNAS module (an ELF relocatable image read from disc) so its entry points can be called.
  *
- * Checks the image (func_003FD558, -1), finds its "reloctable" symbol (-2), and relocates .text, .data and .rodata with
- * the context {size of the import table func_003FD810, that symbol, func_003FD810}, so the module's references into its
+ * Checks the image (elfModule_open, -1), finds its "reloctable" symbol (-2), and relocates .text, .data and .rodata with
+ * the context {size of the import table DirtyDnas_importTable, that symbol, DirtyDnas_importTable}, so the module's references into its
  * own reloctable resolve to the game's functions. Then looks up DirtyDnasRelInit / Updt / Exit into D_0045152C /
- * D_00451530 / D_00451534 (-3 .. -5) and flushes the data and instruction caches. The DNAS manager (func_00256460)
+ * D_00451530 / D_00451534 (-3 .. -5) and flushes the data and instruction caches. The DNAS manager (DNASMan_updateLoadProgram)
  * calls it with the file it loaded.
  *
  * @param image  the image
  * @param imageSize  its size
  * @return 0, or -1 .. -5
  */
-int func_003FCFD8(char* image, int imageSize) {
+int DirtyDnas_loadModule(char* image, int imageSize) {
     struct sElfModule obj;
     struct sRelocCtx hdr;
     int relocTable;
     int* entrySlot;
-    if (func_003FD558(&obj, image, imageSize) == 0) {
+    if (elfModule_open(&obj, image, imageSize) == 0) {
         return -1;
     }
-    relocTable = func_003FD758(&obj, str_reloctable);
+    relocTable = elfModule_findSymbol(&obj, str_reloctable);
     if (relocTable == 0) {
         return -2;
     }
-    hdr.size = func_003FD908 - func_003FD810;
+    hdr.size = DirtyDnas_importTableEnd - DirtyDnas_importTable;
     hdr.start = relocTable;
-    // PORT: the context keeps the table's address as an integer: char* arithmetic on it in func_003FD2F8 changes
+    // PORT: the context keeps the table's address as an integer: char* arithmetic on it in elfModule_applyRelSection changes
     // that function's register allocation
-    hdr.table = (int)func_003FD810;
-    func_003FD660(&obj, &hdr);
+    hdr.table = (int)DirtyDnas_importTable;
+    elfModule_relocate(&obj, &hdr);
     entrySlot = D_0045152C_i;
-    *entrySlot = func_003FD758(&obj, str_DirtyDnasRelInit);
+    *entrySlot = elfModule_findSymbol(&obj, str_DirtyDnasRelInit);
     if (*entrySlot == 0) {
         return -3;
     }
     entrySlot = D_00451530_i;
-    *entrySlot = func_003FD758(&obj, str_DirtyDnasRelUpdt);
+    *entrySlot = elfModule_findSymbol(&obj, str_DirtyDnasRelUpdt);
     if (*entrySlot == 0) {
         return -4;
     }
     entrySlot = D_00451534_i;
-    *entrySlot = func_003FD758(&obj, str_DirtyDnasRelExit);
+    *entrySlot = elfModule_findSymbol(&obj, str_DirtyDnasRelExit);
     if (*entrySlot == 0) {
         return -5;
     }
@@ -213,37 +213,37 @@ int func_003FCFD8(char* image, int imageSize) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD0D8);
+INCLUDE_ASM("seg/seg_2FDDC8", DirtyDnas_init);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void (*D_0045152C[])(int, int);
 /**
  * Calls the DNAS module's DirtyDnasRelInit with @p initParams and 0x1020000.
  *
- * @param initParams  the DNAS parameters (func_002562D0 passes its block at +0x24)
+ * @param initParams  the DNAS parameters (DNASMan_startCheck passes its block at +0x24)
  */
-void func_003FD0D8(int initParams) {
+void DirtyDnas_init(int initParams) {
     D_0045152C[0](initParams, 0x1020000);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD100);
+INCLUDE_ASM("seg/seg_2FDDC8", DirtyDnas_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00451530[])(void);
 /**
  * Calls the DNAS module's DirtyDnasRelUpdt (the caller's argument passes through) and returns its result.
  *
- * @return the module's result (func_002565E0 goes on to Exit once it is 0)
+ * @return the module's result (DNASMan_updateResult goes on to Exit once it is 0)
  */
-int func_003FD100(void) {
+int DirtyDnas_update(void) {
     return D_00451530[0]();
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD128);
+INCLUDE_ASM("seg/seg_2FDDC8", DirtyDnas_exit);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00451534[])(void);
@@ -253,13 +253,13 @@ extern int (*D_00451534[])(void);
  *
  * @return the module's result
  */
-int func_003FD128(void) {
+int DirtyDnas_exit(void) {
     return D_00451534[0]();
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD150);
+INCLUDE_ASM("seg/seg_2FDDC8", DirtyDnas_run);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -275,7 +275,7 @@ extern int (*D_00451534_a[])(int) __asm__("D_00451534");
  * @param fn  callback polled before each update
  * @param fnArg  its argument
  */
-void func_003FD150(int initParams, int exitArg, int (*fn)(int), int fnArg) {
+void DirtyDnas_run(int initParams, int exitArg, int (*fn)(int), int fnArg) {
     int none;
     D_0045152C[0](initParams, 0x1020000);
     none = 0;
@@ -286,7 +286,7 @@ void func_003FD150(int initParams, int exitArg, int (*fn)(int), int fnArg) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD1D8);
+INCLUDE_ASM("seg/seg_2FDDC8", elfModule_hasElfMagic);
 #ifdef SKIP_ASM
 /**
  * Returns whether an image starts with the ELF magic "\x7FELF".
@@ -295,13 +295,13 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FD1D8);
  * @return 1 or 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003FD1D8(int *elfImage) {
+int elfModule_hasElfMagic(int *elfImage) {
     return *elfImage == 0x464C457F;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD1F0);
+INCLUDE_ASM("seg/seg_2FDDC8", elfModule_getSectionHeader);
 #ifdef SKIP_ASM
 struct sShdr { int name; int type; int flags; int addr; int offset; int size; int link; int info; int align; int entsize; };
 struct sEhdr { char pad[0x20]; int shoff; char pad2[0xC]; unsigned short shnum; unsigned short shstrndx; };
@@ -313,7 +313,7 @@ struct sEhdr { char pad[0x20]; int shoff; char pad2[0xC]; unsigned short shnum; 
  * @return the section header's address
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sShdr* func_003FD1F0(struct sElfModule* elfModule, int n) {
+struct sShdr* elfModule_getSectionHeader(struct sElfModule* elfModule, int n) {
     char* base = elfModule->image;
     struct sEhdr* elfHeader = (struct sEhdr*)base;
     // ORIGINAL-PTR: an ELF image locates its section header table by a byte offset (System V gABI Elf32_Ehdr e_shoff,
@@ -323,7 +323,7 @@ struct sShdr* func_003FD1F0(struct sElfModule* elfModule, int n) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD210);
+INCLUDE_ASM("seg/seg_2FDDC8", elfModule_findSection);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int strcmp(const char*, const char*);
@@ -334,7 +334,7 @@ extern int strcmp(const char*, const char*);
  * @param name  section name
  * @return the section header, or 0
  */
-struct sShdr* func_003FD210(struct sElfModule* elfModule, char* name) {
+struct sShdr* elfModule_findSection(struct sElfModule* elfModule, char* name) {
     struct sEhdr* elfHeader = (struct sEhdr*)elfModule->image;
     // ORIGINAL-PTR: an ELF image locates its section header table and section names by byte offsets (System V gABI
     // Elf32_Ehdr e_shoff, Elf32_Shdr sh_offset / sh_name), so the loader adds them to the image address
@@ -353,7 +353,7 @@ struct sShdr* func_003FD210(struct sElfModule* elfModule, char* name) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD2B8);
+INCLUDE_ASM("seg/seg_2FDDC8", elfModule_getSectionBase);
 #ifdef SKIP_ASM
 /**
  * Returns the image offset of an ELF section index for symbol addressing: the section's file offset for indexes up to
@@ -364,10 +364,10 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FD2B8);
  * @return the offset
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-unsigned func_003FD2B8(struct sElfModule* elfModule, unsigned n) {
+unsigned elfModule_getSectionBase(struct sElfModule* elfModule, unsigned n) {
     unsigned sectionBase;
     if (n <= 65279) {
-        sectionBase = func_003FD1F0(elfModule, n)->offset;
+        sectionBase = elfModule_getSectionHeader(elfModule, n)->offset;
     } else {
         sectionBase = n == 65521 ? 0xFFF00000 : 0;
     }
@@ -376,19 +376,19 @@ unsigned func_003FD2B8(struct sElfModule* elfModule, unsigned n) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD2F8);
+INCLUDE_ASM("seg/seg_2FDDC8", elfModule_applyRelSection);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 // (prototype from their definition at line 207)
-struct sShdr* func_003FD210_D2F8(struct sElfModule* p, char* name) __asm__("func_003FD210");
+struct sShdr* elfModule_findSection_D2F8(struct sElfModule* p, char* name) __asm__("elfModule_findSection");
 
 struct sHiEnt { unsigned int idx; unsigned int val; };
-extern int func_003FD6E0_D2F8(struct sElfModule*, int, char*) __asm__("func_003FD6E0");
+extern int elfModule_getSymbolAddress_D2F8(struct sElfModule*, int, char*) __asm__("elfModule_getSymbolAddress");
 /**
  * Applies one REL section of a loaded ELF image to its target section, in place.
  *
- * For each 8-byte entry: resolves the symbol (func_003FD6E0); an address inside the context's range [start,
+ * For each 8-byte entry: resolves the symbol (elfModule_getSymbolAddress); an address inside the context's range [start,
  * start + size) is replaced by the word at the same offset of its table. R_MIPS_32 adds the address, R_MIPS_26
  * adds it shifted right by 2 (unmasked), R_MIPS_HI16 entries are queued (up to 31), and R_MIPS_LO16 completes the low
  * half and fills every queued HI16 with the carried high half. Quirk: the LO16 sum uses only the first queued HI16's
@@ -399,13 +399,13 @@ extern int func_003FD6E0_D2F8(struct sElfModule*, int, char*) __asm__("func_003F
  * @param relName  name of its REL section
  * @param ctx  relocation context {range size, range start, replacement table}
  */
-void func_003FD2F8(struct sElfModule* elfModule, char* targetName, char* relName, struct sRelocCtx* ctx) {
+void elfModule_applyRelSection(struct sElfModule* elfModule, char* targetName, char* relName, struct sRelocCtx* ctx) {
     char symName[0x100];
     struct sHiEnt hi[31];
     struct sShdr* tsec;
     struct sShdr* rsec;
-    tsec = func_003FD210_D2F8(elfModule, targetName);
-    rsec = func_003FD210_D2F8(elfModule, relName);
+    tsec = elfModule_findSection_D2F8(elfModule, targetName);
+    rsec = elfModule_findSection_D2F8(elfModule, relName);
     if (tsec != 0 && rsec != 0) {
         unsigned int cnt = 0;
         unsigned int n = (unsigned int)rsec->size >> 3;
@@ -418,7 +418,7 @@ void func_003FD2F8(struct sElfModule* elfModule, char* targetName, char* relName
             unsigned int idx = ent[0] >> 2;
             unsigned int type = ent[1] & 0xFF;
             unsigned int val = data[idx];
-            unsigned int sym = func_003FD6E0_D2F8(elfModule, ent[1] >> 8, symName);
+            unsigned int sym = elfModule_getSymbolAddress_D2F8(elfModule, ent[1] >> 8, symName);
             if (sym >= (unsigned int)ctx->start && sym < (unsigned int)ctx->start + ctx->size) {
                 sym = *(unsigned int*)(sym - ctx->start + ctx->table);
             }
@@ -457,17 +457,17 @@ void func_003FD2F8(struct sElfModule* elfModule, char* targetName, char* relName
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD558);
+INCLUDE_ASM("seg/seg_2FDDC8", elfModule_open);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 // (prototype from their definition at line 207)
-struct sShdr* func_003FD210_D558(struct sElfModule* p, char* name) __asm__("func_003FD210");
+struct sShdr* elfModule_findSection_D558(struct sElfModule* p, char* name) __asm__("elfModule_findSection");
 
 extern char str_text[];
 extern char str_symtab[];
 extern char str_strtab[];
-extern int func_003FD1D8_D558(int*) __asm__("func_003FD1D8");
+extern int elfModule_hasElfMagic_D558(int*) __asm__("elfModule_hasElfMagic");
 /**
  * Opens an ELF relocatable image as a module descriptor.
  *
@@ -479,20 +479,20 @@ extern int func_003FD1D8_D558(int*) __asm__("func_003FD1D8");
  * @param x  the image size
  * @return 1 when it is a MIPS relocatable, else 0
  */
-int func_003FD558(struct sElfModule* elfModule, char* image, int x) {
+int elfModule_open(struct sElfModule* elfModule, char* image, int x) {
     int* img = (int*)image;
     int ok = 0;
     struct sShdr* textSec;
     struct sShdr* symtabSec;
     struct sShdr* strtabSec;
-    if (func_003FD1D8_D558(img)) {
+    if (elfModule_hasElfMagic_D558(img)) {
         if (img[4] == 0x80001) {
             elfModule->imageSize = x;
             elfModule->image = image;
             ok = 1;
-            textSec = func_003FD210_D558(elfModule, str_text);
-            symtabSec = func_003FD210_D558(elfModule, str_symtab);
-            strtabSec = func_003FD210_D558(elfModule, str_strtab);
+            textSec = elfModule_findSection_D558(elfModule, str_text);
+            symtabSec = elfModule_findSection_D558(elfModule, str_symtab);
+            strtabSec = elfModule_findSection_D558(elfModule, str_strtab);
             if (textSec) {
                 elfModule->text = image + textSec->offset;
                 elfModule->textSize = textSec->size;
@@ -512,7 +512,7 @@ int func_003FD558(struct sElfModule* elfModule, char* image, int x) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD660);
+INCLUDE_ASM("seg/seg_2FDDC8", elfModule_relocate);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_text[];
@@ -521,26 +521,26 @@ extern char str_data[];
 extern char str_rel_data[];
 extern char str_rodata[];
 extern char str_rel_rodata[];
-extern void func_003FD2F8(struct sElfModule*, char*, char*, struct sRelocCtx*);
+extern void elfModule_applyRelSection(struct sElfModule*, char*, char*, struct sRelocCtx*);
 /**
- * Relocates a loaded ELF module's .text, .data and .rodata with their .rel.* sections (func_003FD2F8).
+ * Relocates a loaded ELF module's .text, .data and .rodata with their .rel.* sections (elfModule_applyRelSection).
  *
  * @param elfModule  the module descriptor
  * @param relocCtx  the relocation context
  */
-void func_003FD660(struct sElfModule* elfModule, struct sRelocCtx* relocCtx) {
-    func_003FD2F8(elfModule, str_text, str_rel_text, relocCtx);
-    func_003FD2F8(elfModule, str_data, str_rel_data, relocCtx);
-    func_003FD2F8(elfModule, str_rodata, str_rel_rodata, relocCtx);
+void elfModule_relocate(struct sElfModule* elfModule, struct sRelocCtx* relocCtx) {
+    elfModule_applyRelSection(elfModule, str_text, str_rel_text, relocCtx);
+    elfModule_applyRelSection(elfModule, str_data, str_rel_data, relocCtx);
+    elfModule_applyRelSection(elfModule, str_rodata, str_rel_rodata, relocCtx);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD6E0);
+INCLUDE_ASM("seg/seg_2FDDC8", elfModule_getSymbolAddress);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char* strcpy(char* d, const char* s);
-extern unsigned func_003FD2B8(struct sElfModule* p, unsigned n);
+extern unsigned elfModule_getSectionBase(struct sElfModule* p, unsigned n);
 struct sSym { int name; int val; int size; unsigned char info; unsigned char other; unsigned short shndx; };
 /**
  * Returns the address of symbol @p idx of a loaded ELF module (image + section offset + value) and copies its name to
@@ -551,7 +551,7 @@ struct sSym { int name; int val; int size; unsigned char info; unsigned char oth
  * @param dst  receives the name
  * @return the address, or 0 without a symbol or string table
  */
-int func_003FD6E0(struct sElfModule* elfModule, int idx, char* dst) {
+int elfModule_getSymbolAddress(struct sElfModule* elfModule, int idx, char* dst) {
     int symAddr = 0;
     struct sSym* symtab = elfModule->symtab;
     if (symtab) {
@@ -562,7 +562,7 @@ int func_003FD6E0(struct sElfModule* elfModule, int idx, char* dst) {
             strcpy(dst, strtab + sym->name);
             // An ELF symbol's address is an Elf32_Addr integer (System V gABI: the section's sh_offset in
             // the image plus st_value), so the loader adds them to the image address as integers
-            symAddr = (int)elfModule->image + func_003FD2B8(elfModule, sym->shndx) + sym->val;
+            symAddr = (int)elfModule->image + elfModule_getSectionBase(elfModule, sym->shndx) + sym->val;
         }
     }
     return symAddr;
@@ -570,12 +570,12 @@ int func_003FD6E0(struct sElfModule* elfModule, int idx, char* dst) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2FDDC8", func_003FD758);
+INCLUDE_ASM("seg/seg_2FDDC8", elfModule_findSymbol);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int strcmp(const char*, const char*);
-extern unsigned func_003FD2B8_D758(struct sElfModule* p, unsigned n) __asm__("func_003FD2B8");
+extern unsigned elfModule_getSectionBase_D758(struct sElfModule* p, unsigned n) __asm__("elfModule_getSectionBase");
 /**
  * Finds a symbol of a loaded ELF module by name and returns its address (image + section offset + value).
  *
@@ -583,7 +583,7 @@ extern unsigned func_003FD2B8_D758(struct sElfModule* p, unsigned n) __asm__("fu
  * @param name  symbol name
  * @return the address, or 0 when not found
  */
-int func_003FD758(struct sElfModule* elfModule, char* name) {
+int elfModule_findSymbol(struct sElfModule* elfModule, char* name) {
     int symAddr = 0;
     struct sSym* symtab = elfModule->symtab;
     if (symtab) {
@@ -594,7 +594,7 @@ int func_003FD758(struct sElfModule* elfModule, char* name) {
                 if (strcmp(elfModule->strtab + sym->name, name) == 0) {
                     // ORIGINAL-PTR: an ELF symbol's address is an Elf32_Addr integer (System V gABI: the section's
                     // sh_offset in the image plus st_value), so the loader adds them to the image address as integers
-                    symAddr = (int)elfModule->image + func_003FD2B8_D758(elfModule, sym->shndx) + sym->val;
+                    symAddr = (int)elfModule->image + elfModule_getSectionBase_D758(elfModule, sym->shndx) + sym->val;
                     break;
                 }
                 sym++;

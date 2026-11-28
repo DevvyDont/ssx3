@@ -159,7 +159,7 @@ struct cGameComm {
     int mAtFinishLine;           // 0x090 (name ours) [R] 0; [U] festateloadscreen cGFFinishlineState_gainFocus (the
                                  //       finish-line results state starting) sets 1 right after stopSyncInput; read
                                  //       only into bit 9 of mFlagsOnCommError (On Tour's setCommError skips bit 9)
-    int mLinkTimeout;            // 0x094 (name ours) [U] link timeout in frames: func_00258870 arms it
+    int mLinkTimeout;            // 0x094 (name ours) [U] link timeout in frames: cGameComm_armLinkTimeout arms it
                                  //       (1800/3600/3660), checkErrors counts it down (0 = timed out, mLinkTimedOut)
     int mMessageDisplay;         // 0x098 [O]; [U] updateMessageDisplay's popup state (0 none, 1 peer paused, 2 waiting)
     int mPingResult;             // 0x09C (name ours) [R] 1; [U] ping result: cleared by the online-error overlay
@@ -171,10 +171,10 @@ struct cGameComm {
     int mLoading;                // 0x0AC [O]; [R] 1; [U] syncWait clears it; updateDisplayError waits while it is set
     float mStallTimer;           // 0x0B0 [O] (On Tour [4]); [U] +1.0 per stalled frame, -0.15 per update; 3600 = error
     int mStallCount;             // 0x0B4 [O] (On Tour [4]); [U] "STALLCNT"
-    int mPingCount;              // 0x0B8 (name ours) [U] ping server (cGameComm_update / func_002583A8): number of
+    int mPingCount;              // 0x0B8 (name ours) [U] ping server (cGameComm_update / cGameComm_startServerPing): number of
                                  //       pings sent (max 4)
     int mPingDelay;              // 0x0BC (name ours) [U] ping: frames until the next ping
-    int mPingAddr;               // 0x0C0 (name ours) [U] ping: the address being pinged (func_002583A8's argument)
+    int mPingAddr;               // 0x0C0 (name ours) [U] ping: the address being pinged (cGameComm_startServerPing's argument)
     int mPingID[4];              // 0x0C4 (name ours) [U] ping: the id of each ping sent (matched against replies);
                                  //       [R] cleared
     tServerSettings mServerSettings; // 0x0D4 [O] (On Tour 0xFC, 0x1C bytes); [U] sent by the server (0x2C bytes)
@@ -193,7 +193,7 @@ struct cGameComm {
     int mAsyncWriteSize;         // 0x130 [O]; [U] asyncWriteUpdate (cGameComm_asyncWriteUpdate)
     tGameCommPacket* mPacketCache; // 0x134 [O]; [U] the packet being received (updateReadQueue cGameComm_updateReadQueue); the
                                  //       destructor frees it
-    int mPingTimer;              // 0x138 (name ours) [U] ping: frames left (func_002583A8 sets seconds * 60); the
+    int mPingTimer;              // 0x138 (name ours) [U] ping: frames left (cGameComm_startServerPing sets seconds * 60); the
                                  //       online-error overlay tests it
     int mPingReceived;           // 0x13C (name ours) [U] ping: a reply arrived (also set without broadband); the
                                  //       online-error overlay then shows its ping-received message

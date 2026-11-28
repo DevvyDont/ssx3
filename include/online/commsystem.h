@@ -10,7 +10,7 @@
 // One instance: cCommSystem_construct does `cMemMan_alloc(0x34, "cCommSystem", ...)` + cCommSystem_cCommSystem into
 // cCommSystem::mCommSystem (retail cCommSystem_mCommSystem); cCommSystem_destroy (destroy) runs cCommSystem__cCommSystem. Size 0x34 [R].
 // No base class and no virtuals (the constructor stores no vtable; On Tour has none).
-// Statics (retail addresses): mCommSystem cCommSystem_mCommSystem, mNumNetConn cCommSystem_mNumNetConn (func_00255F20 stores the count),
+// Statics (retail addresses): mCommSystem cCommSystem_mCommSystem, mNumNetConn cCommSystem_mNumNetConn (cCommSystem_netConnQuery stores the count),
 // mNetConns cCommSystem_mNetConns (NetConfigRecT[10], 0x100 each: the 'netw'/'list' reply buffer; retail reads strings at
 // +0x4 (list box), +0x42 (display name) and +0x80 (passed to 'star' by update), which are On Tour's NetConfigRecT
 // strDev/strIsp/strLoad four bytes earlier: retail's record lacks one of On Tour's two leading ints).
@@ -67,7 +67,7 @@ struct cCommSystem {
     int mNetConnError;           // 0x28 [O]; [R] 0; [U] netConnFailed stores the error ('conn' status or 'time');
                                  //      getError(channel) (cCommSystem_getError) reports it first
     int mBroadBand;              // 0x2C [O] (On Tour: bool); [R] 0; [U] update sets 1 when 'bbnd' answers 1; read by
-                                 //      cGameComm_syncGame (tServerSettings), the ping (func_002583A8), tagsunk
+                                 //      cGameComm_syncGame (tServerSettings), the ping (cGameComm_startServerPing), tagsunk
     int mInterfaceType;          // 0x30 [O]; [R] 1; [U] netConnConnect sets 1, update stores the 'type' status; read by
                                  //      tagsunk LobbyMan_authenticate
 

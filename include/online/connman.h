@@ -2,7 +2,7 @@
 #define ONLINE_CONNMAN_H
 
 // cConnMan / cGameConnMan: the front end's two online connection state machines, both embedded in cRealFE
-// (fe/fereal.h; the preview's getConnMan__7cRealFE / getGameConnMan__7cRealFE, retail func_002591B8 / func_002591D0,
+// (fe/fereal.h; the preview's getConnMan__7cRealFE / getGameConnMan__7cRealFE, retail lobbyman_getConnMan / lobbyman_getGameConnMan,
 // return this + 0xB5AB0 / + 0xB5ABC; cRealFE_cRealFE constructs both, cRealFE__cRealFE destroys both with flags 2,
 // cRealFE_update ticks both).
 //   cConnMan: the network (ISP / DNAS) connection: cConnMan_connect starts cCommSystem::netConnConnect with a timeout,

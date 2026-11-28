@@ -451,18 +451,18 @@ CHECK_SIZE(cBaseClass_DynamicEmitter, 0x200);
 
 // cAttachedDynamicEmitter: the emitter a cAttachedEmitterFX (visualfx/attachedemitterfx.h) keeps per attach point;
 // a cBaseClass_DynamicEmitter with its own vtable (cAttachedDynamicEmitter_vtbl) and four members. Size 0x210: [R]
-// func_002F2130 builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and
+// cAttachedEmitterFX_createEmitter builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and
 // cAttachedDynamicEmitter_cAttachedDynamicEmitter. No On Tour class; the member names are ours.
 struct cAttachedDynamicEmitter : cBaseClass_DynamicEmitter {
-    int mBoneIndex;                 // 0x200 (name ours) [R] ctor 0; [U] func_002F2130 stores the attach point (index
-                                    //       into the owner's mBoneIndices); func_002F1A08 follows that bone
-    int mStopped;                   // 0x204 (name ours) [R] ctor 0; [U] func_002F2268 sets it, func_002F2280 and
-                                    //       func_002F2130 clear it; func_002F1A08 emits only while it is 0
-    float mPhase;                   // 0x208 (name ours) [R] ctor 0; [U] func_002F1A08 advances it by rate / 60,
+    int mBoneIndex;                 // 0x200 (name ours) [R] ctor 0; [U] cAttachedEmitterFX_createEmitter stores the attach point (index
+                                    //       into the owner's mBoneIndices); cAttachedEmitterFX_update follows that bone
+    int mStopped;                   // 0x204 (name ours) [R] ctor 0; [U] cAttachedEmitterFX_stopEmitter sets it, cAttachedEmitterFX_resumeEmitter and
+                                    //       cAttachedEmitterFX_createEmitter clear it; cAttachedEmitterFX_update emits only while it is 0
+    float mPhase;                   // 0x208 (name ours) [R] ctor 0; [U] cAttachedEmitterFX_update advances it by rate / 60,
                                     //       wrapping at 4
-    void* mTypeData;                // 0x20C (name ours) [U] func_002F2130 points it at a 0x110-byte record of
+    void* mTypeData;                // 0x20C (name ours) [U] cAttachedEmitterFX_createEmitter points it at a 0x110-byte record of
                                     //       cAttachedEmitterFX_mEmitterDataArray and passes it to the emitter's setup
-                                    //       (vtable slot 3); func_002F1A08 reads the emission parameters from it
+                                    //       (vtable slot 3); cAttachedEmitterFX_update reads the emission parameters from it
 };
 
 CHECK_OFFSET(cAttachedDynamicEmitter, mBoneIndex, 0x200);

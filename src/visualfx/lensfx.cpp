@@ -208,13 +208,13 @@ void cBoltOnFXInterface::clearEntries()
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface__cBoltOnFXInterface);
 #ifdef SKIP_ASM
 extern void* cBoltOnFXInterface_vtbl[];
-extern "C" void func_002F2218(cAttachedEmitterFX* owner, int id);
+extern "C" void cAttachedEmitterFX_deleteEmitter(cAttachedEmitterFX* owner, int id);
 void operator_delete(int* ptr);
 
 /**
  * Destroys a bolt-on effect set: releases every attached emitter it still holds, then frees the object when asked.
  *
- * Re-installs the vtable cBoltOnFXInterface_vtbl, releases each used entry's emitter from the owner (+0xC) with func_002F2218 and
+ * Re-installs the vtable cBoltOnFXInterface_vtbl, releases each used entry's emitter from the owner (+0xC) with cAttachedEmitterFX_deleteEmitter and
  * marks it free, then frees the object with operator_delete when bit 0 of @p flags is set. It is the destructor slot of
  * cBoltOnFXInterface_vtbl.
  *
@@ -226,7 +226,7 @@ extern "C" void cBoltOnFXInterface__cBoltOnFXInterface(cBoltOnFXInterface* self,
     int i;
     for (i = 0; i < 15; i++) {
         if (self->mEntries[i].mEmitter != tBoltOnFXEntry::kNoEmitter) {
-            func_002F2218(self->mAttachedEmitterFX, self->mEntries[i].mEmitter);
+            cAttachedEmitterFX_deleteEmitter(self->mAttachedEmitterFX, self->mEntries[i].mEmitter);
             self->mEntries[i].mEmitter = tBoltOnFXEntry::kNoEmitter;
         }
     }
@@ -268,12 +268,12 @@ int cBoltOnFXInterface::findOrCreateEntry(int kind, int itemId)
 //100%
 INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_createEntry);
 #ifdef SKIP_ASM
-extern "C" int func_002F2130(cAttachedEmitterFX* emitterFx, int typeIndex, int boneIndex);
+extern "C" int cAttachedEmitterFX_createEmitter(cAttachedEmitterFX* emitterFx, int typeIndex, int boneIndex);
 
 /**
  * Creates an attached emitter of a given kind on an item in the first free entry of a bolt-on effect set.
  *
- * The emitter comes from func_002F2130 on the owner (+0xC); the entry stores its index, @p y as the item (+0x4) and @p
+ * The emitter comes from cAttachedEmitterFX_createEmitter on the owner (+0xC); the entry stores its index, @p y as the item (+0x4) and @p
  * x as the kind (+0x8). Returns 0 when all 15 entries are in use, so the caller then marks entry 0.
  *
  * @param x  the particle effect kind
@@ -286,7 +286,7 @@ int cBoltOnFXInterface::createEntry(int x, int y)
     int i;
     for (i = 0; i < 15; i++) {
         if (self->mEntries[i].mEmitter == tBoltOnFXEntry::kNoEmitter) {
-            self->mEntries[i].mEmitter = func_002F2130(self->mAttachedEmitterFX, x, y);
+            self->mEntries[i].mEmitter = cAttachedEmitterFX_createEmitter(self->mAttachedEmitterFX, x, y);
             self->mEntries[i].mItem = y;
             self->mEntries[i].mKind = x;
             return i;
@@ -309,7 +309,7 @@ extern "C" void* cBEBoltDB_getCharBolts(void* self, int i);
 extern "C" int cRider_getCheatIdentity(void* self);
 extern "C" int cRider_getIdentity(void* self);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
-extern "C" void func_002F2218(cAttachedEmitterFX* owner, int id);
+extern "C" void cAttachedEmitterFX_deleteEmitter(cAttachedEmitterFX* owner, int id);
 
 struct sVEi_CCB8 {
     short delta;
@@ -339,7 +339,7 @@ struct sLensItem_CCB8 {
  * cBEBoltDB_getCharBolts) and, for each one with a kind (+0x11, not -1) whose part is fitted (the record's table at +0x288 for
  * slot +0x4; normal characters below 10 also need flag 0x10), marks cBoltOnFXInterface_findOrCreateEntry's entry for each of its two items
  * (+0x12, +0x13) as used; kinds of 50 and up use kinds k-50 and k-49. Unused entries' emitters are released with
- * func_002F2218. Clears the dirty flag (+0x0).
+ * cAttachedEmitterFX_deleteEmitter. Clears the dirty flag (+0x0).
  *
  */
 void cBoltOnFXInterface::rebuild()
@@ -399,7 +399,7 @@ void cBoltOnFXInterface::rebuild()
     }
     for (int entryIdx = 0; entryIdx < 15; entryIdx++) {
         if (ents[entryIdx].mEmitter != tBoltOnFXEntry::kNoEmitter && used[entryIdx] == 0) {
-            func_002F2218(self->mAttachedEmitterFX, ents[entryIdx].mEmitter);
+            cAttachedEmitterFX_deleteEmitter(self->mAttachedEmitterFX, ents[entryIdx].mEmitter);
             ents[entryIdx].mEmitter = tBoltOnFXEntry::kNoEmitter;
         }
     }

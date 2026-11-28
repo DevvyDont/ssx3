@@ -1,7 +1,7 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/ctor_1218", func_00100218);
+INCLUDE_ASM("seg/ctor_1218", crt_deregisterFrameInfo);
 #ifdef SKIP_ASM
 extern void __deregister_frame_info(void* p);
 extern char D_0043CE00[];
@@ -14,7 +14,7 @@ extern char D_0043CE00[];
  * 12) of the global destructor table D_0043CEE4, whose other entries run the units' static destructors. The unit was
  * built as C at -O0 (frame pointer, unfilled delay slots), so it has its own flags.
  */
-void func_00100218(void)
+void crt_deregisterFrameInfo(void)
 {
     __deregister_frame_info(D_0043CE00);
 }

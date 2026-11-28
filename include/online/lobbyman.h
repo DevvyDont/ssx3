@@ -157,7 +157,7 @@ struct LobbyMan {
                                     //       [U] LobbyMan_sendRequest (send request) stores the new state; values above
     int mServerAddr;                // 0x004 [R] ctor 0; [U] connect (LobbyMan_connect) / update (LobbyMan_update) store
                                     //       the lobby server's address and connect to it on port 11000 (0x2AF8);
-                                    //       the online pause-error overlay pings it (func_002583A8)
+                                    //       the online pause-error overlay pings it (cGameComm_startServerPing)
     int mAuthenticated;             // 0x008 [P] assert "authenticated" (lw 0x8); [U] onauthentication sets 1,
                                     //       disconnect (LobbyMan_disconnect) clears
     int mLoggedIn;                  // 0x00C [P] assert "loggedin" (lw 0xC); [U] onNewsRetrieved ("new0") sets 1,
@@ -168,7 +168,7 @@ struct LobbyMan {
                                     //       the known address, state 3; zero: look the server name up, state 2)
     int mHaveCPAT;                  // 0x018 [R] ctor 0; [U] onauthentication: 1 when the reply has "CPAT";
                                     //       selectpersona (LobbyMan_selectPersona) then sends mCPAT as "CDEV"
-    char mCPAT[0x24];               // 0x01C [U] onauthentication decodes "CPAT" into it (func_003EFD30, up to 0x21)
+    char mCPAT[0x24];               // 0x01C [U] onauthentication decodes "CPAT" into it (LobbyUtil_hashMemoryRanges, up to 0x21)
     int mRequestId;                 // 0x040 [U] LobbyMan_sendRequest stores the LobbyApi request (LobbyApi_sendCommand); the
                                     //       cancel paths pass it to LobbyApi_cancelCallbacks; the rank list keeps it per slot
     int mFindingPlayer;             // 0x044 [R] ctor 0; [U] findplayer ("user", LobbyMan_findPlayer) sets 1,
@@ -208,7 +208,7 @@ struct LobbyMan {
     char* mAuth;                    // 0x09C [U] onplaymsg: "AUTH"
     int mWhen;                      // 0x0A0 [U] onplaymsg: "WHEN" (TagFieldGetTime)
     int mMatchType;                 // 0x0A4 [U] the game-kind argument of challenge (LobbyMan_challengePlayer, LobbyMan_lockChallenge)
-                                    //       and quickmatch (LobbyMan_startQuickMatch); onplaymsg passes it to func_00259098
+                                    //       and quickmatch (LobbyMan_startQuickMatch); onplaymsg passes it to lobbyman_startRaceConnection
     int mHostAddr;                  // 0x0A8 [U] onplaymsg: "FROM" address (LobbyMan_getConfigValue may override it)
     int mOppoAddr;                  // 0x0AC [U] onplaymsg: "ADDR" address
     int mSeed;                      // 0x0B0 [U] onplaymsg: "SEED"

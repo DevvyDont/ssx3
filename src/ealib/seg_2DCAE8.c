@@ -9798,9 +9798,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkCreate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *RpcAlloc_66F0(int) __asm__("RpcAlloc");
-extern void func_003F4C68_66F0(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
-extern int func_003F4C98_66F0(int *, int, int) __asm__("func_003F4C98");
-extern void func_003F4E80_66F0(void *, int) __asm__("func_003F4E80");
+extern void NetLib_callService_66F0(int *, int, int, int, int, int, int, int, int, int) __asm__("NetLib_callService");
+extern int NetLib_resolveService_66F0(int *, int, int) __asm__("NetLib_resolveService");
+extern void NetLib_writeBackRange_66F0(void *, int) __asm__("NetLib_writeBackRange");
 extern void memset_66F0(void *, int, int) __asm__("memset");
 
 /**
@@ -9809,8 +9809,8 @@ extern void memset_66F0(void *, int, int) __asm__("memset");
  * Allocates @p n + 916 bytes with RpcAlloc and zeroes them: the 0x180-byte NetGameLinkRefT followed by three
  * 64-byte-aligned buffers, the receive buffer (@p n bytes; recvbuf, recvsize), the 336-byte status area (statbuf) and
  * a 4-byte word (sendreadpos) where the IOP reports its send-buffer read position. Sets statstate to -1 (no status
- * read yet) and the sendwindow to @p n, passes the three buffers to func_003F4E80, then sends 'gmlk'/'crea'
- * (func_003F4C98 binds the request to that command, func_003F4C68 sends it) with @p commRef, @p n and the address of
+ * read yet) and the sendwindow to @p n, passes the three buffers to NetLib_writeBackRange, then sends 'gmlk'/'crea'
+ * (NetLib_resolveService binds the request to that command, NetLib_callService sends it) with @p commRef, @p n and the address of
  * sendreadpos, waiting for the IOP's link reference, which lands in iopref. The channel (cDSockChannel) keeps the
  * block as mGameLink; @p owner is not sent.
  *
@@ -9841,11 +9841,11 @@ NetGameLinkRefT *NetGameLinkCreate(int commRef, int owner, int n) {
     buf += 399;
     buf &= ~0x3F;
     block->sendreadpos = (int *)buf;
-    func_003F4E80_66F0(block->statbuf, 336);
-    func_003F4E80_66F0(block->recvbuf, block->recvsize);
-    func_003F4E80_66F0(block->sendreadpos, 4);
-    func_003F4C98_66F0(msg, 'gmlk', 'crea');
-    func_003F4C68_66F0(msg, 1, commRef, n, (int)&block->sendreadpos, 4, 0, 0, 1, (int)block);
+    NetLib_writeBackRange_66F0(block->statbuf, 336);
+    NetLib_writeBackRange_66F0(block->recvbuf, block->recvsize);
+    NetLib_writeBackRange_66F0(block->sendreadpos, 4);
+    NetLib_resolveService_66F0(msg, 'gmlk', 'crea');
+    NetLib_callService_66F0(msg, 1, commRef, n, (int)&block->sendreadpos, 4, 0, 0, 1, (int)block);
     return block;
 }
 #endif
@@ -9856,20 +9856,20 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkDestroy);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0051EE98_67F8[] __asm__("D_0051EE98");
 extern void RpcFree(int *);
-extern void func_003F4C68(int *, int, int, int, int, int, int, int, int, int);
-extern void func_003F4C98(int *, int, int);
+extern void NetLib_callService(int *, int, int, int, int, int, int, int, int, int);
+extern void NetLib_resolveService(int *, int, int);
 
 /**
  * Destroys a DirtySock game link (EE-side stub of the IOP call).
  *
- * Builds the 'gmlk'/'dest' request in D_0051EE98 with func_003F4C98, sends it with func_003F4C68 carrying the
+ * Builds the 'gmlk'/'dest' request in D_0051EE98 with NetLib_resolveService, sends it with NetLib_callService carrying the
  * link's IOP reference (*@p linkRef), then releases the EE-side ref with RpcFree.
  *
  * @param linkRef  the game link ref
  */
 void NetGameLinkDestroy(int *linkRef) {
-    func_003F4C98(D_0051EE98_67F8, 'gmlk', 'dest');
-    func_003F4C68(D_0051EE98_67F8, 0, *linkRef, 0, 0, 0, 0, 0, 1, 0);
+    NetLib_resolveService(D_0051EE98_67F8, 'gmlk', 'dest');
+    NetLib_callService(D_0051EE98_67F8, 0, *linkRef, 0, 0, 0, 0, 0, 1, 0);
     RpcFree(linkRef);
 }
 #endif
@@ -9889,7 +9889,7 @@ struct S_6878 { int iopref; int statstate; char pad[0x158 - 8]; int statbuf; };
  * argument, the reply words and the reply data; only the block (the last argument) is used.
  *
  * @param requestKey  the request key (unused)
- * @param requestFlags  the request flags (unused; as func_003F5A50's)
+ * @param requestFlags  the request flags (unused; as NetSession_onRecvDone's)
  * @param replyWord10  reply word +0x10 (unused)
  * @param result  the reply's result word (unused)
  * @param replyData  the reply data address (unused)
@@ -9914,8 +9914,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkStatus);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 /* NetGameLinkRefT (ealib/netgamelink.h): its member names at these offsets. */
 typedef struct { int iopref; int statstate; char pad8[0x150]; int statbuf; } G_6958;
-extern int func_003F4C68_6958(int *, int, int, int, int, int, int, int, void *, void *) __asm__("func_003F4C68");
-extern int func_003F4C98_6958(int *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_6958(int *, int, int, int, int, int, int, int, void *, void *) __asm__("NetLib_callService");
+extern int NetLib_resolveService_6958(int *, int, int) __asm__("NetLib_resolveService");
 extern int NetGameLink_completeStatus_6958(int, int, int, int, int, int, int, int, G_6958 *) __asm__("NetGameLink_completeStatus");
 extern int D_0051EEA8_6958[] __asm__("D_0051EEA8");
 
@@ -9937,11 +9937,11 @@ char *NetGameLinkStatus(G_6958 *self) {
     }
     if (self->statstate == 0) {
         self->statstate = 1;
-        func_003F4C98_6958(D_0051EEA8_6958, 'gmlk', 'stat');
+        NetLib_resolveService_6958(D_0051EEA8_6958, 'gmlk', 'stat');
         if (was == 0) {
-            func_003F4C68_6958(D_0051EEA8_6958, 0, self->iopref, 0, 0, 0, self->statbuf, 336, NetGameLink_completeStatus_6958, self);
+            NetLib_callService_6958(D_0051EEA8_6958, 0, self->iopref, 0, 0, 0, self->statbuf, 336, NetGameLink_completeStatus_6958, self);
         } else {
-            func_003F4C68_6958(D_0051EEA8_6958, 1, self->iopref, 0, 0, 0, self->statbuf, 336, (void *)1, 0);
+            NetLib_callService_6958(D_0051EEA8_6958, 1, self->iopref, 0, 0, 0, self->statbuf, 336, (void *)1, 0);
             NetGameLink_completeStatus_6958(0, 0, 0, 0, 0, 0, 0, 0, self);
         }
     }
@@ -9990,10 +9990,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkRecv);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003F4EA0(int, int *);
+extern int NetLib_checkSharedBlock(int, int *);
 extern int NetTick(void);
-extern int func_003F4C98_6B10(int *, int, int) __asm__("func_003F4C98");
-extern int func_003F4C68_6B10(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
+extern int NetLib_resolveService_6B10(int *, int, int) __asm__("NetLib_resolveService");
+extern int NetLib_callService_6B10(int *, int, int, int, int, int, int, int, int, int) __asm__("NetLib_callService");
 extern void *func_0041605C_6B10(short *, int, int) __asm__("func_0041605C");
 extern int D_0051EEB8_6B10[] __asm__("D_0051EEB8");
 
@@ -10001,7 +10001,7 @@ int NetGameLinkRecv_impl(char *self, short *out, int n) __asm__("NetGameLinkRecv
 /**
  * Reads packets from the game link's receive buffer, asking the IOP for more once it is drained.
  *
- * When nothing is buffered (end +0x164 negative) it asks func_003F4EA0 whether the IOP filled the receive buffer
+ * When nothing is buffered (end +0x164 negative) it asks NetLib_checkSharedBlock whether the IOP filled the receive buffer
  * (+0x16C); a fill with a new id (compared with +0x15C) sets the read position +0x160 to 0x10 (past the fill header)
  * and the end to the fill length + 0x10. With data waiting, @p n of 1 copies one packet into @p out (NetGameLinkPeek) and
  * advances by its length; any other @p n copies all the waiting bytes when they fit in @p n (nothing otherwise). Once
@@ -10018,7 +10018,7 @@ int NetGameLinkRecv_impl(char *self, short *out, int n) {
     int fillId;
 
     if (*(int *)(self + 0x164) < 0) {
-        fillId = func_003F4EA0(*(int *)(self + 0x16C), &loc);
+        fillId = NetLib_checkSharedBlock(*(int *)(self + 0x16C), &loc);
         if (fillId >= 0) {
             if (fillId != *(int *)(self + 0x15C)) {
                 *(int *)(self + 0x160) = 0x10;
@@ -10045,8 +10045,8 @@ int NetGameLinkRecv_impl(char *self, short *out, int n) {
         *(int *)(self + 0x160) = 0;
         *(int *)(self + 0x164) = -1;
         *(int *)(self + 0x170) = NetTick();
-        func_003F4C98_6B10(D_0051EEB8_6B10, 'gmlk', 'recv');
-        func_003F4C68_6B10(D_0051EEB8_6B10, 1, *(int *)self, *(int *)(self + 0x16C), 0, 0, 0, 0, 0, 0);
+        NetLib_resolveService_6B10(D_0051EEB8_6B10, 'gmlk', 'recv');
+        NetLib_callService_6B10(D_0051EEB8_6B10, 1, *(int *)self, *(int *)(self + 0x16C), 0, 0, 0, 0, 0, 0);
     }
     return ret;
 }
@@ -10060,8 +10060,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkSend);
 typedef struct { char b[4]; } U4_6C80;
 /* NetGameLinkRefT (ealib/netgamelink.h): its member names at these offsets. */
 typedef struct { int id; char pad[0x170]; int sendwindow; int sendpos; unsigned int sendreadpos; } S_6C80;
-extern int func_003F4C68_6C80(int *, int, int, int, char *, int, int, int, int, int) __asm__("func_003F4C68");
-extern int func_003F4C98_6C80(int *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_6C80(int *, int, int, int, char *, int, int, int, int, int) __asm__("NetLib_callService");
+extern int NetLib_resolveService_6C80(int *, int, int) __asm__("NetLib_resolveService");
 extern int D_0051EEC8_6C80[] __asm__("D_0051EEC8");
 
 /**
@@ -10085,8 +10085,8 @@ int NetGameLinkSend(S_6C80 *self, unsigned char *msg, int len) {
     w = self->sendpos;
     if (self->sendwindow - (w - *(int *)&readPos) < len) return 0;
     self->sendpos = w + len;
-    func_003F4C98_6C80(D_0051EEC8_6C80, 'gmlk', 'send');
-    func_003F4C68_6C80(D_0051EEC8_6C80, 1, self->id, 0, (char *)msg, len, 0, 0, 0, 0);
+    NetLib_resolveService_6C80(D_0051EEC8_6C80, 'gmlk', 'send');
+    NetLib_callService_6C80(D_0051EEC8_6C80, 1, self->id, 0, (char *)msg, len, 0, 0, 0, 0);
     return 1;
 }
 #endif
@@ -10095,8 +10095,8 @@ int NetGameLinkSend(S_6C80 *self, unsigned char *msg, int len) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkControl);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003F4C68_6D78(int *, int, int, int, int *, int, int, int, int, int *) __asm__("func_003F4C68");
-extern void func_003F4C98_6D78(int *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_6D78(int *, int, int, int, int *, int, int, int, int, int *) __asm__("NetLib_callService");
+extern void NetLib_resolveService_6D78(int *, int, int) __asm__("NetLib_resolveService");
 extern int D_0051EED8_6D78[] __asm__("D_0051EED8");
 
 int NetGameLinkControl_impl(int *p, int b, int c) __asm__("NetGameLinkControl");
@@ -10114,8 +10114,8 @@ int NetGameLinkControl_impl(int *p, int b, int c) __asm__("NetGameLinkControl");
 int NetGameLinkControl_impl(int *link, int selector, int value) {
     int out;
 
-    func_003F4C98_6D78(D_0051EED8_6D78, 'gmlk', 'ctrl');
-    func_003F4C68_6D78(D_0051EED8_6D78, 1, *link, selector, &value, 4, 0, 0, 1, &out);
+    NetLib_resolveService_6D78(D_0051EED8_6D78, 'gmlk', 'ctrl');
+    NetLib_callService_6D78(D_0051EED8_6D78, 1, *link, selector, &value, 4, 0, 0, 1, &out);
     return out;
 }
 #endif
@@ -10124,8 +10124,8 @@ int NetGameLinkControl_impl(int *link, int selector, int value) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilCreate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003F4C68_6E08(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
-extern void func_003F4C98_6E08(int *, int, int) __asm__("func_003F4C98");
+extern void NetLib_callService_6E08(int *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
+extern void NetLib_resolveService_6E08(int *, int, int) __asm__("NetLib_resolveService");
 
 /**
  * Creates a DirtySock game-util (connection setup) object on the IOP.
@@ -10139,8 +10139,8 @@ int NetGameUtilCreate(void) {
     int msg[4];
     int result;
 
-    func_003F4C98_6E08(msg, 'gmut', 'crea');
-    func_003F4C68_6E08(msg, 1, 0, 0, 0, 0, 0, 0, 1, &result);
+    NetLib_resolveService_6E08(msg, 'gmut', 'crea');
+    NetLib_callService_6E08(msg, 1, 0, 0, 0, 0, 0, 0, 1, &result);
     return result;
 }
 #endif
@@ -10149,13 +10149,13 @@ int NetGameUtilCreate(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilDestroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003F4C68_6E70(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
-extern int func_003F4C98_6E70(int *, int, int) __asm__("func_003F4C98");
+extern void NetLib_callService_6E70(int *, int, int, int, int, int, int, int, int, int) __asm__("NetLib_callService");
+extern int NetLib_resolveService_6E70(int *, int, int) __asm__("NetLib_resolveService");
 
 /**
  * Destroys a DirtySock game-util (connection setup) object (EE-side stub of the IOP call).
  *
- * Builds the 'gmut'/'dest' request with func_003F4C98 and sends it with func_003F4C68 with @p utilRef as the IOP
+ * Builds the 'gmut'/'dest' request with NetLib_resolveService and sends it with NetLib_callService with @p utilRef as the IOP
  * reference.
  *
  * @param utilRef  the game util ref
@@ -10163,8 +10163,8 @@ extern int func_003F4C98_6E70(int *, int, int) __asm__("func_003F4C98");
 void NetGameUtilDestroy(int utilRef) {
     int request[4];
 
-    func_003F4C98_6E70(request, 'gmut', 'dest');
-    func_003F4C68_6E70(request, 1, utilRef, 0, 0, 0, 0, 0, 1, 0);
+    NetLib_resolveService_6E70(request, 'gmut', 'dest');
+    NetLib_callService_6E70(request, 1, utilRef, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
 
@@ -10172,8 +10172,8 @@ void NetGameUtilDestroy(int utilRef) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilReset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003F4C68_6ED8(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
-extern int func_003F4C98_6ED8(int *, int, int) __asm__("func_003F4C98");
+extern void NetLib_callService_6ED8(int *, int, int, int, int, int, int, int, int, int) __asm__("NetLib_callService");
+extern int NetLib_resolveService_6ED8(int *, int, int) __asm__("NetLib_resolveService");
 
 /**
  * Resets a game-util object on the IOP ('gmut'/'rset', waited for). Nothing in the build calls it.
@@ -10183,8 +10183,8 @@ extern int func_003F4C98_6ED8(int *, int, int) __asm__("func_003F4C98");
 void NetGameUtilReset(int handle) {
     int msg[4];
 
-    func_003F4C98_6ED8(msg, 'gmut', 'rset');
-    func_003F4C68_6ED8(msg, 1, handle, 0, 0, 0, 0, 0, 1, 0);
+    NetLib_resolveService_6ED8(msg, 'gmut', 'rset');
+    NetLib_callService_6ED8(msg, 1, handle, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
 
@@ -10192,8 +10192,8 @@ void NetGameUtilReset(int handle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilConnect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003F4C68_6F40(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
-extern void func_003F4C98_6F40(int *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_6F40(int *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
+extern void NetLib_resolveService_6F40(int *, int, int) __asm__("NetLib_resolveService");
 
 int NetGameUtilConnect_impl(int a, int b, int c) __asm__("NetGameUtilConnect");
 /**
@@ -10211,8 +10211,8 @@ int NetGameUtilConnect_impl(int handle, int connectKind, int address) {
     int msg[4];
     int result;
 
-    func_003F4C98_6F40(msg, 'gmut', 'conn');
-    func_003F4C68_6F40(msg, 1, handle, connectKind, address, -1, 0, 0, 1, &result);
+    NetLib_resolveService_6F40(msg, 'gmut', 'conn');
+    NetLib_callService_6F40(msg, 1, handle, connectKind, address, -1, 0, 0, 1, &result);
     return result;
 }
 #endif
@@ -10221,8 +10221,8 @@ int NetGameUtilConnect_impl(int handle, int connectKind, int address) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilComplete);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003F4C68_6FC8(void *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
-extern void func_003F4C98_6FC8(void *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_6FC8(void *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
+extern void NetLib_resolveService_6FC8(void *, int, int) __asm__("NetLib_resolveService");
 struct S_6FC8 { int a[4]; int out; };
 
 /**
@@ -10237,8 +10237,8 @@ struct S_6FC8 { int a[4]; int out; };
 int NetGameUtilComplete(int handle) {
     struct S_6FC8 msg;
 
-    func_003F4C98_6FC8(&msg, 'gmut', 'comp');
-    func_003F4C68_6FC8(&msg, 1, handle, 0, 0, 0, 0, 0, 1, &msg.out);
+    NetLib_resolveService_6FC8(&msg, 'gmut', 'comp');
+    NetLib_callService_6FC8(&msg, 1, handle, 0, 0, 0, 0, 0, 1, &msg.out);
     return msg.out;
 }
 #endif
@@ -10247,8 +10247,8 @@ int NetGameUtilComplete(int handle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_queryStatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003F4C68_7038(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
-extern void func_003F4C98_7038(int *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_7038(int *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
+extern void NetLib_resolveService_7038(int *, int, int) __asm__("NetLib_resolveService");
 
 int NetGameUtil_queryStatus_impl(int a, int b) __asm__("NetGameUtil_queryStatus");
 /**
@@ -10264,8 +10264,8 @@ int NetGameUtil_queryStatus_impl(int handle, int selector) {
     int msg[4];
     int result;
 
-    func_003F4C98_7038(msg, 'gmut', 'stat');
-    func_003F4C68_7038(msg, 1, handle, selector, 0, 0, 0, 0, 1, &result);
+    NetLib_resolveService_7038(msg, 'gmut', 'stat');
+    NetLib_callService_7038(msg, 1, handle, selector, 0, 0, 0, 0, 1, &result);
     return result;
 }
 #endif
@@ -10274,8 +10274,8 @@ int NetGameUtil_queryStatus_impl(int handle, int selector) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_postStatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003F4C68_70B8(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
-extern int func_003F4C98_70B8(int *, int, int) __asm__("func_003F4C98");
+extern void NetLib_callService_70B8(int *, int, int, int, int, int, int, int, int, int) __asm__("NetLib_callService");
+extern int NetLib_resolveService_70B8(int *, int, int) __asm__("NetLib_resolveService");
 
 /**
  * Sends a game-util status request to the IOP and ignores the answer.
@@ -10288,8 +10288,8 @@ extern int func_003F4C98_70B8(int *, int, int) __asm__("func_003F4C98");
 void NetGameUtil_postStatus(int handle) {
     int msg[4];
 
-    func_003F4C98_70B8(msg, 'gmut', 'stat');
-    func_003F4C68_70B8(msg, 1, handle, 0, 0, 0, 0, 0, 1, 0);
+    NetLib_resolveService_70B8(msg, 'gmut', 'stat');
+    NetLib_callService_70B8(msg, 1, handle, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
 
@@ -10297,8 +10297,8 @@ void NetGameUtil_postStatus(int handle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_advertise);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003F4C68_7120(int *, int, int, int, char *, int, int, int, int, int) __asm__("func_003F4C68");
-extern int func_003F4C98_7120(int *, int, int) __asm__("func_003F4C98");
+extern void NetLib_callService_7120(int *, int, int, int, char *, int, int, int, int, int) __asm__("NetLib_callService");
+extern int NetLib_resolveService_7120(int *, int, int) __asm__("NetLib_resolveService");
 extern int sprintf_7120(char *, int *, int, int) __asm__("sprintf");
 extern int D_004A4860_7120[] __asm__("D_004A4860");
 
@@ -10317,8 +10317,8 @@ void NetGameUtil_advertise(int util, int kind, int name) {
     int request[4];
 
     sprintf_7120(advertText, D_004A4860_7120, kind, name);
-    func_003F4C98_7120(request, 'gmut', 'advt');
-    func_003F4C68_7120(request, 1, util, 0, advertText, -1, 0, 0, 1, 0);
+    NetLib_resolveService_7120(request, 'gmut', 'advt');
+    NetLib_callService_7120(request, 1, util, 0, advertText, -1, 0, 0, 1, 0);
 }
 #endif
 
@@ -10326,8 +10326,8 @@ void NetGameUtil_advertise(int util, int kind, int name) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilWithdraw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003F4C68_71B0(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
-extern int func_003F4C98_71B0(int *, int, int) __asm__("func_003F4C98");
+extern void NetLib_callService_71B0(int *, int, int, int, int, int, int, int, int, int) __asm__("NetLib_callService");
+extern int NetLib_resolveService_71B0(int *, int, int) __asm__("NetLib_resolveService");
 
 /**
  * Withdraws the game util's network advert ('gmut'/'with', waited for). Nothing in the build calls it.
@@ -10337,8 +10337,8 @@ extern int func_003F4C98_71B0(int *, int, int) __asm__("func_003F4C98");
 void NetGameUtilWithdraw(int handle) {
     int msg[4];
 
-    func_003F4C98_71B0(msg, 'gmut', 'with');
-    func_003F4C68_71B0(msg, 1, handle, 0, 0, 0, 0, 0, 1, 0);
+    NetLib_resolveService_71B0(msg, 'gmut', 'with');
+    NetLib_callService_71B0(msg, 1, handle, 0, 0, 0, 0, 0, 1, 0);
 }
 #endif
 
@@ -10346,8 +10346,8 @@ void NetGameUtilWithdraw(int handle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtil_locate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003F4C68_7218(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
-extern void func_003F4C98_7218(int *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_7218(int *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
+extern void NetLib_resolveService_7218(int *, int, int) __asm__("NetLib_resolveService");
 extern char D_004A4868_7218[] __asm__("D_004A4868");
 
 int NetGameUtil_locate_impl(int a, int b, char *c) __asm__("NetGameUtil_locate");
@@ -10369,8 +10369,8 @@ int NetGameUtil_locate_impl(int util, int kind, char *name) {
     if (name == 0) {
         name = D_004A4868_7218;
     }
-    func_003F4C98_7218(request, 'gmut', 'loca');
-    func_003F4C68_7218(request, 1, util, 0, (int)name, -1, 0, 0, 1, &foundAddress);
+    NetLib_resolveService_7218(request, 'gmut', 'loca');
+    NetLib_callService_7218(request, 1, util, 0, (int)name, -1, 0, 0, 1, &foundAddress);
     return foundAddress;
 }
 #endif
@@ -10379,8 +10379,8 @@ int NetGameUtil_locate_impl(int util, int kind, char *name) {
 INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilQuery);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003F4C68_72A0(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
-extern void func_003F4C98_72A0(int *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_72A0(int *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
+extern void NetLib_resolveService_72A0(int *, int, int) __asm__("NetLib_resolveService");
 extern char D_004A4868_72A0[] __asm__("D_004A4868");
 
 int NetGameUtilQuery_impl(int a, char *b, int c, int d) __asm__("NetGameUtilQuery");
@@ -10403,8 +10403,8 @@ int NetGameUtilQuery_impl(int util, char *kind, int buffer, int bufferSize) {
     if (kind == 0) {
         kind = D_004A4868_72A0;
     }
-    func_003F4C98_72A0(request, 'gmut', 'quer');
-    func_003F4C68_72A0(request, 5, util, 0, (int)kind, -1, buffer, bufferSize, 1, &count);
+    NetLib_resolveService_72A0(request, 'gmut', 'quer');
+    NetLib_callService_72A0(request, 5, util, 0, (int)kind, -1, buffer, bufferSize, 1, &count);
     return count;
 }
 #endif
@@ -10414,8 +10414,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PingRpc_create);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int func_003F4C68_7340(int *, int, int, int, int, int, int, int, int, char *) __asm__("func_003F4C68");
-extern int func_003F4C98_7340(int *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_7340(int *, int, int, int, int, int, int, int, int, char *) __asm__("NetLib_callService");
+extern int NetLib_resolveService_7340(int *, int, int) __asm__("NetLib_resolveService");
 extern char *RpcAlloc_7340(int) __asm__("RpcAlloc");
 extern void *memset_7340(void *, int, int) __asm__("memset");
 
@@ -10433,8 +10433,8 @@ char *PingRpc_create(void) {
     char *block = RpcAlloc_7340(2132);
     memset_7340(block, 0, 2132);
     *(unsigned int *)(block + 0x10) = (unsigned int)(block + 0x53) & 0xFFFFFFC0;
-    func_003F4C98_7340(buf, 'ping', 'crea');
-    func_003F4C68_7340(buf, 1, 0, 0, 0, 0, 0, 0, 1, block + 0xC);
+    NetLib_resolveService_7340(buf, 'ping', 'crea');
+    NetLib_callService_7340(buf, 1, 0, 0, 0, 0, 0, 0, 1, block + 0xC);
     return block;
 }
 #endif
@@ -10444,8 +10444,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", PingRpc_destroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void RpcFree_73E0(void *) __asm__("RpcFree");
-extern int func_003F4C68_73E0(void *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
-extern void func_003F4C98_73E0(void *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_73E0(void *, int, int, int, int, int, int, int, int, int) __asm__("NetLib_callService");
+extern void NetLib_resolveService_73E0(void *, int, int) __asm__("NetLib_resolveService");
 struct S_73E0 { int a[4]; };
 
 /**
@@ -10458,8 +10458,8 @@ struct S_73E0 { int a[4]; };
 void PingRpc_destroy(void *block) {
     struct S_73E0 msg;
 
-    func_003F4C98_73E0(&msg, 'ping', 'dest');
-    func_003F4C68_73E0(&msg, 0, *(int *)((char*)block + 0xC), 0, 0, 0, 0, 0, 1, 0);
+    NetLib_resolveService_73E0(&msg, 'ping', 'dest');
+    NetLib_callService_73E0(&msg, 0, *(int *)((char*)block + 0xC), 0, 0, 0, 0, 0, 1, 0);
     RpcFree_73E0(block);
 }
 #endif
@@ -10468,8 +10468,8 @@ void PingRpc_destroy(void *block) {
 INCLUDE_ASM("ealib/seg_2DCAE8", PingRpc_request);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003F4C68_7450(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
-extern void func_003F4C98_7450(int *, int, int) __asm__("func_003F4C98");
+extern int NetLib_callService_7450(int *, int, int, int, int, int, int, int, int, int *) __asm__("NetLib_callService");
+extern void NetLib_resolveService_7450(int *, int, int) __asm__("NetLib_resolveService");
 
 int PingRpc_request_impl(char *o, int a, int b, int c) __asm__("PingRpc_request");
 /**
@@ -10477,7 +10477,7 @@ int PingRpc_request_impl(char *o, int a, int b, int c) __asm__("PingRpc_request"
  *
  * Sends 'ping'/'requ' with the block's IOP reference (+0xC), @p address, @p payload and @p payloadLen, and waits for the result. The lobby
  * pings servers and players with a tag payload (LobbyApi_ping), cGameComm_update and the pause-overlay check
- * (func_002583A8) use it too; replies are collected with PingRpc_pollResponse.
+ * (cGameComm_startServerPing) use it too; replies are collected with PingRpc_pollResponse.
  *
  * @param block  the ping block
  * @param address  the address to ping
@@ -10489,8 +10489,8 @@ int PingRpc_request_impl(char *block, int address, int payload, int payloadLen) 
     int msg[4];
     int result;
 
-    func_003F4C98_7450(msg, 'ping', 'requ');
-    func_003F4C68_7450(msg, 1, *(int *)(block + 0xC), address, payload, payloadLen, 0, 0, 1, &result);
+    NetLib_resolveService_7450(msg, 'ping', 'requ');
+    NetLib_callService_7450(msg, 1, *(int *)(block + 0xC), address, payload, payloadLen, 0, 0, 1, &result);
     return result;
 }
 #endif
@@ -10512,7 +10512,7 @@ struct S_7500 { volatile int recvLen; volatile int busy; int sendTick; int iopre
  * unused.
  *
  * @param requestKey  the request key (unused)
- * @param requestFlags  the request flags (unused; as func_003F5A50's)
+ * @param requestFlags  the request flags (unused; as NetSession_onRecvDone's)
  * @param replyWord10  reply word +0x10 (unused)
  * @param result  the reply's result word (unused)
  * @param replyData  the reply data address (unused)
@@ -10540,8 +10540,8 @@ typedef struct { char b[4]; } U4_7500;
 extern int D_0051EEE8_7500[] __asm__("D_0051EEE8");
 extern void InvalidDCache_7500(char *, char *) __asm__("InvalidDCache");
 extern void func_0041605C_7500(char *, char *, int) __asm__("func_0041605C");
-extern int func_003F4C98_7500(int *, int, int) __asm__("func_003F4C98");
-extern void func_003F4C68_7500(int *, int, int, int, int, int, char *, int, void *, void *) __asm__("func_003F4C68");
+extern int NetLib_resolveService_7500(int *, int, int) __asm__("NetLib_resolveService");
+extern void NetLib_callService_7500(int *, int, int, int, int, int, char *, int, void *, void *) __asm__("NetLib_callService");
 extern char PingRpc_completeResponse_7500[] __asm__("PingRpc_completeResponse");
 
 int PingRpc_pollResponse_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__("PingRpc_pollResponse");
@@ -10590,8 +10590,8 @@ int PingRpc_pollResponse_impl(struct S_7500 *self, char *buf, int *bufLen, int *
             InvalidDCache_7500(self->respBuf, self->respBuf + 0x7FF);
             self->recvLen = -1;
         }
-        func_003F4C98_7500(D_0051EEE8_7500, 'ping', 'resp');
-        func_003F4C68_7500(D_0051EEE8_7500, 1, self->iopref, 0, 0, 0, self->respBuf, 0x800, PingRpc_completeResponse_7500, self);
+        NetLib_resolveService_7500(D_0051EEE8_7500, 'ping', 'resp');
+        NetLib_callService_7500(D_0051EEE8_7500, 1, self->iopref, 0, 0, 0, self->respBuf, 0x800, PingRpc_completeResponse_7500, self);
     }
     return res;
 }
@@ -10629,12 +10629,12 @@ void LobbyApi_debugPrintf(char *self, const char *fmt, ...) {
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_queueRequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void *func_002591E8_7718(int) __asm__("func_002591E8");
+extern void *lobbyman_alloc_7718(int) __asm__("lobbyman_alloc");
 
 /**
  * Queues a pending-request record on the lobby and returns it.
  *
- * Allocates a 68-byte record (func_002591E8): +0 a request id taken from the counter +0x54C (which then advances, kept
+ * Allocates a 68-byte record (lobbyman_alloc): +0 a request id taken from the counter +0x54C (which then advances, kept
  * below 2^31), +4 the command @p tag, +0x38 / +0x3C the completion routine and its context. It is linked into the
  * request list +0x53C in front of the first 'ping' record, so command requests stay ahead of pings. The lobby's command
  * (LobbyApi_sendCommand), connect (LobbyApi_connect) and ping (LobbyApi_ping) routines use it.
@@ -10652,7 +10652,7 @@ void *LobbyApi_queueRequest(char *lobby, int tag, int callback, int context) {
     char *nx;
     char *head;
 
-    n = func_002591E8_7718(68);
+    n = lobbyman_alloc_7718(68);
     if (n != 0) {
         *(int*)(n + 4) = tag;
         *(int*)(n + 0x38) = callback;
@@ -10683,12 +10683,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_takeRequest);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct N_77F0 { int pad0; int key; int w[14]; struct N_77F0 *next; } N_77F0;
 extern void *memset_77F0(void *, int, unsigned int) __asm__("memset");
-extern void func_00259210_77F0(void *) __asm__("func_00259210");
+extern void lobbyman_free_77F0(void *) __asm__("lobbyman_free");
 /**
  * Takes the first pending-request record off the lobby's list when it matches a command.
  *
  * Clears @p dst (68 bytes) and, when the head of the request list +0x53C has the command @p key (or @p key is 'DQUE',
- * which takes any), unlinks it, copies it into @p dst and frees it (func_00259210). LobbyApi_update uses it to find the
+ * which takes any), unlinks it, copies it into @p dst and frees it (lobbyman_free). LobbyApi_update uses it to find the
  * completion routine of each reply; LobbyApi_dropRequests drains the list with 'DQUE'.
  *
  * @param dst  receives the record (all zero when none was taken)
@@ -10702,7 +10702,7 @@ int LobbyApi_takeRequest(char *self, N_77F0 *dst, int key) {
     if (n != 0 && (n->key == key || key == 'DQUE')) {
         *(N_77F0 **)(self + 0x53C) = n->next;
         *dst = *n;
-        func_00259210_77F0(n);
+        lobbyman_free_77F0(n);
     }
     return *(int *)(self + 0x53C) != 0;
 }
@@ -10715,7 +10715,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_takePing);
 struct N_7918 { int f0; int tag; int id; int fC; int f10; int f14; char name[0x28]; struct N_7918 *next; };
 struct L_7918 { char pad[0x53C]; struct N_7918 *head; int cnt; };
 extern int strcmp_7918(char *, char *) __asm__("strcmp");
-extern void func_00259210_7918(void *) __asm__("func_00259210");
+extern void lobbyman_free_7918(void *) __asm__("lobbyman_free");
 
 /**
  * Takes a matching ping record off the lobby's request list.
@@ -10741,7 +10741,7 @@ int LobbyApi_takePing(struct L_7918 *list, struct N_7918 *out, char *name, int i
             ((n->id == id && strcmp_7918(name, n->name) == 0) || (id == -1 && n->fC < cutoff))) {
             *pp = n->next;
             *out = *n;
-            func_00259210_7918(n);
+            lobbyman_free_7918(n);
             list->cnt--;
             return 1;
         }
@@ -10773,18 +10773,18 @@ void LobbyApi_dropRequests(int lobby) {
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_setRoomPopulation);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003EE3E0(int, int, void *);
-extern void *func_003EE468(int, int);
-extern int func_003EEEE8(int);
+extern void SortList_setValue(int, int, void *);
+extern void *SortList_getValue(int, int);
+extern int HashTable_findInt(int);
 extern void sprintf(void *, int *, int);
 extern int D_004A4870_7B00[] __asm__("D_004A4870");
 
 /**
  * Updates a room's user count in the lobby's room list.
  *
- * When the room list (slot 0: index +0x310, list +0x314) exists, finds room @p roomId (func_003EEEE8, func_003EE468) and,
+ * When the room list (slot 0: index +0x310, list +0x314) exists, finds room @p roomId (HashTable_findInt, SortList_getValue) and,
  * if its count (+0x10) differs from @p population, stores the count, writes it as text at +0x14 ("%d") and puts the record
- * back (func_003EE3E0). LobbyApi_update calls it for "+who", "+pop", "+usr" and move / room replies.
+ * back (SortList_setValue). LobbyApi_update calls it for "+who", "+pop", "+usr" and move / room replies.
  *
  * @param lobby  the lobby
  * @param roomId  the room id
@@ -10797,13 +10797,13 @@ void LobbyApi_setRoomPopulation(void *lobby, int roomId, int population) {
 
     temp_4 = (*(int *)((char*)(lobby) + (0x310)));
     if (temp_4 != 0) {
-        temp_2 = func_003EEEE8(temp_4);
+        temp_2 = HashTable_findInt(temp_4);
         if (temp_2 != 0) {
-            temp_2_2 = func_003EE468((*(int *)((char*)(lobby) + (0x314))), temp_2);
+            temp_2_2 = SortList_getValue((*(int *)((char*)(lobby) + (0x314))), temp_2);
             if ((temp_2_2 != 0) && (population != (*(int *)((char*)(temp_2_2) + (0x10))))) {
                 (*(int *)((char*)(temp_2_2) + (0x10))) = population;
                 sprintf(temp_2_2 + 0x14, D_004A4870_7B00, population);
-                func_003EE3E0((*(int *)((char*)(lobby) + (0x314))), temp_2, temp_2_2);
+                SortList_setValue((*(int *)((char*)(lobby) + (0x314))), temp_2, temp_2_2);
             }
         }
     }
@@ -10814,7 +10814,7 @@ void LobbyApi_setRoomPopulation(void *lobby, int roomId, int population) {
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_notifyListChanges);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003EE620_7BA0(int) __asm__("func_003EE620");
+extern int SortList_update_7BA0(int) __asm__("SortList_update");
 
 struct M_7BA0 { int type; int idx; int zero; int h; };
 /* A list slot of LobbyApiRefT::mLists: {index, list, routine, context, ?} (names ours, as the header's). */
@@ -10826,7 +10826,7 @@ void LobbyApi_notifyListChanges_impl(struct O_7BA0 *self) __asm__("LobbyApi_noti
  * Notifies the owners of the lobby's lists that changed.
  *
  * For each of the 8 list slots (+0x310, 0x14 bytes each: index, list, routine, context) that is open and has a routine,
- * when func_003EE620 reports changes on its list (> 0) it calls the routine with the lobby, an event (type 2, the slot
+ * when SortList_update reports changes on its list (> 0) it calls the routine with the lobby, an event (type 2, the slot
  * number, 0, the list) and the slot's context. Called from LobbyApi_update.
  */
 void LobbyApi_notifyListChanges_impl(struct O_7BA0 *self) {
@@ -10834,7 +10834,7 @@ void LobbyApi_notifyListChanges_impl(struct O_7BA0 *self) {
     for (i = 0; i < 8; i++) {
         struct S_7BA0 *listSlot = &self->s[i];
         if (listSlot->h != 0 && listSlot->fn != 0) {
-            if (func_003EE620_7BA0(listSlot->list) > 0) {
+            if (SortList_update_7BA0(listSlot->list) > 0) {
                 struct M_7BA0 changeEvent;
                 changeEvent.h = listSlot->list;
                 changeEvent.type = 2;
@@ -10857,10 +10857,10 @@ extern int cDirtysock_tag_TagFieldGetString_7C40(int, char *, int, char *) __asm
 extern int cDirtysock_tag_TagFieldSetNumber_7C40(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetNumber");
 extern void cDirtysock_tag_TagFieldSetString_7C40(char *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
 extern int PingRpc_pollResponse_7C40(int, char *, int *, int *) __asm__("PingRpc_pollResponse");
-extern int func_003EE558_7C40(int) __asm__("func_003EE558");
-extern char *func_003EE560_7C40(int, int) __asm__("func_003EE560");
-extern void func_003EE600_7C40(int, int) __asm__("func_003EE600");
-extern int func_003F5D88_7C40(int) __asm__("func_003F5D88");
+extern int SortList_getPassCount_7C40(int) __asm__("SortList_getPassCount");
+extern char *SortList_getAt_7C40(int, int) __asm__("SortList_getAt");
+extern void SortList_bumpChanged_7C40(int, int) __asm__("SortList_bumpChanged");
+extern int NetSession_getTick_7C40(int) __asm__("NetSession_getTick");
 extern int strcasecmp_7C40(char *, char *) __asm__("strcasecmp");
 extern void sprintf_7C40(char *, char *, int) __asm__("sprintf");
 
@@ -10893,7 +10893,7 @@ extern int LobbyApi_takePing_7C40(char *, struct Rec_7C40 *, char *, int, int) _
  * "NAME"; the matching pending ping (LobbyApi_takePing) gets its routine called with a 'ping' event whose tags carry NAME,
  * ADDR and PING (the round-trip time). The time is also written as "%dms" into the room-list entry with that address
  * (slot 0, +0x64 / +0x5C) and the user-list entry with that name (slot 1, +8 / +0x28), each followed by
- * func_003EE600(list, 1). Then every ping whose deadline has passed (protocol time from func_003F5D88) is completed
+ * SortList_bumpChanged(list, 1). Then every ping whose deadline has passed (protocol time from NetSession_getTick) is completed
  * with code -1 and PING 0.
  */
 void LobbyApi_handlePings(char *self) {
@@ -10929,11 +10929,11 @@ void LobbyApi_handlePings(char *self) {
         if (*(int *)(self + 0x310) != 0) {
             char *listEntry;
 
-            for (len = 0; (listEntry = func_003EE560_7C40(*(int *)(self + 0x314), len)) != 0; len++) {
+            for (len = 0; (listEntry = SortList_getAt_7C40(*(int *)(self + 0x314), len)) != 0; len++) {
                 if (*(unsigned int *)(listEntry + 0x64) == addr) {
                     sprintf_7C40(listEntry + 0x5C, str_pct_dms, info[0]);
-                    if (len < func_003EE558_7C40(*(int *)(self + 0x314))) {
-                        func_003EE600_7C40(*(int *)(self + 0x314), 1);
+                    if (len < SortList_getPassCount_7C40(*(int *)(self + 0x314))) {
+                        SortList_bumpChanged_7C40(*(int *)(self + 0x314), 1);
                     }
                 }
             }
@@ -10941,15 +10941,15 @@ void LobbyApi_handlePings(char *self) {
         if (*(int *)(self + 0x324) != 0) {
             char *listEntry;
 
-            for (len = 0; (listEntry = func_003EE560_7C40(*(int *)(self + 0x328), len)) != 0; len++) {
+            for (len = 0; (listEntry = SortList_getAt_7C40(*(int *)(self + 0x328), len)) != 0; len++) {
                 if (strcasecmp_7C40(listEntry + 8, name) == 0) {
                     sprintf_7C40(listEntry + 0x28, str_pct_dms, info[0]);
-                    func_003EE600_7C40(*(int *)(self + 0x328), 1);
+                    SortList_bumpChanged_7C40(*(int *)(self + 0x328), 1);
                 }
             }
         }
     }
-    currentTick = func_003F5D88_7C40(*(int *)self);
+    currentTick = NetSession_getTick_7C40(*(int *)self);
     while (LobbyApi_takePing_7C40(self, &rec, name, -1, currentTick) != 0) {
         if (rec.fn != 0) {
             ev.mType = 0;
@@ -11018,12 +11018,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_create);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char str_VERS_c_7FF0[] __asm__("str_VERS_c");
-extern void *func_002591E8_7FF0(int) __asm__("func_002591E8");
+extern void *lobbyman_alloc_7FF0(int) __asm__("lobbyman_alloc");
 extern void memset_7FF0(void *, int, int) __asm__("memset");
 extern char *strchr_7FF0(char *, int) __asm__("strchr");
 extern void cDirtysock_tag_TagFieldDupl_7FF0(void *, int, char *) __asm__("cDirtysock_tag_TagFieldDupl");
 extern void cDirtysock_tag_TagFieldSetString_7FF0(void *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
-extern int func_003F5478_7FF0(int) __asm__("func_003F5478");
+extern int NetSession_create_7FF0(int) __asm__("NetSession_create");
 extern int PingRpc_create_7FF0(void) __asm__("PingRpc_create");
 extern void LobbyApi_disconnect_7FF0(void *) __asm__("LobbyApi_disconnect");
 
@@ -11031,7 +11031,7 @@ extern void LobbyApi_disconnect_7FF0(void *) __asm__("LobbyApi_disconnect");
  * Creates a lobby client object (1360 bytes) and returns it.
  *
  * Zeroes the block and stores the default tags (+0x34, 256 bytes): @p tagString is duplicated as tags when it contains '=',
- * otherwise stored as the "VERS" tag. Creates the lobby protocol (func_003F5478(0x8000), +0) and a ping object
+ * otherwise stored as the "VERS" tag. Creates the lobby protocol (NetSession_create(0x8000), +0) and a ping object
  * (PingRpc_create, +4), stores the debug routine and its data (+0x548, +0x544; see LobbyApi_debugPrintf) and resets everything
  * with LobbyApi_disconnect. LobbyMan (LobbyMan_createLobbyApi) creates its mpLobbyApi with it.
  *
@@ -11044,7 +11044,7 @@ void *LobbyApi_create(char *tagString, int debugData, int debugProc) {
     LobbyApiRefT* lobbyRef;
     int pingRef;
 
-    lobbyRef = (LobbyApiRefT*)func_002591E8_7FF0(1360);
+    lobbyRef = (LobbyApiRefT*)lobbyman_alloc_7FF0(1360);
     if (((char*)lobbyRef) != 0) {
         memset_7FF0(lobbyRef, 0, 1360);
         if (tagString != 0) {
@@ -11054,7 +11054,7 @@ void *LobbyApi_create(char *tagString, int debugData, int debugProc) {
                 cDirtysock_tag_TagFieldSetString_7FF0(lobbyRef->mTags, 0x100, str_VERS_c_7FF0, tagString);
             }
         }
-        *(int*)lobbyRef = func_003F5478_7FF0(0x8000);
+        *(int*)lobbyRef = NetSession_create_7FF0(0x8000);
         pingRef = PingRpc_create_7FF0();
         lobbyRef->mpDebugData = (void*)debugData;
         lobbyRef->mpDebugProc = (void (*)(void*, const char*))debugProc;
@@ -11069,11 +11069,11 @@ void *LobbyApi_create(char *tagString, int debugData, int debugProc) {
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_disconnect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_00259210_80C0(void *) __asm__("func_00259210");
+extern void lobbyman_free_80C0(void *) __asm__("lobbyman_free");
 extern void LobbyApi_resetServerPing_80C0(void *) __asm__("LobbyApi_resetServerPing");
-extern void *func_003EE480_80C0(int, int) __asm__("func_003EE480");
-extern int func_003EE9A0_80C0(int) __asm__("func_003EE9A0");
-extern void func_003F5738_80C0(int) __asm__("func_003F5738");
+extern void *SortList_remove_80C0(int, int) __asm__("SortList_remove");
+extern int HashTable_takeAny_80C0(int) __asm__("HashTable_takeAny");
+extern void NetSession_disconnect_80C0(int) __asm__("NetSession_disconnect");
 
 struct E_80C0 { int a, b, c, d, e; };
 /* LobbyApiRefT (ealib/lobbyapi.h): its member names at these offsets. */
@@ -11091,7 +11091,7 @@ struct S_80C0 {
 /**
  * Disconnects the lobby and clears its state.
  *
- * Sets the state +0xC to 'offl', disconnects the protocol (func_003F5738), empties and frees the entries of every open
+ * Sets the state +0xC to 'offl', disconnects the protocol (NetSession_disconnect), empties and frees the entries of every open
  * list slot (+0x310), frees all pending request records (+0x53C), resets the server-ping state (LobbyApi_resetServerPing) and
  * clears the outstanding-ping count +0x540 and the request id counter +0x54C. Used by LobbyApi_create, LobbyApi_destroy and
  * LobbyMan's disconnect.
@@ -11102,18 +11102,18 @@ void LobbyApi_disconnect(struct S_80C0 *lobby) {
     int i, entryRef;
     char *request;
     lobby->mState = 'offl';
-    func_003F5738_80C0(lobby->mpSession);
+    NetSession_disconnect_80C0(lobby->mpSession);
     for (i = 0; i < 8; i++) {
         if (lobby->e[i].a != 0) {
-            while ((entryRef = func_003EE9A0_80C0(lobby->e[i].a)) != 0) {
-                func_00259210_80C0(func_003EE480_80C0(lobby->e[i].b, entryRef));
+            while ((entryRef = HashTable_takeAny_80C0(lobby->e[i].a)) != 0) {
+                lobbyman_free_80C0(SortList_remove_80C0(lobby->e[i].b, entryRef));
             }
         }
     }
     while (lobby->mpRequests != 0) {
         request = lobby->mpRequests;
         lobby->mpRequests = *(char **)(request + 0x40);
-        func_00259210_80C0(request);
+        lobbyman_free_80C0(request);
     }
     LobbyApi_resetServerPing_80C0(lobby);
     lobby->mPingsOutstanding = 0;
@@ -11126,11 +11126,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_destroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void LobbyApi_disconnect_81C8(void *) __asm__("LobbyApi_disconnect");
-extern void func_003EE820_81C8(int) __asm__("func_003EE820");
-extern void func_003EE260_81C8(int) __asm__("func_003EE260");
+extern void HashTable_destroy_81C8(int) __asm__("HashTable_destroy");
+extern void SortList_destroy_81C8(int) __asm__("SortList_destroy");
 extern void PingRpc_destroy_81C8(int) __asm__("PingRpc_destroy");
-extern void func_003F55B8_81C8(int) __asm__("func_003F55B8");
-extern void func_00259210_81C8(void *) __asm__("func_00259210");
+extern void NetSession_destroy_81C8(int) __asm__("NetSession_destroy");
+extern void lobbyman_free_81C8(void *) __asm__("lobbyman_free");
 
 struct S_81C8 { int h; int list; int pad[3]; };
 /* LobbyApiRefT's member names at these offsets. */
@@ -11140,21 +11140,21 @@ void LobbyApi_destroy_impl(struct O_81C8 *self) __asm__("LobbyApi_destroy");
 /**
  * Destroys a lobby made by LobbyApi_create.
  *
- * Disconnects it (LobbyApi_disconnect), destroys every open list slot's index and list (func_003EE820, func_003EE260), the
- * ping object (PingRpc_destroy) and the protocol (func_003F55B8), then frees the lobby (func_00259210).
+ * Disconnects it (LobbyApi_disconnect), destroys every open list slot's index and list (HashTable_destroy, SortList_destroy), the
+ * ping object (PingRpc_destroy) and the protocol (NetSession_destroy), then frees the lobby (lobbyman_free).
  */
 void LobbyApi_destroy_impl(struct O_81C8 *self) {
     int i;
     LobbyApi_disconnect_81C8(self);
     for (i = 0; i < 8; i++) {
         if (self->s[i].h != 0) {
-            func_003EE820_81C8(self->s[i].h);
-            func_003EE260_81C8(self->s[i].list);
+            HashTable_destroy_81C8(self->s[i].h);
+            SortList_destroy_81C8(self->s[i].list);
         }
     }
     PingRpc_destroy_81C8(self->mpPing);
-    func_003F55B8_81C8(self->mpSession);
-    func_00259210_81C8(self);
+    NetSession_destroy_81C8(self->mpSession);
+    lobbyman_free_81C8(self);
 }
 #endif
 
@@ -11190,10 +11190,10 @@ extern void LobbyApi_debugPrintf_8260(void *, int *, int, int) __asm__("LobbyApi
 extern int LobbyApi_queueRequest_8260(void *, int, int, int) __asm__("LobbyApi_queueRequest");
 extern void LobbyApi_dropRequests_8260() __asm__("LobbyApi_dropRequests");
 extern void LobbyApi_resetServerPing_8260(void *) __asm__("LobbyApi_resetServerPing");
-extern void func_003F5638_8260(int, int, int) __asm__("func_003F5638");
-extern void func_003F5738_8260(int) __asm__("func_003F5738");
-extern int func_003F5910_8260(int, int, int, void *, int) __asm__("func_003F5910");
-extern int func_003F5D88_8260(int) __asm__("func_003F5D88");
+extern void NetSession_connect_8260(int, int, int) __asm__("NetSession_connect");
+extern void NetSession_disconnect_8260(int) __asm__("NetSession_disconnect");
+extern int NetSession_send_8260(int, int, int, void *, int) __asm__("NetSession_send");
+extern int NetSession_getTick_8260(int) __asm__("NetSession_getTick");
 extern int D_00495F30_8260[] __asm__("D_00495F30");
 
 /* LobbyApiRefT (ealib/lobbyapi.h): its member names at these offsets. */
@@ -11212,7 +11212,7 @@ struct S_8260 {
  *
  * Stores the address (+0x3B4) and port (+0x3B0), drops pending requests (LobbyApi_dropRequests), clears the snapshot counter
  * +0x50C, resets the server-ping state and queues an 'skey' request record with the routine and context (returns -1
- * when that fails). Then reconnects the protocol (func_003F5738, func_003F5638), prints "connecting to %08x:%d" through
+ * when that fails). Then reconnects the protocol (NetSession_disconnect, NetSession_connect), prints "connecting to %08x:%d" through
  * LobbyApi_debugPrintf, sends '@dir' with the default tags (+0x34), sets the state +0xC to 'rdir', the timeout +0x10 to now +
  * 120000 and +0x14 to now, and clears the server-down text +0x3B8. LobbyMan calls it with port 11000.
  *
@@ -11233,14 +11233,14 @@ int LobbyApi_connect(struct S_8260 *lobby, int serverAddr, int serverPort, int c
     if (LobbyApi_queueRequest_8260(lobby, 'skey', callback, context) == 0) {
         return -1;
     }
-    func_003F5738_8260(lobby->mpSession);
-    func_003F5638_8260(lobby->mpSession, lobby->mAddress, lobby->mPort);
+    NetSession_disconnect_8260(lobby->mpSession);
+    NetSession_connect_8260(lobby->mpSession, lobby->mAddress, lobby->mPort);
     LobbyApi_debugPrintf_8260(lobby, D_00495F30_8260, lobby->mAddress, lobby->mPort);
     cDirtysock_tag_TagFieldDupl_8260(buf, 0x100, lobby->mTags);
-    func_003F5910_8260(lobby->mpSession, 0x40646972, 0, buf, -1);
+    NetSession_send_8260(lobby->mpSession, 0x40646972, 0, buf, -1);
     lobby->mState = 'rdir';
-    lobby->mTimeout = func_003F5D88_8260(lobby->mpSession) + 0x1D4C0;
-    lobby->mStateTime = func_003F5D88_8260(lobby->mpSession);
+    lobby->mTimeout = NetSession_getTick_8260(lobby->mpSession) + 0x1D4C0;
+    lobby->mStateTime = NetSession_getTick_8260(lobby->mpSession);
     lobby->mDownText = 0;
     return 0;
 }
@@ -11250,14 +11250,14 @@ int LobbyApi_connect(struct S_8260 *lobby, int serverAddr, int serverPort, int c
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_setListEnabled);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_00259210_8368(void *) __asm__("func_00259210");
-extern int func_003EE1E8_8368(int, int, int) __asm__("func_003EE1E8");
-extern void func_003EE260_8368(int) __asm__("func_003EE260");
-extern void *func_003EE480_8368(int, int) __asm__("func_003EE480");
-extern int func_003EE778_8368(int, int) __asm__("func_003EE778");
-extern void func_003EE820_8368(int) __asm__("func_003EE820");
-extern int func_003EE9A0_8368(int) __asm__("func_003EE9A0");
-extern void func_003F5910_8368(int, int, int, char *, int) __asm__("func_003F5910");
+extern void lobbyman_free_8368(void *) __asm__("lobbyman_free");
+extern int SortList_create_8368(int, int, int) __asm__("SortList_create");
+extern void SortList_destroy_8368(int) __asm__("SortList_destroy");
+extern void *SortList_remove_8368(int, int) __asm__("SortList_remove");
+extern int HashTable_create_8368(int, int) __asm__("HashTable_create");
+extern void HashTable_destroy_8368(int) __asm__("HashTable_destroy");
+extern int HashTable_takeAny_8368(int) __asm__("HashTable_takeAny");
+extern void NetSession_send_8368(int, int, int, char *, int) __asm__("NetSession_send");
 extern void strcat_8368(char *, char *) __asm__("strcat");
 
 /* "ROOMS=", "RANKS=", "USERS=", "1", "0" (in .sdata, 8-aligned); the original used string literals */
@@ -11273,7 +11273,7 @@ struct O_8368 { int lobby; char pad[0x8]; int state; char pad2[0x300]; struct S_
 /**
  * Opens or closes one of the lobby's list slots and returns the slot's list.
  *
- * Opening (@p on nonzero) a closed slot creates its index (func_003EE778(1000, 2000)) and list (func_003EE1E8(100, 100,
+ * Opening (@p on nonzero) a closed slot creates its index (HashTable_create(1000, 2000)) and list (SortList_create(100, 100,
  * 0)); closing an open one frees its entries and destroys both. For slots 0 (rooms), 1 (users) and 2 (ranks), when the
  * lobby is connected (state not 'offl', 'rdir' or 'conn') it tells the server with a 'sele' command "ROOMS=1",
  * "USERS=1" or "RANKS=1" ("=0" when closing). Nothing in the build calls it.
@@ -11302,12 +11302,12 @@ int LobbyApi_setListEnabled(struct O_8368 *self, unsigned int i, int on) {
         if (self->s[i].h == 0) {
             int state;
 
-            self->s[i].h = func_003EE778_8368(1000, 2000);
-            self->s[i].list = func_003EE1E8_8368(100, 100, 0);
+            self->s[i].h = HashTable_create_8368(1000, 2000);
+            self->s[i].list = SortList_create_8368(100, 100, 0);
             state = self->state;
             if (state != 'offl' && state != 'rdir' && state != 'conn' && buf[0] != 0) {
                 strcat_8368(buf, D_004A48C8);
-                func_003F5910_8368(self->lobby, 'sele', 0, buf, -1);
+                NetSession_send_8368(self->lobby, 'sele', 0, buf, -1);
             }
         }
     }
@@ -11315,17 +11315,17 @@ int LobbyApi_setListEnabled(struct O_8368 *self, unsigned int i, int on) {
         if (self->s[i].h != 0) {
             int state;
 
-            while ((entryRef = func_003EE9A0_8368(self->s[i].h)) != 0) {
-                func_00259210_8368(func_003EE480_8368(self->s[i].list, entryRef));
+            while ((entryRef = HashTable_takeAny_8368(self->s[i].h)) != 0) {
+                lobbyman_free_8368(SortList_remove_8368(self->s[i].list, entryRef));
             }
-            func_003EE820_8368(self->s[i].h);
+            HashTable_destroy_8368(self->s[i].h);
             self->s[i].h = 0;
-            func_003EE260_8368(self->s[i].list);
+            SortList_destroy_8368(self->s[i].list);
             self->s[i].list = 0;
             state = self->state;
             if (state != 'offl' && state != 'rdir' && state != 'conn' && buf[0] != 0) {
                 strcat_8368(buf, D_004A48D0);
-                func_003F5910_8368(self->lobby, 'sele', 0, buf, -1);
+                NetSession_send_8368(self->lobby, 'sele', 0, buf, -1);
             }
         }
     }
@@ -11337,9 +11337,9 @@ int LobbyApi_setListEnabled(struct O_8368 *self, unsigned int i, int on) {
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_openList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003EE778_85B0(int, int) __asm__("func_003EE778");
-extern int func_003EE1E8_85B0(int, int, int) __asm__("func_003EE1E8");
-extern void func_003EE768_85B0(int, int) __asm__("func_003EE768");
+extern int HashTable_create_85B0(int, int) __asm__("HashTable_create");
+extern int SortList_create_85B0(int, int, int) __asm__("SortList_create");
+extern void SortList_setUserWord_85B0(int, int) __asm__("SortList_setUserWord");
 
 struct S_85B0 { int h; int list; int a; int b; int pad; };
 struct O_85B0 { char pad[0x310]; struct S_85B0 s[8]; };
@@ -11348,8 +11348,8 @@ int LobbyApi_openList_impl(struct O_85B0 *self, unsigned int i, int a, int b) __
 /**
  * Opens one of the lobby's list slots with a change routine and returns its list.
  *
- * Stores the routine and context in the slot (+0x310 + 0x14 * @p i, +8 / +0xC), creates the index (func_003EE778(1000,
- * 2000)) and the list (func_003EE1E8(100, 100, 0)) and links them (func_003EE768). Does not check whether the slot was
+ * Stores the routine and context in the slot (+0x310 + 0x14 * @p i, +8 / +0xC), creates the index (HashTable_create(1000,
+ * 2000)) and the list (SortList_create(100, 100, 0)) and links them (SortList_setUserWord). Does not check whether the slot was
  * already open. LobbyMan opens the room, user and rank lists (slots 0-2) and rank snapshots (slot 4) with it.
  *
  * @param i  the list slot (0-7)
@@ -11362,9 +11362,9 @@ int LobbyApi_openList_impl(struct O_85B0 *self, unsigned int i, int callback, in
     if (i < 8) {
     self->s[i].a = callback;
     self->s[i].b = context;
-    self->s[i].h = func_003EE778_85B0(1000, 2000);
-    self->s[i].list = func_003EE1E8_85B0(100, 100, 0);
-    func_003EE768_85B0(self->s[i].list, self->s[i].h);
+    self->s[i].h = HashTable_create_85B0(1000, 2000);
+    self->s[i].list = SortList_create_85B0(100, 100, 0);
+    SortList_setUserWord_85B0(self->s[i].list, self->s[i].h);
     listRef = self->s[i].list;
     }
     return listRef;
@@ -11404,17 +11404,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_closeList);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 typedef struct { int a; int b; int x; int y; int d; } E_8688;
 typedef struct { char pad[0x310]; E_8688 e[8]; } T_8688;
-extern int func_003EE770_8688(int) __asm__("func_003EE770");
-extern int func_003EE9A0_8688(int) __asm__("func_003EE9A0");
-extern void *func_003EE480_8688(int, int) __asm__("func_003EE480");
-extern void func_00259210_8688(void *) __asm__("func_00259210");
-extern void func_003EE820_8688(int) __asm__("func_003EE820");
-extern void func_003EE260_8688(int) __asm__("func_003EE260");
+extern int SortList_getUserWord_8688(int) __asm__("SortList_getUserWord");
+extern int HashTable_takeAny_8688(int) __asm__("HashTable_takeAny");
+extern void *SortList_remove_8688(int, int) __asm__("SortList_remove");
+extern void lobbyman_free_8688(void *) __asm__("lobbyman_free");
+extern void HashTable_destroy_8688(int) __asm__("HashTable_destroy");
+extern void SortList_destroy_8688(int) __asm__("SortList_destroy");
 
 /**
  * Destroys a list opened with LobbyApi_openList.
  *
- * Frees every entry (through the index func_003EE770 returns for the list), destroys the index and the list; when the
+ * Frees every entry (through the index SortList_getUserWord returns for the list), destroys the index and the list; when the
  * slot still refers to this list its index and list words are cleared. The slot's routine and context are cleared in
  * any case. LobbyMan closes its room, user, rank and snapshot lists with it.
  *
@@ -11425,12 +11425,12 @@ void LobbyApi_closeList(T_8688 *self, unsigned int i, int listRef) {
     int iter;
     int item;
     if (i < 8 && listRef != 0) {
-        iter = func_003EE770_8688(listRef);
-        while ((item = func_003EE9A0_8688(iter)) != 0) {
-            func_00259210_8688(func_003EE480_8688(listRef, item));
+        iter = SortList_getUserWord_8688(listRef);
+        while ((item = HashTable_takeAny_8688(iter)) != 0) {
+            lobbyman_free_8688(SortList_remove_8688(listRef, item));
         }
-        func_003EE820_8688(iter);
-        func_003EE260_8688(listRef);
+        HashTable_destroy_8688(iter);
+        SortList_destroy_8688(listRef);
         if (self->e[i].b == listRef) {
             self->e[i].a = 0;
             self->e[i].b = 0;
@@ -11445,11 +11445,11 @@ void LobbyApi_closeList(T_8688 *self, unsigned int i, int listRef) {
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_addListEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void *func_002591E8_8778(int) __asm__("func_002591E8");
+extern void *lobbyman_alloc_8778(int) __asm__("lobbyman_alloc");
 extern void memset_8778(void *, int, int) __asm__("memset");
-extern int func_003EEC88_8778(int, char *) __asm__("func_003EEC88");
-extern int func_003EE320_8778(int, void *) __asm__("func_003EE320");
-extern int func_003EEB30_8778(int, char *, int) __asm__("func_003EEB30");
+extern int HashTable_findString_8778(int, char *) __asm__("HashTable_findString");
+extern int SortList_add_8778(int, void *) __asm__("SortList_add");
+extern int HashTable_addString_8778(int, char *, int) __asm__("HashTable_addString");
 
 struct S_8778 { int h; int list; int a; int b; int pad; };
 struct O_8778 { char pad[0x310]; struct S_8778 s[8]; };
@@ -11460,7 +11460,7 @@ int LobbyApi_addListEntry_impl(struct O_8778 *self, unsigned int i, char *arg) _
  * Adds an entry to one of the lobby's keyed lists (slots 3-7), unless its name is already there.
  *
  * Slot 3 takes a name: a zeroed 312-byte record is made with the name at +8. Slots 4-7 take a 168-byte record, copied,
- * keyed by its name at +8. The record is added to the slot's list (func_003EE320) and indexed by name (func_003EEB30).
+ * keyed by its name at +8. The record is added to the slot's list (SortList_add) and indexed by name (HashTable_addString).
  * Nothing in the build calls it.
  *
  * @param i  the list slot (3-7)
@@ -11475,26 +11475,26 @@ int LobbyApi_addListEntry_impl(struct O_8778 *self, unsigned int i, char *record
         if (i == 3) {
             char *newRecord;
             int entryRef;
-            if (func_003EEC88_8778(self->s[3].h, record) != 0) {
+            if (HashTable_findString_8778(self->s[3].h, record) != 0) {
                 return 0;
             }
-            newRecord = func_002591E8_8778(312);
+            newRecord = lobbyman_alloc_8778(312);
             memset_8778(newRecord, 0, 312);
             strcpy(newRecord + 8, record);
-            entryRef = func_003EE320_8778(self->s[3].list, newRecord);
-            func_003EEB30_8778(self->s[3].h, newRecord + 8, entryRef);
+            entryRef = SortList_add_8778(self->s[3].list, newRecord);
+            HashTable_addString_8778(self->s[3].h, newRecord + 8, entryRef);
             return 1;
         }
         if (i - 4 < 4) {
             char *newRecord;
             int entryRef;
-            if (func_003EEC88_8778(self->s[i].h, record + 8) != 0) {
+            if (HashTable_findString_8778(self->s[i].h, record + 8) != 0) {
                 return 0;
             }
-            newRecord = func_002591E8_8778(168);
+            newRecord = lobbyman_alloc_8778(168);
             *(struct B_8778 *)newRecord = *(struct B_8778 *)record;
-            entryRef = func_003EE320_8778(self->s[i].list, newRecord);
-            func_003EEB30_8778(self->s[i].h, newRecord + 8, entryRef);
+            entryRef = SortList_add_8778(self->s[i].list, newRecord);
+            HashTable_addString_8778(self->s[i].h, newRecord + 8, entryRef);
             return 1;
         }
         return -1;
@@ -11507,10 +11507,10 @@ int LobbyApi_addListEntry_impl(struct O_8778 *self, unsigned int i, char *record
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_removeListEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003EEC88_8968(int, int) __asm__("func_003EEC88");
-extern int func_003EED08_8968(int, int) __asm__("func_003EED08");
-extern void *func_003EE480_8968(int, int) __asm__("func_003EE480");
-extern void func_00259210_8968(void *) __asm__("func_00259210");
+extern int HashTable_findString_8968(int, int) __asm__("HashTable_findString");
+extern int HashTable_removeString_8968(int, int) __asm__("HashTable_removeString");
+extern void *SortList_remove_8968(int, int) __asm__("SortList_remove");
+extern void lobbyman_free_8968(void *) __asm__("lobbyman_free");
 
 struct S_8968 { int h; int list; int a; int b; int pad; };
 struct O_8968 { char pad[0x310]; struct S_8968 s[8]; };
@@ -11519,8 +11519,8 @@ int LobbyApi_removeListEntry_impl(struct O_8968 *self, unsigned int i, int arg) 
 /**
  * Removes a named entry from one of the lobby's keyed lists (slots 3-7).
  *
- * Looks the name up in the slot's index (func_003EEC88), removes it (func_003EED08) and frees the entry taken from the
- * list (func_003EE480). Nothing in the build calls it.
+ * Looks the name up in the slot's index (HashTable_findString), removes it (HashTable_removeString) and frees the entry taken from the
+ * list (SortList_remove). Nothing in the build calls it.
  *
  * @param i  the list slot (3-7)
  * @param entryName  the entry's name
@@ -11535,12 +11535,12 @@ int LobbyApi_removeListEntry_impl(struct O_8968 *self, unsigned int i, int entry
         if (i - 3 >= 5) {
             return -1;
         }
-        entryRef = func_003EEC88_8968(self->s[i].h, entryName);
+        entryRef = HashTable_findString_8968(self->s[i].h, entryName);
         if (entryRef == 0) {
             return 0;
         }
-        func_003EED08_8968(self->s[i].h, entryName);
-        func_00259210_8968(func_003EE480_8968(self->s[i].list, entryRef));
+        HashTable_removeString_8968(self->s[i].h, entryName);
+        lobbyman_free_8968(SortList_remove_8968(self->s[i].list, entryRef));
         return 1;
     }
     return -1;
@@ -11550,14 +11550,14 @@ int LobbyApi_removeListEntry_impl(struct O_8968 *self, unsigned int i, int entry
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_hasListEntry);
 #ifdef SKIP_ASM
-extern int func_003EEC88(int, int);
+extern int HashTable_findString(int, int);
 
 /**
  * Tells whether a lobby list slot's index holds a name.
  *
  * @param lobby  the lobby
  * @param slot  the list slot (0-7)
- * @param entryName  the name or key to look up (func_003EEC88)
+ * @param entryName  the name or key to look up (HashTable_findString)
  * @return 1 when present, 0 when not, -1 when @p slot is invalid or closed
  */
 int LobbyApi_hasListEntry(struct LobbyApiRefT *lobby, unsigned int slot, int entryName) {
@@ -11566,7 +11566,7 @@ int LobbyApi_hasListEntry(struct LobbyApiRefT *lobby, unsigned int slot, int ent
     if (slot < 8U) {
         temp_4 = lobby->mLists[slot][0];
         if (temp_4 != 0) {
-            return func_003EEC88(temp_4, entryName) != 0;
+            return HashTable_findString(temp_4, entryName) != 0;
         }
     }
     return -1;
@@ -11625,13 +11625,13 @@ extern int cDirtysock_tag_TagFieldGetString_8B10(int, char *, int, char *) __asm
 extern void cDirtysock_tag_TagFieldSetCrypt_8B10(char *, int, char *, char *, char *) __asm__("cDirtysock_tag_TagFieldSetCrypt");
 extern void cDirtysock_tag_TagFieldSetNumber_8B10(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetNumber");
 extern void cDirtysock_tag_TagFieldSetString_8B10(char *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
-extern void func_00259210_8B10(void *) __asm__("func_00259210");
+extern void lobbyman_free_8B10(void *) __asm__("lobbyman_free");
 extern int *LobbyApi_queueRequest_8B10(void *, int, int, int) __asm__("LobbyApi_queueRequest");
 extern int cDirtysock_tag_TagFieldMerge_8B10(char *, int, char *) __asm__("cDirtysock_tag_TagFieldMerge");
-extern void *func_003EE480_8B10(int, int) __asm__("func_003EE480");
-extern int func_003EE9A0_8B10(int) __asm__("func_003EE9A0");
-extern void func_003F35D0_8B10(char *, int, char *, char *, int, int) __asm__("func_003F35D0");
-extern void func_003F5910_8B10(int, int, int, char *, int) __asm__("func_003F5910");
+extern void *SortList_remove_8B10(int, int) __asm__("SortList_remove");
+extern int HashTable_takeAny_8B10(int) __asm__("HashTable_takeAny");
+extern void LobbyCrypt_encodeText_8B10(char *, int, char *, char *, int, int) __asm__("LobbyCrypt_encodeText");
+extern void NetSession_send_8B10(int, int, int, char *, int) __asm__("NetSession_send");
 
 extern char str_empty_k[];
 extern char str_PASS_b[];
@@ -11660,8 +11660,8 @@ struct O_8B10 {
  * context (LobbyApi_queueRequest; -2 when that fails). For 'auth', 'acct' and 'pass' the tags are copied, the lobby's default
  * tags (+0x34) merged in (cDirtysock_tag_TagFieldMerge) and PASS replaced: without a session key (+0x24 empty) by TagFieldSetCrypt
  * with the MASK text from the '@dir' reply (+0x4BC) plus a MASK tag holding its SESS number (+0x4B8); with one by '~'
- * and the password encrypted with it (func_003F35D0). A 'snap' command empties the list slot named by its CHAN tag
- * (4-7), clears +0x508 and counts a pending snapshot (+0x50C). The command goes out with func_003F5910. LobbyMan's
+ * and the password encrypted with it (LobbyCrypt_encodeText). A 'snap' command empties the list slot named by its CHAN tag
+ * (4-7), clears +0x508 and counts a pending snapshot (+0x50C). The command goes out with NetSession_send. LobbyMan's
  * requests (LobbyMan_sendRequest and others) use it.
  *
  * @param cmd  the command FourCC
@@ -11696,7 +11696,7 @@ int LobbyApi_sendCommand(struct O_8B10 *self, int cmd, char *tags, int callback,
             cDirtysock_tag_TagFieldSetNumber_8B10(buf, 0x200, str_MASK, self->mSess);
         } else {
             str[0] = '~';
-            func_003F35D0_8B10(str + 1, 0x1F, str + 1, self->mSessionKey, 0x10, 0x10);
+            LobbyCrypt_encodeText_8B10(str + 1, 0x1F, str + 1, self->mSessionKey, 0x10, 0x10);
             cDirtysock_tag_TagFieldSetString_8B10(buf, 0x200, str_PASS_b, str);
         }
         tags = buf;
@@ -11704,14 +11704,14 @@ int LobbyApi_sendCommand(struct O_8B10 *self, int cmd, char *tags, int callback,
     if (cmd == 'snap') {
         k = cDirtysock_tag_TagFieldGetNumber_8B10(cDirtysock_tag_TagFieldFind_8B10(tags, str_CHAN_b), 0);
         if (k >= 4 && k < 8 && self->s[k].h != 0) {
-            while ((entryRef = func_003EE9A0_8B10(self->s[k].h)) != 0) {
-                func_00259210_8B10(func_003EE480_8B10(self->s[k].list, entryRef));
+            while ((entryRef = HashTable_takeAny_8B10(self->s[k].h)) != 0) {
+                lobbyman_free_8B10(SortList_remove_8B10(self->s[k].list, entryRef));
             }
         }
         self->mChannel = 0;
         self->mPendingSnapshots++;
     }
-    func_003F5910_8B10(self->mpSession, cmd, 0, tags, -1);
+    NetSession_send_8B10(self->mpSession, cmd, 0, tags, -1);
     return *n;
 }
 #endif
@@ -11763,7 +11763,7 @@ typedef struct {
 } S_8DC0;
 typedef struct { int id; int f4; int addr; int t; char pad[8]; char name[0x20]; } N_8DC0;
 extern N_8DC0 *LobbyApi_queueRequest_8DC0(S_8DC0 *, int, int, int) __asm__("LobbyApi_queueRequest");
-extern int func_003F5D88_8DC0(int) __asm__("func_003F5D88");
+extern int NetSession_getTick_8DC0(int) __asm__("NetSession_getTick");
 extern char *strncpy_8DC0(char *, char *, int) __asm__("strncpy");
 extern int TagFieldSetString_8DC0(char *, int, char *, char *) __asm__("cDirtysock_tag_TagFieldSetString");
 extern int TagFieldSetAddress_8DC0(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetAddress");
@@ -11797,7 +11797,7 @@ int LobbyApi_ping(S_8DC0 *self, char *name, int addr, int x, int callback, int c
     n = LobbyApi_queueRequest_8DC0(self, 'ping', callback, context);
     if (n == 0) return -4;
     n->addr = addr;
-    n->t = func_003F5D88_8DC0(self->mpSession) + x;
+    n->t = NetSession_getTick_8DC0(self->mpSession) + x;
     strncpy_8DC0(n->name, name, 0x1F);
     buf[0] = 0;
     TagFieldSetString_8DC0(buf, 0x100, str_NAME_b_8DC0, name);
@@ -11933,13 +11933,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_rankList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern void *func_002591E8_9160(int) __asm__("func_002591E8");
-extern void func_00259210_9160(void *) __asm__("func_00259210");
+extern void *lobbyman_alloc_9160(int) __asm__("lobbyman_alloc");
+extern void lobbyman_free_9160(void *) __asm__("lobbyman_free");
 extern void memset_9160(void *, int, int) __asm__("memset");
-extern int *func_003EE560_9160(int, int) __asm__("func_003EE560");
-extern int func_003EE550_9160(int) __asm__("func_003EE550");
-extern int func_003EED08_9160(int, void *) __asm__("func_003EED08");
-extern void *func_003EE480_9160(int, int) __asm__("func_003EE480");
+extern int *SortList_getAt_9160(int, int) __asm__("SortList_getAt");
+extern int SortList_getCount_9160(int) __asm__("SortList_getCount");
+extern int HashTable_removeString_9160(int, void *) __asm__("HashTable_removeString");
+extern void *SortList_remove_9160(int, int) __asm__("SortList_remove");
 extern char str_bogus_9160[] __asm__("str_bogus") __attribute__((aligned(8)));
 
 /**
@@ -11964,9 +11964,9 @@ int LobbyApi_rankList(LobbyApiRefT* self, int limit) {
         return -1;
     }
     k = 0;
-    hist = (short *)func_002591E8_9160(0x4000);
+    hist = (short *)lobbyman_alloc_9160(0x4000);
     memset_9160(hist, 0, 0x4000);
-    while ((rankEntry = func_003EE560_9160(rankList, k)) != 0) {
+    while ((rankEntry = SortList_getAt_9160(rankList, k)) != 0) {
         if ((unsigned)(rankEntry[0] - 1) >= 0x1FFF) {
             rankEntry[0] = 500;
             __builtin_memcpy(rankEntry + 2, str_bogus_9160, 6);
@@ -11982,10 +11982,10 @@ int LobbyApi_rankList(LobbyApiRefT* self, int limit) {
         *histSlot = sum;
         sum += res;
         if (sum > limit) {
-            int cnt = func_003EE550_9160(rankList);
+            int cnt = SortList_getCount_9160(rankList);
             if (cnt >= sum) {
                 int i = 0;
-                while ((rankEntry = func_003EE560_9160(rankList, i)) != 0) {
+                while ((rankEntry = SortList_getAt_9160(rankList, i)) != 0) {
                     if (rankEntry[0] <= k) {
                         rankEntry[0] = 0;
                     }
@@ -11999,7 +11999,7 @@ int LobbyApi_rankList(LobbyApiRefT* self, int limit) {
     } while (k >= 0);
     res = 0;
     k = 0;
-    while ((rankEntry = func_003EE560_9160(rankList, k)) != 0) {
+    while ((rankEntry = SortList_getAt_9160(rankList, k)) != 0) {
         if (rankEntry[0] > 0) {
             res++;
             rankEntry[1] = hist[rankEntry[0]];
@@ -12007,14 +12007,14 @@ int LobbyApi_rankList(LobbyApiRefT* self, int limit) {
         k++;
     }
     k = 0;
-    while ((rankEntry = func_003EE560_9160(rankList, k)) != 0) {
+    while ((rankEntry = SortList_getAt_9160(rankList, k)) != 0) {
         if (rankEntry[0] == 0) {
-            func_00259210_9160(func_003EE480_9160(rankList, func_003EED08_9160(rankIndex, rankEntry + 2)));
+            lobbyman_free_9160(SortList_remove_9160(rankList, HashTable_removeString_9160(rankIndex, rankEntry + 2)));
         } else {
             k++;
         }
     }
-    func_00259210_9160(hist);
+    lobbyman_free_9160(hist);
     return res;
 }
 #endif
@@ -12028,10 +12028,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", LobbyApi_pickRoom);
 struct N_9378 { int id; int f4; unsigned int flags; int userLimit; int userCount; int userCountText; int flagText;
     char name[1]; };
 extern char D_004A4888_9378[] __asm__("str_empty_k");
-extern int func_003EE620_9378(int) __asm__("func_003EE620");
-extern int func_003EE600(int, int);
-extern int func_003EE558_9378(int) __asm__("func_003EE558");
-extern struct N_9378 *func_003EE560_9378(int, int) __asm__("func_003EE560");
+extern int SortList_update_9378(int) __asm__("SortList_update");
+extern int SortList_bumpChanged(int, int);
+extern int SortList_getPassCount_9378(int) __asm__("SortList_getPassCount");
+extern struct N_9378 *SortList_getAt_9378(int, int) __asm__("SortList_getAt");
 extern int strlen(const char *);
 extern int strncmp(const char *, const char *, int);
 
@@ -12041,7 +12041,7 @@ int LobbyApi_pickRoom_impl(char *self, int limit, unsigned int mask, unsigned in
  *
  * Among the room-list entries (slot 0) whose flags (+8) masked with @p mask equal @p val and whose name begins with
  * @p name, prefers the fullest room below @p limit percent full (users T at +0x10 * 100 / limit L at +0xC), otherwise
- * the emptiest. It first calls func_003EE600 on the room list with func_003EE620's result. Nothing in the build calls
+ * the emptiest. It first calls SortList_bumpChanged on the room list with SortList_update's result. Nothing in the build calls
  * it.
  *
  * @param limit  the fullness limit in percent
@@ -12062,9 +12062,9 @@ int LobbyApi_pickRoom_impl(char *self, int limit, unsigned int mask, unsigned in
     }
     if (*(int *)(self + 0x310) != 0) {
     i = 0;
-    func_003EE600(*(int *)(self + 0x314), func_003EE620_9378(*(int *)(self + 0x314)));
-    for (; i < func_003EE558_9378(*(int *)(self + 0x314)); i++) {
-        struct N_9378 *n = func_003EE560_9378(*(int *)(self + 0x314), i);
+    SortList_bumpChanged(*(int *)(self + 0x314), SortList_update_9378(*(int *)(self + 0x314)));
+    for (; i < SortList_getPassCount_9378(*(int *)(self + 0x314)); i++) {
+        struct N_9378 *n = SortList_getAt_9378(*(int *)(self + 0x314), i);
         int fullness;
         if ((n->flags & mask) != val) continue;
         if (strncmp(n->name, name, strlen(name)) != 0) continue;
@@ -12256,8 +12256,8 @@ extern int TagDupl_95C8(char *, int, char *) __asm__("cDirtysock_tag_TagFieldDup
 extern int TagSetNumber_95C8(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetNumber");
 extern int TagSetAddress_95C8(char *, int, char *, int) __asm__("cDirtysock_tag_TagFieldSetAddress");
 extern int TagSetBinary_95C8(char *, int, char *, void *, int) __asm__("cDirtysock_tag_TagFieldSetBinary");
-extern void *func_002591E8_95C8(int) __asm__("func_002591E8");
-extern void func_00259210_95C8(void *) __asm__("func_00259210");
+extern void *lobbyman_alloc_95C8(int) __asm__("lobbyman_alloc");
+extern void lobbyman_free_95C8(void *) __asm__("lobbyman_free");
 extern void *memset_95C8(void *, int, int) __asm__("memset");
 extern int sprintf_95C8(char *, char *, ...) __asm__("sprintf");
 extern char *strcpy(char *, const char *);
@@ -12268,24 +12268,24 @@ extern void LobbyApi_notifyListChanges_95C8(void *) __asm__("LobbyApi_notifyList
 extern void LobbyApi_handlePings_95C8(void *) __asm__("LobbyApi_handlePings");
 extern void LobbyApi_dropConnection_95C8(void *, int, int) __asm__("LobbyApi_dropConnection");
 extern void LobbyApi_pingServer_95C8(void *) __asm__("LobbyApi_pingServer");
-extern int func_003EE320_95C8(int, void *) __asm__("func_003EE320");
-extern void func_003EE3E0_95C8(int, int, void *) __asm__("func_003EE3E0");
-extern void *func_003EE468_95C8(int, int) __asm__("func_003EE468");
-extern void *func_003EE480_95C8(int, int) __asm__("func_003EE480");
-extern int func_003EE9A0_95C8(int) __asm__("func_003EE9A0");
-extern void func_003EEB30_95C8(int, char *, int) __asm__("func_003EEB30");
-extern int func_003EEC88_95C8(int, char *) __asm__("func_003EEC88");
-extern int func_003EED08_95C8(int, char *) __asm__("func_003EED08");
-extern void func_003EEDA0_95C8(int, int, int) __asm__("func_003EEDA0");
-extern int func_003EEEE8_95C8(int, int) __asm__("func_003EEEE8");
-extern void func_003EEF40_95C8(int, int) __asm__("func_003EEF40");
-extern void func_003F5638_95C8(int, int, int) __asm__("func_003F5638");
-extern int func_003F5738_95C8(int) __asm__("func_003F5738");
-extern int func_003F57C8_95C8(int, int) __asm__("func_003F57C8");
-extern int func_003F5910_95C8(int, int, int, char *, int) __asm__("func_003F5910");
-extern int func_003F5A70_95C8(int, int *, int *, char **) __asm__("func_003F5A70");
-extern void func_003F5C38_95C8(int, int, int, int, int) __asm__("func_003F5C38");
-extern unsigned int func_003F5D88_95C8(int) __asm__("func_003F5D88");
+extern int SortList_add_95C8(int, void *) __asm__("SortList_add");
+extern void SortList_setValue_95C8(int, int, void *) __asm__("SortList_setValue");
+extern void *SortList_getValue_95C8(int, int) __asm__("SortList_getValue");
+extern void *SortList_remove_95C8(int, int) __asm__("SortList_remove");
+extern int HashTable_takeAny_95C8(int) __asm__("HashTable_takeAny");
+extern void HashTable_addString_95C8(int, char *, int) __asm__("HashTable_addString");
+extern int HashTable_findString_95C8(int, char *) __asm__("HashTable_findString");
+extern int HashTable_removeString_95C8(int, char *) __asm__("HashTable_removeString");
+extern void HashTable_addInt_95C8(int, int, int) __asm__("HashTable_addInt");
+extern int HashTable_findInt_95C8(int, int) __asm__("HashTable_findInt");
+extern void HashTable_removeInt_95C8(int, int) __asm__("HashTable_removeInt");
+extern void NetSession_connect_95C8(int, int, int) __asm__("NetSession_connect");
+extern int NetSession_disconnect_95C8(int) __asm__("NetSession_disconnect");
+extern int NetSession_getStatus_95C8(int, int) __asm__("NetSession_getStatus");
+extern int NetSession_send_95C8(int, int, int, char *, int) __asm__("NetSession_send");
+extern int NetSession_peek_95C8(int, int *, int *, char **) __asm__("NetSession_peek");
+extern void NetSession_recv_95C8(int, int, int, int, int) __asm__("NetSession_recv");
+extern unsigned int NetSession_getTick_95C8(int) __asm__("NetSession_getTick");
 
 extern char D_00495F30_95C8[] __asm__("D_00495F30");
 extern char D_00495FB0_95C8[] __asm__("D_00495FB0");
@@ -12346,7 +12346,7 @@ extern char D_004A4A68_95C8[] __asm__("D_004A4A68");
  *
  * Does nothing without a protocol (+0). Unless offline it tracks the inactivity timeout (+0x10; 60 s after each
  * message, a gap over 5000 extends it) and disconnects with 'time' (LobbyApi_dropConnection) when it passes; stops in the 'term'
- * and 'offl' states. Handles ping replies (LobbyApi_handlePings), then reads each message (func_003F5A70): '~png' keep-alives
+ * and 'offl' states. Handles ping replies (LobbyApi_handlePings), then reads each message (NetSession_peek): '~png' keep-alives
  * are answered (with the last server ping as TIME), anything else goes to event routine 0 and to the matching request
  * record's routine (LobbyApi_takeRequest). The protocol flow: in 'rdir' the '@dir' reply gives the real server (ADDR, PORT,
  * SESS, MASK; or the DOWN text and flag 0x400) and moves to 'conn' with a server ping (LobbyApi_pingServer); the connection
@@ -12374,7 +12374,7 @@ void LobbyApi_update(struct Lob_95C8 *self)
     if (self->mpSession == 0) {
         return;
     }
-    now = func_003F5D88_95C8(self->mpSession);
+    now = NetSession_getTick_95C8(self->mpSession);
     if (self->mState != 'offl') {
         int diff = now - self->mStateTime;
         if (self->mStateTime != 0 && diff > 5000) {
@@ -12389,7 +12389,7 @@ void LobbyApi_update(struct Lob_95C8 *self)
         return;
     }
     LobbyApi_handlePings_95C8(self);
-    while ((len = func_003F5A70_95C8(self->mpSession, &kind, &code, &data)) >= 0) {
+    while ((len = NetSession_peek_95C8(self->mpSession, &kind, &code, &data)) >= 0) {
         self->mTimeout = now + 60000;
         if (kind == 0x7E706E67) {
             if (self->mLastPing != 0xFFFFFFFF) {
@@ -12398,7 +12398,7 @@ void LobbyApi_update(struct Lob_95C8 *self)
                 data = buf;
                 len = -1;
             }
-            func_003F5910_95C8(self->mpSession, kind, code, data, len);
+            NetSession_send_95C8(self->mpSession, kind, code, data, len);
         } else {
             ev.kind = kind;
             ev.code = code;
@@ -12413,24 +12413,24 @@ void LobbyApi_update(struct Lob_95C8 *self)
             }
             if (self->mState == 'rdir') {
                 if (kind == 0x40646972) {
-                    int port = func_003F57C8_95C8(self->mpSession, 'lprt');
-                    self->mLocalAddr = func_003F57C8_95C8(self->mpSession, 'ladr');
+                    int port = NetSession_getStatus_95C8(self->mpSession, 'lprt');
+                    self->mLocalAddr = NetSession_getStatus_95C8(self->mpSession, 'ladr');
                     if (TagFind_95C8(data, D_004A4910_95C8) == 0) {
                         self->mAddress = TagGetAddr_95C8(TagFind_95C8(data, str_ADDR_b_95C8), 0);
                         self->mPort = TagGetNumber_95C8(TagFind_95C8(data, D_004A4918_95C8), 0);
                     }
                     self->mSess = TagGetNumber_95C8(TagFind_95C8(data, D_004A4920_95C8), 0);
                     TagGetString_95C8(TagFind_95C8(data, str_MASK_95C8), self->mMask, 0x40, D_004A4888_95C8);
-                    func_003F5738_95C8(self->mpSession);
+                    NetSession_disconnect_95C8(self->mpSession);
                     if (self->mAddress != 0) {
                         self->mState = 'conn';
                         LobbyApi_pingServer_95C8(self);
                         LobbyApi_debugPrintf_95C8(self, D_00495F30_95C8, self->mAddress, self->mPort);
-                        func_003F5638_95C8(self->mpSession, self->mAddress, self->mPort);
+                        NetSession_connect_95C8(self->mpSession, self->mAddress, self->mPort);
                         buf[0] = 0;
                         TagSetAddress_95C8(buf, 0x100, str_ADDR_b_95C8, self->mLocalAddr);
                         TagSetNumber_95C8(buf, 0x100, D_004A4918_95C8, port);
-                        func_003F5910_95C8(self->mpSession, 'addr', 0, buf, -1);
+                        NetSession_send_95C8(self->mpSession, 'addr', 0, buf, -1);
                         break;
                     }
                     TagGetString_95C8(TagFind_95C8(data, D_004A4928_95C8), self->mDownText, 0x100, D_004A4888_95C8);
@@ -12441,7 +12441,7 @@ void LobbyApi_update(struct Lob_95C8 *self)
             if (kind == -1 && code == -1) {
                 buf[0] = 0;
                 TagSetBinary_95C8(buf, 0x100, D_004A4930_95C8, D_00495FB0_95C8, 10);
-                func_003F5910_95C8(self->mpSession, 'skey', 0, buf, -1);
+                NetSession_send_95C8(self->mpSession, 'skey', 0, buf, -1);
                 self->mMore = 1;
                 self->mState = 'skey';
                 kind = 'conn';
@@ -12546,8 +12546,8 @@ void LobbyApi_update(struct Lob_95C8 *self)
                     self->mRoomFlags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49D0_95C8), 0);
                     self->mEventFlags |= 8;
                     if (self->s[1].h != 0) {
-                        while ((entryRef = func_003EE9A0_95C8(self->s[1].h)) != 0) {
-                            func_00259210_95C8(func_003EE480_95C8(self->s[1].list, entryRef));
+                        while ((entryRef = HashTable_takeAny_95C8(self->s[1].h)) != 0) {
+                            lobbyman_free_95C8(SortList_remove_95C8(self->s[1].list, entryRef));
                         }
                         self->mEventFlags |= 0x40;
                     }
@@ -12557,7 +12557,7 @@ void LobbyApi_update(struct Lob_95C8 *self)
                 id = TagGetNumber_95C8(TagFind_95C8(data, D_004A49D8_95C8), -1);
                 if (id >= 0) {
                     if (TagFind_95C8(data, D_004A49B0_95C8) != 0) {
-                        struct Room_95C8 *roomRecord = func_002591E8_95C8(sizeof(struct Room_95C8));
+                        struct Room_95C8 *roomRecord = lobbyman_alloc_95C8(sizeof(struct Room_95C8));
                         memset_95C8(roomRecord, 0, sizeof(struct Room_95C8));
                         roomRecord->id = id;
                         TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), roomRecord->name, 0x20, D_004A4888_95C8);
@@ -12575,23 +12575,23 @@ void LobbyApi_update(struct Lob_95C8 *self)
                         } else if (len > 0) {
                             sprintf_95C8(roomRecord->ping, D_004A4A20_95C8, len);
                         }
-                        entryRef = func_003EEEE8_95C8(self->s[0].h, roomRecord->id);
+                        entryRef = HashTable_findInt_95C8(self->s[0].h, roomRecord->id);
                         if (entryRef != 0) {
-                            struct Room_95C8 *old = func_003EE468_95C8(self->s[0].list, entryRef);
+                            struct Room_95C8 *old = SortList_getValue_95C8(self->s[0].list, entryRef);
                             if (old != 0 && old->ping[0] >= '0' && old->ping[0] <= '9') {
                                 strcpy(roomRecord->ping, old->ping);
                             }
-                            func_00259210_95C8(old);
-                            func_003EE3E0_95C8(self->s[0].list, entryRef, roomRecord);
+                            lobbyman_free_95C8(old);
+                            SortList_setValue_95C8(self->s[0].list, entryRef, roomRecord);
                         } else {
-                            func_003EEDA0_95C8(self->s[0].h, roomRecord->id, func_003EE320_95C8(self->s[0].list,
+                            HashTable_addInt_95C8(self->s[0].h, roomRecord->id, SortList_add_95C8(self->s[0].list,
                                     roomRecord));
                         }
                     } else {
-                        entryRef = func_003EEEE8_95C8(self->s[0].h, id);
+                        entryRef = HashTable_findInt_95C8(self->s[0].h, id);
                         if (entryRef != 0) {
-                            func_003EEF40_95C8(self->s[0].h, id);
-                            func_00259210_95C8(func_003EE480_95C8(self->s[0].list, entryRef));
+                            HashTable_removeInt_95C8(self->s[0].h, id);
+                            lobbyman_free_95C8(SortList_remove_95C8(self->s[0].list, entryRef));
                             self->mEventFlags |= 0x20;
                         }
                     }
@@ -12634,7 +12634,7 @@ void LobbyApi_update(struct Lob_95C8 *self)
                 id = TagGetNumber_95C8(TagFind_95C8(data, D_004A49D8_95C8), -1);
                 if (id >= 0) {
                     if (TagFind_95C8(data, D_004A49B0_95C8) != 0) {
-                        struct User_95C8 *userRecord = func_002591E8_95C8(sizeof(struct User_95C8));
+                        struct User_95C8 *userRecord = lobbyman_alloc_95C8(sizeof(struct User_95C8));
                         memset_95C8(userRecord, 0, sizeof(struct User_95C8));
                         userRecord->id = id;
                         TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), userRecord->name, 0x20, D_004A4888_95C8);
@@ -12646,25 +12646,25 @@ void LobbyApi_update(struct Lob_95C8 *self)
                         userRecord->rank = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C8_95C8), 0);
                         TagGetString_95C8(TagFind_95C8(data, D_004A4A38_95C8), userRecord->extra, 0x80,
                                 D_004A4888_95C8);
-                        entryRef = func_003EEEE8_95C8(self->s[1].h, userRecord->id);
+                        entryRef = HashTable_findInt_95C8(self->s[1].h, userRecord->id);
                         if (entryRef != 0) {
-                            struct User_95C8 *old = func_003EE468_95C8(self->s[1].list, entryRef);
+                            struct User_95C8 *old = SortList_getValue_95C8(self->s[1].list, entryRef);
                             __builtin_memcpy(old, userRecord, sizeof(struct User_95C8));
-                            func_003EE3E0_95C8(self->s[1].list, entryRef, old);
-                            func_00259210_95C8(userRecord);
+                            SortList_setValue_95C8(self->s[1].list, entryRef, old);
+                            lobbyman_free_95C8(userRecord);
                             userRecord = old;
                         } else {
-                            func_003EEDA0_95C8(self->s[1].h, userRecord->id, func_003EE320_95C8(self->s[1].list,
+                            HashTable_addInt_95C8(self->s[1].h, userRecord->id, SortList_add_95C8(self->s[1].list,
                                     userRecord));
                         }
                         if (userRecord->flags & 0x200000) {
                             self->mUserFlags = userRecord->flags;
                         }
                     } else {
-                        entryRef = func_003EEEE8_95C8(self->s[1].h, id);
+                        entryRef = HashTable_findInt_95C8(self->s[1].h, id);
                         if (entryRef != 0) {
-                            func_003EEF40_95C8(self->s[1].h, id);
-                            func_00259210_95C8(func_003EE480_95C8(self->s[1].list, entryRef));
+                            HashTable_removeInt_95C8(self->s[1].h, id);
+                            lobbyman_free_95C8(SortList_remove_95C8(self->s[1].list, entryRef));
                         }
                     }
                     LobbyApi_setRoomPopulation_95C8(self, self->mRoomId, TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0));
@@ -12673,11 +12673,11 @@ void LobbyApi_update(struct Lob_95C8 *self)
             }
             if (kind == 0x2B726E6B && self->s[2].h != 0) {
                 if (TagGetNumber_95C8(TagFind_95C8(data, D_004A4A40_95C8), 0) == -2) {
-                    while ((entryRef = func_003EE9A0_95C8(self->s[2].h)) != 0) {
-                        func_00259210_95C8(func_003EE480_95C8(self->s[2].list, entryRef));
+                    while ((entryRef = HashTable_takeAny_95C8(self->s[2].h)) != 0) {
+                        lobbyman_free_95C8(SortList_remove_95C8(self->s[2].list, entryRef));
                     }
                 } else {
-                    struct Rank_95C8 *k = func_002591E8_95C8(sizeof(struct Rank_95C8));
+                    struct Rank_95C8 *k = lobbyman_alloc_95C8(sizeof(struct Rank_95C8));
                     k->rank = 0;
                     k->score = TagGetNumber_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);
                     TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), k->name, 0x20, D_004A4888_95C8);
@@ -12685,27 +12685,27 @@ void LobbyApi_update(struct Lob_95C8 *self)
                     if (k->score >= 0x2000) {
                         k->score = 0x1FFF;
                     }
-                    entryRef = func_003EEC88_95C8(self->s[2].h, k->name);
+                    entryRef = HashTable_findString_95C8(self->s[2].h, k->name);
                     if (entryRef == 0 && k->score > 0) {
-                        func_003EEB30_95C8(self->s[2].h, k->name, func_003EE320_95C8(self->s[2].list, k));
+                        HashTable_addString_95C8(self->s[2].h, k->name, SortList_add_95C8(self->s[2].list, k));
                     } else if (entryRef != 0) {
                         if (k->score > 0) {
-                            struct Rank_95C8 *old = func_003EE468_95C8(self->s[2].list, entryRef);
+                            struct Rank_95C8 *old = SortList_getValue_95C8(self->s[2].list, entryRef);
                             __builtin_memcpy(old, k, sizeof(struct Rank_95C8));
-                            func_003EE3E0_95C8(self->s[2].list, entryRef, old);
+                            SortList_setValue_95C8(self->s[2].list, entryRef, old);
                         } else {
-                            func_00259210_95C8(func_003EE480_95C8(self->s[2].list, func_003EED08_95C8(self->s[2].h,
+                            lobbyman_free_95C8(SortList_remove_95C8(self->s[2].list, HashTable_removeString_95C8(self->s[2].h,
                                     k->name)));
                         }
-                        func_00259210_95C8(k);
+                        lobbyman_free_95C8(k);
                     } else {
-                        func_00259210_95C8(k);
+                        lobbyman_free_95C8(k);
                     }
                 }
                 self->mEventFlags |= 0x80;
             }
             if (kind == 0x2B736E70 && self->mChannel >= 4 && self->mChannel < 8 && self->s[self->mChannel].h != 0) {
-                struct Rank_95C8 *k = func_002591E8_95C8(sizeof(struct Rank_95C8));
+                struct Rank_95C8 *k = lobbyman_alloc_95C8(sizeof(struct Rank_95C8));
                 k->rank = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C8_95C8), 0);
                 k->score = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A10_95C8), 0);
                 TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), k->name, 0x20, D_004A4888_95C8);
@@ -12713,15 +12713,15 @@ void LobbyApi_update(struct Lob_95C8 *self)
                 if (k->score >= 0x2000) {
                     k->score = 0x1FFF;
                 }
-                entryRef = func_003EEC88_95C8(self->s[self->mChannel].h, k->name);
+                entryRef = HashTable_findString_95C8(self->s[self->mChannel].h, k->name);
                 if (entryRef == 0) {
-                    int ref = func_003EE320_95C8(self->s[self->mChannel].list, k);
-                    func_003EEB30_95C8(self->s[self->mChannel].h, k->name, ref);
+                    int ref = SortList_add_95C8(self->s[self->mChannel].list, k);
+                    HashTable_addString_95C8(self->s[self->mChannel].h, k->name, ref);
                 } else {
-                    struct Rank_95C8 *old = func_003EE468_95C8(self->s[self->mChannel].list, entryRef);
+                    struct Rank_95C8 *old = SortList_getValue_95C8(self->s[self->mChannel].list, entryRef);
                     __builtin_memcpy(old, k, sizeof(struct Rank_95C8));
-                    func_003EE3E0_95C8(self->s[self->mChannel].list, entryRef, old);
-                    func_00259210_95C8(k);
+                    SortList_setValue_95C8(self->s[self->mChannel].list, entryRef, old);
+                    lobbyman_free_95C8(k);
                 }
                 self->mEventFlags |= 0x80;
             }
@@ -12741,15 +12741,15 @@ void LobbyApi_update(struct Lob_95C8 *self)
                     self->mRoomFlags = TagGetFlags_95C8(TagFind_95C8(data, D_004A4A68_95C8), 0);
                     self->mEventFlags |= 8;
                     if (self->s[1].h != 0) {
-                        while ((entryRef = func_003EE9A0_95C8(self->s[1].h)) != 0) {
-                            func_00259210_95C8(func_003EE480_95C8(self->s[1].list, entryRef));
+                        while ((entryRef = HashTable_takeAny_95C8(self->s[1].h)) != 0) {
+                            lobbyman_free_95C8(SortList_remove_95C8(self->s[1].list, entryRef));
                         }
                         self->mEventFlags |= 0x40;
                     }
                 }
             }
         }
-        func_003F5C38_95C8(self->mpSession, 0, 0, 0, 0);
+        NetSession_recv_95C8(self->mpSession, 0, 0, 0, 0);
     }
     LobbyApi_notifyListChanges_95C8(self);
     if (self->mNextPingTime != 0 && self->mNextPingTime <= now) {

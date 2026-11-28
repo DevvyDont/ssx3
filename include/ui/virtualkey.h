@@ -7,7 +7,7 @@
 // codes). [U] cKeyboardPopup_onInputBegin moves the on-screen keyboard to the matching key: back to backspace, tab,
 // return to enter, shift, caps lock, escape, the four arrows, and F1..F10 to the quick-message keys Q1..Q10;
 // cMenuSys_input (util/menu) also turns insert and delete into the menu keys that insert and delete a character. The
-// USB keyboard driver (seg/seg_2F41F8: func_003F6700, func_003F67E0) maps the modifier and lock keys (control, menu =
+// USB keyboard driver (seg/seg_2F41F8: kbReader_testModifierKey, kbReader_testLockKey) maps the modifier and lock keys (control, menu =
 // alt, the Windows keys, num lock, scroll lock and the left / right forms) to their USB modifier and LED bits.
 enum tUIVirtualKey {
     kVK_Back = 8,

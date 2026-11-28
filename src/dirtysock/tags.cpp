@@ -1105,7 +1105,7 @@ struct sDsTmK2 {
 };
 
 // ds_timeinsecs / ds_secstotime
-extern "C" unsigned int func_003EF088();
+extern "C" unsigned int LobbyUtil_getCurrentTime();
 extern "C" sDsTmK2* LobbyApi_secondsToCalendar(sDsTmK2* tm, unsigned long secs);
 
 /**
@@ -1114,7 +1114,7 @@ extern "C" sDsTmK2* LobbyApi_secondsToCalendar(sDsTmK2* tm, unsigned long secs);
  * @param record  the tag record to edit
  * @param len     size of the record buffer in bytes
  * @param name    the field name (0 clears the record first)
- * @param epoch   seconds since 1970; 0 means the current time (func_003EF088)
+ * @param epoch   seconds since 1970; 0 means the current time (LobbyUtil_getCurrentTime)
  * @return cDirtysock_tag__TagFieldSetupTerm()'s result, or -1 when the time cannot be converted
  */
 // PORT: epoch is widened to 64-bit `unsigned long` (zero-extended) for ds_secstotime.
@@ -1126,7 +1126,7 @@ extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name
     unsigned long secs = epoch;
 
     if (secs == 0)
-        secs = func_003EF088();
+        secs = LobbyUtil_getCurrentTime();
     timeParts = LobbyApi_secondsToCalendar(&tm, secs);
     if (timeParts == 0)
         return -1;
@@ -1975,7 +1975,7 @@ extern "C" unsigned long LobbyApi_calendarToSeconds(sDsTmK2* tm);
  *
  * @param data    field text, or 0
  * @param defval  value used when nothing could be parsed
- * @return the time in seconds; when parsing gives 0, @p defval, or the current time (func_003EF088) when that
+ * @return the time in seconds; when parsing gives 0, @p defval, or the current time (LobbyUtil_getCurrentTime) when that
  *         is 0 too
  */
 extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int defval)
@@ -2034,7 +2034,7 @@ extern "C" unsigned int cDirtysock_tag_TagFieldGetTime(char* data, unsigned int 
     if (result == 0) {
         result = defval;
         if (result == 0) {
-            result = func_003EF088();
+            result = LobbyUtil_getCurrentTime();
         }
     }
     return result;
