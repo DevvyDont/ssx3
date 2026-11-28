@@ -64,9 +64,7 @@ void cReplay::removeCache(void* pCache)
         void** slot = (void**)&InputCache;
         for (int i = 0; i < 2; i++, slot++) {
             if (*slot == pCache) {
-                if (*slot != 0) {
-                    _$_12cReplayCache(*slot, 3);
-                }
+                delete (cReplayCache*)(*slot);
                 *slot = 0;
                 return;
             }

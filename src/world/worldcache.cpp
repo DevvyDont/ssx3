@@ -392,9 +392,7 @@ void cWorldMemoryMan::deactivateSectionMem(int i)
 {
     cSectionBlockAllocator** base = &m_pSectionAllocator[0];
     cSectionBlockAllocator** slot = base + i;
-    if (*slot != 0) {
-        _$_22cSectionBlockAllocator(*slot, 3);
-    }
+    delete *slot;
     *slot = 0;
 }
 #endif
@@ -600,9 +598,7 @@ void cWorldCache::purge()
     if (chunkResolve != 0) {
         chunkResolve->vt[1].fn(vthis(chunkResolve, chunkResolve->vt[1]), 3);
     }
-    if (((int*)self->m_pSharedCacheTable) != 0) {
-        _$_16cWorldCacheTable((cWorldCacheTable*)((int*)self->m_pSharedCacheTable), 3);
-    }
+    delete (cWorldCacheTable*)((int*)self->m_pSharedCacheTable);
     if (((void*)self->m_pSectionCacheTable) != 0) {
         unsigned int i;
         for (i = 0; i < (self->mp_DataHeader)->m_uiNumSections; i++) {
@@ -763,9 +759,7 @@ void cWorldCache::deactivateSectionMem(int i)
 {
     m_pWorldMemMan->deactivateSectionMem(i);
     int* sectionTable = ((int*)m_pSectionCacheTable[i]);
-    if (sectionTable != 0) {
-        _$_16cWorldCacheTable((cWorldCacheTable*)sectionTable, 3);
-    }
+    delete (cWorldCacheTable*)sectionTable;
     m_pSectionCacheTable[i] = 0;
 }
 #endif
@@ -957,8 +951,7 @@ void cWorldCache::purgePage(int cell)
         resHandle.m_bfRID.m_uiUID = (list->m_pPageEntries)[i].m_uiGUID;
         cWorldCache_removeBxStreamData(this, cell, (list->m_pPageEntries)[i].m_uiType, resHandle);
     }
-    if (m_HullPages[cell].mp_Page != 0)
-        _$_9cHullPage(m_HullPages[cell].mp_Page, 3);
+    delete m_HullPages[cell].mp_Page;
     m_HullPages[cell].mp_Page = 0;
     m_HullPages[cell].m_State = 0;
 }

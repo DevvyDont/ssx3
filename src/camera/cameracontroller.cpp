@@ -52,7 +52,7 @@ extern "C" void cCameraController__cCameraController(cCameraController* self, in
     self->mVtbl = cCameraController_vtbl;
     void* algoList = self->AlgorithmList;
     if (algoList != 0) {
-        _$_15cCameraAlgoList(algoList, 3);
+        delete (cCameraAlgoList*)algoList;
     }
     if (flags & 1) {
         operator_delete((int*)self);

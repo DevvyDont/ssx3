@@ -1039,7 +1039,7 @@ bool cRealFE::loseFocus()
     }
     void* moviePlayer = mpMoviePlayer;
     if (moviePlayer != 0) {
-        _$_12cMoviePlayer(moviePlayer, 3);
+        delete (cMoviePlayer*)moviePlayer;
         mpMoviePlayer = 0;
     }
     mMovieSkippable = 0;
@@ -1397,9 +1397,7 @@ void cRealFE::update()
     out:
         if (done == 0) return;
     }
-    if (mpMoviePlayer != 0) {
-        _$_12cMoviePlayer(mpMoviePlayer, 3);
-    }
+    delete mpMoviePlayer;
     int movieBits = cRealFE_mMovieList;
     mWaitRenderNum = 1;
     mpMoviePlayer = 0;

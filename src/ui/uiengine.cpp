@@ -623,9 +623,7 @@ void cUIFontInterface::purgeFonts()
 {
     for (int i = 0; i < mFontCount; i++) {
         cUIFontEntry* fontEntry = &((&mFontEntry[0]))[i];
-        if (((int)fontEntry->mpFont) != 0) {
-            _$_5cFont((fontEntry->mpFont), 3);
-        }
+        delete (fontEntry->mpFont);
         fontEntry->mpFileName = 0;
         fontEntry->mHashID = 0;
     }

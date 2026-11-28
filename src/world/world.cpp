@@ -9,6 +9,8 @@
 #include "world/world.h"
 #include "world/worldview.h"
 #include "object/rollermodifier.h"
+#include "worldpainter/worldpainterman.h"
+#include "wscript/wscriptcache.h"
 //100%
 INCLUDE_ASM("world/world", cWorld_cWorld);
 #ifdef SKIP_ASM
@@ -67,12 +69,8 @@ extern "C" void cWorld__cWorld(void** self, int flags)
     if (self[0] != 0) {
         cWorldCache__cWorldCache((int*)self[0], 3);
     }
-    if (self[1] != 0) {
-        _$_13cWScriptCache(self[1], 3);
-    }
-    if (self[2] != 0) {
-        _$_16cWorldPainterMan(self[2], 3);
-    }
+    delete (cWScriptCache*)self[1];
+    delete (cWorldPainterMan*)self[2];
     SphereTree_purgeCache();
     cWorld_m_pTheWorld = 0;
     if (flags & 1) {

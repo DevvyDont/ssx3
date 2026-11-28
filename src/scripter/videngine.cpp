@@ -46,7 +46,7 @@ extern "C" bool cVidEngine_ReadyVideo(void** self, int file)
     params.bPreLoad = 0;
     //E
     if (cMoviePlayer_init(*self, &params) == 0) {
-        if (*self != 0) _$_12cMoviePlayer(*self, 3);
+        delete (cMoviePlayer*)(*self);
         *self = 0;
         return false;
     }

@@ -6119,9 +6119,7 @@ extern "C" void cSnowFall__cSnowFall(cSnowFall* self, int flags)
     int i;
     for (i = 0; i < 12; i++) {
         int* snowBox = ((int*)self->mSnowBoxes[i]);
-        if (snowBox != 0) {
-            _$_8cSnowBox((cSnowBox*)snowBox, 3);
-        }
+        delete (cSnowBox*)snowBox;
     }
     cMemMan_validate();
     cObjNode__cObjNode(self, flags);

@@ -28,6 +28,7 @@
 #include "world/patchrecord.h"
 #include "world/worldcache.h"
 #include "visualfx/lensfx.h"
+#include "fe/feasyncmanager.h"
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
@@ -922,7 +923,7 @@ void cSSXApp::purge()
     if (mSpeechBigFile) FILESYS_delbigsync(mSpeechBigFile, 100);
     if (BE) cBE_purgeBE(BE);
     cGameModeMan_purgeGM(GameModeMan);
-    if (mFEAsyncManager) _$_15cFEAsyncManager(mFEAsyncManager, 3);
+    delete mFEAsyncManager;
     {
         cConsoleConfig* consoleConfig = ConsoleConfig;
         if (consoleConfig) {

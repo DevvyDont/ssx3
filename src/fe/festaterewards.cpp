@@ -2693,9 +2693,7 @@ extern void* cFEState_vtbl[];
 extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(cFEStateVideoPlayer* self, int flags)
 {
     VPTR_OF(cListNode, self) = cFEStateVideoPlayer_vtbl;
-    if (self->mpMoviePlayer != 0) {
-        _$_12cMoviePlayer(self->mpMoviePlayer, 3);
-    }
+    delete self->mpMoviePlayer;
     VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState(self, flags);
 }
@@ -2736,9 +2734,7 @@ extern "C" void _$_12cMoviePlayer(void* p, int a1);
 void cFEStateVideoPlayer::onDestroyScreen()
 {
     void* moviePlayer = mpMoviePlayer;
-    if (moviePlayer != 0) {
-        _$_12cMoviePlayer(moviePlayer, 3);
-    }
+    delete (cMoviePlayer*)moviePlayer;
     mpMoviePlayer = 0;
 }
 #endif

@@ -2,6 +2,7 @@
 #include "common.h"
 #include "animation/animdatabase.h"
 #include "scripter/scanimmgr.h"
+#include "animation/adfdatasource.h"
 
 //100%
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_cScriptAnimBankManager);
@@ -267,9 +268,7 @@ void cScriptAnimBankManager::UnlinkBank1(tScriptAnimBankInfo* bankInfo)
     void* obj = *slot;
     *slot = 0;
     cAnimDataBase_purgeChanCache((void**)tbl);
-    if (obj != 0) {
-        _$_14cAdfDataSource(obj, 3);
-    }
+    delete (cAdfDataSource*)obj;
     if (bankInfo->numAnims != 0 && ((int)bankInfo->pTableAnimID) != 0) {
         cMemMan_free((void*)((int)bankInfo->pTableAnimID));
     }

@@ -45,9 +45,7 @@ extern "C" void _$_20cWorldTriggerManager(cWorldTriggerManager* self, int flags)
  */
 extern "C" void WORLDTRIGGERMANAGER_DeInit()
 {
-    if (gWorldTriggerManager != 0) {
-        _$_20cWorldTriggerManager(gWorldTriggerManager, 3);
-    }
+    delete gWorldTriggerManager;
     gWorldTriggerManager = 0;
 }
 #endif

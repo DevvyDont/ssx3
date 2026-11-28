@@ -38,6 +38,15 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "main/crowdman2d.h"
+#include "main/crowdman3d.h"
+#include "main/inputsync.h"
+#include "object/instanceman.h"
+#include "object/multiparticle.h"
+#include "render/font.h"
+#include "render/occlusionman.h"
+#include "sound/icepick/worldsound.h"
+#include "visualfx/worldlightman.h"
 
 extern "C" void cGame_load(cGame* self);
 
@@ -729,7 +738,7 @@ void cGame::purge()
     cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
     if (UI != 0) cUIEngine__cUIEngine(UI, 3);
-    if (InputSync != 0) _$_10cInputSync(InputSync, 3);
+    delete InputSync;
     cCutSceneTransitionMan_ForceToRegularMode(CutSceneTransitionMan);
     cSurfPropCache_purge(SurfPropCache);
     operator_delete((int*)SurfPropCache);
@@ -738,30 +747,30 @@ void cGame::purge()
     VDelete_FA98((char*)LensFxMan, 25756, 8);
     cPathSys_purgePaths(gPaths);
     cBXNash_purgeTheAIFwdDiffCache(BXNash);
-    if (MenuSys != 0) _$_8cMenuSys(MenuSys, 3);
+    delete MenuSys;
     void* bm = &gBucketMan_gl;
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purge(bm);
     VDelete_FA98((char*)WScriptMan, 1172, 8);
-    if (CrowdMan2d != 0) _$_11cCrowdMan2d(CrowdMan2d, 3);
-    if (CrowdMan3d != 0) _$_11cCrowdMan3d(CrowdMan3d, 3);
-    if (MultiParticleMan != 0) _$_17cMultiParticleMan(MultiParticleMan, 3);
+    delete CrowdMan2d;
+    delete CrowdMan3d;
+    delete MultiParticleMan;
     if (PlaybackMan != 0) cPlaybackMan__cPlaybackMan(PlaybackMan, 3);
-    if (InstanceMan != 0) _$_12cInstanceMan(InstanceMan, 3);
+    delete InstanceMan;
     cCameraTriggerMan_purge(((char*)&gCamTriggerMan));
     cRenderStateMan_purge();
     if (ViewMan != 0) cGameViewMan__cGameViewMan(ViewMan, 3);
     VDelete_FA98((char*)AI, 204, 8);
     if (Replay != 0) cReplay__cReplay(Replay, 3);
     VDelete_FA98((char*)StreamPause, 0x0, 8);
-    if (SectionMan != 0) _$_11cSectionMan(SectionMan, 3);
+    delete SectionMan;
     if (FXLoader != 0) cFXLoader__cFXLoader(FXLoader, 3);
-    if (WorldLightMan != 0) _$_14cWorldLightMan(WorldLightMan, 3);
+    delete WorldLightMan;
     if (World != 0) cWorld__cWorld(World, 3);
-    if (OcclusionMan != 0) _$_13cOcclusionMan(OcclusionMan, 3);
+    delete OcclusionMan;
     if (mpTrackBigFile != 0) cBigFile__cBigFile(mpTrackBigFile, 3);
     operator_delete((int*)LoadIndicator);
-    if (DebugFont != 0) _$_5cFont(DebugFont, 3);
+    delete DebugFont;
     {
         sObj20_FA98* nash = (sObj20_FA98*)BXNash;
         if (nash != 0) {
@@ -780,7 +789,7 @@ void cGame::purge()
     cGraphicsMan_PurgeTextures(GrMan);
     cIrradianceDataBase_Purge(cIrradianceDataBase_TheDataBase);
     SSXApp->Game = 0;
-    if (WorldSound != 0) _$_11cWorldSound(WorldSound, 3);
+    delete WorldSound;
     cWorldTriggerManager_Reset(gWorldTriggerManager);
     cSSXAudio_InGameDeInit(gSSXAudio);
     cSSXAudio_InGamePurge(gSSXAudio);

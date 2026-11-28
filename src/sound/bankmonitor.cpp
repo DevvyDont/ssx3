@@ -2997,9 +2997,7 @@ cSpeechInstance::~cSpeechInstance()
 {
     int i;
     for (i = 0; i < mNumBanks; i++) {
-        if (mBanks[i] != 0) {
-            _$_11cSpeechBank(mBanks[i], 3);
-        }
+        delete mBanks[i];
     }
     cSpeechInstance_mNumTotalBanks -= mNumBanks;
     for (i = 0; i < mNumEventFiles; i++) {
@@ -3787,9 +3785,7 @@ void cSpeechSys::Shutdown()
 {
     for (int i = 0; i < 2; i++) {
         void* instance = mSpeechInstance[i];
-        if (instance != 0) {
-            _$_15cSpeechInstance((cSpeechInstance*)instance, 3);
-        }
+        delete (cSpeechInstance*)instance;
         mSpeechInstance[i] = 0;
     }
     SPCH_shutdown();
@@ -5704,9 +5700,7 @@ extern "C" void cMusicSys__cMusicSys(cMusicSys* self, int flags)
     if (self->mMPFFile != 0) {
         cMemMan_free(self->mMPFFile);
     }
-    if (self->mSongInstance != 0) {
-        _$_13cSongInstance((cSongInstance*)(self->mSongInstance), 3);
-    }
+    delete (cSongInstance*)(self->mSongInstance);
     gMusicSys = 0;
     if (flags & 2) {
         cStreamSys__cStreamSys(self->mpVStreamSys, 0);
@@ -5943,9 +5937,7 @@ void cMusicSys::StopSong()
     }
     ResumeSong();
     mSongPlaying = 0;
-    if (mSongInstance != 0) {
-        _$_13cSongInstance((cSongInstance*)(mSongInstance), 3);
-    }
+    delete (cSongInstance*)(mSongInstance);
     mSongInstance = 0;
 }
 #endif

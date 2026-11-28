@@ -786,9 +786,7 @@ extern "C" void cStreamSys__cStreamSys(cStreamSys* streamSysObj, int flags)
     }
     for (int i = 0; i < streamSysObj->mNumStreams; i++) {
         cStreamInstance* streamInst = streamSysObj->mStreamInstance[i];
-        if (streamInst != 0) {
-            _$_15cStreamInstance(streamInst, 3);
-        }
+        delete streamInst;
     }
     if (streamSysObj->mStreamInstance != 0) {
         cMemMan_free(streamSysObj->mStreamInstance);
@@ -932,9 +930,7 @@ extern "C" void _$_15cStreamInstance(cStreamInstance* e, int a1);
 void cStreamSys::STREAM_Destroy(int i)
 {
     cStreamInstance* stream = mStreamInstance[i];
-    if (stream != 0) {
-        _$_15cStreamInstance(stream, 3);
-    }
+    delete stream;
     mStreamInstance[i] = 0;
 }
 #endif

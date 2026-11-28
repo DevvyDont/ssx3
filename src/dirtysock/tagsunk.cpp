@@ -9277,7 +9277,7 @@ extern "C" void _$_9cSetupMan(cSetupMan* self, int flags);
 extern "C" void cSetupMan_destroyInstance(void)
 {
     if (cSetupMan_mSetupMan != 0) {
-        _$_9cSetupMan((cSetupMan*)cSetupMan_mSetupMan, 3);
+        delete (cSetupMan*)cSetupMan_mSetupMan;
         cSetupMan_mSetupMan = 0;
     }
 }
@@ -10652,7 +10652,7 @@ extern "C" void _$_15cSharedLoginMan(cSharedLoginMan* self, int flags);
 extern "C" void cSharedLoginMan_destroyInstance(void)
 {
     if (SharedLoginMan != 0) {
-        _$_15cSharedLoginMan((cSharedLoginMan*)SharedLoginMan, 3);
+        delete (cSharedLoginMan*)SharedLoginMan;
         SharedLoginMan = 0;
     }
 }
@@ -12137,7 +12137,7 @@ extern "C" void _$_8cVoipMan(cVoipMan* self, int flags);
 extern "C" void cVoipMan_destroyInstance(void)
 {
     if (VoipMan != 0) {
-        _$_8cVoipMan((cVoipMan*)VoipMan, 3);
+        delete (cVoipMan*)VoipMan;
         VoipMan = 0;
     }
 }

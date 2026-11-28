@@ -8,6 +8,7 @@
 #include "inseq/scriptplayerentity.h"
 #include "inseq/scriptplayermain.h"
 #include "scripter/bxscriptengine.h"
+#include "inseq/inseq.h"
 
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetupBXEngine);
@@ -70,9 +71,7 @@ void cBXScriptEngine::PurgeBXEngine()
         }
         mpScriptDatabase = 0;
         mScriptDatabaseSize = 0;
-        if (mpInSeq != 0) {
-            _$_6cInSeq(mpInSeq, 3);
-        }
+        delete mpInSeq;
         mpInSeq = 0;
         if (mpInSeqHeap != 0) {
             cMemMan_free(mpInSeqHeap);

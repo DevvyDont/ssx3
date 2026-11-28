@@ -6,6 +6,7 @@
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "movie/movieplayer.h"
 
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_cScriptSoundBankManager);
@@ -296,7 +297,7 @@ extern int cPauseState_FlagsTable[];
 void cVidEngine::ResetVideoEngine()
 {
     if (mpPlayer != 0) {
-        _$_12cMoviePlayer(mpPlayer, 3);
+        delete mpPlayer;
         if (mIsPlaying != 0) {
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_ResumeSFX(cAudioInterface_bxAudio());

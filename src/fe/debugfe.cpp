@@ -2109,8 +2109,7 @@ void cDebugFE::purge()
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         ps2GraphicsMan->RemoveTexture(ParticleTID);
     }
-    if (Font != 0)
-        _$_5cFont(Font, 3);
+    delete Font;
 }
 #endif
 

@@ -10,6 +10,7 @@
 #include "be/beintoption.h"
 #include "ui/uiengine.h"
 #include "main/ssxapp.h"
+#include "util/localefile.h"
 
 //100%
 INCLUDE_ASM("util/locale", cFELocale_addFile);
@@ -79,7 +80,7 @@ void cFELocale::deleteFile(signed char i)
 {
     s195A50Arr* arr = (s195A50Arr*)&mpLocaleFile;
     if (arr->items[i] != 0) {
-        _$_11cLocaleFile(arr->items[i], 3);
+        delete (cLocaleFile*)arr->items[i];
         arr->items[i] = 0;
     }
 }
