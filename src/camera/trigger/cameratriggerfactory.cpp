@@ -2851,7 +2851,7 @@ extern float D_004C57F0[4];
 extern float D_004C5800[4];
 extern float D_004C5810[4];
 extern float D_004C5820[4];
-extern "C" void* cCameraTriggerMan_cCameraTriggerMan(void*);
+extern "C" void* __17cCameraTriggerMan(void*);
 extern "C" void cCameraTriggerMan__cCameraTriggerMan(void*, int);
 extern int D_004A4DF0;
 void sti_00175A20(int init, int prio) __asm__("func_00175A20");
@@ -2861,7 +2861,7 @@ void sti_00175A20(int init, int prio) __asm__("func_00175A20");
  * Only priority 0xFFFF does anything. With @p init set it fills the 56 four-float constants D_004C54B0..D_004C5820 (the
  * colour and blend vectors every unit of this kind sets up; nothing else in the ELF reads these copies), sets the word
  * D_004A4DF0 to all ones (its low byte, then the upper 24 bits) and constructs the camera trigger manager
- * gCamTriggerMan with cCameraTriggerMan_cCameraTriggerMan. With @p init clear it destroys gCamTriggerMan
+ * gCamTriggerMan with cCameraTriggerMan::cCameraTriggerMan. With @p init clear it destroys gCamTriggerMan
  * (cCameraTriggerMan__cCameraTriggerMan, flags 2). func_00176A28 calls it with (1, 0xFFFF) and func_00176A48 with (0,
  * 0xFFFF).
  *
@@ -3098,7 +3098,7 @@ void sti_00175A20(int init, int prio)
             D_004C5820[3] = 0.0f;
             *(char*)&D_004A4DF0 = -1;
             D_004A4DF0 = (D_004A4DF0 & 0xFF) | 0xFFFFFF00u;
-            cCameraTriggerMan_cCameraTriggerMan(((char*)&gCamTriggerMan));
+            __17cCameraTriggerMan(((char*)&gCamTriggerMan));
         } else {
             cCameraTriggerMan__cCameraTriggerMan(((char*)&gCamTriggerMan), 2);
         }
@@ -6997,7 +6997,7 @@ void* cBackgroundMan_cBackgroundMan(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan__cBackgroundMan);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_14cBackgroundMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void cMemMan_free(void* p);
@@ -7012,28 +7012,25 @@ struct sIdList_0017ABE0 {
  * Destroys a background-image manager: releases its textures and the id array.
  *
  * For each of the count (+0x4) texture ids (+0x0) that is not negative, calls GrMan's virtual slot 50 (On Tour
- * RemoveTexture) with it, then frees the array with cMemMan_free and the object itself when @p flags bit 0 is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * RemoveTexture) with it, then frees the array with cMemMan_free and the object itself when g++'s delete flag bit 0 is
+ * set.
  */
-extern "C" void cBackgroundMan__cBackgroundMan(cBackgroundMan* self, int flags)
+cBackgroundMan::~cBackgroundMan()
 {
-    if (self->mpiImageTID != 0)
+    if (mpiImageTID != 0)
     {
-        for (int i = 0; i < self->miNumImage; i++)
+        for (int i = 0; i < miNumImage; i++)
         {
-            int id = self->mpiImageTID[i];
+            int id = mpiImageTID[i];
             if (id >= 0)
             {
                 cPS2GraphicsMan* obj = GrMan;
                 obj->RemoveTexture(id);
             }
         }
-        if (self->mpiImageTID != 0)
-            cMemMan_free(self->mpiImageTID);
+        if (mpiImageTID != 0)
+            cMemMan_free(mpiImageTID);
     }
-    if (flags & 1)
-        operator_delete((int*)self);
 }
 #endif
 

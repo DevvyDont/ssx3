@@ -839,7 +839,7 @@ extern "C" void cCounterNode_writeToReplayFrame(cCounterNode* self, cBxReplayFra
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", cCrowdMan3d_cCrowdMan3d);
+INCLUDE_ASM("object/debouncenode", __11cCrowdMan3d);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sDebounceState;
@@ -852,12 +852,10 @@ extern void* TheCrowdMan3d_p __asm__("TheCrowdMan3d");
  * For each block it sets the crowd model id (+0x4) and all 32 member ids (+0xC, 8-byte entries) to -1 and resets the
  * block with tCrowdBlock3d_reset, stores the manager in TheCrowdMan3d (the global the world scripts and replay code use), then
  * resets all five blocks again. cGame's loader allocates it (2500 bytes, "CrowdMan3d").
- *
- * @return self
  */
-extern "C" cCrowdMan3d* cCrowdMan3d_cCrowdMan3d(cCrowdMan3d* self)
+cCrowdMan3d::cCrowdMan3d()
 {
-    tCrowdBlock3d* crowdBlock = self->mBlocks;
+    tCrowdBlock3d* crowdBlock = mBlocks;
     int i;
     for (i = 4; i != -1; i--) {
         tCrowdBlock3d* next = crowdBlock + 1;
@@ -871,16 +869,15 @@ extern "C" cCrowdMan3d* cCrowdMan3d_cCrowdMan3d(cCrowdMan3d* self)
         tCrowdBlock3d_reset((sDebounceState*)crowdBlock);
         crowdBlock = next;
     }
-    TheCrowdMan3d_p = self;
+    TheCrowdMan3d_p = this;
     for (i = 0; i < 5; i++) {
-        tCrowdBlock3d_reset((sDebounceState*)&self->mBlocks[i]);
+        tCrowdBlock3d_reset((sDebounceState*)&mBlocks[i]);
     }
-    return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", cCrowdMan3d__cCrowdMan3d);
+INCLUDE_ASM("object/debouncenode", _$_11cCrowdMan3d);
 #ifdef SKIP_ASM
 extern int TheCrowdMan3d;
 void operator_delete(int*);
@@ -892,25 +889,20 @@ void* tCrowdBlock3d_destroy(void* self);
  * Frees each block's animation data (tCrowdBlock3d_destroy), clears the global TheCrowdMan3d, then runs the block destructor
  * (tCrowdBlock3d_destroy again) over the five blocks in reverse and deletes the manager when bit 0 of flags is set. The second
  * pass is harmless because tCrowdBlock3d_freeAnimation nulls the pointers it frees.
- *
- * @param flags  destructor flags; bit 0 deletes the storage
  */
-extern "C" void cCrowdMan3d__cCrowdMan3d(cCrowdMan3d* self, int flags)
+cCrowdMan3d::~cCrowdMan3d()
 {
     int i;
     for (i = 0; i < 5; i++) {
-        self->mBlocks[i].destroy();
+        mBlocks[i].destroy();
     }
     TheCrowdMan3d = 0;
-    if (self->mBlocks != 0) {
-        tCrowdBlock3d* blockIter = self->mBlocks + 5;
-        while (self->mBlocks != blockIter) {
+    if (mBlocks != 0) {
+        tCrowdBlock3d* blockIter = mBlocks + 5;
+        while (mBlocks != blockIter) {
             blockIter--;
             blockIter->destroy();
         }
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
     }
 }
 #endif

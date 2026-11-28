@@ -599,7 +599,7 @@ extern "C" void cGame_renderVideo(cGame* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/game", cSectionMan_cSectionMan);
+INCLUDE_ASM("main/game", __11cSectionMani);
 #ifdef SKIP_ASM
 extern "C" void cSectionMan_init(cSectionMan* self);
 
@@ -607,31 +607,24 @@ extern "C" void cSectionMan_init(cSectionMan* self);
  * Constructs the section manager for a game and initializes it.
  *
  * @param Game  the game (cGame*) that owns it
- * @return @p self
  */
-extern "C" void* cSectionMan_cSectionMan(cSectionMan* self, int Game)
+cSectionMan::cSectionMan(int Game)
 {
-    self->mpGame = (cGame*)Game;
-    self->init();
-    return ((void*)self);
+    mpGame = (cGame*)Game;
+    init();
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/game", cSectionMan__cSectionMan);
+INCLUDE_ASM("main/game", _$_11cSectionMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 /**
  * Destroys the section manager; it owns nothing, so this only frees the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cSectionMan__cSectionMan(cSectionMan* self, int flags)
+cSectionMan::~cSectionMan()
 {
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

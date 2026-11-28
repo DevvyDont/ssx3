@@ -39,12 +39,18 @@ CHECK_OFFSET(cCameraAlgoListNode, Next, 0x014);
 CHECK_OFFSET(cCameraAlgoListNode, m_deleteAlgorithmOnDestruction, 0x018);
 CHECK_SIZE(cCameraAlgoListNode, 0x1C);
 
+void operator_delete(int* p);
+
 struct cCameraAlgoList {
     cCameraAlgoListNode* Head;      // 0x000 [O]
     int Length;                     // 0x004 [O]
 
     // Methods bound to their retail symbols by asm labels.
     void removeAll() __asm__("cCameraAlgoList_removeAll");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cCameraAlgoList();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cCameraAlgoList, Head, 0x000);

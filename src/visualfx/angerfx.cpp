@@ -542,7 +542,7 @@ extern "C" void tAvalanchePackedFrameData_setRotation(unsigned char* dest, float
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", tActiveAvalancheNode__tActiveAvalancheNode);
+INCLUDE_ASM("visualfx/angerfx", _$_20tActiveAvalancheNode);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void cDynamicColourEmitter_purge(void* p, int a1);
@@ -554,16 +554,11 @@ extern "C" void cDynamicColourEmitter__cDynamicColourEmitter(void* p, int a1);
  *
  * The emitter is purged with cDynamicColourEmitter_purge(emitter, 1) and destroyed without being freed (flags
  * 2).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(tActiveAvalancheNode* self, int flags)
+tActiveAvalancheNode::~tActiveAvalancheNode()
 {
-    cDynamicColourEmitter_purge(&self->m_emitter, 1);
-    cDynamicColourEmitter__cDynamicColourEmitter(&self->m_emitter, 2);
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
+    cDynamicColourEmitter_purge(&m_emitter, 1);
+    cDynamicColourEmitter__cDynamicColourEmitter(&m_emitter, 2);
 }
 #endif
 

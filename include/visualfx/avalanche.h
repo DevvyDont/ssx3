@@ -231,6 +231,8 @@ CHECK_OFFSET(tActiveAvalanche, m_currTime, 0x018);
 CHECK_SIZE(tActiveAvalanche, 0x01C);
 
 // A playing node (cAvalanche_m_activeNodes[64]).
+void operator_delete(int* p);
+
 struct tActiveAvalancheNode {
     int m_lastKeyFrame;             // 0x000 [O]; [U] getFrameData (lw), triggerAvalanche
     char unk_004[0xC];              // 0x004 alignment gap before the 16-aligned vector
@@ -254,6 +256,10 @@ struct tActiveAvalancheNode {
     bool update(float currTime) __asm__("tActiveAvalancheNode_update");
     void end(int force) __asm__("tActiveAvalancheNode_end");
     void renderLines() __asm__("tActiveAvalancheNode_renderLines");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~tActiveAvalancheNode();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(tActiveAvalancheNode, m_lastKeyFrame, 0x000);

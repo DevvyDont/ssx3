@@ -1753,7 +1753,7 @@ void tMoviePlayOptions::SetDefaults()
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", cMoviePlayer_cMoviePlayer);
+INCLUDE_ASM("mem/memstd", __12cMoviePlayer);
 #ifdef SKIP_ASM
 extern "C" void cMoviePlayer_SetSSXREALDefaults();
 
@@ -1762,40 +1762,33 @@ extern "C" void cMoviePlayer_SetSSXREALDefaults();
  * (+0x14) to their defaults (tMoviePlayOptions_SetDefaults), copies the default play speed (+0x34) to the speed (+0x10) and clears the
  * finished (+0x0), paused (+0x8) and frame (+0xC) words, the decoder (+0x38), the video driver (+0x3C) and the
  * new-frame flag (+0x40).
- *
- * @return @p self
  */
-extern "C" void* cMoviePlayer_cMoviePlayer(cMoviePlayer* self)
+cMoviePlayer::cMoviePlayer()
 {
     cMoviePlayer_SetSSXREALDefaults();
-    self->m_PlayOp.SetDefaults();
-    self->m_fSpeed = self->m_PlayOp.fPlaySpeed;
-    self->m_pPlayer = 0;
-    self->m_pVd = 0;
-    self->mpCurrFrame = 0;
-    self->mbNewFrame = 0;
-    self->mbPaused = 0;
-    return ((void*)self);
+    m_PlayOp.SetDefaults();
+    m_fSpeed = m_PlayOp.fPlaySpeed;
+    m_pPlayer = 0;
+    m_pVd = 0;
+    mpCurrFrame = 0;
+    mbNewFrame = 0;
+    mbPaused = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", cMoviePlayer__cMoviePlayer);
+INCLUDE_ASM("mem/memstd", _$_12cMoviePlayer);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void cMoviePlayer_purge(cMoviePlayer* self);
 
 /**
- * Destroys a movie player: releases everything (cMoviePlayer_purge) and frees the object when @p flags bit 0 is set.
- *
- * @param flags  bit 0 frees the memory (callers pass 3)
+ * Destroys a movie player: releases everything (cMoviePlayer_purge) and frees the object when g++'s delete flag bit 0
+ * is set.
  */
-extern "C" void cMoviePlayer__cMoviePlayer(cMoviePlayer* self, int flags)
+cMoviePlayer::~cMoviePlayer()
 {
-    self->purge();
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    purge();
 }
 #endif
 

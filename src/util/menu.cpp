@@ -1508,7 +1508,7 @@ void cMenu::onLoseFocus()
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", cMenuSys_cMenuSys);
+INCLUDE_ASM("util/menu", __8cMenuSys);
 #ifdef SKIP_ASM
 void cMenuSys_init(void* self);
 
@@ -1516,34 +1516,26 @@ void cMenuSys_init(void* self);
  * Constructs the debug menu system.
  *
  * Clears the first word and calls cMenuSys_init__FPv to reset the rest.
- *
- * @return this
  */
-extern "C" void* cMenuSys_cMenuSys(cMenuSys* self)
+cMenuSys::cMenuSys()
 {
-    *(int*)self = 0;
-    self->init();
-    return ((void*)self);
+    *(int*)this = 0;
+    init();
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", cMenuSys__cMenuSys);
+INCLUDE_ASM("util/menu", _$_8cMenuSys);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 /**
  * Destroys the debug menu system.
  *
- * Has no members to release; frees the object with operator delete when bit 0 of @p flags is set.
- *
- * @param flags  g++ in-charge flags; bit 0 deletes the object
+ * Has no members to release; frees the object with operator delete when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cMenuSys__cMenuSys(cMenuSys* self, int flags)
+cMenuSys::~cMenuSys()
 {
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 

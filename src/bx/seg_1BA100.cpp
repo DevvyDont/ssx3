@@ -2120,21 +2120,19 @@ int tWPNameField::operatorNotEqual(tWPNameField* rhs)
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_cWorldPainterMan);
+INCLUDE_ASM("bx/seg_1BA100", __16cWorldPainterMan);
 #ifdef SKIP_ASM
 /**
  * Constructs the world painter manager: clears the word at +0x4.
- *
- * @return @p self
  */
-extern "C" void *cWorldPainterMan_cWorldPainterMan(cWorldPainterMan* self) {
-    self->m_pCache = 0;
-    return ((void*)self);
+cWorldPainterMan::cWorldPainterMan()
+{
+    m_pCache = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan__cWorldPainterMan);
+INCLUDE_ASM("bx/seg_1BA100", _$_16cWorldPainterMan);
 #ifdef SKIP_ASM
 void cMemMan_free(void *);
 void operator_delete(int *);
@@ -2160,15 +2158,11 @@ struct cWorldPainterSectionArr : cWorldPainterSection {
  *
  * Runs cWorldPainterSection__cWorldPainterSection (flags 0) on each element of m_pCache, last first, using the new[]
  * count cookie 0x10 bytes before the array, then frees the block with cMemMan_free.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object itself (operator delete)
  */
-extern "C" void cWorldPainterMan__cWorldPainterMan(cWorldPainterMan* self, int flags) {
+cWorldPainterMan::~cWorldPainterMan()
+{
     // Same-layout cast: cWorldPainterSectionArr only adds the constructor and destructor.
-    delete[] (cWorldPainterSectionArr*)self->m_pCache;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    delete[] (cWorldPainterSectionArr*)m_pCache;
 }
 #endif
 

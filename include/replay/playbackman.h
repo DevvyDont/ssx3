@@ -3,8 +3,8 @@
 
 // cPlaybackMan: the mission playback manager: plays back recorded rider input (the "playback.big" demo files, one
 // tPlaybackFile per BE mission) for previews and "perform" runs, and records into CurrentFrame. One instance,
-// cGame::PlaybackMan (main/game.h, 0x034): cGame_load does cPlaybackMan_cPlaybackMan(cMemMan_alloc(0x7C, "PlaybackMan",
-// 0x20000000, 0), 40).
+// cGame::PlaybackMan (main/game.h, 0x034): cGame_load does cPlaybackMan::cPlaybackMan(cMemMan_alloc(0x7C,
+// "PlaybackMan", 0x20000000, 0), 40).
 //
 // Size 0x7C: [R] that allocation; the constructor writes up to 0x78 (AsyncHandle). No base class, no virtual functions.
 // EA's source: d:/ssx/code/source/replay/playbackman.cpp, header ../source/replay/playbackman.h (preview strings);
@@ -132,6 +132,9 @@ struct cPlaybackMan {
     bool isPauseAI() __asm__("cPlaybackMan_isPauseAI");
     int findFileById(int id) __asm__("cPlaybackMan_findFileById");
     bool setupFile(int idx) __asm__("cPlaybackMan_setupFile");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cPlaybackMan(int maxPlaybackFiles);
 };
 
 CHECK_OFFSET(cPlaybackMan, BigFile, 0x00);

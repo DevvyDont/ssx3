@@ -4300,25 +4300,20 @@ void cPS2MemCard::issueDeletePath()
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", cLocaleFile__cLocaleFile);
+INCLUDE_ASM("worldpainter/quadtree", _$_11cLocaleFile);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void MEM_free(void* p);
 
 /**
  * Destroys a locale file (the 0x14-byte "LocaleFile" entry cFELocale_addFile creates): frees its loaded data (+0x4)
- * with MEM_free when set and, when bit 0 of @p flags is set, frees the object with operator_delete.
- *
- * @param flags  bit 0 set: also free the object
+ * with MEM_free when set and, when bit 0 of g++'s delete flag is set, frees the object with operator_delete.
  */
-extern "C" void cLocaleFile__cLocaleFile(cLocaleFile* self, int flags)
+cLocaleFile::~cLocaleFile()
 {
-    void* buffer = self->mpStringTableData;
+    void* buffer = mpStringTableData;
     if (buffer != 0) {
         MEM_free(buffer);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
     }
 }
 #endif

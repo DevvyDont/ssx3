@@ -10,7 +10,7 @@
 // (getScoreStats .. updateMedalStats); most readers index cBELibrary_profileLib directly (be/beint*.cpp, belibrary.cpp).
 // Size 0xF88: [R] the static initialiser __sti__all_in_one_be_cpp (be/bedbreward) constructs and destroys the array
 // with a 0xF88 stride (cBELibrary_profileLib[3][10], 0x9B50 per profile; the inlined ctor sets the 525 bolt slots at
-// +0x290 to {-1, 0} and clears +0x288) and calls cBECharProfileDB__cBECharProfileDB on each at exit; [U] every reader
+// +0x290 to {-1, 0} and clears +0x288) and calls cBECharProfileDB::~cBECharProfileDB on each at exit; [U] every reader
 // multiplies the character by 0xF88 (3976).
 // The 64-bit `unsigned long` bitfield at 0x278 (cBECharProfileDB_init does ld/sd on it) makes the struct 8-aligned:
 // 0xF84 bytes of members round up to 0xF88. No base classes, no vtable.
@@ -282,6 +282,8 @@ enum eBECharacters {
     kCHAR_NATE = 7, kCHAR_PSYMON = 8, kCHAR_VIGGO = 9, kCHAR_NUM = 10
 };
 
+void operator_delete(int* p);
+
 struct cBECharProfileDB {
     int bFirstTimeWorldCircuit;     // 0x000 [O] (bool; a word) - first data member after On Tour's strProfileName;
                                     //       [R] init: 1
@@ -378,6 +380,10 @@ struct cBECharProfileDB {
     int showDefaultBolts() __asm__("cBECharProfileDB_showDefaultBolts");
     bool isBoltVisible(int id) __asm__("cBECharProfileDB_isBoltVisible");
     bool hasBoltFlags(int id, unsigned int mask) __asm__("cBECharProfileDB_hasBoltFlags");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cBECharProfileDB();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 CHECK_OFFSET(cBECharProfileDB, bFirstTimeWorldCircuit, 0x0);
 CHECK_OFFSET(cBECharProfileDB, mCollectibles, 0x4);

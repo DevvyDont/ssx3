@@ -3232,7 +3232,7 @@ cBERewardDB* cBERewardInterface::getDB()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", cBEUserAwards_cBEUserAwards);
+INCLUDE_ASM("be/beintreward", __13cBEUserAwards);
 #ifdef SKIP_ASM
 extern "C" void cBEUserAwards_clear(cBEUserAwards* self);
 
@@ -3242,22 +3242,19 @@ extern "C" void cBEUserAwards_clear(cBEUserAwards* self);
  *
  * The pointers at +0x174 for kinds 0, 2, 3, 4, 5, 7 and 8 get areas inside the object (+0x146 to +0x170);
  * kinds 1, 6 and 9 stay 0.
- *
- * @return @p self
  */
-extern "C" void* cBEUserAwards_cBEUserAwards(cBEUserAwards* self)
+cBEUserAwards::cBEUserAwards()
 {
     for (int i = 0; i < 10; i++)
-        self->mpAwardBits[i] = 0;
-    self->mpAwardBits[0] = (unsigned char*)(&self->mAwards.bTrophies[0]);
-    self->mpAwardBits[2] = (unsigned char*)(&self->mAwards.bPeakPasses[0]);
-    self->mpAwardBits[3] = (unsigned char*)(&self->mAwards.bPosters[0]);
-    self->mpAwardBits[4] = (unsigned char*)(&self->mAwards.bTradingCards[0]);
-    self->mpAwardBits[5] = (unsigned char*)(&self->mAwards.bConceptArts[0]);
-    self->mpAwardBits[7] = (unsigned char*)(&self->mAwards.bToys[0]);
-    self->mpAwardBits[8] = (unsigned char*)(&self->mAwards.bCheatChars[0]);
-    self->clear();
-    return (self);
+        mpAwardBits[i] = 0;
+    mpAwardBits[0] = (unsigned char*)(&mAwards.bTrophies[0]);
+    mpAwardBits[2] = (unsigned char*)(&mAwards.bPeakPasses[0]);
+    mpAwardBits[3] = (unsigned char*)(&mAwards.bPosters[0]);
+    mpAwardBits[4] = (unsigned char*)(&mAwards.bTradingCards[0]);
+    mpAwardBits[5] = (unsigned char*)(&mAwards.bConceptArts[0]);
+    mpAwardBits[7] = (unsigned char*)(&mAwards.bToys[0]);
+    mpAwardBits[8] = (unsigned char*)(&mAwards.bCheatChars[0]);
+    clear();
 }
 #endif
 
@@ -3441,7 +3438,7 @@ const unsigned char* cBEUserAwards::getAwardBits(int i)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", cBERewardDB_cBERewardDB);
+INCLUDE_ASM("be/beintreward", __11cBERewardDB);
 #ifdef SKIP_ASM
 /**
  * Constructs the reward database: sets the load handle (+0x0) to -1 and zeroes the table pointers and counts.
@@ -3449,52 +3446,43 @@ INCLUDE_ASM("be/beintreward", cBERewardDB_cBERewardDB);
  * Zeroes +0x4 to +0x24 and +0x2C to +0x4C. It skips +0x28 and +0x50, the cheat-character table and count that
  * cBERewardDB_initRewards fills and cBERewardInterface_getTotalNumCheatChars reads (an oversight; the one instance, cBELibrary_rewardDB, is a zeroed global
  * anyway).
- *
- * @return @p self
  */
-extern "C" void* cBERewardDB_cBERewardDB(cBERewardDB* self)
+cBERewardDB::cBERewardDB()
 {
-    self->mpRewardsFile = 0;
-    self->mRewardFileIndex = -1;
-    self->mpTrophies = 0;
-    self->mpMedals = 0;
-    self->mpPeakPasses = 0;
-    self->mpPosters = 0;
-    self->mpTradingCards = 0;
-    self->mpConceptArts = 0;
-    self->mpToys = 0;
-    self->mpVideos = 0;
-    self->mpStrings = 0;
-    self->mNumTrophies = 0;
-    self->mNumMedals = 0;
-    self->mNumPeakPasses = 0;
-    self->mNumPosters = 0;
-    self->mNumTradingCards = 0;
-    self->mNumConceptArts = 0;
-    self->mNumToys = 0;
-    self->mNumVideos = 0;
-    return ((void*)self);
+    mpRewardsFile = 0;
+    mRewardFileIndex = -1;
+    mpTrophies = 0;
+    mpMedals = 0;
+    mpPeakPasses = 0;
+    mpPosters = 0;
+    mpTradingCards = 0;
+    mpConceptArts = 0;
+    mpToys = 0;
+    mpVideos = 0;
+    mpStrings = 0;
+    mNumTrophies = 0;
+    mNumMedals = 0;
+    mNumPeakPasses = 0;
+    mNumPosters = 0;
+    mNumTradingCards = 0;
+    mNumConceptArts = 0;
+    mNumToys = 0;
+    mNumVideos = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintreward", cBERewardDB__cBERewardDB);
+INCLUDE_ASM("be/beintreward", _$_11cBERewardDB);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void cBERewardDB_purge(void* self);
 
 /**
- * Destroys the reward database: frees its data with cBERewardDB_purge and deletes the object when bit 0 of @p flags is set.
- *
- * @param flags  destructor flags; bit 0 frees the object
+ * Destroys the reward database: frees its data with cBERewardDB_purge and deletes the object when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cBERewardDB__cBERewardDB(cBERewardDB* self, int flags)
+cBERewardDB::~cBERewardDB()
 {
-    cBERewardDB_purge(self);
-    if (flags & 1)
-    {
-        operator_delete(((int*)self));
-    }
+    cBERewardDB_purge(this);
 }
 #endif
 

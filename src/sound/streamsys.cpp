@@ -8,7 +8,7 @@
 #include "sound/soundsys.h"
 
 //100%
-INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance);
+INCLUDE_ASM("sound/streamsys", __15cStreamInstanceP12cSndPlayOptsii);
 #ifdef SKIP_ASM
 extern "C" int SNDSTRM_create(void* desc, int n, int m, void* mem, int size);
 extern "C" int SNDSTRM_overhead(int n, int m);
@@ -21,6 +21,9 @@ static inline int curVol_99D8(cSndPlayOpts* p) { return p->mBaseVol[p->mInst]; }
 #define MIN_99D8(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_99D8(a, b) ((a) >= (b) ? (a) : (b))
 
+extern "C" cStreamInstance* __15cStreamInstanceP12cSndPlayOptsii(
+        cStreamInstance* self, cSndPlayOpts* p, int heap, int extra);
+
 /**
  * Constructs a sound stream instance from play options: applies the volume scale and opens the stream.
  *
@@ -30,27 +33,25 @@ static inline int curVol_99D8(cSndPlayOpts* p) { return p->mBaseVol[p->mInst]; }
  * @param p  play options (On Tour cSndPlayOpts* PlayOpts)
  * @param heap  memory type for the buffer (On Tour MemType)
  * @param extra  extra buffer space in bytes (On Tour BuffSpace)
- * @return @p self
  */
-extern "C" cStreamInstance* cStreamInstance_cStreamInstance(cStreamInstance* self, cSndPlayOpts* p, int heap, int extra)
+cStreamInstance::cStreamInstance(cSndPlayOpts* p, int heap, int extra)
 {
-    self->mBigHeader = 0;
-    self->mHandle = -1;
-    self->mBigHandle = 0;
-    self->mMemAllocType = heap;
-    self->mQueuedTimeout = 0;
-    self->mVolControl = p->mVolControl[p->mInst];
-    self->mBaseVol = curVol_99D8(p);
-    if (self->mVolControl) {
+    mBigHeader = 0;
+    mHandle = -1;
+    mBigHandle = 0;
+    mMemAllocType = heap;
+    mQueuedTimeout = 0;
+    mVolControl = p->mVolControl[p->mInst];
+    mBaseVol = curVol_99D8(p);
+    if (mVolControl) {
         p->mBaseVol[p->mInst] =
-            (int)MAX_99D8(MIN_99D8((float)p->mBaseVol[p->mInst] * *self->mVolControl, 127.0f), 0.0f);
+            (int)MAX_99D8(MIN_99D8((float)p->mBaseVol[p->mInst] * *mVolControl, 127.0f), 0.0f);
         p->mCurrent[p->mInst].vol = MAX_99D8(MIN_99D8(p->mBaseVol[p->mInst], 127), 0);
     }
     int n = SNDSTRM_overhead(8, 300) + extra;
-    self->mBuffer = new (str_Stream, heap, 0) char[n];
-    self->mExternalBuffer = 0;
-    self->mHandle = SNDSTRM_create(&p->mCurrent[p->mInst], 8, 300, self->mBuffer, n);
-    return self;
+    mBuffer = new (str_Stream, heap, 0) char[n];
+    mExternalBuffer = 0;
+    mHandle = SNDSTRM_create(&p->mCurrent[p->mInst], 8, 300, mBuffer, n);
 }
 #endif
 
@@ -60,7 +61,7 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance1);
 /**
  * Constructs a sound stream instance in caller-supplied memory, from the current play-option level.
  *
- * Takes the level's volume control and volume (scaled by it and clamped to 0..127, as cStreamInstance_cStreamInstance
+ * Takes the level's volume control and volume (scaled by it and clamped to 0..127, as cStreamInstance::cStreamInstance
  * does), keeps @p mem as the buffer without owning it (+4 = 1) and opens the stream with SNDSTRM_create(.., @p n,
  * @p maxChunks, mem, size). cStreamSys_STREAM_CreateInstance1 runs it.
  *
@@ -106,7 +107,7 @@ void * cStreamInstance::cStreamInstance2(int handle)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", cStreamInstance__cStreamInstance);
+INCLUDE_ASM("sound/streamsys", _$_15cStreamInstance);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
@@ -115,26 +116,21 @@ extern "C" void* MEM_free(void* self);
 
 /**
  * Destroys a stream instance: closes the stream, frees an owned buffer and the big-file data, and with bit 0 of
- * @p flags deletes it.
+ * g++'s delete flag deletes it.
  *
  * SNDSTRM_destroy runs when there is a buffer; it is freed (cMemMan_free) unless it was supplied (+4); the big-file
  * directory (+0x74) is freed with MEM_free.
- *
- * @param flags  bit 0 set to also delete the object
  */
-extern "C" void cStreamInstance__cStreamInstance(cStreamInstance* self, int flags)
+cStreamInstance::~cStreamInstance()
 {
-    if (*(void**)self != 0) {
-        SNDSTRM_destroy(self->mHandle);
-        if (self->mExternalBuffer == 0 && *(void**)self != 0) {
-            cMemMan_free(*(void**)self);
+    if (*(void**)this != 0) {
+        SNDSTRM_destroy(mHandle);
+        if (mExternalBuffer == 0 && *(void**)this != 0) {
+            cMemMan_free(*(void**)this);
         }
     }
-    if (self->mBigHeader != 0) {
-        MEM_free(self->mBigHeader);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
+    if (mBigHeader != 0) {
+        MEM_free(mBigHeader);
     }
 }
 #endif
@@ -741,7 +737,7 @@ INCLUDE_ASM("sound/streamsys", cStreamSys__cStreamSys);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
-extern "C" void cStreamInstance__cStreamInstance(cStreamInstance* e, int a1);
+extern "C" void _$_15cStreamInstance(cStreamInstance* e, int a1);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern void* cBankMonitor_vtbl[];
 
@@ -791,7 +787,7 @@ extern "C" void cStreamSys__cStreamSys(cStreamSys* streamSysObj, int flags)
     for (int i = 0; i < streamSysObj->mNumStreams; i++) {
         cStreamInstance* streamInst = streamSysObj->mStreamInstance[i];
         if (streamInst != 0) {
-            cStreamInstance__cStreamInstance(streamInst, 3);
+            _$_15cStreamInstance(streamInst, 3);
         }
     }
     if (streamSysObj->mStreamInstance != 0) {
@@ -815,7 +811,7 @@ extern char str_StreamBuffer[];
 
 /**
  * Creates stream instance @p idx: allocates 132 bytes ("StreamBuffer") and constructs it from the current play-option
- * level (cStreamInstance_cStreamInstance with @p heap and @p extra).
+ * level (cStreamInstance::cStreamInstance with @p heap and @p extra).
  *
  * @param idx  the stream index
  * @param heap  the memory type
@@ -825,7 +821,7 @@ void cStreamSys::STREAM_CreateInstance(int idx, int heap, int extra)
 {
     cStreamInstance** slot = (cStreamInstance**)((idx << 2) + (int)mStreamInstance);
     void* mem = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
-    *slot = cStreamInstance_cStreamInstance((cStreamInstance*)mem, (cSndPlayOpts*)&mpVBankManager->BankMonitor,
+    *slot = __15cStreamInstanceP12cSndPlayOptsii((cStreamInstance*)mem, (cSndPlayOpts*)&mpVBankManager->BankMonitor,
                                             heap, extra);
 }
 #endif
@@ -926,10 +922,10 @@ void cStreamSys::STREAM_SetBigFile(int i, const char* val)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Destroy);
 #ifdef SKIP_ASM
-extern "C" void cStreamInstance__cStreamInstance(cStreamInstance* e, int a1);
+extern "C" void _$_15cStreamInstance(cStreamInstance* e, int a1);
 
 /**
- * Destroys stream @p i (cStreamInstance__cStreamInstance with flags 3) and clears its slot.
+ * Destroys stream @p i (cStreamInstance::~cStreamInstance with flags 3) and clears its slot.
  *
  * @param i  the stream index
  */
@@ -937,7 +933,7 @@ void cStreamSys::STREAM_Destroy(int i)
 {
     cStreamInstance* stream = mStreamInstance[i];
     if (stream != 0) {
-        cStreamInstance__cStreamInstance(stream, 3);
+        _$_15cStreamInstance(stream, 3);
     }
     mStreamInstance[i] = 0;
 }
@@ -1747,41 +1743,33 @@ void cController::Update(float frameTime)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_cBankMonitorInstance);
+INCLUDE_ASM("sound/streamsys", __20cBankMonitorInstance);
 #ifdef SKIP_ASM
 /**
  * Constructs a bank monitor instance: free (type 0), 0x8000 pitch, distance -1.0, the handles -1 / -30000.
- *
- * @return this
  */
-extern "C" void* cBankMonitorInstance_cBankMonitorInstance(cBankMonitorInstance* self)
+cBankMonitorInstance::cBankMonitorInstance()
 {
-    self->mLastPitch = 0x8000;
-    self->mVolMultiplier = -1.0f;
-    self->mLastVolume = -1;
-    self->mLastAzimuth = -30000;
-    self->mMonitorType = 0;
-    self->mFading = 0;
-    self->mCloseStateLocked = 0;
-    return ((void*)self);
+    mLastPitch = 0x8000;
+    mVolMultiplier = -1.0f;
+    mLastVolume = -1;
+    mLastAzimuth = -30000;
+    mMonitorType = 0;
+    mFading = 0;
+    mCloseStateLocked = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", cBankMonitorInstance__cBankMonitorInstance);
+INCLUDE_ASM("sound/streamsys", _$_20cBankMonitorInstance);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 /**
- * Destroys a bank monitor instance: nothing to release; deletes it when bit 0 of @p flags is set.
- *
- * @param flags  bit 0 set to also delete the object
+ * Destroys a bank monitor instance: nothing to release; deletes it when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cBankMonitorInstance__cBankMonitorInstance(cBankMonitorInstance* self, int flags)
+cBankMonitorInstance::~cBankMonitorInstance()
 {
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 

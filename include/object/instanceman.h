@@ -5,7 +5,7 @@
 // bytes) for objects created at run time (world scripts, replays): a record array and a free list. One instance:
 // cGame_load (src/main/gameload.cpp) does `operator new(0x10, "InstancesMan", 0x20000000)` + the constructor with
 // section id 0x80 and 0x40 records, kept as cGame::InstanceMan (main/game.h 0x88; the preview's getInstanceMan__C5cGame).
-// Methods: the constructor cInstanceMan_cInstanceMan (0x00351030; formerly misnamed cWScriptCompile_parseKeywords), the destructor, allocInstance /
+// Methods: the constructor cInstanceMan::cInstanceMan (0x00351030; formerly misnamed cWScriptCompile_parseKeywords), the destructor, allocInstance /
 // allocInstance1 (take a record off the free list and stamp its id), freeInstance, copyInstance, and cInstanceMan_getInstanceRecord (claim
 // record id >> 8 when the id's section byte matches).
 // No EA path in the preview; its inline asserts "(((tInstanceManRecord*)(inst)) - Instances) < NumInstances" and
@@ -14,7 +14,7 @@
 // header takes object/ (the class is the object system's).
 //
 // Size 0x10: [R] the allocation in cGame_load; [O] On Tour's cInstanceMan is 0x10 with the same four members.
-// No base classes, no vtable (the destructor cInstanceMan__cInstanceMan is not virtual).
+// No base classes, no vtable (the destructor cInstanceMan::~cInstanceMan is not virtual).
 // Tags: [R] the constructor (stores all four members) and the allocation; [P] the preview asserts above; [U] how retail
 // code uses the field; [O] SSX On Tour's DWARF (class cInstanceMan: same names, types, order and offsets).
 
@@ -22,6 +22,8 @@
 
 struct tInstanceList;       // On Tour: { tInstanceList* Next; } - the first word of a free record
 struct tInstanceManRecord;  // On Tour 0xB0: a tInstanceRecord (0xAC) + m_PadBytes[4]
+
+void operator_delete(int* p);
 
 struct cInstanceMan {
     unsigned int InstanceSectionId; // 0x0 [O]; [R] ctor stores its first argument (0x80); [U] allocInstance /
@@ -36,6 +38,11 @@ struct cInstanceMan {
 
     // Methods bound to their retail symbols by asm labels.
     int freeInstance(void* node) __asm__("cInstanceMan_freeInstance__FPvT0");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cInstanceMan(int instanceSectionId, int n);
+    ~cInstanceMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cInstanceMan, InstanceSectionId, 0x0);

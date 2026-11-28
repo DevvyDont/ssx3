@@ -233,7 +233,7 @@ public:
 
 class cCompPart30_cmp : virtual public cRiderVb_cmp {
 public:
-    cCompPart30_cmp();              // cCheatFX_cCheatFX
+    cCompPart30_cmp();              // cCheatFX::cCheatFX
     virtual ~cCompPart30_cmp();
 };
 

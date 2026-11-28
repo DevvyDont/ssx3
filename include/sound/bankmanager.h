@@ -11,7 +11,7 @@
 //   cBankManager : cAsyncSys (0x0), cBankMonitor (0x1D8), virtual cSoundSys
 // Retail methods: cBankManager_cBankManager (0x28B9B8) .. cBankManager_ASYNCSYS_OnEndAsyncLoad (0x28BF38) in the
 // splat unit sound/bankmanager, and the out-of-line inlines BANK_Status / BANK_Used / BANK_Loading / BANK_InUse /
-// BANK_Handle (bx/seg_1BA100). cBankInstance's methods: cBankInstance_cBankInstance .. cBankInstance_Unload
+// BANK_Handle (bx/seg_1BA100). cBankInstance's methods: cBankInstance::cBankInstance .. cBankInstance_Unload
 // (0x28B248..0x28B588, splat unit sound/asyncsys) and cBankInstance_AllocMem .. cBankInstance_OnEndAsyncLoad
 // (0x28B588..0x28B9B8, sound/bankmanager). gpBankManager (0x004A3614) is the one cBankManager [O] (On Tour static
 // gpBankManager); [R] its ctor stores this, its dtor clears it.
@@ -32,7 +32,7 @@
 // &BankMonitor (gpBankManager + 0x1D8) to the cBankMonitor / cSndPlayOpts methods.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail constructors cBankManager_cBankManager / cBankInstance_cBankInstance, destructors, allocation tags;
+//   [R] retail constructors cBankManager_cBankManager / cBankInstance::cBankInstance, destructors, allocation tags;
 //   [P] the July 2003 preview's out-of-line inlines BANK_Status / Used / Loading / Handle (preview mBank 0xAC0) and
 //       ASYNCSYS_Busy / GetCurrOperationUserHandle, carried to retail by tools/layout_xlate.py;
 //   [O] SSX On Tour's DWARF (class cBankManager 0xAD4: mMaxBanks, mBank; class cBankInstance 0x60, same offsets);
@@ -49,6 +49,8 @@ enum eBankStatus { EMPTY = 0, USED = 1, LOADING = 2 };
 
 // cBankInstance (0x60 [R] operator new[](count x 0x60, "BankInstances"); [O] same size and offsets): one bank slot.
 // Its On Tour enums are kept as ints: eBankStatus (above), eSoundMemLocation (sound/asyncsys.h).
+void operator_delete(int* p);
+
 struct cBankInstance {
     int mBankStatus;            // 0x00 [O] eBankStatus; [R] ctor 0; [P] BANK_Status / BANK_Used (== 1) / BANK_Loading
                                 //       (== 2) / BANK_Handle; [U] SyncLoad / OnEndAsyncLoad set 1 or 0,
@@ -92,6 +94,11 @@ struct cBankInstance {
     void Attach(void* mainMemData, int mainMemSize) __asm__("cBankInstance_Attach");
     void OnEndAsyncLoad(int id, int flag, const char* name, void* pBuffer, int dataSize)
         __asm__("cBankInstance_OnEndAsyncLoad");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cBankInstance();
+    ~cBankInstance();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 struct cBankManager {
@@ -117,8 +124,8 @@ struct cBankManager {
     // --- cBankManager
     int mMaxBanks;              // 0xAC8 [O]; [R] ctor stores its count argument
     cBankInstance* mBank;       // 0xACC [O]; [R] operator new[](count x 0x60, "BankInstances") with
-                                //       cBankInstance_cBankInstance; the dtor destroys the array (count from its new[]
-                                //       cookie, cBankInstance__cBankInstance) and frees it; [P] BANK_Status / Used /
+                                //       cBankInstance::cBankInstance; the dtor destroys the array (count from its new[]
+                                //       cookie, cBankInstance::~cBankInstance) and frees it; [P] BANK_Status / Used /
                                 //       Loading / Handle (preview 0xAC0, seen); [U] every BANK_* / ASYNCSYS_On* method
                                 //       indexes it by bank number
 

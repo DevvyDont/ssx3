@@ -44,6 +44,9 @@ struct cFERiderManager {
     void setHumanVisible(int i, int visible) __asm__("cFERiderManager_setHumanVisible");
     void render() __asm__("cFERiderManager_render");
     void update() __asm__("cFERiderManager_update");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cFERiderManager();
 };
 
 CHECK_OFFSET(cFERiderManager, mHumans, 0x0000);

@@ -12,7 +12,7 @@
 // cSongInstance_Create: cSongInstance_cSongInstance(cMemMan_alloc(0xC4, "SongInstance"), ...).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] constructors cSongConfiguration_cSongConfiguration / cSongInstance_cSongInstance, destructors cSongConfiguration__cSongConfiguration / cSongInstance__cSongInstance, the music.inf keys
+//   [R] constructors cSongConfiguration_cSongConfiguration / cSongInstance_cSongInstance, destructors cSongConfiguration__cSongConfiguration / cSongInstance::~cSongInstance, the music.inf keys
 //       cMusicSys's ctor parses into each cSongConfiguration (member names follow the key; EA's own names unknown);
 //   [P] the preview's assert strings;
 //   [U] how the retail methods use the field. Names marked "(our name)" describe that use; the rest are unk_.
@@ -24,7 +24,7 @@
 struct cSongConfiguration {
     char mPathData[0x20];    // 0x00 [R] music.inf PATHDATA (strcpy); [U] cSongInstance ctor loads "<song path><PATHDATA>" as the MPF file (cMusicSys_LoadMPFFile)
     char mMusData[0x20];     // 0x20 [R] music.inf MUSDATA; [U] cSongInstance_Update opens it as the main stream (0x11000001)
-    int mNumBankData;        // 0x40 [P] "mSongConfigurations[mNumSongs]->mNumBankData < MUSIC_MAXLOOPFILES"; [R] ctor 0, LOOPDATA ++; [U] > 0 opens / closes the overlay stream (cSongInstance_Update, dtor cSongInstance__cSongInstance); cSongInstance_GetRandomLoopBank % it
+    int mNumBankData;        // 0x40 [P] "mSongConfigurations[mNumSongs]->mNumBankData < MUSIC_MAXLOOPFILES"; [R] ctor 0, LOOPDATA ++; [U] > 0 opens / closes the overlay stream (cSongInstance_Update, dtor cSongInstance::~cSongInstance); cSongInstance_GetRandomLoopBank % it
     char mBankData[1][0x20]; // 0x44 [P] MUSIC_MAXLOOPFILES = 1 (ctor's init loop runs once); [R] music.inf LOOPDATA; [U] cSongInstance_Update opens it as the overlay stream (0x11000002)
     int mBeatsPerMeasure;    // 0x64 [R] music.inf BeatsPerMeasure (ctor 4); [U] cSongInstance_GetBarLength
     int mMeasuresPerBar;     // 0x68 [R] music.inf MeasuresPerBar (ctor 2); [U] cSongInstance_GetBarLength
@@ -51,6 +51,8 @@ struct cSongConfiguration {
 
 // cSongInstance (0xC4): the playing song (cMusicSys::mSongInstance). No vtable.
 struct cBankManager;
+
+void operator_delete(int* p);
 
 struct cSongInstance {
     cSongConfiguration* mpConfig; // 0x00 (our name) [R] ctor arg 3; [U] every method reads the song's settings through it
@@ -116,6 +118,10 @@ struct cSongInstance {
     bool IsLoopBankReady(cBankManager* other) __asm__("cSongInstance_IsLoopBankReady");
     int GetDuckToLoops() __asm__("cSongInstance_GetDuckToLoops__FPv");
     int GetSedValue() __asm__("cSongInstance_GetSedValue");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cSongInstance();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cSongConfiguration, mPathData, 0x00);

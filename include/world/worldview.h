@@ -7,7 +7,7 @@
 // cWorldCache+0x10 (cWorldCache_cWorldCache constructs it in place; reached as World->m_pWorldCache->m_WorldView).
 // No vtable, no base class. EA's source: d:/ssx/code/source/world/worldview.cpp and ../source/world/worldview.h
 // (preview assert strings). Retail splits it over two units:
-//   world/worldcache (0x003A8F80-0x003A9800): cWorldView_cWorldView, cWorldView__cWorldView, cWorldView_init,
+//   world/worldcache (0x003A8F80-0x003A9800): cWorldView_cWorldView, cWorldView::~cWorldView, cWorldView_init,
 //     cWorldView_purge, cWorldView_reset, cWorldView_update, cWorldView_recursiveFlushPages,
 //     cWorldView_recursiveIsEmptyPages, cWorldView_setFocus, cWorldView_getFocus,
 //     cWorldView_getTestFocus;
@@ -210,6 +210,8 @@ CHECK_SIZE(tStreamFocusInfo, 0x50);
 
 struct t4Vector;
 
+void operator_delete(int* p);
+
 struct cWorldView {
     cWorldCache* mp_WorldCache;     // 0x000 [P] assert mp_WorldCache->isPageEmpty; [R] init's third argument (the
                                     //       cache; the init view calls it `id`), reset = 0; [U] every page call
@@ -251,6 +253,10 @@ struct cWorldView {
     void recursiveIsEmptyPages(tBxBSPNode* node, int* ok) __asm__("cWorldView_recursiveIsEmptyPages");
     float getDistanceToBox(const t4Vector& pos, const t4Vector& boxMin, const t4Vector& boxMax)
         __asm__("cWorldView_getDistanceToBox");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cWorldView();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cWorldView, mp_WorldCache, 0x000);

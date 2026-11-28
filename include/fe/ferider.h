@@ -10,7 +10,7 @@
 // fe/feridermanager (0x0019E680 ... 0x001A0358).
 //
 // Size 0xCE0:
-//   [R] cFERiderManager_cFERiderManager constructs two in place, 0xCE0 apart (cFERider_cFERider(this + i * 0xCE0));
+//   [R] cFERiderManager::cFERiderManager constructs two in place, 0xCE0 apart (cFERider_cFERider(this + i * 0xCE0));
 //       the last field written is the word at 0xCD8 (cFERider_init) and the tPoses make the class 16-byte aligned,
 //       so 0xCDC-0xCE0 is tail padding.
 //   On Tour's DWARF says 0xCC0: retail's bools are words, it has two FX pointers On Tour does not (0xC70, 0xC74), and
@@ -41,7 +41,7 @@ struct cFERider {
     int mCharID;                    // 0x000 [O]; [R] -1; init stores the character, purge -1; [U] below 10 = a real
                                     //       character (setCharID / update)
     int mProfileIndex;              // 0x004 [O]; [R] -1; init stores the profile, purge -1
-    cAnimModel* mpAnimModel;        // 0x008 [O]; [R] 0; init: cAnimModel_cAnimModel(cMemMan_alloc(352, "AnimModel"));
+    cAnimModel* mpAnimModel;        // 0x008 [O]; [R] 0; init: cAnimModel::cAnimModel(cMemMan_alloc(352, "AnimModel"));
                                     //       purge destroys it
     cRiderAnim* mpRiderAnim;        // 0x00C [O]; [R] 0; compileModel: cMemMan_alloc(0x70, "RiderAnim") (rideranim)
     int mLoadAll;                   // 0x010 [O] (bool); [R] 0; init's loadAll argument (queueLoadExtraTextures when

@@ -35,7 +35,7 @@ struct t4Matrix {
 // __8t2Vectorff ...); [O] On Tour struct t2Vector (size 0x8, base t2vect; ctors t2Vector() and
 // t2Vector(float ix, float iy)). Uses: cFont's Offset / UVScale / ShadowOffset / BaseScale / Scale ([O] t2Vector members;
 // render/font.h keeps them as float[2]), the UV argument of cGraphicsMan::RenderIndexedTriList ([O] const t2Vector*).
-// Both constructors are EA's: [R] cFont_cFont / cFont_cFont1 build (0, 0) and (1, 1) temporaries through the 2-float
+// Both constructors are EA's: [R] cFont::cFont / cFont_cFont1 build (0, 0) and (1, 1) temporaries through the 2-float
 // one. Members x, y as in the units' local copies. On Tour's t2Vector derives from t2vect, whose float& x() / y()
 // accessors its 2-float ctor assigns through; X() / Y() stand in for them (the flat struct keeps the field names).
 // This is src/fe/ovstatehud.cpp's local definition verbatim (matched code: onRender2D needs the accessor form).

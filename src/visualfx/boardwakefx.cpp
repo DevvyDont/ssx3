@@ -3820,13 +3820,13 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
 extern int cLensFxMan_mbDrawSun;
 void* cHalo_cHalo(void* self);
 void cLensFxMan__drawFrameCallBack(void* self);
-extern "C" void cSunHalo_cSunHalo(void* self);
+extern "C" void __8cSunHalo(void* self);
 
 /**
  * Constructs the lens effects manager base: its element arrays, then registers its callback with the graphics
  * manager.
  *
- * It builds the 2 x 256 halos mLightHalo (cHalo_cHalo) and the two suns mSunHalo (cSunHalo_cSunHalo), sets
+ * It builds the 2 x 256 halos mLightHalo (cHalo_cHalo) and the two suns mSunHalo (cSunHalo::cSunHalo), sets
  * mbLocked to 1 and clears both views' mNumHalo. It then passes cLensFxMan__drawFrameCallBack
  * and itself to graphics manager slot 117 and sets cLensFxMan_mbDrawSun. The PS2 version's constructor
  * (cPS2LensFxMan_cPS2LensFxMan) calls this.
@@ -3862,7 +3862,7 @@ extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
             char* colPtr = rowPtr;
             int colsLeft = 1;
             do {
-                cSunHalo_cSunHalo(colPtr);
+                __8cSunHalo(colPtr);
                 colPtr += 0x210;
             } while (--colsLeft != -1);
             rowPtr += 0x420;
@@ -5469,7 +5469,7 @@ void* cTransitionObj_cTransitionObj(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_cSnowBox);
+INCLUDE_ASM("visualfx/boardwakefx", __8cSnowBoxiiffff);
 #ifdef SKIP_ASM
 
 struct sMatD88 {
@@ -5518,6 +5518,9 @@ static inline void wakeScaleMatD88(sMatD88* dst, const sMatD88* src, const t4Vec
         : "memory");
 }
 
+extern "C" void* __8cSnowBoxiiffff(cSnowBox* self, int viewNum, int snowBoxType, float boxScale, float flakeSize,
+                                   float opacity, float gravity);
+
 /**
  * Constructs one snowfall box for a view.
  *
@@ -5531,51 +5534,50 @@ static inline void wakeScaleMatD88(sMatD88* dst, const sMatD88* src, const t4Vec
  * @param flakeSize  flake size (On Tour flakeSize)
  * @param opacity  flake opacity (On Tour opacity)
  * @param gravity  fall speed (On Tour gravity)
- * @return this
  */
-extern "C" void* cSnowBox_cSnowBox(cSnowBox* self, int viewNum, int snowBoxType, float boxScale, float flakeSize, float opacity, float gravity)
+cSnowBox::cSnowBox(int viewNum, int snowBoxType, float boxScale, float flakeSize, float opacity, float gravity)
 {
-    self->mNumFlakes = 0;
-    self->mWindScale = 0.0f;
-    self->mOffset.x = 0.0f;
-    self->mOffset.y = 0.0f;
-    self->mOffset.z = 0.0f;
-    self->mOffset.w = 1.0f;
-    self->mWindNext.x = 0.0f;
-    self->mWindNext.y = 0.0f;
-    self->mWindNext.z = 0.0f;
-    self->mWindNext.w = 0.0f;
-    self->mWindLast.x = 0.0f;
-    self->mWindLast.y = 0.0f;
-    self->mWindLast.z = 0.0f;
-    self->mWindLast.w = 0.0f;
-    self->mCurrentTimeToWindChange = 0.0f;
-    self->mTotalTimeToWindChange = 0.0f;
-    self->mColourR = 1.0f;
-    self->mColourG = 1.0f;
-    self->mColourB = 1.0f;
-    self->mViewNum = viewNum;
-    self->mSnowBoxType = snowBoxType;
-    self->mBoxScale = boxScale;
-    self->mFlakeSize = flakeSize;
-    self->mOpacity = opacity;
-    self->mGravity = gravity;
-    self->mResetWind = 1;
-    self->mRandSeed = BXrand();
-    self->mRandSeed2 = BXrand();
-    self->mRandSeed3 = BXrand();
-    wakeCopyMatD88((sMatD88*)&self->mBoxMatrix, (sMatD88*)&t4mat_Identity);
+    mNumFlakes = 0;
+    mWindScale = 0.0f;
+    mOffset.x = 0.0f;
+    mOffset.y = 0.0f;
+    mOffset.z = 0.0f;
+    mOffset.w = 1.0f;
+    mWindNext.x = 0.0f;
+    mWindNext.y = 0.0f;
+    mWindNext.z = 0.0f;
+    mWindNext.w = 0.0f;
+    mWindLast.x = 0.0f;
+    mWindLast.y = 0.0f;
+    mWindLast.z = 0.0f;
+    mWindLast.w = 0.0f;
+    mCurrentTimeToWindChange = 0.0f;
+    mTotalTimeToWindChange = 0.0f;
+    mColourR = 1.0f;
+    mColourG = 1.0f;
+    mColourB = 1.0f;
+    mViewNum = viewNum;
+    mSnowBoxType = snowBoxType;
+    mBoxScale = boxScale;
+    mFlakeSize = flakeSize;
+    mOpacity = opacity;
+    mGravity = gravity;
+    mResetWind = 1;
+    mRandSeed = BXrand();
+    mRandSeed2 = BXrand();
+    mRandSeed3 = BXrand();
+    wakeCopyMatD88((sMatD88*)&mBoxMatrix, (sMatD88*)&t4mat_Identity);
     {
         sMatD88 scaledCopy;
         t4Vector scale;
         sMatD88 scaled;
-        scale.x = self->mBoxScale;
-        scale.y = self->mBoxScale;
-        scale.z = self->mBoxScale;
+        scale.x = mBoxScale;
+        scale.y = mBoxScale;
+        scale.z = mBoxScale;
         scale.w = 1.0f;
-        wakeScaleMatD88(&scaled, (sMatD88*)&self->mBoxMatrix, scale);
+        wakeScaleMatD88(&scaled, (sMatD88*)&mBoxMatrix, scale);
         wakeCopyMatD88(&scaledCopy, &scaled);
-        wakeCopyMatD88((sMatD88*)&self->mBoxMatrix, &scaledCopy);
+        wakeCopyMatD88((sMatD88*)&mBoxMatrix, &scaledCopy);
     }
     {
         t4Vector origin;
@@ -5583,9 +5585,8 @@ extern "C" void* cSnowBox_cSnowBox(cSnowBox* self, int viewNum, int snowBoxType,
         origin.y = 0.0f;
         origin.z = 0.0f;
         origin.w = 1.0f;
-        *(&self->mOffset) = origin;
+        *(&mOffset) = origin;
     }
-    return ((char*)self);
 }
 #endif
 
@@ -5606,22 +5607,17 @@ void cSnowBox::resetWind()
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", cSnowBox__cSnowBox);
+INCLUDE_ASM("visualfx/boardwakefx", _$_8cSnowBox);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
 /**
  * Destroys a snow box.
  *
- * Has nothing to release; frees the object with operator delete when bit 0 of @p flags is set.
- *
- * @param flags  g++ in-charge flags; bit 0 deletes the object
+ * Has nothing to release; frees the object with operator delete when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cSnowBox__cSnowBox(cSnowBox* self, int flags)
+cSnowBox::~cSnowBox()
 {
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -6083,19 +6079,19 @@ extern "C" void* cSnowFall_cSnowFall(cSnowFall* self, void* bucket)
     for (int j = 0; j < 2; j++) {
         self->mLastCameraPosition[j] = t4VectorCtor(0.0f, 0.0f, 0.0f, 1.0f);
     }
-    self->mSnowBoxes[0] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    self->mSnowBoxes[1] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-    self->mSnowBoxes[2] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-    self->mSnowBoxes[3] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-    self->mSnowBoxes[4] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    self->mSnowBoxes[5] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    self->mSnowBoxes[0] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    self->mSnowBoxes[1] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+    self->mSnowBoxes[2] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+    self->mSnowBoxes[3] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+    self->mSnowBoxes[4] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+    self->mSnowBoxes[5] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     if (SSXApp->Game->AI->NumberOfPlayersAllocated >= 2) {
-        self->mSnowBoxes[6] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        self->mSnowBoxes[7] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
-        self->mSnowBoxes[8] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
-        self->mSnowBoxes[9] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
-        self->mSnowBoxes[10] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-        self->mSnowBoxes[11] = (cSnowBox*)cSnowBox_cSnowBox((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        self->mSnowBoxes[6] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        self->mSnowBoxes[7] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
+        self->mSnowBoxes[8] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);
+        self->mSnowBoxes[9] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
+        self->mSnowBoxes[10] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
+        self->mSnowBoxes[11] = (cSnowBox*)__8cSnowBoxiiffff((cSnowBox*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     }
     cMemMan_validate();
     return (self);
@@ -6107,7 +6103,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cSnowFall__cSnowFall);
 #ifdef SKIP_ASM
 extern void* cSnowFall_vtbl[];
 extern "C" void cMemMan_validate(void);
-extern "C" void cSnowBox__cSnowBox(cSnowBox* self, int flags);
+extern "C" void _$_8cSnowBox(cSnowBox* self, int flags);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
 
 /**
@@ -6124,7 +6120,7 @@ extern "C" void cSnowFall__cSnowFall(cSnowFall* self, int flags)
     for (i = 0; i < 12; i++) {
         int* snowBox = ((int*)self->mSnowBoxes[i]);
         if (snowBox != 0) {
-            cSnowBox__cSnowBox((cSnowBox*)snowBox, 3);
+            _$_8cSnowBox((cSnowBox*)snowBox, 3);
         }
     }
     cMemMan_validate();

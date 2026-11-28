@@ -44,7 +44,7 @@ struct cSpeechSys {
     cStreamSys* mpVStreamSys;           // 0x000 [R] g++ 2.95 virtual-base pointer to cStreamSys (= this + 0xC98 in a complete object; cSSXAudio + 0x7768); [U] methods reach cBankManager as **(this) and its cBankMonitor as **(this) + 0x1D8
     cSpeechInstance** mSpeechInstance;  // 0x004 [R] operator new[](2 x 4, "mSpeechInstance"), both 0; [U] cSpeechSys_CreateInstance
                                         //       fills slot i with cMemMan_alloc(0x904, "SpeechInstance") + ctor
-                                        //       cSpeechInstance_cSpeechInstance; the dtor frees the array
+                                        //       cSpeechInstance::cSpeechInstance; the dtor frees the array
     void* mpBankMem;                    // 0x008 (our name, after the "bank mem" tag) [U] SPCH_Init: MEM_alloc("bank
                                         //       mem", n, 0) (the speech bank buffer); cSpeechSys_Shutdown MEM_free()s and
                                         //       clears it

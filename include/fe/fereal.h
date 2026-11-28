@@ -56,11 +56,11 @@ struct cRealFE {
                                     //       mCamera.View / Near / Far (0x10 / 0x14 / 0x18) and &mCamera.CamMat (0x50) to the
                                     //       graphics manager; update calls slot 3 of mCamera.mVtbl; load sets mCamera.Pose
     cFERiderManager mRiderManager;  // 0x0B0 [O] cFERiderManager (fe/feridermanager.h, 0x19C0); [P] getRiderManager returns
-                                    //       this + 0xB0; [R] cFERiderManager_cFERiderManager(&mRiderManager); [U] load / purge /
+                                    //       this + 0xB0; [R] cFERiderManager::cFERiderManager(&mRiderManager); [U] load / purge /
                                     //       render / update pass its address
     char mBoltFileManager[0xB4030]; // 0x1A70 [P] getBoltFileManager returns this + 0x1A70 (name from the accessor; On
-                                    //       Tour has no such member); [R] cFEBoltFileManager_cFEBoltFileManager(this + 0x1A70) (its ctor),
-                                    //       cFEBoltFileManager__cFEBoltFileManager(.., 2) in cFE__cFE; extent: up to mFXLoader; [U] load / purge /
+                                    //       Tour has no such member); [R] cFEBoltFileManager::cFEBoltFileManager(this + 0x1A70) (its ctor),
+                                    //       cFEBoltFileManager::~cFEBoltFileManager(.., 2) in cFE__cFE; extent: up to mFXLoader; [U] load / purge /
                                     //       update (cFEBoltFileManager_init / cFEBoltFileManager_purge / cFEBoltFileManager_update) pass its address
     cFXLoader* mFXLoader;           // 0xB5AA0 [O]; [R] cFE_cFE: cMemMan_alloc(1, "FXLoader_FE") + cFXLoader_cFXLoader;
                                     //       cFE__cFE destroys it when set
@@ -143,10 +143,10 @@ struct cFE {
                                     //       cSimpleCamera_init(&mCamera, 0, pi/4, 5, 5000); cFE__cFE stores cSimpleCamera_vtbl
                                     //       back; [U] cRealFE_load sets mCamera.Pose (P 0x30, Q 0x40) and updates it
     cFERiderManager mRiderManager;  // 0x0B0 [O] cFERiderManager (fe/feridermanager.h, 0x19C0); [P] getRiderManager /
-                                    //       getHuman use this + 0xB0; [R] cFERiderManager_cFERiderManager /
+                                    //       getHuman use this + 0xB0; [R] cFERiderManager::cFERiderManager /
                                     //       __cFERiderManager(&mRiderManager)
     char mBoltFileManager[0xB4030]; // 0x1A70 [P] getBoltFileManager returns this + 0x1A70 (no On Tour member); [R]
-                                    //       cFEBoltFileManager_cFEBoltFileManager(this + 0x1A70) (its ctor), cFEBoltFileManager__cFEBoltFileManager(.., 2) in cFE__cFE;
+                                    //       cFEBoltFileManager::cFEBoltFileManager(this + 0x1A70) (its ctor), cFEBoltFileManager::~cFEBoltFileManager(.., 2) in cFE__cFE;
                                     //       extent: up to mFXLoader
     cFXLoader* mFXLoader;           // 0xB5AA0 [O]; [R] cFE_cFE: cMemMan_alloc(1, "FXLoader_FE") + cFXLoader_cFXLoader;
                                     //       cFE__cFE destroys it when set

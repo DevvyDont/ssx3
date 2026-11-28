@@ -138,7 +138,7 @@ extern "C" void cFERider_queueLoadExtraTextures(cFERider* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cAttachedEmitterFX_cAttachedEmitterFX1(void* mem, void* owner);
 extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface1(void* mem, void* owner, void* a2);
-extern "C" void* cAnimModel_cAnimModel(void* mem);
+extern "C" void* __10cAnimModel(void* mem);
 extern "C" void cAnimModel_init(void* pool, int a1, int a2);
 extern "C" void cAttachedEmitterFX_setModel(void* a, void* b);
 // PORT: these are defined later in the unit with struct-typed params; bind void* views by asm label
@@ -188,7 +188,7 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     self[3268 / 4] = dirty;
     *(void**)&self[3184 / 4] = cAttachedEmitterFX_cAttachedEmitterFX1(cMemMan_alloc(168, str_AttachedEmitterFX_b, 0, 0), self);
     *(void**)&self[3188 / 4] = cBoltOnFXInterface_cBoltOnFXInterface1(cMemMan_alloc(200, str_cBoltOnFXInterface_b, 0, 0), self, *(void**)&self[3184 / 4]);
-    *(void**)&self[2] = cAnimModel_cAnimModel(cMemMan_alloc(352, str_AnimModel, 0, 0));
+    *(void**)&self[2] = __10cAnimModel(cMemMan_alloc(352, str_AnimModel, 0, 0));
     cAnimModel_init(*(void**)&self[2], 100, 15);
     cAttachedEmitterFX_setModel(*(void**)&self[3184 / 4], *(void**)&self[2]);
     void* list = cBEBoltInterface_getCharProfile(iface, profile, character);
@@ -1554,23 +1554,20 @@ void cFERider::speak()
 #endif
 
 //100%
-INCLUDE_ASM("fe/feridermanager", cFERiderManager_cFERiderManager);
+INCLUDE_ASM("fe/feridermanager", __15cFERiderManager);
 #ifdef SKIP_ASM
 extern "C" void* cFERider_cFERider(void* self);
 
 /**
  * Constructs the front end's rider manager: constructs its two riders (cFERider_cFERider, 0xCE0 bytes each).
- *
- * @return @p self
  */
-extern "C" void* cFERiderManager_cFERiderManager(cFERiderManager* self)
+cFERiderManager::cFERiderManager()
 {
-    char* slot = (char*)self;
+    char* slot = (char*)this;
     int i;
     for (i = 1; i != -1; i--, slot += 0xCE0) {
         cFERider_cFERider(slot);
     }
-    return ((void*)self);
 }
 #endif
 

@@ -57,7 +57,7 @@ struct cDebugFE {
     cDebugScreen* ActiveScreen;     // 0x014 [O]; [P] (preview 0x20); [U] load picks Screens[1] when SSXApp's unk_74 is
                                     //       set, else Screens[0]; startlobby sets Screens[1]; update / render call its
                                     //       slots 2 / 3
-    cFont* Font;                    // 0x018 [O]; [P] getFont (lw); [U] load builds it (cFont_cFont(cMemMan_alloc(0x84,
+    cFont* Font;                    // 0x018 [O]; [P] getFont (lw); [U] load builds it (cFont::cFont(cMemMan_alloc(0x84,
                                     //       "DebugFont"), "data/fonts/debugfnt.sfn") and sets its scale; purge deletes it
     int ParticleTID;                // 0x01C [O]; [P] (preview 0x28); [U] load: the "part" texture of
                                     //       data/textures/dot.ssh (GrMan slot 46), else -1; render draws the heartbeat
@@ -205,7 +205,7 @@ struct cDebugMenuScreen {
                                     //       (getNext/PrevLocation, the WCBAM steppers, legalTrackMode, the entries'
                                     //       locationID / bIsBAM)
     cBackgroundMan BackgroundMan;   // 0x8C10 [O] (fe/backgroundman.h); [R] cBackgroundMan_cBackgroundMan + loadImages
-                                    //       (ctor), cBackgroundMan__cBackgroundMan(.., 2) (dtor); [U] update sets the
+                                    //       (ctor), cBackgroundMan::~cBackgroundMan(.., 2) (dtor); [U] update sets the
                                     //       active image; draw renders it instead of the menu while miActiveImage
                                     //       (0x8C18) >= 0
     // The menu rows (SelectedItem). [O] On Tour's enum cDebugMenuScreen::tItems names the rows both games share
@@ -302,12 +302,13 @@ struct cDebugLobbyScreen {
                                     //       persona, 10 / 11 room, 12 occupants, 13 waiting, 14 chat, 15 challenged, 16
                                     //       play game, 17 declined, 18 ... 24 errors): cDebugLobbyScreen_handleLobbyEvent / cDebugLobbyScreen_runStateMachine /
                                     //       the callbacks set it, draw prints its line
-    cMenuSys mMenuSys;              // 0x0008 cMenuSys (util/menusys.h, 0x68); [R] cMenuSys_cMenuSys(&mMenuSys) /
-                                    //       cMenuSys__cMenuSys(.., 2); the ctor sets mMenuSys.Font / Input / BoxTexture
-                                    //       (0x60 / 0x64 / 0x68) from the debug FE's Font, SSXApp's Inputs[0] and BoxTID;
-                                    //       [U] the open-menu stack (MenuDepth, MenuStack): cMenuSys_pushMenu / popMenu
-                                    //       (cDebugLobbyScreen_selectOccupant / cDebugLobbyScreen_openChatMenu pop while MenuDepth != 0) / isActive / input /
-                                    //       render
+    cMenuSys mMenuSys;              // 0x0008 cMenuSys (util/menusys.h, 0x68); [R] cMenuSys::cMenuSys(&mMenuSys) /
+                                    //       cMenuSys::~cMenuSys(.., 2); the ctor sets mMenuSys.Font / Input /
+                                    //       BoxTexture (0x60 / 0x64 / 0x68) from the debug FE's Font, SSXApp's
+                                    //       Inputs[0] and BoxTID; [U] the open-menu stack (MenuDepth, MenuStack):
+                                    //       cMenuSys_pushMenu / popMenu (cDebugLobbyScreen_selectOccupant /
+                                    //       cDebugLobbyScreen_openChatMenu pop while MenuDepth != 0) / isActive /
+                                    //       input / render
     AccountMenu mLoginMenu;         // 0x0070 [R] the "Login Method" menu (Create Account, Login): AccountMenu_AccountMenu(this +
                                     //       0x70, ...), AccountMenu__AccountMenu(.., 2) (dtor); [U] pushed on the login step
                                     //       (state 3)

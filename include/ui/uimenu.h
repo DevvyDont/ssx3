@@ -5,11 +5,11 @@
 // screens). EA's source is d:/ssx/code/source/ui/uimenu.cpp (preview assert path). Retail spreads its code over
 // ui/uilistbox (cUIMenu_setFocus .. cUIMenu_getNext, cUIMenu_getPrev), ui/uimenu (cUIMenu_setSelected ..
 // cUIMenu_setSelectedByIndex) and ui/uivector (the constructor cUIMenu_cUIMenu, the destructor cUIMenu__cUIMenu, getType
-// and the out-of-line inline accessors tAttrMenu_tAttrMenu .. cUIMenu_getSelectedIndex).
+// and the out-of-line inline accessors tAttrMenu::tAttrMenu .. cUIMenu_getSelectedIndex).
 //
 // Size 0xA8: cUIScreen_createObjectByStruct (record type 0x13) does operator new(0xA8, "UIMenu") and builds it inline
 // (cUIThing ctor cUIThing_cUIThing, cUIGroup's vtable, cList ctor cList_cList at 0x74, cUIMenu's vtable, tAttrMenu ctor
-// tAttrMenu_tAttrMenu at 0x90, then the stores below); cUIMenu_cUIMenu is the same constructor out of line. Retail vtable
+// tAttrMenu::tAttrMenu at 0x90, then the stores below); cUIMenu_cUIMenu is the same constructor out of line. Retail vtable
 // _vt$7cUIMenu = D_00494928 (cUIMenu_vtbl).
 // Bases: cUIGroup (0x90 bytes: cUIThing 0x74 + cList mList 0x1C; ui/uigroup.h, tag "cUIGroup" 0x90) <- cUIThing <-
 // cListNode, written out flat below. The vptr is cUIThing's (0x8).
@@ -28,7 +28,7 @@
 //   [O] On Tour's member order and types alone, where the fields on both sides of it are placed by [P] or [R].
 //
 // mAttrMenu is EA's tAttrMenu (On Tour: 1 byte, unsigned char bitfields, LSB first), defined below. Its constructor
-// tAttrMenu_tAttrMenu clears the 4 bits with a byte access (lbu/andi 0xF0/sb), while every accessor and the menu code
+// tAttrMenu::tAttrMenu clears the 4 bits with a byte access (lbu/andi 0xF0/sb), while every accessor and the menu code
 // read-modify-write the aligned word at 0x90 (lw/sw): g++ 2.95 does exactly that for a 1-byte bitfield struct
 // embedded in a word-aligned object (SLOW_BYTE_ACCESS). Checked with ee-gcc 2.95.3 -O2: `p->mFlipInput = 0 ...` on a
 // tAttrMenu* gives lbu/andi 0xf0/sb, `self->mAttrMenu.mFlipInput = enable != 0` gives retail cUIMenu_setFlipInput's
@@ -44,13 +44,16 @@ struct cUIScreen;
 struct cListNode;
 struct cUIScrollBar;
 
-// EA's tAttrMenu (On Tour DWARF: struct tAttrMenu, size 0x1). Retail: tAttrMenu::tAttrMenu() is tAttrMenu_tAttrMenu.
+// EA's tAttrMenu (On Tour DWARF: struct tAttrMenu, size 0x1). Retail: tAttrMenu::tAttrMenu() is tAttrMenu::tAttrMenu.
 struct tAttrMenu {
     unsigned char mCreateThread : 1;    // bit 0 [U] cUIMenu_isCreateThead/cUIMenu_setCreateThread; passed to cUIMenu_setSelected by onInputChangeItem
     unsigned char mFlipInput : 1;       // bit 1 [P] isFlipInput/setFlipInput (cUIMenu_isFlipInput/cUIMenu_setFlipInput)
     unsigned char mScrollMenu : 1;      // bit 2 [O]; [U] cUIMenu_setScrollableMenu sets it; getNext / cUIMenu_getPrev /
                                         //       cUIMenu_findFirstHighlightable / cUIMenu_reverseFindFirstHighlightable / onInputChangeItem test it
     unsigned char mDisableDirSound : 1; // bit 3 [O]; [U] cUIMenu_isDisableDirSound/cUIMenu_setDisableDirSound; cUIMenu_onInput tests it
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    tAttrMenu();
 };
 
 CHECK_SIZE(tAttrMenu, 0x1);
@@ -93,7 +96,7 @@ struct cUIMenu : public cUIGroup {
     // cUIMenu's own slots ([R] cUIMenu_vtbl; types [O] On Tour's class cUIMenu):
     virtual char getType();                                               // 22 cUIMenu_getType__FPv
     tAttrMenu mAttrMenu;             // 0x090 [O] tAttrMenu; [P] isFlipInput/setFlipInput (bit 1, lw/sw the word at 0x90;
-                                     //       retail cUIMenu_isFlipInput/cUIMenu_setFlipInput); [R] tAttrMenu() tAttrMenu_tAttrMenu clears
+                                     //       retail cUIMenu_isFlipInput/cUIMenu_setFlipInput); [R] tAttrMenu() tAttrMenu::tAttrMenu clears
                                      //       bits 0-3 (byte); [U] cUIMenu_getNext / onInput / setScrollableMenu (bit 2)
     signed char mInputMap[4];        // 0x091 [O] char mInputMap[4]; [U] cUIMenu_setInputMap stores 4 bytes (sb 0x91..0x94),
                                      //       cUIMenu_onInput reads them (lb)

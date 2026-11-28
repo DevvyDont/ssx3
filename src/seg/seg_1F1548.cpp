@@ -1714,17 +1714,14 @@ extern "C" void tDrop_render_impl(tDrop* obj, sVec2_2C30* off)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", tCrystal_tCrystal);
+INCLUDE_ASM("seg/seg_1F1548", __8tCrystal);
 #ifdef SKIP_ASM
 /**
  * Constructs a screen-splash ice crystal: clears its active flag (+0x4) and returns it.
- *
- * @param crystal  the crystal (0x4C bytes)
- * @return the crystal
  */
-extern "C" void *tCrystal_tCrystal(tCrystal* crystal) {
-    crystal->mActive = 0;
-    return ((void*)crystal);
+tCrystal::tCrystal()
+{
+    mActive = 0;
 }
 #endif
 
@@ -2096,7 +2093,7 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_cSplashManager);
 #ifdef SKIP_ASM
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" int* tDrop_tDrop(int* arg0);
-extern "C" void* tCrystal_tCrystal(tCrystal* arg0);
+extern "C" void* __8tCrystal(tCrystal* arg0);
 extern "C" void cSplashManager_reset(cSplashManager* arg0);
 extern char cSplashManager_vtbl[];
 
@@ -2133,7 +2130,7 @@ extern "C" void* cSplashManager_cSplashManager(cSplashManager* splashManager, vo
         char* entry = (char*)&splashManager->mCrystalList[0];
         int i = 29;
         do {
-            tCrystal_tCrystal((tCrystal*)entry);
+            __8tCrystal((tCrystal*)entry);
             i--;
             entry += 0x4C;
         } while (i != -1);
@@ -2722,7 +2719,7 @@ void cSplashManager::ReportSnowfall(float intensity)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", cSunHalo_cSunHalo);
+INCLUDE_ASM("seg/seg_1F1548", __8cSunHalo);
 #ifdef SKIP_ASM
 extern void cHalo_cHalo(void *);
 extern "C" void cSunHalo_InitLens(void *);
@@ -2740,18 +2737,15 @@ struct tSunLensInit : tSunLens {
  * Runs cHalo_cHalo (the cHalo base constructor), constructs the 16 lens entries (mSunLens; trivial), clears the
  * occlusion factor (mfOcclude) and the halo's mbOnScreen / mbRequestZSample shorts, then calls cSunHalo_InitLens for
  * the default flare.
- *
- * @param sunHalo  the object to construct (this)
- * @return @p sunHalo
  */
-extern "C" void *cSunHalo_cSunHalo(cSunHalo* sunHalo) {
-    cHalo_cHalo(sunHalo);
-    new (sunHalo->mSunLens) tSunLensInit[16];
-    sunHalo->mfOcclude = 0.0f;
-    sunHalo->mbRequestZSample = 0;
-    sunHalo->mbOnScreen = 0;
-    cSunHalo_InitLens(sunHalo);
-    return ((void*)sunHalo);
+cSunHalo::cSunHalo()
+{
+    cHalo_cHalo(this);
+    new (mSunLens) tSunLensInit[16];
+    mfOcclude = 0.0f;
+    mbRequestZSample = 0;
+    mbOnScreen = 0;
+    cSunHalo_InitLens(this);
 }
 #endif
 
@@ -3249,7 +3243,7 @@ extern "C" void *cWorldLightMan_cWorldLightMan(cWorldLightMan* self, cBXNash* pN
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", cWorldLightMan__cWorldLightMan);
+INCLUDE_ASM("seg/seg_1F1548", _$_14cWorldLightMan);
 #ifdef SKIP_ASM
 extern "C" void cWorldLightMan_purgeLightCache(void *);
 void operator_delete(int *);
@@ -3258,18 +3252,13 @@ void operator_delete(int *);
  * Destroys the world light manager: its world-painter query, its light cache, then itself.
  *
  * Deletes the world-painter query (m_pWPQuery) through its virtual destructor if set, calls
- * cWorldLightMan_purgeLightCache (purgeLightCache) and frees the manager when bit 0 of @p flags is set.
- *
- * @param lightMan  the light manager (this)
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * cWorldLightMan_purgeLightCache (purgeLightCache) and frees the manager when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cWorldLightMan__cWorldLightMan(cWorldLightMan* lightMan, int flags) {
-    if (lightMan->m_pWPQuery != 0) {
-        delete lightMan->m_pWPQuery;
+cWorldLightMan::~cWorldLightMan()
+{
+    if (m_pWPQuery != 0) {
+        delete m_pWPQuery;
     }
-    cWorldLightMan_purgeLightCache((lightMan));
-    if (flags & 1) {
-        operator_delete((int *)lightMan);
-    }
+    cWorldLightMan_purgeLightCache((this));
 }
 #endif

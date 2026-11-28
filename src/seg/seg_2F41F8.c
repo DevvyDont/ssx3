@@ -2482,7 +2482,7 @@ static inline struct sKb *ctl(void) { return (struct sKb *)((char *)D_00526010 -
  * the max-connect word D_00526010, capped at 8). Clears every keyboard's connected and previous flags and the ready
  * flag of each 0x8C-byte buffer in @p ents, resets the current keyboard, sets the info-refresh period and counter to 60
  * updates, installs the callbacks (defaults kbReader_defaultOnConnect and kbReader_defaultIdleHook) and runs one connection query to
- * completion (kbReader_startInfoQuery, then kbReader_finishInfoQuery until done). The USB keyboard reader object (cUsbKeyboard_cUsbKeyboard) calls it
+ * completion (kbReader_startInfoQuery, then kbReader_finishInfoQuery until done). The USB keyboard reader object (cUsbKeyboard::cUsbKeyboard) calls it
  * with no module path, so the modules are expected to be loaded already (initOnline loads them).
  *
  * @param name  directory of USBD.IRX / USBKB.IRX, or 0 to skip loading

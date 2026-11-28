@@ -61,44 +61,37 @@ extern "C" int gameanimcmp(int* lhs, int* rhs)
 #endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_cGameAnimMap);
+INCLUDE_ASM("animation/mdfarchive", __12cGameAnimMap);
 #ifdef SKIP_ASM
 inline void* operator new[](unsigned int, void* p) { return p; }
 extern void* cGameAnimMap_TheGameAnimMap;
 
 /**
- * Constructs the game-animation map and makes it the global cGameAnimMap_TheGameAnimMap; returns @p self.
+ * Constructs the game-animation map and makes it the global cGameAnimMap_TheGameAnimMap; returns the object.
  *
  * The 518-entry member array has an empty constructor, so nothing else is written (cGameAnimMap_initMap fills it).
  * main/ssxapp allocates the 6216-byte object (tag "GameAnimMap").
- *
- * @return @p self
  */
-extern "C" void* cGameAnimMap_cGameAnimMap(cGameAnimMap* self)
+cGameAnimMap::cGameAnimMap()
 {
-    new (((void*)self)) tAnimID[518];
-    cGameAnimMap_TheGameAnimMap = ((void*)self);
-    return ((void*)self);
+    new (((void*)this)) tAnimID[518];
+    cGameAnimMap_TheGameAnimMap = ((void*)this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", cGameAnimMap__cGameAnimMap);
+INCLUDE_ASM("animation/mdfarchive", _$_12cGameAnimMap);
 #ifdef SKIP_ASM
 // cGameAnimMap_TheGameAnimMap is declared void* earlier in the unit.
 void operator_delete(int* ptr);
 
 /**
- * Destroys the game-animation map: clears cGameAnimMap_TheGameAnimMap and frees @p self if bit 0 of @p flags is set.
- *
- * @param flags  bit 0: delete the object itself
+ * Destroys the game-animation map: clears cGameAnimMap_TheGameAnimMap and frees the object if bit 0 of g++'s delete
+ * flag is set.
  */
-extern "C" void cGameAnimMap__cGameAnimMap(cGameAnimMap* self, int flags)
+cGameAnimMap::~cGameAnimMap()
 {
     cGameAnimMap_TheGameAnimMap = 0;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 

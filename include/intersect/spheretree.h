@@ -12,7 +12,7 @@
 // cWorldSphTree_cWorldSphTree), and On Tour's SphereTree is 0xC0. No vtable, no base class.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail constructor SphereTree_SphereTree (zeroes treeInfo, calls SphereTree_init) and SphereTree_init;
+//   [R] retail constructor SphereTree::SphereTree (zeroes treeInfo, calls SphereTree_init) and SphereTree_init;
 //   [U] how retail code uses the field (C bodies in src/intersect/riderspheretree.cpp and the retail asm);
 //   [O] SSX On Tour's DWARF (class SphereTree, struct tSphTreeInfo, struct tLevel); On Tour's offsets equal
 //       retail's for every member here.
@@ -86,7 +86,7 @@ struct SphereTree {
     float worstCase;                // 0x094 [O]; [U] IsPlaneCollision/IsTriCollision clear it (0.0f),
                                     //       checkPlaneCollision/
                                     //       checkTriCollision keep the deepest penetration; < 0 means a hit
-    tSphTreeInfo* treeInfo;         // 0x098 [O]; [R] SphereTree_SphereTree zeroes it; [U] every query (levels, depth,
+    tSphTreeInfo* treeInfo;         // 0x098 [O]; [R] SphereTree::SphereTree zeroes it; [U] every query (levels, depth,
                                     //       bitTree), bxSphereTree_Load points it at staticInfo
     int sortAxis[8];                // 0x09C [O]; [U] populateSortAxis sorts the 8 child indices into it (BXSORT_shell);
                                     //       checkPlaneCollision/checkTriCollision visit children in this order
@@ -121,6 +121,9 @@ struct SphereTree {
         __asm__("SphereTree_isSphereInsideTri");
     void populateSortAxis(t4Vector* vdir) __asm__("SphereTree_populateSortAxis");
     void TransformRel(t4Vector* mat, float scale) __asm__("SphereTree_TransformRel");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    SphereTree();
 };
 
 CHECK_OFFSET(SphereTree, axis, 0x000);

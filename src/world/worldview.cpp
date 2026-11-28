@@ -2419,7 +2419,7 @@ void* cPS2ChunkResolve::patchInstanceChain(tInstanceRecord* instance, tModelReco
 #endif
 
 //100%
-INCLUDE_ASM("world/worldview", cWScriptCache_cWScriptCache);
+INCLUDE_ASM("world/worldview", __13cWScriptCacheP6cWorld);
 #ifdef SKIP_ASM
 extern "C" void cWScriptCache_init(void* self, int a1);
 
@@ -2427,14 +2427,12 @@ extern "C" void cWScriptCache_init(void* self, int a1);
  * Constructs the world-script cache for a world, sized for one section to start with.
  *
  * @param world  the owning world (On Tour cWorld*)
- * @return self
  */
-extern "C" void* cWScriptCache_cWScriptCache(cWScriptCache* self, cWorld* world)
+cWScriptCache::cWScriptCache(cWorld* world)
 {
-    self->mpWorld = world;
-    self->mpCache = 0;
-    cWScriptCache_init(self, 1);
-    return ((void*)self);
+    mpWorld = world;
+    mpCache = 0;
+    cWScriptCache_init(this, 1);
 }
 #endif
 

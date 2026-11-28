@@ -135,6 +135,8 @@ enum eNISListStatePlay {
 
 struct cScriptPlayerMain;
 
+void operator_delete(int* p);
+
 struct tNISList {
     // A ready list's start mode (mPlayOnReady, ReadyList's playOnReady). [O] On Tour's enum tNISList::ePlayOnReady,
     // names and values; [U] tNISList_Update plays a ready list with its transition in for
@@ -151,7 +153,7 @@ struct tNISList {
     int mViewIndex;                     // 0x008 [O]; [R] Load stores the list index; [U]
                                         //       cSSXScriptEngine_SetNISListViewIndex stores its argument
     cCircularBuffer mList;              // 0x00C [O] cCircularBuffer<5, tNISListEntry>; [R] the ctor runs
-                                        //       cCircularBuffer_cCircularBuffer / _Reset on self+0xC; [U] every method
+                                        //       cCircularBuffer::cCircularBuffer / _Reset on self+0xC; [U] every method
                                         //       passes self+0xC to the cCircularBuffer_* methods
     int mState;                         // 0x0A4 [O] eNISListState (0 idle, 1 loading, 2 ready, 3 playing); [U]
                                         //       tNISList_GetState returns it, IsPausedPendingNextScript tests == 3
@@ -213,6 +215,10 @@ struct tNISList {
     void Update() __asm__("tNISList_Update");
     int Play(int fade, int notify) __asm__("tNISList_Play");
     int DoTransitionToNext() __asm__("tNISList_DoTransitionToNext");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~tNISList();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(tNISList, mpNISEngine, 0x000);

@@ -1371,11 +1371,11 @@ extern "C" void RpcFree(int buffer) {
 INCLUDE_ASM("seg/seg_156860", cGameComm_construct);
 #ifdef SKIP_ASM
 extern "C" void *cMemMan_alloc(int, int *, int, int);
-extern "C" cGameComm *cGameComm_cGameComm(void *, int, int);
+extern "C" cGameComm *__9cGameCommii(void *, int, int);
 extern int D_004804B8[];
 
 /**
- * Creates the game comm singleton: 0x5F0 bytes tagged "cGameComm", constructed by cGameComm_cGameComm.
+ * Creates the game comm singleton: 0x5F0 bytes tagged "cGameComm", constructed by cGameComm::cGameComm.
  *
  * Stores the result in cGameComm_mGameComm; cGameComm_destroy destroys it.
  *
@@ -1383,7 +1383,7 @@ extern int D_004804B8[];
  * @param isServer  nonzero to run the server side of the handshake (mServer)
  */
 extern "C" void cGameComm_construct(int channel, int isServer) {
-    cGameComm_mGameComm = cGameComm_cGameComm(cMemMan_alloc(1520, D_004804B8, 0x20000000, 0), channel, isServer);
+    cGameComm_mGameComm = __9cGameCommii(cMemMan_alloc(1520, D_004804B8, 0x20000000, 0), channel, isServer);
 }
 #endif
 
@@ -1407,7 +1407,7 @@ extern "C" void cGameComm_destroy(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_156860", cGameComm_cGameComm);
+INCLUDE_ASM("seg/seg_156860", __9cGameCommii);
 #ifdef SKIP_ASM
 cBEInterface* cBE_getInterface_6C78(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENetworkInterface_getSyncDataSize(void* iface);
@@ -1428,99 +1428,95 @@ extern "C" void* PingRpc_create();
  *
  * Retail's arguments are (channel, server), not On Tour's (playerID, numPlayers): this build links two machines.
  *
- * @param vself  the object to construct (this)
  * @param port   the cCommSystem channel index the link uses
  * @param isServer      non-zero on the machine that hosts the race (stored in mServer)
- * @return @p vself
  */
 // cGameComm setup (called by cGameComm_construct on a fresh 0x5F0-byte block): clears the session state,
 // the five packet queues and the two message buffers, and returns self.
-extern "C" cGameComm* cGameComm_cGameComm(void* vself, int port, int isServer)
+cGameComm::cGameComm(int port, int isServer)
 {
-    cGameComm* self = (cGameComm*)vself;
-    self->mChannel = port;
-    self->mServer = isServer;
-    cGameComm_setState_6C78(self, kGameComm_Init);
-    self->mBEBufferSize = cBENetworkInterface_getSyncDataSize(cBE_getInterface_6C78(SSXApp->BE, 7));
-    self->mWaitingTimer = 30;
-    self->mConnected = 1;
-    self->mBEBuffer = 0;
-    self->mSyncInput = 1;
-    self->mCheating[0] = 0;
-    self->mCheating[1] = 0;
-    self->mSyncInputDelay = 0;
-    self->mLinkTimedOut = 0;
-    self->mOverlayTimeout = -1;
-    self->mAlone = 0;
-    self->mGameStartGate = 0;
-    self->mRaceInProgress = 0;
-    self->mWaitingMessage = 0;
-    self->mCommError = 0;
-    self->mCommErrorWasSignificant = 0;
-    self->mLinkTimeout = 0;
-    self->mRemoteExitGame = 0;
-    self->mRemoteEndGame = 0;
-    self->mAtFinishLine = 0;
-    self->mPingResult = 1;
-    self->mPauseTimeout = -1;
-    self->mLoading = 1;
-    self->mLocalFinishedRace = 0;
-    self->mRemoteFinishedRace = 0;
-    self->mStallTimer = 0;
-    self->mStallThreshold = 0;
-    self->mMessageDisplay = 0;
-    self->mPauseCount[0] = 0;
-    self->mPauseCount[1] = 0;
-    self->mLocalUnplugCount = 0;
-    self->mRemoteUnplugCount = 0;
-    self->mAsyncReadData = 0;
-    self->mAsyncWriteData = 0;
-    self->mAsyncReadSize = 0;
-    self->mNetLatency[0] = SSXApp->TimerPeriod;
-    self->mNetLatency[1] = SSXApp->TimerPeriod;
-    self->mLatency = SSXApp->TimerPeriod;
-    self->mNumSamples = 3;
-    self->mError = 0;
-    self->mDisplayError = 0;
-    self->mLocalDisconnected = 0;
-    self->mRemoteDisconnected = 0;
-    self->mPacketCache = 0;
-    self->mPauseMenu[0] = 0;
-    self->mPauseMenu[1] = 0;
-    self->mSyncWaitComplete = 0;
-    self->mDesync = 0;
-    self->mUnPauseFlag = 0;
-    self->mUnPauseTimer = 0;
-    self->mStallCount = 0;
-    self->mPingCount = 0;
-    self->mPingDelay = 0;
-    self->mPingAddr = 0;
+    mChannel = port;
+    mServer = isServer;
+    cGameComm_setState_6C78(this, kGameComm_Init);
+    mBEBufferSize = cBENetworkInterface_getSyncDataSize(cBE_getInterface_6C78(SSXApp->BE, 7));
+    mWaitingTimer = 30;
+    mConnected = 1;
+    mBEBuffer = 0;
+    mSyncInput = 1;
+    mCheating[0] = 0;
+    mCheating[1] = 0;
+    mSyncInputDelay = 0;
+    mLinkTimedOut = 0;
+    mOverlayTimeout = -1;
+    mAlone = 0;
+    mGameStartGate = 0;
+    mRaceInProgress = 0;
+    mWaitingMessage = 0;
+    mCommError = 0;
+    mCommErrorWasSignificant = 0;
+    mLinkTimeout = 0;
+    mRemoteExitGame = 0;
+    mRemoteEndGame = 0;
+    mAtFinishLine = 0;
+    mPingResult = 1;
+    mPauseTimeout = -1;
+    mLoading = 1;
+    mLocalFinishedRace = 0;
+    mRemoteFinishedRace = 0;
+    mStallTimer = 0;
+    mStallThreshold = 0;
+    mMessageDisplay = 0;
+    mPauseCount[0] = 0;
+    mPauseCount[1] = 0;
+    mLocalUnplugCount = 0;
+    mRemoteUnplugCount = 0;
+    mAsyncReadData = 0;
+    mAsyncWriteData = 0;
+    mAsyncReadSize = 0;
+    mNetLatency[0] = SSXApp->TimerPeriod;
+    mNetLatency[1] = SSXApp->TimerPeriod;
+    mLatency = SSXApp->TimerPeriod;
+    mNumSamples = 3;
+    mError = 0;
+    mDisplayError = 0;
+    mLocalDisconnected = 0;
+    mRemoteDisconnected = 0;
+    mPacketCache = 0;
+    mPauseMenu[0] = 0;
+    mPauseMenu[1] = 0;
+    mSyncWaitComplete = 0;
+    mDesync = 0;
+    mUnPauseFlag = 0;
+    mUnPauseTimer = 0;
+    mStallCount = 0;
+    mPingCount = 0;
+    mPingDelay = 0;
+    mPingAddr = 0;
     for (int j = 3; j >= 0; j--) {
-        self->mPingID[j] = 0;
+        mPingID[j] = 0;
     }
-    self->mRaceStartTime = SSXApp->TimerTick / SSXApp->TimerHz;
-    self->mLocalEndTime = 0;
-    self->mRemoteEndTime = 0;
-    self->mPingTimer = 0;
-    self->mPingSocket = 0;
-    self->mPingReceived = 0;
+    mRaceStartTime = SSXApp->TimerTick / SSXApp->TimerHz;
+    mLocalEndTime = 0;
+    mRemoteEndTime = 0;
+    mPingTimer = 0;
+    mPingSocket = 0;
+    mPingReceived = 0;
     for (int i = 0; i < 4; i++) {
-        tGameCommQueue* queue = &self->mReadQueue[i];
+        tGameCommQueue* queue = &mReadQueue[i];
         queue->mHead = 0;
         queue->mTail = 0;
         MEM_fill_6C78(queue->mQueue, 0, sizeof(queue->mQueue));
     }
-    self->mWriteQueue.mHead = 0;
-    self->mWriteQueue.mTail = 0;
-    MEM_fill_6C78(self->mWriteQueue.mQueue, 0, sizeof(self->mWriteQueue.mQueue));
-    self->mCheckSumSent = 0;
-    self->mCheckSumReceived = 0;
-    self->mAITick[0] = -1;
-    self->mAITick[1] = -1;
-    MEM_fill_6C78(self->mCheckSumBuffer[0], 0, sizeof(self->mCheckSumBuffer[0]));
-    MEM_fill_6C78(self->mCheckSumBuffer[1], 0, sizeof(self->mCheckSumBuffer[1]));
-    self->mPingSocket = PingRpc_create();
-    return self;
+    mWriteQueue.mHead = 0;
+    mWriteQueue.mTail = 0;
+    MEM_fill_6C78(mWriteQueue.mQueue, 0, sizeof(mWriteQueue.mQueue));
+    mCheckSumSent = 0;
+    mCheckSumReceived = 0;
+    mAITick[0] = -1;
+    mAITick[1] = -1;
+    MEM_fill_6C78(mCheckSumBuffer[0], 0, sizeof(mCheckSumBuffer[0]));
+    MEM_fill_6C78(mCheckSumBuffer[1], 0, sizeof(mCheckSumBuffer[1]));
+    mPingSocket = PingRpc_create();
 }
 #endif
 

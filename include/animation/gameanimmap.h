@@ -10,7 +10,7 @@
 // gameanimmap.h (preview asserts); retail methods are in the animation/mdfarchive splat unit (0x00314D98..0x003150B0)
 // plus the empty testResolve in animation/gameanimmap (0x003150B0). No vtable (no virtual dtor: the dtor is called
 // directly).
-// Size 0x1848: [R] cSSXApp's init allocates cMemMan_alloc(6216 = 0x1848, "GameAnimMap") + cGameAnimMap_cGameAnimMap
+// Size 0x1848: [R] cSSXApp's init allocates cMemMan_alloc(6216 = 0x1848, "GameAnimMap") + cGameAnimMap::cGameAnimMap
 // (main/ssxapp.cpp); three 518-word arrays (initMap / lookupGAD / getAnimName loop to 518 = 0x206) end there:
 // 0x1030 + 518 * 4 = 0x1848. [O] On Tour's cGameAnimMap is 0x25A4: the same three arrays with 803 entries.
 // No base class.
@@ -55,6 +55,8 @@ CHECK_SIZE(tAnimID, 0x4);
 
 struct cAdfDataSource;
 
+void operator_delete(int* p);
+
 struct cGameAnimMap {
     unsigned int GameAnimHashes[518]; // 0x000 [O]; [U] initMap stores GetHashValue32(GameAnimNames[i]) in [i];
                                     //       lookupGAD compares the hash against GameAnimHashes[GameAnimSort[mid]]; initMap
@@ -73,6 +75,11 @@ struct cGameAnimMap {
     int lookupGAD(unsigned int hash) __asm__("cGameAnimMap_lookupGAD");
     void remSource(cAdfDataSource* list) __asm__("cGameAnimMap_remSource");
     void setMap(unsigned int hash, void* value) __asm__("cGameAnimMap_setMap");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cGameAnimMap();
+    ~cGameAnimMap();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cGameAnimMap, GameAnimHashes, 0x000);

@@ -6,7 +6,7 @@
 // class name (cPS2BezierMan_cPS2BezierMan__FPv, vtables.tsv); the allocation tag says "PS2BezierMan".
 // Size 0x9C90: [R] cBezierMan_construct__Fv (render/bezierman) does cMemMan_alloc(0x9C90, "PS2BezierMan") + the ctor
 // cPS2BezierMan_cPS2BezierMan__FPv (render/ps2bezierman): cBezierMan ctor cBezierMan_cBezierMan (vtable cBezierMan_vtbl, stores
-// TheBezierMan), vtable D_00493760, cBezierCache_cBezierCache on this + 0x10, then Init (cPS2BezierMan_Init). Dtor cPS2BezierMan__cPS2BezierMan (Purge,
+// TheBezierMan), vtable D_00493760, cBezierCache::cBezierCache on this + 0x10, then Init (cPS2BezierMan_Init). Dtor cPS2BezierMan__cPS2BezierMan (Purge,
 // then cBezierMan dtor cBezierMan__cBezierMan, which clears TheBezierMan).
 // Bases: cBezierMan (On Tour 0x8: m_currPatchDist 0x0, then its vptr at 0x4) <- cPS2BezierMan.
 // Methods (D_00493760; the same order as On Tour's cBezierMan declarations): 0 ~ cPS2BezierMan__cPS2BezierMan, 1 Init cPS2BezierMan_Init,
@@ -74,7 +74,7 @@ struct cPS2BezierMan {
     void** mVtbl;                    // 0x0004 [R] cBezierMan_vtbl (cBezierMan ctor/dtor), D_00493760 (ctor, dtor cPS2BezierMan__cPS2BezierMan)
     // --- cPS2BezierMan
     char unk_0008[0x8];              // 0x0008 (no retail access found)
-    cBezierCache mPatchCache;        // 0x0010 [R] cBezierCache_cBezierCache / cBezierCache_allocateCaches(this + 0x10, 900, 220, 140, ...) in the
+    cBezierCache mPatchCache;        // 0x0010 [R] cBezierCache::cBezierCache / cBezierCache_allocateCaches(this + 0x10, 900, 220, 140, ...) in the
                                      //        ctor and Init, cBezierCache_clearRecords in Reset (render/beziercache.h; cPS2BezierMan_GetBezST
                                      //        reads this + 0x1A0 = mPatchCache.mBasis, cPS2BezierMan_GetBezdST this +
                                      //        0x320 = mPatchCache.mDBasis)

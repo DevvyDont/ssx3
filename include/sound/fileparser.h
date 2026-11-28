@@ -11,11 +11,13 @@
 // tables of cSSXAudio) and reserves 0x810 (the next local starts 0x810 after it, e.g. cSpeechInstance_ReadConfig). No vtable.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] the constructor FileParser_FileParser (FileParser(const char* Filename, int MemType)) and destructor FileParser__FileParser;
+//   [R] the constructor FileParser::FileParser (FileParser(const char* Filename, int MemType)) and destructor FileParser::~FileParser;
 //   [O] On Tour's FileParser (same three members + mTempStr[2048], same offsets);
 //   [U] how the retail methods use the field.
 
 #include "layout.h"
+
+void operator_delete(int* p);
 
 struct FileParser {
     int mFileSize;       // 0x000 [O]; [R] ctor = BXFILE_size(Filename); [U] IsEOF (FileParser_IsEOF) stops at mPtr - mBasePtr >= mFileSize
@@ -41,6 +43,11 @@ struct FileParser {
     signed char GetChar() __asm__("FileParser_GetChar__FPv");
     int SkipSpace() __asm__("FileParser_SkipSpace");
     char* GetName() __asm__("FileParser_GetName");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    FileParser(const char* name, int flags);
+    ~FileParser();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(FileParser, mFileSize, 0x000);

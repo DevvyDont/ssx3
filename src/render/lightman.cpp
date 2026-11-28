@@ -2423,7 +2423,7 @@ void* cFont::cFont1()
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", cFont_cFont);
+INCLUDE_ASM("render/lightman", __5cFontPCci);
 #ifdef SKIP_ASM
 
 
@@ -2437,48 +2437,41 @@ extern "C" void cFont_loadFont(cFont* self, const char* name, int flags);
  *
  * @param name  font file name (e.g. "data/fonts/debugfnt.sfn")
  * @param flags  memory flags for the font's allocations (On Tour: memtype)
- * @return @p self
  */
-extern "C" cFont* cFont_cFont(cFont* self, const char* name, int flags)
+cFont::cFont(const char* name, int flags)
 {
-    self->MissingGlyph = 0;
-    (*(t2Vector*)&self->ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
-    (*(t2Vector*)&self->BaseScale[0]) = t2Vector(1.0f, 1.0f);
-    (*(t2Vector*)&self->Scale[0]) = (*(t2Vector*)&self->BaseScale[0]);
+    MissingGlyph = 0;
+    (*(t2Vector*)&ShadowOffset[0]) = t2Vector(0.0f, 0.0f);
+    (*(t2Vector*)&BaseScale[0]) = t2Vector(1.0f, 1.0f);
+    (*(t2Vector*)&Scale[0]) = (*(t2Vector*)&BaseScale[0]);
     {
         tARGBInit white;
         white.A = 1.0f;
         white.R = 1.0f;
         white.G = 1.0f;
         white.B = 1.0f;
-        (*(tARGB*)&self->Color[0]) = white;
+        (*(tARGB*)&Color[0]) = white;
     }
-    (*(tARGB*)&self->ShadowColor[0]) = tARGBInit(1.0f, 0.0f, 0.0f, 0.0f);
-    self->FontName[0] = 0;
-    self->loadFont(name, flags);
-    return self;
+    (*(tARGB*)&ShadowColor[0]) = tARGBInit(1.0f, 0.0f, 0.0f, 0.0f);
+    FontName[0] = 0;
+    loadFont(name, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", cFont__cFont);
+INCLUDE_ASM("render/lightman", _$_5cFont);
 #ifdef SKIP_ASM
 extern "C" void cFont_purge(void* self);
 void operator_delete(int* ptr);
 
 /**
- * Destroys a font: calls cFont_purge and frees the object when bit 0 of @p flags is set.
+ * Destroys a font: calls cFont_purge and frees the object when bit 0 of g++'s delete flag is set.
  *
  * Callers: cDebugFE_purge, cGame_purge and cUIFontInterface_purgeFonts.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cFont__cFont(cFont* self, int flags)
+cFont::~cFont()
 {
-    cFont_purge(self);
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
+    cFont_purge(this);
 }
 #endif
 

@@ -20,7 +20,7 @@
 // names from On Tour's cQuadTree / tQuadTreeNode methods): see methods.txt.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail's constructor cQuadTree_cQuadTree (cQuadTree(minx, miny, areaWidth, defaultKey, defaultData)),
+//   [R] retail's constructor cQuadTree::cQuadTree (cQuadTree(minx, miny, areaWidth, defaultKey, defaultData)),
 //       cQuadTree_exportTree, cQuadTree_resolve;
 //   [P] the July 2003 preview's assert string (quadtree.cpp);
 //   [U] how retail code uses the field;
@@ -120,6 +120,9 @@ struct cQuadTree {
     int calcUsedNodes(unsigned short *node) __asm__("cQuadTree_calcUsedNodes");
     void resolve() __asm__("cQuadTree_resolve__FPv");
     void exportNode(tQuadTreeNode* out, int* count, int* map, tQuadTreeNode* node) __asm__("cQuadTree_exportNode");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cQuadTree(int defaultKey, int defaultData, float fparg0, float fparg1, float fparg2);
 };
 
 CHECK_OFFSET(cQuadTree, m_scale, 0x00);

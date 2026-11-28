@@ -9,7 +9,7 @@
 // bIsActive = 0, vtable cBEEconInterface_vtbl) into cBEEconInterface::instance (retail cBEEconInterface_instance, D_004A1214);
 // the rest of the game reaches it as cBE_getInterface(cBE_getBE(), 11). EA's source:
 // d:/ssx/code/source/be/beintecon.cpp (preview assert string). The rest of the retail be/beintecon unit
-// (cBECharProfileDB__cBECharProfileDB, cBECharProfileDB_init, cBECharProfileDB_applyStartingBolts..cBECharProfileDB_hasBoltFlags) is cBECharProfileDB's.
+// (cBECharProfileDB::~cBECharProfileDB, cBECharProfileDB_init, cBECharProfileDB_applyStartingBolts..cBECharProfileDB_hasBoltFlags) is cBECharProfileDB's.
 //
 // Size 0x10 [R] (the allocation; the July 2003 preview's getThis allocates 0x10 too). [O] On Tour's cBEEconInterface
 // has no data members of its own (size 0x8 = its cBEInterface), and neither does retail's.

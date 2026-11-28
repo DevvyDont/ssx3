@@ -30,7 +30,7 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_cWorldSphTree);
 #ifdef SKIP_ASM
 extern void* cWorldSphTree_vtbl[];
 extern char str_SphereTree[];
-extern "C" void* SphereTree_SphereTree(void* p);
+extern "C" void* __10SphereTree(void* p);
 extern "C" float SphereTree_GetRadius(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
@@ -41,7 +41,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
  * Stores cWorldSphTree's vtable at +0x50, clears +0x4 and +0x8, sets +0x0 to 1 unless @p isLow and keeps @p
  * ast at +0x60 and +0x64. Copies the tree's transCenter to +0x40 and stores centre + r and centre - r (w = 1)
  * at +0x20 and +0x30, r being SphereTree_GetRadius()'s radius. Also allocates a fresh 0x140-byte "SphereTree"
- * (SphereTree_SphereTree) at +0x68, which the destructor cWorldSphTree__cWorldSphTree frees.
+ * (SphereTree::SphereTree) at +0x68, which the destructor cWorldSphTree__cWorldSphTree frees.
  *
  * @param ast    the bxSphereTree to wrap
  * @param isLow  nonzero for a low-detail wrapper: +0x0 is then 0 and cWorldSphTree_GetIdealParam() returns -1
@@ -74,7 +74,7 @@ extern "C" void* cWorldSphTree_cWorldSphTree(cWorldSphTree* self, bxSphereTree* 
     corner.w = 1.0f;
     self->boxMin = corner;
     void* localTree = cMemMan_alloc(320, str_SphereTree, 0, 0);
-    SphereTree_SphereTree(localTree);
+    __10SphereTree(localTree);
     self->localTree = (bxSphereTree*)localTree;
     return ((void*)self);
 }
@@ -1394,7 +1394,7 @@ void cBXNash::initTheAIFwdDiffCache()
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBXNash_purgeTheAIFwdDiffCache);
 #ifdef SKIP_ASM
-extern "C" void cAIFwdDiffCache__cAIFwdDiffCache(void* p, int flags);
+extern "C" void _$_15cAIFwdDiffCache(void* p, int flags);
 
 /**
  * Deletes the AI forward-difference cache (+0xA4) built by cBXNash_initTheAIFwdDiffCache, then clears the pointer.
@@ -1403,7 +1403,7 @@ void cBXNash::purgeTheAIFwdDiffCache()
 {
     void* fwdDiffCache = TheAIFwdDiffCache;
     if (fwdDiffCache != 0) {
-        cAIFwdDiffCache__cAIFwdDiffCache(fwdDiffCache, 3);
+        _$_15cAIFwdDiffCache(fwdDiffCache, 3);
     }
     TheAIFwdDiffCache = 0;
 }

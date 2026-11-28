@@ -53,7 +53,7 @@ void cWScriptCache::init(int count)
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", cWScriptCache__cWScriptCache);
+INCLUDE_ASM("world/wscriptcache", _$_13cWScriptCache);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int*);
@@ -66,18 +66,13 @@ extern int cWScriptCache_mpWScriptCache;
  * If the entry array mpCache exists, delete[] runs cWScriptCacheEntry__cWScriptCacheEntry (flag 0) on each 0xC-byte
  * entry from the last to the first (the count is the array cookie 0x10 bytes before it) and frees the block with
  * cMemMan_free. Then clears cWScriptCache_mpWScriptCache
- * and calls operator delete when bit 0 of @p flags is set.
- *
- * @param flags  g++ in-charge flags; bit 0 deletes the object
+ * and calls operator delete when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cWScriptCache__cWScriptCache(cWScriptCache* self, int flags)
+cWScriptCache::~cWScriptCache()
 {
     // Same-layout cast: cWScriptCacheEntryArr only adds the constructor and destructor.
-    delete[] (cWScriptCacheEntryArr*)self->mpCache;
+    delete[] (cWScriptCacheEntryArr*)mpCache;
     cWScriptCache_mpWScriptCache = 0;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

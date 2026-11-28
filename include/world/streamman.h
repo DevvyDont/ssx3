@@ -7,7 +7,7 @@
 // (cWorldCache_cWorldCache constructs it in place, cWorldCache__cWorldCache destroys it); no vtable, no base class.
 // EA's source is d:/ssx/code/source/world/streamman.cpp (preview assert strings); methods 0x003A6D50-0x003A7598
 // (world/streamman):
-//   cStreamMan_cStreamMan, cStreamMan__cStreamMan, cStreamMan_init, cStreamMan_reset,
+//   cStreamMan::cStreamMan, cStreamMan::~cStreamMan, cStreamMan_init, cStreamMan_reset,
 //   cStreamMan_purge, cStreamMan_addStreamRequest, cStreamMan_cancelStreamRequest,
 //   cStreamMan_setBandWidthLimit, cStreamMan_update, cStreamMan_decompressChunk,
 //   cStreamMan_processChunk. The static _NULLCHUNK is cStreamMan_NULLCHUNK.
@@ -21,7 +21,7 @@
 // DWARF (class cStreamMan), placed by:
 //   [P] the July 2003 preview's assert strings in streamman.cpp ("uiHullID==(tUInt32)m_ActiveHull",
 //       "m_uiBxChunkSizeLeft==0");
-//   [R] retail's constructor (cStreamMan_cStreamMan: tags "cStreamMan CDBUFFER", "cStreamMan DECOMPRESS"), init and
+//   [R] retail's constructor (cStreamMan::cStreamMan: tags "cStreamMan CDBUFFER", "cStreamMan DECOMPRESS"), init and
 //       reset (cStreamMan_reset);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order, where the fields on both sides are placed by [P], [R] or [U].
@@ -30,6 +30,8 @@
 #include "layout.h"
 
 struct cWorldCache;
+
+void operator_delete(int* p);
 
 struct cStreamMan {
     cWorldCache* mp_WorldCache;     // 0x000 [O]; [R] init(baseFileName, pWorldCache) stores its third argument
@@ -87,6 +89,11 @@ struct cStreamMan {
     bool processChunk(void* pcount_, void* pdata_) __asm__("cStreamMan_processChunk");
     void* decompressChunk(int dst, int srcSize, int src) __asm__("cStreamMan_decompressChunk__FPviii");
     int init(const char* name, int id) __asm__("cStreamMan_init");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cStreamMan();
+    ~cStreamMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cStreamMan, mp_WorldCache, 0x000);

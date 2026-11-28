@@ -9,12 +9,12 @@
 // online::Event on mEventList. No C++ base class and no virtual functions (no vptr store in the constructor).
 //
 // Size 0x300: [R] LobbyMan_createInstance creates the singleton with cMemMan_alloc(0x300, "LobbyMan", 0x20000000) +
-// the constructor LobbyMan_LobbyMan (which stores every field up to the second tLobbyAccount, 0x2B0 + 0x50 = 0x300);
+// the constructor LobbyMan::LobbyMan (which stores every field up to the second tLobbyAccount, 0x2B0 + 0x50 = 0x300);
 // LobbyMan_destroyInstance destroys it (destructor LobbyMan__LobbyMan). Instance: D_004A3028 (EA: LobbyMan::mLobbyMan, preview
 // assert "!mLobbyMan" in the create function).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] retail's constructor LobbyMan_LobbyMan / destructor LobbyMan__LobbyMan / LobbyMan_resetNewAccount (account-form reset);
+//   [R] retail's constructor LobbyMan::LobbyMan / destructor LobbyMan__LobbyMan / LobbyMan_resetNewAccount (account-form reset);
 //   [P] the July 2003 preview's asserts in lobbyman.cpp, read at the preview offset: "state == ..." (preview 0x4),
 //       "authenticated" (lw 0x8), "loggedin" (lw 0xC), "!disconnected" (lw 0x10), "idx >= 0 && idx < numpersonas"
 //       / "numpersonas < max_personas" (lw 0x40), "idx < getnumrooms()" (lw 0x30). From 0x14 on retail inserted
@@ -377,6 +377,9 @@ struct LobbyMan {
     void* sendAbortChallenge() __asm__("LobbyMan_sendAbortChallenge__FPv");
     void sendLockChallenge(int playerName, int newState) __asm__("LobbyMan_sendLockChallenge");
     void resetNewAccount() __asm__("LobbyMan_resetNewAccount");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    LobbyMan();
 };
 
 CHECK_OFFSET(LobbyMan, mState, 0x000);

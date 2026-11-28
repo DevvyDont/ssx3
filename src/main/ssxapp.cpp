@@ -116,7 +116,7 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv);
 extern "C" void* SHAPE_locate(const char* name, void* list);
 extern "C" void cGraphicsMan_UploadTextures(void* gfx);
 void* cPreStartScreen_cPreStartScreen(void* p);
-extern "C" void* cFEAsyncManager_cFEAsyncManager(void* p);
+extern "C" void* __15cFEAsyncManager(void* p);
 extern "C" void cFEAsyncManager_Init(void* p);
 extern "C" void* cGameModeMan_getGM();
 struct cAppMan;
@@ -172,7 +172,7 @@ void cSSXApp::init(int argc, char** argv)
     cAppMan_setNextModule((cAppMan*)this, (unsigned int)cPreStartScreen_cPreStartScreen(cMemMan_alloc(0xC,
             str_PreStartScreen, 0x100, 0)));
     GameModeMan = (cGameModeMan*)cGameModeMan_getGM();
-    void* feAsyncManager = cFEAsyncManager_cFEAsyncManager(cMemMan_alloc(1424, str_FEAsyncManager, 0, 0));
+    void* feAsyncManager = __15cFEAsyncManager(cMemMan_alloc(1424, str_FEAsyncManager, 0, 0));
     *(void**)&mFEAsyncManager = feAsyncManager;
     cFEAsyncManager_Init(feAsyncManager);
 }
@@ -844,7 +844,7 @@ extern "C" void WORLDTRIGGERMANAGER_DeInit_noarg() __asm__("WORLDTRIGGERMANAGER_
 extern "C" void SSXAUDIO_DeInit();
 extern "C" void cBE_purgeBE(void* p);
 extern "C" void cGameModeMan_purgeGM(void* p);
-extern "C" void cFEAsyncManager__cFEAsyncManager(void* p, int flags);
+extern "C" void _$_15cFEAsyncManager(void* p, int flags);
 extern void* PadCache;
 
 struct sVEPurge0 {
@@ -922,7 +922,7 @@ void cSSXApp::purge()
     if (mSpeechBigFile) FILESYS_delbigsync(mSpeechBigFile, 100);
     if (BE) cBE_purgeBE(BE);
     cGameModeMan_purgeGM(GameModeMan);
-    if (mFEAsyncManager) cFEAsyncManager__cFEAsyncManager(mFEAsyncManager, 3);
+    if (mFEAsyncManager) _$_15cFEAsyncManager(mFEAsyncManager, 3);
     {
         cConsoleConfig* consoleConfig = ConsoleConfig;
         if (consoleConfig) {
@@ -1010,9 +1010,9 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cSSXApp_activateBEOptions_self(void* self) __asm__("cSSXApp_activateBEOptions");
 extern "C" void cSSXApp_initLocale(cSSXApp* self);
 extern "C" void cRiderAnimBase_initAIAnimEventMap();
-extern "C" void* cGameAnimMap_cGameAnimMap(void* self);
+extern "C" void* __12cGameAnimMap(void* self);
 extern "C" void cGameAnimMap_initMap(void* self);
-extern "C" void* cAnimDataBase_cAnimDataBase(void* self);
+extern "C" void* __13cAnimDataBase(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cSSXAudio_BEAudioModeToAudioMode(void* self, unsigned char a1);
 extern "C" void SSXAUDIO_Init(int a);
@@ -1156,9 +1156,9 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cSSXApp_activateBEOptions_self(self);
     ((cSSXApp*)self)->initLocale();
     cRiderAnimBase_initAIAnimEventMap();
-    self->f94 = cGameAnimMap_cGameAnimMap(cMemMan_alloc(6216, str_GameAnimMap, 0, 0));
+    self->f94 = __12cGameAnimMap(cMemMan_alloc(6216, str_GameAnimMap, 0, 0));
     cGameAnimMap_initMap(self->f94);
-    self->f90 = cAnimDataBase_cAnimDataBase(cMemMan_alloc(0x3FC, str_AnimDataBase, 0, 0));
+    self->f90 = __13cAnimDataBase(cMemMan_alloc(0x3FC, str_AnimDataBase, 0, 0));
     cBE_getInterface_Fv(cBE_getBE(), 4);
     SSXAUDIO_Init(cSSXAudio_BEAudioModeToAudioMode(cAudioInterface_bxAudio(), cBEOptionInterface_mOption_82D0.output));
     setLoaderThreadPriority();
@@ -1380,7 +1380,7 @@ extern "C" void initOnline()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", cCrowdMan2d_cCrowdMan2d);
+INCLUDE_ASM("main/ssxapp", __11cCrowdMan2d);
 #ifdef SKIP_ASM
 extern "C" void cCrowdMan2d_resetSlots(cCrowdMan2d* self);
 // PORT: the ctor's mangled name says int; it receives the allocated block (pointer in int)
@@ -1431,19 +1431,17 @@ static inline int AnimCount_229180(char* anim)
  * at +0x0 and its animation (cCrowdRender2D_constructCrowdAnim2D) at +0x4. Fills the shared record D_00536690: the
  * first short takes the animation's current frame texture id (+0x10), +0xC 0x20000, the shorts at +0x2, +0x4 and +0x6
  * -1, +0x8 and +0x10 0. Then resets the slots (cCrowdMan2d_resetSlots). cGame_load builds it as CrowdMan2d (10016 bytes).
- *
- * @return @p self
  */
-extern "C" void* cCrowdMan2d_cCrowdMan2d(cCrowdMan2d* self)
+cCrowdMan2d::cCrowdMan2d()
 {
-    new ((char*)&self->mQuadId[0]) sCrowdId_229180[128];
-    new ((char*)&self->mQuad[0]) sCrowdSlot_229180[128];
-    new ((char*)&self->mMarker[0]) sCrowdRest_229180[40];
+    new ((char*)&mQuadId[0]) sCrowdId_229180[128];
+    new ((char*)&mQuad[0]) sCrowdSlot_229180[128];
+    new ((char*)&mMarker[0]) sCrowdRest_229180[40];
     // PORT: the singleton pointer is held in an int global
-    TheCrowdMan2d = (int)self;
-    self->mpRender = (cCrowdRender2D*)cCrowdRender2D_cCrowdRender2D((int)cMemMan_alloc(0x10, str_cCrowdRender2D, 0x20000000, 0));
-    char* anim = (char*)cCrowdRender2D_constructCrowdAnim2D(self->mpRender);
-    self->mpAnim = (cCrowdAnim2D*)anim;
+    TheCrowdMan2d = (int)this;
+    mpRender = (cCrowdRender2D*)cCrowdRender2D_cCrowdRender2D((int)cMemMan_alloc(0x10, str_cCrowdRender2D, 0x20000000, 0));
+    char* anim = (char*)cCrowdRender2D_constructCrowdAnim2D(mpRender);
+    mpAnim = (cCrowdAnim2D*)anim;
     D_00536690_229180[0].f0 = AnimCount_229180(anim);
     D_00536690_229180[0].fC = 0x20000;
     D_00536690_229180[0].f10 = 0;
@@ -1451,13 +1449,12 @@ extern "C" void* cCrowdMan2d_cCrowdMan2d(cCrowdMan2d* self)
     D_00536690_229180[0].f4 = -1;
     D_00536690_229180[0].f8 = 0;
     D_00536690_229180[0].f6 = -1;
-    self->resetSlots();
-    return (self);
+    resetSlots();
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", cCrowdMan2d__cCrowdMan2d);
+INCLUDE_ASM("main/ssxapp", _$_11cCrowdMan2d);
 #ifdef SKIP_ASM
 extern "C" void cCrowdMan2d_releaseAllQuads(cCrowdMan2d* self);
 extern int TheCrowdMan2d;
@@ -1466,24 +1463,19 @@ void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
 
 /**
  * Destroys the 2D crowd manager: releases every slot, clears the singleton TheCrowdMan2d, frees the animation (+0x4),
- * destroys the renderer (+0x0) and frees the object when bit 0 of @p flags is set.
+ * destroys the renderer (+0x0) and frees the object when bit 0 of g++'s delete flag is set.
  *
  * Uses cCrowdMan2d_releaseAllQuads, operator_delete and cCrowdRender2D__cCrowdRender2D(renderer, 3). cGame_purge calls it.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cCrowdMan2d__cCrowdMan2d(cCrowdMan2d* self, int flags)
+cCrowdMan2d::~cCrowdMan2d()
 {
-    self->releaseAllQuads();
-    int* crowdAnim = (int*)self->mpAnim;
+    releaseAllQuads();
+    int* crowdAnim = (int*)mpAnim;
     TheCrowdMan2d = 0;
     operator_delete(crowdAnim);
-    int* renderer = *(int**)self;
+    int* renderer = *(int**)this;
     if (renderer != 0) {
         cCrowdRender2D__cCrowdRender2D(renderer, 3);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
     }
 }
 #endif
@@ -2300,7 +2292,7 @@ INCLUDE_ASM("main/ssxapp", vu0_storeTwoMatrices);
  * Stores two 4x4 matrices in VU0 data memory, eight quadwords from the address 0x40 put in vi1.
  *
  * The matrices go in order, @p firstMatrix then @p secondMatrix, with vsqi (which advances vi1 by one quadword).
- * FrustumIntersector_FrustumIntersector calls it with its two matrices before gathering the visible world.
+ * FrustumIntersector::FrustumIntersector calls it with its two matrices before gathering the visible world.
  *
  * @param firstMatrix  the first 4x4 matrix (16-byte aligned)
  * @param secondMatrix  the second 4x4 matrix (16-byte aligned)
@@ -2339,7 +2331,7 @@ extern "C" void vu0_storeTwoMatrices(void* firstMatrix, void* secondMatrix)
 INCLUDE_ASM("main/ssxapp", func_00229F80__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: FrustumIntersector_FrustumIntersector calls it right after vu0_storeTwoMatrices.
+ * Does nothing: FrustumIntersector::FrustumIntersector calls it right after vu0_storeTwoMatrices.
  */
 void func_00229F80(void* self)
 {
@@ -2667,7 +2659,7 @@ extern "C" void FrustumIntersector_crossinginstance(void* self, void* node, int 
  *
  * Each of the @p count 8-byte entries holds a cell and a frustum value; the cell's instance list (nodesinside[0], at
  * +0x20) is walked through each node's next link. Ends with FrustumIntersector_crossinginstance(self, 0, 0) when a node
- * is pending (lastinstance). FrustumIntersector_FrustumIntersector calls it.
+ * is pending (lastinstance). FrustumIntersector::FrustumIntersector calls it.
  *
  * @param list  the source entries
  * @param count  the number of entries
@@ -2696,7 +2688,7 @@ extern "C" void FrustumIntersector_crossingpatch(void* self, void* node, int fru
  * Frustum-tests the nodes of each listed source with FrustumIntersector_crossingpatch, then files the last pending one.
  *
  * Same as FrustumIntersector_AddAllInstancesCrossing with each cell's patch list (nodesinside[1], at +0x24) and the
- * pending node in lastpatch. FrustumIntersector_FrustumIntersector calls it.
+ * pending node in lastpatch. FrustumIntersector::FrustumIntersector calls it.
  *
  * @param list  the source entries
  * @param count  the number of entries
@@ -2730,7 +2722,7 @@ extern "C" void FrustumIntersector_crossingfogvolume(void* self, cTypedSpaceNode
  * Walks the typed list (nodesinside[2]) of each of the @p n entries' cells (cell, frustum value), switching on each
  * object's type. Other types are skipped. Ends with FrustumIntersector_crossingfogvolume(self, 0, 0) when an object
  * is pending (lastfogvolume).
- * FrustumIntersector_FrustumIntersector calls it.
+ * FrustumIntersector::FrustumIntersector calls it.
  *
  * @param items  the source entries
  * @param n  the number of entries
@@ -2845,7 +2837,7 @@ static inline int visUsable_A5A0(sVisOwner_A5A0* self, sVisNode_A5A0* n)
  * unassigned (slot +0x7D is 0xFF) or its slot in the camera-slot table (*(self + 0x90), entries at +0x20) has type 6
  * and the path it names (+0x7E) has kind 3. Qualifying objects are sphere-tested against the masked planes by the VU0
  * microprogram at 0xEF0 (skipped when the mask is 0; kSphereTestOutside means outside) and appended to the list at
- * +0x20A0, count +0x209C (no bounds check). FrustumIntersector_FrustumIntersector calls it with the fully-inside cell
+ * +0x20A0, count +0x209C (no bounds check). FrustumIntersector::FrustumIntersector calls it with the fully-inside cell
  * list (+0x98, count +0x94).
  *
  * @param list_  the cell entries (cell, plane mask)
@@ -3199,7 +3191,7 @@ extern "C" void FrustumCallback_operatorCall(void* vctx, void* vnode, void* vcfg
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", FrustumIntersector_FrustumIntersector);
+INCLUDE_ASM("main/ssxapp", __18FrustumIntersectorP7cBXNashP13cOcclusionManPC9tBoundBoxP6cWorld);
 #ifdef SKIP_ASM
 extern "C" void cOcclusionMan_updateView(void* a, void* b);
 extern "C" void vu0_storeTwoMatrices(void* a, void* b);
@@ -3234,6 +3226,10 @@ static inline void Load_22ADD8(FrustumCallback* callback, nash_Cell* root, nash_
     }
 }
 
+extern "C" FrustumIntersector* __18FrustumIntersectorP7cBXNashP13cOcclusionManPC9tBoundBoxP6cWorld(
+        FrustumIntersector* self, cBXNash* nash, cOcclusionMan* occlusionMan, const tBoundBox* cameraBox,
+        cWorld* world);
+
 /**
  * Builds a camera view's visible world: culls the octree and fills the view's object lists.
  *
@@ -3252,41 +3248,39 @@ static inline void Load_22ADD8(FrustumCallback* callback, nash_Cell* root, nash_
  * @param occlusionMan  the occlusion manager: holds the clip planes and the initial plane mask (m_uiVisMask)
  * @param cameraBox  the view's bounding box (passed to cOcclusionMan_updateView)
  * @param world  the world (read by FrustumIntersector_AddAllInstancesInside and FrustumIntersector_AddAllPatchesInside)
- * @return @p self
  */
-extern "C" FrustumIntersector* FrustumIntersector_FrustumIntersector(FrustumIntersector* self, cBXNash* nash,
-                                                                     cOcclusionMan* occlusionMan,
-                                                                     const tBoundBox* cameraBox, cWorld* world)
+FrustumIntersector::FrustumIntersector(cBXNash* nash, cOcclusionMan* occlusionMan, const tBoundBox* cameraBox,
+                                       cWorld* world)
 {
-    self->occlusionman = occlusionMan;
-    self->camerabox = cameraBox;
-    self->world = world;
-    self->numcellsinside = 0;
-    self->numcellscrossing = 0;
-    self->numinstancesinside = 0;
-    self->numinstancescrossing = 0;
-    self->numpatchesinside = 0;
-    self->numpatchescrossing = 0;
-    self->numfogvolumesinside = 0;
-    self->numfogvolumescrossing = 0;
-    self->numlighthalosinside = 0;
-    self->numlighthaloscrossing = 0;
-    self->lastinstance = 0;
-    self->lastpatch = 0;
-    self->lastfogvolume = 0;
+    occlusionman = occlusionMan;
+    camerabox = cameraBox;
+    this->world = world;
+    numcellsinside = 0;
+    numcellscrossing = 0;
+    numinstancesinside = 0;
+    numinstancescrossing = 0;
+    numpatchesinside = 0;
+    numpatchescrossing = 0;
+    numfogvolumesinside = 0;
+    numfogvolumescrossing = 0;
+    numlighthalosinside = 0;
+    numlighthaloscrossing = 0;
+    lastinstance = 0;
+    lastpatch = 0;
+    lastfogvolume = 0;
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         t4Matrix gfxMatrix = ps2GraphicsMan->GetNetMatrix();
-        MatCopy_22ADD8(&self->VFIntersect, &gfxMatrix);
+        MatCopy_22ADD8(&VFIntersect, &gfxMatrix);
     }
-    MatCopy_22ADD8(&self->GFIntersect, ((&GrMan->mGuardBandMatrix)));
-    cOcclusionMan_updateView(self->occlusionman, (void*)self->camerabox);
-    vu0_storeTwoMatrices(&self->VFIntersect, &self->GFIntersect);
-    func_00229F80((void*)self->camerabox);
+    MatCopy_22ADD8(&GFIntersect, ((&GrMan->mGuardBandMatrix)));
+    cOcclusionMan_updateView(occlusionman, (void*)camerabox);
+    vu0_storeTwoMatrices(&VFIntersect, &GFIntersect);
+    func_00229F80((void*)camerabox);
     FrustumCallback callback;
-    cOcclusionMan* om = self->occlusionman;
+    cOcclusionMan* om = occlusionman;
     unsigned int visMask = om->m_uiVisMask;
-    callback.intersector = self;
+    callback.intersector = this;
     callback.occlusionman = om;
     callback.vismask_ = visMask;
     callback.insidefrustum_ = 0;
@@ -3298,13 +3292,12 @@ extern "C" FrustumIntersector* FrustumIntersector_FrustumIntersector(FrustumInte
     Load_22ADD8(&callback, nash->octant[1][0][1].rootcell, &nash->octant[1][0][1]);
     Load_22ADD8(&callback, nash->octant[1][1][0].rootcell, &nash->octant[1][1][0]);
     Load_22ADD8(&callback, nash->octant[1][1][1].rootcell, &nash->octant[1][1][1]);
-    self->AddAllPatchesInside(self->cellsinside, self->numcellsinside);
-    self->AddAllInstancesInside(self->cellsinside, self->numcellsinside);
-    self->AddAllTypedInside(self->cellsinside, self->numcellsinside);
-    self->AddAllPatchesCrossing(self->cellscrossing, self->numcellscrossing);
-    self->AddAllInstancesCrossing(self->cellscrossing, self->numcellscrossing);
-    self->AddAllTypedCrossing(self->cellscrossing, self->numcellscrossing);
-    return self;
+    AddAllPatchesInside(cellsinside, numcellsinside);
+    AddAllInstancesInside(cellsinside, numcellsinside);
+    AddAllTypedInside(cellsinside, numcellsinside);
+    AddAllPatchesCrossing(cellscrossing, numcellscrossing);
+    AddAllInstancesCrossing(cellscrossing, numcellscrossing);
+    AddAllTypedCrossing(cellscrossing, numcellscrossing);
 }
 #endif
 
@@ -3600,11 +3593,11 @@ static inline int IsReady_22B008(cGame* self)
  * For each ViewMan view: sets the view, viewport (slot 24), camera matrix (slot 34) and projection (slot 25), draws
  * SkyBox (slot 4) with a near plane of 1.0, then the real near / far planes and render states; builds the world-space
  * box of the view frustum's eight corners (each corner sum, camera position included, is scaled by the near or far
- * distance), gathers the visible world (FrustumIntersector_FrustumIntersector with BXNash, OcclusionMan and World), and
- * draws cGame_renderBuckets, CrowdMan2d, CrowdMan3d, MultiParticleMan, the AI (riders, slot 4), models, fog volumes,
- * light halos and patches. Then a 640x480 2D pass: DebugFont at 0.8 scale, MenuSys when active, the UI engine and
- * WScriptMan (unless cRenderToggles_m_DisableHUD), the script engine, LoadIndicator, GrMan slot 20, the audio update
- * for mUpdateTick
+ * distance), gathers the visible world (FrustumIntersector::FrustumIntersector with BXNash, OcclusionMan and World),
+ * and draws cGame_renderBuckets, CrowdMan2d, CrowdMan3d, MultiParticleMan, the AI (riders, slot 4), models, fog
+ * volumes, light halos and patches. Then a 640x480 2D pass: DebugFont at 0.8 scale, MenuSys when active, the UI engine
+ * and WScriptMan (unless cRenderToggles_m_DisableHUD), the script engine, LoadIndicator, GrMan slot 20, the audio
+ * update for mUpdateTick
  * / 60 seconds and the world triggers; clears mUpdateTick. The local view's names are off: scene is AI, renderer
  * SkyBox, target LensFxMan, cfg BXNash, hud DebugFont, loader StreamPause, frames mUpdateTick.
  *
@@ -3703,8 +3696,8 @@ bool cGame::render()
         sWorld_22B008 worldData;
         world = &worldData;
         // sBox_22B008 has tBoundBox's layout (MinPoint, MaxPoint)
-        FrustumIntersector_FrustumIntersector((FrustumIntersector*)world, BXNash, OcclusionMan,
-                                              (const tBoundBox*)&box, World);
+        __18FrustumIntersectorP7cBXNashP13cOcclusionManPC9tBoundBoxP6cWorld(
+                (FrustumIntersector*)world, BXNash, OcclusionMan, (const tBoundBox*)&box, World);
         cGame_renderBuckets(this);
         CrowdMan2d->renderMarkers();
         cCrowdMan3d_render(((void*)CrowdMan3d));

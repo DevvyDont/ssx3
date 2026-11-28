@@ -3134,7 +3134,7 @@ extern "C" void cCollectPool_readFromReplayFrame(void* collectPool, cBxReplayFra
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", tMissionMenuQueue_tMissionMenuQueue);
+INCLUDE_ASM("wscript/wscriptman", __17tMissionMenuQueue);
 #ifdef SKIP_ASM
 extern "C" void tMissionMenuQueue_init(tMissionMenuQueue* self);
 
@@ -3142,13 +3142,10 @@ extern "C" void tMissionMenuQueue_init(tMissionMenuQueue* self);
  * Constructs an empty mission menu queue.
  *
  * Runs tMissionMenuQueue_init.
- *
- * @return this
  */
-extern "C" void* tMissionMenuQueue_tMissionMenuQueue(tMissionMenuQueue* self)
+tMissionMenuQueue::tMissionMenuQueue()
 {
-    self->init();
-    return ((void*)self);
+    init();
 }
 #endif
 
@@ -4397,7 +4394,7 @@ void* func_0030D498(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", cAnimModel_cAnimModel);
+INCLUDE_ASM("wscript/wscriptman", __10cAnimModel);
 #ifdef SKIP_ASM
 
 struct sWSSlot8 {
@@ -4412,34 +4409,31 @@ struct sWSSlot8 {
  * localRot, zeroes numParts, unk_03C, the words at +0x12C and +0x130 and the second word of each lodInfo entry, and
  * sets unk_140 to (1, 1, 1, 1). feridermanager allocates 352 bytes tagged "AnimModel" for it, then calls
  * cAnimModel_init with (100, 15).
- *
- * @return @p self
  */
-extern "C" void* cAnimModel_cAnimModel(cAnimModel* self)
+cAnimModel::cAnimModel()
 {
     t4Vector ones;
-    self->InvDefaultMatrices = 0;
-    self->SkelMatrices = 0;
-    self->SkelMatricesScaled = 0;
+    InvDefaultMatrices = 0;
+    SkelMatrices = 0;
+    SkelMatricesScaled = 0;
     ones.x = 1.0f;
     ones.y = 1.0f;
     ones.z = 1.0f;
     ones.w = 1.0f;
-    self->ScaleVect = ones;
-    self->bones = 0;
-    self->parts = 0;
-    self->partIndex = 0;
-    self->MorphChannels = 0;
-    self->numParts = 0;
-    self->NumTextureRefs = 0;
-    self->TextureRefs = 0;
-    self->localPos = 0;
-    self->localRot = 0;
-    self->boneChannelIndex = 0;
+    ScaleVect = ones;
+    bones = 0;
+    parts = 0;
+    partIndex = 0;
+    MorphChannels = 0;
+    numParts = 0;
+    NumTextureRefs = 0;
+    TextureRefs = 0;
+    localPos = 0;
+    localRot = 0;
+    boneChannelIndex = 0;
     for (int i = 3; i >= 0; i--) {
-        ((sWSSlot8*)(&self->lodInfo[0].unk_04))[i].a = 0;
+        ((sWSSlot8*)(&lodInfo[0].unk_04))[i].a = 0;
     }
-    return ((void*)self);
 }
 #endif
 
@@ -4607,7 +4601,7 @@ extern char str_ModelRefs[];
  *
  * Stores @p count as the part capacity (+0x0) and @p maxVariants as numLodRefs (+0x4), allocates parts (+0xC) with
  * operator new tagged "ModelRefs", clears them with MEM_fill, and zeroes numParts (+0x8) and the word at +0x60.
- * feridermanager calls it with (100, 15) right after cAnimModel_cAnimModel.
+ * feridermanager calls it with (100, 15) right after cAnimModel::cAnimModel.
  *
  * @param count  how many parts the model can hold
  * @param maxVariants  refs per LOD slot (numLodRefs), how many cAnimModel_addModelPartLOD allocates

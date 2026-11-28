@@ -2187,7 +2187,7 @@ extern "C" void cGFReplayStartState_loseFocus(void)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", cInputSync_cInputSync);
+INCLUDE_ASM("main/gamestate", __10cInputSyncii);
 #ifdef SKIP_ASM
 /**
  * Constructs a networked input synchroniser for a latency and a sample count.
@@ -2197,22 +2197,20 @@ INCLUDE_ASM("main/gamestate", cInputSync_cInputSync);
  *
  * @param latencyFrames  the latency in frames
  * @param numSamples  copies per sample
- * @return @p self
  */
-extern "C" void* cInputSync_cInputSync(cInputSync* self, int latencyFrames, int numSamples)
+cInputSync::cInputSync(int latencyFrames, int numSamples)
 {
-    self->latency = latencyFrames;
-    self->numsamples = numSamples;
-    self->tick = 0;
-    self->numsyncedpads = 0;
-    self->sendlimit = latencyFrames * numSamples;
-    self->latency = (60 / numSamples) * numSamples;
-    return ((void*)self);
+    latency = latencyFrames;
+    numsamples = numSamples;
+    tick = 0;
+    numsyncedpads = 0;
+    sendlimit = latencyFrames * numSamples;
+    latency = (60 / numSamples) * numSamples;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/gamestate", cInputSync__cInputSync);
+INCLUDE_ASM("main/gamestate", _$_10cInputSync);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
@@ -2226,24 +2224,20 @@ struct sObj_cInputSync__cInputSync {
 
 /**
  * Destroys a networked input synchroniser: for each synced pad frees its sample ring (cMemMan_free) and deletes its two
- * input objects (+0x10, +0x14 of the pad), then frees the object when bit 0 of @p flags is set.
+ * input objects (+0x10, +0x14 of the pad), then frees the object when bit 0 of g++'s delete flag is set.
  *
  * cGame_purge calls it.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cInputSync__cInputSync(cInputSync* self, int flags)
+cInputSync::~cInputSync()
 {
     int i;
-    for (i = 0; i < self->numsyncedpads; i++) {
-        cInputSync_SyncedPad* entry = &((&self->syncedpads[0]))[i];
+    for (i = 0; i < numsyncedpads; i++) {
+        cInputSync_SyncedPad* entry = &((&syncedpads[0]))[i];
         if (((void*)entry->samples))
             cMemMan_free(((void*)entry->samples));
         operator_delete(((int*)entry->destinationpad));
         operator_delete(((int*)entry->input));
     }
-    if (flags & 1)
-        operator_delete((int*)self);
 }
 #endif
 

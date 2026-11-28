@@ -37,6 +37,8 @@ struct tFEAsyncFile {
 CHECK_OFFSET(tFEAsyncFile, useAsync, 0x108);
 CHECK_SIZE(tFEAsyncFile, 0x11C);
 
+void operator_delete(int* p);
+
 struct cFEAsyncManager {
     tFEAsyncFile fileList[5];       // 0x000 [O]
     int mMapGfxBigFile;             // 0x58C [O]
@@ -54,6 +56,11 @@ struct cFEAsyncManager {
     void LoadDataFile(int idx) __asm__("cFEAsyncManager_LoadDataFile");
     void Init() __asm__("cFEAsyncManager_Init");
     void UnloadAll() __asm__("cFEAsyncManager_UnloadAll");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cFEAsyncManager();
+    ~cFEAsyncManager();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cFEAsyncManager, fileList, 0x000);

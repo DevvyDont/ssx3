@@ -4,7 +4,7 @@
 // cScriptPlayerMain: the player of one in-game sequence (InSeq) script: play state, current frame and speed, and one
 // cScriptPlayerEntity per entity of the script (inseq/scriptplayerentity.h). cInSeq owns a fixed pool of them inside
 // its tScriptMainNode list. No virtual functions, no base class.
-// Size 0x48 [R]: cInSeq_cInSeq allocates maxScripts x 0x58 nodes (operator_new_array) and runs this constructor
+// Size 0x48 [R]: cInSeq::cInSeq allocates maxScripts x 0x58 nodes (operator_new_array) and runs this constructor
 // (cScriptPlayerMain_cScriptPlayerMain) on node + 8; the node's next/prev links follow at node + 0x50 / + 0x54 (On Tour tScriptMainNode:
 // index, script, pNext, pPrev; retail has one more word at the node's start). On Tour's class is 0x44: its two bools
 // at 0x3C/0x3D are 1 byte; retail's are words (the constructor zeroes 0x3C, 0x40 and 0x44 separately).
@@ -13,7 +13,7 @@
 // 0x00274518-0x002752E8.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] the constructor cScriptPlayerMain_cScriptPlayerMain (stores every field) and cInSeq_cInSeq;
+//   [R] the constructor cScriptPlayerMain_cScriptPlayerMain (stores every field) and cInSeq::cInSeq;
 //   [U] how retail code uses the field (asm of the 22 methods listed in methods.txt);
 //   [O] SSX On Tour's DWARF (class cScriptPlayerMain): same member order and offsets up to mNumSteps (0x38).
 
@@ -45,6 +45,8 @@ struct tInSeqScriptHeader {
     char nextSectionStart;            // 0xC [O] the data header (mpDataHeader) when headerSize >= 0xD
     char dummyPad[3];                 // 0xD [O]
 };
+
+void operator_delete(int* p);
 
 struct cScriptPlayerMain {
     int mID;                               // 0x00 [O]; [R] ctor -1; [U] Init's ID argument; DeInit -1
@@ -97,6 +99,10 @@ struct cScriptPlayerMain {
     int Init(tInSeqScriptHeader* data, char* owner, int playerId) __asm__("cScriptPlayerMain_Init");
     void Play1(int loopScript) __asm__("cScriptPlayerMain_Play1");
     void DoUpdateFrame() __asm__("cScriptPlayerMain_DoUpdateFrame");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cScriptPlayerMain();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(tInSeqScriptHeader, isSmallEndian, 0x0);

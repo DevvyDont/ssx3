@@ -505,7 +505,7 @@ INCLUDE_ASM("replay/replay", cReplayFrameList_cReplayFrameList__FPv);
 /**
  * Constructs an empty replay frame list: zeroes Tail (+0x0), Head (+0x4) and NumFrames (+0x8).
  *
- * cReplay_cReplay builds FrameList and FreeFrameList with it.
+ * cReplay::cReplay builds FrameList and FreeFrameList with it.
  *
  * @return @p self
  */

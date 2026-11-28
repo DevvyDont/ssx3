@@ -43,7 +43,7 @@ struct tARGB {
 
 // EA's tAttrThing, the type of cUIThing::mAttr (On Tour struct tAttrThing, size 0x4, LSB first). cUIThing keeps mAttr
 // an int (every accessor uses lw/sw 0x14); this type names the bits for code that reads one field, e.g.
-// ((tAttrThing*)&thing->mAttr)->mPivot. [R] tAttrThing_tAttrThing (the ctor: sets bits 0, 1, 3, 6, clears 2, 4, 5, 7,
+// ((tAttrThing*)&thing->mAttr)->mPivot. [R] tAttrThing::tAttrThing (the ctor: sets bits 0, 1, 3, 6, clears 2, 4, 5, 7,
 // mLayer = 0, mPivot = 9); [P] the inline accessors isActive .. isWrap, get/setDrawLayer, get/setPivot.
 struct tAttrThing {
     unsigned int mOrientation : 1;   // bit 0 [O]; [P] isHorizontal
@@ -57,6 +57,9 @@ struct tAttrThing {
     unsigned int mLayer : 5;         // bits 8-12 [O]; [P] getDrawLayer / setDrawLayer
     unsigned int mPivot : 6;         // bits 13-18 [O]; [P] getPivot / setPivot; [U] cScreenPopup_changePivot and
                                      //       cUIVector_setChannelDataKCP channel 12 write bits 13-18
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    tAttrThing();
 };
 
 struct t3Vector;
@@ -64,7 +67,7 @@ struct t3Vector;
 // The bits of tAttrThing::mPivot, the anchor a thing's position refers to (names ours). [U] cUIThing_applyPivot:
 // with kPivotTop set it leaves y alone, with kPivotBottom it subtracts the height, otherwise (kPivotMiddle) half of it;
 // with kPivotLeft it leaves x alone, with kPivotRight it subtracts the width, otherwise (kPivotCenter) half of it.
-// [R] tAttrThing_tAttrThing sets kPivotTopLeft (9); [U] cScreenPopup_changePivot moves x by half a width between the
+// [R] tAttrThing::tAttrThing sets kPivotTopLeft (9); [U] cScreenPopup_changePivot moves x by half a width between the
 // left and centre anchors.
 enum tUIPivot {
     kPivotTop = 1,

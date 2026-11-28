@@ -194,10 +194,10 @@ extern "C" void cScriptObject_DeInitScriptObject(void* p);
 extern "C" void cScriptObject__cScriptObject(void* p, int flags);
 extern "C" void cAnimModel__cAnimModel(void* p, int flags);
 extern "C" void cRiderSphereTree__cRiderSphereTree(void* p, int flags);
-extern "C" void cAirPredictor__cAirPredictor(void* p, int flags);
+extern "C" void _$_13cAirPredictor(void* p, int flags);
 extern "C" void cFocusMan_removebox(void* a, void* p);
 extern "C" void cRiderMetrix__cRiderMetrix(void* p, int flags);
-extern "C" void cPlayerShadow__cPlayerShadow(void* p, int flags);
+extern "C" void _$_13cPlayerShadow(void* p, int flags);
 void operator_delete(int* p);
 extern void* cRider_vtbl[];
 extern char D_00459B90[];
@@ -243,7 +243,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     operator_delete((int*)self->mAIPathHint);
     member = self->mAirPredictor;
     if (member != 0)
-        cAirPredictor__cAirPredictor(member, 3);
+        _$_13cAirPredictor(member, 3);
     void* box = self->mFocusBox;
     if (box != 0)
         cFocusMan_removebox(SSXApp->Game->AI->FocusMan, box);
@@ -262,7 +262,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
         vdel_11B978(polyMember, 164);
     member = self->mShadow;
     if (member != 0)
-        cPlayerShadow__cPlayerShadow(member, 3);
+        _$_13cPlayerShadow(member, 3);
     self->mScriptObjectVtbl = D_00482018;
     self->mScriptObjRiderVtbl = cScriptObjRider_vtbl;
     cScriptObject__cScriptObject(self->unk_6DC, 0);
@@ -295,7 +295,7 @@ void cRider::addFocusBox()
 #endif
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cRiderMetrix_cRiderMetrix(void* mem);
+extern "C" void* __12cRiderMetrix(void* mem);
 extern "C" void cRiderMetrix_linkToRider(void* metrix);
 extern const char str_RiderMetrix[];
 
@@ -308,13 +308,13 @@ extern "C" void cRiderMetrix_linkToRider_impl(void* metrix, cRider* rider) __asm
 /**
  * Creates the rider's cRiderMetrix (trick and score tracking) and links it to the rider.
  *
- * Allocates 0x1CC bytes tagged "RiderMetrix", constructs it with cRiderMetrix_cRiderMetrix(), stores it in
+ * Allocates 0x1CC bytes tagged "RiderMetrix", constructs it with cRiderMetrix::cRiderMetrix(), stores it in
  * mMetrix and calls cRiderMetrix_linkToRider(metrix, self).
  */
 void cRider::addRiderMetrix()
 {
     void* mem = cMemMan_alloc(460, str_RiderMetrix, 0, 0);
-    void* metrix = cRiderMetrix_cRiderMetrix(mem);
+    void* metrix = __12cRiderMetrix(mem);
     mMetrix = (cRiderMetrix*)metrix;
     cRiderMetrix_linkToRider_impl(metrix, this);
 }

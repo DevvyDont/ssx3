@@ -2561,23 +2561,21 @@ void cHUDFX::setAsync(int fxId, int displayInt, float fparg0, int fxData)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", cRiderMetrix_cRiderMetrix);
+INCLUDE_ASM("seg/seg_14B10", __12cRiderMetrix);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_reset(void *);
 
 /**
  * Constructs a rider's metrics with cleared counters and a multiplier of 1.0 (+0x1C4), then resets them.
- *
- * @return @p self
  */
-extern "C" void *cRiderMetrix_cRiderMetrix(cRiderMetrix* self) {
-    self->Rider = 0;
-    self->HUDfx = 0;
-    self->NumHUDfx = 0;
-    self->mPointsTotalInitial = 0;
-    self->mPointsMultiplier = 1.0f;
-    cRiderMetrix_reset(self);
-    return ((void*)self);
+cRiderMetrix::cRiderMetrix()
+{
+    Rider = 0;
+    HUDfx = 0;
+    NumHUDfx = 0;
+    mPointsTotalInitial = 0;
+    mPointsMultiplier = 1.0f;
+    cRiderMetrix_reset(this);
 }
 #endif
 

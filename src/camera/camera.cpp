@@ -2239,26 +2239,23 @@ extern "C" void* cEditorCameraAlgorithm_cEditorCameraAlgorithm(cBasicCameraAlgor
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", cCameraJitterer_cCameraJitterer);
+INCLUDE_ASM("camera/camera", __15cCameraJitterer);
 #ifdef SKIP_ASM
 /**
  * Constructs a camera jitterer: focus and roll jitter times 0.05, current times 1.05, all random jitter values zero.
- *
- * @return @p self
  */
-extern "C" void* cCameraJitterer_cCameraJitterer(cCameraJitterer* self)
+cCameraJitterer::cCameraJitterer()
 {
-    self->FocusJitterTime = 0.05000000074505806f;
-    self->RollJitterTime = 0.05000000074505806f;
-    self->OldRandomSideJitter = 0.0f;
-    self->OldRandomUpJitter = 0.0f;
-    self->OldRandomRollJitter = 0.0f;
-    self->RandomSideJitter = 0.0f;
-    self->RandomUpJitter = 0.0f;
-    self->RandomRollJitter = 0.0f;
-    self->CurrFocusJitterTime = 1.0499999523162842f;
-    self->CurrRollJitterTime = 1.0499999523162842f;
-    return ((void*)self);
+    FocusJitterTime = 0.05000000074505806f;
+    RollJitterTime = 0.05000000074505806f;
+    OldRandomSideJitter = 0.0f;
+    OldRandomUpJitter = 0.0f;
+    OldRandomRollJitter = 0.0f;
+    RandomSideJitter = 0.0f;
+    RandomUpJitter = 0.0f;
+    RandomRollJitter = 0.0f;
+    CurrFocusJitterTime = 1.0499999523162842f;
+    CurrRollJitterTime = 1.0499999523162842f;
 }
 #endif
 
@@ -3207,7 +3204,7 @@ void cRelativeChaseAlgorithm::snap(int id)
 INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_cSplineCamAlgorithm);
 #ifdef SKIP_ASM
 extern void* cSplineCamAlgorithm_vtbl[];
-extern "C" void cCubicSplineInterpolant_cCubicSplineInterpolant(void* spline);
+extern "C" void __23cCubicSplineInterpolant(void* spline);
 // PORT: cCubicSplineInterpolant_initAsNatural is declared (void*) but forwards a second argument (the key count) in $a1.
 void cCubicSplineInterpolant_initAsNatural_2(void* spline, int n) __asm__("cCubicSplineInterpolant_initAsNatural__FPv");
 extern "C" void cCubicSplineInterpolant_addPoint(void* spline, float x, float y);
@@ -3259,7 +3256,7 @@ static inline float Length_161060(const t4VectorPoint& v)
  * Constructs a spline camera that flies through four points in @p dur seconds.
  *
  * Runs the look-at chase constructor, stores cSplineCamAlgorithm_vtbl and constructs the X/Y/Z interpolants XOfT,
- * YOfT and ZOfT (+0x390, +0x39C, +0x3A8; cCubicSplineInterpolant_cCubicSplineInterpolant). Sets LeadDistance, HeightOffset, View = @p fov and
+ * YOfT and ZOfT (+0x390, +0x39C, +0x3A8; cCubicSplineInterpolant::cCubicSplineInterpolant). Sets LeadDistance, HeightOffset, View = @p fov and
  * AlgorithmType 0x4B (On Tour CAMERA_ALGORITHM_SPLINE = 75). Each interpolant gets four keys (cCubicSplineInterpolant_initAsNatural,
  * cCubicSplineInterpolant_addPoint) at times 0, dur/3, 2dur/3 and dur from the points' x, y and z. TotalTime = dur and LastEvaluatedTime
  * = 0; the path length is then summed over 100 samples (cCubicSplineInterpolant_evaluate, cCubicSplineInterpolant::evaluate) and Speed =
@@ -3283,9 +3280,9 @@ extern "C" void* cSplineCamAlgorithm_cSplineCamAlgorithm(cSplineCamAlgorithm* se
     char* sx = self->XOfT;
     char* sy = self->YOfT;
     char* sz = self->ZOfT;
-    cCubicSplineInterpolant_cCubicSplineInterpolant(sx);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(sy);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(sz);
+    __23cCubicSplineInterpolant(sx);
+    __23cCubicSplineInterpolant(sy);
+    __23cCubicSplineInterpolant(sz);
     self->LeadDistance = leadDistance;
     self->HeightOffset = heightOffset;
     self->View = fov;
@@ -4418,7 +4415,7 @@ extern "C" void cPIDFilter_reset(cPIDFilter* self, float value);
  * Constructs the race chase camera algorithm with its default tuning.
  *
  * Runs the cChaseAlgorithm constructor, stores cLookAtChaseAlgorithm_vtbl, constructs the five splines at
- * +0x304..+0x334 (cCubicSplineInterpolant_cCubicSplineInterpolant) and resets TurningPIDFilter (cPIDFilter_reset with 0). Then sets Position to
+ * +0x304..+0x334 (cCubicSplineInterpolant::cCubicSplineInterpolant) and resets TurningPIDFilter (cPIDFilter_reset with 0). Then sets Position to
  * t4vect_Origin, pitch, heading and roll 0, AlgorithmType 0x54, the zero vectors (LastVelLookahead, LastRailMove and the
  * half-pipe moves), LastDist 200, LastDrop 0, LastViewScalar 1, SecondsSinceLastHandplant 10, FramesSinceHandplant
  * 5000, half-pipe flags 0, View pi/4 and the PID factors (P 0.0114, history 0, D 0.00128).
@@ -4431,11 +4428,11 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
     cChaseAlgorithm_cChaseAlgorithm((cChaseAlgorithm*)self);
     cPIDFilter* filter = &self->TurningPIDFilter;
     VPTR_OF(cCameraAlgorithm, self) = cLookAtChaseAlgorithm_vtbl;
-    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->AirTargetSpline);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->AirPositionSpline);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->FullAirTargetSpline);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->FullAirPositionSpline);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->HalfPipeAngleSpline);
+    __23cCubicSplineInterpolant(&self->AirTargetSpline);
+    __23cCubicSplineInterpolant(&self->AirPositionSpline);
+    __23cCubicSplineInterpolant(&self->FullAirTargetSpline);
+    __23cCubicSplineInterpolant(&self->FullAirPositionSpline);
+    __23cCubicSplineInterpolant(&self->HalfPipeAngleSpline);
     self->TurningPIDFilter.ProportionFactor = cPIDFilter_getDefaultProportionFactor();
     self->TurningPIDFilter.ErrorHistoryFactor = cPIDFilter_getDefaultErrorHistoryFactor_0();
     self->TurningPIDFilter.DerrivativeFactor = cPIDFilter_getDefaultDerrivativeFactor_0();

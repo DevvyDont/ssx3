@@ -49,7 +49,7 @@ struct cWorldSphTree {
                                     //       pass it
                                     //       to SphereTree_*; Transform sets it to localTree, UnTransform back to origSt
     bxSphereTree* origSt;           // 0x064 [O]; [R] ctor = ast; [U] UnTransform restores st from it
-    bxSphereTree* localTree;        // 0x068 [O]; [R] ctor: cMemMan_alloc(0x140, "SphereTree") + SphereTree_SphereTree;
+    bxSphereTree* localTree;        // 0x068 [O]; [R] ctor: cMemMan_alloc(0x140, "SphereTree") + SphereTree::SphereTree;
                                     //       dtor operator_delete's it; [U] Transform copies st into it
                                     //       (bxSphereTree_operatorE)
     char unk_06C[0x4];              // 0x06C padding (16-byte aligned class)

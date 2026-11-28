@@ -21,6 +21,8 @@ struct t4Matrix;
 struct t4Vector;
 struct tWorldPainterSnowfallParameters;
 
+void operator_delete(int* p);
+
 struct cSnowBox {
     int mViewNum;                   // 0x000 [O]
     int mSnowBoxType;               // 0x004 [O] eSnowBoxType
@@ -50,6 +52,11 @@ struct cSnowBox {
     void update(const tWorldPainterSnowfallParameters* params) __asm__("cSnowBox_update");
     void updateForCameraPosition(const t4Vector* delta) __asm__("cSnowBox_updateForCameraPosition");
     void render(const t4Matrix* snowMatrix, float x, float y, float z) __asm__("cSnowBox_render");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cSnowBox(int viewNum, int snowBoxType, float boxScale, float flakeSize, float opacity, float gravity);
+    ~cSnowBox();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cSnowBox, mViewNum, 0x000);

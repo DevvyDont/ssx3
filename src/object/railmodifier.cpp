@@ -1349,7 +1349,7 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_cRollerModifier);
 extern void* cTransformModifier_vtbl[];
 extern void* cRollerModifier_vtbl[];
 void* cRigidBody_cRigidBody(void* self);
-extern "C" void SphereTree_SphereTree(void* p);
+extern "C" void __10SphereTree(void* p);
 extern "C" void* bxSphereTree_operatorE(void* self, void* src);
 extern "C" void cRollerModifier_updateMOI(cRollerModifier* self);
 
@@ -1500,7 +1500,7 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, tAddRoll
     *(void***)self = cTransformModifier_vtbl;
     cRigidBody_cRigidBody(&self->Pose);
     *(void***)self = cRollerModifier_vtbl;
-    SphereTree_SphereTree(&self->SphTree);
+    __10SphereTree(&self->SphTree);
     self->Life = 0.0f;
     self->m_pInstance = ii->Inst;
     bxSphereTree_operatorE(&self->SphTree, ii->SphTree);
@@ -1711,7 +1711,7 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_cRollerModifier1);
 extern void* cTransformModifier_vtbl[];
 extern void* cRollerModifier_vtbl[];
 void* cRigidBody_cRigidBody(void* self);
-extern "C" void SphereTree_SphereTree(void* self);
+extern "C" void __10SphereTree(void* self);
 extern void* cObjectInterface_getWorld_DF70() __asm__("cObjectInterface_getWorld");
 void* cWorld_getPolyModelInfo(void* a, void* b);
 extern "C" void* tSphTreeList_getMeshTree(void* a, int b);
@@ -1746,7 +1746,7 @@ cRollerModifier* cRollerModifier::cRollerModifier1(cBxReplayFrame* stream)
     VPTR_AT(this, 0) = cTransformModifier_vtbl;
     cRigidBody_cRigidBody(((char*)&Pose));
     VPTR_AT(this, 0) = cRollerModifier_vtbl;
-    SphereTree_SphereTree(((char*)&SphTree));
+    __10SphereTree(((char*)&SphTree));
     ((cRigidBody*)(((char*)&Pose)))->readFromReplayFrame(stream);
     stream->read((char*)&mKineticEnergy, 40);
     m_pInstance = stream->readReplayInstance();
@@ -2263,7 +2263,7 @@ void cRollerModifier::collide(const tCollideInfo*, const tIntersectInfo*)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cTexFlipModifier_cTexFlipModifier);
+INCLUDE_ASM("object/railmodifier", __16cTexFlipModifierPvP15tInstanceRecord);
 #ifdef SKIP_ASM
 int BXrand();
 extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
@@ -2286,24 +2286,23 @@ static inline float ftrunc_0035F0B8(float x)
  *
  * @param def  tex-flip make-data (tAddTexFlipData)
  * @param owner  instance record
- * @return self
  */
-extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier* self, void* def, tInstanceRecord* owner)
+cTexFlipModifier::cTexFlipModifier(void* def, tInstanceRecord* owner)
 {
     tAddTexFlipData* defData = (tAddTexFlipData*)def;
     float one = 1.0f;
-    self->Instance = (tInstanceRecord*)owner;
-    self->TexIndex = 0;
-    self->NumMaterials = 0;
-    self->NumTexFlipMaterials = 0;
-    self->Type = defData->Type;
+    Instance = (tInstanceRecord*)owner;
+    TexIndex = 0;
+    NumMaterials = 0;
+    NumTexFlipMaterials = 0;
+    Type = defData->Type;
     float rate = defData->Speed * (one / (float)cAppMan_TheAppMan->TimerHz);
-    self->Speed = rate;
-    self->Dir = defData->Dir;
-    self->BaseSpeed = rate;
-    self->Time = 0.0f;
+    Speed = rate;
+    Dir = defData->Dir;
+    BaseSpeed = rate;
+    Time = 0.0f;
     int n = defData->StartId;
-    if ((float)n < *(float*)(int*)&self->Time) {
+    if ((float)n < *(float*)(int*)&Time) {
         union { int i; float f; } randBits;
         randBits.i = (BXrand() & 0x7FFFFF) | 0x3F800000;
         float x = (randBits.f - one) * 8.0f;
@@ -2311,12 +2310,11 @@ extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier*
         if (rounded < x) {
             rounded += one;
         }
-        self->TexIndex = (int)rounded;
+        TexIndex = (int)rounded;
     } else {
-        self->TexIndex = n;
+        TexIndex = n;
     }
-    self->setupTexFlip();
-    return (self);
+    setupTexFlip();
 }
 #endif
 

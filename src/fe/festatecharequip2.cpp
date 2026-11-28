@@ -94,7 +94,7 @@ INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_findNode);
 
 INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_freeNode);
 
-INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_cBoltFileIndexManager);
+INCLUDE_ASM("fe/festatecharequip2", __21cBoltFileIndexManager);
 
 INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_reset);
 
@@ -106,9 +106,9 @@ INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_getPartTextureFile);
 
 INCLUDE_ASM("fe/festatecharequip2", cBoltFileIndexManager_setPartTextureFile);
 
-INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_cFEBoltFileManager);
+INCLUDE_ASM("fe/festatecharequip2", __18cFEBoltFileManager);
 
-INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager__cFEBoltFileManager);
+INCLUDE_ASM("fe/festatecharequip2", _$_18cFEBoltFileManager);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEBoltFileManager_init);
 

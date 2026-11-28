@@ -14,13 +14,13 @@
 // already declares cGame::CrowdMan2d as cCrowdMan2d* (no mangled symbol spells the class itself). Retail code:
 // main/ssxapp 0x00229180..0x00229E58. No On Tour class (On Tour keeps only cCrowdAnim2D / cCrowdRender2D).
 //
-// Size 0x2720: [R] cGame_load (main/gameload): cMemMan_alloc(10016, "CrowdMan2d") + the constructor cCrowdMan2d_cCrowdMan2d,
-// which builds the arrays up to 0x2220 + 40 * 0x20 = 0x2720. No vtable, no base class (the destructor cCrowdMan2d__cCrowdMan2d is
+// Size 0x2720: [R] cGame_load (main/gameload): cMemMan_alloc(10016, "CrowdMan2d") + the constructor cCrowdMan2d::cCrowdMan2d,
+// which builds the arrays up to 0x2220 + 40 * 0x20 = 0x2720. No vtable, no base class (the destructor cCrowdMan2d::~cCrowdMan2d is
 // called directly by cGame_purge with flags 3).
 // Quad slots and markers hold 16-byte vectors (lqc2 / sqc2), so they are 16-byte aligned; the 8-byte gaps at 0x208
 // and 0x218 are that alignment (no access).
 //
-// A FLAT layout, like main/game.h. Evidence tags: [R] the constructor cCrowdMan2d_cCrowdMan2d / destructor cCrowdMan2d__cCrowdMan2d / reset
+// A FLAT layout, like main/game.h. Evidence tags: [R] the constructor cCrowdMan2d::cCrowdMan2d / destructor cCrowdMan2d::~cCrowdMan2d / reset
 // cCrowdMan2d_resetSlots; [U] how retail code uses the field (src/main/ssxapp.cpp views sCrowd_229180, sCrowd_2292E0,
 // sCrowd_229530 and the asm). Names are ours.
 
@@ -62,6 +62,8 @@ CHECK_SIZE(tCrowdMarker2d, 0x20);
 
 struct cBxReplayFrame;
 
+void operator_delete(int* p);
+
 struct cCrowdMan2d {
     cCrowdRender2D* mpRender;       // 0x0000 [R] ctor: cCrowdRender2D_cCrowdRender2D(cMemMan_alloc(0x10,
                                     //        "cCrowdRender2D")); dtor destroys it (flags 3)
@@ -97,6 +99,11 @@ struct cCrowdMan2d {
     void renderMarkers() __asm__("cCrowdMan2d_renderMarkers");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cCrowdMan2d_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cCrowdMan2d_readFromReplayFrame");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cCrowdMan2d();
+    ~cCrowdMan2d();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cCrowdMan2d, mpRender, 0x0000);

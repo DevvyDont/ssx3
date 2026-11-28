@@ -212,7 +212,7 @@ struct cWScriptMan {
     tTrickNameDef MissionTrick;        // 0x038 [O] tTrickNameDef (8 bytes in retail); [U] updateMissionTrick
     char Events[0x184];                // 0x040 [O] tWScriptEventList: NumEvents + 32 events of 12 bytes; [U] eventJump,
                                        //       eventLand and eventCollide push onto it
-    tMissionMenuQueue MissionMenuQueue; // 0x1C4 [O] tMissionMenuQueue (0xC8 on both); [R] tMissionMenuQueue_tMissionMenuQueue
+    tMissionMenuQueue MissionMenuQueue; // 0x1C4 [O] tMissionMenuQueue (0xC8 on both); [R] tMissionMenuQueue::tMissionMenuQueue
     // cWScriptMan
     cWorld* World;                     // 0x28C [O]; [R] ctor = cWorld_m_pTheWorld
     tInstanceRecord* Inst;             // 0x290 [O]; [U] the doOn*Script instance

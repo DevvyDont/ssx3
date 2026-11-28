@@ -1454,9 +1454,9 @@ CHECK_OFFSET(cPunchFX, mActive, 0xA0);
 CHECK_SIZE(cPunchFX, 0xB0);
 
 // cCheatFX (cRiderHandler + 0xD20, 0x10 bytes): FX part, new in retail (no preview vtable); [O] On Tour's last
-// cRiderHandler base. ctor cCheatFX_cCheatFX (in charge: cRider at this + 0x10), vtables D_004886E0/D_00488728.
+// cRiderHandler base. ctor cCheatFX::cCheatFX (in charge: cRider at this + 0x10), vtables D_004886E0/D_00488728.
 struct cCheatFX {
-    cRider* mRider;           // 0x00 [R] virtual-base pointer to the shared cRider; [R] cCheatFX_cCheatFX
+    cRider* mRider;           // 0x00 [R] virtual-base pointer to the shared cRider; [R] cCheatFX::cCheatFX
     tCheatState m_cheatState; // 0x04 [O]; [R] ctor -> resetStates (cCheatFX_resetStates: memset(this + 4, 0, 4)); [U]
                               //      update/updateState byte fields
     char pad_08[0x8];         // 0x08 On Tour's m_input (0x8) is not in retail: setCheatInput/getInput use
@@ -1475,6 +1475,9 @@ struct cCheatFX {
     int getInput() __asm__("cCheatFX_getInput");
     void reset() __asm__("cCheatFX_reset__FPv");
     void render() __asm__("cCheatFX_render__FPv");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cCheatFX(int inChrg);
 };
 
 CHECK_OFFSET(cCheatFX, mRider, 0x00);

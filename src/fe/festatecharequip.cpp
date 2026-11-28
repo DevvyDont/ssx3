@@ -11,8 +11,8 @@ INCLUDE_ASM("fe/festatecharequip", cFE_cFE);
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void* cFadeScreen_cFadeScreen(void* self);
 extern "C" void* cSimpleCamera_cSimpleCamera(void* self);
-extern "C" void* cFERiderManager_cFERiderManager(void* self);
-extern "C" void* cFEBoltFileManager_cFEBoltFileManager(void* self);
+extern "C" void* __15cFERiderManager(void* self);
+extern "C" void* __18cFEBoltFileManager(void* self);
 // PORT: called with an extra int in $a1 here; cSimpleCamera_init's body is (self, x, y, z). Bound by asm label.
 void cSimpleCamera_init_i(void* self, int a1, float x, float y, float z) __asm__("cSimpleCamera_init");
 extern void* cFE_vtbl[];
@@ -47,8 +47,8 @@ extern "C" void* cFE_cFE(cFE* self)
     self->mVtbl = cFE_vtbl;
     cSimpleCamera_cSimpleCamera(&self->mCamera);
     self->mCamera.mVtbl = cFECamera_vtbl;
-    cFERiderManager_cFERiderManager(&self->mRiderManager);
-    cFEBoltFileManager_cFEBoltFileManager(self->mBoltFileManager);
+    __15cFERiderManager(&self->mRiderManager);
+    __18cFEBoltFileManager(self->mBoltFileManager);
     self->mpUI = (cUIEngine*)(new (str_UIEngine, 0, 0) cFEObjK1956F8_70);
     cSimpleCamera_init_i(&self->mCamera, 0, 0.7853981852531433f, 5.0f, 5000.0f);
     self->mFXLoader = (cFXLoader*)(new (str_FXLoader_FE, 0, 0) cFEObjK1956F8_1(1));
@@ -63,7 +63,7 @@ void operator_delete(int* p);
 extern "C" void cUIEngine__cUIEngine(void* p, int flags);
 extern "C" void cGraphicsMan_PurgeTextures(void* p);
 extern "C" void cFXLoader__cFXLoader(void* p, int flags);
-extern "C" void cFEBoltFileManager__cFEBoltFileManager(void* p, int flags);
+extern "C" void _$_18cFEBoltFileManager(void* p, int flags);
 extern "C" void cFERiderManager__cFERiderManager(void* p, int flags);
 extern void* cFE_vtbl[];
 extern void* cAppModule_vtbl[];
@@ -73,7 +73,7 @@ extern void* cSimpleCamera_vtbl[];
  * Destroys the front-end module's base part, freeing it when asked.
  *
  * Stores the vtable cFE_vtbl, destroys the UI engine (+0xC, cUIEngine__cUIEngine with 3), purges the graphics manager's
- * textures, destroys the FX loader (+0xB5AA0) when present, then the file manager (+0x1A70, cFEBoltFileManager__cFEBoltFileManager) and the
+ * textures, destroys the FX loader (+0xB5AA0) when present, then the file manager (+0x1A70, cFEBoltFileManager::~cFEBoltFileManager) and the
  * rider manager (+0xB0, cFERiderManager__cFERiderManager), resets the camera's (+0x10) vtable word (+0xA0) to cSimpleCamera_vtbl and
  * stores the base vtable cAppModule_vtbl. Calls operator_delete when bit 0 of @p flags is set. cRealFE__cRealFE calls it as
  * its base destructor.
@@ -90,7 +90,7 @@ extern "C" void cFE__cFE(cFE* self, int flags)
     if (self->mFXLoader != 0) {
         cFXLoader__cFXLoader(self->mFXLoader, 3);
     }
-    cFEBoltFileManager__cFEBoltFileManager(self->mBoltFileManager, 2);
+    _$_18cFEBoltFileManager(self->mBoltFileManager, 2);
     cFERiderManager__cFERiderManager(&self->mRiderManager, 2);
     self->mCamera.mVtbl = cSimpleCamera_vtbl;
     self->mVtbl = cAppModule_vtbl;

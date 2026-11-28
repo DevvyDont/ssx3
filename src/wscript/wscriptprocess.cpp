@@ -1296,7 +1296,7 @@ void cWScriptTask::readFromReplayFrame(cBxReplayFrame* obj)
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_cWScriptMan);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void tMissionMenuQueue_tMissionMenuQueue(void* p);
+extern "C" void __17tMissionMenuQueue(void* p);
 void cProcessList_cProcessList(void* p);
 extern "C" void cCollectPool_init(void* p);
 extern "C" void MEM_fill(void* dst, int value, int size);
@@ -1318,7 +1318,7 @@ extern void* cWScriptMan_cWScriptMan_current __asm__("cWScriptMan_TheWScriptMan"
 extern "C" void* cWScriptMan_cWScriptMan(cWScriptMan* self)
 {
     self->MissionHeightInstId = 0xFFFFFFFF;
-    tMissionMenuQueue_tMissionMenuQueue(&self->MissionMenuQueue);
+    __17tMissionMenuQueue(&self->MissionMenuQueue);
     self->mVtbl = cWScriptMan_vtbl;
     cProcessList_cProcessList((char*)&self->IdleList);
     cProcessList_cProcessList((char*)&self->ActiveList);

@@ -119,7 +119,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void cDataManager_DetachAll(void* self);
-extern "C" void tNISList__tNISList(int* self, int flags);
+extern "C" void _$_8tNISList(int* self, int flags);
 extern "C" void cSSXScriptEngine_ForceEndScriptsAll(cSSXScriptEngine* self);
 extern "C" void cSSXScriptEngine_PurgeTrack(cSSXScriptEngine* self);
 extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int idx);
@@ -167,7 +167,7 @@ void cSSXScriptEngine::Purge()
         tNISList* objPtr = mpNISLists + cookies[-1].count;
         while (mpNISLists != objPtr) {
             objPtr--;
-            tNISList__tNISList((int*)objPtr, 0);
+            _$_8tNISList((int*)objPtr, 0);
         }
         tArrayNewCookie* array = (tArrayNewCookie*)mpNISLists;
         cMemMan_free(&array[-1]);
@@ -180,7 +180,7 @@ void cSSXScriptEngine::Purge()
         tNISList* objPtr = mpIdleLists + cookies[-1].count;
         while (mpIdleLists != objPtr) {
             objPtr--;
-            tNISList__tNISList((int*)objPtr, 0);
+            _$_8tNISList((int*)objPtr, 0);
         }
         tArrayNewCookie* array = (tArrayNewCookie*)mpIdleLists;
         cMemMan_free(&array[-1]);

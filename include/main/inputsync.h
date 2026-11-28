@@ -6,16 +6,16 @@
 // (preupdate / sendClientInput), remote pads are filled from cGameComm_readPacket, and aiupdate hands every pad its
 // next sample once all of them have one (aiinputready). EA's source: d:/ssx/code/source/main/inputsync.cpp (preview
 // assert path); retail code is in the decomp's unit main/gamestate.cpp (0x00237060 .. 0x00237CA8).
-// Size 0x44: [R] cGame_load does operator new(68, "InputSync", 0, 0) + cInputSync_cInputSync(p, latencyFrames,
+// Size 0x44: [R] cGame_load does operator new(68, "InputSync", 0, 0) + cInputSync::cInputSync(p, latencyFrames,
 // cGameComm_mGameComm->mNumSamples) and keeps it in cGame::InputSync (main/game.h, 0x7C); cGame_purge deletes it with
-// cInputSync__cInputSync(p, 3). 0x44 = 0x14 + 2 * 0x18: two synced pads (one per human player).
+// cInputSync::~cInputSync(p, 3). 0x44 = 0x14 + 2 * 0x18: two synced pads (one per human player).
 // No base classes, no vtable (the destructor is called directly; no vptr store anywhere).
 //
-// A FLAT layout, like main/game.h. Tags: [R] the constructor cInputSync_cInputSync / destructor cInputSync__cInputSync
-// and the allocation above; [U] how retail code uses the field (main/gamestate.cpp, the asm); [O] SSX On Tour's DWARF
-// (class cInputSync, size 0x8C): same member names and order, but On Tour adds `bool mDisabled` before sendlimit, a
-// `sendpos` in SyncedPad (0x1C there), four synced pads and `bool mbForceFirstUpdate`, so its offsets are not used.
-// No preview evidence (no accessors).
+// A FLAT layout, like main/game.h. Tags: [R] the constructor cInputSync::cInputSync / destructor
+// cInputSync::~cInputSync and the allocation above; [U] how retail code uses the field (main/gamestate.cpp, the asm);
+// [O] SSX On Tour's DWARF (class cInputSync, size 0x8C): same member names and order, but On Tour adds `bool mDisabled`
+// before sendlimit, a `sendpos` in SyncedPad (0x1C there), four synced pads and `bool mbForceFirstUpdate`, so its
+// offsets are not used. No preview evidence (no accessors).
 
 #include "layout.h"
 
@@ -71,6 +71,8 @@ CHECK_OFFSET(cInputSync_SyncedPad, destinationpad, 0x10);
 CHECK_OFFSET(cInputSync_SyncedPad, input, 0x14);
 CHECK_SIZE(cInputSync_SyncedPad, 0x18);
 
+void operator_delete(int* p);
+
 struct cInputSync {
     int sendlimit;                  // 0x000 [O]; [R] ctor: l * n; [U] preupdate recomputes it from cGameComm_getLatency
                                     //       (at least 2 samples, capped at latency); createlocal/remoteinput start writepos at it
@@ -92,6 +94,11 @@ struct cInputSync {
     int compressinput(cInputSync_PadSample* src, cInputSync_CompressedSample* dst) __asm__("cInputSync_compressinput");
     void decompressinput(cInputSync_PadSample* out, char* buf) __asm__("cInputSync_decompressinput");
     void postupdate() __asm__("cInputSync_postupdate__FPv");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cInputSync(int latencyFrames, int numSamples);
+    ~cInputSync();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 CHECK_OFFSET(cInputSync, sendlimit, 0x0);
 CHECK_OFFSET(cInputSync, latency, 0x4);

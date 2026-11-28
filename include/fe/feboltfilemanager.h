@@ -9,7 +9,7 @@
 // EA's source: d:/ssx/code/source/fe/feboltfilemanager.cpp (the July 2003 preview's assert path; its asserts name the
 // members mFiles[charID][fileIndex] (.flags / .refCount), pFile->dataPtr / ->async, mMemUsed, mNumLoadThreads and the
 // constants kCHAR_NUM, kNumBoltFiles, kMaxMemUsed, kMaxLoadThreads, kBoltFileFlag_Done, kBoltFileType_Num).
-// Retail code: fe/festatecharequipdetail, cFEBoltFileManager_cFEBoltFileManager (ctor) ... cFEBoltFileManager_getUseCount (methods, all func_ so far).
+// Retail code: fe/festatecharequipdetail, cFEBoltFileManager::cFEBoltFileManager (ctor) ... cFEBoltFileManager_getUseCount (methods, all func_ so far).
 //
 // NAMES: the class name is derived, not seen: the preview's inline accessor getBoltFileManager__3cFE returns it and
 // the source file is fe/feboltfilemanager.cpp; EA's front end pairs getRiderManager / fe/feridermanager.cpp with
@@ -18,9 +18,9 @@
 // file", and On Tour's sibling cache (cFEAsyncManager, fe/all_in_one_fe) keeps the same record shape as
 // "struct tFEAsyncFile {fileName[256], dataPtr, asyncFileHandle, useAsync, fileSize, ...}".
 //
-// Size 0xB4030: [R] cFE_cFE builds it at +0x1A70 (cFEBoltFileManager_cFEBoltFileManager) and the next member, mFXLoader, is at +0xB5AA0;
+// Size 0xB4030: [R] cFE_cFE builds it at +0x1A70 (cFEBoltFileManager::cFEBoltFileManager) and the next member, mFXLoader, is at +0xB5AA0;
 // cFEBoltFileManager_init (init) writes mFiles[10][256] (0x120 each), 0xB4000, 0xB4004 and the ten words from 0xB4008.
-// No base classes, no vtable (cFEBoltFileManager__cFEBoltFileManager, the destructor, takes the g++ delete flag but stores no vtable).
+// No base classes, no vtable (cFEBoltFileManager::~cFEBoltFileManager, the destructor, takes the g++ delete flag but stores no vtable).
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [P] the July 2003 preview's assert strings (fe/feboltfilemanager.cpp);
 //   [R] retail's init / destructor (cFEBoltFileManager_init / cFEBoltFileManager_purge / cFEBoltFileManager_freeFile);
@@ -91,6 +91,8 @@ CHECK_OFFSET(tBoltFile, fileSize, 0x118);
 CHECK_OFFSET(tBoltFile, stamp, 0x11C);
 CHECK_SIZE(tBoltFile, 0x120);
 
+void operator_delete(int* p);
+
 struct cFEBoltFileManager {
     tBoltFile mFiles[10][256];      // 0x00000 [P] mFiles[charID][fileIndex] (charID < kCHAR_NUM, fileIndex <
                                     //       kNumBoltFiles); [R] init loops 10 x 256 at 0x12000 / 0x120
@@ -122,6 +124,11 @@ struct cFEBoltFileManager {
     void* detachFileData(int bank, int slotIndex) __asm__("cFEBoltFileManager_detachFileData");
     int getFileType(int bank, int i) __asm__("cFEBoltFileManager_getFileType");
     int getUseCount(int bank, int i) __asm__("cFEBoltFileManager_getUseCount");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cFEBoltFileManager();
+    ~cFEBoltFileManager();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cFEBoltFileManager, mFiles, 0x00000);
@@ -171,6 +178,9 @@ struct cBoltFileIndexManager {
     void setModelPartFile(int bit, int lowKey, int val) __asm__("cBoltFileIndexManager_setModelPartFile");
     int getPartTextureFile(int bit, int lowKey) __asm__("cBoltFileIndexManager_getPartTextureFile");
     void setPartTextureFile(int bit, int lowKey, int val) __asm__("cBoltFileIndexManager_setPartTextureFile");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cBoltFileIndexManager();
 };
 
 CHECK_OFFSET(cBoltFileIndexManager, mNodes, 0x0000);

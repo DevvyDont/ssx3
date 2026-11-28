@@ -62,6 +62,8 @@ struct tTradingCardInfo;
 struct tTrophyInfo;
 struct tVideoInfo;
 
+void operator_delete(int* p);
+
 struct cBERewardDB {
     int mRewardFileIndex;             // 0x000 [O]
     char* mpRewardsFile;              // 0x004 [O]
@@ -90,6 +92,11 @@ struct cBERewardDB {
     int getRewardName(int type, int idx) __asm__("cBERewardDB_getRewardName");
     void init(int async) __asm__("cBERewardDB_init");
     void update() __asm__("cBERewardDB_update");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cBERewardDB();
+    ~cBERewardDB();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cBERewardDB, mRewardFileIndex, 0x000);

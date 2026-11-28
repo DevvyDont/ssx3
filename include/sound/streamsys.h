@@ -40,7 +40,7 @@ struct cStreamSys {
     int mNumStreams;                    // 0x004 [O]; [R] the ctor stores its count; [U] the loop bound of
                                         //       STREAM_Update / STREAM_Pause / STREAM_Resume and of the dtor
     cStreamInstance** mStreamInstance;  // 0x008 [O]; [R] operator new[](count * 4, "StreamArray"), zeroed by the ctor;
-                                        //       the dtor destroys each instance (cStreamInstance__cStreamInstance(p,
+                                        //       the dtor destroys each instance (cStreamInstance::~cStreamInstance(p,
                                         //       3))
                                         //       and frees it; [U] every STREAM_* method indexes it by stream number
 

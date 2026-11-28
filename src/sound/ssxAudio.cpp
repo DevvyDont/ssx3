@@ -872,8 +872,8 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_FrontEndLoad);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_InitSoundLevels(cSSXAudio* self, int a1);
 extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int a1);
-// PORT: FileParser_FileParser/FileParser_AssignString return values (the unit declares them void); bound by asm label.
-extern "C" void* FileParser_FileParser_r(void* self, char* name, int size) __asm__("FileParser_FileParser");
+// PORT: FileParser::FileParser/FileParser_AssignString return values (the unit declares them void); bound by asm label.
+extern "C" void* FileParser_FileParser_r(void* self, char* name, int size) __asm__("__10FileParserPCci");
 extern "C" int FileParser_FindSection(void* self, const char* section);
 extern "C" int FileParser_IsEOF(void* self);
 extern "C" char* FileParser_GetName(void* self);
@@ -886,7 +886,7 @@ extern "C" void cSSXAudio_DuckToStream(cSSXAudio* self, int a1, float f0, float 
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int a1, int a2);
 extern "C" void cMusicSys_SetSongTag(void* mon, int id);
 extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
-extern "C" void FileParser__FileParser(void* self, int flags);
+extern "C" void _$_10FileParser(void* self, int flags);
 extern char* str_H_H;
 extern char str_GLOBAL[];
 extern char str_FE[];
@@ -954,7 +954,7 @@ void cSSXAudio::FrontEndLoad()
     mFrontEndMusicMode = 10;
     mFrontEndRadioModeID = mRadioModeID;
     ResumeAudio();
-    FileParser__FileParser(&parser, 2);
+    _$_10FileParser(&parser, 2);
 }
 #endif
 
@@ -1121,7 +1121,7 @@ void cSSXAudio::InGameLoad()
     }
     cSSXAudio_LoadGruntBanks(((char*)this), 0);
     mRaceMusicOn = 1;
-    FileParser__FileParser(&parser, 2);
+    _$_10FileParser(&parser, 2);
 }
 #endif
 
@@ -2294,9 +2294,9 @@ void cSSXAudio::DuckToStream(int duckStream, float fadeTime, float duckLevel)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_LoadMixes);
 #ifdef SKIP_ASM
-// PORT: FileParser_FileParser returns a value (the unit declares it void); bound by asm label.
-extern "C" void* FileParser_FileParser_r(void* self, char* name, int size) __asm__("FileParser_FileParser");
-extern "C" void FileParser__FileParser(void* self, int flags);
+// PORT: FileParser::FileParser returns a value (the unit declares it void); bound by asm label.
+extern "C" void* FileParser_FileParser_r(void* self, char* name, int size) __asm__("__10FileParserPCci");
+extern "C" void _$_10FileParser(void* self, int flags);
 extern "C" char* FileParser_FindNextSection(void* self);
 extern "C" char* FileParser_GetName(void* self);
 extern "C" int FileParser_IsEOF(void* self);
@@ -2386,7 +2386,7 @@ void cSSXAudio::LoadMixes()
         }
         mNumAudioMixes++;
     }
-    FileParser__FileParser(&parser, 2);
+    _$_10FileParser(&parser, 2);
 }
 #endif
 
@@ -3136,9 +3136,9 @@ extern "C" int cSSXAudio_HandleDelayMonitorTriggers(void) {
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ReadPlayListNames);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
-extern "C" void FileParser_FileParser(void* self, char* name, int size);
+extern "C" void __10FileParserPCci(void* self, char* name, int size);
 extern "C" char* FileParser_FindNextSection(void* self);
-extern "C" void FileParser__FileParser(void* self, int flags);
+extern "C" void _$_10FileParser(void* self, int flags);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char* str_x_H;
 
@@ -3152,7 +3152,7 @@ void cSSXAudio::ReadPlayListNames()
 {
     if (BXFILE_exists(str_x_H) != 0) {
         char parser[2064];
-        FileParser_FileParser(parser, str_x_H, 0x100);
+        __10FileParserPCci(parser, str_x_H, 0x100);
         mNumPlayLists = 0;
         while (mNumPlayLists < 20) {
             char* section = FileParser_FindNextSection(parser);
@@ -3162,7 +3162,7 @@ void cSSXAudio::ReadPlayListNames()
             strcpy(mPlayListName[mNumPlayLists], section);
             mNumPlayLists = mNumPlayLists + 1;
         }
-        FileParser__FileParser(parser, 2);
+        _$_10FileParser(parser, 2);
         return;
     }
     mNumPlayLists = 0;
@@ -3172,8 +3172,8 @@ void cSSXAudio::ReadPlayListNames()
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SelectPlayList);
 #ifdef SKIP_ASM
-extern "C" void FileParser_FileParser(void* self, char* name, int size);
-extern "C" void FileParser__FileParser(void* self, int flags);
+extern "C" void __10FileParserPCci(void* self, char* name, int size);
+extern "C" void _$_10FileParser(void* self, int flags);
 extern "C" int FileParser_FindPartialSection(void* self, const char* section);
 extern "C" void FileParser_SkipSectionNames(void* self);
 extern "C" int FileParser_IsEOF(void* self);
@@ -3203,7 +3203,7 @@ void cSSXAudio::SelectPlayList(const char* name)
     char parser[2064];
     char buf[0x40];
     cMusicSys_ClearActiveSongs((char*)&MusicSys);
-    FileParser_FileParser(parser, str_x_H, 0x100);
+    __10FileParserPCci(parser, str_x_H, 0x100);
     if (FileParser_FindPartialSection(parser, name) != 0) {
         FileParser_SkipSectionNames(parser);
         while (FileParser_IsEOF(parser) == 0) {
@@ -3223,7 +3223,7 @@ void cSSXAudio::SelectPlayList(const char* name)
     }
     func_002B4060((char*)&MusicSys);
     MusicSys.mDefaultActiveMap = MusicSys.mActiveMap;
-    FileParser__FileParser(parser, 2);
+    _$_10FileParser(parser, 2);
 }
 #endif
 

@@ -5,7 +5,7 @@
 // No vtable. Size 0xE8: retail cMemMan_alloc(0xE8, "TexFlipModifier") in cMoveNode's addTexFlip and the replay loader;
 // On Tour 0xA8 (its tTexFlipMaterialBlockRecord is smaller; the members before it keep On Tour's offsets).
 // EA's source: d:/ssx/code/source/object/texflipmodifier.cpp (preview assert).
-// Methods (src/object/railmodifier.cpp): ctor cTexFlipModifier_cTexFlipModifier (tAddTexFlipData, instance), replay ctor cTexFlipModifier_cTexFlipModifier1,
+// Methods (src/object/railmodifier.cpp): ctor cTexFlipModifier::cTexFlipModifier (tAddTexFlipData, instance), replay ctor cTexFlipModifier_cTexFlipModifier1,
 // setup cTexFlipModifier_setupTexFlip (counts materials, fills MaterialBlock), update cTexFlipModifier_update, signal cTexFlipModifier_signal,
 // writeToReplayFrame cTexFlipModifier_writeToReplayFrame.
 
@@ -16,7 +16,7 @@
 struct tInstanceRecord;
 
 // World-script data that adds a texture-flip modifier (On Tour tAddTexFlipData, 0x18; same layout). [O] On Tour's
-// cTexFlipModifier(const tAddTexFlipData& tdata, tInstanceRecord* inst); [U] cTexFlipModifier_cTexFlipModifier
+// cTexFlipModifier(const tAddTexFlipData& tdata, tInstanceRecord* inst); [U] cTexFlipModifier::cTexFlipModifier
 // (src/object/railmodifier.cpp) stores Type / Dir into the members of the same names, Speed / TimerHz as the rate,
 // and starts the flip at StartId (TexIndex).
 struct tAddTexFlipData {
@@ -91,6 +91,9 @@ struct cTexFlipModifier {
     void signal(int id, float value) __asm__("cTexFlipModifier_signal");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cTexFlipModifier_writeToReplayFrame");
     void update() __asm__("cTexFlipModifier_update");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cTexFlipModifier(void* def, tInstanceRecord* owner);
 };
 
 CHECK_OFFSET(cTexFlipModifier, Type, 0x00);

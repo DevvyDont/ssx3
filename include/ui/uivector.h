@@ -23,7 +23,7 @@
 //
 // mAttrVector is EA's tAttrVector (On Tour: 4 bytes, unsigned int bitfields, LSB first), defined below. Retail reads
 // and writes it as a word (lw/sw 0x74; mNumVertices = word >> 17); setUIData, setChannelData(KCP) and render2D use it
-// as this type, and the unit's view sCount_6618 (tAttrVector_tAttrVector) is the same bitfield.
+// as this type, and the unit's view sCount_6618 (tAttrVector::tAttrVector) is the same bitfield.
 
 #include "layout.h"
 #include "ui/uithing.h"
@@ -34,13 +34,16 @@ struct cListNode;
 struct t2Vector;
 struct tBxVertex;
 
-// EA's tAttrVector (On Tour DWARF: struct tAttrVector, size 0x4). Retail: tAttrVector::tAttrVector() is tAttrVector_tAttrVector
+// EA's tAttrVector (On Tour DWARF: struct tAttrVector, size 0x4). Retail: tAttrVector::tAttrVector() is tAttrVector::tAttrVector
 // (clears mFill, mLoop, mNumVertices).
 struct tAttrVector {
     unsigned int mFill : 1;             // bit 0 [U] cUIVector_setUIData (record flag 1); render2D draws filled when set
     unsigned int mLoop : 1;             // bit 1 [U] cUIVector_setUIData (record flag 2)
     unsigned int mNumTriangles : 15;    // bits 2-16 [U] cUIVector_setUIData; render2D passes it to the draw call
     unsigned int mNumVertices : 15;     // bits 17-31 [U] setUIData; loop bound in render2D / getSize / setSize / setColour
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    tAttrVector();
 };
 
 CHECK_SIZE(tAttrVector, 0x4);
@@ -64,7 +67,7 @@ struct cUIVector : public cUIThing {
     // cUIVector's own slots ([R] cUIVector_vtbl; types [O] On Tour's class cUIVector):
     virtual char getType();                                               // 22 cUIVector_getType__FPv
     tAttrVector mAttrVector;         // 0x074 [O] tAttrVector (mFill:1 mLoop:1 mNumTriangles:15 mNumVertices:15); [R] the
-                                     //       ctors clear mFill, mLoop, mNumVertices (tAttrVector_tAttrVector on this + 0x74);
+                                     //       ctors clear mFill, mLoop, mNumVertices (tAttrVector::tAttrVector on this + 0x74);
                                      //       [U] cUIVector_setUIData fills it; render2D / getSize / setChannelData(KCP) /
                                      //       setColour read the counts (lw)
     unsigned char* mpTriangles;      // 0x078 [O]; [R] = 0; [U] cUIVector_setUIData points it after the record's header

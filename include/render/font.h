@@ -3,12 +3,12 @@
 
 // cFont: a bitmap font loaded from an .sfn file ("FNTS" header, version >= 200): the glyph table, the font texture,
 // and the draw state for text (offset, scales, colours). Size 0x84: cMemMan_alloc(0x84, "DebugFont") +
-// cFont_cFont(self, "data/fonts/debugfnt.sfn", 0) in fe/debugfe.cpp and main/gameload.cpp (the third caller,
+// cFont::cFont(self, "data/fonts/debugfnt.sfn", 0) in fe/debugfe.cpp and main/gameload.cpp (the third caller,
 // func_003985xx, builds a table of fonts the same way). No base class, no virtuals. EA path (preview assert):
 // source/render/font.cpp; the header name follows the unit.
 //
 // A FLAT layout: every field at its retail offset. Evidence tags:
-//   [R] retail's constructor cFont_cFont (0x3915E8: MissingGlyph = 0, ShadowOffset (0,0), BaseScale (1,1),
+//   [R] retail's constructor cFont::cFont (0x3915E8: MissingGlyph = 0, ShadowOffset (0,0), BaseScale (1,1),
 //       Scale = BaseScale, Color (1,1,1,1), ShadowColor (1,0,0,0), FontName[0] = 0) and cFont_loadFont
 //       (sprintf(FontName, "font:%24s", name));
 //   [U] how retail code uses the field;
@@ -30,6 +30,8 @@ struct tGlyph {
     signed char yoffset;            // 0xA [O]
     unsigned char pad;              // 0xB [O]
 };
+
+void operator_delete(int* p);
 
 struct cFont {
     // Character codes linkFont treats specially (Latin-1; names ours): [U] cFont_linkFont makes the glyph of
@@ -77,6 +79,11 @@ struct cFont {
     void* cFont1() __asm__("cFont_cFont1");
     void loadFont(const char* name, int flags) __asm__("cFont_loadFont");
     void textf1(int fmt, float posX, float posY, float sx, float sy, ...) __asm__("cFont_textf1");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cFont(const char* name, int flags);
+    ~cFont();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 // --- layout checks

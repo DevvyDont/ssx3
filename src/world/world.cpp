@@ -15,8 +15,8 @@ INCLUDE_ASM("world/world", cWorld_cWorld);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cWorldCache_cWorldCache(void* mem);
-extern "C" void* cWScriptCache_cWScriptCache(void* mem, void* world);
-extern "C" void* cWorldPainterMan_cWorldPainterMan(void* mem);
+extern "C" void* __13cWScriptCacheP6cWorld(void* mem, void* world);
+extern "C" void* __16cWorldPainterMan(void* mem);
 extern "C" void SphereTree_initCache(int a, int b, int c, int d);
 extern char str_cWorldCache[];
 extern char str_cWScriptCache[];
@@ -35,8 +35,8 @@ extern "C" void* cWorld_cWorld(void** self)
 {
     cWorld_m_pTheWorld = (cWorld*)(self);
     self[0] = cWorldCache_cWorldCache(cMemMan_alloc(0x1C00, str_cWorldCache, 0, 0));
-    self[1] = cWScriptCache_cWScriptCache(cMemMan_alloc(0x10, str_cWScriptCache, 0, 0), self);
-    self[2] = cWorldPainterMan_cWorldPainterMan(cMemMan_alloc(8, str_cWorldPainterMan_b, 0, 0));
+    self[1] = __13cWScriptCacheP6cWorld(cMemMan_alloc(0x10, str_cWScriptCache, 0, 0), self);
+    self[2] = __16cWorldPainterMan(cMemMan_alloc(8, str_cWorldPainterMan_b, 0, 0));
     self[4] = 0;
     self[5] = 0;
     SphereTree_initCache(10, 4, 2, 5);
@@ -48,8 +48,8 @@ extern "C" void* cWorld_cWorld(void** self)
 INCLUDE_ASM("world/world", cWorld__cWorld);
 #ifdef SKIP_ASM
 extern "C" void cWorldCache__cWorldCache(int* self, int flags);
-extern "C" void cWScriptCache__cWScriptCache(void* self, int flags);
-extern "C" void cWorldPainterMan__cWorldPainterMan(void* self, int flags);
+extern "C" void _$_13cWScriptCache(void* self, int flags);
+extern "C" void _$_16cWorldPainterMan(void* self, int flags);
 extern "C" void SphereTree_purgeCache(void);
 void operator_delete(int* p);
 
@@ -68,10 +68,10 @@ extern "C" void cWorld__cWorld(void** self, int flags)
         cWorldCache__cWorldCache((int*)self[0], 3);
     }
     if (self[1] != 0) {
-        cWScriptCache__cWScriptCache(self[1], 3);
+        _$_13cWScriptCache(self[1], 3);
     }
     if (self[2] != 0) {
-        cWorldPainterMan__cWorldPainterMan(self[2], 3);
+        _$_16cWorldPainterMan(self[2], 3);
     }
     SphereTree_purgeCache();
     cWorld_m_pTheWorld = 0;

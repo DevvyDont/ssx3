@@ -134,12 +134,12 @@ struct cBXScriptEngine {
     // --- cInSeqComm (second base: a vptr only)
     void** mInSeqCommVtbl;                  // 0x2AC [R] _vt$15cBXScriptEngine$10cInSeqComm (D_00482450); [U]
                                             //       SetupBXEngine
-                                            //       hands self + 0x2AC to cInSeq_cInSeq as the comm interface
+                                            //       hands self + 0x2AC to cInSeq::cInSeq as the comm interface
     // --- cBXScriptEngine
     tBXScriptState* mpScriptDatabase;       // 0x2B0 [O]; [R] SetupBXEngine: new (count * 8, "BXScriptDatabase");
                                             //       PurgeBXEngine frees it
     int mScriptDatabaseSize;                // 0x2B4 [O]; [R] SetupBXEngine stores the count; [U] GetScriptDatabaseSize
-    cInSeq* mpInSeq;                        // 0x2B8 [O]; [R] SetupBXEngine: cInSeq_cInSeq(cMemMan_alloc(0x20,
+    cInSeq* mpInSeq;                        // 0x2B8 [O]; [R] SetupBXEngine: cInSeq::cInSeq(cMemMan_alloc(0x20,
                                             //       "InSeq"));
                                             //       [U] PlayScript, StopScript, PauseAll, Update,
                                             //       GetRequestPlayerByPlayerID

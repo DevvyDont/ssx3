@@ -1158,7 +1158,7 @@ extern "C" tCmpChanCache* gGenCacheBucket(int bank, int n)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", cAnimDataBase_cAnimDataBase);
+INCLUDE_ASM("animation/animmodel", __13cAnimDataBase);
 #ifdef SKIP_ASM
 extern "C" void memset(void* dst, int c, int n);
 // PORT: prototype mismatch. cAnimDataBase_initChanCache is defined later in the unit as (void), but this
@@ -1168,22 +1168,19 @@ void cAnimDataBase_initChanCache_1(void* self) __asm__("cAnimDataBase_initChanCa
 /**
  * Constructs the animation database: makes it the global instance, zeroes it and clears the channel cache.
  *
- * Stores @p self in cAnimDataBase_TheAnimDataBase (whose start is the bank table cScriptAnimBankManager_LinkBank() installs banks
+ * Stores the object in cAnimDataBase_TheAnimDataBase (whose start is the bank table cScriptAnimBankManager_LinkBank() installs banks
  * into), zero-fills its 0x3FC bytes (memset) and calls cAnimDataBase_initChanCache().
- *
- * @return @p self
  */
-extern "C" void* cAnimDataBase_cAnimDataBase(cAnimDataBase* self)
+cAnimDataBase::cAnimDataBase()
 {
-    cAnimDataBase_TheAnimDataBase = (cAnimDataBase*)(self);
-    memset(self, 0, 0x3FC);
-    cAnimDataBase_initChanCache_1(self);
-    return ((void*)self);
+    cAnimDataBase_TheAnimDataBase = (cAnimDataBase*)(this);
+    memset(this, 0, 0x3FC);
+    cAnimDataBase_initChanCache_1(this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", cAnimDataBase__cAnimDataBase);
+INCLUDE_ASM("animation/animmodel", _$_13cAnimDataBase);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void operator_delete(int*);
@@ -1193,19 +1190,13 @@ extern "C" void cAnimDataBase_purgeChanCache_self(void* self) __asm__("cAnimData
 /**
  * Destroys the animation database: clears cAnimDataBase_TheAnimDataBase and frees the channel cache.
  *
- * Calls cAnimDataBase_purgeChanCache (passing @p self, which it ignores) and frees @p self with operator_delete when bit 0 of
- * @p flags is set. Reverse of cAnimDataBase_cAnimDataBase.
- *
- * @param flags  bit 0: delete the object itself
+ * Calls cAnimDataBase_purgeChanCache (passing the object, which it ignores) and frees the object with operator_delete when bit 0 of
+ * g++'s delete flag is set. Reverse of cAnimDataBase::cAnimDataBase.
  */
-extern "C" void cAnimDataBase__cAnimDataBase(cAnimDataBase* self, int flags)
+cAnimDataBase::~cAnimDataBase()
 {
     cAnimDataBase_TheAnimDataBase = 0;
-    cAnimDataBase_purgeChanCache_self(self);
-    if (flags & 1)
-    {
-        operator_delete((int*)self);
-    }
+    cAnimDataBase_purgeChanCache_self(this);
 }
 #endif
 
@@ -1255,7 +1246,7 @@ extern sAnimNode_311110* gChanCacheLRU_311110[] __asm__("gChanCacheLRU");
  *
  * For each of the 48 buckets that is non-null, each of its 20 nodes (0x24 bytes) gets its owner's byte at +0x5 set to
  * 0xFF (no cached node) and its data freed with cMemMan_free; then the bucket array is freed and gChanCache[bank] and
- * gChanCacheLRU[bank] (the bucket's current node) are zeroed. Called by cAnimDataBase__cAnimDataBase and before animation data is
+ * gChanCacheLRU[bank] (the bucket's current node) are zeroed. Called by cAnimDataBase::~cAnimDataBase and before animation data is
  * unloaded (scripter/scanimmgr, fe/fereal, ai/ai).
  */
 extern "C" void cAnimDataBase_purgeChanCache(void)
@@ -1294,7 +1285,7 @@ extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, tAdfArchiv
 /**
  * Constructs an animation data source over @p data that is already in memory, and returns @p self.
  *
- * Zeroes the first word (the loaded-file pointer that cAdfDataSource__cAdfDataSource frees, so the caller keeps ownership of @p data)
+ * Zeroes the first word (the loaded-file pointer that cAdfDataSource::~cAdfDataSource frees, so the caller keeps ownership of @p data)
  * and calls cAdfDataSource_populateFromData(@p self, @p data). scripter/scanimmgr uses it for banks it has loaded.
  *
  * @param data  the animation file data
@@ -1316,7 +1307,7 @@ extern "C" char* FILE_loadpack(void* src, int flags);
 /**
  * Constructs an animation data source by loading file @p src, and returns @p self.
  *
- * Loads the file with FILE_loadpack(@p src, 0), keeps the buffer in the first word (freed by cAdfDataSource__cAdfDataSource) and calls
+ * Loads the file with FILE_loadpack(@p src, 0), keeps the buffer in the first word (freed by cAdfDataSource::~cAdfDataSource) and calls
  * cAdfDataSource_populateFromData on it. ai/ai and fe/fereal create their animation banks with it.
  *
  * @param src  the file name of the animation bank
@@ -1355,7 +1346,7 @@ void cAdfDataSource::populateFromData(tAdfArchive* data)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", cAdfDataSource__cAdfDataSource);
+INCLUDE_ASM("animation/animmodel", _$_14cAdfDataSource);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
@@ -1363,20 +1354,14 @@ void operator_delete(int*);
 /**
  * Destroys an animation data source: frees its loaded file buffer (the first word) when there is one.
  *
- * Frees @p self with operator_delete when bit 0 of @p flags is set; callers pass 3.
- *
- * @param flags  bit 0: delete the object itself
+ * Frees the object with operator_delete when bit 0 of g++'s delete flag is set; callers pass 3.
  */
-extern "C" void cAdfDataSource__cAdfDataSource(cAdfDataSource* self, int flags)
+cAdfDataSource::~cAdfDataSource()
 {
-    void* data = *(void**)self;
+    void* data = *(void**)this;
     if (data != 0)
     {
         cMemMan_free(data);
-    }
-    if (flags & 1)
-    {
-        operator_delete((int*)self);
     }
 }
 #endif

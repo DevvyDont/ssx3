@@ -2895,19 +2895,18 @@ void cBoltFileIndexManager::freeNode(tBoltFileIndexNode* node)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", cBoltFileIndexManager_cBoltFileIndexManager);
+INCLUDE_ASM("fe/festatecharequipdetail", __21cBoltFileIndexManager);
 #ifdef SKIP_ASM
 extern "C" void cBoltFileIndexManager_reset(cBoltFileIndexManager* self);
 
+extern "C" cBoltFileIndexManager* __21cBoltFileIndexManager(cBoltFileIndexManager* self);
+
 /**
  * Constructs the file-index hash table by resetting it with cBoltFileIndexManager_reset.
- *
- * @return @p self
  */
-extern "C" cBoltFileIndexManager* cBoltFileIndexManager_cBoltFileIndexManager(cBoltFileIndexManager* self)
+cBoltFileIndexManager::cBoltFileIndexManager()
 {
-    self->reset();
-    return self;
+    reset();
 }
 #endif
 
@@ -3072,7 +3071,7 @@ void cBoltFileIndexManager::setPartTextureFile(int bit, int lowKey, int val)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager_cFEBoltFileManager);
+INCLUDE_ASM("fe/festatecharequipdetail", __18cFEBoltFileManager);
 #ifdef SKIP_ASM
 extern cFEBoltFileManager* D_004A196C;
 extern "C" void cFEBoltFileManager_init(cFEBoltFileManager* self);
@@ -3082,19 +3081,16 @@ extern "C" void cFEBoltFileManager_init(cFEBoltFileManager* self);
  *
  * cFE_cFE builds it at the front end's +0x1A70. D_004A196C is what the sort comparators compareDeferredModelPartFiles and compareDeferredPartTextureFiles
  * read.
- *
- * @return @p self
  */
-extern "C" cFEBoltFileManager* cFEBoltFileManager_cFEBoltFileManager(cFEBoltFileManager* self)
+cFEBoltFileManager::cFEBoltFileManager()
 {
-    D_004A196C = self;
-    self->init();
-    return self;
+    D_004A196C = this;
+    init();
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", cFEBoltFileManager__cFEBoltFileManager);
+INCLUDE_ASM("fe/festatecharequipdetail", _$_18cFEBoltFileManager);
 #ifdef SKIP_ASM
 extern cFEBoltFileManager* D_004A196C;
 extern "C" void cFEBoltFileManager_purge(cFEBoltFileManager* self);
@@ -3102,17 +3098,12 @@ void operator_delete(int* p);
 
 /**
  * Destroys the FE file cache: clears D_004A196C, purges every slot (cFEBoltFileManager_purge) and frees the object when bit 0 of
- * @p flags is set.
- *
- * @param flags  deleting-destructor flags; bit 0 frees the object
+ * g++'s delete flag is set.
  */
-extern "C" void cFEBoltFileManager__cFEBoltFileManager(cFEBoltFileManager* self, int flags)
+cFEBoltFileManager::~cFEBoltFileManager()
 {
     D_004A196C = 0;
-    self->purge();
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    purge();
 }
 #endif
 
@@ -3127,7 +3118,7 @@ extern char str_BoltFileIndexManager[];
  *
  * For each of the 10 banks it clears all 256 slots (state, name, data, handle, size and use count `timer` to 0, type
  * -1) and sets the bank's stamp counter (counts) to 1; then clears used and nPending. The file-index table D_004A1968
- * is allocated on first use (cMemMan_alloc, 8004 bytes, tag "BoltFileIndexManager", built by cBoltFileIndexManager_cBoltFileIndexManager), otherwise
+ * is allocated on first use (cMemMan_alloc, 8004 bytes, tag "BoltFileIndexManager", built by cBoltFileIndexManager::cBoltFileIndexManager), otherwise
  * reset with cBoltFileIndexManager_reset. cRealFE_load calls it on the front end's +0x1A70.
  */
 void cFEBoltFileManager::init()
@@ -3150,7 +3141,7 @@ void cFEBoltFileManager::init()
     mNumLoadThreads = 0;
     mMemUsed = 0;
     if (D_004A1968 == 0) {
-        D_004A1968 = cBoltFileIndexManager_cBoltFileIndexManager((cBoltFileIndexManager*)cMemMan_alloc(8004, str_BoltFileIndexManager, 0, 0));
+        D_004A1968 = __21cBoltFileIndexManager((cBoltFileIndexManager*)cMemMan_alloc(8004, str_BoltFileIndexManager, 0, 0));
     } else {
         D_004A1968->reset();
     }

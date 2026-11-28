@@ -228,7 +228,7 @@ extern "C" int lobbyman_compareStatsAscending(void* self, int sortParam, char* l
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_LobbyMan);
+INCLUDE_ASM("dirtysock/tagsunk", __8LobbyMan);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cBXString2;
@@ -250,58 +250,54 @@ extern char str_StlBlock_b[];
  * mPersona through mAuth) to the shared empty cBXString, builds mServerName as "ps2ssx04.ea.com", allocates the empty
  * mEventList head node ("StlBlock") and constructs the two account forms (cBXString_cBXString), then resets the
  * new-account form with LobbyMan_resetNewAccount(). LobbyMan_createInstance() calls it on a 0x300-byte "LobbyMan" block.
- *
- * @param self_  the memory to construct in
- * @return @p self_
  */
-extern "C" void* LobbyMan_LobbyMan(LobbyMan* self_)
+LobbyMan::LobbyMan()
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
     int frameFiller[4];
-    self_->mState = 0;
-    self_->mServerAddr = 0;
-    self_->mAuthenticated = 0;
-    self_->mLoggedIn = 0;
-    self_->mDisconnected = 0;
-    self_->mbUseCachedAddr = 0;
-    self_->mHaveCPAT = 0;
-    self_->mFindingPlayer = 0;
-    self_->mUserName = (char*)cBXString_EmptyString_94D0;
-    self_->mPassword = (char*)cBXString_EmptyString_94D0;
-    self_->mpLobbyApi = 0;
-    self_->mpHostLookup = 0;
-    self_->mpRoomList = 0;
-    self_->mpUserList = 0;
-    self_->mpRankList = 0;
-    self_->mNumPersonas = 0;
-    char** persona = &self_->mPersonas[0];
+    mState = 0;
+    mServerAddr = 0;
+    mAuthenticated = 0;
+    mLoggedIn = 0;
+    mDisconnected = 0;
+    mbUseCachedAddr = 0;
+    mHaveCPAT = 0;
+    mFindingPlayer = 0;
+    mUserName = (char*)cBXString_EmptyString_94D0;
+    mPassword = (char*)cBXString_EmptyString_94D0;
+    mpLobbyApi = 0;
+    mpHostLookup = 0;
+    mpRoomList = 0;
+    mpUserList = 0;
+    mpRankList = 0;
+    mNumPersonas = 0;
+    char** persona = &mPersonas[0];
     for (int i = 3; i != -1; i--, persona++) {
         *persona = (char*)cBXString_EmptyString_94D0;
     }
-    self_->mPersona = (char*)cBXString_EmptyString_94D0;
-    self_->mRoomName = (char*)cBXString_EmptyString_94D0;
-    self_->mGameName = (char*)cBXString_EmptyString_94D0;
-    self_->mChallengeMessage = (char*)cBXString_EmptyString_94D0;
-    self_->mHostName = (char*)cBXString_EmptyString_94D0;
-    self_->mOppoName = (char*)cBXString_EmptyString_94D0;
-    self_->mOpponent = (char*)cBXString_EmptyString_94D0;
-    self_->mAuth = (char*)cBXString_EmptyString_94D0;
-    cBXString_cBXString2(&self_->mServerName, str_ps2ssx04_ea_com);
+    mPersona = (char*)cBXString_EmptyString_94D0;
+    mRoomName = (char*)cBXString_EmptyString_94D0;
+    mGameName = (char*)cBXString_EmptyString_94D0;
+    mChallengeMessage = (char*)cBXString_EmptyString_94D0;
+    mHostName = (char*)cBXString_EmptyString_94D0;
+    mOppoName = (char*)cBXString_EmptyString_94D0;
+    mOpponent = (char*)cBXString_EmptyString_94D0;
+    mAuth = (char*)cBXString_EmptyString_94D0;
+    cBXString_cBXString2(&mServerName, str_ps2ssx04_ea_com);
     // the inlined std::list constructor: a circular list of just its head node ("StlBlock")
-    tLobbyEventList* lst = &self_->mEventList;
-    self_->mEventList.mpHead = cMemMan_alloc(0xC, str_StlBlock_b, 0x20000000, 0);
-    ((_List_node<online_Event*>*)lst->mpHead)->_M_next = self_->mEventList.mpHead;
-    ((_List_node<online_Event*>*)lst->mpHead)->_M_prev = self_->mEventList.mpHead;
-    self_->mpConfig = 0;
-    self_->mRankSlot = 0;
-    self_->unk_0FC = 0;
-    self_->mpSlotTag = 0;
-    cBXString_cBXString((cBXString2*)(&self_->mNewAccount));
-    cBXString_cBXString((cBXString2*)(&self_->mAccount));
+    tLobbyEventList* lst = &mEventList;
+    mEventList.mpHead = cMemMan_alloc(0xC, str_StlBlock_b, 0x20000000, 0);
+    ((_List_node<online_Event*>*)lst->mpHead)->_M_next = mEventList.mpHead;
+    ((_List_node<online_Event*>*)lst->mpHead)->_M_prev = mEventList.mpHead;
+    mpConfig = 0;
+    mRankSlot = 0;
+    unk_0FC = 0;
+    mpSlotTag = 0;
+    cBXString_cBXString((cBXString2*)(&mNewAccount));
+    cBXString_cBXString((cBXString2*)(&mAccount));
     for (int i = 0x1C; i >= 0; i--)
-        self_->mRankSnapshot[i] = 0;
-    self_->resetNewAccount();
-    return ((char*)self_);
+        mRankSnapshot[i] = 0;
+    resetNewAccount();
 }
 #endif
 
@@ -1672,17 +1668,17 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_createInstance);
 #ifdef SKIP_ASM
 extern char str_LobbyMan[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* LobbyMan_LobbyMan(LobbyMan* self);
+extern "C" void* __8LobbyMan(LobbyMan* self);
 
 /**
- * Creates the lobby manager singleton: allocates 0x300 bytes ("LobbyMan") and constructs them with LobbyMan_LobbyMan()
+ * Creates the lobby manager singleton: allocates 0x300 bytes ("LobbyMan") and constructs them with LobbyMan::LobbyMan()
  * into LobbyMan_mLobbyMan.
  *
  * An existing instance is overwritten without a check. The main menu and the debug menu screen call it.
  */
 extern "C" void LobbyMan_createInstance(void)
 {
-    LobbyMan_mLobbyMan = (LobbyMan*)(LobbyMan_LobbyMan((LobbyMan*)cMemMan_alloc(0x300, str_LobbyMan, 0x20000000, 0)));
+    LobbyMan_mLobbyMan = (LobbyMan*)(__8LobbyMan((LobbyMan*)cMemMan_alloc(0x300, str_LobbyMan, 0x20000000, 0)));
 }
 #endif
 
@@ -6232,7 +6228,7 @@ extern "C" void cBXString_Reset(void* self);
  *
  * Empties its five strings (mName, mPassword, mConfirmPassword, mMail, mParentMail) with cBXString_Reset and sets mSpam
  * to {1, 1}, mBornMonth and mBornDay to 1, mBornYear to 1985, mGender to 0 and mLegalAccepted to 0. mNameOptions and
- * the mChange* flags are left alone. The constructor LobbyMan_LobbyMan and the account screens call it.
+ * the mChange* flags are left alone. The constructor LobbyMan::LobbyMan and the account screens call it.
  */
 void LobbyMan::resetNewAccount()
 {
@@ -9252,11 +9248,11 @@ INCLUDE_ASM("dirtysock/tagsunk", cSetupMan_createInstance);
 extern char str_cSetupMan[];
 extern void* cSetupMan_mSetupMan;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cSetupMan_cSetupMan(cSetupMan* self, int a1, int a2, int a3);
+extern "C" void* __9cSetupManiii(cSetupMan* self, int a1, int a2, int a3);
 
 /**
  * Creates the online setup manager cSetupMan_mSetupMan: allocates 300 bytes (tag "cSetupMan") and constructs it with
- * cSetupMan_cSetupMan().
+ * cSetupMan::cSetupMan().
  *
  * @param channel  comm channel index (from the game-connection manager)
  * @param isHost  non-zero on the host
@@ -9264,7 +9260,7 @@ extern "C" void* cSetupMan_cSetupMan(cSetupMan* self, int a1, int a2, int a3);
  */
 extern "C" void cSetupMan_createInstance(int channel, int isHost, int ranked)
 {
-    cSetupMan_mSetupMan = cSetupMan_cSetupMan((cSetupMan*)cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), channel, isHost, ranked);
+    cSetupMan_mSetupMan = __9cSetupManiii((cSetupMan*)cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), channel, isHost, ranked);
 }
 #endif
 
@@ -9272,23 +9268,23 @@ extern "C" void cSetupMan_createInstance(int channel, int isHost, int ranked)
 INCLUDE_ASM("dirtysock/tagsunk", cSetupMan_destroyInstance);
 #ifdef SKIP_ASM
 extern void* cSetupMan_mSetupMan;
-extern "C" void cSetupMan__cSetupMan(cSetupMan* self, int flags);
+extern "C" void _$_9cSetupMan(cSetupMan* self, int flags);
 
 /**
- * Destroys the online setup manager cSetupMan_mSetupMan, if any (cSetupMan__cSetupMan() with flags 3), and clears the
+ * Destroys the online setup manager cSetupMan_mSetupMan, if any (cSetupMan::~cSetupMan() with flags 3), and clears the
  * pointer.
  */
 extern "C" void cSetupMan_destroyInstance(void)
 {
     if (cSetupMan_mSetupMan != 0) {
-        cSetupMan__cSetupMan((cSetupMan*)cSetupMan_mSetupMan, 3);
+        _$_9cSetupMan((cSetupMan*)cSetupMan_mSetupMan, 3);
         cSetupMan_mSetupMan = 0;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", cSetupMan_cSetupMan);
+INCLUDE_ASM("dirtysock/tagsunk", __9cSetupManiii);
 #ifdef SKIP_ASM
 extern "C" void* MEM_fill(void* dst, int value, int size);
 
@@ -9302,29 +9298,27 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
  * @param channel  comm channel index; stored at +0x120
  * @param isHost   non-zero on the host; stored at +0x124
  * @param ranked       bIsRankedGame; stored at +0x128 (cSetupMan_sendCharacterMessage() then sends flat attributes)
- * @return the object
  */
-extern "C" void* cSetupMan_cSetupMan(cSetupMan* self, int channel, int isHost, int ranked)
+cSetupMan::cSetupMan(int channel, int isHost, int ranked)
 {
-    self->mState = 1;
-    self->mChannel = channel;
-    self->mIsHost = isHost;
-    self->mPacketCache = 0;
-    self->unk_118 = 0;
-    self->unk_11C = 0;
-    self->mReadQueue.mHead = 0;
-    self->mReadQueue.mTail = 0;
-    self->mRanked = ranked;
-    MEM_fill(&self->mReadQueue.mQueue[0], 0, 0x80);
-    self->mWriteQueue.mHead = 0;
-    self->mWriteQueue.mTail = 0;
-    MEM_fill(&self->mWriteQueue.mQueue[0], 0, 0x80);
-    return ((void*)self);
+    mState = 1;
+    mChannel = channel;
+    mIsHost = isHost;
+    mPacketCache = 0;
+    unk_118 = 0;
+    unk_11C = 0;
+    mReadQueue.mHead = 0;
+    mReadQueue.mTail = 0;
+    mRanked = ranked;
+    MEM_fill(&mReadQueue.mQueue[0], 0, 0x80);
+    mWriteQueue.mHead = 0;
+    mWriteQueue.mTail = 0;
+    MEM_fill(&mWriteQueue.mQueue[0], 0, 0x80);
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", cSetupMan__cSetupMan);
+INCLUDE_ASM("dirtysock/tagsunk", _$_9cSetupMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void cSetupMan_freePacket(cSetupMan* self, int* p);
@@ -9366,14 +9360,11 @@ static inline int* PopB_264138(cSetupMan* o)
 /**
  * Destroys the online setup manager: frees the pending receive buffer and every packet still in its two queues.
  *
- * Each packet goes to cSetupMan_freePacket(); the state is then set to 1 and the object freed when bit 0 of @p flags is set.
- *
- * @param self_  the setup manager (cSetupMan_mSetupMan)
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Each packet goes to cSetupMan_freePacket(); the state is then set to 1 and the object freed when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cSetupMan__cSetupMan(cSetupMan* self_, int flags)
+cSetupMan::~cSetupMan()
 {
-    cSetupMan* self = self_;
+    cSetupMan* self = this;
     if (((int*)self->mPacketCache) != 0)
         self->freePacket(((int*)self->mPacketCache));
     while (PeekA_264138(self) != 0)
@@ -9381,8 +9372,6 @@ extern "C" void cSetupMan__cSetupMan(cSetupMan* self_, int flags)
     while (PeekB_264138(self) != 0)
         self->freePacket(PopB_264138(self));
     self->mState = 1;
-    if (flags & 1)
-        operator_delete((int*)self);
 }
 #endif
 
@@ -10166,10 +10155,11 @@ static inline sMsgListIter5190 sMsgList5190_insert(sMsgListIter5190 pos, void* c
 /**
  * Handles the opponent's character choice on the host's setup manager: records it, echoes it back and posts an event.
  *
- * The setup manager (cSetupMan_mSetupMan, built by cSetupMan_cSetupMan) moves its state word (+0x0) from 1 to 2, stores
- * the opponent's character and name in the back end (cSetupMan_applyOpponentCharacter), sends a type-1 message with that character and the
- * new state (cSetupMan_sendCharacterMessage) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent")
- * onto LobbyMan's mEventList. cSetupMan_update calls it for a type-1 message while the host is in a state below 7.
+ * The setup manager (cSetupMan_mSetupMan, built by cSetupMan::cSetupMan) moves its state word (+0x0) from 1 to 2,
+ * stores the opponent's character and name in the back end (cSetupMan_applyOpponentCharacter), sends a type-1 message
+ * with that character and the new state (cSetupMan_sendCharacterMessage) and pushes an 8-byte online event of kind 243
+ * (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. cSetupMan_update calls it for a type-1 message
+ * while the host is in a state below 7.
  *
  * @param rider  the opponent's character id from the message
  * @param name   the opponent's name block from the message, copied into the back end
@@ -10375,7 +10365,7 @@ struct sNetMsg5458 {
 /**
  * Sends the row highlighted on the bragging-rights screen to the peer and posts it as a lobby event.
  *
- * Does nothing in state 12. On the host (+0x124 set, cSetupMan_cSetupMan's isHost) the state word moves from 5 or 6 to
+ * Does nothing in state 12. On the host (+0x124 set, cSetupMan::cSetupMan's isHost) the state word moves from 5 or 6 to
  * 7 and the message type is 6; a client sends type 7. The {type, id, state} message goes out through cSetupMan_sendMessage, and
  * a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update") carrying @p id is pushed onto LobbyMan's
  * mEventList. cFEStateBraggingRights_onWidgetMenu calls it with the menu's current row.
@@ -10633,17 +10623,17 @@ INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_createInstance);
 extern char str_cSharedLoginMan[];
 extern void* SharedLoginMan;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cSharedLoginMan_cSharedLoginMan(cSharedLoginMan* self);
+extern "C" void* __15cSharedLoginMan(cSharedLoginMan* self);
 
 /**
  * Creates the shared-login manager singleton SharedLoginMan.
  *
- * Allocates 8 bytes tagged "cSharedLoginMan" and runs the constructor cSharedLoginMan_cSharedLoginMan on them.
+ * Allocates 8 bytes tagged "cSharedLoginMan" and runs the constructor cSharedLoginMan::cSharedLoginMan on them.
  * cFEStateNetAccountMem_cFEStateNetAccountMem calls it.
  */
 extern "C" void cSharedLoginMan_createInstance(void)
 {
-    SharedLoginMan = cSharedLoginMan_cSharedLoginMan((cSharedLoginMan*)cMemMan_alloc(8, str_cSharedLoginMan, 0x20000000, 0));
+    SharedLoginMan = __15cSharedLoginMan((cSharedLoginMan*)cMemMan_alloc(8, str_cSharedLoginMan, 0x20000000, 0));
 }
 #endif
 
@@ -10651,57 +10641,50 @@ extern "C" void cSharedLoginMan_createInstance(void)
 INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_destroyInstance);
 #ifdef SKIP_ASM
 extern void* SharedLoginMan;
-extern "C" void cSharedLoginMan__cSharedLoginMan(cSharedLoginMan* self, int flags);
+extern "C" void _$_15cSharedLoginMan(cSharedLoginMan* self, int flags);
 
 /**
  * Destroys the shared-login manager singleton SharedLoginMan, if there is one, and clears the pointer.
  *
- * Calls the deleting destructor cSharedLoginMan__cSharedLoginMan with flags 3.
+ * Calls the deleting destructor cSharedLoginMan::~cSharedLoginMan with flags 3.
  * cFEStateNetAccountMem__cFEStateNetAccountMem calls it.
  */
 extern "C" void cSharedLoginMan_destroyInstance(void)
 {
     if (SharedLoginMan != 0) {
-        cSharedLoginMan__cSharedLoginMan((cSharedLoginMan*)SharedLoginMan, 3);
+        _$_15cSharedLoginMan((cSharedLoginMan*)SharedLoginMan, 3);
         SharedLoginMan = 0;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan_cSharedLoginMan);
+INCLUDE_ASM("dirtysock/tagsunk", __15cSharedLoginMan);
 #ifdef SKIP_ASM
 extern "C" void cSharedLoginMan_init(cSharedLoginMan* self);
 
 /**
  * Constructs a shared-login manager by running cSharedLoginMan_init on it.
- *
- * @return @p self
  */
-extern "C" void* cSharedLoginMan_cSharedLoginMan(cSharedLoginMan* self)
+cSharedLoginMan::cSharedLoginMan()
 {
-    self->init();
-    return ((void*)self);
+    init();
 }
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", cSharedLoginMan__cSharedLoginMan);
+INCLUDE_ASM("dirtysock/tagsunk", _$_15cSharedLoginMan);
 #ifdef SKIP_ASM
 extern "C" void cSharedLoginMan_shutdown(cSharedLoginMan* self);
 void operator_delete(int*);
 
 /**
- * Destroys a shared-login manager: runs cSharedLoginMan_shutdown, then frees the object when bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a shared-login manager: runs cSharedLoginMan_shutdown, then frees the object when bit 0 of g++'s delete flag
+ * is set.
  */
-extern "C" void cSharedLoginMan__cSharedLoginMan(cSharedLoginMan* self, int flags)
+cSharedLoginMan::~cSharedLoginMan()
 {
-    self->shutdown();
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    shutdown();
 }
 #endif
 
@@ -11855,17 +11838,17 @@ INCLUDE_ASM("dirtysock/tagsunk", cUsbKeyboard_createInstance);
 extern char str_cUsbKeyboard[];
 extern void* Keyboard;
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cUsbKeyboard_cUsbKeyboard(cUsbKeyboard* self);
+extern "C" void* __12cUsbKeyboard(cUsbKeyboard* self);
 
 /**
  * Creates the USB keyboard reader singleton Keyboard.
  *
- * Allocates 1124 bytes tagged "cUsbKeyboard" and runs the constructor cUsbKeyboard_cUsbKeyboard on them. initOnline
+ * Allocates 1124 bytes tagged "cUsbKeyboard" and runs the constructor cUsbKeyboard::cUsbKeyboard on them. initOnline
  * calls it.
  */
 extern "C" void cUsbKeyboard_createInstance(void)
 {
-    Keyboard = cUsbKeyboard_cUsbKeyboard((cUsbKeyboard*)cMemMan_alloc(1124, str_cUsbKeyboard, 0x20000000, 0));
+    Keyboard = __12cUsbKeyboard((cUsbKeyboard*)cMemMan_alloc(1124, str_cUsbKeyboard, 0x20000000, 0));
 }
 #endif
 
@@ -11888,7 +11871,7 @@ extern "C" void cUsbKeyboard_destroyInstance(void) {
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", cUsbKeyboard_cUsbKeyboard);
+INCLUDE_ASM("dirtysock/tagsunk", __12cUsbKeyboard);
 #ifdef SKIP_ASM
 extern char D_005371D0[];
 extern "C" void usbkeyboard_setupKeyboard(void* self);
@@ -11901,17 +11884,14 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
  * Calls kbReader_init(0, 0, D_005371D0, usbkeyboard_setupKeyboard, 0) (D_005371D0 the library's read buffers, usbkeyboard_setupKeyboard its
  * keyboard-connect callback) and sets the enabled word (+0x460) only when it succeeds, then zeroes the 0x460 bytes of
  * rings (8 x 0x8C).
- *
- * @return @p self
  */
-extern "C" void* cUsbKeyboard_cUsbKeyboard(cUsbKeyboard* self)
+cUsbKeyboard::cUsbKeyboard()
 {
-    self->mEnabled = 0;
+    mEnabled = 0;
     if (kbReader_init(0, 0, D_005371D0, (void*)usbkeyboard_setupKeyboard, 0) >= 0) {
-        self->mEnabled = 1;
+        mEnabled = 1;
     }
-    MEM_fill(self, 0, 1120);
-    return ((void*)self);
+    MEM_fill(this, 0, 1120);
 }
 #endif
 
@@ -11949,7 +11929,7 @@ extern "C" void sceUsbKbSetArrangement(void* self, int a1);
 extern "C" void sceUsbKbSetReadMode(void* self, int a1);
 
 /**
- * Sets up a newly connected USB keyboard: the connect callback cUsbKeyboard_cUsbKeyboard registers.
+ * Sets up a newly connected USB keyboard: the connect callback cUsbKeyboard::cUsbKeyboard registers.
  *
  * Runs the library's default callback kbReader_defaultOnConnect (LED setup; the second argument register passes through untouched),
  * then sceUsbKbSetArrangement and sceUsbKbSetReadMode with the keyboard number (the first argument) and 0, which put
@@ -12147,17 +12127,17 @@ extern "C" void cVoipMan_createInstance(void)
 INCLUDE_ASM("dirtysock/tagsunk", cVoipMan_destroyInstance);
 #ifdef SKIP_ASM
 extern void* VoipMan;
-extern "C" void cVoipMan__cVoipMan(cVoipMan* self, int flags);
+extern "C" void _$_8cVoipMan(cVoipMan* self, int flags);
 
 /**
  * Destroys the voice-chat manager singleton VoipMan, if there is one, and clears the pointer.
  *
- * Calls the deleting destructor cVoipMan__cVoipMan with flags 3.
+ * Calls the deleting destructor cVoipMan::~cVoipMan with flags 3.
  */
 extern "C" void cVoipMan_destroyInstance(void)
 {
     if (VoipMan != 0) {
-        cVoipMan__cVoipMan((cVoipMan*)VoipMan, 3);
+        _$_8cVoipMan((cVoipMan*)VoipMan, 3);
         VoipMan = 0;
     }
 }
@@ -12182,22 +12162,17 @@ void* cVoipMan_cVoipMan(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("dirtysock/tagsunk", cVoipMan__cVoipMan);
+INCLUDE_ASM("dirtysock/tagsunk", _$_8cVoipMan);
 #ifdef SKIP_ASM
 extern "C" void cVoipMan_disconnect(cVoipMan* self);
 void operator_delete(int*);
 
 /**
- * Destroys the voice-chat manager: disconnects it (cVoipMan_disconnect), then frees the object when bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys the voice-chat manager: disconnects it (cVoipMan_disconnect), then frees the object when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cVoipMan__cVoipMan(cVoipMan* self, int flags)
+cVoipMan::~cVoipMan()
 {
-    self->disconnect();
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    disconnect();
 }
 #endif
 

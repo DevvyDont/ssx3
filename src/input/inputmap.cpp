@@ -84,7 +84,7 @@ void cInputMap::loadMapFile1(const char* path)
 INCLUDE_ASM("input/inputmap", cInputMap_loadMapFile);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* self, void* a1, void* a2);
+extern "C" void* __15cInputMapParserPvT1(cInputMapParser* self, void* a1, void* a2);
 extern char str_InputParser[];
 
 /**
@@ -98,7 +98,7 @@ extern char str_InputParser[];
  */
 void cInputMap::loadMapFile(void* mem, void* len)
 {
-    Parser = (cInputMapParser*)cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC,
+    Parser = (cInputMapParser*)__15cInputMapParserPvT1((cInputMapParser*)cMemMan_alloc(0x109EC,
             str_InputParser, 0x100, 0), mem, len);
 }
 #endif
@@ -388,7 +388,7 @@ void cInputPad::update(int n, float* vals)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", cInputMapParser_cInputMapParser);
+INCLUDE_ASM("input/inputmap", __15cInputMapParserPvT1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cInputMapParser_parseFile(void* self);
@@ -401,15 +401,13 @@ extern "C" void cInputMapParser_parseFile(void* self);
  * and the identifier count, pushes registers 63..1 onto FreeRegisters, links all 2048 parse nodes into the
  * free list and then calls cInputMapParser_parseFile().
  *
- * @param vself   the parser to construct
  * @param file    the script text (On Tour const char*)
  * @param length  the text's length in bytes
- * @return the parser
  */
 // Initialises a compiled input map: id stack 63..1 and the node free list.
-extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* vself, void* file, void* length)
+cInputMapParser::cInputMapParser(void* file, void* length)
 {
-    cInputMapParser* self = vself;
+    cInputMapParser* self = this;
     (*(void**)&self->FileLength) = length;
     (*(void**)&self->File) = file;
     (*(void**)&self->FilePointer) = file;
@@ -428,7 +426,6 @@ extern "C" void* cInputMapParser_cInputMapParser(cInputMapParser* vself, void* f
     }
     self->ParseNodes[0x7FF].Operand1 = 0;
     cInputMapParser_parseFile(self);
-    return self;
 }
 #endif
 

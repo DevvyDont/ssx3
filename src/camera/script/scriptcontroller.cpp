@@ -338,13 +338,13 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_cScriptManu
 extern void* cScriptManualAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
-extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
+extern "C" void* __15cCameraJitterer(void* self);
 
 /**
  * Constructs a manual script camera algorithm (camera at a scripted position and orientation).
  *
  * Runs cScriptAlgorithm_cScriptAlgorithm, installs cScriptManualAlgorithm_vtbl at +0x10, constructs the jitterer at +0x74 with
- * cCameraJitterer_cCameraJitterer, sets the position (+0x30) to t4vect_Origin and the type (+0xC) to 0x56
+ * cCameraJitterer::cCameraJitterer, sets the position (+0x30) to t4vect_Origin and the type (+0xC) to 0x56
  * (On Tour SCRIPT_MANUAL), and zeroes roll, heading and pitch (+0x40..+0x48).
  *
  * @return @p self
@@ -353,7 +353,7 @@ extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(cScriptManualAlgo
 {
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptManualAlgorithm_vtbl;
-    cCameraJitterer_cCameraJitterer(&self->Jitterer);
+    __15cCameraJitterer(&self->Jitterer);
     self->Position = t4vect_Origin;
     self->AlgorithmType = 86;
     self->Heading = 0.0f;
@@ -711,7 +711,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_cScriptPoint
 extern void* cScriptPointAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
-extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
+extern "C" void* __15cCameraJitterer(void* self);
 
 /**
  * Constructs a point script camera algorithm (camera at a scripted point).
@@ -725,7 +725,7 @@ extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(cScriptPointAlgorit
 {
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptPointAlgorithm_vtbl;
-    cCameraJitterer_cCameraJitterer(&self->Jitterer);
+    __15cCameraJitterer(&self->Jitterer);
     self->Position = t4vect_Origin;
     self->AlgorithmType = 87;
     self->Roll = 0.0f;
@@ -1053,7 +1053,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_cScriptTarg
 extern void* cScriptTargetAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
-extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
+extern "C" void* __15cCameraJitterer(void* self);
 
 /**
  * Constructs a target script camera algorithm (camera looking at a scripted subject).
@@ -1067,7 +1067,7 @@ extern "C" void* cScriptTargetAlgorithm_cScriptTargetAlgorithm(cScriptTargetAlgo
 {
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptTargetAlgorithm_vtbl;
-    cCameraJitterer_cCameraJitterer(&self->Jitterer);
+    __15cCameraJitterer(&self->Jitterer);
     self->Position = t4vect_Origin;
     self->AlgorithmType = 88;
     self->Roll = 0.0f;
@@ -1471,7 +1471,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_cScriptRe
 extern void* cScriptRelativeAlgorithm_vtbl[];
 extern t4Vector t4vect_Origin;
 extern "C" void* cScriptAlgorithm_cScriptAlgorithm(cScriptAlgorithm* self);
-extern "C" void* cCameraJitterer_cCameraJitterer(void* self);
+extern "C" void* __15cCameraJitterer(void* self);
 
 /**
  * Constructs a relative script camera algorithm (camera placed relative to an algorithmic subject).
@@ -1485,7 +1485,7 @@ extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(cScriptRelati
 {
     cScriptAlgorithm_cScriptAlgorithm((cScriptAlgorithm*)self);
     VPTR_OF(cCameraAlgorithm, self) = cScriptRelativeAlgorithm_vtbl;
-    cCameraJitterer_cCameraJitterer(&self->Jitterer);
+    __15cCameraJitterer(&self->Jitterer);
     self->Position = t4vect_Origin;
     self->AlgorithmType = 89;
     self->Roll = 0.0f;
@@ -2372,20 +2372,16 @@ void* cCameraTriggerList_cCameraTriggerList(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", cCameraTriggerList__cCameraTriggerList);
+INCLUDE_ASM("camera/script/scriptcontroller", _$_18cCameraTriggerList);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 /**
- * Destroys a camera trigger list: frees its memory with operator_delete when @p flags bit 0 is set; nothing else.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a camera trigger list: frees its memory with operator_delete when g++'s delete flag bit 0 is set; nothing
+ * else.
  */
-extern "C" void cCameraTriggerList__cCameraTriggerList(cCameraTriggerList* self, int flags)
+cCameraTriggerList::~cCameraTriggerList()
 {
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

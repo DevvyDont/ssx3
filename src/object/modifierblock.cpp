@@ -1153,7 +1153,7 @@ void* cSpring_cSpring(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", cSpring__cSpring);
+INCLUDE_ASM("object/modifierblock", _$_7cSpring);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
@@ -1161,17 +1161,12 @@ void operator_delete(int* ptr);
 /**
  * Destroys a spring: frees its node array (+0x24, On Tour Nodes) when it has one, then frees the object when
  * asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cSpring__cSpring(cSpring* self, int flags)
+cSpring::~cSpring()
 {
-    void* nodes = self->Nodes;
+    void* nodes = Nodes;
     if (nodes != 0) {
         cMemMan_free(nodes);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
     }
 }
 #endif

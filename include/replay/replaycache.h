@@ -6,7 +6,7 @@
 // rider's command each tick (addControlCmd merges a repeat into the last entry, addCmdFrame appends); during playback
 // it returns them (getControlCmd), moveTo seeks to a tick, truncate cuts the list, load decodes a saved one.
 // cReplay owns up to two (cReplay::InputCache[2], replay/replay.h): cReplay_addCache does cMemMan_alloc(0x10,
-// "ReplayCache", 0, 0) + cReplayCache_cReplayCache; each cPlayer keeps the one it gets in cPlayer::ReplayCache
+// "ReplayCache", 0, 0) + cReplayCache::cReplayCache; each cPlayer keeps the one it gets in cPlayer::ReplayCache
 // (ai/player.h, 0xDF8). EA's source: d:/ssx/code/source/replay/replaycache.cpp (every reference to that assert path in
 // the preview, 0x00239310 .. 0x0023983C, is inside its cReplayCache methods, 0x00239220 .. 0x002399B8). Retail code is
 // in the decomp's unit replay/playbackman.cpp (0x0026D0A0 .. 0x0026D5E0); the decomp's unit replay/replaycache.cpp
@@ -14,7 +14,7 @@
 // Size 0x10: [R] the allocation size in cReplay_addCache. No vtable (the destructor is called directly), no bases in
 // retail code.
 //
-// A FLAT layout, like main/game.h. Tags: [R] cReplayCache_cReplayCache (operator new(0x8000, "CmdFrame") -> 0xC) and the
+// A FLAT layout, like main/game.h. Tags: [R] cReplayCache::cReplayCache (operator new(0x8000, "CmdFrame") -> 0xC) and the
 // allocation above; [U] how retail code uses the field (replay/playbackman.cpp, replay/replaycache.cpp's cReplay_writeInput,
 // the asm); [O] SSX On Tour's DWARF: class cReplayCache (size 0x10, CmdFrame at 0xC; its first 0xC bytes are not
 // named there) and class cReplayCacheState (size 0xC: RecordCursor, PlaybackCursor, PlaybackLeft), whose members fit
@@ -28,6 +28,8 @@
 // tControlCmd&), getCmdFrame() returns tControlCmd*.
 
 union tControlCmd;
+
+void operator_delete(int* p);
 
 struct cReplayCache {
     // --- cReplayCacheState (On Tour: size 0xC; [O] names, placed by [U])
@@ -54,6 +56,11 @@ struct cReplayCache {
     bool moveTo(unsigned int pos) __asm__("cReplayCache_moveTo");
     int load(char** pp) __asm__("cReplayCache_load");
     bool getControlCmd(tControlCmd* out) __asm__("cReplayCache_getControlCmd");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cReplayCache();
+    ~cReplayCache();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 CHECK_OFFSET(cReplayCache, RecordCursor, 0x0);
 CHECK_OFFSET(cReplayCache, PlaybackCursor, 0x4);

@@ -8,17 +8,19 @@
 // "SpeechInstance", "%sheaders.big", "%seventdat\events.evt", "mNumTotalBanks >= 0"); retail methods in the
 // sound/bankmonitor unit 0x2AF8A8..0x2B07F8, just before cSpeechSys's. Neither class has a vtable.
 // Class names from the allocation tags "SpeechInstance" / "SpeechBank". On Tour has no speech system.
-// Sizes [R]: cSpeechSys cSpeechSys_CreateInstance = cSpeechInstance_cSpeechInstance(cMemMan_alloc(0x904, "SpeechInstance")); cSpeechBank_Create =
+// Sizes [R]: cSpeechSys cSpeechSys_CreateInstance = cSpeechInstance::cSpeechInstance(cMemMan_alloc(0x904, "SpeechInstance")); cSpeechBank_Create =
 // cSpeechBank_cSpeechBank(cMemMan_alloc(0x4C, "SpeechBank")).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] constructors cSpeechInstance_cSpeechInstance / cSpeechBank_cSpeechBank, destructors cSpeechInstance__cSpeechInstance / cSpeechBank__cSpeechBank, the speech.inf keys
+//   [R] constructors cSpeechInstance::cSpeechInstance / cSpeechBank_cSpeechBank, destructors cSpeechInstance::~cSpeechInstance / cSpeechBank::~cSpeechBank, the speech.inf keys
 //       cSpeechInstance_ReadConfig reads;
 //   [U] how the retail methods use the field. Names marked "(our name)" describe that use; the rest are unk_.
 
 #include "layout.h"
 
 // cSpeechBank (0x4C): one loaded speech bank header (a "<name>.hdr" file).
+void operator_delete(int* p);
+
 struct cSpeechBank {
     int mBankId;       // 0x00 (our name) [R] ctor -1; cSpeechBank_Create = SPCH_addTable(data) (the driver's bank id);
                        //      [U] cSpeechBank_HasBankId compares it with a requested bank id; dtor SPCH_removeTable()s it
@@ -29,6 +31,10 @@ struct cSpeechBank {
 
     // Methods bound to their retail symbols by asm labels.
     bool HasBankId(int bankId) __asm__("cSpeechBank_HasBankId");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cSpeechBank();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 // One speech event file of a cSpeechInstance (8 bytes; our names).
@@ -38,6 +44,8 @@ struct tSpeechEventFile {
 };
 
 // cSpeechInstance (0x904): one speech stream.
+void operator_delete(int* p);
+
 struct cSpeechInstance {
     int mIndex;                        // 0x000 (our name) [R] ctor arg 1 = the instance's index in
                                        //       cSpeechSys::mSpeechInstance; [U] cSpeechInstance_PlayEvent passes it to
@@ -58,7 +66,7 @@ struct cSpeechInstance {
                                        //       (cSpeechInstance_AddBank ++, cSpeechInstance_mNumTotalBanks counts them all);
                                        //       dtor / cSpeechInstance_PlayEvent loop bound
     cSpeechBank* mBanks[500];          // 0x0F4 (our name) [U] cSpeechInstance_AddBank appends cSpeechBank_Create(...); cSpeechInstance_PlayEvent
-                                       //       searches by bank id; dtor destroys them (cSpeechBank__cSpeechBank)
+                                       //       searches by bank id; dtor destroys them (cSpeechBank::~cSpeechBank)
     int unk_8C4;                       // 0x8C4 [R] ctor 0; [U] set by func_002B07E8 (cSpeechSys func_002B0FE8)
     int mHoldTime;                     // 0x8C8 (our name) [R] ctor 0; [U] set by cSpeechInstance_SetHoldTime (cSpeechSys
                                        //       cSpeechSys_SetHoldTime); cSpeechInstance_PlayEvent passes it to cSpeechSys's play slot
@@ -92,6 +100,11 @@ struct cSpeechInstance {
     void AddBank(const char* bankPath, const char* shortName, void* headerData) __asm__("cSpeechInstance_AddBank");
     void IsPlaying() __asm__("cSpeechInstance_IsPlaying");
     void SetHoldTime(int holdValue) __asm__("cSpeechInstance_SetHoldTime");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cSpeechInstance(int instanceIndex, int streamId, int section, int memType, int loadLangHead, int reserved);
+    ~cSpeechInstance();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cSpeechBank, mBankId, 0x00);

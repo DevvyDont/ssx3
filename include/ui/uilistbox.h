@@ -45,6 +45,9 @@ struct tListBoxEntry {
                                      //      cUIListBox_setEntryDataByIndex (sw)
     char mUnicodeBufferSize;         // 0x10 [O]; [U] cUIListBox_setEntryByAsciiString (lb 0xA8 + i*0x14)
     char unk_11[0x3];                // 0x11 padding
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    tListBoxEntry();
 };
 
 CHECK_OFFSET(tListBoxEntry, mStringID, 0x00);

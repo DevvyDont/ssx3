@@ -36,7 +36,7 @@ struct tInstanceRecord;
 struct tSphTreeInfo;
 
 // EA's sphere tree of one mesh, placed in world space (On Tour: bxSphereTree 0x140 = SphereTree 0xC0 + staticInfo).
-// Retail methods in src/intersect/riderspheretree.cpp: SphereTree_SphereTree (ctor), SphereTree_init (reset), SphereTree_GetResolution
+// Retail methods in src/intersect/riderspheretree.cpp: SphereTree::SphereTree (ctor), SphereTree_init (reset), SphereTree_GetResolution
 // (radius), SphereTree_MoveOffset (translate), SphereTree_TransformAbs (set transform); bxSphereTree_operatorE is operator=.
 struct cRiderSphereTree;
 struct t4Vector;
@@ -47,7 +47,7 @@ struct bxSphereTree {
     t4Vector transCenter;  // 0x080 [O]; [U] SphereTree_MoveOffset adds the offset (lqc2/sqc2 0x80); reset stores t4vect_Origin
     float scale;           // 0x090 [O]; [U] SphereTree_init stores 1.0f, SphereTree_GetResolution multiplies the radius by it
     float worstCase;       // 0x094 [O]; [U] the riderspheretree.cpp queries keep the deepest penetration here
-    tSphTreeInfo* treeInfo; // 0x098 [O]; [R] SphereTree_SphereTree zeroes it; [U] cRollerModifier's ctors read the centre
+    tSphTreeInfo* treeInfo; // 0x098 [O]; [R] SphereTree::SphereTree zeroes it; [U] cRollerModifier's ctors read the centre
                            //       (+0x2C) and body inertia (+0x5C) from it; SphereTree_GetResolution reads it
     int sortAxis[8];       // 0x09C [O]; [U] riderspheretree.cpp's views ("order[8]", child visiting order)
     char unk_0BC[0x4];     // 0x0BC padding
@@ -132,7 +132,7 @@ struct cRollerModifier : public cTransformModifier {
     tInstanceRecord* m_pInstance; // 0x0D0 [O]; [R] ctor: the intersect info's instance (ii + 0x50), then sets flag bits
                                   //       in its word +0x8; cRollerModifier_cRollerModifier1 reads it from the frame; [U] writeToReplayFrame
     char unk_0D4[0xC];            // 0x0D4 padding (SphTree is 16-byte aligned)
-    bxSphereTree SphTree;         // 0x0E0 [O]; [R] ctor SphereTree_SphereTree(self + 0xE0), then operator= (bxSphereTree_operatorE) from
+    bxSphereTree SphTree;         // 0x0E0 [O]; [R] ctor SphereTree::SphereTree(self + 0xE0), then operator= (bxSphereTree_operatorE) from
                                   //       ii + 0x48; ctors read SphTree.treeInfo (lw 0x178); [U] collide, translateMe
     tBoundBox boundbox;           // 0x220 [O]; [U] setBoundBox (sq 0x220, 0x230), getBoundBox returns its address
     t4Matrix Transform;           // 0x240 [O]; [U] ctors/update build it from the body pose (sqc2 0x240-0x270);

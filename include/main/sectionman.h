@@ -5,7 +5,7 @@
 // hubs, the five skies 0x2C-0x30; 0x31 = none) and locations (eBELocationID: an event's set of sections) to world
 // sections, queues their load/activate/unload requests on the world (cWorldView loadSection/unloadSection/
 // activateSection), swaps the sky, sets the stream bandwidth, and runs the event-switch ("mode") sequence.
-// One instance: cGame_loadTrack allocates it as `cSectionMan_cSectionMan(cMemMan_alloc(0x1D4, "SectionMan"), game)`; reached
+// One instance: cGame_loadTrack allocates it as `cSectionMan::cSectionMan(cMemMan_alloc(0x1D4, "SectionMan"), game)`; reached
 // as SSXApp->Game->SectionMan (cGame::SectionMan, main/game.h). No vtable, no base class.
 // EA's source: d:/ssx/code/source/main/sectionman.cpp (preview and retail assert strings).
 //
@@ -14,7 +14,7 @@
 // mLocationModeMap = D_00442820, mStreamBandWidthRates[5] = cSectionMan_mStreamBandWidthRates = {256000, 460800, 819200, 819200, 819200}.
 //
 // Methods (names from On Tour's cSectionMan, matched by body and call pattern):
-//   main/game: cSectionMan_cSectionMan (ctor), cSectionMan__cSectionMan (dtor), cSectionMan_init, cSectionMan_load,
+//   main/game: cSectionMan::cSectionMan (ctor), cSectionMan::~cSectionMan (dtor), cSectionMan_init, cSectionMan_load,
 //     cSectionMan_activate, cSectionMan_isLoaded, cSectionMan_isActive, cSectionMan_loadSection,
 //     cSectionMan_activateSection, cSectionMan_unloadSection, cSectionMan_loadMode,
 //     cSectionMan_activateMode, cSectionMan_eventbegin, cSectionMan_update, cSectionMan_skyLoadComplete,
@@ -35,7 +35,7 @@
 // A FLAT layout, like main/game.h. Member names are EA's, from SSX On Tour's PSP DWARF (class cSectionMan), placed by:
 //   [P] the July 2003 preview's assert strings in sectionman.cpp ("m_pFreeEventList", "pPrevEvent->pNext==pEvent",
 //       "mpGame->World->isSectionLoaded(...)", "mMode==Mode");
-//   [R] retail's constructor and init (cSectionMan_cSectionMan, cSectionMan_init, cSectionMan_initEventPool);
+//   [R] retail's constructor and init (cSectionMan::cSectionMan, cSectionMan_init, cSectionMan_initEventPool);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order, where the fields on both sides are placed by [P], [R] or [U].
 // Unnamed fields are unk_XXX; rename only with evidence.
@@ -133,6 +133,8 @@ enum eSectionManMode {
     kSMMode_Num = 8
 };
 
+void operator_delete(int* p);
+
 struct cSectionMan {
     tSectionManEvent m_EventPool[51];      // 0x000 [O] (On Tour 61); [R] initEventPool: 50 linked + a terminator at 0x190
     tSectionManEvent* m_pFreeEventList;    // 0x198 [P] assert m_pFreeEventList; [R] = &m_EventPool[0];
@@ -195,6 +197,11 @@ struct cSectionMan {
     void removeActiveEvent(tSectionManEvent* prev, tSectionManEvent* node) __asm__("cSectionMan_removeActiveEvent");
     void load(int idx, int mode) __asm__("cSectionMan_load");
     int isLoaded(int idx) __asm__("cSectionMan_isLoaded");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cSectionMan(int Game);
+    ~cSectionMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cSectionMan, m_EventPool, 0x000);

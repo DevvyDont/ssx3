@@ -10,7 +10,7 @@
 // Find__16cPS2DeferManagerRC10sDrawStateUc, Find__16cPS2DeferManagerPC14cDrawStateListG7cTexKeyUci).
 //
 // Size 0x6B100: [R] cPS2GraphicsMan_Init allocates it with cMemMan_alloc(0x6B100, "DEFER MAN") and calls
-// cPS2DeferManager_cPS2DeferManager. No base class, no vtable (the ctor stores none; no vtable in vtables.tsv).
+// cPS2DeferManager::cPS2DeferManager. No base class, no vtable (the ctor stores none; no vtable in vtables.tsv).
 // The ctor (render/font.cpp, view sFontCache) fills the sDrawState texture ids of the 0xA28 submit records, the 0x400
 // draw-state list entries and the current state with -1 (sTextureState ctor) and runs the (empty) constructors of the
 // 0x800 buckets and the 12 view states.
@@ -195,6 +195,9 @@ struct cPS2DeferManager {
     void setCurrentState(const sDrawState* src) __asm__("cPS2DeferManager_setCurrentState");
     void writeVu1ProgramSetup(int type, int mode, unsigned int w3, ulong** pp)
         __asm__("cPS2DeferManager_writeVu1ProgramSetup");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cPS2DeferManager();
 };
 
 CHECK_OFFSET(cPS2DeferManager, mNumSubmitDMA, 0x00000);

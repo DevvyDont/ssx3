@@ -52,7 +52,7 @@ struct cFEStateVideoPlayer : public cFEState {
     char mAudioFileName[256];       // 0x148 [O]; [R] emptied, mOptions.sAudioFileName points at it; [U]
                                     //       setVideoSourceFiles copies the audio file into it, or empties it
     cMoviePlayer* mpMoviePlayer;    // 0x248 [O][P] (preview 0x144); [R] 0; the dtor deletes it; [U] onCreateScreen:
-                                    //       cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, "MoviePlayer")); Start /
+                                    //       cMoviePlayer::cMoviePlayer(cMemMan_alloc(68, "MoviePlayer")); Start /
                                     //       onUpdate / onRender2D drive it, onDestroyScreen deletes it and clears it
     tMoviePlayOptions mOptions;     // 0x24C [O] (On Tour 0x18, retail 0x24); [R] tMoviePlayOptions_SetDefaults, then
                                     //       the two file-name pointers; [U] setOptions copies a whole block in (0x24

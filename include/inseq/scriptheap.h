@@ -6,14 +6,14 @@
 // allocate from it through EA's operator new(size, cScriptHeap*) / new[] (operator_new3 / operator_new_array), which
 // store the heap pointer in the first kScriptHeapPointerSize (kScriptHeapPointerSize = 4) bytes of each allocation so that
 // operator delete (operator_delete1) can find it again. No virtual functions, no base class.
-// Size 0xC [R]: cInSeq's members around it are at 0x4 (mMaxScripts) and 0x14 (mpScriptHeap), and cInSeq_cInSeq
+// Size 0xC [R]: cInSeq's members around it are at 0x4 (mMaxScripts) and 0x14 (mpScriptHeap), and cInSeq::cInSeq
 // runs the constructor cScriptHeap_cScriptHeap on cInSeq + 0x8. Same size, order and offsets as On Tour's class cScriptHeap.
 // EA's source: z:/main/game/source/inseq/all_in_one_inseq.cpp in SSX On Tour's DWARF (the July 2003 preview has no
 // assert or out-of-line accessor for it), hence inseq/; the header's file name is a guess. Retail code: unit
 // replay/replaycache 0x002722E0-0x00272488.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] the constructor cScriptHeap_cScriptHeap (stores all three fields) and cInSeq_cInSeq;
+//   [R] the constructor cScriptHeap_cScriptHeap (stores all three fields) and cInSeq::cInSeq;
 //   [U] how retail code uses the field: AllocMem cScriptHeap_AllocMem, FreeMem cScriptHeap_FreeMem;
 //   [O] SSX On Tour's DWARF (class cScriptHeap, struct tFreeBlock): member names, types and order.
 

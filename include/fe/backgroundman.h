@@ -11,6 +11,8 @@
 #include "layout.h"
 
 
+void operator_delete(int* p);
+
 struct cBackgroundMan {
     int* mpiImageTID;               // 0x000 [O]
     int miNumImage;                 // 0x004 [O]
@@ -24,6 +26,10 @@ struct cBackgroundMan {
     int setActiveImage(int i) __asm__("cBackgroundMan_setActiveImage");
     bool loadImages() __asm__("cBackgroundMan_loadImages");
     void renderImage() __asm__("cBackgroundMan_renderImage");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cBackgroundMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cBackgroundMan, mpiImageTID, 0x000);

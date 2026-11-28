@@ -19,7 +19,7 @@
 #include "world/instancerecord.h"
 
 //100%
-INCLUDE_ASM("replay/playbackman", cPlaybackMan_cPlaybackMan);
+INCLUDE_ASM("replay/playbackman", __12cPlaybackMani);
 #ifdef SKIP_ASM
 struct cBigFile;
 cBigFile* cBigFile_cBigFile(cBigFile* self);
@@ -48,41 +48,39 @@ extern char str_BigFile_b[];
  *
  * @param maxPlaybackFiles  number of playback-file entries cPlaybackMan_initLocation() allocates (cGame
  *                          passes 40)
- * @return @p self
  */
-extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPlaybackFiles)
+cPlaybackMan::cPlaybackMan(int maxPlaybackFiles)
 {
-    cReplayFrame_cReplayFrame((cReplayFrame*)&self->SaveFramePtr);
+    cReplayFrame_cReplayFrame((cReplayFrame*)&SaveFramePtr);
     cGame* world = SSXApp->Game;
-    self->Game = world;
+    Game = world;
     cAI* level = world->AI;
-    self->AI = level;
-    self->AsyncFileNum = -1;
-    self->MaxPlaybackFiles = maxPlaybackFiles;
-    self->AsyncHandle = cPlaybackMan::kNoAsyncHandle;
-    self->SaveFrame = 0;
-    self->SaveFrameData = 0;
-    self->CurrentFrame = 0;
-    self->NumPlaybackFiles = 0;
-    self->PlaybackFiles = 0;
-    self->State = 0;
+    AI = level;
+    AsyncFileNum = -1;
+    MaxPlaybackFiles = maxPlaybackFiles;
+    AsyncHandle = cPlaybackMan::kNoAsyncHandle;
+    SaveFrame = 0;
+    SaveFrameData = 0;
+    CurrentFrame = 0;
+    NumPlaybackFiles = 0;
+    PlaybackFiles = 0;
+    State = 0;
     cInput* playerInput = level->Players[0]->Input;
     cInputMap* map = playerInput->Map;
-    self->RealInputPad = playerInput->Pad;
-    self->InputPad = (cInputPad*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
-    self->InputPad->NumButtons = 0;
+    RealInputPad = playerInput->Pad;
+    InputPad = (cInputPad*)cMemMan_alloc(676, str_cInputPad, 0x20000000, 0);
+    InputPad->NumButtons = 0;
     cInput* replayStream = (cInput*)cMemMan_alloc(8, str_cInput, 0x20000000, 0);
     // ORIGINAL-PTR: the retail symbols cInput_setPad__FPvi / cInput_setMap__FPvi mangle the pad and the map as int, so
     // the original converted the pointers to them too
-    cInput_setPad(replayStream, (int)self->InputPad);
+    cInput_setPad(replayStream, (int)InputPad);
     cInput_setMap(replayStream, (int)map);
-    self->Input = replayStream;
+    Input = replayStream;
     char name[0x100];
     sprintf(name, kPlaybackBigFmt, kPlaybackPath);
     cBigFile* bf = cBigFile_cBigFile((cBigFile*)cMemMan_alloc(8, str_BigFile_b, 0, 0));
-    self->BigFile = bf;
+    BigFile = bf;
     cBigFile_open(bf, name, 0);
-    return self;
 }
 #endif
 
@@ -728,7 +726,7 @@ bool cPlaybackMan::setupFile(int idx)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", cReplayCache_cReplayCache);
+INCLUDE_ASM("replay/playbackman", __12cReplayCache);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -740,19 +738,16 @@ void cReplayCache_reset(void* self);
  *
  * The buffer holds up to 0x1000 8-byte command chunks. cReplayCache_reset then zeroes the chunk count and read position.
  * cReplay_addCache calls it on a new 0x10-byte "ReplayCache" block.
- *
- * @return @p self
  */
-extern "C" void* cReplayCache_cReplayCache(cReplayCache* self)
+cReplayCache::cReplayCache()
 {
-    self->CmdFrame = (tControlCmd*)operator_new_tag(0x8000, str_CmdFrame, 0, 0);
-    self->reset();
-    return ((void*)self);
+    CmdFrame = (tControlCmd*)operator_new_tag(0x8000, str_CmdFrame, 0, 0);
+    reset();
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", cReplayCache__cReplayCache);
+INCLUDE_ASM("replay/playbackman", _$_12cReplayCache);
 #ifdef SKIP_ASM
 extern "C" void cReplayCache_purge(cReplayCache* self);
 void operator_delete(int* ptr);
@@ -761,15 +756,10 @@ void operator_delete(int* ptr);
  * Destroys a replay input cache: frees its command buffer (cReplayCache_purge) and the object itself when asked.
  *
  * cReplay_removeCache calls it with flags 3.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cReplayCache__cReplayCache(cReplayCache* self, int flags)
+cReplayCache::~cReplayCache()
 {
-    ((cReplayCache*)self)->purge();
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
+    ((cReplayCache*)this)->purge();
 }
 #endif
 
@@ -781,7 +771,7 @@ void cMemMan_free(void* p);
 /**
  * Frees the replay input cache's command buffer (+0xC), if any, and clears the pointer.
  *
- * cReplayCache__cReplayCache calls it when the cache is destroyed.
+ * cReplayCache::~cReplayCache calls it when the cache is destroyed.
  */
 void cReplayCache::purge()
 {
@@ -1081,8 +1071,8 @@ extern void* cReplayFrame_vtbl[];
  * Constructs an empty replay frame.
  *
  * Runs the cReplayFramePtr base constructor, installs the cReplayFrame vtable cReplayFrame_vtbl and clears the frame
- * (cReplayFrame_clearFrame). cReplay_cReplay builds its 16 Frames and cPlaybackMan_cPlaybackMan its saved frame (+0x14)
- * with it.
+ * (cReplayFrame_clearFrame). cReplay::cReplay builds its 16 Frames and cPlaybackMan::cPlaybackMan its saved frame
+ * (+0x14) with it.
  *
  * @return the constructed frame (self)
  */

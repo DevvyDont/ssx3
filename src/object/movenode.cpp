@@ -597,19 +597,19 @@ void cMoveNode::addUVScroll(void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addTexFlip);
 #ifdef SKIP_ASM
 extern char str_TexFlipModifier[];
-extern "C" void* cTexFlipModifier_cTexFlipModifier(void* mem, void* desc, void* owner);
+extern "C" void* __16cTexFlipModifierPvP15tInstanceRecord(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, cTexFlipModifier* mod);
 
 /**
- * Adds a texture-flip modifier built from a placement record: a new "TexFlipModifier" (cTexFlipModifier_cTexFlipModifier, with the node's
+ * Adds a texture-flip modifier built from a placement record: a new "TexFlipModifier" (cTexFlipModifier::cTexFlipModifier, with the node's
  * instance) on the node.
  *
  * @param desc  the texture-flip data (On Tour const tAddTexFlipData& tdata)
  */
 void cMoveNode::addTexFlip(void* desc)
 {
-    addTexFlipModifier((cTexFlipModifier*)cTexFlipModifier_cTexFlipModifier(cMemMan_alloc(232, str_TexFlipModifier,
-            0x20000000, 0), desc, Instance));
+    addTexFlipModifier((cTexFlipModifier*)__16cTexFlipModifierPvP15tInstanceRecord(
+            cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), desc, Instance));
 }
 #endif
 
@@ -2655,7 +2655,7 @@ void* cParticleNode_writeToReplayFrame(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", cMultiParticleMan_cMultiParticleMan);
+INCLUDE_ASM("object/movenode", __17cMultiParticleMan);
 #ifdef SKIP_ASM
 extern void* cMultiParticleMan_TheMultiParticleMan;
 
@@ -2663,22 +2663,19 @@ extern void* cMultiParticleMan_TheMultiParticleMan;
  * Constructs the multi-particle manager and makes it the global instance.
  *
  * Stores this in cMultiParticleMan_TheMultiParticleMan and clears its four words.
- *
- * @return this
  */
-extern "C" void* cMultiParticleMan_cMultiParticleMan(cMultiParticleMan* self)
+cMultiParticleMan::cMultiParticleMan()
 {
     int i;
-    cMultiParticleMan_TheMultiParticleMan = ((void*)self);
+    cMultiParticleMan_TheMultiParticleMan = ((void*)this);
     for (i = 0; i < 4; i++) {
-        self->Particles[i] = 0;
+        Particles[i] = 0;
     }
-    return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", cMultiParticleMan__cMultiParticleMan);
+INCLUDE_ASM("object/movenode", _$_17cMultiParticleMan);
 #ifdef SKIP_ASM
 extern void* cMultiParticleMan_TheMultiParticleMan;
 extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* p, int flags);
@@ -2687,22 +2684,17 @@ void operator_delete(int* ptr);
 /**
  * Destroys the multi-particle manager: deletes each of its up to 4 cMultiParticle (destructor flags 3) and clears the
  * global cMultiParticleMan_TheMultiParticleMan that points at the manager.
- *
- * @param flags  destructor flags; bit 0 frees the manager itself with operator_delete
  */
-extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, int flags)
+cMultiParticleMan::~cMultiParticleMan()
 {
     int i;
     for (i = 0; i < 4; i++) {
-        cMultiParticle* particle = self->Particles[i];
+        cMultiParticle* particle = Particles[i];
         if (particle != 0) {
             cMultiParticle__cMultiParticle(particle, 3);
         }
     }
     cMultiParticleMan_TheMultiParticleMan = 0;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -2710,13 +2702,13 @@ extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, in
 INCLUDE_ASM("object/movenode", cMultiParticleMan_addParticle);
 #ifdef SKIP_ASM
 extern char str_MultiParticle[];
-extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* particleData, int maxInst);
+extern "C" void* __14cMultiParticlePvi(cMultiParticle* mem, void* particleData, int maxInst);
 
 /**
  * Creates the cMultiParticle for slot @p i if the slot is empty (On Tour addParticle(int id, tParticleData* pdata,
  * int numInst)).
  *
- * Allocates 0x50 bytes (tag str_MultiParticle, "MultiParticle") and runs the cMultiParticle constructor (cMultiParticle_cMultiParticle) with
+ * Allocates 0x50 bytes (tag str_MultiParticle, "MultiParticle") and runs the cMultiParticle constructor (cMultiParticle::cMultiParticle) with
  * @p pdata and @p numInst. An occupied slot is left alone; @p i is not range-checked against the 4 slots.
  *
  * @param i  the slot index (On Tour id)
@@ -2727,7 +2719,7 @@ void cMultiParticleMan::addParticle(int i, void* pdata, int numInst)
 {
     void** slot = (void**)&Particles[i];
     if (*slot == 0) {
-        *slot = cMultiParticle_cMultiParticle((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), pdata, numInst);
+        *slot = __14cMultiParticlePvi((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), pdata, numInst);
     }
 }
 #endif
@@ -2918,7 +2910,7 @@ extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, cBxReplayFram
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", cMultiParticle_cMultiParticle);
+INCLUDE_ASM("object/movenode", __14cMultiParticlePvi);
 #ifdef SKIP_ASM
 struct sQuad_7DD8 {
     float v[4];
@@ -2953,14 +2945,12 @@ extern "C" void cMultiParticle_setupMultiParticle(void* self);
  * sets up the emitter and id list (cMultiParticle_setupMultiParticle), then copies BoundBox from the emitter and Offset
  * from the emitter position with w = 0.
  *
- * @param mem  storage for the system
  * @param particleData  particle data (tParticleData, 216 bytes)
  * @param maxInst  maximum instance count
- * @return mem
  */
-extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* particleData, int maxInst)
+cMultiParticle::cMultiParticle(void* particleData, int maxInst)
 {
-    cMultiParticle* self = mem;
+    cMultiParticle* self = this;
     self->MaxInst = maxInst;
     self->NumInst = 0;
     tParticleData* buf = (tParticleData*)cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
@@ -2971,7 +2961,6 @@ extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* partic
     *(sQuad_7DD8*)&self->BoundBox = emitterDesc->a;
     *(sQuad_7DD8*)&self->BoundBox.MaxPoint = emitterDesc->b;
     *(sQuad_7DD8*)&self->Offset = sQuad_7DD8(emitterDesc->pos[0], emitterDesc->pos[1], emitterDesc->pos[2], 0.0f);
-    return self;
 }
 #endif
 

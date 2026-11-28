@@ -2,7 +2,7 @@
 #define MAIN_GAMERENDER_H
 
 // FrustumIntersector: one camera view's visibility query. cGame_render builds one on its stack per view
-// (FrustumIntersector_FrustumIntersector, the ctor: it runs the whole query): it culls the world's octree cells against the view
+// (FrustumIntersector::FrustumIntersector, the ctor: it runs the whole query): it culls the world's octree cells against the view
 // (FrustumCallback, FrustumCallback_operatorCall), then sorts the objects of the inside / crossing cells into fixed-size lists -
 // instances, patches, fog volumes and light halos, each "inside" (whole object visible) or "crossing" (tested again on
 // VU0, one object pending at a time in last*). cGame's render passes (renderModels, renderPatches, renderFogVolumes,
@@ -20,7 +20,7 @@
 // allocation); the ctor zeroes every count and last* word up to 0x7FC4, and lighthaloscrossing[128] ends at 0x81C8,
 // rounded up to the 16-byte alignment of the matrices; [O] On Tour's 0x8210 minus 0x40. No vtable, no base class.
 //
-// A FLAT layout, like main/game.h. Evidence tags: [R] the ctor FrustumIntersector_FrustumIntersector; [U] how retail code uses the field
+// A FLAT layout, like main/game.h. Evidence tags: [R] the ctor FrustumIntersector::FrustumIntersector; [U] how retail code uses the field
 // (src/main/ssxapp.cpp and the asm of the functions above); [O] SSX On Tour's DWARF (names, types, order);
 // [P] the preview's asserts (array bounds).
 
@@ -46,6 +46,8 @@ struct CellClipT {
 CHECK_OFFSET(CellClipT, pCell, 0x0);
 CHECK_OFFSET(CellClipT, uVisMask, 0x4);
 CHECK_SIZE(CellClipT, 0x8);
+
+struct cBXNash;
 
 struct FrustumIntersector {
     cOcclusionMan* occlusionman;    // 0x0000 [O] (a reference); [R] ctor argument 2; [U] cOcclusionMan_updateView
@@ -96,6 +98,9 @@ struct FrustumIntersector {
     void AddAllTypedInside(CellClipT* list, int count) __asm__("FrustumIntersector_AddAllTypedInside");
     void crossingpatch(void *vnode, int frustum) __asm__("FrustumIntersector_crossingpatch");
     void crossingfogvolume(tParticleInstanceRecord* obj, int frustum) __asm__("FrustumIntersector_crossingfogvolume");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    FrustumIntersector(cBXNash* nash, cOcclusionMan* occlusionMan, const tBoundBox* cameraBox, cWorld* world);
 };
 
 CHECK_OFFSET(FrustumIntersector, occlusionman, 0x0000);

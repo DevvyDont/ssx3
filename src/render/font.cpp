@@ -3577,7 +3577,7 @@ void cPS2LightMan::ClearChannel()
 #endif
 
 //100%
-INCLUDE_ASM("render/font", cPS2DeferManager_cPS2DeferManager);
+INCLUDE_ASM("render/font", __16cPS2DeferManager);
 #ifdef SKIP_ASM
 extern "C" void* memset(void* dst, int c, int n);
 
@@ -3635,13 +3635,10 @@ inline void* operator new(unsigned int, void* p) { return p; }
  * words from +0x57484 and twelve from +0x69CBC with empty constructors. Neither count (+0x0 for the draw records,
  * +0x51480 for the state entries) is set here. Called from cPS2GraphicsMan_Init. The C's struct names (sFontCache,
  * sFontGlyph80, ...) are placeholders: the object is the one mpDeferMan points to.
- *
- * @return @p self
  */
-extern "C" void* cPS2DeferManager_cPS2DeferManager(cPS2DeferManager* self)
+cPS2DeferManager::cPS2DeferManager()
 {
-    new (((void*)self)) sFontCache;
-    return ((void*)self);
+    new (((void*)this)) sFontCache;
 }
 #endif
 

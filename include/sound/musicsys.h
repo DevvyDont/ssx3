@@ -61,7 +61,7 @@ struct cMusicSys {
     char unk_3F4[0x4];                        // 0x03F4 padding (mActiveMap is 8-aligned)
     unsigned long mActiveMap;                 // 0x03F8 PORT: 64-bit long on the EE. [P] MUSIC_StoreDefaultActiveMap (ld); [R] ctor sets bit n for song n; [U] cMusicSys_AddActiveSongByName/cMusicSys_AddActiveSong/cMusicSys_getActiveMap/cMusicSys_IsCurrentSongActive
     unsigned long mDefaultActiveMap;          // 0x0400 [P] MUSIC_StoreDefaultActiveMap (sd) / MUSIC_GetDefaultActiveMap (retail 0x2BACD8)
-    cSongInstance* mSongInstance;                  // 0x0408 [P] assert "mSongInstance" (musicsys.cpp:1487, this+0x408); MUSIC_Current (retail 0x2BAC30), MUSIC_GetStreamHandle, MUSIC_SetDelay; [U] cMusicSys_StartSong: cSongInstance_Create = cMemMan_alloc(0xC4, "SongInstance") + ctor cSongInstance_cSongInstance; dtor cSongInstance__cSongInstance
+    cSongInstance* mSongInstance;                  // 0x0408 [P] assert "mSongInstance" (musicsys.cpp:1487, this+0x408); MUSIC_Current (retail 0x2BAC30), MUSIC_GetStreamHandle, MUSIC_SetDelay; [U] cMusicSys_StartSong: cSongInstance_Create = cMemMan_alloc(0xC4, "SongInstance") + ctor cSongInstance_cSongInstance; dtor cSongInstance::~cSongInstance
     float mFadeStep;                          // 0x040C (our name) [U] cMusicSys_FadeBaseVolume: volume fade step per tick;
                                               //        cMusicSys_StepBaseVolumeFade (monitor callback) adds it
     float mFadeVolume;                        // 0x0410 (our name) [U] cMusicSys_FadeBaseVolume/cMusicSys_StepBaseVolumeFade: current faded volume

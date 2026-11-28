@@ -7,14 +7,14 @@
 // RecyclePlayer puts it back; Play/Stop/Pause/Resume/Preview forward to the player by ID. One instance:
 // cBXScriptEngine::mpInSeq (scripter/ssxscriptengine.h 0x2B8). No virtual functions, no base class, no global.
 // Size 0x20 [R]: cBXScriptEngine_SetupBXEngine allocates it with cMemMan_alloc(0x20, "InSeq") and runs
-// cInSeq_cInSeq(it, engine->mpInSeqHeap, size, maxUniqueAnimPlayers, engine + 0x2AC = the engine's cInSeqComm
+// cInSeq::cInSeq(it, engine->mpInSeqHeap, size, maxUniqueAnimPlayers, engine + 0x2AC = the engine's cInSeqComm
 // base). Same size, order and offsets as On Tour's class cInSeq.
 // EA's source: z:/main/game/source/inseq/all_in_one_inseq.cpp in SSX On Tour's DWARF (the July 2003 preview has no
 // assert or out-of-line accessor for this class), hence inseq/; the header's file name is a guess. Retail code: unit
 // replay/replaycache 0x00272788-0x00272D68.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] the constructor cInSeq_cInSeq (stores every field) and the allocation above;
+//   [R] the constructor cInSeq::cInSeq (stores every field) and the allocation above;
 //   [U] how retail code uses the field (asm of the methods listed in methods.txt);
 //   [O] SSX On Tour's DWARF (class cInSeq, struct tScriptMainNode): member names, types and order.
 
@@ -24,7 +24,7 @@
 
 struct cInSeqComm;          // On Tour: interface, vptr only; cBXScriptEngine implements it (its base at 0x2AC)
 
-// One pool slot (On Tour tScriptMainNode, 0x50). Retail 0x58 [R]: cInSeq_cInSeq allocates maxScripts x 0x58 with
+// One pool slot (On Tour tScriptMainNode, 0x50). Retail 0x58 [R]: cInSeq::cInSeq allocates maxScripts x 0x58 with
 // new[] (operator_new_array, element constructor = cScriptPlayerMain_cScriptPlayerMain on node + 8) and links
 // +0x50/+0x54. Retail has one more word than On Tour at the node's start (as cScriptPlayerEntity and the channel
 // classes do) and its cScriptPlayerMain is 0x48 (On Tour 0x44), so On Tour's offsets are +4 / +8 here.
@@ -38,6 +38,8 @@ struct tScriptMainNode {
     tScriptMainNode* pNext;           // 0x50 [O]; [R] ctor &node[i + 1], last 0; [U] the lists' forward link
     tScriptMainNode* pPrev;           // 0x54 [O]; [R] ctor &node[i - 1], first 0; [U] RecyclePlayer unlinks by it
 };
+
+void operator_delete(int* p);
 
 struct cInSeq {
     cInSeqComm* mpCommInterface;      // 0x00 [O]; [R] ctor stores its 5th argument (cBXScriptEngine + 0x2AC); [U]
@@ -70,6 +72,11 @@ struct cInSeq {
     void Resume(int playerID) __asm__("cInSeq_Resume");
     void ResumeAll() __asm__("cInSeq_ResumeAll");
     void* GetPlayer(int playerID) __asm__("cInSeq_GetPlayer");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cInSeq(void* pHeap, void* heapSize, unsigned int count, int tag);
+    ~cInSeq();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(tScriptMainNode, unk_00, 0x00);

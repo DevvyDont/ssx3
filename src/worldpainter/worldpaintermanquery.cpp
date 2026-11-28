@@ -1206,7 +1206,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tQuadTreeNode_setLeafNode);
 extern "C" void tQuadTreeNode_setLeafNode_impl(void* self, int a, int b) __asm__("tQuadTreeNode_setLeafNode");
 
 /**
- * Makes a node a leaf: stores @p key in m_key (+0x4) and @p data in m_data (+0x0). cQuadTree_cQuadTree uses it for the
+ * Makes a node a leaf: stores @p key in m_key (+0x4) and @p data in m_data (+0x0). cQuadTree::cQuadTree uses it for the
  * root.
  *
  * @param key  the leaf key (the region index)
@@ -1257,7 +1257,7 @@ void tQuadTreeNode::init()
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("worldpainter/worldpaintermanquery", cQuadTree_cQuadTree);
+INCLUDE_ASM("worldpainter/worldpaintermanquery", __9cQuadTreeiifff);
 #ifdef SKIP_ASM
 extern "C" unsigned short cQuadTree_getFreeNode();
 extern "C" void tQuadTreeNode_setLeafNode(int, int, int);
@@ -1270,28 +1270,26 @@ extern "C" void tQuadTreeNode_setLeafNode(int, int, int);
  * clears m_pad and makes the root a leaf with the default key and data (tQuadTreeNode_setLeafNode), which m_defaultNode
  * also keeps (getLeaf returns it for positions outside the grid).
  *
- * @param quadTree  the cQuadTree
  * @param defaultKey  the key of the whole area (and of positions outside it)
  * @param defaultData  the data pointer of the whole area
  * @param fparg0  the area's minimum x in world units
  * @param fparg1  the area's minimum y in world units
  * @param fparg2  the area's width (and height) in world units
- * @return @p quadTree
  */
-extern "C" void *cQuadTree_cQuadTree(cQuadTree* quadTree, int defaultKey, int defaultData, float fparg0, float fparg1, float fparg2) {
-    quadTree->m_freeNodes = 0;
-    quadTree->m_nodes = 0;
-    quadTree->m_numNodes = 0;
-    quadTree->m_numUsedNodes = 0;
-    quadTree->m_offsetX = fparg0;
-    quadTree->m_offsetY = fparg1;
-    quadTree->m_scale = (float) (32768.0f / fparg2);
-    quadTree->m_root = cQuadTree_getFreeNode();
-    (*(short*)&quadTree->m_pad) = 0;
-    tQuadTreeNode_setLeafNode(((int)quadTree->m_nodes) + ((quadTree->m_root) * 8), defaultKey, defaultData);
-    quadTree->m_defaultNode.m_key = defaultKey;
-    (*(int*)&quadTree->m_defaultNode) = defaultData;
-    return ((void*)quadTree);
+cQuadTree::cQuadTree(int defaultKey, int defaultData, float fparg0, float fparg1, float fparg2)
+{
+    m_freeNodes = 0;
+    m_nodes = 0;
+    m_numNodes = 0;
+    m_numUsedNodes = 0;
+    m_offsetX = fparg0;
+    m_offsetY = fparg1;
+    m_scale = (float) (32768.0f / fparg2);
+    m_root = cQuadTree_getFreeNode();
+    (*(short*)&m_pad) = 0;
+    tQuadTreeNode_setLeafNode(((int)m_nodes) + ((m_root) * 8), defaultKey, defaultData);
+    m_defaultNode.m_key = defaultKey;
+    (*(int*)&m_defaultNode) = defaultData;
 }
 #endif
 

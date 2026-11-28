@@ -547,29 +547,23 @@ int cBEEconInterface::getCostForNextIncrement(int humanIndex, int characterId, u
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", cBECharProfileDB__cBECharProfileDB);
+INCLUDE_ASM("be/beintecon", _$_16cBECharProfileDB);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
 /**
  * Destroys a character profile: frees its item lookup table (+0x288, from cBECharProfileDB_buildBoltList) and clears the pointer; with
- * @p flags & 1 also frees the object.
- *
- * @param flags  bit 0: operator_delete the object
+ * g++'s delete flag & 1 also frees the object.
  */
-extern "C" void cBECharProfileDB__cBECharProfileDB(cBECharProfileDB* self, int flags)
+cBECharProfileDB::~cBECharProfileDB()
 {
-    void* buffer = self->mpBoltsMap;
+    void* buffer = mpBoltsMap;
     if (buffer != 0)
     {
         cMemMan_free(buffer);
     }
-    self->mpBoltsMap = 0;
-    if (flags & 1)
-    {
-        operator_delete((int*)self);
-    }
+    mpBoltsMap = 0;
 }
 #endif
 

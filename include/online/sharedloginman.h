@@ -10,8 +10,8 @@
 // "!SharedLoginMan" and the allocation tag "cSharedLoginMan"). Retail code: dirtysock/tagsunk 0x00265880..0x00265F00.
 // One instance, SharedLoginMan: cSharedLoginMan_createInstance creates it, cSharedLoginMan_destroyInstance destroys it. No On Tour counterpart.
 //
-// Size 8: [R] cSharedLoginMan_createInstance: cMemMan_alloc(8, "cSharedLoginMan", 0x20000000) + the constructor cSharedLoginMan_cSharedLoginMan, which runs
-// the init cSharedLoginMan_init (state 1, result 0). No vtable, no base class (the destructor cSharedLoginMan__cSharedLoginMan is called directly).
+// Size 8: [R] cSharedLoginMan_createInstance: cMemMan_alloc(8, "cSharedLoginMan", 0x20000000) + the constructor cSharedLoginMan::cSharedLoginMan, which runs
+// the init cSharedLoginMan_init (state 1, result 0). No vtable, no base class (the destructor cSharedLoginMan::~cSharedLoginMan is called directly).
 //
 // A FLAT layout, like main/game.h. Evidence tags: [R] the init cSharedLoginMan_init / shutdown cSharedLoginMan_shutdown; [U] how retail
 // code uses the field (src/dirtysock/tagsunk.cpp, src/fe/feasyncfile.cpp).
@@ -20,6 +20,8 @@
 // then moves one state on when done (4, 8, 12, 16) or two on when it failed; 20 / 21 / 22 format results.
 
 #include "layout.h"
+
+void operator_delete(int* p);
 
 struct cSharedLoginMan {
     int mState;                     // 0x0 [R] init 1, shutdown 0; [U] the state machine above; the front end's
@@ -44,6 +46,11 @@ struct cSharedLoginMan {
     void startSaveAccount() __asm__("cSharedLoginMan_startSaveAccount");
     void startCreateAccount() __asm__("cSharedLoginMan_startCreateAccount");
     void startFormat() __asm__("cSharedLoginMan_startFormat");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cSharedLoginMan();
+    ~cSharedLoginMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cSharedLoginMan, mState, 0x0);

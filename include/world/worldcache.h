@@ -119,7 +119,9 @@ CHECK_OFFSET(cWorldBlockAllocator, m_pFreeBlocks, 0x10);
 CHECK_SIZE(cWorldBlockAllocator, 0x14);
 
 // One section's arena (On Tour cSectionBlockAllocator; retail cMemMan_alloc(0x14, "Section Allocator")).
-// Methods: cSectionBlockAllocator_cSectionBlockAllocator (ctor), cSectionBlockAllocator__cSectionBlockAllocator (dtor), cSectionBlockAllocator_releaseBlocks, cSectionBlockAllocator_allocate.
+// Methods: cSectionBlockAllocator_cSectionBlockAllocator (ctor), cSectionBlockAllocator::~cSectionBlockAllocator (dtor), cSectionBlockAllocator_releaseBlocks, cSectionBlockAllocator_allocate.
+void operator_delete(int* p);
+
 struct cSectionBlockAllocator {
     cWorldBlockAllocator* m_pBlockAllocator; // 0x00 [P] assert pAllocator (ctor argument); [R] ctor
     unsigned int m_uiSectionID;     // 0x04 [O]; [R] ctor
@@ -130,6 +132,10 @@ struct cSectionBlockAllocator {
     // Methods bound to their retail symbols by asm labels.
     void releaseBlocks() __asm__("cSectionBlockAllocator_releaseBlocks");
     char* allocate(int size, unsigned int flags) __asm__("cSectionBlockAllocator_allocate");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cSectionBlockAllocator();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cSectionBlockAllocator, m_pBlockAllocator, 0x00);
@@ -140,7 +146,7 @@ CHECK_OFFSET(cSectionBlockAllocator, m_pMRUBlock, 0x10);
 CHECK_SIZE(cSectionBlockAllocator, 0x14);
 
 // cWorldMemoryMan: the world's memory manager (one instance: cWorldCache::m_pWorldMemMan, cWorldCache_init:
-// cMemMan_alloc(0x13C, "WORLD MEMMAN")). On Tour 0x13C, same layout. Methods: cWorldMemoryMan_cWorldMemoryMan,
+// cMemMan_alloc(0x13C, "WORLD MEMMAN")). On Tour 0x13C, same layout. Methods: cWorldMemoryMan::cWorldMemoryMan,
 // cWorldMemoryMan__cWorldMemoryMan (dtor: destroys the three pools), cWorldMemoryMan_activateSectionMem, cWorldMemoryMan_deactivateSectionMem
 // (deactivateSectionMem); allocate() is inline (cWorldCache_addBxStreamDataTest: m_pSectionAllocator[section]).
 struct cWorldMemoryMan {
@@ -152,6 +158,9 @@ struct cWorldMemoryMan {
     // Methods bound to their retail symbols by asm labels.
     void activateSectionMem(int index, int section) __asm__("cWorldMemoryMan_activateSectionMem");
     void deactivateSectionMem(int i) __asm__("cWorldMemoryMan_deactivateSectionMem");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cWorldMemoryMan();
 };
 
 CHECK_OFFSET(cWorldMemoryMan, m_BlockAllocator, 0x000);
@@ -171,13 +180,20 @@ CHECK_OFFSET(tPageEntry, m_uiGUID, 0x2);
 CHECK_SIZE(tPageEntry, 0x4);
 
 // cHullPage (On Tour 0x10; retail cMemMan_alloc(0x10, "cHullPage") in cWorldCache_updatePages).
-// Methods: cHullPage_cHullPage, cHullPage__cHullPage (dtor); add/getEntry are inline.
+// Methods: cHullPage::cHullPage, cHullPage::~cHullPage (dtor); add/getEntry are inline.
+void operator_delete(int* p);
+
 struct cHullPage {
     const tBxBSPHull* m_pBSPHull;   // 0x0 [P] assert pBSPHull (ctor argument); [R] ctor
     unsigned int m_uiNumPageEntry;  // 0x4 [P] assert m_uiNumPageEntry <= 0xFFFF; [R] = hull->m_uiNumChunk; dtor = 0
     unsigned int m_uiCurrentPageEntry; // 0x8 [P] assert m_uiCurrentPageEntry < m_uiNumPageEntry; [R] = 0;
                                     //     [U] addBxStreamDataTest/Submit append, purgePage walks it down
     tPageEntry* m_pPageEntries;     // 0xC [P] assert m_pPageEntries; [R] new(n * 4, "cHullPage Entries")
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cHullPage(unsigned short* data);
+    ~cHullPage();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cHullPage, m_pBSPHull, 0x0);
@@ -225,13 +241,20 @@ enum eBxStreamDataType {
 
 // cWorldCacheTable: the resource table of one section (cWorldCache_activateSectionMem: cMemMan_alloc(0xE8,
 // "SectionTable")) or of the shared data (cWorldCache_init: cMemMan_alloc(0xE8, "SharedTable")). On Tour 0xE8, same
-// layout. Methods: cWorldCacheTable_cWorldCacheTable, cWorldCacheTable__cWorldCacheTable (dtor); get/set/testIncrement/testDecrement are
+// layout. Methods: cWorldCacheTable::cWorldCacheTable, cWorldCacheTable::~cWorldCacheTable (dtor); get/set/testIncrement/testDecrement are
 // inline: ~85 retail functions index World->m_pWorldCache->m_pSectionCacheTable[id & 0xFF]->m_pCacheTable[type].
+void operator_delete(int* p);
+
 struct cWorldCacheTable {
     char* m_pCacheTableMem;         // 0x00 [O]; [R] new(total * 4, "WorldCacheTableMem"); the dtor frees it
     tWorldCacheDataTable m_pCacheTable[28]; // 0x04 [P] assert m_pCacheTable[dataType] (kBxStreamData_Num = 28 types);
                                     //      [R] ctor clears and fills it
     short* m_piTable;               // 0xE4 [O]; [R] ctor stores its argument (the section's or header's iTable)
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cWorldCacheTable(void* data);
+    ~cWorldCacheTable();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cWorldCacheTable, m_pCacheTableMem, 0x00);
@@ -291,7 +314,7 @@ struct cWorldCache {
                                     //        new(numSections * 4, "SectionTables"); [U] activate/deactivateSectionMem
     cWorldMemoryMan* m_pWorldMemMan;   // 0x000C [O]; [R] init: cMemMan_alloc(0x13C, "WORLD MEMMAN")
     cWorldView m_WorldView;            // 0x0010 [O]; [R] ctor: cWorldView_cWorldView(this + 0x10)
-    cStreamMan m_StreamMan;            // 0x0300 [O]; [R] ctor: cStreamMan_cStreamMan(this + 0x300)
+    cStreamMan m_StreamMan;            // 0x0300 [O]; [R] ctor: cStreamMan::cStreamMan(this + 0x300)
     cChunkResolve* mp_ChunkResolve;    // 0x03E8 [O]; [R] init = cChunkResolve_construct(); [U] addBxStreamDataSubmit /
                                     //        removeBxStreamData call its vtable (slots 3, 4); purge deletes it
     unsigned int m_uiNumHullPage;      // 0x03EC [P] assert m_uiNumHullPage<(tUInt32)kBxBSPMaxHulls; [R] initPageMap =

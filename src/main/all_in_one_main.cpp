@@ -1613,7 +1613,7 @@ extern "C" int cFE_getRiderManager1(int realFe) {
 INCLUDE_ASM("main/all_in_one_main", cFE_getBoltFileManager);
 #ifdef SKIP_ASM
 /**
- * Returns the front end's member at +0x1A70 (the object cFE_cFE builds with cFEBoltFileManager_cFEBoltFileManager).
+ * Returns the front end's member at +0x1A70 (the object cFE_cFE builds with cFEBoltFileManager::cFEBoltFileManager).
  *
  * @param realFe  the front end (cRealFE / cFE)
  * @return @p realFe + 0x1A70
@@ -1898,7 +1898,7 @@ extern "C" void cUIInput_setKey(int *input, int key) {
 INCLUDE_ASM("main/all_in_one_main", cDebugMenuScreen__cDebugMenuScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cBackgroundMan__cBackgroundMan_CD00(void *, int) __asm__("cBackgroundMan__cBackgroundMan");
+extern "C" void cBackgroundMan__cBackgroundMan_CD00(void *, int) __asm__("_$_14cBackgroundMan");
 void operator_delete(int*);
 extern void* cDebugScreen_vtbl[];
 
@@ -1906,7 +1906,7 @@ extern void* cDebugScreen_vtbl[];
 /**
  * Destroys a debug menu screen: tears down its id list member, then runs the cDebugScreen part.
  *
- * cBackgroundMan__cBackgroundMan(self + 0x8C10, 2) releases each non-negative id in that list through the graphics manager's
+ * cBackgroundMan::~cBackgroundMan(self + 0x8C10, 2) releases each non-negative id in that list through the graphics manager's
  * virtual slot 50 and frees the array; then cDebugScreen's vtable is stored at +0x0.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory

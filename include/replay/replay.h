@@ -4,7 +4,7 @@
 // cReplay: the race replay recorder/player (record the race as key frames + per-rider input caches, play it back,
 // instant replays, highlights, saving to the memory card). EA's header is ../source/replay/replay.h (the July 2003
 // preview files its inline asserts under it). One instance per game: cGame::Replay (main/game.h 0x028), created in
-// main/gameload.cpp by operator new(0x688, "Replay") + the constructor cReplay_cReplay; no global, no vtable, no base.
+// main/gameload.cpp by operator new(0x688, "Replay") + the constructor cReplay::cReplay; no global, no vtable, no base.
 // Size 0x688 [R] (allocation); the last field, WriteCheckSum, ends exactly there. On Tour's cReplay is 0x8F8: same
 // member order, but its cReplayFrame is 0x48 (retail 0x38), its tRiderStats 0xB0 (retail 0xAC), it keeps 4 input
 // caches / highlights / chapters (retail 2) and its bools are bytes (retail words).
@@ -14,7 +14,7 @@
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Names are EA's, from SSX On Tour's PSP DWARF
 // (class cReplay), placed by:
-//   [R] retail's constructor cReplay_cReplay / destructor cReplay__cReplay and allocations (tags read from the retail ELF:
+//   [R] retail's constructor cReplay::cReplay / destructor cReplay__cReplay and allocations (tags read from the retail ELF:
 //       "Replay", "ReplayCache", "WriteBlock", "WriteTmp");
 //   [U] how retail code uses the field (cReplay_init, cReplay_reset and the methods named per field);
 //   [O] On Tour's member order. Between the fixed points (PadNum 0x28 = setReplayPadNum's field, Frames 0x2C..0x3AC,
@@ -137,7 +137,7 @@ struct cReplay {
                                          //       cReplay_updateCameraSelect/cReplay_updateInput/cReplay_update read SSXApp's pad[PadNum]
                                          //       (+0xB0)
     cReplayFrame Frames[16];             // 0x02C [O] cReplayFrame Frames[16] (retail 0x38 each, On Tour 0x48); [R]
-                                         //       ctor cReplay_cReplay constructs 16 x 0x38 (cReplayFrame_cReplayFrame), dtor
+                                         //       ctor cReplay::cReplay constructs 16 x 0x38 (cReplayFrame_cReplayFrame), dtor
                                          //       cReplay__cReplay destroys them through vtable slot 7; each frame's
                                          //       vptr is at +0
     cReplayFrame* NextCandidate;         // 0x3AC [O]; [U] cReplay_freeOneReplayFrame walks from it for a
@@ -165,9 +165,9 @@ struct cReplay {
                                          //       (stepFrame), cReplay_rewindFrame/E528/E568
     cReplayFrame* PlaybackFrame;         // 0x488 [O]; [U] ditto: the frame PlaybackTick lies in
     cReplayCache* InputCache[2];         // 0x48C [O] (On Tour 4); [R] cReplay_addCache: cMemMan_alloc(0x10,
-                                         //       "ReplayCache") into the first free slot of 2, ctor cReplay_cReplay
+                                         //       "ReplayCache") into the first free slot of 2, ctor cReplay::cReplay
                                          //       zeroes 2; [U] moved with the playback cursor (cReplayCache_moveTo)
-    cReplayHighlight Highlight[2];       // 0x494 [O] (On Tour 4 x 0xB8); [R] reset by cReplayHighlight_reset in cReplay_cReplay
+    cReplayHighlight Highlight[2];       // 0x494 [O] (On Tour 4 x 0xB8); [R] reset by cReplayHighlight_reset in cReplay::cReplay
                                          //       on 2 x 0xB4; [U] cReplay_reset sets PlayerId 0/1;
                                          //       cReplay_beginMarkHighlight/cReplay_endMarkHighlight/cReplay_cancelMarkHighlight index it by player
     int Chapters[2];                     // 0x5FC [O] (On Tour 4); [U] cReplay_eventChapter sets bit `pos` of
@@ -339,6 +339,9 @@ struct cReplay {
     cReplayFrame* compareHighlights(int i, cReplayFrame* best, int positive) __asm__("cReplay_compareHighlights");
     bool updateInput(int debug) __asm__("cReplay_updateInput");
     void saveFrame1(cReplayFrame* out, tReplayFrameType* src) __asm__("cReplay_saveFrame1");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cReplay();
 };
 
 CHECK_OFFSET(cReplayFrameList, Tail, 0x0);

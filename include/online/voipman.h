@@ -9,12 +9,14 @@
 // cVoipMan_createInstance creates it, cVoipMan_destroyInstance destroys it. No On Tour counterpart.
 //
 // Size 8: [R] cVoipMan_createInstance: cMemMan_alloc(8, "cVoipMan", 0x20000000) + the constructor cVoipMan_cVoipMan (clears both
-// words). No vtable, no base class (the destructor cVoipMan__cVoipMan is called directly).
+// words). No vtable, no base class (the destructor cVoipMan::~cVoipMan is called directly).
 //
 // A FLAT layout, like main/game.h. Evidence tags: [R] the constructor; [U] how retail code uses the field
 // (src/dirtysock/tagsunk.cpp). Names are ours.
 
 #include "layout.h"
+
+void operator_delete(int* p);
 
 struct cVoipMan {
     int mConnected;                 // 0x0 [R] ctor 0; [U] cVoipMan_connect sets 1 after voipRpc_connect (connect),
@@ -31,6 +33,10 @@ struct cVoipMan {
     void* getVoiceStatus() __asm__("cVoipMan_getVoiceStatus__FPv");
     void setVoiceLevel(int level, int maxLevel) __asm__("cVoipMan_setVoiceLevel");
     void getVoiceLevel(void* outLevel, void* outMax) __asm__("cVoipMan_getVoiceLevel");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cVoipMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cVoipMan, mConnected, 0x0);

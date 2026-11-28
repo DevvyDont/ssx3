@@ -10,7 +10,7 @@
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance (the class has no bases and
 // no vtable). Member names are EA's, from SSX On Tour's PSP DWARF (class cInputMapParser, size 0x109E8), placed at
 // retail offsets by:
-//   [R] retail's own initialisation: cInputMapParser_cInputMapParser (stores, the free-list and register-stack loops)
+//   [R] retail's own initialisation: cInputMapParser::cInputMapParser (stores, the free-list and register-stack loops)
 //       and the allocation size 0x109EC (the July 2003 preview allocates 0x109EC too, with the same constructor
 //       stores);
 //   [U] how matched retail code uses the field;
@@ -61,7 +61,7 @@ struct tParseNode {
                                     //      (1 Reference, 2 Button, 3 Config, 4 Constant, 5 Selection, 6.. operators)
     union {
         tParseNode* Operand1;       // 0x04 [U] first operand (operators, Selection's condition); the free-list link
-                                    //       (cInputMapParser_cInputMapParser, cInputMapParser_newParseNode,
+                                    //       (cInputMapParser::cInputMapParser, cInputMapParser_newParseNode,
                                     //       freeParseNode)
         tIdentifier* Identifier;    // 0x04 [U] Reference node (Type 1): the identifier (compileParseNode reads
                                     //       ->Expression)
@@ -192,6 +192,9 @@ struct cInputMapParser {
         __asm__("cInputMapParser_compileBinaryNode");
     int compileUnaryNode(tParseNode* node, int* dst, tInputOpCode* code, int cap, int op, int defaultModifier)
         __asm__("cInputMapParser_compileUnaryNode");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cInputMapParser(void* file, void* length);
 };
 
 CHECK_OFFSET(cInputMapParser, File, 0x00000);

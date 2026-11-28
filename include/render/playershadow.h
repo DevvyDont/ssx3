@@ -13,6 +13,8 @@
 #include "bx/math3d.h"
 
 
+void operator_delete(int* p);
+
 struct cPlayerShadow {
     float mObjUp[3];                // 0x000 [O] t3Vector
     float mProjPos[3];              // 0x00C [O] t3Vector
@@ -40,6 +42,10 @@ struct cPlayerShadow {
     void InitBones(int head, int lHand, int rHand, int lFoot, int rFoot, int hips) __asm__("cPlayerShadow_InitBones");
     void AddShadow() __asm__("cPlayerShadow_AddShadow");
     void LockShadowTexture() __asm__("cPlayerShadow_LockShadowTexture");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cPlayerShadow();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cPlayerShadow, mObjUp, 0x000);

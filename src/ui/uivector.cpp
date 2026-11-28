@@ -769,12 +769,12 @@ extern "C" void cList__cList(cList* self, int flags)
 //100%
 INCLUDE_ASM("ui/uivector", cUIThing_cUIThing1);
 #ifdef SKIP_ASM
-extern "C" tAttrThing* tAttrThing_tAttrThing(tAttrThing* f);
+extern "C" tAttrThing* __10tAttrThing(tAttrThing* f);
 extern void* cUIThing_vtbl[];
 
 /**
  * Constructs a bare cUIThing: links the node to itself (mpPrev = mpNext = this), stores cUIThing_vtbl and constructs
- * the tAttrThing word mAttr with tAttrThing_tAttrThing; no other member is set.
+ * the tAttrThing word mAttr with tAttrThing::tAttrThing; no other member is set.
  *
  * Unlike cUIThing_cUIThing it takes no screen or parent. Nothing in retail calls it.
  *
@@ -785,7 +785,7 @@ void* cUIThing::cUIThing1()
     mpNext = (cListNode*)this;
     mpPrev = (cListNode*)this;
     VPTR_OF(cListNode, this) = cUIThing_vtbl;
-    tAttrThing_tAttrThing((tAttrThing*)(&mAttr));
+    __10tAttrThing((tAttrThing*)(&mAttr));
     return ((char*)this);
 }
 #endif
@@ -1192,7 +1192,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setPivot);
 /**
  * Sets the UI thing's pivot (mAttr bits 13-18) to the low 6 bits of @p pivot.
  *
- * @param pivot  the pivot code (0..63; tAttrThing_tAttrThing starts it at 9)
+ * @param pivot  the pivot code (0..63; tAttrThing::tAttrThing starts it at 9)
  */
 void cUIThing::setPivot(int pivot)
 {
@@ -2079,14 +2079,14 @@ extern void* cUIMenu_vtbl[];
 // PORT: the other ctor in the unit calls this base ctor with (self, 0, 0)
 extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
 extern "C" void* cList_cList(void* p);
-extern "C" void* tAttrMenu_tAttrMenu(tAttrMenu* self);
+extern "C" void* __9tAttrMenu(tAttrMenu* self);
 
 /**
  * Constructs an empty menu.
  *
  * Runs the cUIThing constructor (cUIThing_cUIThing; the screen and parent, On Tour pScreen / parent, are not declared
  * here and stay in $a1/$a2), stores cUIGroup_vtbl and constructs the item list (+0x74), then stores cUIMenu_vtbl,
- * constructs mAttrMenu (tAttrMenu_tAttrMenu), sets mStoredIndex 0xFF and clears mScrollItemCurrent, mScrollItemNum,
+ * constructs mAttrMenu (tAttrMenu::tAttrMenu), sets mStoredIndex 0xFF and clears mScrollItemCurrent, mScrollItemNum,
  * mScrollItemNumVisible, mScrollItemOffset, mpScrollBar and mpSelected.
  *
  * @return @p self
@@ -2097,7 +2097,7 @@ extern "C" void* cUIMenu_cUIMenu(cUIMenu* self)
     VPTR_OF(cListNode, self) = cUIGroup_vtbl;
     cList_cList(&self->mList);
     VPTR_OF(cListNode, self) = cUIMenu_vtbl;
-    tAttrMenu_tAttrMenu(&self->mAttrMenu);
+    __9tAttrMenu(&self->mAttrMenu);
     self->mStoredIndex = 0xFF;
     self->mScrollItemCurrent = 0;
     self->mScrollItemNum = 0;
@@ -2157,18 +2157,15 @@ int cUIMenu_getType(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", tAttrMenu_tAttrMenu);
+INCLUDE_ASM("ui/uivector", __9tAttrMenu);
 #ifdef SKIP_ASM
 /**
  * Clears the low four bits of a cUIMenu's tAttrMenu byte (mCreateThread, mFlipInput, mScrollMenu, mDisableDirSound) and
  * returns it: the tAttrMenu constructor, run on cUIMenu + 0x90.
- *
- * @return the tAttrMenu
  */
-extern "C" void* tAttrMenu_tAttrMenu(tAttrMenu* self)
+tAttrMenu::tAttrMenu()
 {
-    *(unsigned char*)self &= 0xf0;
-    return ((void*)self);
+    *(unsigned char*)this &= 0xf0;
 }
 #endif
 
@@ -2360,12 +2357,12 @@ unsigned char cUIMenu::getSelectedIndex()
 INCLUDE_ASM("ui/uivector", cUIPair_cUIPair1);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
-extern "C" void* tAttrPair_tAttrPair(tAttrPair* p);
+extern "C" void* __9tAttrPair(tAttrPair* p);
 extern void* cUIPair_vtbl[];
 
 /**
  * Constructs a cUIPair with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIPair_vtbl and constructs
- * mAttrPair (+0x74) with tAttrPair_tAttrPair.
+ * mAttrPair (+0x74) with tAttrPair::tAttrPair.
  *
  * Unlike cUIPair_cUIPair it leaves mpEntry / mpWidget unset. Nothing in retail calls it.
  *
@@ -2375,7 +2372,7 @@ void* cUIPair::cUIPair1()
 {
     cUIThing_cUIThing(((char*)this), 0, 0);
     VPTR_OF(cListNode, this) = cUIPair_vtbl;
-    tAttrPair_tAttrPair(&mAttrPair);
+    __9tAttrPair(&mAttrPair);
     return ((char*)this);
 }
 #endif
@@ -2384,12 +2381,12 @@ INCLUDE_ASM("ui/uivector", cUIPair_cUIPair);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIThing_cUIThing_self(void* self) __asm__("cUIThing_cUIThing");
-extern "C" void* tAttrPair_tAttrPair(tAttrPair* self);
+extern "C" void* __9tAttrPair(tAttrPair* self);
 extern void* cUIPair_vtbl[];
 
 /**
  * Constructs a UI pair: the cUIThing constructor (cUIThing_cUIThing; the screen and parent pass through in $a1 / $a2),
- * cUIPair_vtbl, its tAttrPair (tAttrPair_tAttrPair), no entry or widget, and sets mActive (bit 1 of mAttr).
+ * cUIPair_vtbl, its tAttrPair (tAttrPair::tAttrPair), no entry or widget, and sets mActive (bit 1 of mAttr).
  *
  * @return @p self
  */
@@ -2397,7 +2394,7 @@ extern "C" void* cUIPair_cUIPair(cUIPair* self)
 {
     cUIThing_cUIThing_self(((char*)self));
     VPTR_OF(cListNode, self) = cUIPair_vtbl;
-    tAttrPair_tAttrPair(&self->mAttrPair);
+    __9tAttrPair(&self->mAttrPair);
     self->mpEntry = 0;
     self->mpWidget = 0;
     ((sUIVectorFlags*)(&self->mAttr))->bit1 = true;
@@ -2445,19 +2442,16 @@ int cUIPair_getType(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", tAttrPair_tAttrPair);
+INCLUDE_ASM("ui/uivector", __9tAttrPair);
 #ifdef SKIP_ASM
 /**
  * Clears the two 6-bit pivot fields of a cUIPair's tAttrPair (mEntryPivot in byte 0, mWidgetPivot in byte 1) and
  * returns it: the tAttrPair constructor, run on cUIPair + 0x74.
- *
- * @return the tAttrPair
  */
-extern "C" void* tAttrPair_tAttrPair(tAttrPair* self)
+tAttrPair::tAttrPair()
 {
-    self->mWidgetPivot = 0;
-    self->mEntryPivot = 0;
-    return ((void*)self);
+    mWidgetPivot = 0;
+    mEntryPivot = 0;
 }
 #endif
 
@@ -2526,13 +2520,13 @@ INCLUDE_ASM("ui/uivector", cUIListBox_cUIListBox1);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" unsigned char *tAttrListBox_tAttrListBox(unsigned char *arg0);
-extern "C" void *tListBoxEntry_tListBoxEntry(tListBoxEntry* arg0);
+extern "C" void *__13tListBoxEntry(tListBoxEntry* arg0);
 extern void* cUIListBox_vtbl[];
 
 /**
  * Constructs a cUIListBox with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIListBox_vtbl,
  * constructs mAttrListBox (+0x74) with tAttrListBox_tAttrListBox and each of the 32 mpEntries (0x14 bytes from +0x98) with
- * tListBoxEntry_tListBoxEntry.
+ * tListBoxEntry::tListBoxEntry.
  *
  * Unlike cUIListBox_cUIListBox it leaves mNumEntries, mCurrentEntry and the colours unset. Nothing in retail calls it.
  *
@@ -2546,7 +2540,7 @@ void* cUIListBox::cUIListBox1()
     tAttrListBox_tAttrListBox((unsigned char*)(&mAttrListBox));
     char* entry = (char*)&mpEntries[0];
     for (i = 0x1F; i != -1; i--) {
-        tListBoxEntry_tListBoxEntry((tListBoxEntry*)entry);
+        __13tListBoxEntry((tListBoxEntry*)entry);
         entry += 0x14;
     }
     return ((char*)this);
@@ -2745,12 +2739,12 @@ unsigned char cUIListBox::getNumEntries()
 INCLUDE_ASM("ui/uivector", cUIState_cUIState2);
 #ifdef SKIP_ASM
 extern "C" void* cList_cList(void* p);
-extern "C" void* tAttrState_tAttrState(tAttrState* p);
+extern "C" void* __10tAttrState(tAttrState* p);
 extern void* cUIState_vtbl[];
 
 /**
  * Constructs a bare cUIState: links the node to itself (mpPrev = mpNext = this), stores the cUIState vtable cUIState_vtbl,
- * constructs the tAttrState word mAttrState with tAttrState_tAttrState (visible, first time, mode 2) and the screen list
+ * constructs the tAttrState word mAttrState with tAttrState::tAttrState (visible, first time, mode 2) and the screen list
  * mScreens with cList_cList.
  *
  * Unlike cUIState_cUIState / cUIState_cUIState1 it sets no engine, parent, controller or user fields. Nothing in retail calls
@@ -2763,7 +2757,7 @@ void* cUIState::cUIState2()
     mpNext = (cListNode*)this;
     mpPrev = (cListNode*)this;
     VPTR_OF(cListNode, this) = cUIState_vtbl;
-    tAttrState_tAttrState((tAttrState*)(&mAttrState));
+    __10tAttrState((tAttrState*)(&mAttrState));
     cList_cList(&mScreens);
     return ((char*)this);
 }
@@ -4730,12 +4724,12 @@ unsigned short cUITextScroll::getSelectedIndex()
 INCLUDE_ASM("ui/uivector", cUIVector_cUIVector1);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
-extern "C" void* tAttrVector_tAttrVector(tAttrVector* p);
+extern "C" void* __11tAttrVector(tAttrVector* p);
 extern void* cUIVector_vtbl[];
 
 /**
  * Constructs a cUIVector with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIVector_vtbl and
- * constructs the tAttrVector word mAttrVector (+0x74) with tAttrVector_tAttrVector (no fill, no loop, no vertices).
+ * constructs the tAttrVector word mAttrVector (+0x74) with tAttrVector::tAttrVector (no fill, no loop, no vertices).
  *
  * Unlike cUIVector_cUIVector it leaves the colour and vertex arrays unset. Nothing in retail calls it.
  *
@@ -4745,7 +4739,7 @@ void* cUIVector::cUIVector1()
 {
     cUIThing_cUIThing(((char*)this), 0, 0);
     VPTR_OF(cListNode, this) = cUIVector_vtbl;
-    tAttrVector_tAttrVector(&mAttrVector);
+    __11tAttrVector(&mAttrVector);
     return ((char*)this);
 }
 #endif
@@ -4768,7 +4762,7 @@ int cUIVector_getType(void* vself)
 extern "C" void* __sti__all_in_one_ui_cpp(int, int);
 
 //100%
-INCLUDE_ASM("ui/uivector", tAttrThing_tAttrThing);
+INCLUDE_ASM("ui/uivector", __10tAttrThing);
 #ifdef SKIP_ASM
 /**
  * Constructs a cUIThing's tAttrThing word and returns it: sets bit 0 (orientation: vertical), bit 1 (active), bit 3
@@ -4776,23 +4770,19 @@ INCLUDE_ASM("ui/uivector", tAttrThing_tAttrThing);
  * draw layer (bits 8-12), and sets the 6-bit pivot (bits 13-18) to 9.
  *
  * cUIThing_cUIThing1 runs it on mAttr (+0x14).
- *
- * @param attrThing  the tAttrThing (cUIThing + 0x14)
- * @return @p attrThing
  */
-extern "C" tAttrThing* tAttrThing_tAttrThing(tAttrThing* attrThing)
+tAttrThing::tAttrThing()
 {
-    attrThing->mOrientation = 1;
-    attrThing->mWrap = 0;
-    attrThing->mLayer = 0;
-    attrThing->mStatic = 0;
-    attrThing->mFocused = 0;
-    attrThing->mCached = 0;
-    attrThing->mActive = 1;
-    attrThing->mEnabled = 1;
-    attrThing->mVisible = 1;
-    attrThing->mPivot = 9;
-    return attrThing;
+    mOrientation = 1;
+    mWrap = 0;
+    mLayer = 0;
+    mStatic = 0;
+    mFocused = 0;
+    mCached = 0;
+    mActive = 1;
+    mEnabled = 1;
+    mVisible = 1;
+    mPivot = 9;
 }
 #endif
 //100%
@@ -4813,41 +4803,35 @@ extern "C" unsigned char *tAttrListBox_tAttrListBox(unsigned char *attr) {
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", tListBoxEntry_tListBoxEntry);
+INCLUDE_ASM("ui/uivector", __13tListBoxEntry);
 #ifdef SKIP_ASM
 /**
  * Constructs one list-box entry (tListBoxEntry, 0x14 bytes) and returns it: zeroes mStringID, mpString, mpAsciiString,
  * mpData and the byte mUnicodeBufferSize.
  *
  * cUIListBox_cUIListBox1 runs it on each of a cUIListBox's 32 mpEntries.
- *
- * @param entry  the tListBoxEntry
- * @return @p entry
  */
-extern "C" void *tListBoxEntry_tListBoxEntry(tListBoxEntry* entry) {
-    entry->mStringID = 0;
-    entry->mpString = 0;
-    entry->mpAsciiString = 0;
-    entry->mpData = 0;
-    entry->mUnicodeBufferSize = 0;
-    return ((void*)entry);
+tListBoxEntry::tListBoxEntry()
+{
+    mStringID = 0;
+    mpString = 0;
+    mpAsciiString = 0;
+    mpData = 0;
+    mUnicodeBufferSize = 0;
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", tAttrState_tAttrState);
+INCLUDE_ASM("ui/uivector", __10tAttrState);
 #ifdef SKIP_ASM
 /**
  * Constructs a cUIState's tAttrState and returns it: stores 0x218 in the 16-bit word, i.e. visible (bit 3) and first
  * time (bit 4) set, mode (bits 8-13) 2 and every other flag and the popup count clear.
  *
  * cUIState_cUIState2 runs it on mAttrState (+0x1C).
- *
- * @return the object
  */
-extern "C" void* tAttrState_tAttrState(tAttrState* self)
+tAttrState::tAttrState()
 {
-    *(short*)self = 536;
-    return ((void*)self);
+    *(short*)this = 536;
 }
 #endif
 //100%
@@ -4885,23 +4869,19 @@ extern "C" unsigned char *tAttrTextScroll_tAttrTextScroll(unsigned char *attr) {
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uivector", tAttrVector_tAttrVector);
+INCLUDE_ASM("ui/uivector", __11tAttrVector);
 #ifdef SKIP_ASM
 /**
  * Constructs a cUIVector's tAttrVector word and returns it: clears mFill (bit 0), mLoop (bit 1) and the 15-bit vertex
  * count mNumVertices (bits 17-31); the triangle count (bits 2-16) is left as it was.
  *
  * cUIVector_cUIVector1 runs it on mAttrVector (+0x74).
- *
- * @param attrVector  the tAttrVector (cUIVector + 0x74)
- * @return the same address
  */
-extern "C" void* tAttrVector_tAttrVector(tAttrVector* attrVector)
+tAttrVector::tAttrVector()
 {
-    attrVector->mFill = 0;
-    attrVector->mLoop = 0;
-    attrVector->mNumVertices = 0;
-    return attrVector;
+    mFill = 0;
+    mLoop = 0;
+    mNumVertices = 0;
 }
 #endif
 

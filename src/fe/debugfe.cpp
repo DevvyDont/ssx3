@@ -425,7 +425,7 @@ INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_cDebugLobbyScreen);
 extern void* cDebugLobbyScreen_vtbl[];
 extern int cBXString_EmptyString;
 extern void* D_004A4E90;
-extern "C" void* cMenuSys_cMenuSys(void* self);
+extern "C" void* __8cMenuSys(void* self);
 extern "C" void* AccountMenu_AccountMenu(void* self, void* a, void* b);
 extern "C" void* PersonaMenu_PersonaMenu(void* self, void* a, void* b, void* c);
 extern "C" void* LobbyMenu_LobbyMenu(void* self, void* a);
@@ -439,7 +439,7 @@ extern "C" void* AbortMenu_AbortMenu(void* self, void* a);
  * Constructs the debug front end's lobby screen (cDebugLobbyScreen in the July 2003 preview) with its eight menus.
  *
  * Stores the vtable cDebugLobbyScreen_vtbl (slots: destructor cDebugLobbyScreen__cDebugLobbyScreen, update cDebugLobbyScreen_update, draw cDebugLobbyScreen_draw), zeroes the
- * state at +0x4 and builds the menu system at +0x8 (cMenuSys_cMenuSys). Each menu gets a one-pointer functor holding
+ * state at +0x4 and builds the menu system at +0x8 (cMenuSys::cMenuSys). Each menu gets a one-pointer functor holding
  * this screen, which its command handler calls back: the account menu "Login Method" at +0x70 (AccountMenu_AccountMenu, Create
  * Account and Login), the "Continue" menu at +0x604 (ContinueMenu_ContinueMenu), "Select Persona" at +0x74C (PersonaMenu_PersonaMenu, with
  * Create Persona and Delete Persona), "Select Room" at +0xD2C (LobbyMenu_LobbyMenu), "Room Occupants" at +0x1044
@@ -457,7 +457,7 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
 {
     *(void***)self = cDebugLobbyScreen_vtbl;
     self->mState = 0;
-    cMenuSys_cMenuSys(&self->mMenuSys);
+    __8cMenuSys(&self->mMenuSys);
     cDebugLobbyScreen::OnCreate onCreate;
     onCreate.unk_0 = (cDebugLobbyScreen*)((char*)self);
     cDebugLobbyScreen::OnCreate onLogin;
@@ -511,7 +511,7 @@ extern "C" void cMenuItem__cMenuItem(void* self, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
 extern "C" void PersonaMenu__PersonaMenu(void* self, int flags);
 extern "C" void AccountMenu__AccountMenu(void* self, int flags);
-extern "C" void cMenuSys__cMenuSys(void* self, int flags);
+extern "C" void _$_8cMenuSys(void* self, int flags);
 void operator_delete(int* ptr);
 extern void* cDebugLobbyScreen_vtbl[];
 extern void* cDebugScreen_vtbl[];
@@ -590,7 +590,7 @@ static inline void dtorF_17D3B0(char* sub)
  * and +0x1C04, then the menus in reverse order: Abort (+0x1AAC), You've been Challenged (+0x18C0), the chat menu
  * (+0x1534, its 14 line items through their virtual destructors), Room Occupants (+0x1044, 24 items), Select Room
  * (+0xD2C, 12 items), Select Persona (+0x74C, PersonaMenu__PersonaMenu), Continue (+0x604) and Login Method (+0x70,
- * AccountMenu__AccountMenu), and the menu system (+0x8, cMenuSys__cMenuSys). Ends with cDebugScreen's vtable cDebugScreen_vtbl and
+ * AccountMenu__AccountMenu), and the menu system (+0x8, cMenuSys::~cMenuSys). Ends with cDebugScreen's vtable cDebugScreen_vtbl and
  * operator_delete when bit 0 of @p flags is set. The item and menu destructors run with flags 2 (no free).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the screen
@@ -610,7 +610,7 @@ extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(cDebugLobbyScreen* self, in
     PersonaMenu__PersonaMenu(&self->mPersonaMenu, 2);
     dtorF_17D3B0((char*)&self->mContinueMenu);
     AccountMenu__AccountMenu(&self->mLoginMenu, 2);
-    cMenuSys__cMenuSys(&self->mMenuSys, 2);
+    _$_8cMenuSys(&self->mMenuSys, 2);
     *(void***)self = cDebugScreen_vtbl;
     if (flags & 1)
         operator_delete((int*)self);
@@ -1961,7 +1961,7 @@ extern char str_part[];
 extern char str_menu[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cMemMan_free(void* ptr);
-extern "C" void* cFont_cFont(void* self, const char* name, int a2);
+extern "C" void* __5cFontPCci(void* self, const char* name, int a2);
 extern "C" int* FILE_loadz(const char* name, int flags);
 extern "C" int* FILE_load(const char* name, int flags);
 extern "C" void* cDebugMenuScreen_cDebugMenuScreen(void* self);
@@ -1977,7 +1977,7 @@ void cDebugFE::load()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ps2GraphicsMan->InitTextures(0);
-    Font = (cFont*)cFont_cFont(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
+    Font = (cFont*)__5cFontPCci(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
     t2Vector sc(1.600000023841858f, 1.600000023841858f);
     // cFont keeps its t2Vectors (BaseScale, Scale) as float[2]: the same two floats.
     *(t2Vector*)&Font->BaseScale[0] = sc;
@@ -2065,7 +2065,7 @@ bool cDebugFE::loseFocus()
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugFE_purge);
 #ifdef SKIP_ASM
-extern "C" void cFont__cFont(void* p, int flags);
+extern "C" void _$_5cFont(void* p, int flags);
 
 
 struct sDebugFE_0017FAD0 {
@@ -2082,7 +2082,7 @@ struct sDebugFE_0017FAD0 {
  *
  * Deletes the two screens (+0xC, +0x10: debug menu and lobby menu) through their destructor virtual (slot 1, flags
  * 3), zeroes SSXApp->RealFE and SSXApp->DebugFE, frees the two texture ids loaded by cDebugFE_load (+0x20, +0x1C,
- * when >= 0) through GrMan slot 50, and deletes the font (+0x18) with cFont__cFont(font, 3). The local view calls
+ * when >= 0) through GrMan slot 50, and deletes the font (+0x18) with cFont::~cFont(font, 3). The local view calls
  * the texture ids snd1C/snd20; they are On Tour's ParticleTID and BoxTID.
  */
 void cDebugFE::purge()
@@ -2110,7 +2110,7 @@ void cDebugFE::purge()
         ps2GraphicsMan->RemoveTexture(ParticleTID);
     }
     if (Font != 0)
-        cFont__cFont(Font, 3);
+        _$_5cFont(Font, 3);
 }
 #endif
 

@@ -8,12 +8,12 @@
 // EA's source: d:/ssx/code/source/online/gamecomm.cpp and online/gamecomm.h (the preview build's assert strings).
 //
 // One instance: cGameComm_construct(channel, server) does `cMemMan_alloc(0x5F0, "cGameComm", ...)` + the constructor
-// cGameComm_cGameComm into cGameComm::mGameComm (retail cGameComm_mGameComm); cGameComm_destroy (destroy) runs the destructor
+// cGameComm::cGameComm into cGameComm::mGameComm (retail cGameComm_mGameComm); cGameComm_destroy (destroy) runs the destructor
 // cGameComm__cGameComm. Size 0x5F0 [R]. No base class and no virtuals (the constructor stores no vtable; On Tour has none).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] retail's constructor cGameComm_cGameComm (initial values below) and the allocation size;
-//   [U] how retail code uses the field: the class's own methods (cGameComm_cGameComm..cGameComm_updateSyncPacket in seg_156860) and the
+//   [R] retail's constructor cGameComm::cGameComm (initial values below) and the allocation size;
+//   [U] how retail code uses the field: the class's own methods (cGameComm::cGameComm..cGameComm_updateSyncPacket in seg_156860) and the
 //       ~50 users of cGameComm_mGameComm (ovstatepause, ovtemplatepausemenu, gamestate's cInputSync, ai, gameload, ...). The
 //       results reporter LobbyMan_reportRaceResult (tagsunk) sends many fields under DirtySock tags, quoted as "TAG";
 //   [O] SSX On Tour's DWARF (class cGameComm, size 0x101C): same member order where both games have the member. On
@@ -255,6 +255,9 @@ struct cGameComm {
     int checkErrors() __asm__("cGameComm_checkErrors");
     void checkActive() __asm__("cGameComm_checkActive");
     int writePacket(int type, const void* data, int len) __asm__("cGameComm_writePacket");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cGameComm(int port, int isServer);
 };
 
 CHECK_SIZE(tGameCommPacket, 0xF0);

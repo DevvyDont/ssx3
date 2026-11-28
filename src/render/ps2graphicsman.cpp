@@ -520,7 +520,7 @@ INCLUDE_ASM("render/ps2graphicsman", cTextureMan_unlockTexture);
  *
  * When the texture has a block (+0x28 not tTexInfo::kNoVRAM) it clears flag bit 1 of that block's node (+0x30) in the
  * main heap (+0x1F60), or the second heap (+0x4350) for GM_TEXEL_INDEX8. cPS2GraphicsMan_RemoveScreenGrabTexture and
- * cPlayerShadow__cPlayerShadow call it on mTexMan.
+ * cPlayerShadow::~cPlayerShadow call it on mTexMan.
  *
  * @param i  the texture id
  */

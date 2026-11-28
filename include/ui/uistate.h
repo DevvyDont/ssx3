@@ -55,6 +55,9 @@ struct tAttrState {
                                        //       states set it (cFEStateOptions_cFEStateOptions1 callers mask 0x3F00)
     unsigned short mPushCheck : 1;     // bit 14 [O]
     unsigned short mPopFloor : 1;      // bit 15 [O]
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    tAttrState();
 };
 
 struct cListNode;

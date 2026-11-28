@@ -717,7 +717,7 @@ extern "C" bool cWorldLightMan_CalcLightDist(cWorldLightMan* self, cWorldLightMa
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", cCheatFX_cCheatFX);
+INCLUDE_ASM("visualfx/worldlightman", __8cCheatFXi);
 #ifdef SKIP_ASM
 // g++ 2.95 vtable entry (no thunks): {delta, index, fn}. Vtables are double-aligned.
 struct sVtEnt6238 {
@@ -749,36 +749,34 @@ void* cCheatFX_resetStates(void* self);
  * offset. The cheat state starts cleared.
  *
  * @param inChrg  nonzero when this constructor also builds the virtual base
- * @return @p self
  */
 // PORT: hand-written form of g++ 2.95's constructor for a class with a virtual base
 // (cRider at +0x10): vtable copies with delta fixups when not in charge.
-extern "C" void* cCheatFX_cCheatFX(cCheatFX* self, int inChrg)
+cCheatFX::cCheatFX(int inChrg)
 {
     sVt9_6238 ctorVtbl9;
     sVt22_6238 ctorVtbl22;
     if (inChrg) {
-        *(void**)self = (char*)self + 0x10;
-        cRider_cRider((char*)self + 0x10);
+        *(void**)this = (char*)this + 0x10;
+        cRider_cRider((char*)this + 0x10);
     }
-    *(void**)(*(char**)self + 0x6E8) = (void*)&D_004886E0;
-    *(void**)(*(char**)self + 0x6D0) = D_00459B90;
-    *(void**)(*(char**)self + 0x6C0) = (void*)&D_00488728;
+    *(void**)(*(char**)this + 0x6E8) = (void*)&D_004886E0;
+    *(void**)(*(char**)this + 0x6D0) = D_00459B90;
+    *(void**)(*(char**)this + 0x6C0) = (void*)&D_00488728;
     if (inChrg == 0) {
         int vc;
         ctorVtbl9 = D_004886E0;
-        *(void**)(*(char**)self + 0x6E8) = &ctorVtbl9;
+        *(void**)(*(char**)this + 0x6E8) = &ctorVtbl9;
         {
-            char* vbo = *(char**)self - 0x10;
-            vc = (char*)self - vbo;
+            char* vbo = *(char**)this - 0x10;
+            vc = (char*)this - vbo;
         }
         ctorVtbl9.e[1].delta = D_004886E0.e[1].delta + vc;
         ctorVtbl22 = D_00488728;
-        *(void**)(*(char**)self + 0x6C0) = &ctorVtbl22;
+        *(void**)(*(char**)this + 0x6C0) = &ctorVtbl22;
         ctorVtbl22.e[1].delta = D_00488728.e[1].delta + vc;
     }
-    self->resetStates();
-    return ((void*)self);
+    resetStates();
 }
 #endif
 
@@ -1342,7 +1340,7 @@ struct sWlAvElem {
     sWlAvElem() {}
 };
 extern "C" void* cDynamicColourEmitter_cDynamicColourEmitter(void* self);
-extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(void* self, int flags);
+extern "C" void _$_20tActiveAvalancheNode(void* self, int flags);
 struct sWlFx {
     char pad[0xD0];
     char emitter[0x2F0 - 0xD0];
@@ -1376,7 +1374,7 @@ void sti_002F6B88(int init, int prio) __asm__("func_002F6B88");
  * constructs vertlist (2048), collisionvertlist (64) and cAvalanche_m_activeNodes (64, each with a
  * cDynamicColourEmitter at +0xD0), sets kBeamPulseRate to 2 pi, constructs the 8 cRenderStateMan_m_state rows, clears
  * the custom irradiance name cRenderStateMan_m_customIrradiance, copies presets into the colours D_004FAAF0..D_004FAC80
- * and sets D_004A55B8, D_004A55BC to 320, 240. Destruction runs tActiveAvalancheNode__tActiveAvalancheNode on the 64
+ * and sets D_004A55B8, D_004A55BC to 320, 240. Destruction runs tActiveAvalancheNode::~tActiveAvalancheNode on the 64
  * active avalanche nodes, last first. func_002F8370 and func_002F8390 call it.
  *
  * @param init  nonzero to construct, 0 to destroy
@@ -1721,7 +1719,7 @@ void sti_002F6B88(int init, int prio)
                 if (cAvalanche_m_activeNodes != cRenderStateMan_m_state_end) {
                     do {
                         avalancheNode--;
-                        tActiveAvalancheNode__tActiveAvalancheNode(avalancheNode, 0);
+                        _$_20tActiveAvalancheNode(avalancheNode, 0);
                     } while (avalancheNode != cAvalanche_m_activeNodes);
                 }
             }

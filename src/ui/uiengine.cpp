@@ -611,12 +611,12 @@ int cUIFontInterface::getFontByHashName(int key)
 //100%
 INCLUDE_ASM("ui/uiengine", cUIFontInterface_purgeFonts);
 #ifdef SKIP_ASM
-extern "C" void cFont__cFont(cFont* h, int a);
+extern "C" void _$_5cFont(cFont* h, int a);
 
 /**
  * Releases all fonts of a font interface and empties it.
  *
- * Each entry with a font (+0x8) has it destroyed with cFont__cFont(font, 3); every entry's name and hash are cleared
+ * Each entry with a font (+0x8) has it destroyed with cFont::~cFont(font, 3); every entry's name and hash are cleared
  * and the count (+0x34) goes to 0. cSSXApp_purge calls it.
  */
 void cUIFontInterface::purgeFonts()
@@ -624,7 +624,7 @@ void cUIFontInterface::purgeFonts()
     for (int i = 0; i < mFontCount; i++) {
         cUIFontEntry* fontEntry = &((&mFontEntry[0]))[i];
         if (((int)fontEntry->mpFont) != 0) {
-            cFont__cFont((fontEntry->mpFont), 3);
+            _$_5cFont((fontEntry->mpFont), 3);
         }
         fontEntry->mpFileName = 0;
         fontEntry->mHashID = 0;
@@ -706,7 +706,7 @@ void cUIFontInterface::setData(tUIFontTableHeader* hdr)
 INCLUDE_ASM("ui/uiengine", cUIFontInterface_loadFonts);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" int cFont_cFont(void* mem, int name, int a2);
+extern "C" int __5cFontPCci(void* mem, int name, int a2);
 extern char str_UI_Font[];
 
 static inline int uiFontNameOf(cUIFontEntry* e)
@@ -721,7 +721,7 @@ void cUIFontInterface::loadFonts()
 {
     for (int i = 0; i < mFontCount; i++) {
         signed char j = i;
-        *(int*)&mFontEntry[j].mpFont = cFont_cFont(cMemMan_alloc(132, str_UI_Font, 0, 0),
+        *(int*)&mFontEntry[j].mpFont = __5cFontPCci(cMemMan_alloc(132, str_UI_Font, 0, 0),
                 uiFontNameOf(&((&mFontEntry[0]))[i]), 0);
     }
 }

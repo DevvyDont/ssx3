@@ -9,7 +9,7 @@
 // path); retail keeps the ctor, dtor, init and initOnRestart in camera/trigger/triggeralgorithms and the rest in
 // camera/trigger/cameratriggerman (0x0016C9B0 cleanupOnExit ... 0x0016D320 checkCollisions).
 //
-// Size 0x5C: [R] cCameraTriggerMan_cCameraTriggerMan constructs the trigger list at 0x0, 2 active lists 4 bytes apart
+// Size 0x5C: [R] cCameraTriggerMan::cCameraTriggerMan constructs the trigger list at 0x0, 2 active lists 4 bytes apart
 // from 0x14 and 2 trigger stacks 0x20 apart from 0x1C (ending at 0x5C); the static initialiser func_00175A20 builds
 // gCamTriggerMan (D_004C5830) with it, and the next .bss object (D_004C5890) is 0x60 further (0x5C rounded to 16).
 // [O] On Tour's cCameraTriggerMan is 0x5C with the same three members at the same offsets. No bases, no vtable.
@@ -44,6 +44,8 @@ CHECK_SIZE(cActiveTriggerNode, 0x10);
 // (methods cActiveTriggerList_* in camera/trigger/triggeralgorithms and cameratriggervolumes).
 struct tCameraTrigger;
 
+void operator_delete(int* p);
+
 struct cActiveTriggerList {
     cActiveTriggerNode* Head;       // 0x0 [O]; [R] cActiveTriggerList_cActiveTriggerList__FPv zeroes it; [U] purge /
                                     //       find / add / remove walk it
@@ -55,6 +57,10 @@ struct cActiveTriggerList {
     void* find1(void* key) __asm__("cActiveTriggerList_find1");
     void add(tCameraTrigger* item) __asm__("cActiveTriggerList_add");
     cActiveTriggerNode* remove(cActiveTriggerNode* target) __asm__("cActiveTriggerList_remove");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cActiveTriggerList();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cActiveTriggerList, Head, 0x0);
@@ -84,7 +90,7 @@ struct cRider;
 struct cCameraTriggerMan {
     cCameraTriggerList TriggerList;             // 0x00 [O]; [R] the ctor runs
                                                 //       cCameraTriggerList_cCameraTriggerList__FPv on this, the dtor
-                                                //       cCameraTriggerList__cCameraTriggerList; [U] init
+                                                //       cCameraTriggerList::~cCameraTriggerList; [U] init
                                                 //       (cCameraTriggerList_init), streamIn (loadFromBuffer),
                                                 //       loadTriggers (loadFromFile), purge / setTriggers / streamOut
                                                 //       (cCameraTriggerMan_reset) walk Triggers (0x0) and NumTriggers (0x4);
@@ -109,6 +115,9 @@ struct cCameraTriggerMan {
     void* setReplayTriggers() __asm__("cCameraTriggerMan_setReplayTriggers__FPv");
     void checkCollisions(cRider* rider) __asm__("cCameraTriggerMan_checkCollisions");
     void resolve(void* rid, void* stream) __asm__("cCameraTriggerMan_resolve");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cCameraTriggerMan();
 };
 
 CHECK_OFFSET(cCameraTriggerMan, TriggerList, 0x00);

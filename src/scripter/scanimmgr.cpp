@@ -247,15 +247,16 @@ void* cScriptAnimBankManager::GetBankInfo(int id)
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_UnlinkBank1);
 #ifdef SKIP_ASM
 extern "C" void cAnimDataBase_purgeChanCache(void** tbl);
-extern "C" void cAdfDataSource__cAdfDataSource(void* self, int flags);
+extern "C" void _$_14cAdfDataSource(void* self, int flags);
 void cMemMan_free(void*);
 
 /**
  * Unlinks animation bank record @p bankInfo: removes its data source from the anim database and clears the record.
  *
  * Takes the source out of cAnimDataBase_TheAnimDataBase at the bank number (low byte of +0x4), purges the database's
- * channel cache (cAnimDataBase_purgeChanCache), deletes the source (cAdfDataSource__cAdfDataSource with flags 3), frees
- * the anim ID table (+0x10) when the record has anims (+0xC), and resets the user ID (-1), anim count, data and table.
+ * channel cache (cAnimDataBase_purgeChanCache), deletes the source (cAdfDataSource::~cAdfDataSource with flags 3),
+ * frees the anim ID table (+0x10) when the record has anims (+0xC), and resets the user ID (-1), anim count, data and
+ * table.
  *
  * @param bankInfo  the bank record
  */
@@ -267,7 +268,7 @@ void cScriptAnimBankManager::UnlinkBank1(tScriptAnimBankInfo* bankInfo)
     *slot = 0;
     cAnimDataBase_purgeChanCache((void**)tbl);
     if (obj != 0) {
-        cAdfDataSource__cAdfDataSource(obj, 3);
+        _$_14cAdfDataSource(obj, 3);
     }
     if (bankInfo->numAnims != 0 && ((int)bankInfo->pTableAnimID) != 0) {
         cMemMan_free((void*)((int)bankInfo->pTableAnimID));

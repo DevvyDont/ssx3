@@ -36,9 +36,9 @@
 // EA defines it in this file too: the preview's bankmonitor.cpp asserts start with its "mMonitorType == MONITOR_BANK",
 // "mMonitorType == MONITOR_STREAM", "mMonitorType == MONITOR_MIDI", "!mFading", "mHandle < 0 || mFading". Retail's
 // methods sit just before the splat split at 0x2ACD08 (cBankMonitorInstance_Update 0x2AB6B0, then
-// cBankMonitorInstance_cBankMonitorInstance 0x2AB9E0 .. cBankMonitorInstance_Fade 0x2ACB80, splat unit
+// cBankMonitorInstance::cBankMonitorInstance 0x2AB9E0 .. cBankMonitorInstance_Fade 0x2ACB80, splat unit
 // sound/streamsys). Size 0xC0 [R] (cBankMonitor ctor: operator new[](64 x 0xC0, "mBankMonitorInstance") with
-// cBankMonitorInstance_cBankMonitorInstance) [O] (On Tour 0xC0). Retail follows On Tour's member order and offsets up
+// cBankMonitorInstance::cBankMonitorInstance) [O] (On Tour 0xC0). Retail follows On Tour's member order and offsets up
 // to mCloseOnEnd; On Tour's bools are bytes (mCloseOnEnd 0x9C, mTwoPlayerPan 0x9D), retail's are words, so retail's
 // fields from mTwoPlayerPan on sit 4 bytes later (mCallback 0xA8, mLastPitch 0xB0 .. mLastAzimuth 0xB8), which fills
 // On Tour's tail padding.
@@ -70,10 +70,12 @@ struct cDelayOpts {
 };
 
 // One of cMonitor's 48 timed callbacks (On Tour class cMonitorInstance, 0x2C). Methods 0x2AD848..0x2AD998: ctor
-// cMonitorInstance_cMonitorInstance__FPv, dtor cMonitorInstance__cMonitorInstance, Create cMonitorInstance_Create,
+// cMonitorInstance_cMonitorInstance__FPv, dtor cMonitorInstance::~cMonitorInstance, Create cMonitorInstance_Create,
 // IsFree cMonitorInstance_IsFree, Reset cMonitorInstance_Reset, CountReset
 // cMonitorInstance_CountReset__FPvi, Enable cMonitorInstance_Enable__FPv, Disable cMonitorInstance_Disable__FPv (On
 // Tour's order).
+void operator_delete(int* p);
+
 struct cMonitorInstance {
     int mEnabled;           // 0x00 [O]; [U] Enable stores 1, Disable 0
     int mCountReset;        // 0x04 [O]; [R] ctor -1; [U] CountReset stores it and mCountdown; IsFree tests == -1
@@ -97,6 +99,10 @@ struct cMonitorInstance {
     void CountReset(int periodMs) __asm__("cMonitorInstance_CountReset__FPvi");
     void Disable() __asm__("cMonitorInstance_Disable__FPv");
     void Enable() __asm__("cMonitorInstance_Enable__FPv");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cMonitorInstance();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 // cBankMonitorInstance::mRestartInfo (On Tour: an anonymous union __C1 of three anonymous structs, members bank /
@@ -210,6 +216,11 @@ struct cBankMonitorInstance {
     void Update3D(cBankMonitor* bm, float time) __asm__("cBankMonitorInstance_Update3D");
     void Pause() __asm__("cBankMonitorInstance_Pause");
     void Resume() __asm__("cBankMonitorInstance_Resume");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cBankMonitorInstance();
+    ~cBankMonitorInstance();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(tBankRestartInfo, mBank, 0x0);

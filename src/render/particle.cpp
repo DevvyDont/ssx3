@@ -1562,7 +1562,7 @@ extern "C" int compareIntsAscending(int *lhs, int *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", cBezierCache_cBezierCache);
+INCLUDE_ASM("render/particle", __12cBezierCache);
 #ifdef SKIP_ASM
 inline void* operator new[](unsigned int, void* p) { return p; }
 
@@ -1579,21 +1579,18 @@ struct sPtElem2B30 {
  * array constructions (4, 6 and 8 t4Vectors, twice: the basis and derivative-basis tables) compile to empty loops;
  * their offsets in the C (+0x20 to +0x1E0) do not match where cBezierCache_allocateCaches keeps the tables (+0x70, +0x1F0), which is
  * harmless since they emit no stores. cPS2BezierMan_cPS2BezierMan calls it.
- *
- * @return @p self
  */
-extern "C" void* cBezierCache_cBezierCache(cBezierCache* self)
+cBezierCache::cBezierCache()
 {
-    new ((char*)&self->mCacheRecord[2]) sPtElem2B30[4];
-    new ((char*)&self->mLMUVCache[0]) sPtElem2B30[6];
-    new ((char*)&self->m6x6Basis[1]) sPtElem2B30[8];
-    new ((char*)&self->m8x8Basis[3]) sPtElem2B30[4];
-    new ((char*)&self->m8x8Basis[7]) sPtElem2B30[6];
-    new ((char*)&self->mFreeNrmListSP[2]) sPtElem2B30[8];
-    self->m4x4CacheRecord = 0;
-    self->m6x6CacheRecord = 0;
-    self->m8x8CacheRecord = 0;
-    return ((void*)self);
+    new ((char*)&mCacheRecord[2]) sPtElem2B30[4];
+    new ((char*)&mLMUVCache[0]) sPtElem2B30[6];
+    new ((char*)&m6x6Basis[1]) sPtElem2B30[8];
+    new ((char*)&m8x8Basis[3]) sPtElem2B30[4];
+    new ((char*)&m8x8Basis[7]) sPtElem2B30[6];
+    new ((char*)&mFreeNrmListSP[2]) sPtElem2B30[8];
+    m4x4CacheRecord = 0;
+    m6x6CacheRecord = 0;
+    m8x8CacheRecord = 0;
 }
 #endif
 
@@ -2851,7 +2848,7 @@ void* cPlayerShadow_cPlayerShadow(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", cPlayerShadow__cPlayerShadow);
+INCLUDE_ASM("render/particle", _$_13cPlayerShadow);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" void cTextureMan_unlockTexture(void* mgr, int id);
@@ -2863,21 +2860,16 @@ void operator_delete(int* ptr);
  *
  * When mLockTexture is a valid id, frees it in cGraphicsMan_TheGraphicsMan's texture manager (mTexMan,
  * cTextureMan_unlockTexture), removes it through the graphics manager's vtable slot 50 (cPS2GraphicsMan_RemoveTexture) and resets
- * it to -1. Then operator_delete on @p flags bit 0 (cRider__cRider passes 3).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * it to -1. Then operator_delete on g++'s delete flag bit 0 (cRider__cRider passes 3).
  */
-extern "C" void cPlayerShadow__cPlayerShadow(cPlayerShadow* self, int flags)
+cPlayerShadow::~cPlayerShadow()
 {
-    int tex = self->mLockTexture;
+    int tex = mLockTexture;
     if (tex >= 0) {
         cTextureMan_unlockTexture(cGraphicsMan_TheGraphicsMan->mTexMan, tex);
         cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
-        mgr->RemoveTexture(self->mLockTexture);
-        self->mLockTexture = -1;
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
+        mgr->RemoveTexture(mLockTexture);
+        mLockTexture = -1;
     }
 }
 #endif

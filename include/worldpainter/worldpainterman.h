@@ -22,7 +22,7 @@
 //   cWorldPainterQuery_queryPosition and render cWorldPainterMan_render; cRenderStateMan_update reads it too).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail's constructors cWorldPainterMan_cWorldPainterMan and cWorldPainterSection_cWorldPainterSection, init
+//   [R] retail's constructors cWorldPainterMan::cWorldPainterMan and cWorldPainterSection_cWorldPainterSection, init
 //       cWorldPainterMan_init, the allocation sizes above;
 //   [P] the July 2003 preview's assert strings (worldpainterman.h / worldpainterman.cpp);
 //   [U] how retail code uses the field;
@@ -72,6 +72,8 @@ struct t4Vector;
 struct tBxVertex;
 struct tQuadTreeNode;
 
+void operator_delete(int* p);
+
 struct cWorldPainterMan {
     unsigned int m_uiNumSections;   // 0x0 [O]; [P] "( uiSectionID >= 0 ) && ( uiSectionID < m_uiNumSections )";
                                     //       [R] init stores iNumSections; [U] update's loop bound (unsigned compare)
@@ -86,6 +88,11 @@ struct cWorldPainterMan {
     void render1(cQuadTree* tree, tQuadTreeNode* node, tBxVertex* verts, t4Vector* lo, t4Vector* hi)
         __asm__("cWorldPainterMan_render1");
     void reset() __asm__("cWorldPainterMan_reset__FPv");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cWorldPainterMan();
+    ~cWorldPainterMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cWorldPainterMan, m_uiNumSections, 0x0);

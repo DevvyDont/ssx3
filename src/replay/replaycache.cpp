@@ -23,14 +23,14 @@
 INCLUDE_ASM("replay/replaycache", cReplay_addCache);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cReplayCache_cReplayCache(void* self);
+extern "C" void* __12cReplayCache(void* self);
 extern const char str_ReplayCache[];
 
 /**
  * Adds a recorded-input cache to the replay: builds a new cReplayCache in the first free InputCache slot.
  *
  * Checks InputCache[0] and [1] (+0x48C); for the first empty one it allocates 0x10 bytes tagged "ReplayCache"
- * and runs the cache constructor cReplayCache_cReplayCache (which allocates its 0x8000-byte "CmdFrame" buffer and clears
+ * and runs the cache constructor cReplayCache::cReplayCache (which allocates its 0x8000-byte "CmdFrame" buffer and clears
  * its counters). Nothing is allocated when both slots are in use.
  *
  * @return the new cache, or 0 when both slots were already taken
@@ -40,7 +40,7 @@ void* cReplay::addCache()
     void** slot = (void**)&InputCache;
     for (int i = 0; i < 2; i++, slot++) {
         if (*slot == 0) {
-            return *slot = cReplayCache_cReplayCache(cMemMan_alloc(0x10, str_ReplayCache, 0, 0));
+            return *slot = __12cReplayCache(cMemMan_alloc(0x10, str_ReplayCache, 0, 0));
         }
     }
     return 0;
@@ -50,10 +50,10 @@ void* cReplay::addCache()
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_removeCache);
 #ifdef SKIP_ASM
-extern "C" void cReplayCache__cReplayCache(void* p, int mode);
+extern "C" void _$_12cReplayCache(void* p, int mode);
 
 /**
- * Removes a rider's input cache: finds @p pCache in InputCache[2], destroys it (cReplayCache__cReplayCache, flags 3) and clears
+ * Removes a rider's input cache: finds @p pCache in InputCache[2], destroys it (cReplayCache::~cReplayCache, flags 3) and clears
  * the slot. A cache that is not registered is left alone.
  *
  * @param pCache  the cReplayCache to remove
@@ -65,7 +65,7 @@ void cReplay::removeCache(void* pCache)
         for (int i = 0; i < 2; i++, slot++) {
             if (*slot == pCache) {
                 if (*slot != 0) {
-                    cReplayCache__cReplayCache(*slot, 3);
+                    _$_12cReplayCache(*slot, 3);
                 }
                 *slot = 0;
                 return;
@@ -1899,7 +1899,7 @@ INCLUDE_ASM("replay/replaycache", cReplayHighlight_reset);
 /**
  * Clears a highlight record: PlayerId = -1, Frame (+0xB0) = 0 and the 0xAC bytes of Stats (+0x4) zeroed.
  *
- * cReplay_cReplay runs it on both Highlight records; cReplay_reset then gives them their player numbers.
+ * cReplay::cReplay runs it on both Highlight records; cReplay_reset then gives them their player numbers.
  */
 void cReplayHighlight::reset()
 {
@@ -1933,7 +1933,7 @@ INCLUDE_ASM("replay/replaycache", cScriptHeap_cScriptHeap__FPvN20);
  * Constructs a script heap over a caller-supplied buffer: the whole buffer becomes one free block.
  *
  * Stores @p pHeap in mpHeap (+0x0) and mpTopFreeBlock (+0x8), @p heapSize in mHeapSize (+0x4), and writes the first free block's
- * header: size @p heapSize - 8, no next block. cInSeq_cInSeq builds its heap with it.
+ * header: size @p heapSize - 8, no next block. cInSeq::cInSeq builds its heap with it.
  *
  * @param pHeap  the heap buffer
  * @param heapSize  the buffer size in bytes
@@ -2117,7 +2117,7 @@ INCLUDE_ASM("replay/replaycache", operator_new_array__FPv);
 /**
  * Allocates script heap memory by forwarding its arguments (size, heap) to operator_new3.
  *
- * Declared with only self; the size and heap stay in the argument registers. cScriptPlayerMain__cScriptPlayerMain uses it for its entity
+ * Declared with only self; the size and heap stay in the argument registers. cScriptPlayerMain::~cScriptPlayerMain uses it for its entity
  * player array.
  *
  * @return the allocated memory
@@ -2351,7 +2351,7 @@ bool cScriptPlayerChannelSpline::Update(float currFrameNum)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", cInSeq_cInSeq);
+INCLUDE_ASM("replay/replaycache", __6cInSeqPvT1Uii);
 #ifdef SKIP_ASM
 extern "C" void* cScriptPlayerMain_cScriptPlayerMain(cScriptPlayerMain* self);
 // PORT: array new[] with a heap argument; same symbol as the unit's operator_new_array(void*).
@@ -2379,45 +2379,38 @@ struct tScriptMainNodeNew : tScriptMainNode {
  * @param count     number of script players to create (On Tour maxScripts)
  * @param tag       despite the name, the comm interface (On Tour pCommInterface):
  *                  cScriptPlayerMain_GetInSeqCommInterface() falls back to this word (+0x0)
- * @return @p self
  */
-extern "C" cInSeq* cInSeq_cInSeq(cInSeq* self, void* pHeap, void* heapSize, unsigned int count, int tag)
+cInSeq::cInSeq(void* pHeap, void* heapSize, unsigned int count, int tag)
 {
-    cScriptHeap_cScriptHeap(((char*)&self->mHeap), pHeap, heapSize);
-    *(int*)&self->mpCommInterface = tag;
-    self->mMaxScripts = count;
-    self->mpScriptHeap = 0;
-    self->mpScriptUnused = 0;
-    tScriptMainNode** slot = &self->mpScriptHeap;
-    *slot = new (((char*)&self->mHeap)) tScriptMainNodeNew[count];
-    for (unsigned int i = 0; i < self->mMaxScripts; i++) {
-        self->mpScriptHeap[i].index = i;
-        self->mpScriptHeap[i].pNext = &self->mpScriptHeap[i + 1];
-        self->mpScriptHeap[i].pPrev = &self->mpScriptHeap[i - 1];
+    cScriptHeap_cScriptHeap(((char*)&mHeap), pHeap, heapSize);
+    *(int*)&mpCommInterface = tag;
+    mMaxScripts = count;
+    mpScriptHeap = 0;
+    mpScriptUnused = 0;
+    tScriptMainNode** slot = &mpScriptHeap;
+    *slot = new (((char*)&mHeap)) tScriptMainNodeNew[count];
+    for (unsigned int i = 0; i < mMaxScripts; i++) {
+        mpScriptHeap[i].index = i;
+        mpScriptHeap[i].pNext = &mpScriptHeap[i + 1];
+        mpScriptHeap[i].pPrev = &mpScriptHeap[i - 1];
     }
-    self->mpScriptHeap[0].pPrev = 0;
-    self->mpScriptHeap[self->mMaxScripts - 1].pNext = 0;
-    self->mpScriptUsed = 0;
-    self->mpScriptUnused = self->mpScriptHeap;
-    return self;
+    mpScriptHeap[0].pPrev = 0;
+    mpScriptHeap[mMaxScripts - 1].pNext = 0;
+    mpScriptUsed = 0;
+    mpScriptUnused = mpScriptHeap;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", cInSeq__cInSeq);
+INCLUDE_ASM("replay/replaycache", _$_6cInSeq);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 
 /**
  * Destroys an input sequence; the only work is freeing the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cInSeq__cInSeq(cInSeq* self, int flags)
+cInSeq::~cInSeq()
 {
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -4368,19 +4361,14 @@ extern "C" void* cScriptPlayerMain_cScriptPlayerMain(cScriptPlayerMain* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replaycache", cScriptPlayerMain__cScriptPlayerMain);
+INCLUDE_ASM("replay/replaycache", _$_17cScriptPlayerMain);
 #ifdef SKIP_ASM
 /**
  * Destroys a script player: shuts it down with cScriptPlayerMain_DeInit and frees the object when asked.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScriptPlayerMain__cScriptPlayerMain(cScriptPlayerMain* self, int flags)
+cScriptPlayerMain::~cScriptPlayerMain()
 {
-    ((cScriptPlayerMain*)self)->DeInit();
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
+    ((cScriptPlayerMain*)this)->DeInit();
 }
 #endif
 
@@ -4464,7 +4452,7 @@ struct tArrayNewCookie {
  * the 16-byte array cookie, cScriptPlayerEntity__cScriptPlayerEntity) and frees it with operator_delete_array. Then clears mID
  * (-1), mpData, mpManager, mpUserData, the header pointers, mLoopScript, mPlayState, mCurrFrame, mNumPaused and
  * mNumSteps, and sets mScriptLength and mJumpFrame to -1 and mPlaySpeed to 1.0. cInSeq_RecyclePlayer and the destructor
- * cScriptPlayerMain__cScriptPlayerMain call it.
+ * cScriptPlayerMain::~cScriptPlayerMain call it.
  *
  */
 void cScriptPlayerMain::DeInit()

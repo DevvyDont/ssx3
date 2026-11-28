@@ -2,7 +2,7 @@
 #define WSCRIPT_WSCRIPTCACHE_H
 
 // cWScriptCache: the world's per-section Luno script cache (cWorld::m_pWScriptCache; cWorld_cWorld allocates it as
-// cWScriptCache_cWScriptCache(cMemMan_alloc(0x10, "cWScriptCache"), this)). Methods in world/wscriptcache.
+// cWScriptCache::cWScriptCache(cMemMan_alloc(0x10, "cWScriptCache"), this)). Methods in world/wscriptcache.
 // Size 0x10 [R] (the retail allocation; On Tour's is the same). A FLAT layout, like main/game.h: member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
@@ -236,6 +236,8 @@ CHECK_OFFSET(cWScriptCacheEntry, mAsyncHandle, 0x004);
 CHECK_OFFSET(cWScriptCacheEntry, mpScriptHeader, 0x008);
 CHECK_SIZE(cWScriptCacheEntry, 0xC);
 
+void operator_delete(int* p);
+
 struct cWScriptCache {
     cWorld* mpWorld;                // 0x000 [O]
     cWScriptCacheEntry* mpCache;    // 0x004 [O]
@@ -248,6 +250,11 @@ struct cWScriptCache {
     void load(int index, int fileNum) __asm__("cWScriptCache_load");
     void load1(int index, int value) __asm__("cWScriptCache_load1");
     tScriptFileHeader* getScriptBase(int sectionId) __asm__("cWScriptCache_getScriptBase");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cWScriptCache(cWorld* world);
+    ~cWScriptCache();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cWScriptCache, mpWorld, 0x000);

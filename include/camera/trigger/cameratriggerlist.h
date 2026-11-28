@@ -63,6 +63,8 @@ enum eCamLoadErrorStatus {
     eCamLoadErrorInvalidActionType = 6
 };
 
+void operator_delete(int* p);
+
 struct cCameraTriggerList {
     // The trigger file version this build reads (name ours): [U] loadFromBuffer rejects any other Cookie and passes it
     // to readHeader and readTrigger.
@@ -82,6 +84,10 @@ struct cCameraTriggerList {
     void initHeader() __asm__("cCameraTriggerList_initHeader__FP18cCameraTriggerList");
     void readCookie(void* buffer) __asm__("cCameraTriggerList_readCookie__FP18cCameraTriggerListPv");
     int readHeader(void* buffer) __asm__("cCameraTriggerList_readHeader");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cCameraTriggerList();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cCameraTriggerList, Triggers, 0x00);

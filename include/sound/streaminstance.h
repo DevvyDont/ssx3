@@ -13,6 +13,8 @@
 
 struct cSndPlayOpts;
 
+void operator_delete(int* p);
+
 struct cStreamInstance {
     char* mBuffer;                  // 0x000 [O]
     int mExternalBuffer;            // 0x004 [O] bool
@@ -53,6 +55,11 @@ struct cStreamInstance {
     int TimeMult(int multAmount) __asm__("cStreamInstance_TimeMult");
     int GetStatus(void* out) __asm__("cStreamInstance_GetStatus");
     int GetRequestStatus(int requestStatus, int* out) __asm__("cStreamInstance_GetRequestStatus");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cStreamInstance(cSndPlayOpts* p, int heap, int extra);
+    ~cStreamInstance();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cStreamInstance, mBuffer, 0x000);

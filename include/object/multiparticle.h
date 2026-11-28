@@ -5,10 +5,10 @@
 // "MultiParticleInst" in On Tour's wscript). Retail: cMultiParticleMan methods and cMultiParticle's ctors/dtor in
 // src/object/movenode.cpp (0x3579C8-0x357FA0), the rest in src/object/multiparticle.cpp (0x358020-0x358380). No EA
 // path in the preview (On Tour: all_in_one_object.cpp), so the header takes the retail unit name.
-//   cMultiParticle    0x50: cMemMan_alloc(0x50, "MultiParticle") + ctor cMultiParticle_cMultiParticle(pdata, maxInst) in
+//   cMultiParticle    0x50: cMemMan_alloc(0x50, "MultiParticle") + ctor cMultiParticle::cMultiParticle(pdata, maxInst) in
 //                     cMultiParticleMan::addParticle (cMultiParticleMan_addParticle) and + cMultiParticle_cMultiParticle1(replay) in its
 //                     readFromReplayFrame. No vtable (dtor cMultiParticle__cMultiParticle is called directly).
-//   cMultiParticleMan 0x10: operator new(0x10, "MultiParticleMan") + ctor cMultiParticleMan_cMultiParticleMan in cGame (main/gameload.cpp;
+//   cMultiParticleMan 0x10: operator new(0x10, "MultiParticleMan") + ctor cMultiParticleMan::cMultiParticleMan in cGame (main/gameload.cpp;
 //                     cGame::MultiParticleMan, main/game.h +0x40). Instance cMultiParticleMan::TheMultiParticleMan =
 //                     cMultiParticleMan_TheMultiParticleMan (gp-relative; the ctor stores it, the dtor clears it; playbackman reads it).
 //
@@ -51,6 +51,9 @@ struct cMultiParticle {
     void remInst(unsigned int key) __asm__("cMultiParticle_remInst");
     void render() __asm__("cMultiParticle_render");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMultiParticle_writeToReplayFrame");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cMultiParticle(void* particleData, int maxInst);
 };
 
 CHECK_OFFSET(cMultiParticle, MaxInst, 0x00);
@@ -63,8 +66,10 @@ CHECK_OFFSET(cMultiParticle, BoundBox, 0x20);
 CHECK_OFFSET(cMultiParticle, Offset, 0x40);
 CHECK_SIZE(cMultiParticle, 0x50);
 
+void operator_delete(int* p);
+
 struct cMultiParticleMan {
-    cMultiParticle* Particles[4];   // 0x000 [O]; [R] ctor cMultiParticleMan_cMultiParticleMan zeroes all 4; [U] addParticle allocates [id]
+    cMultiParticle* Particles[4];   // 0x000 [O]; [R] ctor cMultiParticleMan::cMultiParticleMan zeroes all 4; [U] addParticle allocates [id]
                                     //       (cMemMan_alloc(0x50, "MultiParticle")), reset/dtor delete them,
                                     //       update/render/replay/unloadSection loop over 4
 
@@ -72,6 +77,11 @@ struct cMultiParticleMan {
     void addParticle(int i, void* pdata, int numInst) __asm__("cMultiParticleMan_addParticle");
     void* addInst(int particleIndex, int instId) __asm__("cMultiParticleMan_addInst__FPvii");
     void* remInst(int particleIndex, int instId) __asm__("cMultiParticleMan_remInst__FPvii");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cMultiParticleMan();
+    ~cMultiParticleMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cMultiParticleMan, Particles, 0x00);

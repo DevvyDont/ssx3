@@ -6,7 +6,7 @@ INCLUDE_ASM("dirtysock/tags2", lobbyman_compareRoomNames);
 
 INCLUDE_ASM("dirtysock/tags2", lobbyman_compareUserNames);
 
-INCLUDE_ASM("dirtysock/tags2", LobbyMan_LobbyMan);
+INCLUDE_ASM("dirtysock/tags2", __8LobbyMan);
 
 INCLUDE_ASM("dirtysock/tags2", LobbyMan__LobbyMan);
 
@@ -330,9 +330,9 @@ INCLUDE_ASM("dirtysock/tags2", cSetupMan_createInstance);
 
 INCLUDE_ASM("dirtysock/tags2", cSetupMan_destroyInstance);
 
-INCLUDE_ASM("dirtysock/tags2", cSetupMan_cSetupMan);
+INCLUDE_ASM("dirtysock/tags2", __9cSetupManiii);
 
-INCLUDE_ASM("dirtysock/tags2", cSetupMan__cSetupMan);
+INCLUDE_ASM("dirtysock/tags2", _$_9cSetupMan);
 
 INCLUDE_ASM("dirtysock/tags2", cSetupMan_update);
 
@@ -382,9 +382,9 @@ INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_createInstance);
 
 INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_destroyInstance);
 
-INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_cSharedLoginMan);
+INCLUDE_ASM("dirtysock/tags2", __15cSharedLoginMan);
 
-INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan__cSharedLoginMan);
+INCLUDE_ASM("dirtysock/tags2", _$_15cSharedLoginMan);
 
 INCLUDE_ASM("dirtysock/tags2", cSharedLoginMan_init);
 
@@ -470,7 +470,7 @@ INCLUDE_ASM("dirtysock/tags2", TibExtMemFree);
 
 INCLUDE_ASM("dirtysock/tags2", cUsbKeyboard_createInstance);
 
-INCLUDE_ASM("dirtysock/tags2", cUsbKeyboard_cUsbKeyboard);
+INCLUDE_ASM("dirtysock/tags2", __12cUsbKeyboard);
 
 INCLUDE_ASM("dirtysock/tags2", usbkeyboard_setupKeyboard);
 
@@ -484,7 +484,7 @@ INCLUDE_ASM("dirtysock/tags2", cVoipMan_destroyInstance);
 
 INCLUDE_ASM("dirtysock/tags2", cVoipMan_cVoipMan);
 
-INCLUDE_ASM("dirtysock/tags2", cVoipMan__cVoipMan);
+INCLUDE_ASM("dirtysock/tags2", _$_8cVoipMan);
 
 INCLUDE_ASM("dirtysock/tags2", cVoipMan_connect);
 

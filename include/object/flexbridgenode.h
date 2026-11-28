@@ -67,7 +67,7 @@ CHECK_OFFSET(tSpringData, Width, 0x1C);
 CHECK_SIZE(tSpringData, 0x20);
 
 // A chain of damped linear + angular springs (On Tour cSpring = cSpringState 0x24 + Nodes; no vptr). EA's
-// object/spring.cpp (src/object/spring.cpp: cSpring_cSpring__FPv, cSpring_cSpring1 (replay), cSpring__cSpring,
+// object/spring.cpp (src/object/spring.cpp: cSpring_cSpring__FPv, cSpring_cSpring1 (replay), cSpring::~cSpring,
 // cSpring_setupSpring, cSpring_setupNodes, cSpring_update, cSpring_writeToReplayFrame). Move it to object/spring.h
 // when that header is written. [U] cSpring_setupSpring stores 0x0..0x24; writeToReplayFrame writes the 0x24-byte
 // state, then Width * 0x50 bytes of Nodes.
@@ -93,6 +93,8 @@ CHECK_OFFSET(tSpringNode, F, 0x30);
 CHECK_OFFSET(tSpringNode, T, 0x40);
 CHECK_SIZE(tSpringNode, 0x50);
 
+void operator_delete(int* p);
+
 struct cSpring {
     int Width;                      // 0x00 [O]; [U] setupSpring (sw), setupNodes / update loop bounds (lw);
                                     //      cFlexBridgeNode grid size (lw 0x50)
@@ -113,6 +115,10 @@ struct cSpring {
     void setupNodes() __asm__("cSpring_setupNodes");
     void update() __asm__("cSpring_update");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cSpring_writeToReplayFrame");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cSpring();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cSpring, Width, 0x00);
@@ -149,7 +155,7 @@ struct cFlexBridgeNode : public cInstanceNode {
     char unk_048[0x8];              // 0x048 the state's tail padding (On Tour state 0x28..0x30; never accessed)
     // --- cFlexBridgeNode
     cSpring Mesh;                   // 0x050 [O] cSpring (0x28); [R] ctors cSpring_cSpring__FPv / cSpring_cSpring1 on
-                                    //      +0x50, setupSpring; dtor cSpring__cSpring(+0x50, 2); [U] update
+                                    //      +0x50, setupSpring; dtor cSpring::~cSpring(+0x50, 2); [U] update
                                     //      cSpring_update(+0x50), writeToReplayFrame cSpring_writeToReplayFrame(+0x50);
                                     //      Width (0x50) / ForceScale (0x64) / TorqueScale (0x68) / Nodes (0x74) read
                                     //      directly

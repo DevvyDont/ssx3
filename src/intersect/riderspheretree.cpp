@@ -1708,7 +1708,7 @@ extern "C" int cWorldIntersectType_IsMeshInt(sTriTester_C0F8* self, tPolyModelMe
 #endif
 
 //100%
-INCLUDE_ASM("intersect/riderspheretree", SphereTree_SphereTree);
+INCLUDE_ASM("intersect/riderspheretree", __10SphereTree);
 #ifdef SKIP_ASM
 // t4Vector with On Tour's empty default constructor (ours has none): constructing axis[8] leaves only the dead loop
 // setup (li 7, li -1), which only a non-POD element type produces.
@@ -1719,15 +1719,12 @@ extern "C" void SphereTree_init(SphereTree* self);
 
 /**
  * Constructs an empty sphere tree: no treeInfo and default axes (SphereTree_init).
- *
- * @return @p self
  */
-extern "C" void* SphereTree_SphereTree(SphereTree* self)
+SphereTree::SphereTree()
 {
-    new (self->axis) tConstructedVector[8];
-    self->treeInfo = 0;
-    self->init();
-    return ((void*)self);
+    new (axis) tConstructedVector[8];
+    treeInfo = 0;
+    init();
 }
 #endif
 

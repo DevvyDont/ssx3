@@ -45,6 +45,8 @@ struct tVisInView {
 struct t4Vector;
 struct tBoundBox;
 
+void operator_delete(int* p);
+
 struct cOcclusionMan {
     tVisCurtainRecord* m_pPlanes;   // 0x000 [O]
     int m_iNumPlanes;               // 0x004 [O]
@@ -58,6 +60,10 @@ struct cOcclusionMan {
     void removeVisCurtain(tVisCurtainRecord* curtain) __asm__("cOcclusionMan_removeVisCurtain");
     void updateView(tBoundBox* bb) __asm__("cOcclusionMan_updateView");
     void updateVisPlane(t4Vector* eyep, tVisCurtainRecord* frustumPtr) __asm__("cOcclusionMan_updateVisPlane");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cOcclusionMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cOcclusionMan, m_pPlanes, 0x000);

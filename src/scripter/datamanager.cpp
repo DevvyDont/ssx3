@@ -328,13 +328,13 @@ void* cDataManager::GetEmptyInstance()
 //100%
 INCLUDE_ASM("scripter/datamanager", tNISList_tNISList);
 #ifdef SKIP_ASM
-extern "C" void cCircularBuffer_cCircularBuffer(void* self);
+extern "C" void __15cCircularBuffer(void* self);
 void cCircularBuffer_Reset(void* self);
 
 /**
  * Constructs an empty NIS list.
  *
- * Initialises the entry buffer at +0xC (cCircularBuffer_cCircularBuffer, cCircularBuffer_Reset), sets the next pending
+ * Initialises the entry buffer at +0xC (cCircularBuffer::cCircularBuffer, cCircularBuffer_Reset), sets the next pending
  * index (+0xBC) to -1 and the cut-scene flag (+0x4) to 1, and zeroes the engine pointer (+0x0), view index (+0x8),
  * state (+0xA4) and the flag and counter words at +0xA8-+0xC8.
  *
@@ -343,7 +343,7 @@ void cCircularBuffer_Reset(void* self);
 extern "C" void* tNISList_tNISList(tNISList* self)
 {
     void* list = (char*)&self->mList;
-    cCircularBuffer_cCircularBuffer(list);
+    __15cCircularBuffer(list);
     cCircularBuffer_Reset(list);
     self->mNextPendingScriptIndex = -1;
     self->mIsCutSceneHandler = 1;
@@ -363,24 +363,19 @@ extern "C" void* tNISList_tNISList(tNISList* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", tNISList__tNISList);
+INCLUDE_ASM("scripter/datamanager", _$_8tNISList);
 #ifdef SKIP_ASM
 extern "C" void tNISList_Reset(tNISList* self, int a1);
 void operator_delete(int* ptr);
 
 /**
  * Destroys a NIS list: resets it (tNISList_Reset with resetTransition 1), clears its engine pointer (+0x0), and frees
- * it with operator_delete when bit 0 of @p flags is set.
- *
- * @param flags  destructor flags; bit 0 frees the memory
+ * it with operator_delete when bit 0 of g++'s delete flag is set.
  */
-extern "C" void tNISList__tNISList(tNISList* self, int flags)
+tNISList::~tNISList()
 {
-    ((tNISList*)self)->Reset(1);
-    *((int*)self) = 0;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
+    ((tNISList*)this)->Reset(1);
+    *((int*)this) = 0;
 }
 #endif
 

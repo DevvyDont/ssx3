@@ -2111,7 +2111,7 @@ void* cCameraAlgoList_cCameraAlgoList(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbreward", cCameraAlgoList__cCameraAlgoList);
+INCLUDE_ASM("be/bedbreward", _$_15cCameraAlgoList);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void cCameraAlgoList_removeAll(void* self);
@@ -2120,16 +2120,10 @@ extern "C" void cCameraAlgoList_removeAll(void* self);
  * Destroys a camera algorithm list: frees its nodes, then the object itself when asked to.
  *
  * cCameraAlgoList_removeAll() deletes every node and the algorithms the list owns.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cCameraAlgoList__cCameraAlgoList(cCameraAlgoList* self, int flags)
+cCameraAlgoList::~cCameraAlgoList()
 {
-    cCameraAlgoList_removeAll(self);
-    if (flags & 1)
-    {
-        operator_delete(((int*)self));
-    }
+    cCameraAlgoList_removeAll(this);
 }
 #endif
 

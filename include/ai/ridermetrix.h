@@ -10,7 +10,7 @@
 // Size 0x1CC [R] (the allocation; On Tour 0x1F0). A FLAT layout, like main/game.h. Member names are EA's, from SSX On
 // Tour's PSP DWARF: its cRiderMetrix derives from cRiderMetrixState (0x000-0x1AB here) and adds Rider onwards.
 // Placed by:
-//   [R] retail's constructor cRiderMetrix_cRiderMetrix and cRiderMetrix_linkToRider;
+//   [R] retail's constructor cRiderMetrix::cRiderMetrix and cRiderMetrix_linkToRider;
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order, where the fields on both sides are placed by [R] or [U].
 // Retail differs from On Tour in two ways: On Tour's three leading bools are words here, and a trick definition
@@ -283,6 +283,9 @@ struct cRiderMetrix {
     bool buildTrickName(tTrickNameDef* vid, int stance, int alternate, int style, int flag)
         __asm__("cRiderMetrix_buildTrickName");
     int checkForMonsterTrick(tTrickNameDef* id) __asm__("cRiderMetrix_checkForMonsterTrick");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cRiderMetrix();
 };
 
 CHECK_OFFSET(cRiderMetrix, CurTrickPower, 0x014);

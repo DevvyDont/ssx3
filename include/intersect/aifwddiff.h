@@ -16,6 +16,8 @@ struct tAIFwdDiff;
 
 struct tPatchRecord;
 
+void operator_delete(int* p);
+
 struct cAIFwdDiffCache {
     tAIFwdDiff* mCache;             // 0x000 [O]
     tAIFwdDiff* mAgeQueue;          // 0x004 [O]
@@ -30,6 +32,10 @@ struct cAIFwdDiffCache {
     void TesselatePatch(tPatchRecord* patch, tAIFwdDiff* fwdDiff) __asm__("cAIFwdDiffCache_TesselatePatch");
     void InitializeCache(tAIFwdDiff* patch) __asm__("cAIFwdDiffCache_InitializeCache");
     void RemoveFromHash(tAIFwdDiff* node) __asm__("cAIFwdDiffCache_RemoveFromHash");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cAIFwdDiffCache();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cAIFwdDiffCache, mCache, 0x000);

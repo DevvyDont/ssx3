@@ -2005,14 +2005,14 @@ INCLUDE_ASM("ai/ai", cAI_purgeAnims);
 extern void* cGameAnimMap_TheGameAnimMap;
 extern "C" void cGameAnimMap_remSource(void*, void*);
 extern "C" void cAnimDataBase_purgeChanCache(void*);
-extern "C" void cAdfDataSource__cAdfDataSource(void*, int);
+extern "C" void _$_14cAdfDataSource(void*, int);
 
 /**
  * Unloads the character animation file that cAI_loadAnims() loaded.
  *
  * For the one entry of cAnimDataBase_TheAnimDataBase->DataSources: removes its animations from the game anim map
  * cGameAnimMap_TheGameAnimMap, clears the entry, frees the animation banks (cAnimDataBase_purgeChanCache) and deletes
- * the data source (cAdfDataSource__cAdfDataSource, flags 3).
+ * the data source (cAdfDataSource::~cAdfDataSource, flags 3).
  */
 void cAI::purgeAnims()
 {
@@ -2026,7 +2026,7 @@ void cAI::purgeAnims()
             cAnimDataBase* animTable = cAnimDataBase_TheAnimDataBase;
             animTable->DataSources[(unsigned char)i] = 0;
             cAnimDataBase_purgeChanCache(animTable);
-            cAdfDataSource__cAdfDataSource(bank, 3);
+            _$_14cAdfDataSource(bank, 3);
         }
     }
 }

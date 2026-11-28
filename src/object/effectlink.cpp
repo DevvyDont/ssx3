@@ -956,7 +956,7 @@ INCLUDE_ASM("object/effectlink", cFlexBridgeNode__cFlexBridgeNode);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cMemMan_free(void* ptr);
 extern "C" void* cObjectInterface_getNash();
-extern "C" void cSpring__cSpring(void* self, int flags);
+extern "C" void _$_7cSpring(void* self, int flags);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 
@@ -1006,7 +1006,7 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
     corner.w = 1.0f;
     *(&self->BoundBox.MaxPoint) = corner;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, inst, box, &old);
-    cSpring__cSpring(&self->Mesh, 2);
+    _$_7cSpring(&self->Mesh, 2);
     cInstanceNode__cInstanceNode(((char*)self), flags);
 }
 #endif

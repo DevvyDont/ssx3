@@ -1018,7 +1018,7 @@ void cRealFE::load()
 INCLUDE_ASM("fe/fereal", cRealFE_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void* cFadeScreen_loseFocus(void* self);
-extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
+extern "C" void _$_12cMoviePlayer(void* p, int a1);
 extern "C" void cFEFlowState_purge(void* flow);
 extern int cRealFE_mMovieList;
 extern char gFlowState;
@@ -1027,7 +1027,7 @@ extern char gFlowState;
  * Lets the front end lose focus once the base fade allows it, stopping any movie that is playing.
  *
  * Returns false while cFadeScreen_loseFocus() still refuses. Otherwise it destroys the movie player at +0xB5AD4 (On
- * Tour mpMoviePlayer; cMoviePlayer__cMoviePlayer with flags 3) and clears it, clears +0xB5AD8, cRealFE_mMovieList and
+ * Tour mpMoviePlayer; cMoviePlayer::~cMoviePlayer with flags 3) and clears it, clears +0xB5AD8, cRealFE_mMovieList and
  * +0xB5ADC, calls cFEFlowState_purge on the front-end flow state gFlowState and returns true.
  *
  * @return true when focus may move on, false to keep it
@@ -1039,7 +1039,7 @@ bool cRealFE::loseFocus()
     }
     void* moviePlayer = mpMoviePlayer;
     if (moviePlayer != 0) {
-        cMoviePlayer__cMoviePlayer(moviePlayer, 3);
+        _$_12cMoviePlayer(moviePlayer, 3);
         mpMoviePlayer = 0;
     }
     mMovieSkippable = 0;
@@ -1294,7 +1294,7 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cFadeScreen_update(void* self);
-extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
+extern "C" void* __12cMoviePlayer(void* mem);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cMusicSys_PauseSong(void* p);
 extern "C" void cMusicSys_ResumeSong(void* p);
@@ -1302,7 +1302,7 @@ extern "C" void tMoviePlayOptions_SetDefaults(void* self);
 extern "C" int cMoviePlayer_init(void* p, void* q);
 extern "C" bool cMoviePlayer_asyncPlay(void* self);
 extern "C" void cMoviePlayer_asyncUpdate(void* self);
-extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
+extern "C" void _$_12cMoviePlayer(void* p, int a1);
 int cSSXAudio_PlayIntroMovieWithDJ(void* self);
 void* cInput_getState(void* self, int a1);
 extern "C" void cUIEngine_update(void* self);
@@ -1345,7 +1345,7 @@ void cRealFE::update()
     cFadeScreen_update(((char*)this));
     if (mpMoviePlayer == 0) {
         if (cRealFE_mMovieList != 0) {
-            mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
+            mpMoviePlayer = (cMoviePlayer*)__12cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
             cMusicSys_PauseSong(&cAudioInterface_bxAudio()->MusicSys);
             tMoviePlayOptions info;
             tMoviePlayOptions_SetDefaults(&info);
@@ -1398,7 +1398,7 @@ void cRealFE::update()
         if (done == 0) return;
     }
     if (mpMoviePlayer != 0) {
-        cMoviePlayer__cMoviePlayer(mpMoviePlayer, 3);
+        _$_12cMoviePlayer(mpMoviePlayer, 3);
     }
     int movieBits = cRealFE_mMovieList;
     mWaitRenderNum = 1;
@@ -1479,14 +1479,14 @@ INCLUDE_ASM("fe/fereal", cRealFE_purgeCharAnimations);
 extern void* cGameAnimMap_TheGameAnimMap;
 extern "C" void cGameAnimMap_remSource(void* a, void* b);
 extern "C" void cAnimDataBase_purgeChanCache(void* a);
-extern "C" void cAdfDataSource__cAdfDataSource(void* a, int b);
+extern "C" void _$_14cAdfDataSource(void* a, int b);
 
 /**
  * Releases the front end's character animation data loaded by cRealFE_loadCharAnimations.
  *
  * For its one animation slot: when cAnimDataBase_TheAnimDataBase holds data, removes it from
  * cGameAnimMap_TheGameAnimMap (cGameAnimMap_remSource), clears the slot, calls cAnimDataBase_purgeChanCache on the table and destroys the data
- * (cAdfDataSource__cAdfDataSource with 3).
+ * (cAdfDataSource::~cAdfDataSource with 3).
  */
 void cRealFE::purgeCharAnimations()
 {
@@ -1499,7 +1499,7 @@ void cRealFE::purgeCharAnimations()
             cAnimDataBase* tbl = cAnimDataBase_TheAnimDataBase;
             tbl->DataSources[idx] = 0;
             cAnimDataBase_purgeChanCache(tbl);
-            cAdfDataSource__cAdfDataSource(animData, 3);
+            _$_14cAdfDataSource(animData, 3);
         }
     }
 }

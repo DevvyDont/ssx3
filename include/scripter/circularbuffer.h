@@ -32,6 +32,9 @@ struct cCircularBuffer {
     int GetNumEntries() __asm__("cCircularBuffer_GetNumEntries");
     void* operatorIndex(int index) __asm__("cCircularBuffer_operatorIndex");
     int IsEmpty() __asm__("cCircularBuffer_IsEmpty");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cCircularBuffer();
 };
 
 CHECK_OFFSET(cCircularBuffer, mBuffer, 0x000);

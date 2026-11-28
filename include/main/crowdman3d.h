@@ -4,11 +4,11 @@
 // cCrowdMan3d: the 3D crowd manager (name ours: the allocation tag "CrowdMan3d", the global TheCrowdMan3d and
 // cGame::CrowdMan3d, main/game.h). Five crowd blocks; each animates one crowd model's members (world instances
 // attached by script) with a shared mesh animation. One instance: cGame_load (main/gameload) allocates it and
-// cGame_purge destroys it (flags 3). Retail code: object/debouncenode (cCrowdMan3d_cCrowdMan3d 0x00343A68 ..
+// cGame_purge destroys it (flags 3). Retail code: object/debouncenode (cCrowdMan3d::cCrowdMan3d 0x00343A68 ..
 // tCrowdBlock3d_readFromReplayFrame). No On Tour class, no preview assert path.
 //
-// Size 0x9C4: [R] cGame_load: operator new(2500, "CrowdMan3d") + cCrowdMan3d_cCrowdMan3d, which builds five 0x1F4-byte
-// blocks; the destructor cCrowdMan3d__cCrowdMan3d destroys five. No vtable, no base class.
+// Size 0x9C4: [R] cGame_load: operator new(2500, "CrowdMan3d") + cCrowdMan3d::cCrowdMan3d, which builds five 0x1F4-byte
+// blocks; the destructor cCrowdMan3d::~cCrowdMan3d destroys five. No vtable, no base class.
 //
 // A FLAT layout. Evidence tags: [R] the constructor / destructor and the block reset tCrowdBlock3d_reset; [U] how retail code
 // uses the field (src/object/debouncenode.cpp). Names are ours.
@@ -60,6 +60,8 @@ CHECK_SIZE(tCrowdBlock3d, 0x1F4);
 
 struct cBxReplayFrame;
 
+void operator_delete(int* p);
+
 struct cCrowdMan3d {
     tCrowdBlock3d mBlocks[5];       // 0x000 [R] the ctor resets all five (tCrowdBlock3d_reset); the dtor frees each block's
                                     //       animation data and destroys the five (tCrowdBlock3d_destroy)
@@ -70,6 +72,11 @@ struct cCrowdMan3d {
     void render() __asm__("cCrowdMan3d_render");
     void writeToReplayFrame(cBxReplayFrame* replayStream) __asm__("cCrowdMan3d_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* replayStream) __asm__("cCrowdMan3d_readFromReplayFrame");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cCrowdMan3d();
+    ~cCrowdMan3d();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cCrowdMan3d, mBlocks, 0x000);

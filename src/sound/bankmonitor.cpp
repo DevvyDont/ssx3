@@ -19,7 +19,7 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_cBankMonitor);
 struct sSndPlayerD9C8;
 extern "C" sSndPlayerD9C8* cMonitor_cMonitor(sSndPlayerD9C8* self, int inchrg, int heap);
 extern "C" void* cSoundSys_cSoundSys(cSoundSys* self, int a);
-extern "C" void* cBankMonitorInstance_cBankMonitorInstance(void* self);
+extern "C" void* __20cBankMonitorInstance(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char str_mBankMonitorInstance[];
@@ -37,7 +37,7 @@ extern const sBmVtblCD08 D_00483B88;
 
 struct sBmVoiceCD08 {
     char pad_0x0[0xC0];
-    sBmVoiceCD08() { cBankMonitorInstance_cBankMonitorInstance(this); }
+    sBmVoiceCD08() { __20cBankMonitorInstance(this); }
     void operator delete[](void* p, unsigned int size);
 };
 
@@ -96,7 +96,7 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor__cBankMonitor);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void cBankMonitorInstance__cBankMonitorInstance(void* self, int flags);
+extern "C" void _$_20cBankMonitorInstance(void* self, int flags);
 struct sSndPlayerDAC8;
 extern "C" void cMonitor__cMonitor(cMonitor* self, int flags);
 extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags);
@@ -144,7 +144,7 @@ extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
         cBankMonitorInstance* bankInstance = self->mBankMonitorInstance + ((int*)self->mBankMonitorInstance)[-4];
         while (self->mBankMonitorInstance != bankInstance) {
             bankInstance--;
-            cBankMonitorInstance__cBankMonitorInstance(bankInstance, 0);
+            _$_20cBankMonitorInstance(bankInstance, 0);
         }
         cMemMan_free((char*)self->mBankMonitorInstance - 0x10);
     }
@@ -261,7 +261,7 @@ struct cMusicSysComplete {
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Create);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* cBankMonitorInstance_cBankMonitorInstance(void* self);
+extern "C" void* __20cBankMonitorInstance(void* self);
 
 // One of a bank monitor's 64 voices (0xC0 bytes): a cBankMonitorInstance. The fields from mCloseStateLocked on carry
 // that class's member names at the same offsets (sound/bankmonitor.h; mVolControl is a float* there).
@@ -290,7 +290,7 @@ struct sBmVoice {
     int mTwoPlayerSide;     // 0xA4
     sSndCallback callback;  // 0xA8
     char padB0[0xC0 - 0xB0];
-    sBmVoice() { cBankMonitorInstance_cBankMonitorInstance(this); }
+    sBmVoice() { __20cBankMonitorInstance(this); }
     void operator delete[](void* p, unsigned int size);
 };
 
@@ -718,22 +718,19 @@ void* cMonitorInstance_cMonitorInstance(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", cMonitorInstance__cMonitorInstance);
+INCLUDE_ASM("sound/bankmonitor", _$_16cMonitorInstance);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
+
+extern "C" void _$_16cMonitorInstance(cMonitorInstance* self, int flags);
 
 /**
  * Destroys a cMonitorInstance (g++ 2.95 destructor): nothing to clean up; frees the object when bit 0 of flags is set.
  *
  * cMonitor__cMonitor calls it with 0 on each of its 48 mMonitorInstance entries.
- *
- * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void cMonitorInstance__cMonitorInstance(cMonitorInstance* self, int flags)
+cMonitorInstance::~cMonitorInstance()
 {
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -996,7 +993,7 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
         cMonitorInstance* monitorInstance = end;
         while (((&self->mMonitorInstance[0])) != monitorInstance) {
             monitorInstance--;
-            cMonitorInstance__cMonitorInstance((cMonitorInstance*)((int*)monitorInstance), 0);
+            _$_16cMonitorInstance((cMonitorInstance*)((int*)monitorInstance), 0);
         }
     }
     cSndPlayOpts__cSndPlayOpts(((cBankMonitor*)self), 0);
@@ -2847,25 +2844,20 @@ void* cSpeechBank_cSpeechBank(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", cSpeechBank__cSpeechBank);
+INCLUDE_ASM("sound/bankmonitor", _$_11cSpeechBank);
 #ifdef SKIP_ASM
 extern "C" void SPCH_removeTable(int bankId);
 
 /**
  * Destroys a cSpeechBank: releases its driver bank (SPCH_removeTable(mBankId)) and frees mpData when mOwnsData.
  *
- * Deletes the object when bit 0 of flags is set. The cSpeechInstance destructor cSpeechInstance__cSpeechInstance calls it with 3.
- *
- * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
+ * Deletes the object when bit 0 of flags is set. The cSpeechInstance destructor cSpeechInstance::~cSpeechInstance calls it with 3.
  */
-extern "C" void cSpeechBank__cSpeechBank(cSpeechBank* self, int flags)
+cSpeechBank::~cSpeechBank()
 {
-    SPCH_removeTable(self->mBankId);
-    if (self->mOwnsData != 0) {
-        MEM_free(self->mpData);
-    }
-    if (flags & 1) {
-        operator_delete(((int*)self));
+    SPCH_removeTable(mBankId);
+    if (mOwnsData != 0) {
+        MEM_free(mpData);
     }
 }
 #endif
@@ -2941,7 +2933,7 @@ bool cSpeechBank::HasBankId(int bankId)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", cSpeechInstance_cSpeechInstance);
+INCLUDE_ASM("sound/bankmonitor", __15cSpeechInstanceiiiiii);
 #ifdef SKIP_ASM
 extern "C" void cStreamSys_STREAM_Create(void* sys, int id, int a, int b, int c);
 extern "C" void cSpeechInstance_ReadConfig(cSpeechInstance* self, int a, int b, int c);
@@ -2954,19 +2946,17 @@ extern "C" void cSpeechInstance_ReadConfig(cSpeechInstance* self, int a, int b, 
  * (cStreamSys_STREAM_Create(stream id, memType, 0, 0x20000)) and reads its speech.inf section (cSpeechInstance_ReadConfig(index,
  * section, loadLangHead)). cSpeechSys_CreateInstance calls it on cMemMan_alloc(0x904, "SpeechInstance").
  *
- * @param mem  the memory for the object
  * @param instanceIndex  the instance's index in cSpeechSys::mSpeechInstance
  * @param streamId  the cStreamSys stream id
  * @param section  the speech.inf section to read
  * @param memType  the memory type passed to the stream open
  * @param loadLangHead  nonzero to also load the language headers ("%slanghead.big")
  * @param reserved  stored in unk_008, which nothing reads (name ours; cSpeechSys_CreateInstance's callers pass -1)
- * @return mem
  */
-extern "C" cSpeechInstance* cSpeechInstance_cSpeechInstance(cSpeechInstance* mem, int instanceIndex, int streamId, int section,
-        int memType, int loadLangHead, int reserved)
+cSpeechInstance::cSpeechInstance(int instanceIndex, int streamId, int section, int memType, int loadLangHead,
+                                 int reserved)
 {
-    cSpeechInstance* self = mem;
+    cSpeechInstance* self = this;
     self->mIndex = instanceIndex;
     self->mStreamId = streamId;
     self->mReadyForSpeech = 1;
@@ -2985,53 +2975,46 @@ extern "C" cSpeechInstance* cSpeechInstance_cSpeechInstance(cSpeechInstance* mem
     }
     cStreamSys_STREAM_Create(D_004A37B4->mpVStreamSys, self->mStreamId, memType, 0, 0x20000);
     self->ReadConfig(instanceIndex, section, loadLangHead);
-    return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", cSpeechInstance__cSpeechInstance);
+INCLUDE_ASM("sound/bankmonitor", _$_15cSpeechInstance);
 #ifdef SKIP_ASM
 extern "C" void cStreamSys_STREAM_Destroy(void* self, int i);
-extern "C" void cSpeechBank__cSpeechBank(cSpeechBank* self, int flags);
+extern "C" void _$_11cSpeechBank(cSpeechBank* self, int flags);
 extern int cSpeechInstance_mNumTotalBanks;
 
 /**
  * Destroys a cSpeechInstance: its speech banks, event files and header data, then closes its stream.
  *
- * Destroys each speech bank (cSpeechBank__cSpeechBank with 3) and subtracts their count (mNumBanks) from
+ * Destroys each speech bank (cSpeechBank::~cSpeechBank with 3) and subtracts their count (mNumBanks) from
  * cSpeechInstance_mNumTotalBanks; for each event file frees both header blocks (mHeaderBigData) and the separately
  * loaded event data; closes the stream (cStreamSys_STREAM_Destroy on cStreamSys). Deletes the object when bit 0 of
  * flags is set. cSpeechSys_Shutdown calls it with 3.
- *
- * @param self  the cSpeechInstance
- * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void cSpeechInstance__cSpeechInstance(cSpeechInstance* self, int flags)
+cSpeechInstance::~cSpeechInstance()
 {
     int i;
-    for (i = 0; i < self->mNumBanks; i++) {
-        if (self->mBanks[i] != 0) {
-            cSpeechBank__cSpeechBank(self->mBanks[i], 3);
+    for (i = 0; i < mNumBanks; i++) {
+        if (mBanks[i] != 0) {
+            _$_11cSpeechBank(mBanks[i], 3);
         }
     }
-    cSpeechInstance_mNumTotalBanks -= self->mNumBanks;
-    for (i = 0; i < self->mNumEventFiles; i++) {
+    cSpeechInstance_mNumTotalBanks -= mNumBanks;
+    for (i = 0; i < mNumEventFiles; i++) {
         for (int j = 0; j < 2; j++) {
-            if (self->mHeaderBigData[i][j] != 0) {
-                MEM_free(self->mHeaderBigData[i][j]);
+            if (mHeaderBigData[i][j] != 0) {
+                MEM_free(mHeaderBigData[i][j]);
             }
         }
-        if (self->mEventFile[i].mOwned != 0) {
-            MEM_free(self->mEventFile[i].mpData);
-            self->mEventFile[i].mOwned = 0;
-            self->mEventFile[i].mpData = 0;
+        if (mEventFile[i].mOwned != 0) {
+            MEM_free(mEventFile[i].mpData);
+            mEventFile[i].mOwned = 0;
+            mEventFile[i].mpData = 0;
         }
     }
-    cStreamSys_STREAM_Destroy(D_004A37B4->mpVStreamSys, self->mStreamId);
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    cStreamSys_STREAM_Destroy(D_004A37B4->mpVStreamSys, mStreamId);
 }
 #endif
 
@@ -3211,8 +3194,8 @@ INCLUDE_ASM("sound/bankmonitor", cSpeechInstance_ReadConfig);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void FileParser_FileParser(void* parser, void* src, int n);
-extern "C" void FileParser__FileParser(void* parser, int flags);
+extern "C" void __10FileParserPCci(void* parser, void* src, int n);
+extern "C" void _$_10FileParser(void* parser, int flags);
 extern "C" void FileParser_SkipSectionNames(void* parser);
 extern "C" int FileParser_FindPartialSection(void* parser, int file);
 extern "C" char* FileParser_GetName(void* parser);
@@ -3237,7 +3220,7 @@ extern "C" void cSpeechInstance_AddBank(cSpeechInstance* self, const char* bankP
  * (cStreamSys_STREAM_SetBigFile on cStreamSys); each BASEPATH stores mBasePath, loads "<base>headers.big" (cSpeechInstance_LoadEventFile; stops at the
  * first failure), optionally "<base>langhead.big", and counts an event file (mNumEventFiles); BANK adds a speech bank
  * (cSpeechInstance_AddBank). Likely bug: the BANK branch reads the value into one buffer but builds the path from, and passes, an
- * uninitialised one (name). Called by the constructor cSpeechInstance_cSpeechInstance and by cSpeechSys_ReloadInstanceConfig.
+ * uninitialised one (name). Called by the constructor cSpeechInstance::cSpeechInstance and by cSpeechSys_ReloadInstanceConfig.
  *
  * @param instanceIndex  the instance's index
  * @param section  the section to read
@@ -3250,7 +3233,7 @@ void cSpeechInstance::ReadConfig(int instanceIndex, int section, int loadLangHea
     char bigFileName[0x40];
     char path[0x80];
     char name[0x60];
-    FileParser_FileParser(parser, D_004A37B0, 0x100);
+    __10FileParserPCci(parser, D_004A37B0, 0x100);
     if (FileParser_FindPartialSection(parser, section) != 0)
     {
         FileParser_SkipSectionNames(parser);
@@ -3283,7 +3266,7 @@ void cSpeechInstance::ReadConfig(int instanceIndex, int section, int loadLangHea
             }
         }
     }
-    FileParser__FileParser(parser, 2);
+    _$_10FileParser(parser, 2);
 }
 #endif
 
@@ -3403,7 +3386,7 @@ INCLUDE_ASM("sound/bankmonitor", cSpeechInstance_PlayEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// A bank list (cSpeechInstance_cSpeechInstance ctor / cSpeechInstance__cSpeechInstance dtor): its voices and up to 500 loaded streams.
+// A bank list (cSpeechInstance::cSpeechInstance ctor / cSpeechInstance::~cSpeechInstance dtor): its voices and up to 500 loaded streams.
 extern char str_pct_spct_s_c[];
 extern char str_data_b[];
 extern char str_pct_spct_spct_s_dat[];
@@ -3791,13 +3774,13 @@ extern "C" void SPCH_Init(cSpeechSys* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", cSpeechSys_Shutdown);
 #ifdef SKIP_ASM
-extern "C" void cSpeechInstance__cSpeechInstance(cSpeechInstance* p, int mode);
+extern "C" void _$_15cSpeechInstance(cSpeechInstance* p, int mode);
 extern "C" void SPCH_shutdown(void);
 
 /**
  * Shuts the speech system down: destroys both speech instances and frees the speech bank buffer.
  *
- * Destroys each instance (cSpeechInstance__cSpeechInstance with 3) and clears its slot, calls the driver's SPCH_shutdown and MEM_free()s
+ * Destroys each instance (cSpeechInstance::~cSpeechInstance with 3) and clears its slot, calls the driver's SPCH_shutdown and MEM_free()s
  * mpBankMem, clearing it. Called by the audio system's shutdown.
  */
 void cSpeechSys::Shutdown()
@@ -3805,7 +3788,7 @@ void cSpeechSys::Shutdown()
     for (int i = 0; i < 2; i++) {
         void* instance = mSpeechInstance[i];
         if (instance != 0) {
-            cSpeechInstance__cSpeechInstance((cSpeechInstance*)instance, 3);
+            _$_15cSpeechInstance((cSpeechInstance*)instance, 3);
         }
         mSpeechInstance[i] = 0;
     }
@@ -3842,11 +3825,11 @@ int cSpeechSys::CanTakeSpeech(int i)
 INCLUDE_ASM("sound/bankmonitor", cSpeechSys_CreateInstance);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" cSpeechInstance* cSpeechInstance_cSpeechInstance(cSpeechInstance* mem, int i, int a, int b, int c, int d, int reserved);
+extern "C" cSpeechInstance* __15cSpeechInstanceiiiiii(cSpeechInstance* mem, int i, int a, int b, int c, int d, int reserved);
 extern const char str_SpeechInstance[];
 
 /**
- * Creates speech instance i: cMemMan_alloc(0x904, "SpeechInstance") constructed by cSpeechInstance_cSpeechInstance.
+ * Creates speech instance i: cMemMan_alloc(0x904, "SpeechInstance") constructed by cSpeechInstance::cSpeechInstance.
  *
  * Stores it in mSpeechInstance[i]. The audio system creates instance 0 for section "CHAR".
  *
@@ -3861,7 +3844,7 @@ void cSpeechSys::CreateInstance(int i, int streamId, int section, int memType, i
 {
     // PORT: pointer arithmetic through int
     void** slot = (void**)(i * 4 + (int)mSpeechInstance);
-    *slot = cSpeechInstance_cSpeechInstance((cSpeechInstance*)cMemMan_alloc(2308, str_SpeechInstance, 0, 0), i, streamId, section,
+    *slot = __15cSpeechInstanceiiiiii((cSpeechInstance*)cMemMan_alloc(2308, str_SpeechInstance, 0, 0), i, streamId, section,
             memType, loadLangHead, reserved);
 }
 #endif
@@ -4746,7 +4729,7 @@ extern "C" void* cSongInstance_cSongInstance_body(sBankMon_1C50* self, int baseP
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", cSongInstance__cSongInstance);
+INCLUDE_ASM("sound/bankmonitor", _$_13cSongInstance);
 #ifdef SKIP_ASM
 extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
 extern "C" int PATH_closeVoice(int id);
@@ -4760,24 +4743,19 @@ void operator_delete(int* ptr);
  * with 0x11000001) and, when the song has loop banks (mNumBankData > 0), the overlay (0x11000002), and frees the stream
  * and overlay buffers (mpPathfinderStream, mpPathfinderOverlay). Called with 3 by cMusicSys_StopSong and the cMusicSys
  * destructor.
- *
- * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void cSongInstance__cSongInstance(cSongInstance* self, int flags)
+cSongInstance::~cSongInstance()
 {
-    cAsyncSys_ASYNCSYS_Cancel(*((void**)gMusicSys->mpVStreamSys), self->mBankIndex);
+    cAsyncSys_ASYNCSYS_Cancel(*((void**)gMusicSys->mpVStreamSys), mBankIndex);
     PATH_closeVoice(0x11000001);
-    if (self->mpConfig->mNumBankData > 0) {
+    if (mpConfig->mNumBankData > 0) {
         PATH_closeVoice(0x11000002);
     }
-    if (self->mpPathfinderStream != 0) {
-        cMemMan_free(self->mpPathfinderStream);
+    if (mpPathfinderStream != 0) {
+        cMemMan_free(mpPathfinderStream);
     }
-    if (self->mpPathfinderOverlay != 0) {
-        cMemMan_free(self->mpPathfinderOverlay);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
+    if (mpPathfinderOverlay != 0) {
+        cMemMan_free(mpPathfinderOverlay);
     }
 }
 #endif
@@ -5446,7 +5424,7 @@ extern char str_PREVIEW[];
 extern char str_SONGBIG[];
 extern const char str_MPF_data_file[];
 extern const char str_cSongConfiguration[];
-extern "C" void* FileParser_FileParser_p(void* parser, void* src, int n) __asm__("FileParser_FileParser");
+extern "C" void* FileParser_FileParser_p(void* parser, void* src, int n) __asm__("__10FileParserPCci");
 extern "C" int FileParser_FindSection(void* parser, const char* name);
 extern "C" char* FileParser_FindNextSection(void* parser);
 extern "C" int FileParser_AssignInt(void* parser, const char* key, int* out);
@@ -5655,7 +5633,7 @@ extern "C" char* cMusicSys_cMusicSys(cMusicSys* self, int inchrg, int maxBanks, 
         }
         self->mNumSongs += 1;
     }
-    FileParser__FileParser(musicInf.parser, 2);
+    _$_10FileParser(musicInf.parser, 2);
     return ((char*)self);
 }
 #endif
@@ -5668,7 +5646,7 @@ void operator_delete(int* ptr);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cStreamSys__cStreamSys(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags);
-extern "C" void cSongInstance__cSongInstance(cSongInstance* self, int flags);
+extern "C" void _$_13cSongInstance(cSongInstance* self, int flags);
 extern void* cMusicSys_vtbl[];
 extern void* cBankMonitor_vtbl[];
 
@@ -5692,7 +5670,7 @@ struct sBmonVcall3398 { short delta; short index; void (*fn)(void*, int); };
  * Destroys cMusicSys: deletes the song configurations, the MPF buffer and the current song, then the bases.
  *
  * Restores the vtables as the constructor does (stack copies when flags is 0), calls each song configuration's virtual
- * destructor with 3, frees mMPFFile, destroys mSongInstance (cSongInstance__cSongInstance with 3) and clears gMusicSys. With bit 1 of flags
+ * destructor with 3, frees mMPFFile, destroys mSongInstance (cSongInstance::~cSongInstance with 3) and clears gMusicSys. With bit 1 of flags
  * it destroys cStreamSys (cStreamSys__cStreamSys), cBankManager and cSoundSys; bit 0 deletes the object.
  *
  * @param flags  g++ 2.95 destructor flags (bit 1: destroy the virtual bases, bit 0: operator delete)
@@ -5727,7 +5705,7 @@ extern "C" void cMusicSys__cMusicSys(cMusicSys* self, int flags)
         cMemMan_free(self->mMPFFile);
     }
     if (self->mSongInstance != 0) {
-        cSongInstance__cSongInstance((cSongInstance*)(self->mSongInstance), 3);
+        _$_13cSongInstance((cSongInstance*)(self->mSongInstance), 3);
     }
     gMusicSys = 0;
     if (flags & 2) {
@@ -5944,14 +5922,14 @@ extern void cMonitor_MONITOR_DestroyAll1_3AC0(void* bank, long key) __asm__("cMo
 extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
 extern "C" void cBankManager_BANK_UnLoad(void* self, int i);
 extern "C" void cMusicSys_ResumeSong(cMusicSys* self);
-extern "C" void cSongInstance__cSongInstance(cSongInstance* self, int flags);
+extern "C" void _$_13cSongInstance(cSongInstance* self, int flags);
 
 /**
  * Stops the current song: cancels its callbacks, unloads its overlay bank and destroys it.
  *
  * Cancels D_004A3838, D_004A3840 and D_004A3848 (cMonitor_MONITOR_DestroyAll1), cancels and unloads bank mBankIndex
  * (cAsyncSys_ASYNCSYS_Cancel, cBankManager_BANK_UnLoad), resumes the song (cMusicSys_ResumeSong), clears mSongPlaying, destroys mCurrent
- * (cSongInstance__cSongInstance with 3) and clears it.
+ * (cSongInstance::~cSongInstance with 3) and clears it.
  */
 // PORT: 64-bit long sound keys
 void cMusicSys::StopSong()
@@ -5966,7 +5944,7 @@ void cMusicSys::StopSong()
     ResumeSong();
     mSongPlaying = 0;
     if (mSongInstance != 0) {
-        cSongInstance__cSongInstance((cSongInstance*)(mSongInstance), 3);
+        _$_13cSongInstance((cSongInstance*)(mSongInstance), 3);
     }
     mSongInstance = 0;
 }

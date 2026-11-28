@@ -17,7 +17,7 @@
 // (D_00488230, 14 slots: 1 dtor, 2 update, 4 render, 14 reset; the rest are cObjNode's).
 //
 // Derives from cObjNode; its own members FLAT, every field at its retail offset. Tags: [R] retail
-// constructors (cSplashManager_cSplashManager, tDrop_tDrop, tCrystal_tCrystal) and the allocation; [U] how retail code
+// constructors (cSplashManager_cSplashManager, tDrop_tDrop, tCrystal::tCrystal) and the allocation; [U] how retail code
 // uses the field; [O] SSX On Tour's DWARF (cSplashManager, tDrop, tCrystal); [P] layout_xlate.py pairs 4 methods
 // (dtor, update, render, reset): preview == retail at 0xC, 0x10, 0x14, 0x18, 0x100C, 0x1010, 0x1020.
 // On Tour's t2Vector / tARGB members are written as float arrays: retail copies them with ldl/ldr pairs (4-byte
@@ -56,7 +56,7 @@ CHECK_SIZE(tDrop, 0x03C);
 // An ice crystal on the screen; it sheds drops (On Tour struct tCrystal, 0x60; retail 0x4C).
 struct tCrystal {
     int mNumSpawned;                // 0x000 [O]; [U] init zeroes it; cSplashManager_update counts the drops it sheds
-    int mActive;                    // 0x004 [O] bool (a word); [R] tCrystal_tCrystal zeroes it; [U] init, update
+    int mActive;                    // 0x004 [O] bool (a word); [R] tCrystal::tCrystal zeroes it; [U] init, update
     float mPosition[2];             // 0x008 [O] t2Vector; [U] init, update, render
     float mSize[2];                 // 0x010 [O] t2Vector; [U] init, render
     float mVelocity[2];             // 0x018 [O] t2Vector; [U] init, update
@@ -71,6 +71,9 @@ struct tCrystal {
 
     // Methods bound to their retail symbols by asm labels.
     void render(const t2Vector* off) __asm__("tCrystal_render");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    tCrystal();
 };
 
 CHECK_OFFSET(tCrystal, mNumSpawned, 0x000);
@@ -102,7 +105,7 @@ struct cSplashManager : public cObjNode {
     int mNumActiveDrops;            // 0x014 [O]; [R] zeroed; [P]; [U] AddDrop, reset, update, render
     int mNumActiveCrystals;         // 0x018 [O]; [R] zeroed; [P]; [U] AddCrystal, reset, update, render
     tDrop mDropList[30];            // 0x01C [O]; [R] 30 x tDrop_tDrop, stride 0x3C; [U] update / render walk them
-    tCrystal mCrystalList[30];      // 0x724 [O]; [R] 30 x tCrystal_tCrystal, stride 0x4C; [U] update / render
+    tCrystal mCrystalList[30];      // 0x724 [O]; [R] 30 x tCrystal::tCrystal, stride 0x4C; [U] update / render
     int mLastCameraPositionValid;   // 0x100C [O] bool (a word); [R] zeroed; [P]; [U] reset clears, update sets / tests
     t4Vector mLastCameraPosition;   // 0x1010 [O]; [R] (0, 0, 0, 1.0); [P]; [U] update (lq/sq, lqc2), ReportImpactLocal (lqc2)
     float mLastCameraSpeed;         // 0x1020 [O]; [R] zeroed; [P]; [U] update stores it, ReportSnowfall reads it

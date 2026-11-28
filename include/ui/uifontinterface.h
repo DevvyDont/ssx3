@@ -3,7 +3,7 @@
 
 // cUIFontInterface: the UI engine's font table (cUIEngine::mpFontInterface, SSXApp->Fonts). setData takes the font
 // chunk of the UI data (a tUIFontTableHeader, then per font {hash, name length, name}) and adds one cUIFontEntry per
-// font; loadFonts creates each entry's cFont (cMemMan_alloc(132, "UI Font") + cFont_cFont); getFontByHashName looks a
+// font; loadFonts creates each entry's cFont (cMemMan_alloc(132, "UI Font") + cFont::cFont); getFontByHashName looks a
 // font up by hash; purgeFonts deletes them. Retail code: ui/uiengine (cUIFontInterface_getFontByHashName ..
 // cUIFontInterface_loadFonts).
 //
@@ -32,7 +32,7 @@ struct tUIFontTableHeader {
 struct cUIFontEntry {
     unsigned int mHashID;           // 0x0 [O]; [U] getFontByHashName compares it with the hash; addFontEntry stores it
     const char* mpFileName;         // 0x4 [O]; [U] addFontEntry stores the name (On Tour's inline setFileName);
-                                    //      loadFonts passes it to cFont_cFont
+                                    //      loadFonts passes it to cFont::cFont
     cFont* mpFont;                  // 0x8 [O]; [U] loadFonts stores the new cFont; purgeFonts deletes it;
                                     //      getFontByHashName returns it
 };

@@ -36,7 +36,7 @@ extern "C" float cCSICubicSpline_evaluate(Cubic_D5A8 *spline, float x) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21E5A8", cCubicSplineInterpolant_cCubicSplineInterpolant);
+INCLUDE_ASM("seg/seg_21E5A8", __23cCubicSplineInterpolant);
 #ifdef SKIP_ASM
 struct Flags_D5E8 {
     unsigned int a : 1;
@@ -53,15 +53,13 @@ struct Flags_D5E8 {
  *
  * Clears CubicSplines (+0x8) and the Initialized, Loaded and NumSplines bit fields of the first word (On Tour
  * cCubicSplineInterpolant layout); the other bits and MaxX are left as they are.
- *
- * @return @p self
  */
-extern "C" Flags_D5E8 *cCubicSplineInterpolant_cCubicSplineInterpolant(cCubicSplineInterpolant* self) {
-    self->CubicSplines = 0;
-    ((Flags_D5E8*)self)->b = 0;
-    ((Flags_D5E8*)self)->c = 0;
-    ((Flags_D5E8*)self)->d = 0;
-    return ((Flags_D5E8*)self);
+cCubicSplineInterpolant::cCubicSplineInterpolant()
+{
+    CubicSplines = 0;
+    ((Flags_D5E8*)this)->b = 0;
+    ((Flags_D5E8*)this)->c = 0;
+    ((Flags_D5E8*)this)->d = 0;
 }
 #endif
 

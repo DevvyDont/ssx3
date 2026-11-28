@@ -70,8 +70,8 @@ extern cBankManager* gpBankManager;
  * Calls cBankInstance_Unload; then, when the allocation location at +0x8 is non-zero: for keSoundMemLocation_Sound it
  * frees the sound-memory handle at +0xC through cPS2SoundManager_DeallocSoundMem (the virtual of the shared cSoundSys's
  * pManager, reached from gpBankManager's cBankMonitor) and sets the handle to -1; it then MEM_frees the main-memory
- * data at +0x10 and zeroes the data pointer, the size at +0x14 and the location. Called by cBankInstance__cBankInstance
- * and, by bank index, by cBankManager_BANK_DeallocMem.
+ * data at +0x10 and zeroes the data pointer, the size at +0x14 and the location. Called by
+ * cBankInstance::~cBankInstance and, by bank index, by cBankManager_BANK_DeallocMem.
  */
 void cBankInstance::DeallocMem()
 {
@@ -138,7 +138,7 @@ INCLUDE_ASM("sound/bankmanager", cBankInstance_UnshareBank);
  * Does nothing when next is null. Otherwise it sets the sound-memory handle unkC to -1, zeroes the main-memory data
  * unk10, its size unk14 and the location unk8 (nothing is freed), and unlinks the bank: when next == prev (a two-bank
  * ring) the other bank's next and prev are cleared, otherwise the neighbours are joined. Its own next and prev are then
- * cleared. Called by cBankInstance__cBankInstance and, by bank index, by cBankManager_BANK_UnshareBank.
+ * cleared. Called by cBankInstance::~cBankInstance and, by bank index, by cBankManager_BANK_UnshareBank.
  */
 void cBankInstance::UnshareBank()
 {
@@ -346,7 +346,7 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_cBankManager);
 #ifdef SKIP_ASM
 extern "C" void* cBankMonitor_cBankMonitor(void* self, int a1, int heap);
 extern "C" void* cAsyncSys_cAsyncSys(void* self);
-extern "C" void* cBankInstance_cBankInstance(void* self);
+extern "C" void* __13cBankInstance(void* self);
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -367,7 +367,7 @@ extern const sBmVtbl D_00483AB8;
 
 struct sBmBank {
     char pad_0x0[0x60];
-    sBmBank() { cBankInstance_cBankInstance(this); }
+    sBmBank() { __13cBankInstance(this); }
     void operator delete[](void* p, unsigned int size);
 };
 
@@ -423,7 +423,7 @@ INCLUDE_ASM("sound/bankmanager", cBankManager__cBankManager);
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void cAsyncSys__cAsyncSys(void* self, int flags);
-extern "C" void cBankInstance__cBankInstance(void* self, int flags);
+extern "C" void _$_13cBankInstance(void* self, int flags);
 extern "C" void cBankMonitor__cBankMonitor(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern cBankManager* gpBankManager;
@@ -448,7 +448,7 @@ extern const sBmVtblBB10 D_00483AB8_BB10 __asm__("D_00483AB8");
  *
  * Restores the cBankManager and cBankMonitor vtables and the virtual base's vtable (D_00483AB8; with flags 0 the g++
  * 2.95 virtual-base this-adjust fix-up runs on a stack copy), clears gpBankManager, destroys the cBankInstance array
- * mBank last-first with cBankInstance__cBankInstance (its count is the word 0x10 bytes before it) and frees it, then
+ * mBank last-first with cBankInstance::~cBankInstance (its count is the word 0x10 bytes before it) and frees it, then
  * runs cBankMonitor__cBankMonitor on BankMonitor and cAsyncSys__cAsyncSys (On Tour ~cAsyncSys) on the object.
  * cSoundSys__cSoundSys destroys the virtual base only when flags bit 1 is set.
  *
@@ -472,7 +472,7 @@ extern "C" void cBankManager__cBankManager(cBankManager* self, int flags)
         cBankInstance* bankInstance = self->mBank + ((int*)self->mBank)[-4];
         while (self->mBank != bankInstance) {
             bankInstance--;
-            cBankInstance__cBankInstance(bankInstance, 0);
+            _$_13cBankInstance(bankInstance, 0);
         }
         cMemMan_free((char*)self->mBank - 0x10);
     }

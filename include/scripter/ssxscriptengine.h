@@ -578,11 +578,11 @@ struct cSSXScriptEngine {
                                                  //       over _vt$15cBXScriptEngine; [U] cSSXScriptEngine_ForcePlayUpdate calls slot 4
     // --- cInSeqComm (second base of cBXScriptEngine: a vptr only)
     void** mInSeqCommVtbl;                       // 0x2AC [R] _vt$16cSSXScriptEngine$10cInSeqComm (D_00482100);
-                                                 //       SetupBXEngine hands self+0x2AC to cInSeq_cInSeq
+                                                 //       SetupBXEngine hands self+0x2AC to cInSeq::cInSeq
     // --- cBXScriptEngine (ctor cBXScriptEngine_cBXScriptEngine; methods in scripter/bxscriptengine)
     tBXScriptState* mpScriptDatabase;            // 0x2B0 [O]; [R] SetupBXEngine: new (count * 8, "BXScriptDatabase")
     int mScriptDatabaseSize;                     // 0x2B4 [O]; [R] SetupBXEngine stores the count
-    cInSeq* mpInSeq;                             // 0x2B8 [O]; [R] SetupBXEngine: cInSeq_cInSeq(alloc(0x20, "InSeq"))
+    cInSeq* mpInSeq;                             // 0x2B8 [O]; [R] SetupBXEngine: cInSeq::cInSeq(alloc(0x20, "InSeq"))
     char* mpInSeqHeap;                           // 0x2BC [O]; [R] SetupBXEngine: new (size, "InSeqHeap")
     char mScriptRequests[16][0x24];              // 0x2C0 [O] tScriptRequestInfo[16]; [R] ResetInstVars: 16 x 0x24
     // --- cVidEngine (ctor cVidEngine_cVidEngine(self+0x500), which zeroes 0x0-0x14 and sets the vptr at 0x18)

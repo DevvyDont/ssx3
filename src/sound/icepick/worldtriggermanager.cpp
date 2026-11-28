@@ -14,7 +14,7 @@
 #include "world/worldview.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cWorldTriggerManager_cWorldTriggerManager(cWorldTriggerManager* self);
+extern "C" void* __20cWorldTriggerManager(cWorldTriggerManager* self);
 extern const char str_WorldTriggerManager[];
 
 //99.88%
@@ -28,7 +28,7 @@ void WORLDTRIGGERMANAGER_Init()
 {
     if (gWorldTriggerManager == 0) {
         void* mem = cMemMan_alloc(836, str_WorldTriggerManager, 0, 0);
-        gWorldTriggerManager = (cWorldTriggerManager*)(cWorldTriggerManager_cWorldTriggerManager((cWorldTriggerManager*)mem));
+        gWorldTriggerManager = (cWorldTriggerManager*)(__20cWorldTriggerManager((cWorldTriggerManager*)mem));
     }
 }
 #endif
@@ -36,7 +36,7 @@ void WORLDTRIGGERMANAGER_Init()
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", WORLDTRIGGERMANAGER_DeInit);
 #ifdef SKIP_ASM
-extern "C" void cWorldTriggerManager__cWorldTriggerManager(cWorldTriggerManager* self, int flags);
+extern "C" void _$_20cWorldTriggerManager(cWorldTriggerManager* self, int flags);
 
 /**
  * Destroys the global world trigger manager, if there is one, and clears the pointer.
@@ -46,14 +46,14 @@ extern "C" void cWorldTriggerManager__cWorldTriggerManager(cWorldTriggerManager*
 extern "C" void WORLDTRIGGERMANAGER_DeInit()
 {
     if (gWorldTriggerManager != 0) {
-        cWorldTriggerManager__cWorldTriggerManager(gWorldTriggerManager, 3);
+        _$_20cWorldTriggerManager(gWorldTriggerManager, 3);
     }
     gWorldTriggerManager = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_cWorldTriggerInstance);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", __21cWorldTriggerInstance);
 #ifdef SKIP_ASM
 extern unsigned char str_empty_j[];
 
@@ -63,50 +63,44 @@ extern unsigned char str_empty_j[];
  * Sets the handle (+0x30) to -1, the position's w (+0x2C) to 1.0, the swap string (+0x40) empty and the last animation
  * frame (+0x68) to -1.0; everything else is 0. The cWorldTriggerManager constructor runs it on each of its 40
  * instances.
- *
- * @return self
  */
-extern "C" void* cWorldTriggerInstance_cWorldTriggerInstance(cWorldTriggerInstance* self)
+cWorldTriggerInstance::cWorldTriggerInstance()
 {
-    self->m_iAudioHandle = -1;
-    self->m_vPosition.w = 1.0f;
-    self->m_bInUse = 0;
-    self->m_iObjectRef = 0;
-    self->m_iVolNum = 0;
-    self->m_eAudioTrigger = 0;
-    self->m_fVolume = 0.0f;
-    self->m_bPositional = 0;
-    self->m_vPosition.x = 0.0f;
-    self->m_vPosition.y = 0.0f;
-    self->m_vPosition.z = 0.0f;
-    self->m_bTouch = 0;
-    self->m_bCrowdTrigger = 0;
-    self->m_iSwapString[0] = str_empty_j[0];
-    self->m_iLastAnimFrame = -1.0f;
-    self->m_iBankReference = 0;
-    self->m_iPatchReference = 0;
-    self->m_bLastAnimFrameDecrease = 0;
-    return ((void*)self);
+    m_iAudioHandle = -1;
+    m_vPosition.w = 1.0f;
+    m_bInUse = 0;
+    m_iObjectRef = 0;
+    m_iVolNum = 0;
+    m_eAudioTrigger = 0;
+    m_fVolume = 0.0f;
+    m_bPositional = 0;
+    m_vPosition.x = 0.0f;
+    m_vPosition.y = 0.0f;
+    m_vPosition.z = 0.0f;
+    m_bTouch = 0;
+    m_bCrowdTrigger = 0;
+    m_iSwapString[0] = str_empty_j[0];
+    m_iLastAnimFrame = -1.0f;
+    m_iBankReference = 0;
+    m_iPatchReference = 0;
+    m_bLastAnimFrameDecrease = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance__cWorldTriggerInstance);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", _$_21cWorldTriggerInstance);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
+
+extern "C" void _$_21cWorldTriggerInstance(cWorldTriggerInstance* self, int flags);
 
 /**
  * Destroys a world trigger instance: nothing to release; deletes the object when bit 0 of flags is set.
  *
- * cWorldTriggerManager__cWorldTriggerManager calls it with 0 for each instance.
- *
- * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
+ * cWorldTriggerManager::~cWorldTriggerManager calls it with 0 for each instance.
  */
-extern "C" void cWorldTriggerInstance__cWorldTriggerInstance(cWorldTriggerInstance* self, int flags)
+cWorldTriggerInstance::~cWorldTriggerInstance()
 {
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -480,11 +474,11 @@ void cWorldTriggerInstance::Reset()
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_cWorldTriggerManager);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", __20cWorldTriggerManager);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void* cWorldTriggerInstance_cWorldTriggerInstance(cWorldTriggerInstance* self);
+extern "C" void* __21cWorldTriggerInstance(cWorldTriggerInstance* self);
 extern "C" void cWorldTriggerManager_LoadTriggerInfo(void* self);
 extern const char str_m_aWorldTriggerInstances[];
 
@@ -500,32 +494,29 @@ struct tArrayNewCookie {
  * info.
  *
  * The instances are a new[] array ("m_aWorldTriggerInstances", 0x70 bytes each, behind the array cookie).
- *
- * @return @p self
  */
-extern "C" void* cWorldTriggerManager_cWorldTriggerManager(cWorldTriggerManager* self)
+cWorldTriggerManager::cWorldTriggerManager()
 {
-    self->mNumHitObjects = 0;
-    self->mLastHitObjectResult = 0;
-    self->mLastHitObject = -1;
-    self->mLastHitObjectChecked = -1;
-    self->mMonitorTriggers = 1;
+    mNumHitObjects = 0;
+    mLastHitObjectResult = 0;
+    mLastHitObject = -1;
+    mLastHitObjectChecked = -1;
+    mMonitorTriggers = 1;
     tArrayNewCookie* cookie = (tArrayNewCookie*)operator_new_tag(4496, str_m_aWorldTriggerInstances, 0, 0);
     cookie->count = 40;
     cWorldTriggerInstance* arr = (cWorldTriggerInstance*)&cookie[1];
     cWorldTriggerInstance* trigger = arr;
     for (int i = 39; i != -1; i--, trigger++) {
-        cWorldTriggerInstance_cWorldTriggerInstance((cWorldTriggerInstance*)trigger);
+        __21cWorldTriggerInstance((cWorldTriggerInstance*)trigger);
     }
-    self->m_aWorldTriggerInstances = arr;
-    self->m_pcTriggerInfoFile = 0;
-    cWorldTriggerManager_LoadTriggerInfo(self);
-    return ((void*)self);
+    m_aWorldTriggerInstances = arr;
+    m_pcTriggerInfoFile = 0;
+    cWorldTriggerManager_LoadTriggerInfo(this);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager__cWorldTriggerManager);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", _$_20cWorldTriggerManager);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
@@ -533,24 +524,19 @@ void operator_delete(int* ptr);
 /**
  * Destroys the world trigger manager: destroys its trigger instances, frees the array, then frees the object
  * if asked.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cWorldTriggerManager__cWorldTriggerManager(cWorldTriggerManager* self, int flags)
+cWorldTriggerManager::~cWorldTriggerManager()
 {
-    cWorldTriggerInstance* instances = self->m_aWorldTriggerInstances;
+    cWorldTriggerInstance* instances = m_aWorldTriggerInstances;
     if (instances != 0) {
         tArrayNewCookie* cookies = (tArrayNewCookie*)instances;
         cWorldTriggerInstance* entry = instances + cookies[-1].count;
-        while (self->m_aWorldTriggerInstances != entry) {
+        while (m_aWorldTriggerInstances != entry) {
             entry--;
-            cWorldTriggerInstance__cWorldTriggerInstance(entry, 0);
+            _$_21cWorldTriggerInstance(entry, 0);
         }
-        tArrayNewCookie* array = (tArrayNewCookie*)self->m_aWorldTriggerInstances;
+        tArrayNewCookie* array = (tArrayNewCookie*)m_aWorldTriggerInstances;
         cMemMan_free(&array[-1]);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
     }
 }
 #endif
@@ -1428,7 +1414,7 @@ extern "C" void cWorldTriggerManager_TouchAllUsed(cWorldTriggerInstance** self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldSound_cWorldSound);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", __11cWorldSound);
 #ifdef SKIP_ASM
 
 extern t4Vector t4vect_Zero;
@@ -1440,22 +1426,19 @@ extern t4Vector t4vect_Zero;
  *
  * The game load allocates it (cMemMan_alloc(592, "cWorldSound")) and passes 0 as a second argument the C declaration
  * does not take.
- *
- * @return self
  */
-extern "C" cWorldSound* cWorldSound_cWorldSound(cWorldSound* self)
+cWorldSound::cWorldSound()
 {
-    cAudioOverlapList* overlapList = ((&self->m_OverlapLists[0]));
+    cAudioOverlapList* overlapList = ((&m_OverlapLists[0]));
     for (int i = 1; i != -1; i--, overlapList++) {
         overlapList->numoverlaps = 0;
         overlapList->lastposition = t4vect_Zero;
     }
-    return (self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldSound__cWorldSound);
+INCLUDE_ASM("sound/icepick/worldtriggermanager", _$_11cWorldSound);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1463,14 +1446,9 @@ void operator_delete(int* ptr);
  * Destroys a cWorldSound: nothing to release; deletes the object when bit 0 of flags is set.
  *
  * The game unload calls it with 3.
- *
- * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void cWorldSound__cWorldSound(cWorldSound* self, int flags)
+cWorldSound::~cWorldSound()
 {
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 

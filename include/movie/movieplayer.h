@@ -5,10 +5,10 @@
 // (syncPlay) or a frame at a time from the caller's loop (asyncPlay / asyncUpdate / asyncRender / asyncPause /
 // asyncResume). EA source d:/ssx/code/source/movie/movieplayer.cpp (the July 2003 preview's assert strings
 // "mpCurrFrame" and "((int(pMem)+headersize)&63)==0", probably the allocator callback's alignment check); retail
-// methods tMoviePlayOptions_SetDefaults (0x253390) and cMoviePlayer_cMoviePlayer .. cMoviePlayer_SSXFreeMemFunc
+// methods tMoviePlayOptions_SetDefaults (0x253390) and cMoviePlayer::cMoviePlayer .. cMoviePlayer_SSXFreeMemFunc
 // (0x2533C8..0x253B18), which splat put in the unit mem/memstd. No vtable, no base.
 //
-// Size 0x44 [R]: cVidEngine_ReadyVideo = cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, "VidEnginePlayer", 0x100, 0));
+// Size 0x44 [R]: cVidEngine_ReadyVideo = cMoviePlayer::cMoviePlayer(cMemMan_alloc(68, "VidEnginePlayer", 0x100, 0));
 // cRealFE_update the same with "MoviePlayer"; cFEStateVideoPlayer keeps one too. On Tour's cMoviePlayer (0x30) is the
 // PSP one (PspAvPlayer, byte bools, a 0x18-byte tMoviePlayOptions): retail has its member order with 4-byte bools,
 // which places every retail access exactly. cMoviePlayer::m_isPlaying [O] (On Tour static int) is
@@ -16,7 +16,7 @@
 // startPlay increments it, purge decrements it when it deletes the video driver.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail constructors cMoviePlayer_cMoviePlayer / tMoviePlayOptions_SetDefaults and the allocations above;
+//   [R] retail constructors cMoviePlayer::cMoviePlayer / tMoviePlayOptions_SetDefaults and the allocations above;
 //   [O] SSX On Tour's DWARF (class cMoviePlayer, struct tMoviePlayOptions): member order and names;
 //   [U] how the retail methods (and their callers) use the field.
 
@@ -49,6 +49,8 @@ struct tMoviePlayOptions {
     // Method bound to its retail symbol by an asm label.
     void SetDefaults() __asm__("tMoviePlayOptions_SetDefaults");
 };
+
+void operator_delete(int* p);
 
 struct cMoviePlayer {
     int mbMovieFinished;        // 0x00 [O] (On Tour bool); [U] startPlay / purge 0; syncPlay / asyncUpdate store
@@ -89,6 +91,11 @@ struct cMoviePlayer {
     void asyncResume() __asm__("cMoviePlayer_asyncResume");
     void* SSXFreeMemFunc() __asm__("cMoviePlayer_SSXFreeMemFunc__FPv");
     int init(tMoviePlayOptions* cfg) __asm__("cMoviePlayer_init");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cMoviePlayer();
+    ~cMoviePlayer();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(tMoviePlayOptions, sVideoFileName, 0x00);

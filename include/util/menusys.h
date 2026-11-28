@@ -34,6 +34,8 @@ enum tMenuKeys {
     kMenuKeyNull = 11
 };
 
+void operator_delete(int* p);
+
 struct cMenuSys {
     // Key, VKey and AsciiKey when nothing was read this frame (name ours). [U] cMenuSys_input stores -1 in VKey and
     // AsciiKey before reading, and asks the USB keyboard only when the pad's menu key is -1.
@@ -76,6 +78,11 @@ struct cMenuSys {
     bool getLeftShift() __asm__("cMenuSys_getLeftShift");
     bool getRightShift() __asm__("cMenuSys_getRightShift");
     void init() __asm__("cMenuSys_init__FPv");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cMenuSys();
+    ~cMenuSys();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cMenuSys, MenuDepth, 0x000);

@@ -63,7 +63,7 @@ void cFELocale::addFile(int lang)
 //100%
 INCLUDE_ASM("util/locale", cFELocale_deleteFile);
 #ifdef SKIP_ASM
-extern "C" void cLocaleFile__cLocaleFile(void*, int);
+extern "C" void _$_11cLocaleFile(void*, int);
 
 struct s195A50Arr {
     void* items[4];
@@ -71,7 +71,7 @@ struct s195A50Arr {
 
 /**
  * Deletes the locale file of entry @p i: when the entry (the pointer table at +0x8) is set, destroys and frees it with
- * cLocaleFile__cLocaleFile(file, 3) and clears the entry.
+ * cLocaleFile::~cLocaleFile(file, 3) and clears the entry.
  *
  * @param i  the file entry index (0 .. 19)
  */
@@ -79,7 +79,7 @@ void cFELocale::deleteFile(signed char i)
 {
     s195A50Arr* arr = (s195A50Arr*)&mpLocaleFile;
     if (arr->items[i] != 0) {
-        cLocaleFile__cLocaleFile(arr->items[i], 3);
+        _$_11cLocaleFile(arr->items[i], 3);
         arr->items[i] = 0;
     }
 }

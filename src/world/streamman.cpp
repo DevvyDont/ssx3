@@ -4,7 +4,7 @@
 #include "world/worldcache.h"
 
 //100%
-INCLUDE_ASM("world/streamman", cStreamMan_cStreamMan);
+INCLUDE_ASM("world/streamman", __10cStreamMan);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -25,28 +25,25 @@ static inline int cStreamMan_min(int a, int b)
  * Sizes the stream buffer as the EA stream bookkeeping for 2 slots, 1 queue and 1 request plus 0x68000 bytes,
  * capped at 0x80000; allocates it as "cStreamMan CDBUFFER" and creates the stream in it (STREAM_create). Then
  * allocates the 0x14000-byte "cStreamMan DECOMPRESS" buffer and calls cStreamMan_reset().
- *
- * @return @p self
  */
-extern "C" void* cStreamMan_cStreamMan(cStreamMan* self)
+cStreamMan::cStreamMan()
 {
-    self->m_BxChunkResourceID = 0xFFFFFFFF;
+    m_BxChunkResourceID = 0xFFFFFFFF;
     int size = STREAM_overhead(2, 1, 1);
     size += 0x18000;
     size += 0x50000;
     size = cStreamMan_min(0x80000, size);
     void* buf = operator_new_tag(size, str_cStreamMan_CDBUFFER, 0, 0);
-    self->m_streamBuffer = (char*)buf;
-    self->m_streamHandle = (int)STREAM_create(2, 1, 1, buf, size);
-    self->m_streamRequest = 0;
-    self->m_pDecompressBuffer = (char*)operator_new_tag(0x14000, str_cStreamMan_DECOMPRESS, 0, 0);
-    self->reset();
-    return ((void*)self);
+    m_streamBuffer = (char*)buf;
+    m_streamHandle = (int)STREAM_create(2, 1, 1, buf, size);
+    m_streamRequest = 0;
+    m_pDecompressBuffer = (char*)operator_new_tag(0x14000, str_cStreamMan_DECOMPRESS, 0, 0);
+    reset();
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/streamman", cStreamMan__cStreamMan);
+INCLUDE_ASM("world/streamman", _$_10cStreamMan);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
@@ -60,21 +57,16 @@ extern "C" void cStreamMan_purge(cStreamMan* self);
  * m_pBxChunkMemHandle is freed only when it is set, m_uiBxChunkSizeLeft is nonzero and the low byte of
  * m_BxChunkResourceID (the bank) is cWorldCache::kSharedBank (0xFF), the shared bank. cStreamMan_reset() (reset) and
  * cStreamMan_purge() (purge: releases the stream handle and frees the stream and decompression buffers) follow.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cStreamMan__cStreamMan(cStreamMan* self, int flags)
+cStreamMan::~cStreamMan()
 {
-    void* buf = self->m_pBxChunkMemHandle;
-    if (buf != 0 && (int)self->m_uiBxChunkSizeLeft != 0
-        && *(unsigned char*)&self->m_BxChunkResourceID == cWorldCache::kSharedBank) {
+    void* buf = m_pBxChunkMemHandle;
+    if (buf != 0 && (int)m_uiBxChunkSizeLeft != 0
+        && *(unsigned char*)&m_BxChunkResourceID == cWorldCache::kSharedBank) {
         cMemMan_free(buf);
     }
-    self->reset();
-    self->purge();
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    reset();
+    purge();
 }
 #endif
 

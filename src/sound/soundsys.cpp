@@ -3021,11 +3021,11 @@ extern "C" void cSSXAudio_WipeoutStart(void) {
 INCLUDE_ASM("sound/soundsys", cSSXAudio_WipeoutHit);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
-extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
+// handle lists (tCrowdEventData::tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* __15tCrowdEventData(tCrowdEventData* self);
 struct sSndList5 {
     char pad0[0x18];
-    sSndList5() { tCrowdEventData_tCrowdEventData((tCrowdEventData*)(this)); }
+    sSndList5() { __15tCrowdEventData((tCrowdEventData*)(this)); }
 };
 struct sSndRandSlot {
     sSndList5 a;
@@ -3226,8 +3226,8 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
-extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
+// handle lists (tCrowdEventData::tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* __15tCrowdEventData(tCrowdEventData* self);
 // sSSXAudioView's pending one-shot queue (an int ring of 5-word records).
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 // Callees declared by several functions below.
@@ -3397,8 +3397,8 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
-extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
+// handle lists (tCrowdEventData::tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* __15tCrowdEventData(tCrowdEventData* self);
 // sSSXAudioView's pending one-shot queue (an int ring of 5-word records).
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 // Callees declared by several functions below.
@@ -3691,8 +3691,8 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
-extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
+// handle lists (tCrowdEventData::tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* __15tCrowdEventData(tCrowdEventData* self);
 // sSSXAudioView's pending one-shot queue (an int ring of 5-word records).
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 // Callees declared by several functions below.
@@ -6478,8 +6478,8 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
-extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
+// handle lists (tCrowdEventData::tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* __15tCrowdEventData(tCrowdEventData* self);
 // sSSXAudioView's pending one-shot queue (an int ring of 5-word records).
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 // Callees declared by several functions below.
@@ -11011,45 +11011,37 @@ void cSSXAudio::StopSpeechForPkTrans()
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", tCrowdEventData_tCrowdEventData);
+INCLUDE_ASM("sound/soundsys", __15tCrowdEventData);
 #ifdef SKIP_ASM
 /**
  * Constructs a crowd sample list: no samples, all 5 pointers cleared.
  *
  * cCrowdSys_cCrowdSys runs it for the TRICK, FALL and ANTICIPATE lists of each of the 3 intensities.
- *
- * @return this
  */
-extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self)
+tCrowdEventData::tCrowdEventData()
 {
     int i;
-    self->mNumEventData = 0;
+    mNumEventData = 0;
     for (i = 4; i >= 0; i--) {
-        self->mpData[i] = 0;
+        mpData[i] = 0;
     }
-    return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", tCrowdEventData__tCrowdEventData);
+INCLUDE_ASM("sound/soundsys", _$_15tCrowdEventData);
 #ifdef SKIP_ASM
 extern "C" void tCrowdEventData_FreeSamples(tCrowdEventData*);
 void operator_delete(int*);
 
 /**
- * Destroys a crowd sample list: frees its samples (tCrowdEventData_FreeSamples) and, with bit 0 of @p flags, the list itself.
+ * Destroys a crowd sample list: frees its samples (tCrowdEventData_FreeSamples) and, with bit 0 of g++'s delete flag, the list itself.
  *
  * cCrowdSys__cCrowdSys runs it for each list.
- *
- * @param flags  bit 0 set to also delete the object
  */
-extern "C" void tCrowdEventData__tCrowdEventData(tCrowdEventData* self, int flags)
+tCrowdEventData::~tCrowdEventData()
 {
-    self->FreeSamples();
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    FreeSamples();
 }
 #endif
 
@@ -11199,7 +11191,7 @@ cCrowdInstance_cCrowdInstance_sObj::cCrowdInstance_cCrowdInstance_sObj()
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", cCrowdInstance__cCrowdInstance);
+INCLUDE_ASM("sound/soundsys", _$_14cCrowdInstance);
 #ifdef SKIP_ASM
 extern "C" void cCrowdInstance_StopCheer(cCrowdInstance* self);
 extern "C" void cCrowdInstance_RemoveAllObjects(cCrowdInstance* self, float v);
@@ -11207,19 +11199,14 @@ void operator_delete(int*);
 
 /**
  * Destroys a crowd instance: stops its cheer (cCrowdInstance_StopCheer), removes all its crowd objects (cCrowdInstance_RemoveAllObjects(self, 0))
- * and, with bit 0 of @p flags, deletes it.
+ * and, with bit 0 of g++'s delete flag, deletes it.
  *
  * cCrowdSys_Shutdown runs it on each element of the "CrowdInstances" array, from the last one down.
- *
- * @param flags  bit 0 set to also delete the object
  */
-extern "C" void cCrowdInstance__cCrowdInstance(cCrowdInstance* self, int flags)
+cCrowdInstance::~cCrowdInstance()
 {
-    self->StopCheer();
-    self->RemoveAllObjects(0.0f);
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    StopCheer();
+    RemoveAllObjects(0.0f);
 }
 #endif
 
@@ -11242,8 +11229,8 @@ typedef void (cController::*sSndCallback)(cController*, cBankMonitorInstance*, f
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
-// handle lists (tCrowdEventData_tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
-extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
+// handle lists (tCrowdEventData::tCrowdEventData clears them; tCrowdEventData_GetRandomSample picks from one) and their timing floats.
+extern "C" void* __15tCrowdEventData(tCrowdEventData* self);
 extern sSndCallback D_004A3700_cb[] __asm__("D_004A3700");
 extern "C" void cMidiSys_OpenMidiOpts_c(sSndSys8140* self, int a, int b) __asm__("cMidiSys_OpenMidiOpts");
 extern "C" int cMidiSys_PlayMidi_c(sSndSys8140* self) __asm__("cMidiSys_PlayMidi");
@@ -12067,7 +12054,7 @@ INCLUDE_ASM("sound/soundsys", cCrowdSys_cCrowdSys);
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
 extern "C" char* cMidiSys_cMidiSys(cMidiSys* self, int embedded, int count, int heap);
-extern "C" void* tCrowdEventData_tCrowdEventData(tCrowdEventData* self);
+extern "C" void* __15tCrowdEventData(tCrowdEventData* self);
 
 struct sSnd69VtEnt {
     short delta;
@@ -12083,7 +12070,7 @@ struct sSnd69Vt7 {
 
 struct sSnd69List {
     char pad0[0x18];
-    sSnd69List() { tCrowdEventData_tCrowdEventData((tCrowdEventData*)(this)); }
+    sSnd69List() { __15tCrowdEventData((tCrowdEventData*)(this)); }
 };
 struct sSnd69Ent {
     sSnd69List a;
@@ -12163,7 +12150,7 @@ INCLUDE_ASM("sound/soundsys", cCrowdSys__cCrowdSys);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 void operator_delete(int*);
-extern "C" void tCrowdEventData__tCrowdEventData(tCrowdEventData* self, int flags);
+extern "C" void _$_15tCrowdEventData(tCrowdEventData* self, int flags);
 extern "C" void cCrowdSys_Shutdown(cCrowdSys* self);
 extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags);
 
@@ -12188,7 +12175,7 @@ extern const sSnd6BVt7 D_00483838_6B __asm__("D_00483838");
  * Destroys the crowd sound system.
  *
  * Re-installs the cCrowdSys vtables, releases the crowd instances and sample banks (cCrowdSys_Shutdown), clears gpCrowdSys,
- * destroys the three tCrowdData sample lists in reverse order (tCrowdEventData__tCrowdEventData), runs the cMidiSys base destructor
+ * destroys the three tCrowdData sample lists in reverse order (tCrowdEventData::~tCrowdEventData), runs the cMidiSys base destructor
  * cMidiSys__cMidiSys, destroys the virtual bases (cBankManager, cSoundSys) when bit 1 of @p flags is set and frees the
  * object when bit 0 is set.
  *
@@ -12219,9 +12206,9 @@ extern "C" void cCrowdSys__cCrowdSys(cCrowdSys* self, int flags)
         tCrowdData* crowdEntry = self->mCrowdData + 3;
         while (self->mCrowdData != crowdEntry) {
             crowdEntry--;
-            tCrowdEventData__tCrowdEventData(&crowdEntry->mAnticipate, 2);
-            tCrowdEventData__tCrowdEventData(&crowdEntry->mFall, 2);
-            tCrowdEventData__tCrowdEventData(&crowdEntry->mTrick, 2);
+            _$_15tCrowdEventData(&crowdEntry->mAnticipate, 2);
+            _$_15tCrowdEventData(&crowdEntry->mFall, 2);
+            _$_15tCrowdEventData(&crowdEntry->mTrick, 2);
         }
     }
     cMidiSys__cMidiSys((cMidiSys*)self, 0);
@@ -12256,10 +12243,10 @@ INCLUDE_ASM("sound/soundsys", cCrowdSys_Init);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void tCrowdEventData_FreeSamples(tCrowdEventData*);
 struct sSndFileBuf;
-extern "C" FileParser* FileParser_FileParser(FileParser* self, const char* name, int flags);
+extern "C" FileParser* __10FileParserPCci(FileParser* self, const char* name, int flags);
 extern "C" bool FileParser_FindSection(FileParser* self, const char* name);
 extern "C" void cCrowdSys_ReadSection(cCrowdSys* self, void* parser);
-extern "C" void FileParser__FileParser(FileParser* self, int flags);
+extern "C" void _$_10FileParser(FileParser* self, int flags);
 extern const char str_CrowdInstances[];
 extern const char str_GLOBAL[];
 
@@ -12309,12 +12296,12 @@ extern "C" void cCrowdSys_Init(sSnd6D78Self* self, const char* name, const char*
         self->voices[i].mCrowdBank = cheerBank;
     }
     sSnd6D78Parser infParser;
-    FileParser_FileParser((FileParser*)((FileParser*)&infParser), name, 0x100);
+    __10FileParserPCci((FileParser*)((FileParser*)&infParser), name, 0x100);
     infParser.cur = infParser.data;
     if (FileParser_FindSection((FileParser*)(&infParser), str_GLOBAL)) ((cCrowdSys*)self)->ReadSection(&infParser);
     infParser.cur = infParser.data;
     if (FileParser_FindSection((FileParser*)(&infParser), key)) ((cCrowdSys*)self)->ReadSection(&infParser);
-    FileParser__FileParser((FileParser*)(&infParser), 2);
+    _$_10FileParser((FileParser*)(&infParser), 2);
 }
 #endif
 
@@ -12322,12 +12309,12 @@ extern "C" void cCrowdSys_Init(sSnd6D78Self* self, const char* name, const char*
 INCLUDE_ASM("sound/soundsys", cCrowdSys_Shutdown);
 #ifdef SKIP_ASM
 extern "C" void cCrowdSys_RemoveAllObjects(cCrowdSys* self);
-extern "C" void cCrowdInstance__cCrowdInstance(cCrowdInstance* p, int flags);
+extern "C" void _$_14cCrowdInstance(cCrowdInstance* p, int flags);
 
 /**
  * Shuts the crowd system down: removes all crowd objects, destroys the crowd instances and frees the sample lists.
  *
- * Calls cCrowdSys_RemoveAllObjects, destroys each instance from the last one down (cCrowdInstance__cCrowdInstance(.., 0)), frees the array
+ * Calls cCrowdSys_RemoveAllObjects, destroys each instance from the last one down (cCrowdInstance::~cCrowdInstance(.., 0)), frees the array
  * (cMemMan_free at its -0x10 header) and clears mpCrowdInstances and mNumInstances, then clears every intensity's
  * mAttack, mDecay, mMaxBend and its ANTICIPATE, FALL and TRICK lists (tCrowdEventData_FreeSamples). cSSXAudio_InGamePurge and
  * cCrowdSys__cCrowdSys call it.
@@ -12340,7 +12327,7 @@ void cCrowdSys::Shutdown()
         cCrowdInstance* curInstance = base + *(int*)((char*)base - 0x10);
         while (mpCrowdInstances != curInstance) {
             curInstance--;
-            cCrowdInstance__cCrowdInstance(curInstance, 0);
+            _$_14cCrowdInstance(curInstance, 0);
         }
         cMemMan_free((char*)mpCrowdInstances - 0x10);
         mpCrowdInstances = 0;
@@ -12732,7 +12719,7 @@ int cCrowdSys::GetCurrentCheer(int i)
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", FileParser_FileParser);
+INCLUDE_ASM("sound/soundsys", __10FileParserPCci);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_size(const char* name);
 extern "C" int FILE_loadat(const char* name, void* buf, int size);
@@ -12748,42 +12735,35 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
  *
  * @param name  the file (On Tour Filename)
  * @param flags  the allocation flags (On Tour int MemType)
- * @return @p self
  */
-extern "C" FileParser* FileParser_FileParser(FileParser* self, const char* name, int flags)
+FileParser::FileParser(const char* name, int flags)
 {
-    self->mBasePtr = 0;
-    self->mPtr = 0;
-    self->mFileSize = BXFILE_size(name);
-    if (self->mFileSize != 0) {
-        self->mBasePtr = (char*)operator_new_tag(self->mFileSize + 1, name, flags, 0);
-        FILE_loadat(name, self->mBasePtr, self->mFileSize + 1);
-        self->mPtr = self->mBasePtr;
-        self->mBasePtr[self->mFileSize] = 0;
+    mBasePtr = 0;
+    mPtr = 0;
+    mFileSize = BXFILE_size(name);
+    if (mFileSize != 0) {
+        mBasePtr = (char*)operator_new_tag(mFileSize + 1, name, flags, 0);
+        FILE_loadat(name, mBasePtr, mFileSize + 1);
+        mPtr = mBasePtr;
+        mBasePtr[mFileSize] = 0;
     }
-    return (self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/soundsys", FileParser__FileParser);
+INCLUDE_ASM("sound/soundsys", _$_10FileParser);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
 /**
- * Destroys a file parser: frees the loaded file (mBasePtr), then the object when bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a file parser: frees the loaded file (mBasePtr), then the object when bit 0 of g++'s delete flag is set.
  */
-extern "C" void FileParser__FileParser(FileParser* self, int flags)
+FileParser::~FileParser()
 {
-    void* basePtr = self->mBasePtr;
+    void* basePtr = mBasePtr;
     if (basePtr != 0) {
         cMemMan_free(basePtr);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
     }
 }
 #endif

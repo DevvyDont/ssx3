@@ -8,7 +8,7 @@
 // drops all of them (cWScriptMan's reset, wscriptman.cpp:2438).
 // Name, members and methods are EA's, from SSX On Tour's DWARF (struct tMissionMenuQueue, size 0xC8, in
 // z:/main/game/source/wscript/all_in_one_wscript.cpp, with tMissionMenuQueueEntry); the fork's retail functions already
-// carry the names (tMissionMenuQueue_tMissionMenuQueue, _init, _empty, _addEntry, _getNextEntry, _getEntry in
+// carry the names (tMissionMenuQueue::tMissionMenuQueue, _init, _empty, _addEntry, _getNextEntry, _getEntry in
 // wscript/wscriptman, 0x0030C740..), and their bodies match On Tour's method set one for one. EA's header is not known;
 // the file name is ours. Retail code: wscript/wscriptman (wscriptman.cpp:3281..3405).
 //
@@ -43,6 +43,9 @@ struct tMissionMenuQueue {
     tMissionMenuQueueEntry* getEntry() __asm__("tMissionMenuQueue_getEntry");
     void init() __asm__("tMissionMenuQueue_init");
     void empty() __asm__("tMissionMenuQueue_empty");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    tMissionMenuQueue();
 };
 
 CHECK_OFFSET(tMissionMenuQueue, Current, 0x00);

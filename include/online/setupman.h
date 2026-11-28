@@ -12,15 +12,15 @@
 // One instance, cSetupMan_mSetupMan (EA: the static cSetupMan::mSetupMan, preview assert "!mSetupMan"): cSetupMan_createInstance creates
 // it, cSetupMan_destroyInstance destroys it. No On Tour counterpart (On Tour has no online code).
 //
-// Size 0x12C: [R] cSetupMan_createInstance: cMemMan_alloc(300, "cSetupMan", 0x20000000) + the constructor cSetupMan_cSetupMan, which
+// Size 0x12C: [R] cSetupMan_createInstance: cMemMan_alloc(300, "cSetupMan", 0x20000000) + the constructor cSetupMan::cSetupMan, which
 // stores every word except the queue slots (cleared with MEM_fill) up to 0x128. No vtable, no base class (the
-// destructor cSetupMan__cSetupMan is called directly with flags 3).
+// destructor cSetupMan::~cSetupMan is called directly with flags 3).
 // The two packet queues are the same 32-slot ring of tGameCommPacket* that cGameComm uses (online/gamecomm.h
 // tGameCommQueue: mHead push count, mTail pop count, mQueue[32]); packets are 0xF0-byte "tGameCommPacket" buffers
 // (cSetupMan_allocPacket). Field names for them follow cGameComm's (On Tour names); the rest are named from retail use.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] the constructor cSetupMan_cSetupMan, the destructor cSetupMan__cSetupMan, the allocation in cSetupMan_createInstance;
+//   [R] the constructor cSetupMan::cSetupMan, the destructor cSetupMan::~cSetupMan, the allocation in cSetupMan_createInstance;
 //   [U] how retail code uses the field (src/dirtysock/tagsunk.cpp views sRingOwner_264138, sNetSession42B8,
 //       sDsPacketQueueK2, sDsRecvQueue_00264A58, sDsSendQueue_00264B20 / _00264BE8, and the asm).
 // mState values (retail use): 1 start (ctor, dtor); 2 the host has a pick; 3 the peer confirmed; 4 / 5 this host
@@ -29,6 +29,8 @@
 
 #include "layout.h"
 #include "online/gamecomm.h"            // tGameCommQueue, tGameCommPacket
+
+void operator_delete(int* p);
 
 struct cSetupMan {
     int mState;                     // 0x000 [R] ctor 1, dtor 1; [U] values above; cGameConnMan's cGameConnMan_update reads
@@ -84,6 +86,11 @@ struct cSetupMan {
     void sendBraggingSelection(int id) __asm__("cSetupMan_sendBraggingSelection");
     void sendBraggingRule(int ruleSlot, int newValue) __asm__("cSetupMan_sendBraggingRule");
     void unlockBragging() __asm__("cSetupMan_unlockBragging");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cSetupMan(int channel, int isHost, int ranked);
+    ~cSetupMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cSetupMan, mState, 0x000);

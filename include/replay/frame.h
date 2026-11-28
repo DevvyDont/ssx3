@@ -4,13 +4,13 @@
 // cReplayFrame: one recorded replay frame - a cReplayFramePtr data block (the saved world/rider state) plus its place
 // in a cReplayFrameList (Next / Prev), its type (plain, highlight, chapter, instant replay; tReplayFrameType), the
 // riders' rankings and highlight end ticks, and the tick range it covers. cReplay owns 16 of them (cReplay::Frames,
-// replay/replay.h, built by cReplay_cReplay with cReplayFrame_cReplayFrame, 0x38 apart) and moves them between its
+// replay/replay.h, built by cReplay::cReplay with cReplayFrame_cReplayFrame, 0x38 apart) and moves them between its
 // FreeFrameList and FrameList; cPlaybackMan embeds one at +0x14 (its saved frame).
 // EA's header: ../source/replay/frame.h (the July 2003 preview files inline asserts under it); EA's source
 // d:/ssx/code/source/replay/frame.cpp. Retail code: unit replay/playbackman (0x0026D5E8 ctor .. 0x0026D730 setRanking)
 // and the destructor in replay/replaycache (0x00272258).
 //
-// Size 0x38: [R] cReplay_cReplay constructs 16 frames 0x38 apart (replay/replay.h Frames[16][0x38]); the last member
+// Size 0x38: [R] cReplay::cReplay constructs 16 frames 0x38 apart (replay/replay.h Frames[16][0x38]); the last member
 // cReplayFrame_clearFrame / cReplay_allocReplayFrame write is 0x34; [O] On Tour's cReplayFrame is 0x48 (4 players:
 // Ranking[4] / HighlightEndTick[4]; retail has 2 players: 2 + 2 words, 0x10 less).
 // Base: cReplayFramePtr (0x00-0x14, replay/frameptr.h; its base cBxReplayFrame is a vptr only, at 0). Written out

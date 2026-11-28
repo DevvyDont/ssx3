@@ -11,7 +11,7 @@
 // (0x002B6AA0 ctor .. 0x002B82B8 CalculateVolume).
 //
 // Size 0x250: [R] cGame_loadTrack allocates cMemMan_alloc(0x250, "cWorldSound") and runs
-// cWorldSound_cWorldSound(mem, 0) on it; the ctor initialises two 0x120-byte overlap lists (count 0 at +0x0,
+// cWorldSound::cWorldSound(mem, 0) on it; the ctor initialises two 0x120-byte overlap lists (count 0 at +0x0,
 // last position = t4vect_Zero at +0x110). [O] On Tour's cWorldSound is 0x250: m_OverlapLists[2] at 0x0, then
 // m_AudioRenderInstance / m_AudioRenderHull at 0x240 / 0x244. No bases, no vtable (the destructor is a plain
 // operator delete).
@@ -134,7 +134,7 @@ CHECK_SIZE(tInstanceAudio, 0x18);
 // The audio instances near one view port's listener (On Tour class cAudioOverlapList, 0x120; its method
 // cAudioOverlapList_update is in the same retail unit).
 struct cAudioOverlapList {
-    int numoverlaps;                // 0x000 [O]; [R] cWorldSound_cWorldSound stores 0; [U] cAudioOverlapList_update
+    int numoverlaps;                // 0x000 [O]; [R] cWorldSound::cWorldSound stores 0; [U] cAudioOverlapList_update
                                     //       clears it before re-querying, the query helper nash_privy_QueryHelper_help1 appends
                                     //       (overlaps[numoverlaps++], no bound check in retail); TriggerWorldAudio /
                                     //       RemoveInstanceFromOverlapList loop over it
@@ -178,6 +178,8 @@ CHECK_SIZE(PointProximityTest, 0x4);
 struct t3Vector;
 struct t4Vector;
 
+void operator_delete(int* p);
+
 struct cWorldSound {
     cAudioOverlapList m_OverlapLists[2];    // 0x000 [O]; [R] the ctor's 2-element loop (stride 0x120); [U]
                                             //       TriggerWorldAudio updates and walks [ViewPort];
@@ -200,6 +202,11 @@ struct cWorldSound {
     void TriggerWorldAudio(const t4Vector* pos, int k) __asm__("cWorldSound_TriggerWorldAudio");
     void GetAudioVolumeTriggers(tInstanceRecord* obj, int* id0, int* id1, int* id2, int* id3)
         __asm__("cWorldSound_GetAudioVolumeTriggers");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cWorldSound();
+    ~cWorldSound();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cWorldSound, m_OverlapLists, 0x000);

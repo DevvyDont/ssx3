@@ -935,7 +935,7 @@ int cAudioInterface_getTimerHz(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", cBankInstance_cBankInstance);
+INCLUDE_ASM("sound/asyncsys", __13cBankInstance);
 #ifdef SKIP_ASM
 /**
  * Constructs an empty sound-bank instance.
@@ -944,26 +944,23 @@ INCLUDE_ASM("sound/asyncsys", cBankInstance_cBankInstance);
  * (+0x8) 0 (dynamic), mSoundMemHandle (+0xC) -1, mpMainMemData (+0x10) and mMainMemDataSize (+0x14) 0, no share links
  * mpNext / mpPrev (+0x18 / +0x1C) and an empty mBankFilename (+0x20). cBankManager_cBankManager builds its bank table
  * ("BankInstances") with it.
- *
- * @return @p self
  */
-extern "C" void* cBankInstance_cBankInstance(cBankInstance* self)
+cBankInstance::cBankInstance()
 {
-    self->mBankStatus = 0;
-    self->mBankHandle = -1;
-    self->mAllocLocation = 0;
-    self->mSoundMemHandle = -1;
-    self->mpMainMemData = 0;
-    self->mMainMemDataSize = 0;
-    self->mpNext = 0;
-    self->mpPrev = 0;
-    self->mBankFilename[0] = 0;
-    return ((void*)self);
+    mBankStatus = 0;
+    mBankHandle = -1;
+    mAllocLocation = 0;
+    mSoundMemHandle = -1;
+    mpMainMemData = 0;
+    mMainMemDataSize = 0;
+    mpNext = 0;
+    mpPrev = 0;
+    mBankFilename[0] = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/asyncsys", cBankInstance__cBankInstance);
+INCLUDE_ASM("sound/asyncsys", _$_13cBankInstance);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void cBankInstance_Unload(cBankInstance* self);
@@ -972,20 +969,15 @@ extern "C" void cBankInstance_DeallocMem(void* self);
 
 /**
  * Destroys a sound-bank instance: unloads it (cBankInstance_Unload), then runs cBankInstance_UnshareBank and cBankInstance_DeallocMem, and frees it
- * with operator_delete when bit 0 of @p flags is set.
+ * with operator_delete when bit 0 of g++'s delete flag is set.
  *
  * cBankManager__cBankManager destroys its bank table with it.
- *
- * @param flags  g++ destructor flags: bit 0 frees the object
  */
-extern "C" void cBankInstance__cBankInstance(cBankInstance* self, int flags)
+cBankInstance::~cBankInstance()
 {
-    self->Unload();
-    cBankInstance_UnshareBank(self);
-    cBankInstance_DeallocMem(self);
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    Unload();
+    cBankInstance_UnshareBank(this);
+    cBankInstance_DeallocMem(this);
 }
 #endif
 

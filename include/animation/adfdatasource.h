@@ -168,6 +168,8 @@ CHECK_OFFSET(tCmpChanCache, prev, 0x1C);
 CHECK_OFFSET(tCmpChanCache, next, 0x20);
 CHECK_SIZE(tCmpChanCache, 0x24);
 
+void operator_delete(int* p);
+
 struct cAdfDataSource {
     void* Data;                     // 0x000 [O]
     tAdfArchive* Archive;           // 0x004 [O]
@@ -180,6 +182,10 @@ struct cAdfDataSource {
     void populateFromData(tAdfArchive* data) __asm__("cAdfDataSource_populateFromData");
     void getFramePartData(void* dest, unsigned int* frame, int part, void* startChan, long numChans)
         __asm__("cAdfDataSource_getFramePartData");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cAdfDataSource();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cAdfDataSource, Data, 0x000);

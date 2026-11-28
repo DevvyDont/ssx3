@@ -13,10 +13,10 @@
 INCLUDE_ASM("scripter/videngine", cVidEngine_ReadyVideo);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
+extern "C" void* __12cMoviePlayer(void* mem);
 extern "C" void tMoviePlayOptions_SetDefaults(void* self);
 extern "C" int cMoviePlayer_init(void* p, void* q);
-extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
+extern "C" void _$_12cMoviePlayer(void* p, int a1);
 extern const char str_VidEnginePlayer[];
 
 
@@ -34,7 +34,7 @@ extern const char str_VidEnginePlayer[];
 extern "C" bool cVidEngine_ReadyVideo(void** self, int file)
 {
     if (*self != 0) return false;
-    *self = cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_VidEnginePlayer, 0x100, 0));
+    *self = __12cMoviePlayer(cMemMan_alloc(68, str_VidEnginePlayer, 0x100, 0));
     tMoviePlayOptions params;
     tMoviePlayOptions_SetDefaults(&params);
     //S
@@ -46,7 +46,7 @@ extern "C" bool cVidEngine_ReadyVideo(void** self, int file)
     params.bPreLoad = 0;
     //E
     if (cMoviePlayer_init(*self, &params) == 0) {
-        if (*self != 0) cMoviePlayer__cMoviePlayer(*self, 3);
+        if (*self != 0) _$_12cMoviePlayer(*self, 3);
         *self = 0;
         return false;
     }
@@ -241,19 +241,16 @@ void cCircularBuffer::Reset()
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/videngine", cCircularBuffer_cCircularBuffer);
+INCLUDE_ASM("scripter/videngine", __15cCircularBuffer);
 #ifdef SKIP_ASM
 void cCircularBuffer_Reset(void*);
 
 /**
  * Constructs a circular buffer of NIS list entries: resets it (cCircularBuffer_Reset).
- *
- * @return @p self
  */
-extern "C" void* cCircularBuffer_cCircularBuffer(cCircularBuffer* self)
+cCircularBuffer::cCircularBuffer()
 {
-    self->Reset();
-    return ((void*)self);
+    Reset();
 }
 #endif
 

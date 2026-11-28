@@ -219,7 +219,7 @@ extern "C" unsigned int cFEStateMPCircuit_getTopUnlockedPeakNum(void)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager_cFEAsyncManager);
+INCLUDE_ASM("fe/ovstatemission", __15cFEAsyncManager);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
 extern "C" void FILESYS_addbigsync(char* name, int a1, int a2, void* out);
@@ -227,20 +227,17 @@ extern char str_data_ui_mapgfx_big[];
 
 /**
  * Constructs the front end's async manager, opening data/ui/mapgfx.big when it exists (handle at +0x58C).
- *
- * @return @p self
  */
-extern "C" void* cFEAsyncManager_cFEAsyncManager(cFEAsyncManager* self)
+cFEAsyncManager::cFEAsyncManager()
 {
     if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
-        FILESYS_addbigsync(str_data_ui_mapgfx_big, 0, 100, (char*)&self->mMapGfxBigFile);
+        FILESYS_addbigsync(str_data_ui_mapgfx_big, 0, 100, (char*)&mMapGfxBigFile);
     }
-    return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager__cFEAsyncManager);
+INCLUDE_ASM("fe/ovstatemission", _$_15cFEAsyncManager);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
 extern "C" void FILESYS_delbigsync(void* handle, int arg);
@@ -249,16 +246,11 @@ extern char str_data_ui_mapgfx_big[];
 
 /**
  * Destroys the async manager: closes data/ui/mapgfx.big if it exists, then frees the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFEAsyncManager__cFEAsyncManager(cFEAsyncManager* self, int flags)
+cFEAsyncManager::~cFEAsyncManager()
 {
     if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
-        FILESYS_delbigsync((void*)self->mMapGfxBigFile, 100);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
+        FILESYS_delbigsync((void*)mMapGfxBigFile, 100);
     }
 }
 #endif

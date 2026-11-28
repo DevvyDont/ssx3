@@ -275,7 +275,7 @@ extern "C" void cVidEngine__cVidEngine(cVidEngine* self, int flags)
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cVidEngine_ResetVideoEngine);
 #ifdef SKIP_ASM
-extern "C" void cMoviePlayer__cMoviePlayer(void* p, int flags);
+extern "C" void _$_12cMoviePlayer(void* p, int flags);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ResumeSFX(void* p);
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* p);
@@ -288,7 +288,7 @@ extern int cPauseState_FlagsTable[];
 /**
  * Stops and deletes the video player and undoes the game-state changes made when playback started.
  *
- * When a player exists it is destroyed (cMoviePlayer__cMoviePlayer, flags 3). If it was playing (+0x4), the pause-mode
+ * When a player exists it is destroyed (cMoviePlayer::~cMoviePlayer, flags 3). If it was playing (+0x4), the pause-mode
  * stack (cPauseState_Stack, top cPauseState_StackIdx) is popped and cPauseState_Flags reloaded from cPauseState_FlagsTable, sound effects resume,
  * the graphics manager's virtual slot 40 gets the value saved at +0x10, and when +0x14 is set it is cleared
  * and cCutSceneTransitionMan_ForceToCutSceneMode() is called on the cutscene transition manager. The first four words are then cleared.
@@ -296,7 +296,7 @@ extern int cPauseState_FlagsTable[];
 void cVidEngine::ResetVideoEngine()
 {
     if (mpPlayer != 0) {
-        cMoviePlayer__cMoviePlayer(mpPlayer, 3);
+        _$_12cMoviePlayer(mpPlayer, 3);
         if (mIsPlaying != 0) {
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             cSSXAudio_ResumeSFX(cAudioInterface_bxAudio());

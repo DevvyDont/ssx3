@@ -2508,7 +2508,7 @@ __asm__("__12cRiderVb_cmp = cRider_cRider\n"
         "__15cCompPart27_cmpi = cPlayerIndicatorFX_cPlayerIndicatorFX\n"
         "__15cCompPart28_cmpi = cDynamicSprayFX_cDynamicSprayFX\n"
         "__15cCompPart29_cmpi = cPunchFX_cPunchFX\n"
-        "__15cCompPart30_cmpi = cCheatFX_cCheatFX\n");
+        "__15cCompPart30_cmpi = __8cCheatFXi\n");
 
 // PORT: vtables this TU does not emit (their key functions are elsewhere), under their retail names.
 __asm__("_vt$14cRiderVbB0_cmp = D_00459B90\n"
@@ -4249,7 +4249,7 @@ float cRider::getTotalPathDistance()
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", cAirPredictor_cAirPredictor);
+INCLUDE_ASM("ai/computer", __13cAirPredictor);
 #ifdef SKIP_ASM
 extern "C" void cAirPredictor_reset(char* self);
 
@@ -4257,33 +4257,24 @@ extern "C" void cAirPredictor_reset(char* self);
  * Constructs an air predictor: marks it unused and resets its flight state.
  *
  * Stores -1 at +0x30, then cAirPredictor_reset.
- *
- * @return this
  */
-extern "C" void* cAirPredictor_cAirPredictor(cAirPredictor* self)
+cAirPredictor::cAirPredictor()
 {
-    self->GuessLandPatchRID = 0xFFFFFFFF;
-    cAirPredictor_reset((char*)self);
-    return ((void*)self);
+    GuessLandPatchRID = 0xFFFFFFFF;
+    cAirPredictor_reset((char*)this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ai/computer", cAirPredictor__cAirPredictor);
+INCLUDE_ASM("ai/computer", _$_13cAirPredictor);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 /**
  * Destroys an air predictor; it owns nothing, so this only frees the object when asked.
- *
- * @param flags  g++ in-charge flags: bit 0 set means delete the object (operator_delete)
  */
-extern "C" void cAirPredictor__cAirPredictor(cAirPredictor* self, int flags)
+cAirPredictor::~cAirPredictor()
 {
-    if (flags & 1)
-    {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

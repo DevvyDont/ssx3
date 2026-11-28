@@ -8,14 +8,14 @@
 // is 1 or 3 (On Tour isSimDone).
 // EA's source is d:/ssx/code/source/ai/airpredictor.cpp (July 2003 preview assert strings); retail's methods are in
 // ai/airpredictor.cpp (0x113198-0x113AD8), the ctor/dtor in ai/computer.cpp (0x113138, 0x113170).
-// Size 0xB0 [R]: cRider_loadRider allocates it with cMemMan_alloc(0xB0, "AirPredictor") + cAirPredictor_cAirPredictor and
+// Size 0xB0 [R]: cRider_loadRider allocates it with cMemMan_alloc(0xB0, "AirPredictor") + cAirPredictor::cAirPredictor and
 // stores it in cRider::mAirPredictor (ai/rider.h, +0x788); cAirPredictor_writeToReplayFrame / readFromReplayFrame copy
 // all 0xB0 bytes. No vtable (On Tour: no virtuals; the replay calls are on the frame object).
 // Base class: On Tour's cAirPredictor (0xB0, "2 variants") has no members of its own; its data is the struct
 // cAirPredictorState (0xB0), written out here as the whole class.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] retail ctor cAirPredictor_cAirPredictor (+0x30 = -1, then reset), cAirPredictor_reset, the allocation size;
+//   [R] retail ctor cAirPredictor::cAirPredictor (+0x30 = -1, then reset), cAirPredictor_reset, the allocation size;
 //   [U] how retail code uses the field (the methods; ai/ai.cpp, ai/rider.cpp, ai/control/handplantcontrol.cpp,
 //       seg/seg_1218.cpp, seg/seg_14B10.cpp, sound/soundsys.cpp, camera/camera.cpp read SimState/TotalAirTime/CurAirTime);
 //   [O] SSX On Tour's DWARF (cAirPredictorState, 0xB0): every member at the same offset as retail's accesses.
@@ -27,6 +27,8 @@
 struct cBxReplayFrame;
 
 struct t4Vector;
+
+void operator_delete(int* p);
 
 struct cAirPredictor {
     // SimState. [O] On Tour's enum cAirPredictorState::eSimState, names and values. [U] simStep hits the terrain in 0
@@ -73,6 +75,11 @@ struct cAirPredictor {
         __asm__("cAirPredictor_simOneTick");
     void updateFlightPath(t4Vector* airPos, t4Vector* airVel, float dt) __asm__("cAirPredictor_updateFlightPath");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cAirPredictor_writeToReplayFrame");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cAirPredictor();
+    ~cAirPredictor();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cAirPredictor, GuessLandPosition, 0x00);

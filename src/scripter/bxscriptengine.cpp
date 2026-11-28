@@ -15,7 +15,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetupBXEngine);
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cInSeq_cInSeq(void* obj, void* buf, int size, int a3, void* out);
+extern "C" void* __6cInSeqPvT1Uii(void* obj, void* buf, int size, int a3, void* out);
 extern char str_InSeqHeap[];
 extern char str_BXScriptDatabase[];
 extern char str_InSeq[];
@@ -28,13 +28,13 @@ extern char str_InSeq[];
  * 8-byte "BXScriptDatabase" entries (mpScriptDatabase, count in mScriptDatabaseSize).
  *
  * @param scriptDatabaseSize  number of script database entries
- * @param maxUniqueAnimPlayers  passed to cInSeq_cInSeq() as its script limit (cInSeq's maxScripts)
+ * @param maxUniqueAnimPlayers  passed to cInSeq::cInSeq() as its script limit (cInSeq's maxScripts)
  * @param heapSize  InSeq heap size in bytes
  */
 void cBXScriptEngine::SetupBXEngine(int scriptDatabaseSize, int maxUniqueAnimPlayers, int heapSize)
 {
     mpInSeqHeap = (char*)operator_new_tag(heapSize, str_InSeqHeap, 0, 0);
-    mpInSeq = (cInSeq*)cInSeq_cInSeq(cMemMan_alloc(0x20, str_InSeq, 0, 0),
+    mpInSeq = (cInSeq*)__6cInSeqPvT1Uii(cMemMan_alloc(0x20, str_InSeq, 0, 0),
         mpInSeqHeap, heapSize, maxUniqueAnimPlayers, (char*)&mInSeqCommVtbl);
     mScriptDatabaseSize = scriptDatabaseSize;
     mpScriptDatabase = (tBXScriptState*)operator_new_tag(scriptDatabaseSize * 8, str_BXScriptDatabase, 0, 0);
@@ -49,7 +49,7 @@ void cBXScriptEngine::SetupBXEngine(int scriptDatabaseSize, int maxUniqueAnimPla
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_PurgeBXEngine);
 #ifdef SKIP_ASM
 extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self);
-extern "C" void cInSeq__cInSeq(void* obj, int flags);
+extern "C" void _$_6cInSeq(void* obj, int flags);
 void cMemMan_free(void*);
 
 /**
@@ -71,7 +71,7 @@ void cBXScriptEngine::PurgeBXEngine()
         mpScriptDatabase = 0;
         mScriptDatabaseSize = 0;
         if (mpInSeq != 0) {
-            cInSeq__cInSeq(mpInSeq, 3);
+            _$_6cInSeq(mpInSeq, 3);
         }
         mpInSeq = 0;
         if (mpInSeqHeap != 0) {

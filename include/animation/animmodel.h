@@ -94,9 +94,9 @@ struct cAnimModel {
                                             //     NumTextureRefs 0x12C, as in On Tour); [U] addTextureFile stores its data
                                             //     argument (view sAnimModelList items) [lstruct L2]
     /* 0x12C */ int NumTextureRefs;         // [O] cAnimModel::NumTextureRefs (+0x78C there, 0x14 before ScaleVect, as here);
-                                            //     [R] cAnimModel_cAnimModel clears it between numParts and localPos, the same store
+                                            //     [R] cAnimModel::cAnimModel clears it between numParts and localPos, the same store
                                             //     order as On Tour's ctor (NumModelParts, NumTextureRefs, TextureRefs, BoneOffset)
-    /* 0x130 */ tTextureRef* TextureRefs;   // [O] cAnimModel::TextureRefs (+0x790); [R] cAnimModel_cAnimModel clears it (see NumTextureRefs)
+    /* 0x130 */ tTextureRef* TextureRefs;   // [O] cAnimModel::TextureRefs (+0x790); [R] cAnimModel::cAnimModel clears it (see NumTextureRefs)
     /* 0x134 */ char unk_134[0xC];
     /* 0x140 */ t4Vector ScaleVect;           // = (a, b, b, 1) (cAnimModel_setScale); .y is the draw call's float (cAnimModel_render); .x scales rider lean (ai/rider)
     /* 0x150 */ unsigned long mask;         // 64-bit mask of enabled parts (cAnimModel_enablePart, cAnimModel_disableAllParts)
@@ -123,6 +123,9 @@ struct cAnimModel {
     void enablePart(int i, int channel) __asm__("cAnimModel_enablePart");
     void disablePart(int i, int channel) __asm__("cAnimModel_disablePart");
     void disableAllParts() __asm__("cAnimModel_disableAllParts");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cAnimModel();
 };
 
 CHECK_OFFSET(sAnimModelPart, mask, 0x10);

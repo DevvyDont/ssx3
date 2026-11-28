@@ -10,12 +10,12 @@
 // 0x002B6A68 TouchAllUsed in sound/icepick/worldtriggermanager.
 //
 // Size 0x344: [R] WORLDTRIGGERMANAGER_Init__Fv allocates cMemMan_alloc(0x344, "WorldTriggerManager") and runs
-// cWorldTriggerManager_cWorldTriggerManager on it. [O] On Tour's cWorldTriggerManager is 0x340 with the same members
+// cWorldTriggerManager::cWorldTriggerManager on it. [O] On Tour's cWorldTriggerManager is 0x340 with the same members
 // in the same order; it packs mLastHitObjectResult / mMonitorTriggers as two 1-byte bools at 0x330 / 0x331, retail
 // stores each as a word (sw 0x330, sw 0x334), so every later member sits 4 bytes higher. No bases, no vtable.
 //
 // A FLAT layout: every field at its retail offset, no C++ inheritance or virtuals.
-// Tags: [R] the constructor (cWorldTriggerManager_cWorldTriggerManager) and WORLDTRIGGERMANAGER_Init; [U] how retail
+// Tags: [R] the constructor (cWorldTriggerManager::cWorldTriggerManager) and WORLDTRIGGERMANAGER_Init; [U] how retail
 // code uses the field; [O] SSX On Tour's DWARF.
 
 #include "layout.h"
@@ -69,12 +69,14 @@ CHECK_SIZE(tTriggerType, 0x10);
 // Retail methods: sound/icepick/worldtriggermanager (0x2B4B70 ctor, 0x2B4BE0 dtor, 0x2B4C08 SameTriggerInstance,
 // 0x2B4C38 Update, 0x2B5758 Stop, 0x2B5818 TriggerToPatch, 0x2B5838 CrowdTrigger, 0x2B5878 SwapTriggerToString,
 // 0x2B5898 Reset); EA's worldtriggermanager.cpp (file_hints: Update at line 139).
-// Size 0x70 [R]: cWorldTriggerManager_cWorldTriggerManager allocates new[](4496 = 40 * 0x70 + 0x10,
+// Size 0x70 [R]: cWorldTriggerManager::cWorldTriggerManager allocates new[](4496 = 40 * 0x70 + 0x10,
 // "m_aWorldTriggerInstances") and constructs each 0x70 apart. [O] On Tour is 0x70 too, but it packs m_bTouch /
 // m_bCrowdTrigger as two 1-byte bools at 0x34 / 0x35; retail stores each as a word (sw 0x34, sw 0x38), so every
 // later member sits 4 bytes higher (m_iViewPort 0x38 -> 0x3C ... m_bLastAnimFrameDecrease 0x68 -> 0x6C). The other
 // On Tour bools (m_bInUse, m_bPositional) are words in retail as well. Tags as for cWorldTriggerManager; [R] here is
-// the instance ctor cWorldTriggerInstance_cWorldTriggerInstance (and Reset / Stop, which re-initialise the tail).
+// the instance ctor cWorldTriggerInstance::cWorldTriggerInstance (and Reset / Stop, which re-initialise the tail).
+void operator_delete(int* p);
+
 struct cWorldTriggerInstance {
     int m_bInUse;                       // 0x00 [O] (On Tour bool; retail sw); [R] ctor 0, Reset 0; [U] the manager's
                                         //      GetFreeInstance / GetTriggerInstance / Update / TouchAllUsed test it
@@ -119,6 +121,11 @@ struct cWorldTriggerInstance {
     bool CrowdTrigger(int trigger) __asm__("cWorldTriggerInstance_CrowdTrigger");
     int SwapTriggerToString(int idx, char* dst) __asm__("cWorldTriggerInstance_SwapTriggerToString");
     void Reset() __asm__("cWorldTriggerInstance_Reset");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cWorldTriggerInstance();
+    ~cWorldTriggerInstance();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cWorldTriggerInstance, m_bInUse, 0x00);
@@ -173,6 +180,8 @@ CHECK_OFFSET(tTriggerInfoFileHeader, mRecords, 0xC);
 struct cRider;
 struct t3Vector;
 struct tInstanceRecord;
+
+void operator_delete(int* p);
 
 struct cWorldTriggerManager {
     cWorldTriggerInstance* m_aWorldTriggerInstances; // 0x000 [O]; [R] new[40] 0x70-byte instances
@@ -234,6 +243,11 @@ struct cWorldTriggerManager {
     bool DuckAmbientAudioTrigger(unsigned int idx) __asm__("cWorldTriggerManager_DuckAmbientAudioTrigger");
     int AdvancedTriggerToString() __asm__("cWorldTriggerManager_AdvancedTriggerToString__FPv");
     bool LoadTriggerInfo() __asm__("cWorldTriggerManager_LoadTriggerInfo");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cWorldTriggerManager();
+    ~cWorldTriggerManager();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cWorldTriggerManager, m_aWorldTriggerInstances, 0x000);

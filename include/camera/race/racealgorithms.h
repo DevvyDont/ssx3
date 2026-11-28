@@ -97,7 +97,7 @@ CHECK_OFFSET(cRelativeChaseAlgorithm, LastCamTargetPos, 0x3B0);
 CHECK_SIZE(cRelativeChaseAlgorithm, 0x3C0);
 
 // cSplineCamAlgorithm (0x3D0; On Tour 0x3C0). Ctor cSplineCamAlgorithm_cSplineCamAlgorithm(this, point1..point4, time, leadDistance,
-// heightOffset, fov) (vtable cSplineCamAlgorithm_vtbl; builds the three interpolants with cCubicSplineInterpolant_cCubicSplineInterpolant / cCubicSplineInterpolant_initAsNatural /
+// heightOffset, fov) (vtable cSplineCamAlgorithm_vtbl; builds the three interpolants with cCubicSplineInterpolant::cCubicSplineInterpolant / cCubicSplineInterpolant_initAsNatural /
 // cCubicSplineInterpolant_addPoint / cCubicSplineInterpolant_evaluate), dtor cSplineCamAlgorithm__cSplineCamAlgorithm (cCubicSplineInterpolant__cCubicSplineInterpolant on each interpolant), snap cSplineCamAlgorithm_snap,
 // update cSplineCamAlgorithm_update, getRaceCamFinalPhaseData cSplineCamAlgorithm_getRaceCamFinalPhaseData, getRestDrop cSplineCamAlgorithm_getRestDrop.
 struct cSplineCamAlgorithm : public cLookAtChaseAlgorithm {
@@ -112,7 +112,7 @@ struct cSplineCamAlgorithm : public cLookAtChaseAlgorithm {
     // --- cSplineCamAlgorithm
     virtual float getRestDrop();                                                    // 13 ([R] cSplineCamAlgorithm_vtbl: cSplineCamAlgorithm_getRestDrop__FPv)
     char XOfT[0xC];                 // 0x390 [O] cCubicSplineInterpolant (On Tour 0x380); [R] ctor passes this+0x390
-                                    //       to cCubicSplineInterpolant_cCubicSplineInterpolant/cCubicSplineInterpolant_evaluate, dtor to cCubicSplineInterpolant__cCubicSplineInterpolant
+                                    //       to cCubicSplineInterpolant::cCubicSplineInterpolant/cCubicSplineInterpolant_evaluate, dtor to cCubicSplineInterpolant__cCubicSplineInterpolant
     char YOfT[0xC];                 // 0x39C [O] cCubicSplineInterpolant; [R] ditto (this+0x39C)
     char ZOfT[0xC];                 // 0x3A8 [O] cCubicSplineInterpolant; [R] ditto (this+0x3A8)
     float TotalTime;                // 0x3B4 [O]; [R] swc1; [U] cSplineCamAlgorithm_update (lwc1)

@@ -14,10 +14,10 @@
 // 0x0, 0x4 and 0xC; loadFile writes 0x0-0x10. On Tour: 0x124 (the same five members at the same offsets, then four
 // statics-turned-members g_StringDatabase .. g_CurrentLanguageID and m_StringNotFound[128] from 0x14, which retail
 // does not have: the allocation is 0x14).
-// No base class, no vtable (the dtor is called directly: cFELocale_deleteFile -> cLocaleFile__cLocaleFile(file, 3)).
+// No base class, no vtable (the dtor is called directly: cFELocale_deleteFile -> cLocaleFile::~cLocaleFile(file, 3)).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] the inlined ctor in cFELocale_addFile, the dtor cLocaleFile__cLocaleFile and the 0x14 allocation;
+//   [R] the inlined ctor in cFELocale_addFile, the dtor cLocaleFile::~cLocaleFile and the 0x14 allocation;
 //   [P] none (no paired methods, no inline accessors);
 //   [U] how retail code uses the field;
 //   [O] SSX On Tour's DWARF (class cLocaleFile: mLanguage 0x0, mpStringTableData 0x4, mNumEntries 0x8,
@@ -35,6 +35,8 @@ struct tHashEntry {
 CHECK_OFFSET(tHashEntry, mHashID, 0x0);
 CHECK_OFFSET(tHashEntry, mID, 0x4);
 CHECK_SIZE(tHashEntry, 0x8);
+
+void operator_delete(int* p);
 
 struct cLocaleFile {
     signed char mLanguage;              // 0x00 [O] char; [R] inlined ctor -1 (sb); [U] loadFile stores its Language
@@ -54,6 +56,10 @@ struct cLocaleFile {
     void* getStringByIndex() __asm__("cLocaleFile_getStringByIndex__FPv");
     int getStringByHash(unsigned int key) __asm__("cLocaleFile_getStringByHash");
     void loadFile(const char* name, char kind) __asm__("cLocaleFile_loadFile");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cLocaleFile();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cLocaleFile, mLanguage, 0x00);

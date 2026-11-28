@@ -569,7 +569,7 @@ extern "C" void cReplay_setupGameCamerasOnExitInstantReplay()
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", cReplay_cReplay);
+INCLUDE_ASM("replay/frameptr", __7cReplay);
 #ifdef SKIP_ASM
 extern "C" void* cReplayFrame_cReplayFrame(void* self);
 void* cReplayFrameList_cReplayFrameList(void* self);
@@ -581,26 +581,23 @@ void cReplay_setReplayState(void* self, int state);
  *
  * Constructs the 16 frames (cReplayFrame_cReplayFrame, cReplayFrame), FrameList and FreeFrameList (cReplayFrameList_cReplayFrameList) and the two
  * Highlight records (cReplayHighlight_reset), sets the state to 15 (kReplayInit) and clears both InputCache pointers.
- *
- * @return @p self
  */
-extern "C" void* cReplay_cReplay(cReplay* self)
+cReplay::cReplay()
 {
-    cReplayFrame* frame = self->Frames;
+    cReplayFrame* frame = Frames;
     for (int i = 15; i != -1; i--, frame++) {
         cReplayFrame_cReplayFrame(frame);
     }
-    cReplayHighlight* highlight = self->Highlight;
-    cReplayFrameList_cReplayFrameList(&self->FrameList);
-    cReplayFrameList_cReplayFrameList(&self->FreeFrameList);
+    cReplayHighlight* highlight = Highlight;
+    cReplayFrameList_cReplayFrameList(&FrameList);
+    cReplayFrameList_cReplayFrameList(&FreeFrameList);
     for (int i = 1; i != -1; i--, highlight++) {
         cReplayHighlight_reset(highlight);
     }
-    self->setReplayState(15);
+    setReplayState(15);
     for (int i = 1; i >= 0; i--) {
-        self->InputCache[i] = 0;
+        InputCache[i] = 0;
     }
-    return ((void*)self);
 }
 #endif
 

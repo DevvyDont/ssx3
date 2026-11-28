@@ -3411,7 +3411,7 @@ void* cAIFwdDiffCache_cAIFwdDiffCache(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", cAIFwdDiffCache__cAIFwdDiffCache);
+INCLUDE_ASM("input/inputparse", _$_15cAIFwdDiffCache);
 #ifdef SKIP_ASM
 void cMemMan_free(void* ptr);
 void operator_delete(int* ptr);
@@ -3419,21 +3419,16 @@ void operator_delete(int* ptr);
 /**
  * Destroys an AI forward-difference cache: frees its node array and hash table and, when asked, the cache itself.
  *
- * Frees the words at +0x0 and +0x8 with cMemMan_free when set, then calls operator delete when bit 0 of @p flags is
- * set. Called by cBXNash_purgeTheAIFwdDiffCache.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
+ * Frees the words at +0x0 and +0x8 with cMemMan_free when set, then calls operator delete when bit 0 of g++'s delete
+ * flag is set. Called by cBXNash_purgeTheAIFwdDiffCache.
  */
-extern "C" void cAIFwdDiffCache__cAIFwdDiffCache(cAIFwdDiffCache* self, int flags)
+cAIFwdDiffCache::~cAIFwdDiffCache()
 {
-    if (*(void**)self != 0) {
-        cMemMan_free(*(void**)self);
+    if (*(void**)this != 0) {
+        cMemMan_free(*(void**)this);
     }
-    if (self->mPatchHash != 0) {
-        cMemMan_free(self->mPatchHash);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
+    if (mPatchHash != 0) {
+        cMemMan_free(mPatchHash);
     }
 }
 #endif

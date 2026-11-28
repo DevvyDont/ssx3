@@ -18,7 +18,7 @@
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, bases written out inline. Evidence tags:
 //   [R] retail constructors / destructors (cCrowdSys_cCrowdSys / cCrowdSys__cCrowdSys, cCrowdInstance cCrowdInstance_cCrowdInstance /
-//       cCrowdInstance__cCrowdInstance), allocation tags, the crowd.inf keys cCrowdSys_ReadSection parses;
+//       cCrowdInstance::~cCrowdInstance), allocation tags, the crowd.inf keys cCrowdSys_ReadSection parses;
 //   [P] the July 2003 preview: assert strings next to the field they test, CROWD_GetData's linkonce;
 //   [U] how the retail methods use the field.
 // On Tour has no crowd sound system: no [O] evidence. Struct names other than cCrowdSys / cCrowdInstance are ours.
@@ -30,8 +30,10 @@ struct cBankManager;
 struct tMidiBank;
 
 // One crowd sample list (0x18; our name): up to 5 loaded sample banks (kCROWDSYS_MAXVARIATIONS_PER_CATEGORY), one
-// picked at random. Methods: ctor tCrowdEventData_tCrowdEventData, dtor tCrowdEventData__tCrowdEventData, Add tCrowdEventData_LoadSample (FILE_loadz the file),
+// picked at random. Methods: ctor tCrowdEventData::tCrowdEventData, dtor tCrowdEventData::~tCrowdEventData, Add tCrowdEventData_LoadSample (FILE_loadz the file),
 // Pick tCrowdEventData_GetRandomSample (mpData[BXrand() % mNumEventData]), Clear tCrowdEventData_FreeSamples (cMemMan_free each).
+void operator_delete(int* p);
+
 struct tCrowdEventData {
     int mNumEventData; // 0x00 [P] assert "mNumEventData < kCROWDSYS_MAXVARIATIONS_PER_CATEGORY" (Add); [R] ctor 0
     void* mpData[5];   // 0x04 [P] asserts "mpData[ mNumEventData ] == NULL", "mpData[ iCount ]"; [R] ctor zeroes 5
@@ -39,6 +41,11 @@ struct tCrowdEventData {
     // Methods bound to their retail symbols by asm labels.
     bool LoadSample(const char* name, int flags) __asm__("tCrowdEventData_LoadSample");
     void FreeSamples() __asm__("tCrowdEventData_FreeSamples");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    tCrowdEventData();
+    ~tCrowdEventData();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 // One crowd intensity's cheer data (0x54; [P] cCrowdSys::CROWD_GetData(eCrowdIntensity) returns &mCrowdData[i]).
@@ -80,6 +87,8 @@ struct tCrowdAmbientInfo {
 // Class name from that tag and the preview's "pCrowdInstance" / "kCrowdInstanceTagBits". No vtable.
 struct cBankMonitor;
 struct cBankMonitorInstance;
+
+void operator_delete(int* p);
 
 struct cCrowdInstance {
     int mViewPort;                             // 0x000 [P] "mViewPort >= 0", "mViewPort == -1", "mViewPort == pOpts->OPTS_GetViewport()"; [R] ctor -1; [U] OPTS_Viewport of its sounds (cCrowdInstance_PlayTrickCheer)
@@ -123,6 +132,10 @@ struct cCrowdInstance {
     void CancelAnticipation() __asm__("cCrowdInstance_CancelAnticipation");
     void StopCheer() __asm__("cCrowdInstance_StopCheer");
     void UpdateLoopPitch(cBankMonitorInstance* obj, float dt) __asm__("cCrowdInstance_UpdateLoopPitch");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cCrowdInstance();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 struct cBankMonitorInstance;
@@ -138,7 +151,7 @@ struct cCrowdSys {
     // --- cCrowdSys
     int mNumInstances;                 // 0x014 [P] "viewport >= 0 && viewport < mNumInstances" (preview lw 0x14); [R] ctor 0; Init (cCrowdSys_Init) stores n; [U] cCrowdSys_Update / cCrowdSys_RemoveAllObjects / cCrowdSys_GetCurrentCheer loop to it
     cCrowdInstance* mpCrowdInstances;  // 0x018 [P] "mpCrowdInstances == NULL" (preview lw 0x18); [R] ctor 0; Init: operator new[](n x 0x190, "CrowdInstances"); DeInit cCrowdSys_Shutdown destroys and frees them
-    tCrowdData mCrowdData[3];          // 0x01C [P] CROWD_GetData(eCrowdIntensity) returns this + 0x1C + i * 0x54; [R] ctor constructs 3 (each list by tCrowdEventData_tCrowdEventData); Init/DeInit clear them
+    tCrowdData mCrowdData[3];          // 0x01C [P] CROWD_GetData(eCrowdIntensity) returns this + 0x1C + i * 0x54; [R] ctor constructs 3 (each list by tCrowdEventData::tCrowdEventData); Init/DeInit clear them
 
     // Methods bound to their retail symbols by asm labels.
     tCrowdData* CROWD_GetData(int i) __asm__("cCrowdSys_CROWD_GetData");

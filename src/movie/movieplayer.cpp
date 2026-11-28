@@ -3992,20 +3992,16 @@ void* cOcclusionMan_cOcclusionMan(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", cOcclusionMan__cOcclusionMan);
+INCLUDE_ASM("movie/movieplayer", _$_13cOcclusionMan);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
 /**
- * Destroys the occlusion manager, which has nothing to release: frees it (operator_delete) when @p flags bit 0 is set.
- *
- * @param flags  bit 0 frees the memory
+ * Destroys the occlusion manager, which has nothing to release: frees it (operator_delete) when g++'s delete flag bit 0
+ * is set.
  */
-extern "C" void cOcclusionMan__cOcclusionMan(cOcclusionMan* self, int flags)
+cOcclusionMan::~cOcclusionMan()
 {
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

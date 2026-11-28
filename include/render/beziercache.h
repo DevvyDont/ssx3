@@ -9,7 +9,7 @@
 // Name: the class name follows EA's file name (beziercache.cpp) and the preview's member names m4x4CacheRecord /
 // m6x6CacheRecord / m8x8CacheRecord; tPatchRecord::m_sCacheRecord[3] (world/patchrecord.h) holds a patch's record
 // index in each table ([P] "Patch->m_sCacheRecord[Size] < 0").
-// Retail code: cBezierCache_cBezierCache (ctor: zeroes the pointers), cBezierCache_allocateCaches (alloc: cMemMan_alloc of every table with the
+// Retail code: cBezierCache::cBezierCache (ctor: zeroes the pointers), cBezierCache_allocateCaches (alloc: cMemMan_alloc of every table with the
 // preview tags "4x4CacheRecord", "4x4FreeList", "4x4PosCache", "4x4UVCache", "4x4LMUVCache", "4x4NrmCache",
 // "4x4FreeNrmList" and their 6x6 / 8x8 twins; cPS2BezierMan's ctor passes the sizes 900, 220, 140), cBezierCache_freeCaches /
 // cBezierCache_clearRecords (reset / free lists), cBezierCache_computePatchNormals / cBezierCache_cachePatch (patch evaluation), cPS2BezierMan_GetBezST
@@ -67,6 +67,9 @@ struct cBezierCache {
     t4Vector m8x8DBasis[8];          // 0x290 (name ours) [U] 8x8 derivative basis table
     t4Vector* mDBasis[3];            // 0x310 (name ours) [U] the three derivative tables, indexed by patch size
                                      //       (cPS2BezierMan_GetBezdST)
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cBezierCache();
 };
 
 CHECK_OFFSET(cBezierCache, mCacheSize, 0x000);

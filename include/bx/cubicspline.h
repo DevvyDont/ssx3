@@ -17,7 +17,7 @@
 // A FLAT layout, like main/game.h. Word 0x0 holds EA's six bitfields (On Tour: unsigned int Type : 1 ... ; LSB first,
 // as the retail masks show), declared directly as in EA's class; CHECK_OFFSET cannot name a bitfield, so the word is
 // pinned by CHECK_OFFSET(MaxX, 0x4). Evidence tags:
-//   [R] the ctor cCubicSplineInterpolant_cCubicSplineInterpolant (CubicSplines = 0; Initialized, Loaded,
+//   [R] the ctor cCubicSplineInterpolant::cCubicSplineInterpolant (CubicSplines = 0; Initialized, Loaded,
 //       NumSplines = 0) and the camera ctors above;
 //   [U] how retail code uses the field (src/bx/cubicspline.cpp: views sCubicSpline / sCubicSplineFlags in
 //       initCommon / calculateSplines, this class in addPoint / evaluate, raw word masks; src/seg/seg_21E5A8.cpp:
@@ -77,6 +77,9 @@ struct cCubicSplineInterpolant {
     float evaluate(float time) __asm__("cCubicSplineInterpolant_evaluate");
     void initAsClamped(float start, float end) __asm__("cCubicSplineInterpolant_initAsClamped__FPvff");
     void purge() __asm__("cCubicSplineInterpolant_purge__FPv");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cCubicSplineInterpolant();
 };
 
 CHECK_OFFSET(cCubicSplineInterpolant, MaxX, 0x004);

@@ -11,7 +11,7 @@
 #include "layout.h"
 
 // tUserAwardsData (0x174): the saved part of the awards log. [O] On Tour's struct tUserAwardsData has exactly these
-// members at exactly these offsets; [R] cBEUserAwards_cBEUserAwards points mpAwardBits[0, 3, 4, 5, 7, 8, 2] at
+// members at exactly these offsets; [R] cBEUserAwards::cBEUserAwards points mpAwardBits[0, 3, 4, 5, 7, 8, 2] at
 // 0x146 / 0x147 / 0x14D / 0x15C / 0x169 / 0x16D / 0x170, the starts of the seven bit arrays below, and
 // cBEUserAwards_clear zeroes the 0x174 bytes (MEM_fill) and stores iCharBoltID = -1.
 struct tUserAwardsData {
@@ -56,6 +56,9 @@ struct cBEUserAwards {
     signed char getNumAwards(int row, int column) __asm__("cBEUserAwards_getNumAwards");
     const unsigned char* getAwardBits(int i) __asm__("cBEUserAwards_getAwardBits__FPvi"); // [O] return type
     int getTotalNumAwards() __asm__("cBEUserAwards_getTotalNumAwards");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cBEUserAwards();
 };
 
 CHECK_OFFSET(cBEUserAwards, mAwards, 0x000);

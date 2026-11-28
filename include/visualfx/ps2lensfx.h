@@ -28,7 +28,7 @@ struct cPS2LensFxMan {
     int mNumHalo[2];                // 0x060 [O] (per view); [R] cLensFxMan_cLensFxMan zeroes both
     cLightHalo mLightHalo[2][256];  // 0x068 [O] (per view); [R] cHalo_cHalo on each
     char unk_6068[0x8];             // 0x6068 padding (cSunHalo is 16-aligned)
-    cSunHalo mSunHalo[2];           // 0x6070 [O] (per view); [R] cSunHalo_cSunHalo on both
+    cSunHalo mSunHalo[2];           // 0x6070 [O] (per view); [R] cSunHalo::cSunHalo on both
     int mNumViews;                  // 0x6490 [O]; [P] SetNumViews
     int mbLocked;                   // 0x6494 [O] (bool, a word); [P] Lock; [R] cLensFxMan_cLensFxMan sets 1
     int unk_6498;                   // 0x6498 no retail access (On Tour: int mTexID)

@@ -2,7 +2,7 @@
 #include "object/instanceman.h"
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_cInstanceMan);
+INCLUDE_ASM("wscript/wscriptcompile", __12cInstanceManii);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -30,14 +30,13 @@ struct cWScriptKeyword {
  *
  * @param instanceSectionId  instance section ID, stored in the first word (the game passes 0x80)
  * @param n  number of instance records (On Tour numInstances)
- * @return @p self
  */
-extern "C" cInstanceMan* cInstanceMan_cInstanceMan(cInstanceMan* self, int instanceSectionId, int n)
+cInstanceMan::cInstanceMan(int instanceSectionId, int n)
 {
     int i;
-    self->InstanceSectionId = instanceSectionId;
-    self->NumInstances = n;
-    cWScriptKeyword** slot = &(*(cWScriptKeyword**)&self->Instances);
+    InstanceSectionId = instanceSectionId;
+    NumInstances = n;
+    cWScriptKeyword** slot = &(*(cWScriptKeyword**)&Instances);
     cWScriptKeyword* mem = (cWScriptKeyword*)operator_new_tag(n * 176, str_Instance, 0x20000000, 0);
     cWScriptKeyword* keyword = mem;
     int j;
@@ -48,17 +47,16 @@ extern "C" cInstanceMan* cInstanceMan_cInstanceMan(cInstanceMan* self, int insta
         keyword->f7E = -1;
     }
     *slot = mem;
-    (*(cWScriptKeyword**)&self->FreeInstances) = 0;
-    for (i = 0; i < self->NumInstances; i++) {
-        ((cWScriptKeyword*)self->Instances)[i].next = ((cWScriptKeyword*)self->FreeInstances);
-        (*(cWScriptKeyword**)&self->FreeInstances) = &((cWScriptKeyword*)self->Instances)[i];
+    (*(cWScriptKeyword**)&FreeInstances) = 0;
+    for (i = 0; i < NumInstances; i++) {
+        ((cWScriptKeyword*)Instances)[i].next = ((cWScriptKeyword*)FreeInstances);
+        (*(cWScriptKeyword**)&FreeInstances) = &((cWScriptKeyword*)Instances)[i];
     }
-    return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan__cInstanceMan);
+INCLUDE_ASM("wscript/wscriptcompile", _$_12cInstanceMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 void cMemMan_free(void* p);
@@ -66,18 +64,14 @@ void cMemMan_free(void* p);
 /**
  * Destroys the world instance manager.
  *
- * Frees the array at +0xC with cMemMan_free if there is one, then calls operator delete when bit 0 of @p flags is set.
- *
- * @param flags  g++ in-charge flags; bit 0 deletes the object
+ * Frees the array at +0xC with cMemMan_free if there is one, then calls operator delete when bit 0 of g++'s delete flag
+ * is set.
  */
-extern "C" void cInstanceMan__cInstanceMan(cInstanceMan* self, int flags)
+cInstanceMan::~cInstanceMan()
 {
-    void* instances = self->Instances;
+    void* instances = Instances;
     if (instances != 0) {
         cMemMan_free(instances);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
     }
 }
 #endif

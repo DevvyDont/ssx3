@@ -33,9 +33,9 @@ struct tInstanceRecord;
 struct cWorld {
     cWorldCache* m_pWorldCache;          // 0x00 [O]; [R] cWorldCache_cWorldCache(cMemMan_alloc(0x1C00, "cWorldCache"));
                                          //      [U] update/load/resetMap; ~110 functions read m_pTheWorld->m_pWorldCache
-    cWScriptCache* m_pWScriptCache;      // 0x04 [O]; [R] cWScriptCache_cWScriptCache(cMemMan_alloc(0x10,
+    cWScriptCache* m_pWScriptCache;      // 0x04 [O]; [R] cWScriptCache::cWScriptCache(cMemMan_alloc(0x10,
                                          //      "cWScriptCache"), this); [U] the script getters (cWorld_getWScriptHeaderId ...)
-    cWorldPainterMan* m_pWorldPainterMan; // 0x08 [O]; [R] cWorldPainterMan_cWorldPainterMan(cMemMan_alloc(8,
+    cWorldPainterMan* m_pWorldPainterMan; // 0x08 [O]; [R] cWorldPainterMan::cWorldPainterMan(cMemMan_alloc(8,
                                          //      "cWorldPainterMan")); [U] load sizes it per section (cWorldPainterMan_init)
     char* m_pDataMaster;                 // 0x0C [O] alone: no retail code reads or writes it (the ctor leaves it)
     tSphTreeList* m_pSphTrees;           // 0x10 [O]; [R] ctor = 0

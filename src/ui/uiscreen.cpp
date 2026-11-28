@@ -771,8 +771,8 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void* cUIThing_cUIThing(void* self, void* screen, int a2);
 extern "C" void* tAttrIcon_tAttrIcon1(void* self);
 extern "C" void* cList_cList(void* self);
-extern "C" void* tAttrMenu_tAttrMenu(void* self);
-extern "C" void* tAttrPair_tAttrPair(void* self);
+extern "C" void* __9tAttrMenu(void* self);
+extern "C" void* __9tAttrPair(void* self);
 extern "C" void* cUIListBox_cUIListBox(void* mem, void* screen, int a2);
 extern "C" void* cUIText_cUIText(void* mem, void* screen, int a2);
 extern "C" void* cUITextScroll_cUITextScroll(void* mem, void* screen, int a2);
@@ -855,7 +855,7 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         VPTR_OF(cListNode, created) = cUIGroup_vtbl;
         cList_cList(&created->mList);
         VPTR_OF(cListNode, created) = cUIMenu_vtbl;
-        tAttrMenu_tAttrMenu(&created->mAttrMenu);
+        __9tAttrMenu(&created->mAttrMenu);
         created->mStoredIndex = 0xFF;
         created->mScrollItemCurrent = 0;
         created->mScrollItemNum = 0;
@@ -881,7 +881,7 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
         tUIPlaceWidget* pPBW = ((tUIPair*)rec)->mWidgets;
         cUIThing_cUIThing(created, this, 0);
         VPTR_OF(cListNode, created) = cUIPair_vtbl;
-        tAttrPair_tAttrPair(&created->mAttrPair);
+        __9tAttrPair(&created->mAttrPair);
         created->mAttr |= 2;
         created->mpEntry = 0;
         created->mpWidget = 0;

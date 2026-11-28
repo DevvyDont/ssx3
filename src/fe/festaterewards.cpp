@@ -2677,7 +2677,7 @@ extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(cFEStateVideoPlayer* vs
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer__cFEStateVideoPlayer);
 #ifdef SKIP_ASM
-extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
+extern "C" void _$_12cMoviePlayer(void* p, int a1);
 extern "C" void cUIState__cUIState(void* self, int flags);
 extern void* cFEStateVideoPlayer_vtbl[];
 extern void* cFEState_vtbl[];
@@ -2685,7 +2685,7 @@ extern void* cFEState_vtbl[];
 /**
  * Destroys the video player state: deletes its movie player, then runs the cUIState destructor.
  *
- * Vtable slot 1 of cFEStateVideoPlayer_vtbl. Reinstalls cFEStateVideoPlayer_vtbl, deletes the movie player (+0x248) with cMoviePlayer__cMoviePlayer(player, 3)
+ * Vtable slot 1 of cFEStateVideoPlayer_vtbl. Reinstalls cFEStateVideoPlayer_vtbl, deletes the movie player (+0x248) with cMoviePlayer::~cMoviePlayer(player, 3)
  * when there is one, installs cFEState's vtable cFEState_vtbl and calls cUIState__cUIState() with @p flags.
  *
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState (bit 0 frees the object's memory)
@@ -2694,7 +2694,7 @@ extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(cFEStateVideoPlayer* se
 {
     VPTR_OF(cListNode, self) = cFEStateVideoPlayer_vtbl;
     if (self->mpMoviePlayer != 0) {
-        cMoviePlayer__cMoviePlayer(self->mpMoviePlayer, 3);
+        _$_12cMoviePlayer(self->mpMoviePlayer, 3);
     }
     VPTR_OF(cListNode, self) = cFEState_vtbl;
     cUIState__cUIState(self, flags);
@@ -2705,7 +2705,7 @@ extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(cFEStateVideoPlayer* se
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
+extern "C" void* __12cMoviePlayer(void* mem);
 extern "C" void cFEStateVideoPlayer_Start(cFEStateVideoPlayer* self);
 extern char str_MoviePlayer[];
 
@@ -2713,11 +2713,11 @@ extern char str_MoviePlayer[];
  * Creates the video player's movie player and starts playback.
  *
  * Vtable slot 4 of cFEStateVideoPlayer_vtbl (the create-screen slot; no screen is created). Allocates 68 bytes under the tag
- * "MoviePlayer", constructs them with cMoviePlayer_cMoviePlayer() into +0x248 and calls cFEStateVideoPlayer_Start().
+ * "MoviePlayer", constructs them with cMoviePlayer::cMoviePlayer() into +0x248 and calls cFEStateVideoPlayer_Start().
  */
 void cFEStateVideoPlayer::onCreateScreen()
 {
-    mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
+    mpMoviePlayer = (cMoviePlayer*)__12cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
     Start();
 }
 #endif
@@ -2725,10 +2725,10 @@ void cFEStateVideoPlayer::onCreateScreen()
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
+extern "C" void _$_12cMoviePlayer(void* p, int a1);
 
 /**
- * Deletes the video player's movie player (+0x248) with cMoviePlayer__cMoviePlayer(player, 3), when there is one, and clears the
+ * Deletes the video player's movie player (+0x248) with cMoviePlayer::~cMoviePlayer(player, 3), when there is one, and clears the
  * pointer.
  *
  * Vtable slot 5 of cFEStateVideoPlayer_vtbl.
@@ -2737,7 +2737,7 @@ void cFEStateVideoPlayer::onDestroyScreen()
 {
     void* moviePlayer = mpMoviePlayer;
     if (moviePlayer != 0) {
-        cMoviePlayer__cMoviePlayer(moviePlayer, 3);
+        _$_12cMoviePlayer(moviePlayer, 3);
     }
     mpMoviePlayer = 0;
 }

@@ -37,7 +37,7 @@ extern "C" void* cCameraController_cCameraController(cCameraController* self, in
 INCLUDE_ASM("camera/cameracontroller", cCameraController__cCameraController);
 #ifdef SKIP_ASM
 extern void* cCameraController_vtbl[];
-extern "C" void cCameraAlgoList__cCameraAlgoList(void* p, int mode);
+extern "C" void _$_15cCameraAlgoList(void* p, int mode);
 void operator_delete(int* ptr);
 
 /**
@@ -52,7 +52,7 @@ extern "C" void cCameraController__cCameraController(cCameraController* self, in
     self->mVtbl = cCameraController_vtbl;
     void* algoList = self->AlgorithmList;
     if (algoList != 0) {
-        cCameraAlgoList__cCameraAlgoList(algoList, 3);
+        _$_15cCameraAlgoList(algoList, 3);
     }
     if (flags & 1) {
         operator_delete((int*)self);

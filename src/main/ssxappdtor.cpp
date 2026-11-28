@@ -1953,8 +1953,8 @@ INCLUDE_ASM("main/ssxappdtor", cInput_setPad__FPvi);
 /**
  * Sets an input's pad (+0x0).
  *
- * cSSXApp_initload, cInputSync_createlocalinput / createremoteinput and cPlaybackMan_cPlaybackMan call it on new 8-byte
- * "cInput" objects with a 0x2A4-byte "cInputPad" block.
+ * cSSXApp_initload, cInputSync_createlocalinput / createremoteinput and cPlaybackMan::cPlaybackMan call it on new
+ * 8-byte "cInput" objects with a 0x2A4-byte "cInputPad" block.
  *
  * @param val  the pad (a pointer passed as an int)
  */

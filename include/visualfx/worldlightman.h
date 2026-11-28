@@ -156,6 +156,8 @@ struct cIrradiance;
 struct t4Vector;
 struct tInstanceRecord;
 
+void operator_delete(int* p);
+
 struct cWorldLightMan {
     cBXNash* m_pNash;               // 0x000 [O]; [R] the ctor's pNash (cGame's BXNash); [U] initLightCache gives each
                                     //       overlap list it
@@ -183,6 +185,10 @@ struct cWorldLightMan {
     void IntersectLights(void* point, void* mgrp, void** outp, int max) __asm__("cWorldLightMan_IntersectLights");
     float GetIntensity(t4Vector* point, tLightRecord* lp) __asm__("cWorldLightMan_GetIntensity");
     tOverlapListNode* evictOverlapNode(int iCurrentTick) __asm__("cWorldLightMan_evictOverlapNode");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    ~cWorldLightMan();
+    static void operator delete(void* p) { operator_delete((int*)p); }
 };
 
 CHECK_OFFSET(cWorldLightMan, m_pNash, 0x000);

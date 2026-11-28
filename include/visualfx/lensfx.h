@@ -17,11 +17,11 @@
 // Sizes:
 //   cHalo / cLightHalo 0x30: [R] cLensFxMan_cLensFxMan constructs mLightHalo with cHalo_cHalo at a 0x30 stride
 //       (0x3000 per view); cLensFxMan_AddHalo indexes count * 0x30 + view * 0x3000.
-//   cSunHalo 0x210: [R] cLensFxMan_cLensFxMan constructs two with cSunHalo_cSunHalo at a 0x210 stride from +0x6070;
+//   cSunHalo 0x210: [R] cLensFxMan_cLensFxMan constructs two with cSunHalo::cSunHalo at a 0x210 stride from +0x6070;
 //       cLensFxMan_ProcessLens / DrawLens / SampleLens index view * 0x210. 16-aligned (t4Vector mScreenPosition).
 //   cLensFxMan 0x64A0: [R] its vptr is the word at 0x649C (both ctors and the dtor store it) and cPS2LensFxMan's own
 //       data starts at 0x64A0 (cPS2LensFxMan_sampleZBuffer's first packet); 16-aligned, so the size is 0x64A0.
-// Bases: none for cHalo and cLensFxMan; cLightHalo and cSunHalo derive from cHalo (On Tour; [R] cSunHalo_cSunHalo
+// Bases: none for cHalo and cLensFxMan; cLightHalo and cSunHalo derive from cHalo (On Tour; [R] cSunHalo::cSunHalo
 // runs cHalo_cHalo on +0x0). cLensFxMan is the first class with virtuals in its chain, so g++ 2.95 puts the vptr
 // after its data: cLensFxMan_vtbl (0x004886B0, 4 slots: 1 dtor cLensFxMan__cLensFxMan, 2 beginDrawFrame,
 // 3 endDrawFrame, 4 sampleZBuffer = __pure_virtual); cPS2LensFxMan_vtbl (0x00487F00) fills slot 4.
@@ -112,7 +112,7 @@ struct cHalo {
     float mAngle;                   // 0x028 [O]; [U] cLightHalo_Process stores (screen x in -1..1) * pi/2;
                                     //       cLightHalo_Render draws with it as the rotation; AddHalo zeroes it
     unsigned short mbOnScreen;      // 0x02C [O]; [U] Process sets/clears it; Render and DrawLens skip a halo without
-                                    //       it; [R] cSunHalo_cSunHalo zeroes it
+                                    //       it; [R] cSunHalo::cSunHalo zeroes it
     unsigned short mbRequestZSample; // 0x02E [O]; [U] Process sets it when the halo is far enough to sample;
                                     //       SampleLens samples only these; Render picks the sampled alpha by it
 };
@@ -192,6 +192,9 @@ struct cSunHalo {
     void RenderLens() __asm__("cSunHalo_RenderLens");
     void Render(tViewInfo* viewInfo, int viewId) __asm__("cSunHalo_Render");
     void InitLens() __asm__("cSunHalo_InitLens");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cSunHalo();
 };
 
 CHECK_OFFSET(cSunHalo, mZRect, 0x000);
@@ -218,7 +221,7 @@ struct cLensFxMan {
     cLightHalo mLightHalo[2][256];  // 0x068 [O] (per view in retail); [R] ctor runs cHalo_cHalo on each (0x30 stride,
                                     //       0x3000 per view); [U] AddHalo fills [view][mNumHalo[view]]
     char unk_6068[0x8];             // 0x6068 padding (cSunHalo is 16-aligned)
-    cSunHalo mSunHalo[2];           // 0x6070 [O] (per view in retail); [R] ctor runs cSunHalo_cSunHalo on both;
+    cSunHalo mSunHalo[2];           // 0x6070 [O] (per view in retail); [R] ctor runs cSunHalo::cSunHalo on both;
                                     //       [U] ProcessLens / DrawLens / SampleLens use [view]
     int mNumViews;                  // 0x6490 [O]; [P] SetNumViews (sw); [U] SampleLens's view loop bound
     int mbLocked;                   // 0x6494 [O] (bool, a word in retail); [P] Lock(bool) (sw); [R] ctor sets 1;

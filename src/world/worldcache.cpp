@@ -170,22 +170,17 @@ void* cSectionBlockAllocator_cSectionBlockAllocator(void* vself, int allocator, 
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cSectionBlockAllocator__cSectionBlockAllocator);
+INCLUDE_ASM("world/worldcache", _$_22cSectionBlockAllocator);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void cSectionBlockAllocator_releaseBlocks(cSectionBlockAllocator* self);
 
 /**
- * Destroys a cSectionBlockAllocator: returns its blocks (cSectionBlockAllocator_releaseBlocks) and deletes it when bit 0 of @p flags is set.
- *
- * @param flags  bit 0 set to delete the object
+ * Destroys a cSectionBlockAllocator: returns its blocks (cSectionBlockAllocator_releaseBlocks) and deletes it when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(cSectionBlockAllocator* self, int flags)
+cSectionBlockAllocator::~cSectionBlockAllocator()
 {
-    self->releaseBlocks();
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    releaseBlocks();
 }
 #endif
 
@@ -299,7 +294,7 @@ char* cSectionBlockAllocator::allocate(int size, unsigned int flags)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("world/worldcache", cWorldMemoryMan_cWorldMemoryMan);
+INCLUDE_ASM("world/worldcache", __15cWorldMemoryMan);
 #ifdef SKIP_ASM
 struct cWorldMemoryMan_cWorldMemoryMan_sCfg {
     int id;
@@ -312,19 +307,16 @@ extern "C" void cWorldBlockAllocator_init(cWorldBlockAllocator* self, int count,
 /**
  * Constructs the world memory manager: three block allocators sized from D_0044C1E0 and 64 empty section
  * allocators.
- *
- * @return @p self
  */
-extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self)
+cWorldMemoryMan::cWorldMemoryMan()
 {
-    ((cWorldBlockAllocator*)self)->init(D_0044C1E0[0].count, D_0044C1E0[0].blockSize);
-    self->m_BlockAllocator[1].init(D_0044C1E0[1].count, D_0044C1E0[1].blockSize);
-    self->m_BlockAllocator[2].init(D_0044C1E0[2].count, D_0044C1E0[2].blockSize);
+    ((cWorldBlockAllocator*)this)->init(D_0044C1E0[0].count, D_0044C1E0[0].blockSize);
+    m_BlockAllocator[1].init(D_0044C1E0[1].count, D_0044C1E0[1].blockSize);
+    m_BlockAllocator[2].init(D_0044C1E0[2].count, D_0044C1E0[2].blockSize);
     int i;
     for (i = 63; i >= 0; i--) {
-        ((int*)&self->m_pSectionAllocator)[i] = 0;
+        ((int*)&m_pSectionAllocator)[i] = 0;
     }
-    return ((void*)self);
 }
 #endif
 
@@ -389,10 +381,10 @@ void cWorldMemoryMan::activateSectionMem(int index, int section)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("world/worldcache", cWorldMemoryMan_deactivateSectionMem);
 #ifdef SKIP_ASM
-extern "C" void cSectionBlockAllocator__cSectionBlockAllocator(cSectionBlockAllocator* self, int flags);
+extern "C" void _$_22cSectionBlockAllocator(cSectionBlockAllocator* self, int flags);
 
 /**
- * Destroys the arena of section @p i (cSectionBlockAllocator__cSectionBlockAllocator with 3) and clears its m_pSectionAllocator slot.
+ * Destroys the arena of section @p i (cSectionBlockAllocator::~cSectionBlockAllocator with 3) and clears its m_pSectionAllocator slot.
  *
  * @param i  the section id
  */
@@ -401,14 +393,14 @@ void cWorldMemoryMan::deactivateSectionMem(int i)
     cSectionBlockAllocator** base = &m_pSectionAllocator[0];
     cSectionBlockAllocator** slot = base + i;
     if (*slot != 0) {
-        cSectionBlockAllocator__cSectionBlockAllocator(*slot, 3);
+        _$_22cSectionBlockAllocator(*slot, 3);
     }
     *slot = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cHullPage_cHullPage);
+INCLUDE_ASM("world/worldcache", __9cHullPagePUs);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -419,45 +411,38 @@ extern char str_cHullPage_Entries[];
  * ("cHullPage Entries").
  *
  * @param data  the hull data (On Tour const tBxBSPHull* pBSPHull)
- * @return @p self
  */
-extern "C" void* cHullPage_cHullPage(cHullPage* self, unsigned short* data)
+cHullPage::cHullPage(unsigned short* data)
 {
-    *(unsigned short**)self = data;
+    *(unsigned short**)this = data;
     unsigned short n = *data;
-    self->m_uiCurrentPageEntry = 0;
-    self->m_uiNumPageEntry = (unsigned int)n;
-    self->m_pPageEntries = (tPageEntry*)operator_new_tag(n * 4, str_cHullPage_Entries, 0x20000000, 0);
-    return ((void*)self);
+    m_uiCurrentPageEntry = 0;
+    m_uiNumPageEntry = (unsigned int)n;
+    m_pPageEntries = (tPageEntry*)operator_new_tag(n * 4, str_cHullPage_Entries, 0x20000000, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cHullPage__cHullPage);
+INCLUDE_ASM("world/worldcache", _$_9cHullPage);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
 /**
- * Destroys a cHullPage: sets m_uiNumPageEntry to 0, frees m_pPageEntries and deletes the page when bit 0 of @p flags is
- * set.
- *
- * @param flags  bit 0 set to delete the object
+ * Destroys a cHullPage: sets m_uiNumPageEntry to 0, frees m_pPageEntries and deletes the page when bit 0 of g++'s
+ * delete flag is set.
  */
-extern "C" void cHullPage__cHullPage(cHullPage* self, int flags)
+cHullPage::~cHullPage()
 {
-    self->m_uiNumPageEntry = 0;
-    if (self->m_pPageEntries != 0) {
-        cMemMan_free(self->m_pPageEntries);
-    }
-    if (flags & 1) {
-        operator_delete(((int*)self));
+    m_uiNumPageEntry = 0;
+    if (m_pPageEntries != 0) {
+        cMemMan_free(m_pPageEntries);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cWorldCacheTable_cWorldCacheTable);
+INCLUDE_ASM("world/worldcache", __16cWorldCacheTablePv);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -481,13 +466,11 @@ struct sWCTable {
  * Reads the 28 list lengths from @p data, allocates one zeroed int pool of their total size named
  * "WorldCacheTableMem", and points every non-empty list at its slice of the pool.
  *
- * @param selfp  the table
  * @param data   28 shorts giving each list's length (from the world data header); kept by the table
- * @return @p selfp
  */
-extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* selfp, void* data)
+cWorldCacheTable::cWorldCacheTable(void* data)
 {
-    sWCTable* self = (sWCTable*)selfp;
+    sWCTable* self = (sWCTable*)this;
     self->sizes = (short*)data;
     memset(self->entries, 0, sizeof(self->entries));
     int total = 0;
@@ -506,28 +489,22 @@ extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* selfp, void
             off += self->entries[j].count;
         }
     }
-    return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cWorldCacheTable__cWorldCacheTable);
+INCLUDE_ASM("world/worldcache", _$_16cWorldCacheTable);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
 
 /**
- * Destroys a cWorldCacheTable: frees m_pCacheTableMem and deletes the table when bit 0 of @p flags is set.
- *
- * @param flags  bit 0 set to delete the object
+ * Destroys a cWorldCacheTable: frees m_pCacheTableMem and deletes the table when bit 0 of g++'s delete flag is set.
  */
-extern "C" void cWorldCacheTable__cWorldCacheTable(cWorldCacheTable* self, int flags)
+cWorldCacheTable::~cWorldCacheTable()
 {
-    if (*(void**)self != 0) {
-        cMemMan_free(*(void**)self);
-    }
-    if (flags & 1) {
-        operator_delete(((int*)self));
+    if (*(void**)this != 0) {
+        cMemMan_free(*(void**)this);
     }
 }
 #endif
@@ -536,7 +513,7 @@ extern "C" void cWorldCacheTable__cWorldCacheTable(cWorldCacheTable* self, int f
 INCLUDE_ASM("world/worldcache", cWorldCache_cWorldCache);
 #ifdef SKIP_ASM
 extern "C" void cWorldView_cWorldView(void* self);
-extern "C" void cStreamMan_cStreamMan(void* self);
+extern "C" void __10cStreamMan(void* self);
 
 /**
  * Constructs the world cache with its world view and stream manager, nothing loaded, and a touch-stale age of
@@ -547,7 +524,7 @@ extern "C" void cStreamMan_cStreamMan(void* self);
 extern "C" void* cWorldCache_cWorldCache(cWorldCache* self)
 {
     cWorldView_cWorldView((char*)&self->m_WorldView);
-    cStreamMan_cStreamMan((char*)&self->m_StreamMan);
+    __10cStreamMan((char*)&self->m_StreamMan);
     cAppMan* app = cAppMan_TheAppMan;
     self->mp_DataHeader = 0;
     self->m_uiNumHullPage = (unsigned int)0;
@@ -565,13 +542,13 @@ INCLUDE_ASM("world/worldcache", cWorldCache__cWorldCache);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void cWorldCache_purge(cWorldCache* self);
-extern "C" void cStreamMan__cStreamMan(void* p, int flags);
-extern "C" void cWorldView__cWorldView(cWorldView* p, int flags);
+extern "C" void _$_10cStreamMan(void* p, int flags);
+extern "C" void _$_10cWorldView(cWorldView* p, int flags);
 
 /**
  * Destroys the world cache and its embedded stream manager and world view.
  *
- * Purges the cache, then runs cStreamMan__cStreamMan() on offset 0x300 and cWorldView__cWorldView() on offset 0x10
+ * Purges the cache, then runs cStreamMan::~cStreamMan() on offset 0x300 and cWorldView::~cWorldView() on offset 0x10
  * (both with flags 2, so nothing is freed), and frees the object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -579,8 +556,8 @@ extern "C" void cWorldView__cWorldView(cWorldView* p, int flags);
 extern "C" void cWorldCache__cWorldCache(cWorldCache* self, int flags)
 {
     self->purge();
-    cStreamMan__cStreamMan(&self->m_StreamMan, 2);
-    cWorldView__cWorldView((cWorldView*)(&self->m_WorldView), 2);
+    _$_10cStreamMan(&self->m_StreamMan, 2);
+    _$_10cWorldView((cWorldView*)(&self->m_WorldView), 2);
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -594,7 +571,7 @@ void cMemMan_free(void*);
 extern "C" void cWorldCache_resetPageMap(cWorldCache* self);
 extern "C" int cWorldView_isSectionUnLoaded(void* view, int i);
 extern "C" void cWorldCache_deactivateSectionMem(cWorldCache* self, int i);
-extern "C" void cWorldCacheTable__cWorldCacheTable(cWorldCacheTable* self, int flags);
+extern "C" void _$_16cWorldCacheTable(cWorldCacheTable* self, int flags);
 
 struct cWorldCache_purge_sVEntry {
     short delta;
@@ -624,7 +601,7 @@ void cWorldCache::purge()
         chunkResolve->vt[1].fn(vthis(chunkResolve, chunkResolve->vt[1]), 3);
     }
     if (((int*)self->m_pSharedCacheTable) != 0) {
-        cWorldCacheTable__cWorldCacheTable((cWorldCacheTable*)((int*)self->m_pSharedCacheTable), 3);
+        _$_16cWorldCacheTable((cWorldCacheTable*)((int*)self->m_pSharedCacheTable), 3);
     }
     if (((void*)self->m_pSectionCacheTable) != 0) {
         unsigned int i;
@@ -672,8 +649,8 @@ INCLUDE_ASM("world/worldcache", cWorldCache_init);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self);
-extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* self, void* data);
+extern "C" void* __15cWorldMemoryMan(cWorldMemoryMan* self);
+extern "C" void* __16cWorldCacheTablePv(cWorldCacheTable* self, void* data);
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" void* cChunkResolve_construct(void);
 extern "C" int cStreamMan_init(void* self, const char* name, void* owner);
@@ -711,7 +688,7 @@ struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
  */
 int cWorldCache::init(const char* name, int pNash)
 {
-    m_pWorldMemMan = (cWorldMemoryMan*)cWorldMemoryMan_cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(316,
+    m_pWorldMemMan = (cWorldMemoryMan*)__15cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(316,
             str_WORLD_MEMMAN, 0, 0));
     sBXStr_7FC0 path;
     sBXStr_7FC0 full;
@@ -724,7 +701,7 @@ int cWorldCache::init(const char* name, int pNash)
     cBXString__cBXString(&base, 2);
     tStreamDataHeader* hdr = mp_DataHeader;
     hdr->m_pSection = (struct tBxSection*)&hdr[1]; // the section records follow the 0x50-byte header
-    m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232,
+    m_pSharedCacheTable = (cWorldCacheTable*)__16cWorldCacheTablePv((cWorldCacheTable*)cMemMan_alloc(232,
             str_SharedTable, 0, 0), &mp_DataHeader->m_iTable[0]);
     m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag((int)mp_DataHeader->m_uiNumSections * 4,
             str_SectionTables, 0, 0));
@@ -748,11 +725,11 @@ int cWorldCache::init(const char* name, int pNash)
 INCLUDE_ASM("world/worldcache", cWorldCache_activateSectionMem);
 #ifdef SKIP_ASM
 extern char str_SectionTable[];
-extern "C" void* cWorldCacheTable_cWorldCacheTable(cWorldCacheTable* self, void* data);
+extern "C" void* __16cWorldCacheTablePv(cWorldCacheTable* self, void* data);
 
 // cWorldCacheTable built by a new-expression: its constructor and cMemMan_alloc as the operator new.
 struct cWorldCacheTableNew : cWorldCacheTable {
-    cWorldCacheTableNew(short* table) __asm__("cWorldCacheTable_cWorldCacheTable");
+    cWorldCacheTableNew(short* table) __asm__("__16cWorldCacheTablePv");
     void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 };
 
@@ -775,7 +752,7 @@ void cWorldCache::activateSectionMem(int i, int section)
 INCLUDE_ASM("world/worldcache", cWorldCache_deactivateSectionMem);
 #ifdef SKIP_ASM
 extern "C" void cWorldMemoryMan_deactivateSectionMem(cWorldMemoryMan* self, int i);
-extern "C" void cWorldCacheTable__cWorldCacheTable(cWorldCacheTable* self, int flags);
+extern "C" void _$_16cWorldCacheTable(cWorldCacheTable* self, int flags);
 
 /**
  * Releases a world section's allocator and deletes its cache table.
@@ -787,7 +764,7 @@ void cWorldCache::deactivateSectionMem(int i)
     m_pWorldMemMan->deactivateSectionMem(i);
     int* sectionTable = ((int*)m_pSectionCacheTable[i]);
     if (sectionTable != 0) {
-        cWorldCacheTable__cWorldCacheTable((cWorldCacheTable*)sectionTable, 3);
+        _$_16cWorldCacheTable((cWorldCacheTable*)sectionTable, 3);
     }
     m_pSectionCacheTable[i] = 0;
 }
@@ -962,7 +939,7 @@ int cWorldCache::isPageLocked(int hullPage)
 INCLUDE_ASM("world/worldcache", cWorldCache_purgePage);
 #ifdef SKIP_ASM
 extern "C" void cWorldCache_removeBxStreamData(cWorldCache* self, int cell, int kind, tResourceID h);
-extern "C" void cHullPage__cHullPage(cHullPage* self, int flags);
+extern "C" void _$_9cHullPage(cHullPage* self, int flags);
 
 /**
  * Unloads a hull page: releases every stream resource it references (cWorldCache_removeBxStreamData), then deletes its list.
@@ -981,7 +958,7 @@ void cWorldCache::purgePage(int cell)
         cWorldCache_removeBxStreamData(this, cell, (list->m_pPageEntries)[i].m_uiType, resHandle);
     }
     if (m_HullPages[cell].mp_Page != 0)
-        cHullPage__cHullPage(m_HullPages[cell].mp_Page, 3);
+        _$_9cHullPage(m_HullPages[cell].mp_Page, 3);
     m_HullPages[cell].mp_Page = 0;
     m_HullPages[cell].m_State = 0;
 }
@@ -1035,7 +1012,7 @@ void cWorldCache::signalPageLoadComplete(int uiHullPage)
 INCLUDE_ASM("world/worldcache", cWorldCache_updatePages);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cHullPage_cHullPage(cHullPage* self, unsigned short* data);
+extern "C" void* __9cHullPagePUs(cHullPage* self, unsigned short* data);
 extern "C" void* cWorldView_getHull(void* self, int i);
 extern "C" void cStreamMan_addStreamRequest(cStreamMan* self, int i, int a, int b);
 extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);
@@ -1043,7 +1020,7 @@ extern char str_cHullPage[];
 
 // PORT: g++ 2.95 new-expression; the ctor and the tagged allocator are bound to their symbols by asm label.
 struct cHullPageNew : cHullPage {
-    cHullPageNew(const tBxBSPHull* hull) __asm__("cHullPage_cHullPage");
+    cHullPageNew(const tBxBSPHull* hull) __asm__("__9cHullPagePUs");
     void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 };
 
@@ -1465,22 +1442,17 @@ extern "C" void* cWorldView_cWorldView_impl(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("world/worldcache", cWorldView__cWorldView);
+INCLUDE_ASM("world/worldcache", _$_10cWorldView);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 void cWorldView_purge(void* self);
 
 /**
  * Destroys a world view: purges it, then frees the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cWorldView__cWorldView(cWorldView* self, int flags)
+cWorldView::~cWorldView()
 {
-    self->purge();
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    purge();
 }
 #endif
 

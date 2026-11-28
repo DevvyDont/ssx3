@@ -10,7 +10,7 @@
 // "cUsbKeyboard"). Retail code: dirtysock/tagsunk 0x00266788..0x00266BA8. One instance, Keyboard: cUsbKeyboard_createInstance
 // creates it, cUsbKeyboard_destroyInstance destroys it. No On Tour counterpart.
 //
-// Size 0x464: [R] cUsbKeyboard_createInstance: cMemMan_alloc(1124, "cUsbKeyboard", 0x20000000) + the constructor cUsbKeyboard_cUsbKeyboard, which
+// Size 0x464: [R] cUsbKeyboard_createInstance: cMemMan_alloc(1124, "cUsbKeyboard", 0x20000000) + the constructor cUsbKeyboard::cUsbKeyboard, which
 // sets mEnabled (0x460) and MEM_fill's the 0x460 bytes of slots. No vtable, no base class (the destructor cUsbKeyboard__cUsbKeyboard
 // is called directly).
 //
@@ -45,6 +45,9 @@ struct cUsbKeyboard {
 
     // Methods bound to their retail symbols by asm labels.
     void update() __asm__("cUsbKeyboard_update");
+
+    // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
+    cUsbKeyboard();
 };
 
 CHECK_OFFSET(cUsbKeyboard, mSlots, 0x000);

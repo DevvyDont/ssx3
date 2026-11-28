@@ -138,9 +138,9 @@ INCLUDE_ASM("replay/replay2", cScriptPlayerChannelSpline_Stop);
 
 INCLUDE_ASM("replay/replay2", cScriptPlayerChannelSpline_Update);
 
-INCLUDE_ASM("replay/replay2", cInSeq_cInSeq);
+INCLUDE_ASM("replay/replay2", __6cInSeqPvT1Uii);
 
-INCLUDE_ASM("replay/replay2", cInSeq__cInSeq);
+INCLUDE_ASM("replay/replay2", _$_6cInSeq);
 
 INCLUDE_ASM("replay/replay2", cInSeq_UpdateFrame);
 
