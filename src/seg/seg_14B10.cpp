@@ -2509,19 +2509,19 @@ extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
  * decay (+8) to -@p fparg0, the decay limit (+4) to -1 (no limit, so cHUDFX_update leaves it) and the number (+0x14) to
  * 0. The text counterpart of cHUDFX_setAsync; nothing in the build references it.
  *
- * @param hudFx  the effect slot
  * @param fxId  the effect
  * @param displayStr  the text to show
  * @param data  the effect's data
  * @param fparg0  the animation position (stored negated)
  */
-extern "C" void cHUDFX_setAsync1(cHUDFX* hudFx, int fxId, signed char *displayStr, int data, float fparg0) {
-    hudFx->copyDispStr(displayStr);
-    hudFx->ID = fxId;
-    hudFx->Data = data;
-    hudFx->CurDecay = -fparg0;
-    hudFx->MaxDecay = -1.0f;
-    hudFx->DisplayInt = 0;
+void cHUDFX::setAsync1(int fxId, signed char *displayStr, int data, float fparg0)
+{
+    copyDispStr(displayStr);
+    ID = fxId;
+    Data = data;
+    CurDecay = -fparg0;
+    MaxDecay = -1.0f;
+    DisplayInt = 0;
 }
 #endif
 

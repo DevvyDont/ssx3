@@ -726,16 +726,16 @@ INCLUDE_ASM("seg/seg_156860", DNASMan_clear);
 /**
  * Clears a DNAS authentication object: state (+0) and the words +4 to +0x14 become 0, the file handle (+0x18) -1.
  *
- * @param dnasMan  the object
  */
-extern "C" void DNASMan_clear(DNASMan *dnasMan) {
-    dnasMan->ElfData = 0;
-    dnasMan->ElfSize = 0;
-    dnasMan->AuthData = 0;
-    dnasMan->AuthSize = 0;
-    dnasMan->CancelRequest = 0;
-    dnasMan->FileHandle = -1;
-    dnasMan->State = 0;
+void DNASMan::clear()
+{
+    ElfData = 0;
+    ElfSize = 0;
+    AuthData = 0;
+    AuthSize = 0;
+    CancelRequest = 0;
+    FileHandle = -1;
+    State = 0;
 }
 #endif
 
@@ -762,14 +762,15 @@ extern "C" void *operator_new__FUi_6258(unsigned int, int *, int, int) __asm__("
  *
  * @param authMode  the mode, passed on to the authentication (+0x20)
  */
-extern "C" void DNASMan_start(DNASMan* self, int authMode) {
-    self->AuthMode = authMode;
-    self->CancelRequest = 0;
-    self->AuthError = 0;
-    self->State = 1;
+void DNASMan::start(int authMode)
+{
+    AuthMode = authMode;
+    CancelRequest = 0;
+    AuthError = 0;
+    State = 1;
     void *mem = operator_new__FUi_6258(0x195000, D_004A2EE0, 0x04000100, 0);
-    self->ElfData = (char*)mem;
-    self->FileHandle = ASYNCFILE_loadat(D_004803E8, mem, 0x195000);
+    ElfData = (char*)mem;
+    FileHandle = ASYNCFILE_loadat(D_004803E8, mem, 0x195000);
 }
 #endif
 
@@ -791,23 +792,23 @@ extern "C" char *strcpy(char *, const char *);
  * key D_004A2ED8, 8, the text from NetConnMAC, "SLUS_20772", the mode (+0x20) and 1. Sets the state (+0) to 4 and
  * starts the module (DirtyDnas_init, the DirtyDnasRelInit entry). DNASMan_update continues.
  */
-extern "C" void DNASMan_startCheck(DNASMan *self)
+void DNASMan::startCheck()
 {
-    self->AuthError = 0;
-    MEM_fill_62D0(self->unk_024, 0, 160);
-    self->unk_06C = self->AuthData;
-    self->unk_070 = self->AuthSize;
-    self->unk_090 = 0;
-    self->unk_08C = 0;
-    self->unk_074 = D_004A2ED8;
-    self->unk_084 = 8;
-    strcpy(self->unk_098, NetConnMAC());
-    strcpy(self->unk_0A8, "SLUS_20772");
-    self->unk_0B8 = 0;
-    self->unk_0BC = self->AuthMode;
-    self->unk_0C0 = 1;
-    self->State = 4;
-    DirtyDnas_init(self->unk_024);
+    AuthError = 0;
+    MEM_fill_62D0(unk_024, 0, 160);
+    unk_06C = AuthData;
+    unk_070 = AuthSize;
+    unk_090 = 0;
+    unk_08C = 0;
+    unk_074 = D_004A2ED8;
+    unk_084 = 8;
+    strcpy(unk_098, NetConnMAC());
+    strcpy(unk_0A8, "SLUS_20772");
+    unk_0B8 = 0;
+    unk_0BC = AuthMode;
+    unk_0C0 = 1;
+    State = 4;
+    DirtyDnas_init(unk_024);
 }
 #endif
 
@@ -820,18 +821,18 @@ extern void cMemMan_free__FPv_63A8(void *) __asm__("cMemMan_free__FPv");
 /**
  * Frees a DNAS authentication object's buffers: the data (+0xC) and the program (+4), clearing each pointer.
  *
- * @param dnasMan  the object
  */
-extern "C" void DNASMan_freeBuffers(DNASMan *dnasMan) {
-    char *authData = dnasMan->AuthData;
+void DNASMan::freeBuffers()
+{
+    char *authData = AuthData;
     if (authData != 0) {
         cMemMan_free__FPv_63A8(authData);
-        dnasMan->AuthData = 0;
+        AuthData = 0;
     }
-    char *elfData = dnasMan->ElfData;
+    char *elfData = ElfData;
     if (elfData != 0) {
         cMemMan_free__FPv_63A8(elfData);
-        dnasMan->ElfData = 0;
+        ElfData = 0;
     }
 }
 #endif
@@ -849,17 +850,17 @@ extern "C" void DNASMan_updateResult(DNASMan* self);
  *
  * State 1 runs DNASMan_updateLoadProgram, 2 runs DNASMan_updateLoadConfig, 4 runs DNASMan_updateResult; states 0, 3 and 5 wait.
  */
-extern "C" void DNASMan_update(DNASMan* self)
+void DNASMan::update()
 {
-    switch (*(int*)self) {
+    switch (*(int*)this) {
     case 1:
-        DNASMan_updateLoadProgram((DNASMan*)self);
+        updateLoadProgram();
         break;
     case 2:
-        DNASMan_updateLoadConfig((DNASMan*)self);
+        updateLoadConfig();
         break;
     case 4:
-        DNASMan_updateResult((DNASMan*)self);
+        updateResult();
         break;
     case 0:
     case 3:
@@ -888,18 +889,19 @@ extern char str_CONFIG_DAT[];
  * (DirtyDnas_loadModule, which resolves DirtyDnasRelInit / Updt / Exit). On success it allocates a 64 KB "AuthData" buffer
  * (+0xC), starts loading "CONFIG.DAT" into it and sets the state to 2.
  */
-extern "C" void DNASMan_updateLoadProgram(DNASMan* self) {
-    if (ASYNCFILE_getstatus_6460(self->FileHandle) == 1) {
-        self->ElfSize = 0;
-        ASYNCFILE_release_6460(self->FileHandle, 0, &self->ElfSize);
-        char *readBuffer = self->ElfData;
+void DNASMan::updateLoadProgram()
+{
+    if (ASYNCFILE_getstatus_6460(FileHandle) == 1) {
+        ElfSize = 0;
+        ASYNCFILE_release_6460(FileHandle, 0, &ElfSize);
+        char *readBuffer = ElfData;
         if (readBuffer != 0) {
-            int readSize = self->ElfSize;
+            int readSize = ElfSize;
             if (readSize > 0 && DirtyDnas_loadModule_6460(readBuffer, readSize) >= 0) {
                 void *authData = operator_new__FUi_6460(0x10000, str_AuthData, 0x04000100, 0);
-                self->AuthData = (char*)authData;
-                self->FileHandle = ASYNCFILE_loadat_6460(str_CONFIG_DAT, authData, 0x10000);
-                self->State = 2;
+                AuthData = (char*)authData;
+                FileHandle = ASYNCFILE_loadat_6460(str_CONFIG_DAT, authData, 0x10000);
+                State = 2;
             }
         }
     }
@@ -920,19 +922,20 @@ extern tDNASFileKey D_004A2EE8[];
  * When the load (+0x18) is done it releases it with the size in +0x10; for a nonzero size it sets the state to 3 and
  * XORs every byte of the data (+0xC) with the 4-byte key D_004A2EE8, repeating.
  */
-extern "C" void DNASMan_updateLoadConfig(DNASMan* self) {
-    if (ASYNCFILE_getstatus_6510(self->FileHandle) == 1) {
-        self->AuthSize = 0;
-        ASYNCFILE_release_6510(self->FileHandle, 0, &self->AuthSize);
-        unsigned char *fileData = (unsigned char*)self->AuthData;
+void DNASMan::updateLoadConfig()
+{
+    if (ASYNCFILE_getstatus_6510(FileHandle) == 1) {
+        AuthSize = 0;
+        ASYNCFILE_release_6510(FileHandle, 0, &AuthSize);
+        unsigned char *fileData = (unsigned char*)AuthData;
         if (fileData != 0) {
-            int n = self->AuthSize;
+            int n = AuthSize;
             if (n > 0) {
-                self->State = 3;
+                State = 3;
                 tDNASFileKey key = D_004A2EE8[0];
                 int i;
                 unsigned char *bytePtr;
-                for (i = 0, bytePtr = fileData; i < self->AuthSize; i++, bytePtr++) {
+                for (i = 0, bytePtr = fileData; i < AuthSize; i++, bytePtr++) {
                     *bytePtr ^= key.b[i % 4];
                 }
             }
@@ -957,25 +960,26 @@ extern "C" void USTR_copy_65E0(unsigned short *, unsigned short *) __asm__("USTR
  * (DirtyDnas_exit), copies three wide strings of it (+0xCC, +0x10C, +0x20C) to ErrorText1, ErrorText2 and ErrorText3
  * (USTR_copy), stores whether the result was 0 in AuthError and sets the state to 5.
  */
-extern "C" void DNASMan_updateResult(DNASMan* self) {
-    if (DirtyDnas_update_65E0(self->CancelRequest) == 0) {
-        tDNASResult *infoBuf = &self->Result;
-        MEM_fill_65E0(infoBuf, 0, sizeof(self->Result));
-        unsigned short *secondText = self->ErrorText2;
-        unsigned short *thirdText = self->ErrorText3;
+void DNASMan::updateResult()
+{
+    if (DirtyDnas_update_65E0(CancelRequest) == 0) {
+        tDNASResult *infoBuf = &Result;
+        MEM_fill_65E0(infoBuf, 0, sizeof(Result));
+        unsigned short *secondText = ErrorText2;
+        unsigned short *thirdText = ErrorText3;
         int result = DirtyDnas_exit_65E0(infoBuf);
-        self->ErrorText1[0] = 0;
+        ErrorText1[0] = 0;
         secondText[0] = 0;
         thirdText[0] = 0;
-        USTR_copy_65E0(self->ErrorText1, self->Result.Text1);
-        USTR_copy_65E0(secondText, self->Result.Text2);
-        USTR_copy_65E0(thirdText, self->Result.Text3);
+        USTR_copy_65E0(ErrorText1, Result.Text1);
+        USTR_copy_65E0(secondText, Result.Text2);
+        USTR_copy_65E0(thirdText, Result.Text3);
         if (result == 0) {
-            self->AuthError = 1;
+            AuthError = 1;
         } else {
-            self->AuthError = 0;
+            AuthError = 0;
         }
-        self->State = 5;
+        State = 5;
     }
 }
 #endif
@@ -1588,7 +1592,7 @@ void cGameComm::setState(int mode)
     switch (mode) {
     case kGameComm_GameActive:
         calcLatency();
-        cGameComm_armLinkTimeout(this, 3600, 0);
+        this->armLinkTimeout(3600, 0);
         clearDiscTrayOpened();
         mState = mode;
         return;
@@ -1603,7 +1607,7 @@ void cGameComm::setState(int mode)
     case kGameComm_SendLatency:
     case kGameComm_RecvLatency:
     case kGameComm_InitGameActive:
-        cGameComm_armLinkTimeout(this, 1800, 0);
+        this->armLinkTimeout(1800, 0);
         break;
     case kGameComm_SendSettingsWait:
     case kGameComm_RecvSettingsWait:
@@ -2201,7 +2205,7 @@ int cGameComm::readPacket(int ch, void* dst, int maxsize)
             gameComm->mStallThreshold = 0;
             gameComm->mWaitingMessage = 0;
         }
-        if (gameComm->mLinkTimeout > 0) cGameComm_armLinkTimeout((cGameComm*)gameComm, 1800, 0);
+        if (gameComm->mLinkTimeout > 0) gameComm->armLinkTimeout(1800, 0);
         return len;
     }
     return 0;
@@ -2356,7 +2360,7 @@ void cGameComm::updateCmdQueue()
         switch (msg.Cmd) {
         case 0:
             if (mGameStartGate == 0) {
-                cGameComm_armLinkTimeout(this, 3660, 1);
+                this->armLinkTimeout(3660, 1);
             } else {
                 mUnPauseFlag = 1;
             }
@@ -2375,7 +2379,7 @@ void cGameComm::updateCmdQueue()
             mWaitingTimer = 0;
             mWaitingMessage = 0;
             if (mGameStartGate == 0) {
-                cGameComm_armLinkTimeout(this, 1800, 0);
+                this->armLinkTimeout(1800, 0);
             } else {
                 cGameComm_setUnPauseTimer_7F98(this);
             }
@@ -2654,18 +2658,19 @@ extern char str_SSXPingServer[];
  * @param serverAddr  the server address
  * @param durationSecs  how long to ping, in seconds
  */
-extern "C" void cGameComm_startServerPing(cGameComm* self, int serverAddr, int durationSecs) {
-    if (self->mPingTimer <= 0) {
-        self->mPingCount = 0;
-        self->mPingAddr = serverAddr;
-        self->mPingID[self->mPingCount++] =
-            PingRpc_request_83A8(self->mPingSocket, serverAddr, str_SSXPingServer, 0xE);
-        self->mPingDelay = 4;
-        self->mPingTimer = durationSecs * 0x3C;
-        self->mPingReceived = 0;
+void cGameComm::startServerPing(int serverAddr, int durationSecs)
+{
+    if (mPingTimer <= 0) {
+        mPingCount = 0;
+        mPingAddr = serverAddr;
+        mPingID[mPingCount++] =
+            PingRpc_request_83A8(mPingSocket, serverAddr, str_SSXPingServer, 0xE);
+        mPingDelay = 4;
+        mPingTimer = durationSecs * 0x3C;
+        mPingReceived = 0;
     }
     if (cCommSystem_mCommSystem->mBroadBand == 0) {
-        self->mPingReceived = 1;
+        mPingReceived = 1;
     }
 }
 #endif
@@ -2782,7 +2787,7 @@ void cGameComm::syncWait()
         buf[0] = 3;
         cGameComm_writePacket(this, 3, buf, 0xC);
     }
-    cGameComm_armLinkTimeout(this, 3600, 0);
+    this->armLinkTimeout(3600, 0);
     while (mSyncWaitComplete == 0 && mError == 0) {
         update();
         THREAD_yieldticks(1);
@@ -2819,7 +2824,7 @@ void cGameComm::sendPauseCmd(int pause)
     if (mError == 0 && mConnected != 0) {
         if (pause != 0) {
             if (mGameStartGate == 0) {
-                cGameComm_armLinkTimeout(this, 3660, 1);
+                this->armLinkTimeout(3660, 1);
             } else {
                 mUnPauseFlag = 1;
             }
@@ -2836,7 +2841,7 @@ void cGameComm::sendPauseCmd(int pause)
             mWaitingMessage = 0;
             mSyncInputDelay = 0;
             if (mGameStartGate == 0) {
-                cGameComm_armLinkTimeout(this, 1800, 0);
+                this->armLinkTimeout(1800, 0);
             } else {
                 cGameComm_setUnPauseTimer_8790(this);
             }
@@ -2854,13 +2859,13 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_armLinkTimeout);
  *
  * Stores @p timeoutFrames when @p forceArm is set, when neither player is in the pause menu, or once the start gate is up.
  *
- * @param gameComm  the game link
  * @param timeoutFrames  the timeout in frames (1800, 3600 or 3660)
  * @param forceArm  nonzero to store it in any case
  */
-extern "C" void cGameComm_armLinkTimeout(cGameComm* gameComm, int timeoutFrames, int forceArm) {
-    if ((forceArm != 0) || ((gameComm->mPauseMenu[1] == 0) && (gameComm->mPauseMenu[0] == 0)) || (gameComm->mGameStartGate != 0)) {
-        gameComm->mLinkTimeout = timeoutFrames;
+void cGameComm::armLinkTimeout(int timeoutFrames, int forceArm)
+{
+    if ((forceArm != 0) || ((mPauseMenu[1] == 0) && (mPauseMenu[0] == 0)) || (mGameStartGate != 0)) {
+        mLinkTimeout = timeoutFrames;
     }
 }
 #endif

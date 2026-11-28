@@ -58,6 +58,7 @@ struct cHUDFX {
     void set(int id, signed char *displayStr, int decayTime, float fparg0) __asm__("cHUDFX_set");
     void set1(int id, int displayInt, float fparg0, int data) __asm__("cHUDFX_set1");
     void setAsync(int fxId, int displayInt, float fparg0, int fxData) __asm__("cHUDFX_setAsync");
+    void setAsync1(int fxId, signed char *displayStr, int data, float fparg0) __asm__("cHUDFX_setAsync1");
 };
 
 CHECK_OFFSET(cHUDFX, ID, 0x000);

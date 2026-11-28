@@ -258,6 +258,8 @@ struct cGameComm {
 
     // Constructor / destructor: g++ 2.95 names their symbols itself (__<n>cX, _$_<n>cX).
     cGameComm(int port, int isServer);
+    void startServerPing(int serverAddr, int durationSecs) __asm__("cGameComm_startServerPing");
+    void armLinkTimeout(int timeoutFrames, int forceArm) __asm__("cGameComm_armLinkTimeout");
 };
 
 CHECK_SIZE(tGameCommPacket, 0xF0);

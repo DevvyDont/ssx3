@@ -96,6 +96,16 @@ struct DNASMan {
                                         //       cFEStateAuthDNAS_onUpdate
     unsigned short ErrorText3[0x100];   // 0x850 (name ours) [U] DNASMan_updateResult: the third text; shown by
                                         //       cFEStateAuthDNAS_onUpdate
+
+    // Methods bound to their retail symbols by asm labels.
+    void clear() __asm__("DNASMan_clear");
+    void start(int authMode) __asm__("DNASMan_start");
+    void startCheck() __asm__("DNASMan_startCheck");
+    void freeBuffers() __asm__("DNASMan_freeBuffers");
+    void update() __asm__("DNASMan_update");
+    void updateLoadProgram() __asm__("DNASMan_updateLoadProgram");
+    void updateLoadConfig() __asm__("DNASMan_updateLoadConfig");
+    void updateResult() __asm__("DNASMan_updateResult");
 };
 
 CHECK_OFFSET(DNASMan, State, 0x000);

@@ -42,6 +42,15 @@ struct cAttachedEmitterFX {
 
     // Methods bound to their retail symbols by asm labels.
     int ShouldDisableSnowTrailSpray() __asm__("cAttachedEmitterFX_ShouldDisableSnowTrailSpray");
+    void init() __asm__("cAttachedEmitterFX_init");
+    void setModel(cAnimModel* model) __asm__("cAttachedEmitterFX_setModel");
+    void clearDisableSnowTrailSpray() __asm__("cAttachedEmitterFX_clearDisableSnowTrailSpray");
+    void render() __asm__("cAttachedEmitterFX_render");
+    int createEmitter(int typeIndex, int boneIndex) __asm__("cAttachedEmitterFX_createEmitter");
+    void stopEmitter(int emitterIndex) __asm__("cAttachedEmitterFX_stopEmitter");
+    void resumeEmitter(int emitterIndex) __asm__("cAttachedEmitterFX_resumeEmitter");
+    void disableEmitter(int emitterIndex) __asm__("cAttachedEmitterFX_disableEmitter");
+    void enableEmitter(int emitterIndex) __asm__("cAttachedEmitterFX_enableEmitter");
 };
 
 CHECK_OFFSET(cAttachedEmitterFX, mBonesLookedUp, 0x000);

@@ -647,7 +647,7 @@ extern "C" void *cAttachedEmitterFX_cAttachedEmitterFX(cAttachedEmitterFX* emitt
     emitterFx->mFERider = 0;
     emitterFx->mVtbl = (void**)cAttachedEmitterFX_vtbl;
     emitterFx->mRider = rider;
-    cAttachedEmitterFX_init(emitterFx);
+    emitterFx->init();
     return emitterFx;
 }
 #endif
@@ -674,8 +674,8 @@ extern "C" void *cAttachedEmitterFX_cAttachedEmitterFX1(cAttachedEmitterFX* emit
     emitterFx->mRider = 0;
     emitterFx->mFERider = feRider;
     emitterFx->mVtbl = (void**)cAttachedEmitterFX_vtbl;
-    cAttachedEmitterFX_init(emitterFx);
-    cAttachedEmitterFX_clearDisableSnowTrailSpray(emitterFx);
+    emitterFx->init();
+    emitterFx->clearDisableSnowTrailSpray();
     return emitterFx;
 }
 #endif
@@ -692,15 +692,15 @@ extern int D_004A3BB4;
  * The first instance (the count D_004A3BB4 still 0) loads the shared type table with cAttachedEmitterFX_loadEmitterTypes; the count then goes
  * up by one.
  *
- * @param emitterFx  the attached-emitter FX object
  */
-extern "C" void cAttachedEmitterFX_init(cAttachedEmitterFX* emitterFx) {
+void cAttachedEmitterFX::init()
+{
     if (D_004A3BB4 == 0) {
         cAttachedEmitterFX_loadEmitterTypes();
     }
     D_004A3BB4 += 1;
     for (int i = 9; i >= 0; i--)
-        emitterFx->mEmitters[i] = 0;
+        mEmitters[i] = 0;
 }
 #endif
 
@@ -761,12 +761,12 @@ INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_setModel);
  * The next update (cAttachedEmitterFX_update) then finds the bones again in the new model (cAttachedEmitterFX_lookUpBones). The front-end rider
  * calls it with its new cAnimModel.
  *
- * @param emitterFx  the attached-emitter FX object
  * @param model  the cAnimModel the emitters follow
  */
-extern "C" void cAttachedEmitterFX_setModel(cAttachedEmitterFX* emitterFx, cAnimModel* model) {
-    emitterFx->mModel = model;
-    emitterFx->mBonesLookedUp = 0;
+void cAttachedEmitterFX::setModel(cAnimModel* model)
+{
+    mModel = model;
+    mBonesLookedUp = 0;
 }
 #endif
 
@@ -779,10 +779,10 @@ INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_clearDisableSnowTrailSpray);
  * cAttachedEmitterFX_update clears the flag at the start of every update and sets it while an emitter sits on attach point 25.
  * cRider's reset paths and cAttachedEmitterFX_cAttachedEmitterFX1 call this.
  *
- * @param emitterFx  the attached-emitter FX object
  */
-extern "C" void cAttachedEmitterFX_clearDisableSnowTrailSpray(cAttachedEmitterFX* emitterFx) {
-    emitterFx->mDisableSnowTrailSpray = 0;
+void cAttachedEmitterFX::clearDisableSnowTrailSpray()
+{
+    mDisableSnowTrailSpray = 0;
 }
 #endif
 
@@ -1064,17 +1064,17 @@ extern "C" void cDynamicEmitter_render(void* obj, int level);
  * (mVisible). The draw layer is 7, or for a front-end rider its mDrawLayer + 1, or 22 when that layer is negative.
  * cRider's cRider_renderAttachedEmitterFX and cFERider_render call it.
  */
-extern "C" void cAttachedEmitterFX_render(cAttachedEmitterFX* self)
+void cAttachedEmitterFX::render()
 {
     int i;
     for (i = 0; i < 10; i++) {
-        if (self->mEmitters[i] != 0) {
+        if (mEmitters[i] != 0) {
             int level = 7;
-            if (self->mFERider != 0)
-                level = (self->mFERider->mDrawLayer < 0) ? 22 : self->mFERider->mDrawLayer + 1;
-            cFERider* feRider = self->mFERider;
-            if ((self->mRider != 0 && self->mRider->mIsOnScreen != 0) || (feRider != 0 && feRider->mVisible != 0))
-                cDynamicEmitter_render(self->mEmitters[i], level);
+            if (mFERider != 0)
+                level = (mFERider->mDrawLayer < 0) ? 22 : mFERider->mDrawLayer + 1;
+            cFERider* feRider = mFERider;
+            if ((mRider != 0 && mRider->mIsOnScreen != 0) || (feRider != 0 && feRider->mVisible != 0))
+                cDynamicEmitter_render(mEmitters[i], level);
         }
     }
 }
@@ -1102,13 +1102,13 @@ extern char* cAttachedEmitterFX_mEmitterDataArray;  /* the 20 attached-emitter t
  * calls its virtual setupEmitter (slot 3) with that record and the emitter's current seed (m_emitter.SeedX0) and its
  * virtual reset (slot 2). The bolt-on FX code (cBoltOnFXInterface_createEntry) calls it.
  *
- * @param emitterFx  the attached-emitter FX object
  * @param typeIndex  the emitter type (record index in cAttachedEmitterFX_mEmitterDataArray)
  * @param boneIndex  the attach point (index into the 26 bone indices)
  * @return the slot index (0-9), or -1 when all 10 slots are used
  */
-extern "C" int cAttachedEmitterFX_createEmitter(cAttachedEmitterFX* emitterFx, int typeIndex, int boneIndex) {
-    Obj2130 **slot = (Obj2130 **)emitterFx->mEmitters;
+int cAttachedEmitterFX::createEmitter(int typeIndex, int boneIndex)
+{
+    Obj2130 **slot = (Obj2130 **)mEmitters;
     int i;
     for (i = 0; i < 10; i++, slot++) {
         if (*slot == 0) {
@@ -1170,12 +1170,12 @@ INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_stopEmitter);
  *
  * cAttachedEmitterFX_update then updates it with emission off. No retail code calls it.
  *
- * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void cAttachedEmitterFX_stopEmitter(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+void cAttachedEmitterFX::stopEmitter(int emitterIndex)
+{
     // the slots hold cAttachedDynamicEmitters (cAttachedEmitterFX_createEmitter)
-    ((cAttachedDynamicEmitter*)emitterFx->mEmitters[emitterIndex])->mStopped = 1;
+    ((cAttachedDynamicEmitter*)mEmitters[emitterIndex])->mStopped = 1;
 }
 #endif
 
@@ -1187,12 +1187,12 @@ INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_resumeEmitter);
  *
  * The counterpart of cAttachedEmitterFX_stopEmitter. No retail code calls it.
  *
- * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void cAttachedEmitterFX_resumeEmitter(cAttachedEmitterFX* emitterFx, int emitterIndex) {
+void cAttachedEmitterFX::resumeEmitter(int emitterIndex)
+{
     // the slots hold cAttachedDynamicEmitters (cAttachedEmitterFX_createEmitter)
-    ((cAttachedDynamicEmitter*)emitterFx->mEmitters[emitterIndex])->mStopped = 0;
+    ((cAttachedDynamicEmitter*)mEmitters[emitterIndex])->mStopped = 0;
 }
 #endif
 
@@ -1204,11 +1204,11 @@ INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_disableEmitter);
  *
  * No retail code calls it.
  *
- * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void cAttachedEmitterFX_disableEmitter(cAttachedEmitterFX* emitterFx, int emitterIndex) {
-    emitterFx->mEmitters[emitterIndex]->m_enabled = 0;
+void cAttachedEmitterFX::disableEmitter(int emitterIndex)
+{
+    mEmitters[emitterIndex]->m_enabled = 0;
 }
 #endif
 
@@ -1220,11 +1220,11 @@ INCLUDE_ASM("seg/seg_1F1548", cAttachedEmitterFX_enableEmitter);
  *
  * The counterpart of cAttachedEmitterFX_disableEmitter. No retail code calls it.
  *
- * @param emitterFx  the attached-emitter FX object
  * @param emitterIndex  the slot index (0-9); the slot must be used
  */
-extern "C" void cAttachedEmitterFX_enableEmitter(cAttachedEmitterFX* emitterFx, int emitterIndex) {
-    emitterFx->mEmitters[emitterIndex]->m_enabled = 1;
+void cAttachedEmitterFX::enableEmitter(int emitterIndex)
+{
+    mEmitters[emitterIndex]->m_enabled = 1;
 }
 #endif
 
