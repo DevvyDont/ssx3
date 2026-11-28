@@ -70,6 +70,8 @@ struct cFEStateCreateDuplicate : public cFEStateNet {
     int unk_6DC;                    // 0x6DC no access seen (inside the 0x6E0 allocation)
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateCreateDuplicate(cUIEngine* pEngine, int bAccount)
+        __asm__("cFEStateCreateDuplicate_cFEStateCreateDuplicate");
     void * cFEStateCreateDuplicate1() __asm__("cFEStateCreateDuplicate_cFEStateCreateDuplicate1");
     virtual ~cFEStateCreateDuplicate();   // g++'s own symbol _$_23cFEStateCreateDuplicate (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateCreateDuplicate_onCreateScreen");

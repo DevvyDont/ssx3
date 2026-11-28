@@ -600,8 +600,6 @@ void cOVState_PROFILE::initGeneral()
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_cOVState_AUTOSAVE);
 #ifdef SKIP_ASM
-extern "C" void* cFEMemCard_cFEMemCard2(void* self, void* a1, int a2);
-extern void* cOVState_AUTOSAVE_vtbl[];
 
 /**
  * Constructs the autosave overlay.
@@ -611,18 +609,14 @@ extern void* cOVState_AUTOSAVE_vtbl[];
  *
  * @param pEngine  the UI engine
  * @param iParent  the overlay to return to (On Tour iParent)
- * @return @p self
  */
-extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(cOVState_AUTOSAVE* self, cUIEngine* pEngine, int iParent)
+cOVState_AUTOSAVE::cOVState_AUTOSAVE(cUIEngine* pEngine, int iParent) : cFEMemCard(pEngine, 0)
 {
-    cFEMemCard_cFEMemCard2(self, pEngine, 0);
-    VPTR_OF(cListNode, self) = cOVState_AUTOSAVE_vtbl;
-    self->mHashName = 37;
-    self->mAutoSaveOn = 1;
-    self->mParentScreen = iParent;
-    self->mSlot = 0;
-    self->mLastProcessState = 0;
-    return ((void*)self);
+    mHashName = 37;
+    mAutoSaveOn = 1;
+    mParentScreen = iParent;
+    mSlot = 0;
+    mLastProcessState = 0;
 }
 #endif
 

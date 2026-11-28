@@ -326,7 +326,7 @@ void cMoveNode::postUpdateModifierBlock()
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_onCollide);
 #ifdef SKIP_ASM
-extern "C" int cObjectInterface_getAIIndex(int);
+extern "C" int cObjectInterface_getAIIndex(cBeing* being);
 void cInstanceNode_runCollideScript(void*, int, int, int);
 
 /**
@@ -339,28 +339,28 @@ void cInstanceNode_runCollideScript(void*, int, int, int);
  * the
  * script system, cWScriptMan_TheWScriptMan).
  *
- * @param tc  collision info (On Tour const tCollideInfo*, passed as int)
- * @param ti  intersection info (On Tour const tIntersectInfo*, passed as int)
- * @param pBeing  the colliding being (cBeing*, passed as int)
+ * @param tc  collision info
+ * @param ti  intersection info
+ * @param pBeing  the colliding being
  */
-extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
+void cMoveNode::onCollide(const tCollideInfo* tc, const tIntersectInfo* ti, cBeing* pBeing)
 {
-    tModifierBlock* modBlock = self->ModifierBlock;
+    tModifierBlock* modBlock = ModifierBlock;
     if (modBlock != 0) {
         cTransformModifier* obj = modBlock->RootTransform;
         if (obj != 0) {
-            obj->collide((const tCollideInfo*)tc, (const tIntersectInfo*)ti);
+            obj->collide(tc, ti);
             // runCollide (slot 9) by hand: the virtual call keeps the slot's address instead of the vtable's
-            cTransformModifier* transform = self->ModifierBlock->RootTransform;
+            cTransformModifier* transform = ModifierBlock->RootTransform;
             sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)VPTR_OF(cTransformModifier, transform);
             if (vt[9].fn(vthis(transform, vt[9]), cObjectInterface_getAIIndex(pBeing)) == 0) {
                 return;
             }
         }
     }
-    if (self->Debounce <= 0) {
-        self->Debounce = cAppMan_TheAppMan->TimerHz / 2;
-        cInstanceNode_runCollideScript(self, tc, ti, pBeing);
+    if (Debounce <= 0) {
+        Debounce = cAppMan_TheAppMan->TimerHz / 2;
+        cInstanceNode_runCollideScript(this, (int)tc, (int)ti, (int)pBeing);
     }
 }
 #endif
@@ -1840,13 +1840,10 @@ INCLUDE_ASM("object/movenode", cObjectNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
  * Writes an object node to a replay frame by forwarding to cMoveNode_writeToReplayFrame.
- *
- * @return cMoveNode_writeToReplayFrame's result (callers ignore it)
  */
-void* cObjectNode_writeToReplayFrame(void* vself)
+void cObjectNode::writeToReplayFrame(cBxReplayFrame*)
 {
-    cObjectNode* self = (cObjectNode*)vself;
-    return cMoveNode_writeToReplayFrame(self);
+    cMoveNode_writeToReplayFrame(this);
 }
 #endif
 
@@ -2620,14 +2617,14 @@ extern "C" void cMoveNode_update(cMoveNode* self);
  * After cMoveNode_update(), returns when the modifier block's word at +0x10 is set (probably the head of its
  * effect link list, so an effect is still attached); otherwise calls the virtual destructor with flags 3.
  */
-extern "C" void cParticleNode_update(cParticleNode* self)
+void cParticleNode::update()
 {
-    self->cMoveNode::update();
-    tModifierBlock* mb = self->ModifierBlock;
+    cMoveNode::update();
+    tModifierBlock* mb = ModifierBlock;
     if (mb != 0 && mb->Effect.Next != 0) {
         return;
     }
-    delete self;
+    delete this;
 }
 #endif
 

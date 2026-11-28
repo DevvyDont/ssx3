@@ -76,6 +76,8 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
                                     //       keyboard id 2)
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateNetCreateRoomPopup(cUIEngine* pEngine, cFEStateNet* pParentState)
+        __asm__("cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup");
     void* cFEStateNetCreateRoomPopup1() __asm__("cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1");
     char* getRoomName() __asm__("cFEStateNetCreateRoomPopup_getRoomName");
     char* getChannelName() __asm__("cFEStateNetCreateRoomPopup_getChannelName");
@@ -89,6 +91,7 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateNetCreateRoomPopup_onWidgetCreate");
     bool checkRoomName() __asm__("cFEStateNetCreateRoomPopup_checkRoomName");
     void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateNetCreateRoomPopup_fillHelpPopup");
+    virtual void onCreateScreen() __asm__("cFEStateNetCreateRoomPopup_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateNetCreateRoomPopup, mpTextRoomName, 0x6D0);

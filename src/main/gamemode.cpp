@@ -2087,7 +2087,7 @@ struct sGM_23B170 {
  * Clears iCharacters to -1 and gives the human rider its character, runs slot +0x24, sets iNextHeat and iRestoreHeat to
  * 1 and clears the time limit, point target and flags. Slot +0x14 (init) of cGMFreerideHandler_vtbl.
  */
-extern "C" void cGMFreerideHandler_init(cGameModeHandler* self)
+void cGMFreerideHandler::init()
 {
     int one = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2099,7 +2099,7 @@ extern "C" void cGMFreerideHandler_init(cGameModeHandler* self)
     memset(gm->iCharacters, -1, 40);
     int humanRider = cBENewPlayerInterface_getHumanRider(iface, 0);
     cGameModeHandler_pManager->iCharacters[humanRider] = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
-    self->cleanRiderRanksPoints();
+    cleanRiderRanksPoints();
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     gm2->iNextHeat = one;
     gm2->iRestoreHeat = one;
@@ -2400,7 +2400,7 @@ struct sGM_23B6C0 {
  * its character and the next slot gets the rival (cBENewRaceInterface_getRival). Slot +0x14 (init) of
  * cGMRivalTimeHandler_vtbl.
  */
-extern "C" void cGMRivalTimeHandler_init(cGameModeHandler* self)
+void cGMRivalTimeHandler::init()
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2423,7 +2423,7 @@ extern "C" void cGMRivalTimeHandler_init(cGameModeHandler* self)
     gm->iNextLocation = -1;
     gm->bIsLastHeat = one;
     gm->bAreResultsLocked = 0;
-    self->cleanRiderRanksTime();
+    cleanRiderRanksTime();
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         cGameModeHandler_pManager->iNumberAI = 0;
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
@@ -2467,7 +2467,7 @@ extern int cGameModeMan_iRanking[];
  *
  * @param idx  the rider index
  */
-extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
+void cGMRivalTimeHandler::raceFinish(int idx)
 {
     if (cAI_isRaceFinished(SSXApp->Game->AI) == 0 ||
         !SSXApp->Game->AI->Riders[idx]->isComputer()) {
@@ -2569,7 +2569,7 @@ struct sGM_23BB98 {
  * The time limit is cBENewRaceInterface_getTimeLimit(race, 1) * 60. Runs slot +0x24; online both players take their characters, offline
  * the human and the rival (cBENewRaceInterface_getRival). Slot +0x14 (init) of cGMRivalPointHandler_vtbl.
  */
-extern "C" void cGMRivalPointHandler_init(cGameModeHandler* self)
+void cGMRivalPointHandler::init()
 {
     int one = 1;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2594,7 +2594,7 @@ extern "C" void cGMRivalPointHandler_init(cGameModeHandler* self)
     gm2->unk_90 = 0;
     gm2->unk_94 = 0;
     gm2->bIsLastHeat = one;
-    self->cleanRiderRanksPoints();
+    cleanRiderRanksPoints();
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) {
         cGameModeHandler_pManager->iNumberAI = 0;
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
@@ -2638,7 +2638,7 @@ extern int cGameModeMan_iRanking[];
  *
  * @param idx  the rider index
  */
-extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
+void cGMRivalPointHandler::raceFinish(int idx)
 {
     cRider* rider = SSXApp->Game->AI->Riders[idx];
     if (rider->mDidNotFinish != 0) {

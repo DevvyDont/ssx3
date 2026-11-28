@@ -46,6 +46,7 @@ struct cSkyBox : public cObjNode {
     virtual ~cSkyBox();   // g++'s own symbol _$_7cSkyBox (the retail label renamed)
     void setSection(int id) __asm__("cSkyBox_setSection");
     int reset() __asm__("cSkyBox_reset__FPv");
+    virtual void render() __asm__("cSkyBox_render");
 };
 
 CHECK_OFFSET(cSkyBox, m_iSectionID, 0x10);

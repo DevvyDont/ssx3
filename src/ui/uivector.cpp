@@ -1613,9 +1613,8 @@ INCLUDE_ASM("ui/uivector", cUIIcon_getType__FPv);
  *
  * @return always 0x11 (groups return 0x10, menus 0x13)
  */
-int cUIIcon_getType(void* vself)
+char cUIIcon::getType()
 {
-    cUIIcon* self = (cUIIcon*)vself;
     return 17;
 }
 #endif
@@ -2381,9 +2380,8 @@ INCLUDE_ASM("ui/uivector", cUIPair_getType__FPv);
  *
  * @return always 0x15 (menus return 0x13, vectors 0x18)
  */
-int cUIPair_getType(void* vself)
+char cUIPair::getType()
 {
-    cUIPair* self = (cUIPair*)vself;
     return 21;
 }
 #endif
@@ -2521,9 +2519,8 @@ INCLUDE_ASM("ui/uivector", cUIListBox_getType__FPv);
  *
  * @return always 0x12 (18)
  */
-int cUIListBox_getType(void* vself)
+char cUIListBox::getType()
 {
-    cUIListBox* self = (cUIListBox*)vself;
     return 18;
 }
 #endif
@@ -3662,9 +3659,8 @@ INCLUDE_ASM("ui/uivector", cUIText_getType__FPv);
  *
  * @return always 0x17 (23)
  */
-int cUIText_getType(void* vself)
+char cUIText::getType()
 {
-    cUIText* self = (cUIText*)vself;
     return 23;
 }
 #endif
@@ -3924,9 +3920,8 @@ INCLUDE_ASM("ui/uivector", cUIScrollBar_getType__FPv);
  *
  * @return always 0x21 (33)
  */
-int cUIScrollBar_getType(void* vself)
+char cUIScrollBar::getType()
 {
-    cUIScrollBar* self = (cUIScrollBar*)vself;
     return 33;
 }
 #endif
@@ -4117,9 +4112,8 @@ INCLUDE_ASM("ui/uivector", cUIProgress_getType__FPv);
  *
  * @return always 0x19 (vectors return 0x18)
  */
-int cUIProgress_getType(void* vself)
+char cUIProgress::getType()
 {
-    cUIProgress* self = (cUIProgress*)vself;
     return 25;
 }
 #endif
@@ -4230,9 +4224,8 @@ INCLUDE_ASM("ui/uivector", cUISlider_getType__FPv);
  *
  * @return 22
  */
-int cUISlider_getType(void* vself)
+char cUISlider::getType()
 {
-    cUISlider* self = (cUISlider*)vself;
     return 22;
 }
 #endif
@@ -4685,9 +4678,8 @@ INCLUDE_ASM("ui/uivector", cUIVector_getType__FPv);
  *
  * @return always 0x18 (groups return 0x10)
  */
-int cUIVector_getType(void* vself)
+char cUIVector::getType()
 {
-    cUIVector* self = (cUIVector*)vself;
     return 0x18;
 }
 #endif

@@ -678,14 +678,13 @@ static inline t4Vector Center_171FA8(const tBoundBox& b)
  * cCTVolumeBox_vtbl). Likely bug: logf is the natural logarithm, so the step count is ln(length / step) + 1 rather
  * than log2, and the final bracket can stay wider than @p step.
  *
- * @param obj  the trigger volume (this)
  * @param pos  the world point to project onto the boundary
  * @param step  the wanted accuracy in cm (On Tour tolerance_cm)
  * @return the boundary point (the last tested point outside the volume), returned by value
  */
-extern "C" t4Vector cCTVolume_getBoundaryPointClosestTo(cCTVolume* obj, t4Vector* pos, float step)
+t4Vector cCTVolume::getBoundaryPointClosestTo(t4Vector* pos, float step)
 {
-    t4Vector center = Center_171FA8(GetBox_171FA8(obj));
+    t4Vector center = Center_171FA8(GetBox_171FA8(this));
     t4Vector dir = Sub_171FA8(*pos, center);
     t4Vector outsidePos = *pos;
     t4Vector lastInsidePos = center;
@@ -693,8 +692,8 @@ extern "C" t4Vector cCTVolume_getBoundaryPointClosestTo(cCTVolume* obj, t4Vector
     // the volume's virtual slot 7, containsPoint
     sVEntry<int(void*, t4Vector*)>* vt;
     sVEntry<int(void*, t4Vector*)>* containsEntry;
-    while (vt = (sVEntry<int(void*, t4Vector*)>*)obj->mVtbl, containsEntry = &vt[7],
-           containsEntry->fn(vthis(obj, *containsEntry), &outsidePos)) {
+    while (vt = (sVEntry<int(void*, t4Vector*)>*)mVtbl, containsEntry = &vt[7],
+           containsEntry->fn(vthis(this, *containsEntry), &outsidePos)) {
         lastInsidePos = outsidePos;
         t4Vector off = Scale_171FA8(dir, k);
         outsidePos = Add_171FA8(center, off);
@@ -704,9 +703,9 @@ extern "C" t4Vector cCTVolume_getBoundaryPointClosestTo(cCTVolume* obj, t4Vector
     int n = (int)logf(len / step) + 1;
     for (int i = 0; i < n; i++) {
         t4Vector testPos = Scale_171FA8(Add_171FA8(outsidePos, lastInsidePos), 0.5f);
-        vt = (sVEntry<int(void*, t4Vector*)>*)obj->mVtbl;
+        vt = (sVEntry<int(void*, t4Vector*)>*)mVtbl;
         containsEntry = &vt[7];
-        if (containsEntry->fn(vthis(obj, *containsEntry), &testPos)) {
+        if (containsEntry->fn(vthis(this, *containsEntry), &testPos)) {
             lastInsidePos = testPos;
         } else {
             outsidePos = testPos;
@@ -2083,16 +2082,15 @@ static inline void RotAxis_173E40(t4Matrix* m, const t4Vector& axis, float angle
  * t4vect_ZAxis by Heading (+0x50), and splits the matrix into a position and a rotation quaternion with tPose_tPose.
  * Slot 2 of both the trigger (cTriggerAlgorithm_vtbl) and the bounded (cBoundedAlgorithm_vtbl) algorithm vtables.
  *
- * @param src  the trigger camera algorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" tPose cTriggerAlgorithm_getPose(cTriggerAlgorithm* src)
+tPose cTriggerAlgorithm::getPose()
 {
     t4Matrix poseMtx;
     vu0CopyMtx_173E40(&poseMtx, &t4mat_Identity);
-    vu0TransMtx_173E40(&poseMtx, *(&src->Position));
-    RotAxis_173E40(&poseMtx, t4vect_YAxis, -src->Pitch);
-    RotAxis_173E40(&poseMtx, t4vect_ZAxis_v173E40, src->Heading);
+    vu0TransMtx_173E40(&poseMtx, *(&Position));
+    RotAxis_173E40(&poseMtx, t4vect_YAxis, -Pitch);
+    RotAxis_173E40(&poseMtx, t4vect_ZAxis_v173E40, Heading);
     return tPose_tPose(&poseMtx);
 }
 #endif
@@ -2266,14 +2264,14 @@ static inline float Atan2_174200(float y, float x)
  * CamTargetPos (+0x20). The action's BoundObj (+0x8) then limits Position (+0x40) through its virtual slot 6
  * (limitPoint), and Heading (+0x50) and Pitch (+0x54) are set to look straight from Position at the target.
  */
-extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
+void cBoundedAlgorithm::update()
 {
-    cCTActionBoundedCam* act = self->BoundAction;
-    self->IdealDist = act->IdealDist;
-    self->HeightOffset = act->HeightOffset;
-    self->PitchOffset = act->PitchOffset;
-    self->View = act->FieldOfView;
-    self->LeadDistance = act->LeadDistance;
+    cCTActionBoundedCam* act = BoundAction;
+    IdealDist = act->IdealDist;
+    HeightOffset = act->HeightOffset;
+    PitchOffset = act->PitchOffset;
+    View = act->FieldOfView;
+    LeadDistance = act->LeadDistance;
     t4Vector lookTarget;
     if (act->TargetType == eCTTargetPoint) {
         lookTarget.x = act->TargetPoint.x;
@@ -2283,30 +2281,30 @@ extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
         // Target's getPosition (slot 1) and getFront (slot 4), called by hand with the result pointer first
-        cCameraTarget* target = self->Target;
+        cCameraTarget* target = Target;
         sVEntry<void(t4Vector*, void*)>* vEntry = &(*(sVEntry<void(t4Vector*, void*)>**)target)[1];
         vEntry->fn(&riderPos, vthis(target, *vEntry));
-        float k = self->LeadDistance;
-        target = self->Target;
+        float k = LeadDistance;
+        target = Target;
         vEntry = &(*(sVEntry<void(t4Vector*, void*)>**)target)[4];
         vEntry->fn(&riderFront, vthis(target, *vEntry));
         ScaleTo_174200(leadOffset, riderFront, k);
         AddTo_174200(leadPos, riderPos, leadOffset);
         t4Vector heightLift;
-        ScaleTo_174200(heightLift, t4vect_ZAxis_4200, self->HeightOffset);
+        ScaleTo_174200(heightLift, t4vect_ZAxis_4200, HeightOffset);
         AddTo_174200(lookTarget, leadPos, heightLift);
     }
-    self->CamTargetPos = lookTarget;
+    CamTargetPos = lookTarget;
     {
         // the bound object's virtual slot 6, limitPoint(t4Vector&)
-        cCTBoundObj* boundObj = self->BoundAction->BoundObj;
+        cCTBoundObj* boundObj = BoundAction->BoundObj;
         sVEntry<void(void*, t4Vector*)>* vt = (sVEntry<void(void*, t4Vector*)>*)boundObj->mVtbl;
         sVEntry<void(void*, t4Vector*)>* limitPoint = &vt[6];
-        limitPoint->fn(vthis(boundObj, *limitPoint), &self->Position);
+        limitPoint->fn(vthis(boundObj, *limitPoint), &Position);
     }
-    t4Vector toTarget = Sub_174200(lookTarget, self->Position);
-    self->Heading = Atan2_174200(toTarget.y, toTarget.x);
-    self->Pitch = Atan2_174200(toTarget.z, Len2_174200(sVec2(toTarget.x, toTarget.y)));
+    t4Vector toTarget = Sub_174200(lookTarget, Position);
+    Heading = Atan2_174200(toTarget.y, toTarget.x);
+    Pitch = Atan2_174200(toTarget.z, Len2_174200(sVec2(toTarget.x, toTarget.y)));
 }
 #endif
 
@@ -2455,11 +2453,11 @@ extern "C" void cTriggerAlgorithm_snap(void* self, long a1);
  *
  * @param subjectId  the subject to snap for: the rider's AI index (On Tour subjectID)
  */
-extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
+void cBoundedAlgorithm::snap(int subjectId)
 {
-    if (self->Target->Rider->getAIIndex() != subjectId)
+    if (Target->Rider->getAIIndex() != subjectId)
         return;
-    cCTActionBoundedCam* act = self->BoundAction;
+    cCTActionBoundedCam* act = BoundAction;
     t4Vector lookTarget;
     if (act->TargetType == eCTTargetPoint) {
         lookTarget.x = act->TargetPoint.x;
@@ -2469,36 +2467,36 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
         // Target's getPosition (slot 1) and getFront (slot 4), called by hand with the result pointer first
-        cCameraTarget* target = self->Target;
+        cCameraTarget* target = Target;
         sVEntry<void(t4Vector*, void*)>* vEntry = &(*(sVEntry<void(t4Vector*, void*)>**)target)[1];
         vEntry->fn(&riderPos, vthis(target, *vEntry));
-        float k = self->LeadDistance;
-        target = self->Target;
+        float k = LeadDistance;
+        target = Target;
         vEntry = &(*(sVEntry<void(t4Vector*, void*)>**)target)[4];
         vEntry->fn(&riderFront, vthis(target, *vEntry));
         ScaleTo_1744B0(leadOffset, riderFront, k);
         AddTo_1744B0(leadPos, riderPos, leadOffset);
         t4Vector heightLift;
-        ScaleTo_1744B0(heightLift, t4vect_ZAxis_44B0, self->HeightOffset);
+        ScaleTo_1744B0(heightLift, t4vect_ZAxis_44B0, HeightOffset);
         AddTo_1744B0(lookTarget, leadPos, heightLift);
     }
-    cCTActionBoundedCam* act2 = self->BoundAction;
-    self->IdealDist = act2->IdealDist;
-    self->HeightOffset = act2->HeightOffset;
-    self->PitchOffset = act2->PitchOffset;
-    self->View = act2->FieldOfView;
-    self->LeadDistance = act2->LeadDistance;
-    cTriggerAlgorithm_snap(((char*)self), subjectId);
+    cCTActionBoundedCam* act2 = BoundAction;
+    IdealDist = act2->IdealDist;
+    HeightOffset = act2->HeightOffset;
+    PitchOffset = act2->PitchOffset;
+    View = act2->FieldOfView;
+    LeadDistance = act2->LeadDistance;
+    cTriggerAlgorithm_snap(((char*)this), subjectId);
     {
         // the bound object's virtual slot 6, limitPoint(t4Vector&)
-        cCTBoundObj* boundObj = self->BoundAction->BoundObj;
+        cCTBoundObj* boundObj = BoundAction->BoundObj;
         sVEntry<void(void*, t4Vector*)>* vt = (sVEntry<void(void*, t4Vector*)>*)boundObj->mVtbl;
         sVEntry<void(void*, t4Vector*)>* limitPoint = &vt[6];
-        limitPoint->fn(vthis(boundObj, *limitPoint), &self->Position);
+        limitPoint->fn(vthis(boundObj, *limitPoint), &Position);
     }
-    t4Vector toTarget = Sub_1744B0(lookTarget, self->Position);
-    self->Heading = Atan2_1744B0(toTarget.y, toTarget.x);
-    self->Pitch = Atan2_1744B0(toTarget.z, Len2_1744B0(sVec2(toTarget.x, toTarget.y)));
+    t4Vector toTarget = Sub_1744B0(lookTarget, Position);
+    Heading = Atan2_1744B0(toTarget.y, toTarget.x);
+    Pitch = Atan2_1744B0(toTarget.z, Len2_1744B0(sVec2(toTarget.x, toTarget.y)));
 }
 #endif
 
@@ -3241,18 +3239,16 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptAlgorithm_getTargetPos
 /**
  * Returns a script camera algorithm's target position.
  *
- * Copies the 16-byte vector at +0x20 of @p scriptAlgo (On Tour cScriptAlgorithm::Target) into @p self, the hidden
- * result slot. Slot 6 (getTargetPos) of cScriptAlgorithm's vtable cScriptAlgorithm_vtbl and of the four script algorithm vtables
+ * Copies the 16-byte vector at +0x20 (On Tour cScriptAlgorithm::Target) into the hidden result slot. Slot 6
+ * (getTargetPos) of cScriptAlgorithm's vtable cScriptAlgorithm_vtbl and of the four script algorithm vtables
  * (cScriptRelativeAlgorithm_vtbl, cScriptTargetAlgorithm_vtbl, cScriptPointAlgorithm_vtbl,
  * cScriptManualAlgorithm_vtbl).
  *
- * @param scriptAlgo  the script camera algorithm (this)
- * @return @p self, holding the target position
+ * @return the target position
  */
-extern "C" t4Vector* cScriptAlgorithm_getTargetPos(t4Vector* self, cScriptAlgorithm* scriptAlgo)
+t4Vector cScriptAlgorithm::getTargetPos()
 {
-    *self = scriptAlgo->Target;
-    return self;
+    return Target;
 }
 #endif
 
@@ -3761,7 +3757,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm_getR
  *
  * @return 61.688
  */
-extern "C" float cDEFAULT_2ChaseAlgorithm_getRestDrop(cDEFAULT_2ChaseAlgorithm* self)
+float cDEFAULT_2ChaseAlgorithm::getRestDrop()
 {
     return 61.68796157836914f;
 }
@@ -3909,7 +3905,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm_getR
  *
  * @return 61.688
  */
-extern "C" float cDEFAULT_3ChaseAlgorithm_getRestDrop(cDEFAULT_3ChaseAlgorithm* self)
+float cDEFAULT_3ChaseAlgorithm::getRestDrop()
 {
     return 61.68796157836914f;
 }
@@ -4055,7 +4051,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm_getR
  *
  * @return 61.688
  */
-extern "C" float cDEFAULT_4ChaseAlgorithm_getRestDrop(cDEFAULT_4ChaseAlgorithm* self)
+float cDEFAULT_4ChaseAlgorithm::getRestDrop()
 {
     return 61.68796157836914f;
 }
@@ -4261,9 +4257,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm_getR
  *
  * @return 0
  */
-float cDirectionChaseAlgorithm_getRestDrop(void* vself)
+float cDirectionChaseAlgorithm::getRestDrop()
 {
-    cDirectionChaseAlgorithm* self = (cDirectionChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -4533,7 +4528,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_getRestD
  *
  * @return 61.688
  */
-extern "C" float cSPOKEChaseAlgorithm_getRestDrop(cSPOKEChaseAlgorithm* self)
+float cSPOKEChaseAlgorithm::getRestDrop()
 {
     return 61.68796157836914f;
 }
@@ -4617,10 +4612,11 @@ static inline t4Vector ctGetB_00177EF8(void* self)
  *
  * @return the blended rider position
  */
-extern "C" t4Vector cSPOKEChaseAlgorithm_getRiderPosition(cSPOKEChaseAlgorithm* self)
+t4Vector cSPOKEChaseAlgorithm::getRiderPosition()
 {
-    t4Vector* riderPos = self->Target->Rider->getPosition();
-    return ctAdd_00177EF8(ctScale_00177EF8(*riderPos, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
+    t4Vector* riderPos = Target->Rider->getPosition();
+    return ctAdd_00177EF8(ctScale_00177EF8(*riderPos, 0.19999998807907104f),
+                          ctScale_00177EF8(ctGetB_00177EF8(this), 0.800000011920929f));
 }
 #endif
 
@@ -4768,26 +4764,29 @@ static inline t4Vector ctScaleP_7FC0(const t4Vector* v, float s)
  * @param in  the rider's velocity from the chase setup (On Tour vel)
  * @return the desired eye position
  */
-extern "C" t4Vector cSPOKEChaseAlgorithm_getDesiredPosition(cSPOKEChaseAlgorithm* self, const t4Vector& in)
+t4Vector cSPOKEChaseAlgorithm::getDesiredPosition(const t4Vector& in)
 {
     t4Vector dir;
-    if (cRider_getMotionState_7FC0(self->Target->Rider) == MS_Handplant)
-        dir = *ctGetA_7FC0(self);
+    if (cRider_getMotionState_7FC0(Target->Rider) == MS_Handplant)
+        dir = *ctGetA_7FC0(this);
     else
         dir = in;
     float len = ctLength_7FC0(dir);
     if (len < 0.009999999776482582f)
-        dir = ctGetC_7FC0(self);
+        dir = ctGetC_7FC0(this);
     else
         ctDivEq_7FC0(dir, len);
-    t4Vector lookDir = ctAdd_00177EF8_7FC0(ctScale_00177EF8_7FC0(self->LastLookDir, 0.9599999785423279f), ctScale_00177EF8_7FC0(dir, 0.04000002145767212f));
+    t4Vector lookDir = ctAdd_00177EF8_7FC0(ctScale_00177EF8_7FC0(LastLookDir, 0.9599999785423279f),
+                                           ctScale_00177EF8_7FC0(dir, 0.04000002145767212f));
     len = ctLength_7FC0(lookDir);
     if (len < 0.019999999552965164f)
         lookDir = dir;
     else
         ctDivEq_7FC0(lookDir, len);
-    self->LastLookDir = lookDir;
-    t4Vector desiredPos = ctSub_7FC0(ctAdd_00177EF8_7FC0(cSPOKEChaseAlgorithm_getRiderPosition_7FC0(self), ctScaleP_7FC0(&t4vect_ZAxis_7FC0, 30.0f)), ctScale_00177EF8_7FC0(lookDir, 250.0f));
+    LastLookDir = lookDir;
+    t4Vector desiredPos = ctSub_7FC0(ctAdd_00177EF8_7FC0(cSPOKEChaseAlgorithm_getRiderPosition_7FC0(this),
+                                                         ctScaleP_7FC0(&t4vect_ZAxis_7FC0, 30.0f)),
+                                     ctScale_00177EF8_7FC0(lookDir, 250.0f));
     return desiredPos;
 }
 #endif
@@ -5105,7 +5104,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_getR
  *
  * @return 61.688
  */
-extern "C" float cSUPERPIPEChaseAlgorithm_getRestDrop(cSUPERPIPEChaseAlgorithm* self)
+float cSUPERPIPEChaseAlgorithm::getRestDrop()
 {
     return 61.68796157836914f;
 }
@@ -5245,13 +5244,12 @@ extern "C" t4Vector cSUPERPIPEChaseAlgorithm_getIdealPosition_impl(char* self) _
  *
  * @return the ideal eye position
  */
-extern "C" t4Vector cSUPERPIPEChaseAlgorithm_getIdealPosition_impl(char* vself)
+t4Vector cSUPERPIPEChaseAlgorithm::getIdealPosition()
 {
-    cSUPERPIPEChaseAlgorithm* self = (cSUPERPIPEChaseAlgorithm*)vself;
-    t4Vector dir = Normalize_1785F0(Sub_1785F0(self->Point1, self->Point2));
-    t4Vector rel = Sub_1785F0(GetPos_1785F0(((char*)self)), self->Point1);
+    t4Vector dir = Normalize_1785F0(Sub_1785F0(Point1, Point2));
+    t4Vector rel = Sub_1785F0(GetPos_1785F0(((char*)this)), Point1);
     t4Vector off = Scale_1785F0(dir, Dot_1785F0(rel, dir) / Dot_1785F0(dir, dir));
-    t4Vector res = Sub_1785F0(Add_1785F0(self->Point1, off), Scale_1785F0(dir, 1500.0f));
+    t4Vector res = Sub_1785F0(Add_1785F0(Point1, off), Scale_1785F0(dir, 1500.0f));
     return res;
 }
 #endif
@@ -5649,7 +5647,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm_ge
  *
  * @return 0
  */
-float cPOST_RACE_1ChaseAlgorithm_getRestDrop(void* self)
+float cPOST_RACE_1ChaseAlgorithm::getRestDrop()
 {
     return 0.0f;
 }

@@ -76,7 +76,7 @@ struct cUIListBox : public cUIThing {
     };
 
     // cUIListBox's own slots ([R] cUIListBox_vtbl; types [O] On Tour's class cUIListBox):
-    virtual char getType();                                               // 22 cUIListBox_getType__FPv
+    virtual char getType() __asm__("cUIListBox_getType__FPv");            // 22
     virtual void setShadow(int a)
         __asm__("cUIListBox_setShadow");                                        // 23 cUIListBox_setShadow
     virtual void setUseStaticColour(int a)
@@ -122,6 +122,7 @@ struct cUIListBox : public cUIThing {
     virtual void updateLocale() __asm__("cUIListBox_updateLocale");
     virtual void render2D(float x, float y) __asm__("cUIListBox_render2D");
     virtual void setUIData(tUIBaseObject* pObj) __asm__("cUIListBox_setUIData");
+    virtual bool onInput(const cUIInput* in) __asm__("cUIListBox_onInput");
 };
 
 CHECK_OFFSET(cUIListBox, mAttrListBox, 0x074);

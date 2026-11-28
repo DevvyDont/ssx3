@@ -189,9 +189,10 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_RenderModel);
  * @param texMat  passed through to slot 95 (texture matrix)
  * @param renderFlags  passed through to slot 95 (render flags)
  */
-extern "C" void cGraphicsMan_RenderModel(cGraphicsMan* self, tInstanceRecord* obj, int animMats, int texMat, int renderFlags)
+void cGraphicsMan::RenderModel(tInstanceRecord* obj, int animMats, int texMat, int renderFlags)
 {
-    self->RenderModel(obj, obj->m_MaterialBlock, *(const t4Matrix*)&obj->m_fmTransform, 1.0f, (const t4Matrix*)animMats, (const t4Matrix*)texMat, renderFlags);
+    RenderModel(obj, obj->m_MaterialBlock, *(const t4Matrix*)&obj->m_fmTransform, 1.0f, (const t4Matrix*)animMats,
+                (const t4Matrix*)texMat, renderFlags);
 }
 #endif
 

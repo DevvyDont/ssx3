@@ -46,6 +46,7 @@ struct cWScriptTask {
     cWScriptProcess* Process;          // 0x3C [O]; [R] initTask; [U] the event handlers
     // 0x40: the vptr (g++ 2.95 puts it after the data). [R] cWScriptTask_vtbl's 16 slots in this order, all
     // cWScriptTask_* (On Tour's methods of the same names). Defined as extern "C" functions, except the destructor.
+    cWScriptTask() __asm__("cWScriptTask_cWScriptTask");
     virtual ~cWScriptTask();             // 1; g++'s own symbol _$_12cWScriptTask (the retail label renamed)
     virtual void update();                                         // 2
     virtual void dispatchTaskEvent(const struct tWScriptEvent& event) __asm__("cWScriptTask_dispatchTaskEvent"); // 3

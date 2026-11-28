@@ -113,6 +113,8 @@ struct cFEStateNetMessenger : public cFEStateNet {
     };
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateNetMessenger(cUIEngine* pEngine, cFEStateNet* pParentState)
+        __asm__("cFEStateNetMessenger_cFEStateNetMessenger");
     void* cFEStateNetMessenger1() __asm__("cFEStateNetMessenger_cFEStateNetMessenger1");
     virtual ~cFEStateNetMessenger();   // g++'s own symbol _$_20cFEStateNetMessenger (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateNetMessenger_onCreateScreen");

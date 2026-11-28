@@ -1188,9 +1188,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getIconsFileName__FPv);
  *
  * @return 0
  */
-int cFEStateRewardGalleryBase_getIconsFileName(void* vself)
+const char* cFEStateRewardGalleryBase::getIconsFileName()
 {
-    cFEStateRewardGalleryBase* self = (cFEStateRewardGalleryBase*)vself;
     return 0;
 }
 #endif

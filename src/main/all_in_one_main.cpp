@@ -2896,8 +2896,9 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setOffset);
  *
  * @param offset  the offset (x, y, z)
  */
-extern "C" void cPopupInfo_setOffset(cPopupInfo* self, t3Vector offset) {
-    self->mvOffset = offset;
+void cPopupInfo::setOffset(t3Vector offset)
+{
+    mvOffset = offset;
 }
 #endif
 
@@ -4347,20 +4348,12 @@ cFEStateOptionsDeviceSelect::~cFEStateOptionsDeviceSelect()
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *cFEMemCard_cFEMemCard_E178(void *, int, int) __asm__("cFEMemCard_cFEMemCard2");
-extern int cFEStateOptionsDeviceSelect_vtbl_E178[] __asm__("cFEStateOptionsDeviceSelect_vtbl");
-
 /**
  * Constructs the memory-card device select state with no engine: runs cFEMemCard_cFEMemCard2 with null engine and type
  * 0, then stores cFEStateOptionsDeviceSelect_vtbl at +0x8.
- *
- * @return @p self
  */
-extern "C" void *cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect(cFEStateOptionsDeviceSelect* self) {
-    cFEMemCard_cFEMemCard_E178(self, 0, 0);
-    VPTR_OF(cListNode, self) = (void**)cFEStateOptionsDeviceSelect_vtbl_E178;
-    return ((void*)self);
+cFEStateOptionsDeviceSelect::cFEStateOptionsDeviceSelect() : cFEMemCard(0, 0)
+{
 }
 #endif
 
@@ -4413,22 +4406,14 @@ cFEStateProfileLoad::~cFEStateProfileLoad()
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEStateProfileLoad_cFEStateProfileLoad1);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *cFEMemCard_cFEMemCard_E240(void *, int, int) __asm__("cFEMemCard_cFEMemCard2");
-extern int cFEStateProfileLoad_vtbl_E240[] __asm__("cFEStateProfileLoad_vtbl");
-
 /**
  * Constructs the profile load/save state with no engine: runs cFEMemCard_cFEMemCard2 with null engine and type 0, then
  * stores cFEStateProfileLoad_vtbl at +0x8.
  *
  * Unlike cFEStateProfileLoad_cFEStateProfileLoad it sets none of the state's own fields.
- *
- * @return @p self
  */
-extern "C" void *cFEStateProfileLoad_cFEStateProfileLoad1(cFEStateProfileLoad* self) {
-    cFEMemCard_cFEMemCard_E240(self, 0, 0);
-    VPTR_OF(cListNode, self) = (void**)cFEStateProfileLoad_vtbl_E240;
-    return ((void*)self);
+cFEStateProfileLoad::cFEStateProfileLoad() : cFEMemCard(0, 0)
+{
 }
 #endif
 
@@ -5396,20 +5381,12 @@ extern "C" void cFEStateMemCard_hideActionButtons(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEStateMemCard_cFEStateMemCard);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *cFEMemCard_cFEMemCard_E950(void *, int, int) __asm__("cFEMemCard_cFEMemCard2");
-extern int cFEStateMemCard_vtbl[];
-
 /**
  * Constructs the memory-card state with no engine: runs cFEMemCard_cFEMemCard2 with null engine and type 0, then stores
  * cFEStateMemCard_vtbl at +0x8.
- *
- * @return @p self
  */
-extern "C" void *cFEStateMemCard_cFEStateMemCard(cFEStateMemCard* self) {
-    cFEMemCard_cFEMemCard_E950(self, 0, 0);
-    VPTR_OF(cListNode, self) = (void**)cFEStateMemCard_vtbl;
-    return ((void*)self);
+cFEStateMemCard::cFEStateMemCard() : cFEMemCard(0, 0)
+{
 }
 #endif
 

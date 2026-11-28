@@ -58,6 +58,7 @@ struct cFEStateStats : public cFEStateNet {
                                     //       cFEStateStats_fillResultRows prints the score as a time (cFEStateStats_formatTime) when set, else as points
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateStats(cUIEngine* pEngine) __asm__("cFEStateStats_cFEStateStats");
     void* cFEStateStats1() __asm__("cFEStateStats_cFEStateStats1");
     virtual ~cFEStateStats();   // g++'s own symbol _$_13cFEStateStats (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateStats_onCreateScreen");

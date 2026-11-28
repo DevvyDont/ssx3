@@ -1034,20 +1034,20 @@ extern "C" double dpmul(double a, double b);
  * @param pos  the content size (On Tour vSize)
  */
 // Converts a screen position into the popup's normalised scroll position for the current layout.
-extern "C" void cScreenPopup_determineAndSetScaling(cScreenPopup* self, t3Vector pos)
+void cScreenPopup::determineAndSetScaling(t3Vector pos)
 {
-    switch (self->meBackgroundType) {
+    switch (meBackgroundType) {
     case ePopupBackground_Online:
-        self->mvCurrentScale.x = (pos.x + 15.0f) / self->mvSizeBackWhite.x;
-        self->mvCurrentScale.y = (pos.y + 10.0f) / self->mvSizeBackWhite.y;
+        mvCurrentScale.x = (pos.x + 15.0f) / mvSizeBackWhite.x;
+        mvCurrentScale.y = (pos.y + 10.0f) / mvSizeBackWhite.y;
         break;
     case ePopupBackground_Blue:
-        self->mvCurrentScale.x = dptofp(dpmul(fptodp((pos.x + 20.0f) / self->mvSizeBackSmall.x), 1.05));
-        self->mvCurrentScale.y = (pos.y + 15.0f) / self->mvSizeBackSmall.y;
+        mvCurrentScale.x = dptofp(dpmul(fptodp((pos.x + 20.0f) / mvSizeBackSmall.x), 1.05));
+        mvCurrentScale.y = (pos.y + 15.0f) / mvSizeBackSmall.y;
         break;
     case ePopupBackground_Black:
-        self->mvCurrentScale.x = 1.0f;
-        self->mvCurrentScale.y = 1.0f;
+        mvCurrentScale.x = 1.0f;
+        mvCurrentScale.y = 1.0f;
         break;
     }
 }
@@ -1146,60 +1146,60 @@ extern "C" float dptofp(double d);
  * @param fXOffset  horizontal offset
  * @param fYOffset  vertical offset
  */
-extern "C" void cScreenPopup_resizeBackground(cScreenPopup* self, t3Vector vSize, float fXOffset, float fYOffset)
+void cScreenPopup::resizeBackground(t3Vector vSize, float fXOffset, float fYOffset)
 {
     float y = 0.0f;
-    switch (self->meBackgroundType) {
+    switch (meBackgroundType) {
     case ePopupBackground_Online:
-        if ((char*)self->mpBackGroundWhite != 0) {
-            t3Vector piecePos = self->mvPosBackWhite;
-            y = self->mvPosTitle.y + fYOffset + vSize.y * 0.5f - 5.0f;
+        if ((char*)mpBackGroundWhite != 0) {
+            t3Vector piecePos = mvPosBackWhite;
+            y = mvPosTitle.y + fYOffset + vSize.y * 0.5f - 5.0f;
             piecePos.x += fXOffset;
             piecePos.y = y;
-            self->mpBackGroundWhite->mPosition = piecePos;
+            mpBackGroundWhite->mPosition = piecePos;
         }
-        if ((char*)self->mpBackGroundRed != 0) {
-            t3Vector piecePos = self->mvPosBackRed;
+        if ((char*)mpBackGroundRed != 0) {
+            t3Vector piecePos = mvPosBackRed;
             piecePos.y = y;
             piecePos.x += fXOffset;
-            self->mpBackGroundRed->mPosition = piecePos;
+            mpBackGroundRed->mPosition = piecePos;
         }
         break;
     case ePopupBackground_Blue:
-        if ((char*)self->mpBackGroundSmall != 0) {
-            t3Vector piecePos = self->mvPosBackSmall;
-            y = dptofp(dpsub(fptodp(self->mvPosTitle.y + fYOffset + vSize.y * 0.5f), 7.5));
+        if ((char*)mpBackGroundSmall != 0) {
+            t3Vector piecePos = mvPosBackSmall;
+            y = dptofp(dpsub(fptodp(mvPosTitle.y + fYOffset + vSize.y * 0.5f), 7.5));
             piecePos.x += fXOffset;
             piecePos.y = y;
-            self->mpBackGroundSmall->mPosition = piecePos;
+            mpBackGroundSmall->mPosition = piecePos;
         }
-        if ((char*)self->mpBackGroundSmallOutline != 0) {
-            t3Vector piecePos = self->mvPosBackSmallOutline;
+        if ((char*)mpBackGroundSmallOutline != 0) {
+            t3Vector piecePos = mvPosBackSmallOutline;
             piecePos.y = y;
             piecePos.x += fXOffset;
-            self->mpBackGroundSmallOutline->mPosition = piecePos;
+            mpBackGroundSmallOutline->mPosition = piecePos;
         }
-        if ((char*)self->mpBackGroundLarge != 0) {
-            t3Vector piecePos = self->mvPosBackLarge;
+        if ((char*)mpBackGroundLarge != 0) {
+            t3Vector piecePos = mvPosBackLarge;
             piecePos.y = y;
             piecePos.x += fXOffset;
-            self->mpBackGroundLarge->mPosition = piecePos;
+            mpBackGroundLarge->mPosition = piecePos;
         }
-        if ((char*)self->mpBackGroundLargeOutline != 0) {
-            t3Vector piecePos = self->mvPosBackLargeOutline;
+        if ((char*)mpBackGroundLargeOutline != 0) {
+            t3Vector piecePos = mvPosBackLargeOutline;
             piecePos.y = y;
             piecePos.x += fXOffset;
-            self->mpBackGroundLargeOutline->mPosition = piecePos;
+            mpBackGroundLargeOutline->mPosition = piecePos;
         }
-        if ((char*)self->mpBackGroundShadow != 0) {
-            t3Vector piecePos = self->mvPosBackShadow;
+        if ((char*)mpBackGroundShadow != 0) {
+            t3Vector piecePos = mvPosBackShadow;
             piecePos.y = y;
             piecePos.x += fXOffset;
-            self->mpBackGroundShadow->mPosition = piecePos;
+            mpBackGroundShadow->mPosition = piecePos;
         }
         break;
     case ePopupBackground_Black:
-        self->mvCurrentScale.y = self->mvCurrentScale.x = 1.0f;
+        mvCurrentScale.y = mvCurrentScale.x = 1.0f;
         break;
     }
 }

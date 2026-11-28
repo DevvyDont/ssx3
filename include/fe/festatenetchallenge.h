@@ -188,6 +188,8 @@ struct cFEStateChallengeReceivedPopup : public cFEStateNet {
                                     //       accepted game (LobbyMan_leaveGame) when it is set
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateChallengeReceivedPopup(cUIEngine* pEngine, cFEStateNet* pParentState, const char* name)
+        __asm__("cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup");
     void* cFEStateChallengeReceivedPopup1() __asm__("cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1");
     // g++'s own symbol _$_30cFEStateChallengeReceivedPopup (the retail label renamed)
     virtual ~cFEStateChallengeReceivedPopup();

@@ -1979,15 +1979,15 @@ static inline void vu0AddToRM(t4Vector& dst, const t4Vector& b)
  *
  * @return the pose (position and orientation quaternion)
  */
-extern "C" tPose cRollerModifier_getBodyPose(cRollerModifier* self)
+tPose cRollerModifier::getBodyPose()
 {
-    tPose pose = self->Pose;
+    tPose pose = Pose;
     t4Vector negatedCom;
     t4Vector rotatedCom;
     t4Vector comOffset;
     t4Vector posDelta;
     t4Vector poseOffset;
-    vu0QuatRotToRM(comOffset, self->Pose.Q, self->COMOffset);
+    vu0QuatRotToRM(comOffset, Pose.Q, COMOffset);
     rotatedCom = comOffset;
     vu0ScaleToRM(comOffset, rotatedCom, -1.0f);
     negatedCom = comOffset;
@@ -3313,12 +3313,11 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_shouldRebound__FPv);
 /**
  * Reports that a typed object node should rebound.
  *
- * @return always 1
+ * @return always true
  */
-int cTypeObjNode_shouldRebound(void* vself)
+bool cTypeObjNode::shouldRebound()
 {
-    cTypeObjNode* self = (cTypeObjNode*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -3449,10 +3448,9 @@ INCLUDE_ASM("object/railmodifier", cSortObjNode_getSortIndex__FPv);
  *
  * @return the sort index
  */
-int cSortObjNode_getSortIndex(void* vself)
+unsigned int cSortObjNode::getSortIndex() const
 {
-    cSortObjNode* self = (cSortObjNode*)vself;
-    return (int)self->SortIndex;
+    return (int)SortIndex;
 }
 #endif
 
@@ -3635,12 +3633,11 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_updateNode__FPv);
 /**
  * Does no per-node update and reports success.
  *
- * @return always 1
+ * @return always true
  */
-int cInstanceNode_updateNode(void* vself)
+bool cInstanceNode::updateNode()
 {
-    cInstanceNode* self = (cInstanceNode*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -4172,9 +4169,8 @@ INCLUDE_ASM("object/railmodifier", cRestoreNode_expire__FPv);
 /**
  * Does nothing when a restore node expires.
  */
-void cRestoreNode_expire(void* vself)
+void cRestoreNode::expire(int)
 {
-    cRestoreNode* self = (cRestoreNode*)vself;
 }
 #endif
 
@@ -4740,9 +4736,8 @@ INCLUDE_ASM("object/railmodifier", cEffectModifier_update__FPv);
 /**
  * Does nothing: cEffectModifier's update has an empty body.
  */
-void cEffectModifier_update(void* vself)
+void cEffectModifier::update()
 {
-    cEffectModifier* self = (cEffectModifier*)vself;
 }
 #endif
 
@@ -4913,9 +4908,8 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_updateAnimState__FPv);
 /**
  * Does nothing: cMoveNode's updateAnimState has an empty body.
  */
-void cMoveNode_updateAnimState(void* vself)
+void cMoveNode::updateAnimState()
 {
-    cMoveNode* self = (cMoveNode*)vself;
 }
 #endif
 
@@ -5876,9 +5870,8 @@ INCLUDE_ASM("object/railmodifier", cFlexRailNode_updateNodes__FPv);
 /**
  * Does nothing: a flex rail's per-frame node update.
  */
-void cFlexRailNode_updateNodes(void* vself)
+void cFlexRailNode::updateNodes()
 {
-    cFlexRailNode* self = (cFlexRailNode*)vself;
 }
 #endif
 

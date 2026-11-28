@@ -89,7 +89,7 @@ struct cFlexRailNode : public cInstanceNode {
     // --- cFlexRailNode (cFlexRailNodeState, 0x30, read whole from a replay frame by cFlexRailNode_cFlexRailNode1)
     // Its new slots ([R] its vtable D_004900D0 / cFloatRailNode_vtbl / cSpringRailNode_vtbl, 50 in all; names from
     // the subclasses' entries, types [O] On Tour's cFlexRailNode / cFloatRailNode definitions):
-    virtual void updateNodes();                                     // 47
+    virtual void updateNodes() __asm__("cFlexRailNode_updateNodes__FPv");   // 47
     virtual void updateMats() __asm__("cFlexRailNode_updateMats__FPv");                                      // 48
     virtual int getMesh(int seg) __asm__("cFlexRailNode_getMesh__FPv");                                   // 49
     virtual void updateBoundBox() = 0;                              // 50 pure ([R] func_00411530 in D_004900D0)

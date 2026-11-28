@@ -183,6 +183,7 @@ struct cPopupInfo {
     void setPopupPostPending1(int postPending) __asm__("cPopupInfo_setPopupPostPending1");
     void setPopupPostPending2(int postPendingId) __asm__("cPopupInfo_setPopupPostPending2");
     void setPopupPostPending3(tPopupElement* src) __asm__("cPopupInfo_setPopupPostPending3");
+    void setOffset(t3Vector offset) __asm__("cPopupInfo_setOffset");
 };
 
 CHECK_OFFSET(cPopupInfo, meType, 0x000);

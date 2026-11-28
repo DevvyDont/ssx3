@@ -1127,29 +1127,29 @@ static inline void AddEq_352500(t4Vector& d, const t4Vector& b)
  * Axis[i] (+0x1B0) and is renormalised, Pos (+0x3B0) advances by Vel (+0x530) with no time step, and Vel.z
  * drops by Drag (+0x6B4) * 980 * the tick period.
  */
-extern "C" void cMeshAnimNode_update(cMeshAnimNode* self)
+void cMeshAnimNode::update()
 {
-    if (self->Life > 0.0f) {
-        self->Life -= cAppMan_TheAppMan->TimerPeriod;
-        if (self->Life <= 0.0f) {
-            self->expire(1);
+    if (Life > 0.0f) {
+        Life -= cAppMan_TheAppMan->TimerPeriod;
+        if (Life <= 0.0f) {
+            expire(1);
             return;
         }
     }
-    if (self->Life > 0.0f) {
-        tModelRecord* skel = self->Instance->m_Model;
+    if (Life > 0.0f) {
+        tModelRecord* skel = Instance->m_Model;
         for (int i = 0; i < skel->m_iNumMeshes; i++) {
             float sinHalf, cosHalf;
-            fSinCos(&sinHalf, &cosHalf, self->Angle[i] * 0.5f);
-            t4Vector* quat = &self->Qrot[i];
-            *quat = QMul_352500(*quat, t4VectorWXYZ(cosHalf, sinHalf * self->Axis[i].x, sinHalf * self->Axis[i].y,
-                                                    sinHalf * self->Axis[i].z));
+            fSinCos(&sinHalf, &cosHalf, Angle[i] * 0.5f);
+            t4Vector* quat = &Qrot[i];
+            *quat = QMul_352500(*quat, t4VectorWXYZ(cosHalf, sinHalf * Axis[i].x, sinHalf * Axis[i].y,
+                                                    sinHalf * Axis[i].z));
             NormalizeEq_352500(*quat);
         }
         for (int i = 0; i < skel->m_iNumMeshes; i++) {
-            AddEq_352500(self->Pos[i], self->Vel[i]);
-            AddEq_352500(self->Vel[i],
-                         t4VectorCtor(0.0f, 0.0f, self->Drag * -980.0f * cAppMan_TheAppMan->TimerPeriod, 0.0f));
+            AddEq_352500(Pos[i], Vel[i]);
+            AddEq_352500(Vel[i],
+                         t4VectorCtor(0.0f, 0.0f, Drag * -980.0f * cAppMan_TheAppMan->TimerPeriod, 0.0f));
         }
     }
 }

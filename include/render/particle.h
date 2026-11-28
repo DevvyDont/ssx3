@@ -427,6 +427,8 @@ struct cBaseClass_DynamicEmitter {
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cBaseClass_DynamicEmitter_readFromReplayFrame");
     void setTime(float duration) __asm__("cBaseClass_DynamicEmitter_setTime");
     void updateBASE(t4Vector* pos, t4Vector* vel, int rnd, float dt) __asm__("cBaseClass_DynamicEmitter_updateBASE");
+    t4Vector getSubEmitterPosition(int idx) __asm__("cBaseClass_DynamicEmitter_getSubEmitterPosition");
+    t4Vector getSubEmitterVelocity(int idx) __asm__("cBaseClass_DynamicEmitter_getSubEmitterVelocity");
 };
 
 CHECK_OFFSET(cBaseClass_DynamicEmitter, Duration, 0x00);

@@ -59,6 +59,13 @@ struct cTextureElement {
     float mRight;                   // 0x14 [O]; [R] 1.0
     float mBottom;                  // 0x18 [O]; [R] 1.0
     unsigned int mHashID;           // 0x1C [O]
+
+    // Methods bound to their retail symbols by asm labels.
+    void render(tRect rect, tARGB colour, int flags) __asm__("cTextureElement_render");
+    void render2(tRect rect, tARGB colour, int flags, float fillFraction) __asm__("cTextureElement_render2");
+    void renderTiled(tRect destRect, tARGB colour, int flags, float tx, float ty)
+        __asm__("cTextureElement_renderTiled");
+    void renderRot(tRect destRect, t3Matrix transform, tARGB colour, int flags) __asm__("cTextureElement_renderRot");
 };
 
 // One player's HUD state (On Tour tHUDRiderInfo, 0x60; retail 0x8C with the tracker at 0x8). Placed by the two

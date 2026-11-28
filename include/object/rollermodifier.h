@@ -164,6 +164,7 @@ struct cRollerModifier : public cTransformModifier {
     virtual bool runCollide(int) __asm__("cRollerModifier_runCollide__FPv");
     virtual const t4Matrix* getRootTransform1(tInstanceRecord*) __asm__("cRollerModifier_getRootTransform1__FPv");
     virtual void setBoundBox(const tBoundBox& bb) __asm__("cRollerModifier_setBoundBox");
+    tPose getBodyPose() __asm__("cRollerModifier_getBodyPose");
 };
 
 CHECK_OFFSET(cRollerModifier, mKineticEnergy, 0x004);

@@ -1258,29 +1258,28 @@ extern "C" void c2DRender_drawRotRect(int ctx, tBxVertex* v, tRect* r);
  * element's UVs (+0xC..+0x18; flag 1 swaps u, flag 2 swaps v) and the colour scaled by 128, and submits them with
  * c2DRender_drawRotRect when flag 4 is set, else c2DRender_drawRect. Nothing in the retail code references it.
  *
- * @param element  the texture element
  * @param rect  the screen rectangle (x, y, w, h)
  * @param colour  the colour (a, r, g, b), 0..1
  * @param flags  1 flip u, 2 flip v, 4 use c2DRender_drawRotRect
  */
-extern "C" void cTextureElement_render(cTextureElement* element, tRect rect, tARGB colour, int flags)
+void cTextureElement::render(tRect rect, tARGB colour, int flags)
 {
-    int tex = element->mSourceShape;
+    int tex = mSourceShape;
     if (tex < 0) {
         return;
     }
     GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
-    float topV = element->mTop;
-    float bottomV = element->mBottom;
-    float leftU = element->mLeft;
-    float rightU = element->mRight;
+    float topV = mTop;
+    float bottomV = mBottom;
+    float leftU = mLeft;
+    float rightU = mRight;
     if (flags & 1) {
         leftU = rightU;
-        rightU = element->mLeft;
+        rightU = mLeft;
     }
     if (flags & 2) {
         topV = bottomV;
-        bottomV = element->mTop;
+        bottomV = mTop;
     }
     tBxVertex quadVerts[4];
     for (int i = 0; i < 4; i++) {
@@ -1325,21 +1324,20 @@ extern void c2DRender_drawRotRect_2220(int ctx, tBxVertex* v, tRect* r) __asm__(
  * cTextureElement_render it draws even a negative texture, ignores the flip flags and scales r, g, b by 255 (alpha by 128). Flag
  * 4 selects c2DRender_drawRotRect over c2DRender_drawRect. Nothing in the retail code references it.
  *
- * @param element  the texture element
  * @param rect  the screen rectangle (x, y, w, h)
  * @param colour  the colour (a, r, g, b), 0..1
  * @param flags  4 uses c2DRender_drawRotRect
  * @param fillFraction  the shown fraction, 0..1
  */
-extern "C" void cTextureElement_render2(cTextureElement* element, tRect rect, tARGB colour, int flags, float fillFraction)
+void cTextureElement::render2(tRect rect, tARGB colour, int flags, float fillFraction)
 {
     float k = 1.0f - fillFraction;
-    int tex = element->mSourceShape;
+    int tex = mSourceShape;
     GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
-    float topV = element->mTop;
-    float bottomV = element->mBottom;
-    float leftU = element->mLeft;
-    float rightU = element->mRight;
+    float topV = mTop;
+    float bottomV = mBottom;
+    float leftU = mLeft;
+    float rightU = mRight;
     rect.Y += k * rect.H;
     rect.H *= 1.0f - k;
     topV += k * (bottomV - topV);
@@ -1394,24 +1392,22 @@ extern "C" void c2DRender_drawRotRect2(int ctx, tBxVertex* v, tRect* dst, tRect*
  * The four vertices get alpha = c.a * 128 and red/green/blue = c * 255; cTextureElement_render scales all four by 128, so the
  * colour here is twice as strong. No caller in retail references it.
  *
- * @param element  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
  * @param destRect  the screen rectangle to fill (x, y, w, h)
  * @param colour  the colour (a, r, g, b in 0..1)
  * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
  * @param tx  how many times the texture repeats across (may be fractional)
  * @param ty  how many times the texture repeats down (may be fractional)
  */
-extern "C" void cTextureElement_renderTiled(cTextureElement* element, tRect destRect, tARGB colour, int flags, float tx,
-                                            float ty)
+void cTextureElement::renderTiled(tRect destRect, tARGB colour, int flags, float tx, float ty)
 {
-    int tex = element->mSourceShape;
+    int tex = mSourceShape;
     GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
     float x0 = destRect.X;
     float y0 = destRect.Y;
-    float topV = element->mTop;
-    float bottomV = element->mBottom;
-    float leftU = element->mLeft;
-    float rightU = element->mRight;
+    float topV = mTop;
+    float bottomV = mBottom;
+    float leftU = mLeft;
+    float rightU = mRight;
     if (tx <= 0.0f) {
         return;
     }
@@ -1422,11 +1418,11 @@ extern "C" void cTextureElement_renderTiled(cTextureElement* element, tRect dest
     float tileHeight = destRect.H / ty;
     if (flags & 1) {
         leftU = rightU;
-        rightU = element->mLeft;
+        rightU = mLeft;
     }
     if (flags & 2) {
         topV = bottomV;
-        bottomV = element->mTop;
+        bottomV = mTop;
     }
     int nx = (int)tx;
     float y = y0;
@@ -1525,27 +1521,26 @@ extern "C" void c2DRender_drawRotRect1(int ctx, tBxVertex* v, tRect* r, t3Matrix
  * degrees) when bit 2 is set; both transform each corner by @p transform (transformPoint2D) before submitting. No caller in retail
  * references it.
  *
- * @param element  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
  * @param destRect  the screen rectangle (x, y, w, h) before the transform
  * @param transform  the 3x3 transform applied to each corner (rows of three floats)
  * @param colour  the colour (a, r, g, b in 0..1)
  * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
  */
-extern "C" void cTextureElement_renderRot(cTextureElement* element, tRect destRect, t3Matrix transform, tARGB colour, int flags)
+void cTextureElement::renderRot(tRect destRect, t3Matrix transform, tARGB colour, int flags)
 {
-    int tex = element->mSourceShape;
+    int tex = mSourceShape;
     GrMan->m_pCurrentDrawState->m_textureState.m_texid[0] = tex;
-    float topV = element->mTop;
-    float bottomV = element->mBottom;
-    float leftU = element->mLeft;
-    float rightU = element->mRight;
+    float topV = mTop;
+    float bottomV = mBottom;
+    float leftU = mLeft;
+    float rightU = mRight;
     if (flags & 1) {
         leftU = rightU;
-        rightU = element->mLeft;
+        rightU = mLeft;
     }
     if (flags & 2) {
         topV = bottomV;
-        bottomV = element->mTop;
+        bottomV = mTop;
     }
     tBxVertex quadVerts[4];
     for (int i = 0; i < 4; i++) {

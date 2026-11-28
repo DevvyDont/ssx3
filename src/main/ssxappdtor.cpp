@@ -735,7 +735,7 @@ void cGameState::onWidgetEvent(cUIThing*, unsigned int)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFEndState__cGFEndState);
+INCLUDE_ASM("main/ssxappdtor", _$_11cGFEndState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -747,15 +747,9 @@ extern char cGameState_vtbl[];
  *
  * It is the destructor slot of cGFEndState_vtbl, the vtable cGFEndState_cGFEndState installs (gainFocus cGFEndState_gainFocus, loseFocus
  * cGFEndState_loseFocus).
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFEndState__cGFEndState(cGFEndState* self, int flags)
+cGFEndState::~cGFEndState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -774,7 +768,7 @@ cGFEndState::cGFEndState()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFEndWaitState__cGFEndWaitState);
+INCLUDE_ASM("main/ssxappdtor", _$_15cGFEndWaitState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -786,20 +780,14 @@ extern char cGameState_vtbl[];
  *
  * It is the destructor slot of cGFEndWaitState_vtbl, a vtable that keeps every other default (On Tour's cGFEndWaitState overrides
  * only the replay methods).
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFEndWaitState__cGFEndWaitState(cGFEndWaitState* self, int flags)
+cGFEndWaitState::~cGFEndWaitState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFFinishlineState__cGFFinishlineState);
+INCLUDE_ASM("main/ssxappdtor", _$_18cGFFinishlineState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -811,20 +799,14 @@ extern char cGameState_vtbl[];
  *
  * It is the destructor slot of cGFFinishlineState_vtbl, whose gainFocus, update and loseFocus (cGFFinishlineState_gainFocus, cGFFinishlineState_update,
  * cGFFinishlineState_loseFocus) sit right before cGFFinishlineState_writeToReplayFrame in fe/festateloadscreen.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFFinishlineState__cGFFinishlineState(cGFFinishlineState* self, int flags)
+cGFFinishlineState::~cGFFinishlineState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFTransportWaitState__cGFTransportWaitState);
+INCLUDE_ASM("main/ssxappdtor", _$_21cGFTransportWaitState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -835,15 +817,9 @@ extern char cGameState_vtbl[];
  * cGameState_vtbl and frees the object when asked.
  *
  * It is the destructor slot of cGFTransportWaitState_vtbl, whose loseFocus slot is cGFTransportWaitState_loseFocus.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFTransportWaitState__cGFTransportWaitState(cGFTransportWaitState* self, int flags)
+cGFTransportWaitState::~cGFTransportWaitState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -862,7 +838,7 @@ cGFTransportWaitState::cGFTransportWaitState()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFEventStartState__cGFEventStartState);
+INCLUDE_ASM("main/ssxappdtor", _$_18cGFEventStartState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -871,20 +847,14 @@ extern char cGameState_vtbl[];
 /**
  * Destroys a cGFEventStartState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees
  * the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFEventStartState__cGFEventStartState(cGFEventStartState* self, int flags)
+cGFEventStartState::~cGFEventStartState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFGateState__cGFGateState);
+INCLUDE_ASM("main/ssxappdtor", _$_12cGFGateState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -893,15 +863,9 @@ extern char cGameState_vtbl[];
 /**
  * Destroys a cGFGateState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees the
  * object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFGateState__cGFGateState(cGFGateState* self, int flags)
+cGFGateState::~cGFGateState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -920,7 +884,7 @@ cGFGateState::cGFGateState()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFRidingState__cGFRidingState);
+INCLUDE_ASM("main/ssxappdtor", _$_14cGFRidingState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -931,15 +895,9 @@ extern char cGameState_vtbl[];
  * frees the object when asked.
  *
  * It is the destructor slot of cGFRidingState_vtbl, whose gainFocus is cGFRidingState_gainFocus.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFRidingState__cGFRidingState(cGFRidingState* self, int flags)
+cGFRidingState::~cGFRidingState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -958,7 +916,7 @@ cGFRidingState::cGFRidingState()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFTrackStartState__cGFTrackStartState);
+INCLUDE_ASM("main/ssxappdtor", _$_18cGFTrackStartState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -967,20 +925,14 @@ extern char cGameState_vtbl[];
 /**
  * Destroys a cGFTrackStartState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees
  * the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFTrackStartState__cGFTrackStartState(cGFTrackStartState* self, int flags)
+cGFTrackStartState::~cGFTrackStartState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFNextHeatState__cGFNextHeatState);
+INCLUDE_ASM("main/ssxappdtor", _$_16cGFNextHeatState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -989,15 +941,9 @@ extern char cGameState_vtbl[];
 /**
  * Destroys a cGFNextHeatState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees
  * the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFNextHeatState__cGFNextHeatState(cGFNextHeatState* self, int flags)
+cGFNextHeatState::~cGFNextHeatState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -1018,7 +964,7 @@ cGFNextHeatState::cGFNextHeatState()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFSessionTeleportState__cGFSessionTeleportState);
+INCLUDE_ASM("main/ssxappdtor", _$_23cGFSessionTeleportState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1027,15 +973,9 @@ extern char cGameState_vtbl[];
 /**
  * Destroys a cGFSessionTeleportState game-flow state: restores the base game-state vtable (cGameState_vtbl), then
  * frees the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(cGFSessionTeleportState* self, int flags)
+cGFSessionTeleportState::~cGFSessionTeleportState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -1054,7 +994,7 @@ cGFSessionTeleportState::cGFSessionTeleportState()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFUserSelectState__cGFUserSelectState);
+INCLUDE_ASM("main/ssxappdtor", _$_18cGFUserSelectState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1063,15 +1003,9 @@ extern char cGameState_vtbl[];
 /**
  * Destroys a cGFUserSelectState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees
  * the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFUserSelectState__cGFUserSelectState(cGFUserSelectState* self, int flags)
+cGFUserSelectState::~cGFUserSelectState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -1090,7 +1024,7 @@ void cGFUserSelectState::setNextLocation(int location)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFSectionLoadState__cGFSectionLoadState);
+INCLUDE_ASM("main/ssxappdtor", _$_19cGFSectionLoadState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1101,20 +1035,14 @@ extern char cGameState_vtbl[];
  * and frees the object when asked.
  *
  * It is the destructor slot of cGFSectionLoadState_vtbl, whose gainFocus/update/loseFocus are cGFSectionLoadState_*.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFSectionLoadState__cGFSectionLoadState(cGFSectionLoadState* self, int flags)
+cGFSectionLoadState::~cGFSectionLoadState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFPreEventState__cGFPreEventState);
+INCLUDE_ASM("main/ssxappdtor", _$_16cGFPreEventState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1125,15 +1053,9 @@ extern char cGameState_vtbl[];
  * frees the object when asked.
  *
  * It is the destructor slot of cGFPreEventState_vtbl, whose gainFocus/update/loseFocus are cGFPreEventState_*.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFPreEventState__cGFPreEventState(cGFPreEventState* self, int flags)
+cGFPreEventState::~cGFPreEventState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -1152,7 +1074,7 @@ cGFPreEventState::cGFPreEventState()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFPostEventState__cGFPostEventState);
+INCLUDE_ASM("main/ssxappdtor", _$_17cGFPostEventState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1163,15 +1085,9 @@ extern char cGameState_vtbl[];
  * and frees the object when asked.
  *
  * It is the destructor slot of cGFPostEventState_vtbl, whose gainFocus/update/loseFocus are cGFPostEventState_*.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGFPostEventState__cGFPostEventState(cGFPostEventState* self, int flags)
+cGFPostEventState::~cGFPostEventState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -1190,7 +1106,7 @@ cGFPostEventState::cGFPostEventState()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFPodiumState__cGFPodiumState);
+INCLUDE_ASM("main/ssxappdtor", _$_14cGFPodiumState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1199,15 +1115,9 @@ extern char cGameState_vtbl[];
 /**
  * Destroys a cGFPodiumState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees the
  * object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFPodiumState__cGFPodiumState(cGFPodiumState* self, int flags)
+cGFPodiumState::~cGFPodiumState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -1226,7 +1136,7 @@ cGFPodiumState::cGFPodiumState()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGFReplayStartState__cGFReplayStartState);
+INCLUDE_ASM("main/ssxappdtor", _$_19cGFReplayStartState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1235,15 +1145,9 @@ extern char cGameState_vtbl[];
 /**
  * Destroys a cGFReplayStartState game-flow state: restores the base game-state vtable (cGameState_vtbl), then
  * frees the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cGFReplayStartState__cGFReplayStartState(cGFReplayStartState* self, int flags)
+cGFReplayStartState::~cGFReplayStartState()
 {
-    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -3503,11 +3407,11 @@ public:
  * makes "CtrlPS2_default" and "default_text" visible for mapping 0, "CtrlPS2_pro" and "pro_text" otherwise (widget
  * virtual slot 9). Slot +0x24 (onCreateScreen) of cGameLoadStateConquer_vtbl.
  */
-extern "C" void cGameLoadStateConquer_onCreateScreen(cUIState* self)
+void cGameLoadStateConquer::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* scr = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_110ctrl_load), 0);
-    self->mpScreen = (cUIScreen*)scr;
+    void* engine = mpEngine;
+    void* scr = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_110ctrl_load), 0);
+    mpScreen = (cUIScreen*)scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
     }
@@ -3515,19 +3419,19 @@ extern "C" void cGameLoadStateConquer_onCreateScreen(cUIState* self)
     char* ctrlPro = str_CtrlPS2_pro;
     int controlConfig = cBENewPlayerInterface_getControllerMapping(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
     cUIObj_245730* widget;
-    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ctrlDefault));
+    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(ctrlDefault));
     if (widget != 0) {
         widget->setVisible(controlConfig == 0);
     }
-    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_default_text_b));
+    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_default_text_b));
     if (widget != 0) {
         widget->setVisible(controlConfig == 0);
     }
-    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(ctrlPro));
+    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(ctrlPro));
     if (widget != 0) {
         widget->setVisible(controlConfig != 0);
     }
-    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pro_text_b));
+    widget = (cUIObj_245730*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_pro_text_b));
     if (widget != 0) {
         widget->setVisible(controlConfig != 0);
     }

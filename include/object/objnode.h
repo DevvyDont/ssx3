@@ -130,7 +130,7 @@ enum tObjNodeType {
 struct cTypeObjNode : public cObjNode {
     // cObjNode (above, 0x10): the vptr at 0x0C holds [R] cTypeObjNode_vtbl (0x00491E80) in both ctors and the dtor.
     // Its one new slot ([R] cTypeObjNode_vtbl, [O] cTypeObjNode::shouldRebound):
-    virtual bool shouldRebound();                                   // 14
+    virtual bool shouldRebound() __asm__("cTypeObjNode_shouldRebound__FPv");   // 14
     // --- cTypeObjNodeState (On Tour 4 bytes; [R] the replay ctor / writeToReplayFrame move these 4 bytes)
     short ObjNodeType;              // 0x10 [O] cTypeObjNodeState::ObjNodeType (tObjNodeType); [R] cTypeObjNode1 sh the
                                     //      type arg, then lh it to index ObjNodeCount; the dtor lh it to decrement;

@@ -35,7 +35,7 @@ struct cUIIcon : public cUIThing {
     //   [R] cUIIcon_vtbl D_00494AA8 (createObjectByStruct, cUIIcon_cUIIcon1, cUIIcon_cUIIcon, the dtor)
     // --- cUIIcon
     // cUIIcon's own slots ([R] cUIIcon_vtbl; types [O] On Tour's class cUIIcon):
-    virtual char getType();                                               // 22 cUIIcon_getType__FPv
+    virtual char getType() __asm__("cUIIcon_getType__FPv");               // 22
     tAttrIcon mAttrIcon;             // 0x074 [O] tAttrIcon; [R] its ctor tAttrIcon_tAttrIcon1 (cUIScreen_createObjectByStruct) /
                                      //       tAttrIcon_tAttrIcon clears the low nibble; [U] accessors cUIIcon_isTiled..cUIIcon_setIconRotate
                                      //       (lw/sw 0x74), cUIIcon_setUIData stores the record flags

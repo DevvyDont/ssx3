@@ -110,6 +110,57 @@ CHECK_OFFSET(cOVTemplate_PauseMenu, mPauseMenuType, 0x110);
 CHECK_SIZE(cOVTemplate_PauseMenu, 0x114);
 __asm__("_vt$21cOVTemplate_PauseMenu = cOVTemplate_PauseMenu_vtbl");   // g++'s name for the retail vtable
 
+// The six pause-menu overlays (ids 1-6, table above): no members of their own (retail allocates 0x114 for each);
+// each overrides onCreateScreen only. Their constructors and destructors (fe/all_in_one_fe.cpp) stay C functions:
+// the destructors inline ~cOVTemplate_PauseMenu, which is out of line here (NOTES_POLY.md trap 3).
+struct cOVState_PAUSE_COMPETE : public cOVTemplate_PauseMenu {
+    // the vptr: [R] cOVState_PAUSE_COMPETE_vtbl (0x473098), overlay id 1
+    virtual void onCreateScreen() __asm__("cOVState_PAUSE_COMPETE_onCreateScreen");
+};
+
+CHECK_SIZE(cOVState_PAUSE_COMPETE, 0x114);
+__asm__("_vt$22cOVState_PAUSE_COMPETE = cOVState_PAUSE_COMPETE_vtbl");   // g++'s name for the retail vtable
+
+struct cOVState_PAUSE_BIGCHAL : public cOVTemplate_PauseMenu {
+    // the vptr: [R] cOVState_PAUSE_BIGCHAL_vtbl (0x472FC0), overlay id 2
+    virtual void onCreateScreen() __asm__("cOVState_PAUSE_BIGCHAL_onCreateScreen");
+};
+
+CHECK_SIZE(cOVState_PAUSE_BIGCHAL, 0x114);
+__asm__("_vt$22cOVState_PAUSE_BIGCHAL = cOVState_PAUSE_BIGCHAL_vtbl");   // g++'s name for the retail vtable
+
+struct cOVState_PAUSE_FREERIDE : public cOVTemplate_PauseMenu {
+    // the vptr: [R] cOVState_PAUSE_FREERIDE_vtbl (0x472EE8), overlay id 3
+    virtual void onCreateScreen() __asm__("cOVState_PAUSE_FREERIDE_onCreateScreen");
+};
+
+CHECK_SIZE(cOVState_PAUSE_FREERIDE, 0x114);
+__asm__("_vt$23cOVState_PAUSE_FREERIDE = cOVState_PAUSE_FREERIDE_vtbl");   // g++'s name for the retail vtable
+
+struct cOVState_PAUSE_SPOKE : public cOVTemplate_PauseMenu {
+    // the vptr: [R] cOVState_PAUSE_SPOKE_vtbl (0x472E10), overlay id 4
+    virtual void onCreateScreen() __asm__("cOVState_PAUSE_SPOKE_onCreateScreen");
+};
+
+CHECK_SIZE(cOVState_PAUSE_SPOKE, 0x114);
+__asm__("_vt$20cOVState_PAUSE_SPOKE = cOVState_PAUSE_SPOKE_vtbl");   // g++'s name for the retail vtable
+
+struct cOVState_PAUSE_QUICKPLAY : public cOVTemplate_PauseMenu {
+    // the vptr: [R] cOVState_PAUSE_QUICKPLAY_vtbl (0x472D38), overlay id 5
+    virtual void onCreateScreen() __asm__("cOVState_PAUSE_QUICKPLAY_onCreateScreen");
+};
+
+CHECK_SIZE(cOVState_PAUSE_QUICKPLAY, 0x114);
+__asm__("_vt$24cOVState_PAUSE_QUICKPLAY = cOVState_PAUSE_QUICKPLAY_vtbl");   // g++'s name for the retail vtable
+
+struct cOVState_PAUSE_ONLINE : public cOVTemplate_PauseMenu {
+    // the vptr: [R] cOVState_PAUSE_ONLINE_vtbl (0x472C60), overlay id 6
+    virtual void onCreateScreen() __asm__("cOVState_PAUSE_ONLINE_onCreateScreen");
+};
+
+CHECK_SIZE(cOVState_PAUSE_ONLINE, 0x114);
+__asm__("_vt$21cOVState_PAUSE_ONLINE = cOVState_PAUSE_ONLINE_vtbl");   // g++'s name for the retail vtable
+
 // cOVState_PAUSE_OPTIONS: cOVState with no members of its own.
 struct cOVState_PAUSE_OPTIONS : public cOVState {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:

@@ -82,6 +82,16 @@ CHECK_OFFSET(cOVTemplate_Dialog, mDialogType, 0x9C);
 CHECK_SIZE(cOVTemplate_Dialog, 0xA0);
 __asm__("_vt$18cOVTemplate_Dialog = cOVTemplate_Dialog_vtbl");   // g++'s name for the retail vtable
 
+// cOVState_QUIT: the quit dialog (overlay id 24, dialog kind 1; table above). No members of its own (the template's
+// 0xA0); its only own slot is onUpdate. Its constructor and destructor (fe/all_in_one_fe.cpp) stay C functions.
+struct cOVState_QUIT : public cOVTemplate_Dialog {
+    // the vptr: [R] cOVState_QUIT_vtbl (0x004748F8)
+    virtual void onUpdate() __asm__("cOVState_QUIT_onUpdate");
+};
+
+CHECK_SIZE(cOVState_QUIT, 0xA0);
+__asm__("_vt$13cOVState_QUIT = cOVState_QUIT_vtbl");   // g++'s name for the retail vtable
+
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cPDATemplate: the in-game PDA frame (screens "PDATemplate" and "bganim1", with the "temperature" text), kept by the

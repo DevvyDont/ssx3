@@ -66,7 +66,7 @@ struct cUIVector : public cUIThing {
     //   mSize: [U] cUIVector_setSize stores it
     // --- cUIVector
     // cUIVector's own slots ([R] cUIVector_vtbl; types [O] On Tour's class cUIVector):
-    virtual char getType();                                               // 22 cUIVector_getType__FPv
+    virtual char getType() __asm__("cUIVector_getType__FPv");             // 22
     tAttrVector mAttrVector;         // 0x074 [O] tAttrVector (mFill:1 mLoop:1 mNumTriangles:15 mNumVertices:15); [R] the
                                      //       ctors clear mFill, mLoop, mNumVertices (tAttrVector::tAttrVector on this + 0x74);
                                      //       [U] cUIVector_setUIData fills it; render2D / getSize / setChannelData(KCP) /

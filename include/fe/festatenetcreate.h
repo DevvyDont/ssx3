@@ -82,6 +82,7 @@ struct cFEStateCreateStep1 : public cFEStateNet {
                                     //       cFEStateCreateStep1_onGainTransition enables it (its slot 8) only when all four strings are set (cFEStateCreateStep1_isFormFilled)
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateCreateStep1(cUIEngine* pEngine, int bNewAccount) __asm__("cFEStateCreateStep1_cFEStateCreateStep1");
     void* cFEStateCreateStep11() __asm__("cFEStateCreateStep1_cFEStateCreateStep11");
     virtual ~cFEStateCreateStep1();   // g++'s own symbol _$_19cFEStateCreateStep1 (the retail label renamed)
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateCreateStep1_onPopupEvent");
@@ -158,6 +159,7 @@ struct cFEStateCreateStep2 : public cFEStateNet {
     int unk_6DC;                    // 0x6DC [U] onCreateScreen cFEStateCreateStep2_onCreateScreen stores 0; no read seen
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateCreateStep2(cUIEngine* pEngine) __asm__("cFEStateCreateStep2_cFEStateCreateStep2");
     void * cFEStateCreateStep21() __asm__("cFEStateCreateStep2_cFEStateCreateStep21");
     virtual ~cFEStateCreateStep2();   // g++'s own symbol _$_19cFEStateCreateStep2 (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateCreateStep2_onCreateScreen");

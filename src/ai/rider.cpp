@@ -5441,19 +5441,19 @@ static inline void AddTo_3F38(t4Vector& a, const t4Vector& b)
  *
  * @return the end position
  */
-extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
+t4Vector cRider::GetNISEndPosition()
 {
-    if (self->mInUse <= 0)
-        return *(&self->mPosition);
+    if (mInUse <= 0)
+        return *(&mPosition);
     float lift = 0.0f;
-    tSSXHeaderActor* rec = GetSSXActorHeader(self->mpEntity);
-    t4Vector pos = *(&self->mPosition);
+    tSSXHeaderActor* rec = GetSSXActorHeader(mpEntity);
+    t4Vector pos = *(&mPosition);
     switch (rec->scriptEndLocation) {
     case 0:
         break;
     case 1:
         {
-            float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 1, self->mAIIndex);
+            float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 1, mAIIndex);
             t4Vector startPos;
             startPos.x = startPoint[2];
             startPos.y = startPoint[3];
@@ -5494,7 +5494,7 @@ extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
         case kLOCATION_DBC2:
         case kLOCATION_EBC3:
             {
-                float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, self->mAIIndex);
+                float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, mAIIndex);
                 t4Vector startPos;
                 startPos.x = startPoint[2];
                 startPos.y = startPoint[3];
@@ -5518,7 +5518,7 @@ extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
         break;
     case 4:
         {
-            float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, self->mAIIndex);
+            float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, mAIIndex);
             t4Vector startPos;
             startPos.x = startPoint[2];
             startPos.y = startPoint[3];

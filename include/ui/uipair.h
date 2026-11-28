@@ -43,7 +43,7 @@ struct cUIPair : public cUIThing {
     };
 
     // cUIPair's own slots ([R] cUIPair_vtbl; types [O] On Tour's class cUIPair):
-    virtual char getType();                                               // 22 cUIPair_getType__FPv
+    virtual char getType() __asm__("cUIPair_getType__FPv");               // 22
     tAttrPair mAttrPair;             // 0x074 [O] tAttrPair (2 bytes); [R] its ctor tAttrPair::tAttrPair on this + 0x74
                                      //       (createObjectByStruct, cUIPair_cUIPair1, cUIPair_cUIPair)
     char unk_076[0x2];               // 0x076 padding
@@ -69,6 +69,7 @@ struct cUIPair : public cUIThing {
     virtual void* traverseRecurse(cListOperator* pOperator) __asm__("cUIPair_traverseRecurse");
     virtual void setUIData(tUIBaseObject*) __asm__("cUIPair_setUIData__FPv");
     virtual void* traverseFlat(cListOperator* pOperator) __asm__("cUIPair_traverseFlat");
+    virtual bool onInput(const cUIInput* in) __asm__("cUIPair_onInput");
 };
 
 CHECK_OFFSET(cUIPair, mAttrPair, 0x074);

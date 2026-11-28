@@ -2104,18 +2104,18 @@ extern char str_TransitionOut_b[];
  * from mpEngine's state stack (cUIStateStack_pop, On Tour cUIStateStack::pop). It is the onUpdate slot (+0x64) of
  * cOVState_QUIT_vtbl, the dialog type 1 overlay (cOVStateManager_triggerOverlay type 0x18).
  */
-extern "C" void cOVState_QUIT_onUpdate(cOVTemplate_Dialog* self)
+void cOVState_QUIT::onUpdate()
 {
-    cOVState_onUpdate(self);
+    cOVState_onUpdate(this);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
-            int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b));
+            int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(str_TransitionOut_b));
             if (frame != cUIScreen::kNoFrame) {
-                cUIScreen_playFrame(self->mpScreen, frame, 1);
+                cUIScreen_playFrame(mpScreen, frame, 1);
             }
-            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(&mpEngine->mStateStack, 1);
         }
     }
 }

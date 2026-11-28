@@ -50,7 +50,7 @@ struct cTriggerAlgorithm : public cChaseAlgorithm {
     //   Target: [U] snap / snapCurrent / update call its virtuals (getPosition slot 1, getVelocity slot 3, getFront
     //       slot 4) and reach the rider through its +0x4
     // --- cTriggerAlgorithm
-    virtual tPose getPose();                                                        // 2 ([R] cTriggerAlgorithm_vtbl: cTriggerAlgorithm_getPose)
+    virtual tPose getPose() __asm__("cTriggerAlgorithm_getPose");                   // 2 ([R] cTriggerAlgorithm_vtbl)
     t4Vector Position;          // 0x40 [O]; [R] = t4vect_Origin; [U] snap/update store the new camera position (sq),
                                 //      cTriggerAlgorithm_getPose translates by it (lq); cBoundedAlgorithm_update passes
                                 //      &Position to the bound object's limitPoint
@@ -115,6 +115,7 @@ struct cBoundedAlgorithm : public cTriggerAlgorithm {
     // the vtable out of the units defining the other overrides
     virtual void snap(int subjectId) __asm__("cBoundedAlgorithm_snap");
     virtual void snapCurrent() __asm__("cBoundedAlgorithm_snapCurrent");
+    virtual void update() __asm__("cBoundedAlgorithm_update");
 };
 
 CHECK_OFFSET(cBoundedAlgorithm, BoundAction, 0x80);

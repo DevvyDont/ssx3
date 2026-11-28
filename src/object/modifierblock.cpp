@@ -993,12 +993,12 @@ static inline void SetAlpha_53B10(sRS_53B10* r, int v) { r->alpha = v; }
  * through the graphics manager's slot 95 with an identity matrix moved to the current view's position
  * (cObjectInterface_getCameraPosition) and flags 0x5420. Then pops the state and writes the saved blend bits back.
  */
-extern "C" void cSkyBox_render(cSkyBox* self)
+void cSkyBox::render()
 {
     if (cRenderToggles_m_DisableSkyBox != 0)
         return;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
-    if (self->m_pInstanceSky == 0)
+    if (m_pInstanceSky == 0)
         return;
     t4Matrix skyMatrix;
     vu0CopyMatrix_53B10(&skyMatrix, &t4mat_Identity);
@@ -1015,11 +1015,11 @@ extern "C" void cSkyBox_render(cSkyBox* self)
     SetBlendM_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 2);
     SetZMode_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 0);
     SetAlpha_53B10(((sRS_53B10*)ctx->m_pCurrentDrawState), 20);
-    tInstanceRecord* skyInstance = self->m_pInstanceSky;
+    tInstanceRecord* skyInstance = m_pInstanceSky;
     if (((char*)skyInstance) != 0)
     {
         skyInstance->m_iFlags = ((unsigned int)skyInstance->m_iFlags & ~2u) | 4;
-        tInstanceRecord* instToDraw = self->m_pInstanceSky;
+        tInstanceRecord* instToDraw = m_pInstanceSky;
         ctx->RenderModel(instToDraw, instToDraw->m_Model->m_MaterialBlock, skyMatrix, 1.0f, 0, (const t4Matrix*)(0), 21536);
     }
     sRS_53B10* topDrawState = (sRS_53B10*)ctx->m_pCurrentDrawState;

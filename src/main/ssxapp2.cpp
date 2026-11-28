@@ -34,37 +34,37 @@ INCLUDE_ASM("main/ssxapp2", cGameState_isPreloadComplete);
 
 INCLUDE_ASM("main/ssxapp2", cGameState_onWidgetEvent);
 
-INCLUDE_ASM("main/ssxapp2", cGFEndState__cGFEndState);
+INCLUDE_ASM("main/ssxapp2", _$_11cGFEndState);
 
-INCLUDE_ASM("main/ssxapp2", cGFEndWaitState__cGFEndWaitState);
+INCLUDE_ASM("main/ssxapp2", _$_15cGFEndWaitState);
 
-INCLUDE_ASM("main/ssxapp2", cGFFinishlineState__cGFFinishlineState);
+INCLUDE_ASM("main/ssxapp2", _$_18cGFFinishlineState);
 
-INCLUDE_ASM("main/ssxapp2", cGFTransportWaitState__cGFTransportWaitState);
+INCLUDE_ASM("main/ssxapp2", _$_21cGFTransportWaitState);
 
-INCLUDE_ASM("main/ssxapp2", cGFEventStartState__cGFEventStartState);
+INCLUDE_ASM("main/ssxapp2", _$_18cGFEventStartState);
 
-INCLUDE_ASM("main/ssxapp2", cGFGateState__cGFGateState);
+INCLUDE_ASM("main/ssxapp2", _$_12cGFGateState);
 
-INCLUDE_ASM("main/ssxapp2", cGFRidingState__cGFRidingState);
+INCLUDE_ASM("main/ssxapp2", _$_14cGFRidingState);
 
-INCLUDE_ASM("main/ssxapp2", cGFTrackStartState__cGFTrackStartState);
+INCLUDE_ASM("main/ssxapp2", _$_18cGFTrackStartState);
 
-INCLUDE_ASM("main/ssxapp2", cGFNextHeatState__cGFNextHeatState);
+INCLUDE_ASM("main/ssxapp2", _$_16cGFNextHeatState);
 
-INCLUDE_ASM("main/ssxapp2", cGFSessionTeleportState__cGFSessionTeleportState);
+INCLUDE_ASM("main/ssxapp2", _$_23cGFSessionTeleportState);
 
-INCLUDE_ASM("main/ssxapp2", cGFUserSelectState__cGFUserSelectState);
+INCLUDE_ASM("main/ssxapp2", _$_18cGFUserSelectState);
 
-INCLUDE_ASM("main/ssxapp2", cGFSectionLoadState__cGFSectionLoadState);
+INCLUDE_ASM("main/ssxapp2", _$_19cGFSectionLoadState);
 
-INCLUDE_ASM("main/ssxapp2", cGFPreEventState__cGFPreEventState);
+INCLUDE_ASM("main/ssxapp2", _$_16cGFPreEventState);
 
-INCLUDE_ASM("main/ssxapp2", cGFPostEventState__cGFPostEventState);
+INCLUDE_ASM("main/ssxapp2", _$_17cGFPostEventState);
 
-INCLUDE_ASM("main/ssxapp2", cGFPodiumState__cGFPodiumState);
+INCLUDE_ASM("main/ssxapp2", _$_14cGFPodiumState);
 
-INCLUDE_ASM("main/ssxapp2", cGFReplayStartState__cGFReplayStartState);
+INCLUDE_ASM("main/ssxapp2", _$_19cGFReplayStartState);
 
 INCLUDE_ASM("main/ssxapp2", cPauseState_set);
 

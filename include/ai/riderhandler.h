@@ -248,6 +248,7 @@ struct cRailslideMotion {
     void loseFocus() __asm__("cRailslideMotion_loseFocus");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cRailslideMotion_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cRailslideMotion_readFromReplayFrame");
+    t4Vector getRailUpNorm(const t4Vector& n) __asm__("cRailslideMotion_getRailUpNorm");
 };
 
 CHECK_OFFSET(cRailslideMotion, RailNorm, 0x00);

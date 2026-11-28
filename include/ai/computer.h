@@ -246,6 +246,7 @@ struct cComputer {
     void avoidTargetCruise(tCruiseCmd* cmd) __asm__("cComputer_avoidTargetCruise");
     float calcTurn(t4Vector* target) __asm__("cComputer_calcTurn");
     void Init() __asm__("cComputer_Init");
+    t4Vector calculateTargetPos() __asm__("cComputer_calculateTargetPos");
 };
 
 // Virtual slots of _vt$9cComputer (D_004585F0). cRiderHandler's slot 1 is pure virtual (cRiderHandler_vtbl: __pure_virtual);

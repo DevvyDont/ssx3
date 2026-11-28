@@ -2452,22 +2452,21 @@ extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(cRailslideMotion* p, con
  * normalised and flipped to agree with the rider's up (mMatrix row 2). For a steep one it builds a = normalised (up x
  * n) and b = n x a, and returns b cos(RailLeanAngle) - a sin(RailLeanAngle) (fSinCos).
  *
- * @param railslide  the cRailslideMotion (this)
  * @param n  the rail normal
  * @return the up vector
  */
-extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(cRailslideMotion* railslide, const t4Vector& n)
+t4Vector cRailslideMotion::getRailUpNorm(const t4Vector& n)
 {
     float sinLean, cosLean;
-    fSinCos(&sinLean, &cosLean, railslide->RailLeanAngle);
+    fSinCos(&sinLean, &cosLean, RailLeanAngle);
     bool steep = absf_BD80(n.z) > 0.92f;
     t4Vector railUp;
     if (!steep) {
         railUp = vu0Normalize_BD80(vu0Sub_BD80(t4vect_ZAxis_BD80, vu0Scale_BD80(n, n.z)));
-        if (vu0Dot_BD80(railUp, up_BD80(railslide)) < 0.0f)
+        if (vu0Dot_BD80(railUp, up_BD80(this)) < 0.0f)
             vu0ScaleEq_BD80(railUp, -1.0f);
     } else {
-        t4Vector sideDir = vu0Normalize_BD80(vu0Cross_BD80(up_BD80(railslide), n));
+        t4Vector sideDir = vu0Normalize_BD80(vu0Cross_BD80(up_BD80(this), n));
         t4Vector perpDir = vu0Cross_BD80(n, sideDir);
         railUp = vu0Sub_BD80(vu0Scale_BD80(perpDir, cosLean), vu0Scale_BD80(sideDir, sinLean));
     }

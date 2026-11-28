@@ -57,7 +57,7 @@ struct cBoostModifier : public cPhysicsModifier {
     // cPhysicsModifier (object/physicsmodifier.h, 0x8): the vptr at 0x04:
     //   [R] cPhysicsModifier_vtbl (0x004913B8); cBoostModifier ctors store cBoostModifier_vtbl (0x00490898)
     // cBoostModifier's own slots ([R] cBoostModifier_vtbl; types [O] On Tour's class cBoostModifier):
-    virtual void applyBoost(cBeing* pBeing);                    // 7
+    virtual void applyBoost(cBeing* pBeing) __asm__("cBoostModifier_applyBoost");   // 7
     virtual void applyDrag(cBeing* pBeing) __asm__("cBoostModifier_applyDrag");                     // 8
     virtual void boostStart() __asm__("cBoostModifier_boostStart__FPv");                                  // 9
     virtual void boostEnd() __asm__("cBoostModifier_boostEnd__FPv");                                    // 10
@@ -82,10 +82,12 @@ struct cBoostModifier : public cPhysicsModifier {
 
     // Methods bound to their retail symbols by asm labels.
     virtual ~cBoostModifier();   // g++'s own symbol _$_14cBoostModifier (the retail label renamed)
-    void* cBoostModifier1(cBxReplayFrame* stream) __asm__("cBoostModifier_cBoostModifier1");
+    cBoostModifier(tAddBoostData* def, tInstanceRecord* instRecord) __asm__("cBoostModifier_cBoostModifier");
+    cBoostModifier(cBxReplayFrame* stream) __asm__("cBoostModifier_cBoostModifier1");
     virtual void update() __asm__("cBoostModifier_update");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cBoostModifier_writeToReplayFrame");
     virtual int getPhysicsType() __asm__("cBoostModifier_getPhysicsType__FPv");
+    virtual void signal(int msg, float) __asm__("cBoostModifier_signal");
 };
 
 CHECK_OFFSET(cBoostModifier, unk_08, 0x08);

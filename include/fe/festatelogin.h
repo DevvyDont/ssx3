@@ -57,6 +57,7 @@ struct cFEStateLogin : public cFEStateNet {
                                     //       destructor cFEStateLogin__cFEStateLogin frees it
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateLogin(cUIEngine* pEngine) __asm__("cFEStateLogin_cFEStateLogin");
     void* cFEStateLogin1() __asm__("cFEStateLogin_cFEStateLogin1");
     virtual ~cFEStateLogin();   // g++'s own symbol _$_13cFEStateLogin (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateLogin_onCreateScreen");

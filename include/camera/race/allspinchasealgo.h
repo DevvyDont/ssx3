@@ -33,7 +33,7 @@ struct cRiderCameraTarget;
 // non-virtual getRiderPosition cSPOKEChaseAlgorithm_getRiderPosition and getDesiredPosition(const t4Vector&) cSPOKEChaseAlgorithm_getDesiredPosition (both return a
 // t4Vector through a hidden pointer: a0 = result, a1 = this).
 struct cSPOKEChaseAlgorithm : public cLookAtChaseAlgorithm {
-    virtual float getRestDrop();                                                    // 13 ([R] cSPOKEChaseAlgorithm_vtbl: cSPOKEChaseAlgorithm_getRestDrop)
+    virtual float getRestDrop() __asm__("cSPOKEChaseAlgorithm_getRestDrop");   // 13 ([R] cSPOKEChaseAlgorithm_vtbl)
     t4Vector LastLookDir;           // 0x390 [O] (On Tour 0x380); [U] snap cSPOKEChaseAlgorithm_snap (sq), getDesiredPosition
                                     //       cSPOKEChaseAlgorithm_getDesiredPosition (lqc2, sq)
 
@@ -46,6 +46,8 @@ struct cSPOKEChaseAlgorithm : public cLookAtChaseAlgorithm {
     // Methods bound to their retail symbols by asm labels.
     virtual void snap(int id) __asm__("cSPOKEChaseAlgorithm_snap");
     virtual void update() __asm__("cSPOKEChaseAlgorithm_update");
+    t4Vector getRiderPosition() __asm__("cSPOKEChaseAlgorithm_getRiderPosition");
+    t4Vector getDesiredPosition(const t4Vector& in) __asm__("cSPOKEChaseAlgorithm_getDesiredPosition");
 };
 
 CHECK_OFFSET(cSPOKEChaseAlgorithm, LastLookDir, 0x390);
@@ -59,7 +61,8 @@ __asm__("_vt$20cSPOKEChaseAlgorithm = cSPOKEChaseAlgorithm_vtbl");   // g++'s na
 // cSUPERPIPEChaseAlgorithm_snap (3), update cSUPERPIPEChaseAlgorithm_update (5), getRaceCamFinalPhaseData cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cSUPERPIPEChaseAlgorithm_getRestDrop
 // (13); non-virtual getIdealPosition cSUPERPIPEChaseAlgorithm_getIdealPosition and getIdealTargetPos cSUPERPIPEChaseAlgorithm_getIdealTargetPos (a0 = result, a1 = this).
 struct cSUPERPIPEChaseAlgorithm : public cLookAtChaseAlgorithm {
-    virtual float getRestDrop();                                                    // 13 ([R] cSUPERPIPEChaseAlgorithm_vtbl: cSUPERPIPEChaseAlgorithm_getRestDrop)
+    // 13 ([R] cSUPERPIPEChaseAlgorithm_vtbl)
+    virtual float getRestDrop() __asm__("cSUPERPIPEChaseAlgorithm_getRestDrop");
     t4Vector Point1;                // 0x390 [O] (On Tour 0x380); [R] ctor = *point1 (lq/sq); [U] getIdealPosition
                                     //       cSUPERPIPEChaseAlgorithm_getIdealPosition (lqc2)
     t4Vector Point2;                // 0x3A0 [O] (On Tour 0x390); [R] ctor = *point2 (lq/sq); [U] getIdealPosition (lqc2)
@@ -72,6 +75,7 @@ struct cSUPERPIPEChaseAlgorithm : public cLookAtChaseAlgorithm {
         __asm__("cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData");
     virtual void snap(int id) __asm__("cSUPERPIPEChaseAlgorithm_snap");
     virtual void update() __asm__("cSUPERPIPEChaseAlgorithm_update");
+    t4Vector getIdealPosition() __asm__("cSUPERPIPEChaseAlgorithm_getIdealPosition");
 };
 
 CHECK_OFFSET(cSUPERPIPEChaseAlgorithm, Point1, 0x390);
@@ -85,7 +89,8 @@ __asm__("_vt$24cSUPERPIPEChaseAlgorithm = cSUPERPIPEChaseAlgorithm_vtbl");   // 
 // cPOST_RACE_1ChaseAlgorithm_snap (3), update cPOST_RACE_1ChaseAlgorithm_update (5), getRaceCamFinalPhaseData cPOST_RACE_1ChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 (7), getRestDrop
 // cPOST_RACE_1ChaseAlgorithm_getRestDrop__FPv (13).
 struct cPOST_RACE_1ChaseAlgorithm : public cLookAtChaseAlgorithm {
-    virtual float getRestDrop();                                                    // 13 ([R] cPOST_RACE_1ChaseAlgorithm_vtbl: cPOST_RACE_1ChaseAlgorithm_getRestDrop__FPv)
+    // 13 ([R] cPOST_RACE_1ChaseAlgorithm_vtbl)
+    virtual float getRestDrop() __asm__("cPOST_RACE_1ChaseAlgorithm_getRestDrop__FPv");
     t4Vector StartDir;              // 0x390 [O] (On Tour 0x380); [R] ctor: the target's direction, normalised (sq),
                                     //       .z = 0 (sw), renormalised (lqc2/sqc2); [U] update cPOST_RACE_1ChaseAlgorithm_update (lqc2)
     int AgeInFrames;                // 0x3A0 [O] (On Tour 0x390); [R] ctor = 0 (sw); [U] update cPOST_RACE_1ChaseAlgorithm_update (lw/sw)

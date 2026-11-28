@@ -2332,11 +2332,11 @@ extern "C" void cScreenPopup_redrawPopup(void*, int);
  *
  * @param uiButton  index of the default button
  */
-extern "C" void cFEPopupConfirm_setDefaultButton(cFEPopupConfirm* self, int uiButton)
+void cFEPopupConfirm::setDefaultButton(unsigned int uiButton)
 {
-    self->info.miDefaultOption = uiButton;
-    if ((int)self->mpScreen != 0) {
-        cScreenPopup_redrawPopup(self, uiButton);
+    info.miDefaultOption = uiButton;
+    if ((int)mpScreen != 0) {
+        cScreenPopup_redrawPopup(this, uiButton);
     }
 }
 #endif

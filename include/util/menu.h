@@ -122,6 +122,7 @@ struct cMenuItem {
         __asm__("cMenuItem_textRender");
     void* textRender1(int rect, const char* leftText, const char* centerText, void* rightText)
         __asm__("cMenuItem_textRender1");
+    tRect textPreRender(const char* left, const char* center, const char* right) __asm__("cMenuItem_textPreRender");
 };
 
 CHECK_OFFSET(cMenuItem, Flags, 0x04);
@@ -435,6 +436,7 @@ struct cSpaceMenuItem {
     // Methods bound to their retail symbols by asm labels.
     int canHaveFocus() __asm__("cSpaceMenuItem_canHaveFocus__FPv");
     void render() __asm__("cSpaceMenuItem_render__FPv");
+    tRect preRender() __asm__("cSpaceMenuItem_preRender");
 };
 
 CHECK_OFFSET(cSpaceMenuItem, Menu, 0x00);

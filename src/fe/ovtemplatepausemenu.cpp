@@ -634,15 +634,15 @@ extern int gPauseCompeteMenu[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_COMPETE_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 1 (the career (game path 0) event pause that cOVStateManager_triggerPauseMenu opens).
  */
-extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(cOVTemplate_PauseMenu* self)
+void cOVState_PAUSE_COMPETE::onCreateScreen()
 {
     int i;
-    self->mPauseMenuNumOptions = 6;
-    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        self->mPauseMenuOptions[i] = gPauseCompeteMenu[i];
+    mPauseMenuNumOptions = 6;
+    for (i = 0; i < mPauseMenuNumOptions; i++) {
+        mPauseMenuOptions[i] = gPauseCompeteMenu[i];
     }
-    self->mPauseMenuType = kOVSTATE_PAUSE_COMPETE;
-    self->cOVTemplate_PauseMenu::onCreateScreen();
+    mPauseMenuType = kOVSTATE_PAUSE_COMPETE;
+    cOVTemplate_PauseMenu::onCreateScreen();
 }
 #endif
 
@@ -661,15 +661,15 @@ extern int gPauseBigChallengeMenu[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_BIGCHAL_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 2 (the local-mission pause that cOVStateManager_triggerPauseMenu opens).
  */
-extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(cOVTemplate_PauseMenu* self)
+void cOVState_PAUSE_BIGCHAL::onCreateScreen()
 {
     int i;
-    self->mPauseMenuNumOptions = 6;
-    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        self->mPauseMenuOptions[i] = gPauseBigChallengeMenu[i];
+    mPauseMenuNumOptions = 6;
+    for (i = 0; i < mPauseMenuNumOptions; i++) {
+        mPauseMenuOptions[i] = gPauseBigChallengeMenu[i];
     }
-    self->mPauseMenuType = kOVSTATE_PAUSE_BIGCHAL;
-    self->cOVTemplate_PauseMenu::onCreateScreen();
+    mPauseMenuType = kOVSTATE_PAUSE_BIGCHAL;
+    cOVTemplate_PauseMenu::onCreateScreen();
 }
 #endif
 
@@ -688,15 +688,15 @@ extern int gPauseFreerideMenu[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_FREERIDE_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 3 (the freeride (cGameMode 4) pause that cOVStateManager_triggerPauseMenu opens).
  */
-extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(cOVTemplate_PauseMenu* self)
+void cOVState_PAUSE_FREERIDE::onCreateScreen()
 {
     int i;
-    self->mPauseMenuNumOptions = 7;
-    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        self->mPauseMenuOptions[i] = gPauseFreerideMenu[i];
+    mPauseMenuNumOptions = 7;
+    for (i = 0; i < mPauseMenuNumOptions; i++) {
+        mPauseMenuOptions[i] = gPauseFreerideMenu[i];
     }
-    self->mPauseMenuType = kOVSTATE_PAUSE_FREERIDE;
-    self->cOVTemplate_PauseMenu::onCreateScreen();
+    mPauseMenuType = kOVSTATE_PAUSE_FREERIDE;
+    cOVTemplate_PauseMenu::onCreateScreen();
 }
 #endif
 
@@ -715,15 +715,15 @@ extern int gPauseSpokeMenu[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_SPOKE_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 4 (the game-state-11 pause that cOVStateManager_triggerPauseMenu opens).
  */
-extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(cOVTemplate_PauseMenu* self)
+void cOVState_PAUSE_SPOKE::onCreateScreen()
 {
     int i;
-    self->mPauseMenuNumOptions = 5;
-    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        self->mPauseMenuOptions[i] = gPauseSpokeMenu[i];
+    mPauseMenuNumOptions = 5;
+    for (i = 0; i < mPauseMenuNumOptions; i++) {
+        mPauseMenuOptions[i] = gPauseSpokeMenu[i];
     }
-    self->mPauseMenuType = kOVSTATE_PAUSE_SPOKE;
-    self->cOVTemplate_PauseMenu::onCreateScreen();
+    mPauseMenuType = kOVSTATE_PAUSE_SPOKE;
+    cOVTemplate_PauseMenu::onCreateScreen();
 }
 #endif
 
@@ -742,15 +742,15 @@ extern int gQuickPlayMenu[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_QUICKPLAY_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 5 (the fallback pause that cOVStateManager_triggerPauseMenu opens).
  */
-extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(cOVTemplate_PauseMenu* self)
+void cOVState_PAUSE_QUICKPLAY::onCreateScreen()
 {
     int i;
-    self->mPauseMenuNumOptions = 5;
-    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        self->mPauseMenuOptions[i] = gQuickPlayMenu[i];
+    mPauseMenuNumOptions = 5;
+    for (i = 0; i < mPauseMenuNumOptions; i++) {
+        mPauseMenuOptions[i] = gQuickPlayMenu[i];
     }
-    self->mPauseMenuType = kOVSTATE_PAUSE_QUICKPLAY;
-    self->cOVTemplate_PauseMenu::onCreateScreen();
+    mPauseMenuType = kOVSTATE_PAUSE_QUICKPLAY;
+    cOVTemplate_PauseMenu::onCreateScreen();
 }
 #endif
 
@@ -769,20 +769,20 @@ extern int gSystemInitiatedPauseMenu[2];
  * when cGame_canUserActivatePauseMenu (On Tour cGame::canUserActivatePauseMenu) returns 0; copies them to +0x9C with the count at
  * +0xBC, sets +0x110 to 6 and runs cOVTemplate_PauseMenu_onCreateScreen.
  */
-extern "C" void cOVState_PAUSE_ONLINE_onCreateScreen(cOVTemplate_PauseMenu* self)
+void cOVState_PAUSE_ONLINE::onCreateScreen()
 {
     int* items = gOnlinePauseMenu;
-    self->mPauseMenuNumOptions = 3;
+    mPauseMenuNumOptions = 3;
     if (cGame_canUserActivatePauseMenu(SSXApp->Game) == 0) {
         items = gSystemInitiatedPauseMenu;
-        self->mPauseMenuNumOptions = 2;
+        mPauseMenuNumOptions = 2;
     }
     int i;
-    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        self->mPauseMenuOptions[i] = items[i];
+    for (i = 0; i < mPauseMenuNumOptions; i++) {
+        mPauseMenuOptions[i] = items[i];
     }
-    self->mPauseMenuType = kOVSTATE_PAUSE_ONLINE;
-    self->cOVTemplate_PauseMenu::onCreateScreen();
+    mPauseMenuType = kOVSTATE_PAUSE_ONLINE;
+    cOVTemplate_PauseMenu::onCreateScreen();
 }
 #endif
 

@@ -44,7 +44,7 @@ struct cEffectModifier : public cEffectLink {
     //   Prev: [R] ditto
     // --- cEffectModifier
     // cEffectModifier's own slots ([R] cEffectModifier_vtbl; types [O] On Tour's class cEffectModifier):
-    virtual void update();                                      // 5
+    virtual void update() __asm__("cEffectModifier_update__FPv");   // 5
     virtual void render() __asm__("cEffectModifier_render__FPv");                                      // 6
     virtual void signal(int signal, float arg) __asm__("cEffectModifier_signal__FPv");                 // 7
     tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst

@@ -57,14 +57,14 @@ INCLUDE_ASM("object/debouncenode", cDebounceNode_updateNode);
  *
  * @return false on the tick the node expires, otherwise true
  */
-extern "C" bool cDebounceNode_updateNode(cDebounceNode* self)
+bool cDebounceNode::updateNode()
 {
-    int n = self->Life;
+    int n = Life;
     if (n > 0) {
         n--;
-        self->Life = n;
+        Life = n;
         if (n == 0) {
-            self->expire(1);
+            expire(1);
             return false;
         }
     }
@@ -527,19 +527,19 @@ struct sDebounceScroll {
  *
  * Adds UVScroll (+0x38/+0x3C) to UV (+0x40/+0x44) and wraps each component back into -1..1 by one step.
  */
-extern "C" void cConveyorNode_update(cConveyorNode* self)
+void cConveyorNode::update()
 {
-    self->UV.x += self->UVScroll.x;
-    self->UV.y += self->UVScroll.y;
-    if (self->UV.x > 1.0f) {
-        self->UV.x -= 1.0f;
-    } else if (self->UV.x < -1.0f) {
-        self->UV.x += 1.0f;
+    UV.x += UVScroll.x;
+    UV.y += UVScroll.y;
+    if (UV.x > 1.0f) {
+        UV.x -= 1.0f;
+    } else if (UV.x < -1.0f) {
+        UV.x += 1.0f;
     }
-    if (self->UV.y > 1.0f) {
-        self->UV.y -= 1.0f;
-    } else if (self->UV.y < -1.0f) {
-        self->UV.y += 1.0f;
+    if (UV.y > 1.0f) {
+        UV.y -= 1.0f;
+    } else if (UV.y < -1.0f) {
+        UV.y += 1.0f;
     }
 }
 #endif
@@ -723,11 +723,11 @@ INCLUDE_ASM("object/debouncenode", cCounterNode_update);
  * When the count (offset 0x1C, decremented by cCounterNode_signal) is 0, sets it to -1 so this happens once, and
  * calls the node's expire virtual (slot 34, cInstanceNode_expire) with 1.
  */
-extern "C" void cCounterNode_update(cCounterNode* self)
+void cCounterNode::update()
 {
-    if (self->Count == 0) {
-        self->Count = -1;
-        self->expire(1);
+    if (Count == 0) {
+        Count = -1;
+        expire(1);
     }
 }
 #endif

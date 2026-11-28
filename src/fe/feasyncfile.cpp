@@ -414,8 +414,6 @@ void cFEAsyncManager::LoadDataFile(int idx)
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_cFEStateNetMessenger);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
-extern void* cFEStateNetMessenger_vtbl[];
 extern void* cBXString_EmptyString_v __asm__("cBXString_EmptyString");
 
 /**
@@ -429,26 +427,23 @@ extern void* cBXString_EmptyString_v __asm__("cBXString_EmptyString");
  *
  * @param pEngine  the UI engine (stored in mpEngine by the base constructor)
  * @param pParentState  the parent state (mpParentState)
- * @return @p self
  */
-extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger* self, cUIEngine* pEngine, cFEStateNet* pParentState)
+cFEStateNetMessenger::cFEStateNetMessenger(cUIEngine* pEngine, cFEStateNet* pParentState)
+    : cFEStateNet(pEngine, pParentState)
 {
     // An unused 16-byte local is needed to reproduce the 0x30-byte frame.
     int framePad[4];
-    cFEStateNet_cFEStateNet_3(self, pEngine, pParentState);
     void* empty = cBXString_EmptyString_v;
-    VPTR_OF(cListNode, self) = cFEStateNetMessenger_vtbl;
-    self->mszFoundName = (char*)empty;
-    self->mszSearchName = (char*)empty;
-    self->mszShownName = (char*)empty;
-    self->miSelectedIndex = -1;
-    self->mHashName = 70;
-    self->mLastRefreshFrame = 0;
-    self->mNames.mpStart = 0;
-    self->mNames.mpFinish = 0;
-    self->mNames.mpEndOfStorage = 0;
-    self->miScrollOffset = 0;
-    return ((void*)self);
+    mszFoundName = (char*)empty;
+    mszSearchName = (char*)empty;
+    mszShownName = (char*)empty;
+    miSelectedIndex = -1;
+    mHashName = 70;
+    mLastRefreshFrame = 0;
+    mNames.mpStart = 0;
+    mNames.mpFinish = 0;
+    mNames.mpEndOfStorage = 0;
+    miScrollOffset = 0;
 }
 #endif
 
@@ -2759,15 +2754,9 @@ void cFEStateNet::showBuddyPresence(const char* name, int mode)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateReadMessagePopup_cFEStateReadMessagePopup);
 #ifdef SKIP_ASM
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
-extern void* cFEStateReadMessagePopup_vtbl[];
 
 
-
-// PORT: the unit declares this as (void*, int, void*, int); the body uses typed arguments.
-extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(cFEStateReadMessagePopup* self, cUIEngine* a1,
-        cFEStateNet* a2, const char* name) __asm__("cFEStateReadMessagePopup_cFEStateReadMessagePopup");
 
 /**
  * Constructs the private-message conversation popup for one sender.
@@ -2779,29 +2768,25 @@ extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(cFEState
  * @param engine  the UI engine (On Tour cUIState's pEngine)
  * @param owner  the parent state, the messenger (On Tour pParentState)
  * @param name  the other player's name
- * @return @p self
  */
-extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(cFEStateReadMessagePopup* self,
-        cUIEngine* engine, cFEStateNet* owner, const char* name)
+cFEStateReadMessagePopup::cFEStateReadMessagePopup(cUIEngine* engine, cFEStateNet* owner, const char* name)
+    : cFEStateNet(engine, owner)
 {
     // An unused 16-byte local is needed to reproduce the 0x50-byte frame.
     int frameFiller[4];
-    cFEStateNet_cFEStateNet_3(self, engine, owner);
-    VPTR_OF(cListNode, self) = cFEStateReadMessagePopup_vtbl;
-    cBXString_cBXString2(((char*)&self->mszSender), name);
-    self->mbResetScroll = 1;
-    self->mHashName = 73;
-    self->mScrollIndex = 0;
-    self->mMessages.mpStart = 0;
-    self->mMessages.mpFinish = 0;
-    self->mMessages.mpEndOfStorage = 0;
+    cBXString_cBXString2(((char*)&mszSender), name);
+    mbResetScroll = 1;
+    mHashName = 73;
+    mScrollIndex = 0;
+    mMessages.mpStart = 0;
+    mMessages.mpFinish = 0;
+    mMessages.mpEndOfStorage = 0;
     tARGB white;
     white.A = 1.0f;
     white.R = 1.0f;
     white.G = 1.0f;
     white.B = 1.0f;
-    *(&self->mTextColour) = white;
-    return self;
+    mTextColour = white;
 }
 #endif
 
@@ -6452,10 +6437,8 @@ extern "C" void* cFEBlankPopup_onCreateScreen(cFEStateNet* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount_cFEUseExistingAccount);
 #ifdef SKIP_ASM
-extern void* cFEUseExistingAccount_vtbl[];
 extern char* cBXString_EmptyString;
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the "use existing account" screen state.
@@ -6465,19 +6448,15 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  * and mNeedsLobby (so net messages are not filtered on this screen).
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
- * @return @p self
  */
-extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount(cFEUseExistingAccount* self, cUIEngine* pEngine)
+cFEUseExistingAccount::cFEUseExistingAccount(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
     char* emptyStr = cBXString_EmptyString;
-    VPTR_OF(cListNode, self) = cFEUseExistingAccount_vtbl;
-    self->mszEmail = emptyStr;
-    self->mHashName = 53;
-    self->unk_6D0 = 0;
-    self->mpTextForgotPassword = 0;
-    self->mNeedsLobby = 0;
-    return ((void*)self);
+    mszEmail = emptyStr;
+    mHashName = 53;
+    unk_6D0 = 0;
+    mpTextForgotPassword = 0;
+    mNeedsLobby = 0;
 }
 #endif
 
@@ -7291,9 +7270,7 @@ int cFEUseExistingAccount::onNetEvent(int id, void* data)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateSelectPersona_cFEStateSelectPersona);
 #ifdef SKIP_ASM
-extern void* cFEStateSelectPersona_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the persona-select screen state.
@@ -7302,15 +7279,11 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  * cFEStateSelectPersona_vtbl, and clears mbExistingPersona.
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
- * @return @p self
  */
-extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPersona* self, cUIEngine* pEngine)
+cFEStateSelectPersona::cFEStateSelectPersona(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    self->mHashName = 0x38;
-    VPTR_OF(cListNode, self) = cFEStateSelectPersona_vtbl;
-    self->mbExistingPersona = 0;
-    return ((void*)self);
+    mHashName = 0x38;
+    mbExistingPersona = 0;
 }
 #endif
 
@@ -9202,11 +9175,9 @@ extern "C" void showOpponentConnection(cUIScreen* self, online_PingEvent* msg)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup);
 #ifdef SKIP_ASM
-extern void* cFEStateChallengeReceivedPopup_vtbl[];
 extern int cFEStateChallengePopup_raceSetup;
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the "challenge received" popup state for one challenger.
@@ -9218,18 +9189,15 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @param pParentState  the parent state (On Tour pParentState)
  * @param name  the challenger's name
- * @return @p self
  */
-extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup(cFEStateChallengeReceivedPopup* self,
-        cUIEngine* pEngine, cFEStateNet* pParentState, const char* name)
+cFEStateChallengeReceivedPopup::cFEStateChallengeReceivedPopup(cUIEngine* pEngine, cFEStateNet* pParentState,
+    const char* name)
+    : cFEStateNet(pEngine, pParentState)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, pParentState);
-    VPTR_OF(cListNode, self) = cFEStateChallengeReceivedPopup_vtbl;
-    cBXString_cBXString2((char*)&self->mszChallenger, name);
-    self->mbAccepted = 0;
-    self->mHashName = 0x40;
+    cBXString_cBXString2((char*)&mszChallenger, name);
+    mbAccepted = 0;
+    mHashName = 0x40;
     cFEStateChallengePopup_raceSetup = 0;
-    return ((void*)self);
 }
 #endif
 
@@ -10006,9 +9974,7 @@ extern "C" int findOnlineCharacterRow(int characterId)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect);
 #ifdef SKIP_ASM
-extern void* cFEStateOnlineCharacterSelect_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the online rider-select state.
@@ -10017,17 +9983,12 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  * mbConfirmed (input blocked until the screen opens), mHashName 0x41 and clears miConfirmCtrl.
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
- * @return @p self
  */
-extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self,
-        cUIEngine* pEngine)
+cFEStateOnlineCharacterSelect::cFEStateOnlineCharacterSelect(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    VPTR_OF(cListNode, self) = cFEStateOnlineCharacterSelect_vtbl;
-    self->mbConfirmed = 1;
-    self->mHashName = 65;
-    self->miConfirmCtrl = 0;
-    return ((void*)self);
+    mbConfirmed = 1;
+    mHashName = 65;
+    miConfirmCtrl = 0;
 }
 #endif
 
@@ -10811,9 +10772,7 @@ void cFEStateOnlineCharacterSelect::onCancelChallengePopupEvent(cUIState* popup,
 INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_cFEStateChatRoom);
 #ifdef SKIP_ASM
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 extern "C" char* strcpy(char* dst, const char* src);
-extern void* cFEStateChatRoom_vtbl[];
 
 
 
@@ -10825,29 +10784,25 @@ extern void* cFEStateChatRoom_vtbl[];
  * to white and copies LobbyMan's mPersona into mszPlayerName.
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
- * @return @p self
  */
-extern "C" cFEStateChatRoom* cFEStateChatRoom_cFEStateChatRoom(cFEStateChatRoom* self, cUIEngine* pEngine)
+cFEStateChatRoom::cFEStateChatRoom(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    VPTR_OF(cListNode, self) = cFEStateChatRoom_vtbl;
-    self->mHashName = 61;
-    self->mbExiting = 0;
+    mHashName = 61;
+    mbExiting = 0;
     for (int i = 0; i < 2; i++) {
-        self->mpMenu[i] = 0;
-        self->miMenuScroll[i] = 0;
+        mpMenu[i] = 0;
+        miMenuScroll[i] = 0;
     }
-    self->mpSlider1 = 0;
-    self->mpTextScrollChat = 0;
-    self->mpSlider2 = 0;
+    mpSlider1 = 0;
+    mpTextScrollChat = 0;
+    mpSlider2 = 0;
     tARGB colour;
     colour.A = 1.0f;
     colour.R = 1.0f;
     colour.G = 1.0f;
     colour.B = 1.0f;
-    *(&self->mChatColour) = colour;
-    strcpy(self->mszPlayerName, ((const char*)LobbyMan_mLobbyMan->mPersona));
-    return self;
+    *(&mChatColour) = colour;
+    strcpy(mszPlayerName, ((const char*)LobbyMan_mLobbyMan->mPersona));
 }
 #endif
 
@@ -10998,12 +10953,12 @@ extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
  *
  * The frame counter is cAppMan_TheAppMan's word at +0x18; then the cFEStateNet update (cFEStateNet_onUpdate) runs.
  */
-extern "C" void cFEStateChatRoom_onUpdate(cFEStateChatRoom* self)
+void cFEStateChatRoom::onUpdate()
 {
     if (cAppMan_TheAppMan->TimerTick % 10000 == 0) {
-        self->updateQualityIcons();
+        updateQualityIcons();
     }
-    cFEStateNet_onUpdate((cFEStateNet*)self);
+    cFEStateNet_onUpdate((cFEStateNet*)this);
 }
 #endif
 
@@ -14067,8 +14022,6 @@ void cMemMan_free(void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int USTR_length(void* s);
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
-extern void* cFEStateAuthDNAS_vtbl[];
 extern char str_kT_205Authenticating[];
 extern char str_cFEStateAuthDNAS[];
 
@@ -14084,30 +14037,25 @@ extern char str_cFEStateAuthDNAS[];
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @param pParentState  the parent state that receives the result (On Tour pParentState)
- * @return @p self
  */
-extern "C" cFEStateAuthDNAS* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS* self, cUIEngine* pEngine,
-    cFEStateNet* pParentState)
+cFEStateAuthDNAS::cFEStateAuthDNAS(cUIEngine* pEngine, cFEStateNet* pParentState) : cFEStateNet(pEngine, pParentState)
 {
-    cFEStateNet_cFEStateNet_3((self), pEngine, pParentState);
-    self->unk_6F4 = 2;
-    VPTR_OF(cListNode, self) = cFEStateAuthDNAS_vtbl;
-    self->unk_6F8 = 0x1E;
-    self->mHashName = 68;
-    self->mpAuth = 0;
-    self->mpTextAuth = 0;
-    self->miState = 0;
-    self->mpustrText = 0;
+    unk_6F4 = 2;
+    unk_6F8 = 0x1E;
+    mHashName = 68;
+    mpAuth = 0;
+    mpTextAuth = 0;
+    miState = 0;
+    mpustrText = 0;
     cFELocale* locale = SSXApp->FELocale;
     sVEntry<void*(void* self, int hash)>* vt = (sVEntry<void*(void*, int)>*)VPTR_OF(cUILocaleInterface, locale);
     int n = USTR_length(vt[4].fn(vthis(locale, vt[4]), GetHashValue32(str_kT_205Authenticating)));
-    if (self->mpustrText != 0) {
-        cMemMan_free(self->mpustrText);
-        self->mpustrText = 0;
+    if (mpustrText != 0) {
+        cMemMan_free(mpustrText);
+        mpustrText = 0;
     }
-    self->mpustrText = (unsigned short*)operator_new_tag((n + 5) * 2, str_cFEStateAuthDNAS, 0x100, 0);
-    self->mNeedsLobby = 0;
-    return (self);
+    mpustrText = (unsigned short*)operator_new_tag((n + 5) * 2, str_cFEStateAuthDNAS, 0x100, 0);
+    mNeedsLobby = 0;
 }
 #endif
 
@@ -14463,9 +14411,7 @@ int cFEStateAuthDNAS::onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned in
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError_cFEStateAuthDNASError);
 #ifdef SKIP_ASM
-extern void* cFEStateAuthDNASError_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the DNAS error popup with its three texts.
@@ -14478,18 +14424,15 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  * @param pustrBody  the body text (unicode), stored in mpustrBody
  * @param pustrFooter  the footer text (unicode), stored in mpustrFooter
  * @param pustrTitle  the title text (unicode), stored in mpustrTitle
- * @return @p self
  */
-extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError(cFEStateAuthDNASError* self, cUIEngine* pEngine,
-        cFEStateNet* pParentState, unsigned short* pustrBody, unsigned short* pustrFooter, unsigned short* pustrTitle)
+cFEStateAuthDNASError::cFEStateAuthDNASError(cUIEngine* pEngine, cFEStateNet* pParentState, unsigned short* pustrBody,
+    unsigned short* pustrFooter, unsigned short* pustrTitle)
+    : cFEStateNet(pEngine, pParentState)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, pParentState);
-    self->mpustrBody = pustrBody;
-    self->mpustrFooter = pustrFooter;
-    self->mpustrTitle = pustrTitle;
-    VPTR_OF(cListNode, self) = cFEStateAuthDNASError_vtbl;
-    self->mHashName = 69;
-    return ((void*)self);
+    mpustrBody = pustrBody;
+    mpustrFooter = pustrFooter;
+    mpustrTitle = pustrTitle;
+    mHashName = 69;
 }
 #endif
 
@@ -14549,14 +14492,14 @@ static inline int IsHash1B6BB8(int id, char* name) { return id == GetHashValue32
  *
  * @param obj  the widget being created (On Tour pWidget)
  */
-extern "C" void cFEStateAuthDNASError_onWidgetCreate(cFEStateAuthDNASError* self, cUIThing* obj)
+void cFEStateAuthDNASError::onWidgetCreate(cUIThing* obj)
 {
     if (IsHash1B6BB8(obj->mHashName, str_Footer)) {
-        self->mpFooter = (cUIText*)obj;
+        mpFooter = (cUIText*)obj;
     } else if (IsHash1B6BB8(obj->mHashName, str_Body)) {
-        self->mpBody = (cUIText*)obj;
+        mpBody = (cUIText*)obj;
     } else if (IsHash1B6BB8(obj->mHashName, str_Title)) {
-        self->mpTitle = (cUIText*)obj;
+        mpTitle = (cUIText*)obj;
     } else if (IsHash1B6BB8(obj->mHashName, str_dnasGroup)) {
         obj->setVisible(1);
     } else if (IsHash1B6BB8(obj->mHashName, str_MenuDNAS)) {
@@ -16134,10 +16077,8 @@ int cFEStateNetAccountMem::getErrorStep(int id)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_cFEStateCreateStep1);
 #ifdef SKIP_ASM
-extern void* cFEStateCreateStep1_vtbl[];
 extern char* cBXString_EmptyString;
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs step 1 of the online account creation (or editing) screen.
@@ -16151,25 +16092,21 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  *
  * @param pEngine  the UI engine (On Tour cUIState ctor pEngine)
  * @param bNewAccount  nonzero to create a new account, 0 to edit the logged-in one (stored in mbEditAccount)
- * @return @p self
  */
-extern "C" void* cFEStateCreateStep1_cFEStateCreateStep1(cFEStateCreateStep1* self, cUIEngine* pEngine, int bNewAccount)
+cFEStateCreateStep1::cFEStateCreateStep1(cUIEngine* pEngine, int bNewAccount) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
     char* emptyStr = cBXString_EmptyString;
-    self->mpStaticContinue = 0;
-    VPTR_OF(cListNode, self) = cFEStateCreateStep1_vtbl;
-    self->mszSavedPassword = emptyStr;
-    self->mszSavedConfirm = emptyStr;
-    self->mszSavedMail = emptyStr;
+    mpStaticContinue = 0;
+    mszSavedPassword = emptyStr;
+    mszSavedConfirm = emptyStr;
+    mszSavedMail = emptyStr;
     if (bNewAccount != 0) {
-        self->mHashName = 77;
+        mHashName = 77;
     } else {
-        self->mHashName = 80;
+        mHashName = 80;
     }
-    self->mbEditAccount = bNewAccount;
-    self->mNeedsLobby = 0;
-    return ((void*)self);
+    mbEditAccount = bNewAccount;
+    mNeedsLobby = 0;
 }
 #endif
 
@@ -17428,9 +17365,7 @@ void cFEStateCreateStep1::markChangedFields()
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep2_cFEStateCreateStep2);
 #ifdef SKIP_ASM
-extern void* cFEStateCreateStep2_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs step 2 of online account creation ("211create_step2": birth date, gender, legal box).
@@ -17439,15 +17374,11 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  * and clears mNeedsLobby.
  *
  * @param pEngine  the UI engine (On Tour cUIState ctor pEngine)
- * @return @p self
  */
-extern "C" void* cFEStateCreateStep2_cFEStateCreateStep2(cFEStateCreateStep2* self, cUIEngine* pEngine)
+cFEStateCreateStep2::cFEStateCreateStep2(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(((cFEStateNet*)self), pEngine, 0);
-    self->mHashName = 78;
-    VPTR_OF(cListNode, self) = cFEStateCreateStep2_vtbl;
-    self->mNeedsLobby = 0;
-    return ((void*)self);
+    mHashName = 78;
+    mNeedsLobby = 0;
 }
 #endif
 
@@ -18676,9 +18607,7 @@ int cFEStateCreateStep2::checkLegalAccepted()
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateDuplicate_cFEStateCreateDuplicate);
 #ifdef SKIP_ASM
-extern void* cFEStateCreateDuplicate_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the "name already taken" state for an account name or a persona name.
@@ -18688,17 +18617,12 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @param bAccount  nonzero for an account name, 0 for a persona name (stored in mbAccount)
- * @return @p self
  */
-extern "C" void* cFEStateCreateDuplicate_cFEStateCreateDuplicate(cFEStateCreateDuplicate* self, cUIEngine* pEngine,
-        int bAccount)
+cFEStateCreateDuplicate::cFEStateCreateDuplicate(cUIEngine* pEngine, int bAccount) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    self->mbAccount = bAccount;
-    VPTR_OF(cListNode, self) = cFEStateCreateDuplicate_vtbl;
-    self->mHashName = 79;
-    self->mNeedsLobby = 0;
-    return ((void*)self);
+    mbAccount = bAccount;
+    mHashName = 79;
+    mNeedsLobby = 0;
 }
 #endif
 
@@ -19378,8 +19302,6 @@ void cFEStateCreateDuplicate::onAccountMemPopupEvent(cUIState* popup, int event)
 INCLUDE_ASM("fe/feasyncfile", cFEStateLobbyMenu_cFEStateLobbyMenu);
 #ifdef SKIP_ASM
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
-extern void* cFEStateLobbyMenu_vtbl[];
 extern char* cBXString_EmptyString;
 
 /**
@@ -19391,31 +19313,27 @@ extern char* cBXString_EmptyString;
  * arrows.
  *
  * @param pEngine  the UI engine (On Tour cUIState ctor pEngine)
- * @return @p self
  */
-extern "C" cFEStateLobbyMenu* cFEStateLobbyMenu_cFEStateLobbyMenu(cFEStateLobbyMenu* self, cUIEngine* pEngine)
+cFEStateLobbyMenu::cFEStateLobbyMenu(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    VPTR_OF(cListNode, self) = cFEStateLobbyMenu_vtbl;
-    self->mszRoomName = self->mszChannelName = cBXString_EmptyString;
-    self->mHashName = 0x3C;
-    self->miFirstPlayer = 0;
-    self->mpMenuPlayers = 0;
-    self->mpMenuRoomMenus = 0;
+    mszRoomName = mszChannelName = cBXString_EmptyString;
+    mHashName = 0x3C;
+    miFirstPlayer = 0;
+    mpMenuPlayers = 0;
+    mpMenuRoomMenus = 0;
     for (int i = 9; i >= 0; i--) {
-        self->mpTextPlayer[i] = 0;
+        mpTextPlayer[i] = 0;
     }
-    self->mpText3InRoom = 0;
+    mpText3InRoom = 0;
     for (int j = 0; j < 4; j++) {
-        self->mpChannelList[j] = 0;
-        self->mpChannelPair[j] = 0;
-        self->mpChannelArrow[j] = 0;
-        self->mpChannelLock[j] = 0;
-        self->miChannelRow[j] = 0;
+        mpChannelList[j] = 0;
+        mpChannelPair[j] = 0;
+        mpChannelArrow[j] = 0;
+        mpChannelLock[j] = 0;
+        miChannelRow[j] = 0;
     }
-    self->mpPlayerUp = 0;
-    self->mpPlayerDown = 0;
-    return self;
+    mpPlayerUp = 0;
+    mpPlayerDown = 0;
 }
 #endif
 
@@ -20789,10 +20707,8 @@ void cFEStateLobbyMenu::updatePlayerScrollArrows()
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup);
 #ifdef SKIP_ASM
-extern void* cFEStateNetCreateRoomPopup_vtbl[];
 extern char* cBXString_EmptyString;
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the create-room popup state.
@@ -20802,19 +20718,15 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @param pParentState  the parent state, the lobby (On Tour pParentState)
- * @return @p self
  */
-extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup(cFEStateNetCreateRoomPopup* self,
-        cUIEngine* pEngine, cFEStateNet* pParentState)
+cFEStateNetCreateRoomPopup::cFEStateNetCreateRoomPopup(cUIEngine* pEngine, cFEStateNet* pParentState)
+    : cFEStateNet(pEngine, pParentState)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, pParentState);
     char* emptyStr = cBXString_EmptyString;
-    VPTR_OF(cListNode, self) = cFEStateNetCreateRoomPopup_vtbl;
-    self->mszRoomName = emptyStr;
-    self->mszChannelName = emptyStr;
-    self->mszPassword = emptyStr;
-    self->mHashName = 71;
-    return ((void*)self);
+    mszRoomName = emptyStr;
+    mszChannelName = emptyStr;
+    mszPassword = emptyStr;
+    mHashName = 71;
 }
 #endif
 
@@ -20828,18 +20740,15 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 
 /**
  * Creates and plays the "232CreateRoomPopup" screen.
- *
- * @return cUIScreen_playFrame's result, or 0 when the screen could not be added
  */
-extern "C" void* cFEStateNetCreateRoomPopup_onCreateScreen(cFEStateNet* self)
+void cFEStateNetCreateRoomPopup::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_232CreateRoomPopup), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_232CreateRoomPopup), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         screen = cUIScreen_playFrame(screen, 0, 0);
     }
-    return screen;
 }
 #endif
 
@@ -21103,7 +21012,7 @@ public:
  * @param eventData  the event's data
  * @return the parent's result
  */
-extern "C" int cFEStateNetCreateRoomPopup_onNetEvent(cFEStateNet* self, int netEvent, int eventData)
+extern "C" int cFEStateNetCreateRoomPopup_onNetEvent(cFEStateNetCreateRoomPopup* self, int netEvent, int eventData)
 {
     return ((cFEStateNetCreateRoomPopup_onNetEvent_cObj*)self->mpParentState)->handleEvent(netEvent, eventData);
 }
@@ -21147,9 +21056,7 @@ void cFEStateNetCreateRoomPopup::fillHelpPopup(cFEStateNetHelpPopup* popup)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateLogin_cFEStateLogin);
 #ifdef SKIP_ASM
-extern void* cFEStateLogin_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the online login-type state (use, choose, create or delete an account).
@@ -21158,16 +21065,12 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  * clears mpustrDisconnect and mNeedsLobby (net messages are not filtered here).
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
- * @return @p self
  */
-extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* self, cUIEngine* pEngine)
+cFEStateLogin::cFEStateLogin(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    self->mHashName = 51;
-    VPTR_OF(cListNode, self) = cFEStateLogin_vtbl;
-    self->mpustrDisconnect = 0;
-    self->mNeedsLobby = 0;
-    return ((void*)self);
+    mHashName = 51;
+    mpustrDisconnect = 0;
+    mNeedsLobby = 0;
 }
 #endif
 
@@ -22250,9 +22153,7 @@ void* cFEStateOnlineAgreement::cFEStateOnlineAgreement1()
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement_cFEStateOnlineAgreement);
 #ifdef SKIP_ASM
-extern void* cFEStateOnlineAgreement_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the online terms-of-service state: cFEStateNet constructor with no parent, mHashName 0x43, its vtable.
@@ -22260,16 +22161,12 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  * Also clears mpTOSLines and miNextTOSLine. Where it goes afterwards is decided by the miMiscData its creator sets.
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
- * @return @p self
  */
-extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, cUIEngine* pEngine)
+cFEStateOnlineAgreement::cFEStateOnlineAgreement(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    self->mHashName = 67;
-    VPTR_OF(cListNode, self) = cFEStateOnlineAgreement_vtbl;
-    self->mpTOSLines = 0;
-    self->miNextTOSLine = (unsigned int)0;
-    return ((void*)self);
+    mHashName = 67;
+    mpTOSLines = 0;
+    miNextTOSLine = (unsigned int)0;
 }
 #endif
 
@@ -22702,9 +22599,7 @@ void cFEStateOnlineAgreement::fillHelpPopup(cFEStateNetHelpPopup* popup)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup);
 #ifdef SKIP_ASM
-extern void* cFEStateNetQuickPlayPopup_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the quick-match popup state.
@@ -22714,31 +22609,27 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
  * @param pParentState  the parent state, the online main menu (On Tour pParentState)
- * @return @p self
  */
-extern "C" void* cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup(cFEStateNetQuickPlayPopup* self,
-        cUIEngine* pEngine, cFEStateNet* pParentState)
+cFEStateNetQuickPlayPopup::cFEStateNetQuickPlayPopup(cUIEngine* pEngine, cFEStateNet* pParentState)
+    : cFEStateNet(pEngine, pParentState)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, pParentState);
-    VPTR_OF(cListNode, self) = cFEStateNetQuickPlayPopup_vtbl;
-    self->mHashName = 72;
-    self->mbSearching = 0;
-    self->mpRankedPair = 0;
-    self->mpRacePair = 0;
-    self->mpBigAirPair = 0;
-    self->mpSuperpipePair = 0;
-    self->mpSlopestylePair = 0;
-    self->mpStaticRanked = 0;
-    self->mpStaticRace = 0;
-    self->mpStaticBigAir = 0;
-    self->mpStaticSuperpipe = 0;
-    self->mpStaticSlopeStyle = 0;
-    self->mpLBRanked = 0;
-    self->mpLBRace = 0;
-    self->mpLBBigAir = 0;
-    self->mpLBSuperpipe = 0;
-    self->mpLBSlopeStyle = 0;
-    return ((void*)self);
+    mHashName = 72;
+    mbSearching = 0;
+    mpRankedPair = 0;
+    mpRacePair = 0;
+    mpBigAirPair = 0;
+    mpSuperpipePair = 0;
+    mpSlopestylePair = 0;
+    mpStaticRanked = 0;
+    mpStaticRace = 0;
+    mpStaticBigAir = 0;
+    mpStaticSuperpipe = 0;
+    mpStaticSlopeStyle = 0;
+    mpLBRanked = 0;
+    mpLBRace = 0;
+    mpLBBigAir = 0;
+    mpLBSuperpipe = 0;
+    mpLBSlopeStyle = 0;
 }
 #endif
 
@@ -23488,22 +23379,16 @@ extern "C" void cFEStateNetSSXWorld_onWidgetEvent(cFEStateNet* self, cUIThing* m
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetQuickMessages_cFEStateNetQuickMessages);
 #ifdef SKIP_ASM
-extern void* cFEStateNetQuickMessages_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 /**
  * Constructs the quick-messages editor state: cFEStateNet constructor with no parent, mHashName 0x4B, its vtable.
  *
  * @param pEngine  the UI engine (On Tour cUIState's pEngine)
- * @return @p self
  */
-extern "C" void* cFEStateNetQuickMessages_cFEStateNetQuickMessages(cFEStateNetQuickMessages* self, cUIEngine* pEngine)
+cFEStateNetQuickMessages::cFEStateNetQuickMessages(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(((cFEStateNet*)self), pEngine, 0);
-    self->mHashName = 75;
-    VPTR_OF(cListNode, self) = cFEStateNetQuickMessages_vtbl;
-    return ((void*)self);
+    mHashName = 75;
 }
 #endif
 
@@ -24073,9 +23958,7 @@ void cFEStateNetQuickMessages::onSaveChangesPopupEvent(cUIState* popup, int even
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateStats_cFEStateStats);
 #ifdef SKIP_ASM
-extern void* cFEStateStats_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
-void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __asm__("cFEStateNet_cFEStateNet");
 
 
 /**
@@ -24085,22 +23968,18 @@ void* cFEStateNet_cFEStateNet_3(void* self, cUIEngine* a1, cFEStateNet* a2) __as
  * mHashName 0x42, and zeroes miMode, miFocusMenu, miFirstResult and mpMenus[4].
  *
  * @param pEngine  the UI engine (On Tour cUIState ctor pEngine)
- * @return @p self
  */
-extern "C" void* cFEStateStats_cFEStateStats(cFEStateStats* self, cUIEngine* pEngine)
+cFEStateStats::cFEStateStats(cUIEngine* pEngine) : cFEStateNet(pEngine, 0)
 {
-    cFEStateNet_cFEStateNet_3(self, pEngine, 0);
-    VPTR_OF(cListNode, self) = cFEStateStats_vtbl;
-    self->mbShowTime = 1;
-    self->mHashName = 66;
-    cFEStateStats* feStateStats = self;
+    mbShowTime = 1;
+    mHashName = 66;
+    cFEStateStats* feStateStats = this;
     feStateStats->miMode = 0;
     feStateStats->miFocusMenu = 0;
     feStateStats->miFirstResult = 0;
     for (int i = 3; i >= 0; i--) {
         feStateStats->mpMenus[i] = 0;
     }
-    return ((void*)self);
 }
 #endif
 

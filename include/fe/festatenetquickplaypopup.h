@@ -94,6 +94,8 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
     cUIThing* mpSlopestylePair;     // 0x730 [R] 0; [U] widget "SlopestylePair"
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateNetQuickPlayPopup(cUIEngine* pEngine, cFEStateNet* pParentState)
+        __asm__("cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup");
     void * cFEStateNetQuickPlayPopup1() __asm__("cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1");
     // g++'s own symbol _$_25cFEStateNetQuickPlayPopup (the retail label renamed)
     virtual ~cFEStateNetQuickPlayPopup();

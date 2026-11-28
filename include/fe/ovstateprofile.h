@@ -84,6 +84,8 @@ struct cOVState_PROFILE : public cFEMemCard {
                                     //       0x18 from cOVTemplate_Dialog_onWidgetEvent); [U] updateDone tests 0x18
 
     // Methods bound to their retail symbols by asm labels.
+    cOVState_PROFILE(cUIEngine* pEngine, unsigned char ucActiveControl, int parentOverlay)
+        __asm__("cOVState_PROFILE_cOVState_PROFILE");
     void displayOff() __asm__("cOVState_PROFILE_displayOff");
     void displayOn() __asm__("cOVState_PROFILE_displayOn");
     void initGeneral() __asm__("cOVState_PROFILE_initGeneral");

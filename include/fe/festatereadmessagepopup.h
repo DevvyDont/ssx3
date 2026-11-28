@@ -92,6 +92,8 @@ struct cFEStateReadMessagePopup : public cFEStateNet {
                                     //       (ldl/ldr)
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateReadMessagePopup(cUIEngine* engine, cFEStateNet* owner, const char* name)
+        __asm__("cFEStateReadMessagePopup_cFEStateReadMessagePopup");
     void* cFEStateReadMessagePopup1() __asm__("cFEStateReadMessagePopup_cFEStateReadMessagePopup1");
     virtual ~cFEStateReadMessagePopup();   // g++'s own symbol _$_24cFEStateReadMessagePopup (the retail label renamed)
     virtual int onWidgetMenu(cUIMenu*pMenu, unsigned int Event, unsigned int index)

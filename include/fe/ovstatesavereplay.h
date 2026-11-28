@@ -72,6 +72,7 @@ struct cOVState_SAVEREPLAY : public cFEMemCard {
     char unk_272[0x2];              // 0x272 padding to the 4-byte size
 
     // Methods bound to their retail symbols by asm labels.
+    cOVState_SAVEREPLAY(cUIEngine* engine, int ovStateId) __asm__("cOVState_SAVEREPLAY_cOVState_SAVEREPLAY");
     virtual ~cOVState_SAVEREPLAY();   // g++'s own symbol _$_19cOVState_SAVEREPLAY (the retail label renamed)
     virtual void updateDone() __asm__("cOVState_SAVEREPLAY_updateDone");
     virtual void displayStatus() __asm__("cOVState_SAVEREPLAY_displayStatus");

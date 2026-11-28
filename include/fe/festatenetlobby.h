@@ -96,6 +96,7 @@ struct cFEStateLobbyMenu : public cFEStateNet {
                                     //       cFEStateLobbyMenu_joinRoomByName assign the room being entered; cFEStateLobbyMenu_handleKeyboardText passes it to cFEStateLobbyMenu_joinRoomByName
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateLobbyMenu(cUIEngine* pEngine) __asm__("cFEStateLobbyMenu_cFEStateLobbyMenu");
     void* cFEStateLobbyMenu1() __asm__("cFEStateLobbyMenu_cFEStateLobbyMenu1");
     virtual ~cFEStateLobbyMenu();   // g++'s own symbol _$_17cFEStateLobbyMenu (the retail label renamed)
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateLobbyMenu_onPopupEvent");

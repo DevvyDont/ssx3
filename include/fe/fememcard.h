@@ -225,6 +225,10 @@ struct cFEMemCard : public cOVState {
         __asm__("cFEMemCard_checkNextAvailableDevice");
     void createReadBuffer(unsigned int size) __asm__("cFEMemCard_createReadBuffer");
     void* cFEMemCard2(int pEngine, int iType) __asm__("cFEMemCard_cFEMemCard2");
+    // The two constructors as the subclass constructors call them (cFEMemCard2 above and the C function
+    // cFEMemCard_cFEMemCard define them: their inlined cOVState / cUIState part has no constructor here).
+    cFEMemCard(cUIEngine* engine, int iType) __asm__("cFEMemCard_cFEMemCard2");
+    cFEMemCard(cUIEngine* engine, int iType, int eOVState) __asm__("cFEMemCard_cFEMemCard");
     void initFEMemCard(int mode) __asm__("cFEMemCard_initFEMemCard");
     void * cFEMemCard1() __asm__("cFEMemCard_cFEMemCard1");
     virtual bool onInputBegin(cUIInput* input) __asm__("cFEMemCard_onInputBegin");

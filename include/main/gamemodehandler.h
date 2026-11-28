@@ -226,6 +226,9 @@ __asm__("_vt$15cGMPointHandler = cGMPointHandler_vtbl");   // g++'s name for the
 // cGMFreerideHandler_vtbl).
 struct cGMFreerideHandler : public cGameModeHandler {
     virtual ~cGMFreerideHandler();   // g++'s own symbol _$_18cGMFreerideHandler (the retail label renamed)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void init() __asm__("cGMFreerideHandler_init");
 };
 
 CHECK_SIZE(cGMFreerideHandler, 0x4);
@@ -235,6 +238,10 @@ __asm__("_vt$18cGMFreerideHandler = cGMFreerideHandler_vtbl");   // g++'s name f
 // cGMRivalTimeHandler_vtbl).
 struct cGMRivalTimeHandler : public cGameModeHandler {
     virtual ~cGMRivalTimeHandler();   // g++'s own symbol _$_19cGMRivalTimeHandler (the retail label renamed)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void raceFinish(int idx) __asm__("cGMRivalTimeHandler_raceFinish");
+    virtual void init() __asm__("cGMRivalTimeHandler_init");
 };
 
 CHECK_SIZE(cGMRivalTimeHandler, 0x4);
@@ -244,6 +251,10 @@ __asm__("_vt$19cGMRivalTimeHandler = cGMRivalTimeHandler_vtbl");   // g++'s name
 // cGMRivalPointHandler_vtbl).
 struct cGMRivalPointHandler : public cGameModeHandler {
     virtual ~cGMRivalPointHandler();   // g++'s own symbol _$_20cGMRivalPointHandler (the retail label renamed)
+
+    // Methods bound to their retail symbols by asm labels.
+    virtual void raceFinish(int idx) __asm__("cGMRivalPointHandler_raceFinish");
+    virtual void init() __asm__("cGMRivalPointHandler_init");
 };
 
 CHECK_SIZE(cGMRivalPointHandler, 0x4);

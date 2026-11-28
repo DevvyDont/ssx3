@@ -166,6 +166,7 @@ struct cScriptAlgorithm : public cCameraAlgorithm {
     cScriptAlgorithm() __asm__("cScriptAlgorithm_cScriptAlgorithm");
     // Methods bound to their retail symbols by asm labels.
     void setScriptObj(int val) __asm__("cScriptAlgorithm_setScriptObj__FPvi");
+    virtual t4Vector getTargetPos() __asm__("cScriptAlgorithm_getTargetPos");
     cScriptObjCamera* getScriptObj() __asm__("cScriptAlgorithm_getScriptObj__FPv"); // [O] returns cScriptObjCamera*
 };
 

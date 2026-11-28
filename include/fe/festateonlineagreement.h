@@ -61,6 +61,7 @@ struct cFEStateOnlineAgreement : public cFEStateNet {
                                     //       per line added
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateOnlineAgreement(cUIEngine* pEngine) __asm__("cFEStateOnlineAgreement_cFEStateOnlineAgreement");
     void* cFEStateOnlineAgreement1() __asm__("cFEStateOnlineAgreement_cFEStateOnlineAgreement1");
     void* cFEStateOnlineAgreement2() __asm__("cFEStateOnlineAgreement_cFEStateOnlineAgreement2");
     virtual ~cFEStateOnlineAgreement();   // g++'s own symbol _$_23cFEStateOnlineAgreement (the retail label renamed)

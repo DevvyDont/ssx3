@@ -88,7 +88,7 @@ struct cMoveNode : public cInstanceNode {
     // cInstanceNode (object/instancenode.h, 0x1C): the vptr at 0x0C holds [R] cMoveNode_vtbl (0x00491028) or a
     // subclass's (each ctor stores its own); [U] every virtual call (cMoveNode_apply, update, render, ...). Its new
     // slots ([R] cMoveNode_vtbl, 51 in all; names from its entries, types [O] On Tour's cMoveNode definitions):
-    virtual void updateAnimState();                                 // 47
+    virtual void updateAnimState() __asm__("cMoveNode_updateAnimState__FPv");   // 47
     virtual void setupOverlapSystem() __asm__("cMoveNode_setupOverlapSystem");                              // 48
     virtual void restoreOverlapSystem() __asm__("cMoveNode_restoreOverlapSystem");                            // 49
     virtual void updateOverlapSystem() __asm__("cMoveNode_updateOverlapSystem");                             // 50
@@ -174,6 +174,8 @@ struct cMoveNode : public cInstanceNode {
     virtual int intersect(cWorldIntersectType& w, tIntersectInfo* intInfo, int num, int flags)
         __asm__("cMoveNode_intersect");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMoveNode_writeToReplayFrame");
+    virtual void onCollide(const tCollideInfo* tc, const tIntersectInfo* ti, cBeing* pBeing)
+        __asm__("cMoveNode_onCollide");
 };
 
 CHECK_OFFSET(cMoveNode, ModifierBlock, 0x1C);

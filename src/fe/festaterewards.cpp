@@ -615,7 +615,8 @@ struct sRewardTable_FDD0 {
     sRewardName_FDD0 entries[1];
 };
 
-// PORT: the unit declares cFEStateRewardGalleryBase_getIconID as `void (void*, char*)`, but the body returns the id.
+// PORT: the unit declares cFEStateRewardGalleryBase_getIconID as `int (void*, char*)`; this definition reads the
+// table through a view, bound to the symbol by an asm label.
 int cFEStateRewardGalleryBase_getIconID_find(sRewardTable_FDD0* self, char* name) __asm__("cFEStateRewardGalleryBase_getIconID");
 
 /**
@@ -1476,24 +1477,26 @@ const char* cFEStateRewardGalleryPosters::getIconsFileName()
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
+extern "C" int cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of a poster in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
- * Vtable slot 26 of the posters vtable cFEStateRewardGalleryPosters_vtbl. Takes the reward record in list entry @p i (+0xA28), copies 4
- * characters of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition
- * is void, but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
+ * Vtable slot 26 of the posters vtable cFEStateRewardGalleryPosters_vtbl. Takes the reward record in list entry
+ * @p i (+0xA28), copies 4 characters of the name its word at +8 points to into a terminated buffer and calls
+ * cFEStateRewardGalleryBase_getIconID(), whose handle it returns (cFEStateRewardGalleryBase_updateHighlither reads
+ * it).
  *
  * @param i  index into the gallery's reward list
+ * @return the icon's handle, or -1 when the table has no icon of that name
  */
-extern "C" void cFEStateRewardGalleryPosters_getIconID(cFEStateRewardGalleryPosters* self, int i)
+int cFEStateRewardGalleryPosters::getIconID(int i)
 {
     char buf[5];
-    tPosterInfo* reward = (tPosterInfo*)((void*)self->mpPosters[i]);
+    tPosterInfo* reward = (tPosterInfo*)((void*)mpPosters[i]);
     strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
-    cFEStateRewardGalleryBase_getIconID(self, buf);
+    return cFEStateRewardGalleryBase_getIconID(this, buf);
 }
 #endif
 
@@ -1598,24 +1601,26 @@ const char* cFEStateRewardGalleryTradingCards::getIconsFileName()
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
+extern "C" int cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of a trading card in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
- * Vtable slot 26 of the trading-card vtable cFEStateRewardGalleryTradingCards_vtbl. Takes the reward record in list entry @p i (+0xA28), copies 4
- * characters of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition
- * is void, but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
+ * Vtable slot 26 of the trading-card vtable cFEStateRewardGalleryTradingCards_vtbl. Takes the reward record in list
+ * entry @p i (+0xA28), copies 4 characters of the name its word at +8 points to into a terminated buffer and calls
+ * cFEStateRewardGalleryBase_getIconID(), whose handle it returns (cFEStateRewardGalleryBase_updateHighlither reads
+ * it).
  *
  * @param i  index into the gallery's reward list
+ * @return the icon's handle, or -1 when the table has no icon of that name
  */
-extern "C" void cFEStateRewardGalleryTradingCards_getIconID(cFEStateRewardGalleryTradingCards* self, int i)
+int cFEStateRewardGalleryTradingCards::getIconID(int i)
 {
     char buf[5];
-    tTradingCardInfo* reward = (tTradingCardInfo*)((void*)self->mpTradingCards[i]);
+    tTradingCardInfo* reward = (tTradingCardInfo*)((void*)mpTradingCards[i]);
     strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
-    cFEStateRewardGalleryBase_getIconID(self, buf);
+    return cFEStateRewardGalleryBase_getIconID(this, buf);
 }
 #endif
 
@@ -1721,24 +1726,26 @@ const char* cFEStateRewardGalleryConceptArts::getIconsFileName()
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
+extern "C" int cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of an art reward in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
- * Vtable slot 26 of the art vtable cFEStateRewardGalleryConceptArts_vtbl. Takes the reward record in list entry @p i (+0xA28), copies 4 characters
- * of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition is void,
- * but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
+ * Vtable slot 26 of the art vtable cFEStateRewardGalleryConceptArts_vtbl. Takes the reward record in list entry
+ * @p i (+0xA28), copies 4 characters of the name its word at +8 points to into a terminated buffer and calls
+ * cFEStateRewardGalleryBase_getIconID(), whose handle it returns (cFEStateRewardGalleryBase_updateHighlither reads
+ * it).
  *
  * @param i  index into the gallery's reward list
+ * @return the icon's handle, or -1 when the table has no icon of that name
  */
-extern "C" void cFEStateRewardGalleryConceptArts_getIconID(cFEStateRewardGalleryConceptArts* self, int i)
+int cFEStateRewardGalleryConceptArts::getIconID(int i)
 {
     char buf[5];
-    tConceptArtInfo* reward = (tConceptArtInfo*)((void*)self->mpConceptArts[i]);
+    tConceptArtInfo* reward = (tConceptArtInfo*)((void*)mpConceptArts[i]);
     strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
-    cFEStateRewardGalleryBase_getIconID(self, buf);
+    return cFEStateRewardGalleryBase_getIconID(this, buf);
 }
 #endif
 
@@ -1843,24 +1850,26 @@ const char* cFEStateRewardGalleryVideos::getIconsFileName()
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
+extern "C" int cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of a video reward in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
- * Vtable slot 26 of the video vtable cFEStateRewardGalleryVideos_vtbl. Takes the reward record in list entry @p i (+0xA28), copies 4
- * characters of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition
- * is void, but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
+ * Vtable slot 26 of the video vtable cFEStateRewardGalleryVideos_vtbl. Takes the reward record in list entry @p i
+ * (+0xA28), copies 4 characters of the name its word at +8 points to into a terminated buffer and calls
+ * cFEStateRewardGalleryBase_getIconID(), whose handle it returns (cFEStateRewardGalleryBase_updateHighlither reads
+ * it).
  *
  * @param i  index into the gallery's reward list
+ * @return the icon's handle, or -1 when the table has no icon of that name
  */
-extern "C" void cFEStateRewardGalleryVideos_getIconID(cFEStateRewardGalleryVideos* self, int i)
+int cFEStateRewardGalleryVideos::getIconID(int i)
 {
     char buf[5];
-    tVideoInfo* reward = (tVideoInfo*)self->mpVideos[i];
+    tVideoInfo* reward = (tVideoInfo*)mpVideos[i];
     strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
-    cFEStateRewardGalleryBase_getIconID(self, buf);
+    return cFEStateRewardGalleryBase_getIconID(this, buf);
 }
 #endif
 
@@ -1965,24 +1974,26 @@ const char* cFEStateRewardGalleryToys::getIconsFileName()
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_getIconID);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
+extern "C" int cFEStateRewardGalleryBase_getIconID(void* self, char* name);
 
 /**
  * Looks up the icon of a toy in the gallery's icon table by the first 4 characters of the reward's icon name.
  *
- * Vtable slot 26 of the toy vtable cFEStateRewardGalleryToys_vtbl. Takes the reward record in list entry @p i (+0xA28), copies 4 characters
- * of the name its word at +8 points to into a terminated buffer and calls cFEStateRewardGalleryBase_getIconID(). The C definition is void,
- * but cFEStateRewardGalleryBase_getIconID()'s handle (or -1) stays in the return register, and cFEStateRewardGalleryBase_updateHighlither reads it.
+ * Vtable slot 26 of the toy vtable cFEStateRewardGalleryToys_vtbl. Takes the reward record in list entry @p i
+ * (+0xA28), copies 4 characters of the name its word at +8 points to into a terminated buffer and calls
+ * cFEStateRewardGalleryBase_getIconID(), whose handle it returns (cFEStateRewardGalleryBase_updateHighlither reads
+ * it).
  *
  * @param i  index into the gallery's reward list
+ * @return the icon's handle, or -1 when the table has no icon of that name
  */
-extern "C" void cFEStateRewardGalleryToys_getIconID(cFEStateRewardGalleryToys* self, int i)
+int cFEStateRewardGalleryToys::getIconID(int i)
 {
     char buf[5];
-    tToyInfo* reward = (tToyInfo*)((void*)self->mpToys[i]);
+    tToyInfo* reward = (tToyInfo*)((void*)mpToys[i]);
     strncpy(buf, (const char*)reward->mpIconName, 4);
     buf[4] = 0;
-    cFEStateRewardGalleryBase_getIconID(self, buf);
+    return cFEStateRewardGalleryBase_getIconID(this, buf);
 }
 #endif
 
@@ -2124,19 +2135,20 @@ extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
  * Looks up the texture element shown for a cheat character: the reward's name hashed and found in the UI engine's
  * texture bank.
  *
- * Vtable slot 27 of the cheat-character vtable cFEStateRewardGalleryCheatChars_vtbl (the other galleries keep the base slot). Hashes the string
- * at +4 of the reward record in list entry @p i (+0xA28) with GetHashValue32() and looks it up with
- * cUITextureBank_getElementByHashname() in mpEngine + 0x58. The C definition is void, but the element stays in the
- * return register, and cFEStateRewardGalleryBase_updateHighlither stores it in the highlighted cell's mpTextureElem.
+ * Vtable slot 27 of the cheat-character vtable cFEStateRewardGalleryCheatChars_vtbl (the other galleries keep the
+ * base slot). Hashes the string at +4 of the reward record in list entry @p i (+0xA28) with GetHashValue32() and
+ * looks it up in mpEngine's texture bank (+0x58, cUITextureBank::getElementByHashname);
+ * cFEStateRewardGalleryBase_updateHighlither stores the element in the highlighted cell's mpTextureElem.
  *
  * @param i  index into the gallery's reward list
+ * @return the texture element of that reward's name
  */
-extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(cFEStateRewardGalleryCheatChars* self, int i)
+const cTextureElement* cFEStateRewardGalleryCheatChars::getTextureElement(int i)
 {
-    cUIEngine* obj = self->mpEngine;
-    tCheatCharInfo* reward = (tCheatCharInfo*)((void*)self->mpCheatChars[i]);
+    cUIEngine* obj = mpEngine;
+    tCheatCharInfo* reward = (tCheatCharInfo*)((void*)mpCheatChars[i]);
     int textureHash = GetHashValue32(reward->mpIconName);
-    cUITextureBank_getElementByHashname(&obj->mTextureBank, textureHash);
+    return obj->mTextureBank.getElementByHashname(textureHash);
 }
 #endif
 

@@ -86,6 +86,7 @@ struct cFEUseExistingAccount : public cFEStateNet {
                                     //       slot 8 with 0 once an account name is entered, 1 when the name is empty
 
     // Methods bound to their retail symbols by asm labels.
+    cFEUseExistingAccount(cUIEngine* pEngine) __asm__("cFEUseExistingAccount_cFEUseExistingAccount");
     void* cFEUseExistingAccount1() __asm__("cFEUseExistingAccount_cFEUseExistingAccount1");
     virtual ~cFEUseExistingAccount();   // g++'s own symbol _$_21cFEUseExistingAccount (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEUseExistingAccount_onCreateScreen");
@@ -146,6 +147,7 @@ struct cFEStateSelectPersona : public cFEStateNet {
                                     //       reads it as a void*)
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateSelectPersona(cUIEngine* pEngine) __asm__("cFEStateSelectPersona_cFEStateSelectPersona");
     void * cFEStateSelectPersona1() __asm__("cFEStateSelectPersona_cFEStateSelectPersona1");
     virtual ~cFEStateSelectPersona();   // g++'s own symbol _$_21cFEStateSelectPersona (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateSelectPersona_onCreateScreen");

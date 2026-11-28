@@ -57,7 +57,7 @@ struct cUIText : public cUIThing {
     //   mSize: [U] cUIText_setUnicodeStringWrap wraps at mSize.x
     // --- cUIText ---
     // cUIText's own slots ([R] cUIText_vtbl; types [O] On Tour's class cUIText):
-    virtual char getType();                                               // 22 cUIText_getType__FPv
+    virtual char getType() __asm__("cUIText_getType__FPv");               // 22
     virtual void setShadow(int a)
         __asm__("cUIText_setShadow");                                        // 23 cUIText_setShadow
     virtual void setUnicode(int a)

@@ -356,12 +356,12 @@ t4Vector cComputer_calculateTargetPos_0610(char* self) __asm__("cComputer_calcul
  *
  * @return the target point
  */
-t4Vector cComputer_calculateTargetPos_0610(char* vself)
+t4Vector cComputer::calculateTargetPos()
 {
-    cComputer* self = (cComputer*)vself;
-    t4Vector toTarget = Sub_0610(self->RiderHandler.GroundMotion.mRider->PathPos, self->RiderHandler.GroundMotion.mRider->mPosition);
+    t4Vector toTarget = Sub_0610(RiderHandler.GroundMotion.mRider->PathPos,
+                                 RiderHandler.GroundMotion.mRider->mPosition);
     toTarget = Scale_0610(toTarget, 0.1f);
-    return Add_0610(self->RiderHandler.GroundMotion.mRider->AimTargetPos, toTarget);
+    return Add_0610(RiderHandler.GroundMotion.mRider->AimTargetPos, toTarget);
 }
 #endif
 

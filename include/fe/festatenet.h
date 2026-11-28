@@ -140,6 +140,10 @@ struct cFEStateNet : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNet1() __asm__("cFEStateNet_cFEStateNet1");
+    // The constructors as the subclass constructors call them (cFEStateNet1 above and the C function
+    // cFEStateNet_cFEStateNet define them: their cUIState part has no constructor here).
+    cFEStateNet() __asm__("cFEStateNet_cFEStateNet1");
+    cFEStateNet(cUIEngine* engine, cUIState* owner) __asm__("cFEStateNet_cFEStateNet");
     int isProcessingEvents() __asm__("cFEStateNet_isProcessingEvents");
     virtual ~cFEStateNet();   // g++'s own symbol _$_11cFEStateNet (the retail label renamed; still a C function)
     virtual void onCreateScreen() __asm__("cFEStateNet_onCreateScreen__FPv");

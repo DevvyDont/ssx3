@@ -286,19 +286,15 @@ void cMultiParticle::writeToReplayFrame(cBxReplayFrame* stream)
 INCLUDE_ASM("object/multiparticle", cPhysicsModifier_cPhysicsModifier);
 #ifdef SKIP_ASM
 // Same stream-like class as cPhysicsModifier_writeToReplayFrame_cObj; v01 sits at vtable offset 8, v02 at 0x10.
-extern char cPhysicsModifier_vtbl[];
 
 /**
- * Constructs a physics modifier from a replay frame: installs cPhysicsModifier_vtbl and reads its first 4 bytes.
+ * Constructs a physics modifier from a replay frame: g++ installs cPhysicsModifier_vtbl; reads its first 4 bytes.
  *
  * @param obj  replay stream (its read slot, vtable entry 2)
- * @return self
  */
-extern "C" void* cPhysicsModifier_cPhysicsModifier(cPhysicsModifier* self, cBxReplayFrame* obj)
+cPhysicsModifier::cPhysicsModifier(cBxReplayFrame* obj)
 {
-    VPTR_OF(cPhysicsModifier, self) = (void**)cPhysicsModifier_vtbl;
-    obj->read((char*)self, 4);
-    return ((void*)self);
+    obj->read((char*)&Active, 4);
 }
 #endif
 

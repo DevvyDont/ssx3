@@ -430,6 +430,7 @@ struct cGameLoadStateConquer : public cUIState {
     virtual ~cGameLoadStateConquer();   // g++'s own symbol _$_21cGameLoadStateConquer (the retail label renamed)
     virtual void onWidgetCreate(cUIThing*) __asm__("cGameLoadStateConquer_onWidgetCreate__FPv");
     virtual bool onGainTransition(int) __asm__("cGameLoadStateConquer_onGainTransition");
+    virtual void onCreateScreen() __asm__("cGameLoadStateConquer_onCreateScreen");
 };
 
 CHECK_SIZE(cGameLoadStateConquer, 0x48);

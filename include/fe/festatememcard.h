@@ -86,6 +86,7 @@ struct cFEStateMemCard : public cFEMemCard {
     int mCard1Error;                // 0x244 [O] (bool); [R] 0 (no other retail access)
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateMemCard() __asm__("cFEStateMemCard_cFEStateMemCard");
     void terminateFreeSpaceCheck() __asm__("cFEStateMemCard_terminateFreeSpaceCheck");
     void exitScreen() __asm__("cFEStateMemCard_exitScreen");
     void updateFreeSpaceCheckState() __asm__("cFEStateMemCard_updateFreeSpaceCheckState");

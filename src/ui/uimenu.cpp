@@ -143,16 +143,16 @@ extern "C" unsigned char cUIMenu_getPrev(void* self);
 extern "C" bool cUIMenu_onInputChangeItem(cUIMenu* self, unsigned char old);
 
 
-static inline int inputIs_B000(void* in, int slot)
+static inline int inputIs_B000(const void* in, int slot)
 {
-    sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)((char*)in + 8);
-    return vt[slot].fn(vthis(in, vt[slot]));
+    sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)((const char*)in + 8);
+    return vt[slot].fn(vthis((void*)in, vt[slot]));
 }
 
-static inline int inputBtn_B000(void* in, int button)
+static inline int inputBtn_B000(const void* in, int button)
 {
-    sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)((char*)in + 8);
-    return vt[2].fn(vthis(in, vt[2]), button);
+    sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)((const char*)in + 8);
+    return vt[2].fn(vthis((void*)in, vt[2]), button);
 }
 
 static inline void focusNotify_B000(char* self, void* item, int what)
@@ -197,13 +197,13 @@ static inline void playEvent_B000(char* thing, int which)
  * @param in  the input (On Tour const cUIInput*)
  * @return true when the menu used the input, otherwise false
  */
-extern "C" bool cUIMenu_onInput(cUIMenu* self, cUIInput* in)
+bool cUIMenu::onInput(const cUIInput* in)
 {
-    if (((self->mAttr >> 5) & 1) || (char*)self->mpSelected == 0) {
+    if (((mAttr >> 5) & 1) || (char*)mpSelected == 0) {
         return false;
     }
-    cUIThing* cur = self->mpSelected;
-    if (!bit_B000(((char*)self), 20, 4)) {
+    cUIThing* cur = mpSelected;
+    if (!bit_B000(((char*)this), 20, 4)) {
         return false;
     }
     if (bit_B000(((char*)cur), 20, 3) && !bit_B000(((char*)cur), 20, 5)) {
@@ -212,109 +212,109 @@ extern "C" bool cUIMenu_onInput(cUIMenu* self, cUIInput* in)
         }
     }
     int result = 0;
-    unsigned char old = self->mScrollItemCurrent;
+    unsigned char old = mScrollItemCurrent;
     int moveResult;
-    if ((inputBtn_B000(in, self->mInputMap[3]) && !(self->mAttr & 1)) ||
-        (inputBtn_B000(in, self->mInputMap[1]) && (self->mAttr & 1))) {
+    if ((inputBtn_B000(in, mInputMap[3]) && !(mAttr & 1)) ||
+        (inputBtn_B000(in, mInputMap[1]) && (mAttr & 1))) {
         unsigned short ev;
-        if (inputBtn_B000(in, self->mInputMap[3]) && !(self->mAttr & 1)) {
-            ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
+        if (inputBtn_B000(in, mInputMap[3]) && !(mAttr & 1)) {
+            ev = cUIThing_getKeyframerEvent((cUIThing*)this, 9);
         } else {
-            ev = cUIThing_getKeyframerEvent((cUIThing*)self, 7);
+            ev = cUIThing_getKeyframerEvent((cUIThing*)this, 7);
         }
         if (ev != cUIScreen::kNoFrame) {
-            void* scr = self->mpScreen;
+            void* scr = mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        self->mScrollItemCurrent = cUIMenu_getNext(((char*)self));
-        int moved = self->onInputChangeItem(old);
-        if (!bit_B000(((char*)self), 144, 3)) {
+        mScrollItemCurrent = cUIMenu_getNext(((char*)this));
+        int moved = onInputChangeItem(old);
+        if (!bit_B000(((char*)this), 144, 3)) {
             if (moved) {
                 result = 1;
             } else {
-                result = cUIThing_getSound(self->mpSelected, 0);
+                result = cUIThing_getSound(mpSelected, 0);
             }
         }
-    } else if ((inputBtn_B000(in, self->mInputMap[2]) && !(self->mAttr & 1)) ||
-               (inputBtn_B000(in, self->mInputMap[0]) && (self->mAttr & 1))) {
+    } else if ((inputBtn_B000(in, mInputMap[2]) && !(mAttr & 1)) ||
+               (inputBtn_B000(in, mInputMap[0]) && (mAttr & 1))) {
         unsigned short ev;
-        if (inputBtn_B000(in, self->mInputMap[2]) && !(self->mAttr & 1)) {
-            ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
+        if (inputBtn_B000(in, mInputMap[2]) && !(mAttr & 1)) {
+            ev = cUIThing_getKeyframerEvent((cUIThing*)this, 8);
         } else {
-            ev = cUIThing_getKeyframerEvent((cUIThing*)self, 6);
+            ev = cUIThing_getKeyframerEvent((cUIThing*)this, 6);
         }
         if (ev != cUIScreen::kNoFrame) {
-            void* scr = self->mpScreen;
+            void* scr = mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        self->mScrollItemCurrent = cUIMenu_getPrev(((char*)self));
-        int moved = self->onInputChangeItem(old);
-        if (!bit_B000(((char*)self), 144, 3)) {
+        mScrollItemCurrent = cUIMenu_getPrev(((char*)this));
+        int moved = onInputChangeItem(old);
+        if (!bit_B000(((char*)this), 144, 3)) {
             if (moved) {
                 result = 1;
             } else {
-                result = cUIThing_getSound(self->mpSelected, 0);
+                result = cUIThing_getSound(mpSelected, 0);
             }
         }
     } else if (inputIs_B000(in, 5)) {
-        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
-        focusNotify_B000(((char*)self), item, 5);
-        moveResult = focusMove_B000(((char*)self), 6, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(&mList, mScrollItemCurrent - mScrollItemOffset);
+        focusNotify_B000(((char*)this), item, 5);
+        moveResult = focusMove_B000(((char*)this), 6, mScrollItemCurrent - mScrollItemOffset);
         if (moveResult & 0x100) {
             playEvent_B000(item, 2);
         }
         if (moveResult & 1) {
-            result = cUIThing_getSound(self->mpSelected, 1);
+            result = cUIThing_getSound(mpSelected, 1);
         } else if (moveResult & 0x10) {
-            result = cUIThing_getSound(self->mpSelected, 0);
+            result = cUIThing_getSound(mpSelected, 0);
         }
     } else if (inputIs_B000(in, 6)) {
-        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
-        focusNotify_B000(((char*)self), item, 6);
-        moveResult = focusMove_B000(((char*)self), 7, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(&mList, mScrollItemCurrent - mScrollItemOffset);
+        focusNotify_B000(((char*)this), item, 6);
+        moveResult = focusMove_B000(((char*)this), 7, mScrollItemCurrent - mScrollItemOffset);
         if (moveResult & 0x100) {
             playEvent_B000(item, 3);
         }
         if (moveResult & 1) {
-            result = cUIThing_getSound(self->mpSelected, 1);
+            result = cUIThing_getSound(mpSelected, 1);
         } else if (moveResult & 0x10) {
-            result = cUIThing_getSound(self->mpSelected, 0);
+            result = cUIThing_getSound(mpSelected, 0);
         }
     } else if (inputIs_B000(in, 8)) {
-        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
-        focusNotify_B000(((char*)self), item, 8);
-        moveResult = focusMove_B000(((char*)self), 9, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(&mList, mScrollItemCurrent - mScrollItemOffset);
+        focusNotify_B000(((char*)this), item, 8);
+        moveResult = focusMove_B000(((char*)this), 9, mScrollItemCurrent - mScrollItemOffset);
         if (moveResult & 0x100) {
             playEvent_B000(item, 5);
         }
         if (moveResult & 1) {
-            result = cUIThing_getSound(self->mpSelected, 1);
+            result = cUIThing_getSound(mpSelected, 1);
         } else if (moveResult & 0x10) {
-            result = cUIThing_getSound(self->mpSelected, 0);
+            result = cUIThing_getSound(mpSelected, 0);
         }
     } else if (inputIs_B000(in, 7)) {
-        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
-        focusNotify_B000(((char*)self), item, 7);
-        moveResult = focusMove_B000(((char*)self), 8, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(&mList, mScrollItemCurrent - mScrollItemOffset);
+        focusNotify_B000(((char*)this), item, 7);
+        moveResult = focusMove_B000(((char*)this), 8, mScrollItemCurrent - mScrollItemOffset);
         if (moveResult & 0x100) {
             playEvent_B000(item, 4);
         }
         if (moveResult & 1) {
-            result = cUIThing_getSound(self->mpSelected, 1);
+            result = cUIThing_getSound(mpSelected, 1);
         } else if (moveResult & 0x10) {
-            result = cUIThing_getSound(self->mpSelected, 0);
+            result = cUIThing_getSound(mpSelected, 0);
         }
     } else if (inputIs_B000(in, 4)) {
-        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
-        focusNotify_B000(((char*)self), item, 4);
+        char* item = (char*)cList_getByIndex_i(&mList, mScrollItemCurrent - mScrollItemOffset);
+        focusNotify_B000(((char*)this), item, 4);
     } else {
         return false;
     }
-    cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)self)));
+    cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)this)));
     char* listener = (char*)owner->mpSound;
     if (listener == 0) {
         listener = gUISoundNull;
@@ -784,10 +784,10 @@ extern char gUISoundNull[4];
 struct sVE_BED8 { short delta; short index; int (*fn)(void*, ...); };
 struct sVEv_BED8 { short delta; short index; void (*fn)(void*, ...); };
 
-static inline int inputIs_BED8(void* in, int slot)
+static inline int inputIs_BED8(const void* in, int slot)
 {
-    sVE_BED8* vt = *(sVE_BED8**)((char*)in + 8);
-    return vt[slot].fn(vthis(in, vt[slot]));
+    sVE_BED8* vt = *(sVE_BED8**)((const char*)in + 8);
+    return vt[slot].fn(vthis((void*)in, vt[slot]));
 }
 
 static inline void focusNotify_BED8(char* self, int what)
@@ -811,62 +811,62 @@ static inline int focusMove_BED8(char* self, int dir)
  * @param in  the input (On Tour const cUIInput* pInput)
  * @return 1 when the pair used the input, otherwise the second widget's answer (0 without one)
  */
-extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
+bool cUIPair::onInput(const cUIInput* in)
 {
     int result = 0;
     char* listener = gUISoundNull;
-    cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)self)));
+    cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)this)));
     if ((char*)owner->mpSound != 0) {
         listener = (char*)owner->mpSound;
     }
     int moveResult;
     if (inputIs_BED8(in, 5)) {
-        focusNotify_BED8(((char*)self), 5);
-        moveResult = focusMove_BED8(((char*)self), 0);
+        focusNotify_BED8(((char*)this), 5);
+        moveResult = focusMove_BED8(((char*)this), 0);
         if (moveResult & 0x100) {
-            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 2);
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)this, 2);
             if (ev != cUIScreen::kNoFrame) {
-                cUIScreen_playFrame(self->mpScreen, ev, 1);
+                cUIScreen_playFrame(mpScreen, ev, 1);
             }
         }
         if (moveResult & 1) {
-            result = cUIThing_getSound(((char*)self), 1);
+            result = cUIThing_getSound(((char*)this), 1);
         } else if (moveResult & 0x10) {
-            result = cUIThing_getSound(((char*)self), 0);
+            result = cUIThing_getSound(((char*)this), 0);
         }
         if (listener != 0) {
             sVEv_BED8* vt = *(sVEv_BED8**)listener;
             vt[2].fn(vthis(listener, vt[2]), result);
         }
     } else if (inputIs_BED8(in, 6)) {
-        focusNotify_BED8(((char*)self), 6);
-        moveResult = focusMove_BED8(((char*)self), 1);
+        focusNotify_BED8(((char*)this), 6);
+        moveResult = focusMove_BED8(((char*)this), 1);
         if (moveResult & 0x100) {
-            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 3);
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)this, 3);
             if (ev != cUIScreen::kNoFrame) {
-                cUIScreen_playFrame(self->mpScreen, ev, 1);
+                cUIScreen_playFrame(mpScreen, ev, 1);
             }
         }
         if (moveResult & 1) {
-            result = cUIThing_getSound(((char*)self), 1);
+            result = cUIThing_getSound(((char*)this), 1);
         } else if (moveResult & 0x10) {
-            result = cUIThing_getSound(((char*)self), 0);
+            result = cUIThing_getSound(((char*)this), 0);
         }
         if (listener != 0) {
             sVEv_BED8* vt = *(sVEv_BED8**)listener;
             vt[2].fn(vthis(listener, vt[2]), result);
         }
     } else if (inputIs_BED8(in, 4)) {
-        focusNotify_BED8(((char*)self), 4);
-        return 1;
+        focusNotify_BED8(((char*)this), 4);
+        return true;
     } else {
-        cUIThing* sub = self->mpWidget;
+        cUIThing* sub = mpWidget;
         if (((char*)sub) != 0) {
             return sub->onInput(in);
         }
-        return 0;
+        return false;
     }
-    return 1;
+    return true;
 }
 #endif
 

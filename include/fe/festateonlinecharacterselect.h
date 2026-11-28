@@ -71,6 +71,8 @@ struct cFEStateOnlineCharacterSelect : public cFEStateNet {
                                     //       resets the player interface (cBENewPlayerInterface_setPlayerCheatCharID) when the pick differs from it
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateOnlineCharacterSelect(cUIEngine* pEngine)
+        __asm__("cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect");
     void * cFEStateOnlineCharacterSelect1() __asm__("cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1");
     // g++'s own symbol _$_29cFEStateOnlineCharacterSelect (the retail label renamed)
     virtual ~cFEStateOnlineCharacterSelect();

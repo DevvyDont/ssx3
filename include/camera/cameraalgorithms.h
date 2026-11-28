@@ -209,7 +209,7 @@ struct cCameraAlgorithm {
         __asm__("cCameraAlgorithm_snapCurrent__FPv");                                                     // 4
     virtual void update()
         __asm__("cCameraAlgorithm_update__FPv");                                                          // 5
-    virtual t4Vector getTargetPos();                                                // 6
+    virtual t4Vector getTargetPos() __asm__("cCameraAlgorithm_getTargetPos");      // 6
     virtual void getRaceCamFinalPhaseData(cRaceCamFinalPhaseData* data_outArg)
         __asm__("cCameraAlgorithm_getRaceCamFinalPhaseData__FPv");     // 7
     virtual void doRaceCamFinalPhase(int ignoreCollisions)
@@ -238,7 +238,7 @@ __asm__("_vt$16cCameraAlgorithm = cCameraAlgorithm_vtbl");   // g++'s name for t
 struct cBasicCameraAlgorithm : public cCameraAlgorithm {
     // cCameraAlgorithm (camera/cameraalgorithms.h, 0x14): the vptr at 0x10:
     //   [R] cBasicCameraAlgorithm_vtbl (cManual: D_0045BD10, cEditor: D_0045BCA8)
-    virtual tPose getPose();                                                        // 2 ([R] cBasicCameraAlgorithm_vtbl: cBasicCameraAlgorithm_getPose)
+    virtual tPose getPose() __asm__("cBasicCameraAlgorithm_getPose");   // 2 ([R] cBasicCameraAlgorithm_vtbl)
     char unk_14[0xC];           // 0x14 alignment gap before the 16-byte-aligned t4Vector
     // --- cBasicCameraAlgorithm
     t4Vector Position;          // 0x20 [O]; [R] = t4vect_Origin; [U] cBasicCameraAlgorithm_setPosition setPosition (sq), cBasicCameraAlgorithm_getPosition
@@ -277,6 +277,7 @@ struct cManualCameraAlgorithm : public cBasicCameraAlgorithm {
     virtual ~cManualCameraAlgorithm();
     // Methods bound to their retail symbols by asm labels.
     virtual void snap(int) __asm__("cManualCameraAlgorithm_snap__FPv");
+    virtual void update() __asm__("cManualCameraAlgorithm_update");
 };
 __asm__("_vt$22cManualCameraAlgorithm = cManualCameraAlgorithm_vtbl");   // g++'s name for the retail vtable
 
@@ -294,7 +295,9 @@ struct cChaseAlgorithm : public cCameraAlgorithm {
     // cCameraAlgorithm (camera/cameraalgorithms.h, 0x14): the vptr at 0x10:
     //   [R] cChaseAlgorithm_vtbl
     // cChaseAlgorithm's own slots ([R] cChaseAlgorithm_vtbl; types [O] On Tour's class cChaseAlgorithm):
-    virtual void setTarget(cRiderCameraTarget* camTarget);                         // 12
+    virtual void setTarget(cRiderCameraTarget* camTarget) __asm__("cChaseAlgorithm_setTarget__FPvi");   // 12
+    // cCameraAlgorithm's slot 6 overridden:
+    virtual t4Vector getTargetPos() __asm__("cChaseAlgorithm_getTargetPos");
     char unk_14[0xC];           // 0x14 alignment gap
     // --- cChaseAlgorithm
     t4Vector CamTargetPos;      // 0x20 [O]; [U] cChaseAlgorithm_getTargetPos returns it (lq); the chase algorithms

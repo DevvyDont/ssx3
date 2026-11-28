@@ -204,6 +204,8 @@ struct cScreenPopup : public cUIState {
     virtual void onDestroyScreen() __asm__("cScreenPopup_onDestroyScreen__FPv");
     virtual int handleEvent(int msg, void* pParam) __asm__("cScreenPopup_handleEvent");
     virtual void onRender2D() __asm__("cScreenPopup_onRender2D__FPv");
+    void determineAndSetScaling(t3Vector pos) __asm__("cScreenPopup_determineAndSetScaling");
+    void resizeBackground(t3Vector vSize, float fXOffset, float fYOffset) __asm__("cScreenPopup_resizeBackground");
 };
 
 CHECK_OFFSET(cScreenPopup, mpBackGroundWhite, 0x48);

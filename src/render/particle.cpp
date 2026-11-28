@@ -1212,12 +1212,10 @@ INCLUDE_ASM("render/particle", cTube_update__FPv);
  *
  * It is the update slot (slot 2) of both tube vtables, cTube_vtbl (the 4-byte "Tube" effect) and cSimpleTube_vtbl (the
  * segmented tube built by cSimpleTube_cSimpleTube). @p self is only passed on.
- *
- * @return whatever cSimpleTube_updateColours leaves in its return register (nothing meaningful)
  */
-void* cTube_update(void* self)
+void cTube::update()
 {
-    return ((cSimpleTube*)self)->updateColours();
+    ((cSimpleTube*)this)->updateColours();
 }
 #endif
 
@@ -2910,7 +2908,7 @@ INCLUDE_ASM("render/particle", cDetailSystem_update__FPv);
 /**
  * Does nothing: the detail-system effect's per-frame update (slot 2 of cDetailSystem_vtbl).
  */
-void cDetailSystem_update(void* self)
+void cDetailSystem::update()
 {
 }
 #endif
@@ -7613,7 +7611,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_projectToScreen);
  * @return the projected point
  */
 // PORT: PS2-only VU0 macro-mode asm; the PC port needs a C version.
-extern "C" t4Vector cPS2GraphicsMan_projectToScreen(cPS2GraphicsMan* self, t4Vector* point)
+t4Vector cPS2GraphicsMan::projectToScreen(t4Vector* point)
 {
     t4Vector result;
     __asm__ __volatile__(
@@ -7635,9 +7633,9 @@ extern "C" t4Vector cPS2GraphicsMan_projectToScreen(cPS2GraphicsMan* self, t4Vec
         "vmaddw.xyzw  $vf13, $vf6, $vf0w\n"
         "sqc2      $vf13, %0\n"
         : "=m"(result)
-        : "r"(point), "r"((char*)&self->mNetMatrix),
-          "m"(self->mScreenScale),
-          "m"(self->mScreenOffset));
+        : "r"(point), "r"((char*)&mNetMatrix),
+          "m"(mScreenScale),
+          "m"(mScreenOffset));
     return result;
 }
 #endif
@@ -7655,9 +7653,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_transformByNetMatrix);
  * @return the transformed (homogeneous) point
  */
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4x4 matrix * vector).
-extern "C" t4Vector cPS2GraphicsMan_transformByNetMatrix(cPS2GraphicsMan* self, t4Vector* point)
+t4Vector cPS2GraphicsMan::transformByNetMatrix(t4Vector* point)
 {
-    char* mat = (char*)&self->mNetMatrix;
+    char* mat = (char*)&mNetMatrix;
     t4Vector result;
     __asm__ __volatile__(
         ".set push\n"

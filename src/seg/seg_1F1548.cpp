@@ -2142,7 +2142,7 @@ extern "C" void* cSplashManager_cSplashManager(cSplashManager* splashManager, vo
     splashManager->mLastCameraPosition.w = 1.0f;
     splashManager->mLastCameraSpeed = 0.0f;
     splashManager->mNumSplashesToAdd = 0.0f;
-    cSplashManager_reset(splashManager);
+    splashManager->cSplashManager::reset();
     return ((char*)splashManager);
 }
 #endif
@@ -2315,15 +2315,14 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_reset);
  * Clears the last-camera-position-valid flag (+0x100C), the splashes still to add (+0x1024), the active drop and
  * crystal counts (+0x14, +0x18) and the last snowfall intensity (+0x1028); the floats are cleared with integer zero
  * stores. Virtual (cSplashManager_vtbl +0x70); called by the constructor and, when a camera snaps, by cSplashManager_CameraSnapped.
- *
- * @param splashManager  the splash manager (this)
  */
-extern "C" void cSplashManager_reset(cSplashManager* splashManager) {
-    splashManager->mLastCameraPositionValid = 0;
-    splashManager->mNumSplashesToAdd = 0.0f;
-    splashManager->mNumActiveDrops = 0;
-    splashManager->mNumActiveCrystals = 0;
-    splashManager->mLastSnowfallIntensity = 0.0f;
+void cSplashManager::reset()
+{
+    mLastCameraPositionValid = 0;
+    mNumSplashesToAdd = 0.0f;
+    mNumActiveDrops = 0;
+    mNumActiveCrystals = 0;
+    mLastSnowfallIntensity = 0.0f;
 }
 #endif
 

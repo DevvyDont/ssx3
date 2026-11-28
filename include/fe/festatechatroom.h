@@ -93,6 +93,7 @@ struct cFEStateChatRoom : public cFEStateNet {
                                     //       onCreateScreen copies it to mpTextScrollChat + 0xA8 (ldl/ldr)
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateChatRoom(cUIEngine* pEngine) __asm__("cFEStateChatRoom_cFEStateChatRoom");
     virtual ~cFEStateChatRoom();   // g++'s own symbol _$_16cFEStateChatRoom (the retail label renamed)
     void* cFEStateChatRoom1() __asm__("cFEStateChatRoom_cFEStateChatRoom1");
     // onUpdate stays a C function (cFEStateChatRoom_onUpdate): declared first, it is the vtable's key function, which

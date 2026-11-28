@@ -4985,45 +4985,45 @@ extern "C" cBeing* cObjectInterface_getBeing(int i);
  * 1 node that no being touches and whose timer is out expires (slot 34, runscript 1); slots 49/50 (empty)
  * bracket the loop.
  */
-extern "C" void cBoostNode_update(cBoostNode* self)
+void cBoostNode::update()
 {
     int hit = 0;
-    if (self->Type != cBoostNode::kBoostType_Timed) {
+    if (Type != cBoostNode::kBoostType_Timed) {
         hit = 1;
     }
-    int timeLeft = self->Time;
+    int timeLeft = Time;
     if (timeLeft > 0) {
         int n = timeLeft - 1;
-        self->Time = n;
+        Time = n;
         if (n > 0) {
             hit = 1;
         }
     }
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
-    vt[49].fn(vthis(self, vt[49]));
-    if (self->Type == cBoostNode::kBoostType_Timed || self->Time <= 0) {
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, this);
+    vt[49].fn(vthis(this, vt[49]));
+    if (Type == cBoostNode::kBoostType_Timed || Time <= 0) {
         for (int i = 0; i < cObjectInterface_getNumBeings(); i++) {
             cBeing* obj = cObjectInterface_getBeing(i);
-            if (self->Type == cBoostNode::kBoostType_Local) {
+            if (Type == cBoostNode::kBoostType_Local) {
                 if (obj->isComputer() != 0) continue;
             }
-            if (obj->isIntersecting(self->Instance) != 0) {
+            if (obj->isIntersecting(Instance) != 0) {
                 hit = 1;
-                if (self->Drag < 0.0f) {
-                    sVEntry<void(void*, cBeing*)>* vtbl = (sVEntry<void(void*, cBeing*)>*)VPTR_OF(cObjNode, self);
-                    vtbl[48].fn(vthis(self, vtbl[48]), obj);  // applyDrag
+                if (Drag < 0.0f) {
+                    sVEntry<void(void*, cBeing*)>* vtbl = (sVEntry<void(void*, cBeing*)>*)VPTR_OF(cObjNode, this);
+                    vtbl[48].fn(vthis(this, vtbl[48]), obj);  // applyDrag
                 } else {
-                    sVEntry<void(void*, cBeing*)>* vtbl = (sVEntry<void(void*, cBeing*)>*)VPTR_OF(cObjNode, self);
-                    vtbl[47].fn(vthis(self, vtbl[47]), obj);  // applyBoost
+                    sVEntry<void(void*, cBeing*)>* vtbl = (sVEntry<void(void*, cBeing*)>*)VPTR_OF(cObjNode, this);
+                    vtbl[47].fn(vthis(this, vtbl[47]), obj);  // applyBoost
                 }
             }
         }
     }
-    sVEntry<void(void*)>* vtbl2 = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, self);
-    vtbl2[50].fn(vthis(self, vtbl2[50]));
+    sVEntry<void(void*)>* vtbl2 = (sVEntry<void(void*)>*)VPTR_OF(cObjNode, this);
+    vtbl2[50].fn(vthis(this, vtbl2[50]));
     if (hit == 0) {
-        sVEntry<void(void*, int)>* vtbl3 = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, self);
-        vtbl3[34].fn(vthis(self, vtbl3[34]), 1);
+        sVEntry<void(void*, int)>* vtbl3 = (sVEntry<void(void*, int)>*)VPTR_OF(cObjNode, this);
+        vtbl3[34].fn(vthis(this, vtbl3[34]), 1);
     }
 }
 #endif
@@ -5179,12 +5179,12 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostNode_signal);
  * Reloads the timer (+0x3C) from the duration (+0x38); other signals are ignored. On Tour's float argument is
  * not taken.
  *
- * @param signal  the signal number
+ * @param msg  the signal number
  */
-extern "C" void cBoostNode_signal(cBoostNode* self, int signal)
+void cBoostNode::signal(int msg, float)
 {
-    if (signal == cBoostNode::kBoostSignal_Restart) {
-        self->Time = self->BoostTime;
+    if (msg == cBoostNode::kBoostSignal_Restart) {
+        Time = BoostTime;
     }
 }
 #endif
@@ -6109,66 +6109,55 @@ void cAnimTeeterNode::writeToReplayFrame(void* stream)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_cBoostModifier);
 #ifdef SKIP_ASM
-extern void* cBoostModifier_vtbl[];
-
 /**
  * Constructs a boost modifier from its script data and instance.
  *
- * Sets Active, stores cBoostModifier_vtbl and Instance (@p instRecord), and from @p def (On Tour tAddBoostData) takes Type
- * (+0x4, read as a short), BoostTime (+0x8 seconds times the frame rate at cAppMan_TheAppMan +0x10, in frames), Boost
- * (BoostX/Y/Z at +0x14, w = 0, not normalised), MaxSpeed (+0x10 times 100) and Drag (+0xC). Time starts at BoostTime
- * for type 1, else 0. Unlike the boost node (cBoostNode_cBoostNode1), which converts MaxSpeed from km/h, it scales by 100.
+ * Sets Active (the inline cPhysicsModifier ctor), g++ stores cBoostModifier_vtbl; stores Instance (@p instRecord),
+ * and from @p def (On Tour tAddBoostData) takes Type (+0x4, read as a short), BoostTime (+0x8 seconds times the
+ * frame rate at cAppMan_TheAppMan +0x10, in frames), Boost (BoostX/Y/Z at +0x14, w = 0, not normalised), MaxSpeed
+ * (+0x10 times 100) and Drag (+0xC). Time starts at BoostTime for type 1, else 0. Unlike the boost node
+ * (cBoostNode_cBoostNode1), which converts MaxSpeed from km/h, it scales by 100.
  *
  * Called by cMoveNode_addBoost.
  *
  * @param def  the script's boost data (On Tour tAddBoostData)
  * @param instRecord  the instance record the modifier belongs to
- * @return @p self
  */
-extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, tAddBoostData* def, tInstanceRecord* instRecord)
+cBoostModifier::cBoostModifier(tAddBoostData* def, tInstanceRecord* instRecord)
 {
-    self->Active = 1;
-    VPTR_OF(cPhysicsModifier, self) = cBoostModifier_vtbl;
-    self->Instance = instRecord;
+    Instance = instRecord;
     int type = (short)def->Type;
-    self->Type = type;
+    Type = type;
     int boostFrames = (int)(def->BoostTime * (float)cAppMan_TheAppMan->TimerHz);
-    self->BoostTime = boostFrames;
+    BoostTime = boostFrames;
     t4Vector boostDir;
     boostDir.x = def->BoostX;
     boostDir.y = def->BoostY;
     boostDir.z = def->BoostZ;
     boostDir.w = 0.0f;
-    *(&self->Boost) = boostDir;
-    self->MaxSpeed = def->MaxSpeed * 100.0f;
-    self->Drag = def->Drag;
-    self->Time = type == cBoostModifier::kBoostModType_Timed ? boostFrames : 0;
-    return (self);
+    Boost = boostDir;
+    MaxSpeed = def->MaxSpeed * 100.0f;
+    Drag = def->Drag;
+    Time = type == kBoostModType_Timed ? boostFrames : 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_cBoostModifier1);
 #ifdef SKIP_ASM
-
-extern void* cBoostModifier_vtbl[];
-
 /**
  * Constructs a boost modifier from a replay frame.
  *
- * Sets Active, stores cBoostModifier_vtbl, reads the 0x30-byte boost state (Boost .. Type) with the frame's read
- * virtual (slot 2) and Instance with readReplayInstance (slot 3). Called by tModifierBlock_readFromReplayFrame.
+ * Sets Active (the inline cPhysicsModifier ctor), g++ stores cBoostModifier_vtbl; reads the 0x30-byte boost state
+ * (Boost .. Type) with the frame's read virtual (slot 2) and Instance with readReplayInstance (slot 3). Called by
+ * tModifierBlock_readFromReplayFrame.
  *
  * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
- * @return @p self
  */
-void* cBoostModifier::cBoostModifier1(cBxReplayFrame* stream)
+cBoostModifier::cBoostModifier(cBxReplayFrame* stream)
 {
-    Active = 1;
-    VPTR_OF(cPhysicsModifier, this) = cBoostModifier_vtbl;
     stream->read((char*)&Boost, 0x30);
     Instance = stream->readReplayInstance();
-    return ((void*)this);
 }
 #endif
 
@@ -6337,14 +6326,15 @@ struct sSelf_342A88 {
  * being's slot 4 (On Tour cBeing::applyBoost). The view sPlane_342A88 reads
  * MaxSpeed and Drag as the plane's d and k.
  *
- * @param obj  the rider in the zone (On Tour cBeing* pBeing)
+ * @param pBeing  the rider in the zone (On Tour cBeing* pBeing)
  */
-extern "C" void cBoostModifier_applyBoost(cBoostModifier* self, cWsMover* obj)
+void cBoostModifier::applyBoost(cBeing* pBeing)
 {
-    float speedDeficit = self->MaxSpeed - vu0Dot(*obj->getVelocity(), self->Boost);
+    cWsMover* obj = (cWsMover*)pBeing;
+    float speedDeficit = MaxSpeed - vu0Dot(*obj->getVelocity(), Boost);
     if (speedDeficit > 0.0f) {
         // PORT: takes the address of a temporary (g++ 2.95 accepts it).
-        cBoostModifierState* pl = (cBoostModifierState*)&self->Boost;
+        cBoostModifierState* pl = (cBoostModifierState*)&Boost;
         setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->Boost, speedDeficit), pl->Drag), cObjectInterface_getUpdateTime()));
     }
 }
@@ -6358,12 +6348,12 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_signal);
  *
  * Reloads the timer (+0x2C) from the duration (+0x28); other signals are ignored.
  *
- * @param signal  the signal number
+ * @param msg  the signal number
  */
-extern "C" void cBoostModifier_signal(cBoostModifier* self, int signal)
+void cBoostModifier::signal(int msg, float)
 {
-    if (signal == cBoostModifier::kBoostModSignal_Restart) {
-        self->Time = self->BoostTime;
+    if (msg == cBoostModifier::kBoostModSignal_Restart) {
+        Time = BoostTime;
     }
 }
 #endif

@@ -60,6 +60,7 @@ struct cFEStateNetQuickMessages : public cFEStateNet {
                                     //       mpMessage[i] (cFEStateNetQuickMessages_setFittedText)
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateNetQuickMessages(cUIEngine* pEngine) __asm__("cFEStateNetQuickMessages_cFEStateNetQuickMessages");
     void * cFEStateNetQuickMessages1() __asm__("cFEStateNetQuickMessages_cFEStateNetQuickMessages1");
     virtual ~cFEStateNetQuickMessages();   // g++'s own symbol _$_24cFEStateNetQuickMessages (the retail label renamed)
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateNetQuickMessages_onPopupEvent");

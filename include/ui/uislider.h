@@ -23,7 +23,7 @@ struct cUISlider : public cUIThing {
     //       cUISlider__cUISlider)
     // --- cUISlider
     // cUISlider's own slots ([R] cUISlider_vtbl; types [O] On Tour's class cUISlider):
-    virtual char getType();                                               // 22 cUISlider_getType__FPv
+    virtual char getType() __asm__("cUISlider_getType__FPv");             // 22
     int mValue;                      // 0x074 [O]; [R] = 0; [U] cUISlider_getValue getValue (lw), cUISlider_setValue setValue (sw);
                                      //       onInput cUISlider_onInput steps it; render2D cUISlider_render2D (lwc1 + cvt.s.w)
     int mNumValues;                  // 0x078 [O]; [R] = 0; [U] setUIData cUISlider_setUIData (sw), cUISlider_setNumValues setNumValues;

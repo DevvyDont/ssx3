@@ -2295,9 +2295,8 @@ INCLUDE_ASM("render/font", cGraphicsMan_RenderLineStrip__FPv);
  *
  * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
  */
-void cGraphicsMan_RenderLineStrip(void* vself)
+void cGraphicsMan::RenderLineStrip(int, char*, float)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
 }
 #endif
 
@@ -6446,10 +6445,10 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getSubEmitterPosition);
  * @param idx  the sub-emitter, counted from the oldest
  * @return the position
  */
-extern "C" t4Vector cBaseClass_DynamicEmitter_getSubEmitterPosition(cBaseClass_DynamicEmitter* self, int idx)
+t4Vector cBaseClass_DynamicEmitter::getSubEmitterPosition(int idx)
 {
-    int next = self->m_subEmitterId + 1;
-    return (self->m_positions)[(idx + next) % self->m_numSubEmitters];
+    int next = m_subEmitterId + 1;
+    return m_positions[(idx + next) % m_numSubEmitters];
 }
 #endif
 //100%
@@ -6465,10 +6464,10 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getSubEmitterVelocity);
  * @param idx  the sub-emitter, counted from the oldest
  * @return the velocity
  */
-extern "C" t4Vector cBaseClass_DynamicEmitter_getSubEmitterVelocity(cBaseClass_DynamicEmitter* self, int idx)
+t4Vector cBaseClass_DynamicEmitter::getSubEmitterVelocity(int idx)
 {
-    int next = self->m_subEmitterId + 1;
-    return (self->m_velocities)[(idx + next) % self->m_numSubEmitters];
+    int next = m_subEmitterId + 1;
+    return m_velocities[(idx + next) % m_numSubEmitters];
 }
 #endif
 //100%
@@ -6802,7 +6801,7 @@ INCLUDE_ASM("render/font", cDetailSystem_addPatch__FPv);
  *
  * Slot 5 of vtable cDetailSystem_vtbl (the "DetailSystem" effect).
  */
-void cDetailSystem_addPatch(void* self)
+void cDetailSystem::addPatch()
 {
 }
 #endif

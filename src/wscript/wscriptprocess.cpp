@@ -26,13 +26,6 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern char cWScriptProcess_vtbl[];
 extern char str_WScriptTasks[];
 
-struct sElem_307598 {
-    char pad[0x44];
-    // PORT: the element constructor is cWScriptTask_cWScriptTask (defined below as an extern "C" function).
-    sElem_307598() __asm__("cWScriptTask_cWScriptTask");
-    void operator delete[](void* p, unsigned int size);
-};
-
 
 /**
  * Constructs a world-script process for a world section from its process definition: resolves its scripts and
@@ -65,11 +58,11 @@ extern "C" void* cWScriptProcess_cWScriptProcess(cWScriptProcess* self, cWScript
         self->EventScriptCode[j] = (char*)cWScriptMan_getScriptCode_2(self->Manager, def->EventScriptId[j]);
     int n = def->NumTasks;
     self->NumTasks = n;
-    sElem_307598** pv = (sElem_307598**)&self->Tasks;
-    *pv = new (str_WScriptTasks, 0x20000000, 0) sElem_307598[n];
+    cWScriptTask** tasks = &self->Tasks;
+    *tasks = new (str_WScriptTasks, 0x20000000, 0) cWScriptTask[n];
     char* ed = ((char*)def->unk_008);
     for (int k = 0; k < self->NumTasks; k++, ed += 0x38)
-        cWScriptTask_initTask((cWScriptTask*)&((sElem_307598*)self->Tasks)[k], self, (cWScriptTask_initTask_sDef*)ed);
+        cWScriptTask_initTask(&self->Tasks[k], self, (cWScriptTask_initTask_sDef*)ed);
     self->State = 0;
     self->RunningTask = self->NumTasks;
     self->Next = 0;
@@ -834,24 +827,19 @@ void cWScriptProcess::readFromReplayFrame(cBxReplayFrame* stream)
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_cWScriptTask);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern void* cWScriptTask_vtbl[];
 
 /**
- * Constructs an empty script task: stores cWScriptTask_vtbl (vptr at +0x40) and zeroes its state, id and scripts.
+ * Constructs an empty script task: g++ stores cWScriptTask_vtbl (vptr at +0x40); zeroes its state, id and scripts.
  *
  * Clears the three task scripts (+0x8..+0x13), the process (+0x3C), the id (+0x4) and the state (+0x0).
  * cWScriptProcess_cWScriptProcess builds its task array with it before cWScriptTask_initTask fills each task.
- *
- * @return @p self
  */
-extern "C" void* cWScriptTask_cWScriptTask(cWScriptTask* self)
+cWScriptTask::cWScriptTask()
 {
-    VPTR_OF(cWScriptTask, self) = cWScriptTask_vtbl;
-    MEM_fill((char*)&self->TaskScriptCode, 0, 0xC);
-    self->Process = 0;
-    self->TaskId = (unsigned int)0;
-    *(int*)self = 0;
-    return ((void*)self);
+    MEM_fill(TaskScriptCode, 0, 0xC);
+    Process = 0;
+    TaskId = 0;
+    State = 0;
 }
 #endif
 

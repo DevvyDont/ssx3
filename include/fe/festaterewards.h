@@ -55,7 +55,7 @@ struct cFEStateRewardGalleryBase : public cFEState {
     }
     // cFEStateRewardGalleryBase's own slots ([R] cFEStateRewardGalleryBase_vtbl; types and order [O] On Tour's class,
     // whose extra getIconID(const char*) is retail's non-virtual cFEStateRewardGalleryBase_getIconID):
-    virtual const char* getIconsFileName();                                         // 25
+    virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryBase_getIconsFileName__FPv");   // 25
     virtual int getIconID(int index);                                               // 26 (retail getIconID1)
     virtual const cTextureElement* getTextureElement(int index)
         __asm__("cFEStateRewardGalleryBase_getTextureElement__FPv");                    // 27
@@ -238,6 +238,7 @@ struct cFEStateRewardGalleryPosters : public cFEStateRewardGalleryBase {
     virtual int getRewardStoreNum(const void* other) __asm__("cFEStateRewardGalleryPosters_getRewardStoreNum__FPvT0");
     virtual const char* getRewardName(const void* other) __asm__("cFEStateRewardGalleryPosters_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryPosters_getIconsFileName__FPv");
+    virtual int getIconID(int i) __asm__("cFEStateRewardGalleryPosters_getIconID");
     virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryPosters_getRewardCost");
 };
 
@@ -276,6 +277,7 @@ struct cFEStateRewardGalleryTradingCards : public cFEStateRewardGalleryBase {
     virtual const char* getRewardName(const void* other)
         __asm__("cFEStateRewardGalleryTradingCards_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryTradingCards_getIconsFileName__FPv");
+    virtual int getIconID(int i) __asm__("cFEStateRewardGalleryTradingCards_getIconID");
     virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryTradingCards_getRewardCost");
 };
 
@@ -315,6 +317,7 @@ struct cFEStateRewardGalleryConceptArts : public cFEStateRewardGalleryBase {
     virtual const char* getRewardName(const void* other)
         __asm__("cFEStateRewardGalleryConceptArts_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryConceptArts_getIconsFileName__FPv");
+    virtual int getIconID(int i) __asm__("cFEStateRewardGalleryConceptArts_getIconID");
     virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryConceptArts_getRewardCost");
 };
 
@@ -349,6 +352,7 @@ struct cFEStateRewardGalleryVideos : public cFEStateRewardGalleryBase {
     virtual int getRewardStoreNum(const void* other) __asm__("cFEStateRewardGalleryVideos_getRewardStoreNum__FPvT0");
     virtual const char* getRewardName(const void* other) __asm__("cFEStateRewardGalleryVideos_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryVideos_getIconsFileName__FPv");
+    virtual int getIconID(int i) __asm__("cFEStateRewardGalleryVideos_getIconID");
     virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryVideos_getRewardCost");
 };
 
@@ -382,6 +386,7 @@ struct cFEStateRewardGalleryToys : public cFEStateRewardGalleryBase {
     virtual int getRewardStoreNum(const void* other) __asm__("cFEStateRewardGalleryToys_getRewardStoreNum__FPvT0");
     virtual const char* getRewardName(const void* other) __asm__("cFEStateRewardGalleryToys_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryToys_getIconsFileName__FPv");
+    virtual int getIconID(int i) __asm__("cFEStateRewardGalleryToys_getIconID");
     virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryToys_getRewardCost");
 };
 
@@ -412,6 +417,8 @@ struct cFEStateRewardGalleryCheatChars : public cFEStateRewardGalleryBase {
     // Methods bound to their retail symbols by asm labels.
     // g++'s own symbol _$_31cFEStateRewardGalleryCheatChars (the retail label renamed)
     virtual ~cFEStateRewardGalleryCheatChars();
+    virtual const cTextureElement* getTextureElement(int i)
+        __asm__("cFEStateRewardGalleryCheatChars_getTextureElement");
     virtual void allocRewards() __asm__("cFEStateRewardGalleryCheatChars_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryCheatChars_purgeRewards");
     virtual const void* getReward(int i) __asm__("cFEStateRewardGalleryCheatChars_getReward__FPvi");

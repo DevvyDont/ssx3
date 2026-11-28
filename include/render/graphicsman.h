@@ -285,7 +285,10 @@ public:
             const t2Vector* UV, const tARGB* Color, const t3Vector& Offset)
         __asm__("cGraphicsMan_RenderIndexedTriList");
     virtual void RenderLineStrip(int numverts, const tBxVertex* verts, int isstatic) = 0;                // slot 73: [R] cPS2GraphicsMan_RenderLineStrip; every caller passes (n, tBxVertex*, 0); [O] the PSP twin's RenderLineStrip(int, const tBxVertex*, bool isstatic), and On Tour lists this pure one first
-    virtual void RenderLineStrip(int numverts, char* packedoffsets, float scale);                         // slot 74: [R] cGraphicsMan_RenderLineStrip__FPv (the base's empty body; cPS2GraphicsMan keeps it); [O] On Tour's cGraphicsMan defines RenderLineStrip(int numverts, char* packedoffsets, float scale) itself
+    // slot 74: [R] the base's empty body (cPS2GraphicsMan keeps it); [O] On Tour's cGraphicsMan defines
+    // RenderLineStrip(int numverts, char* packedoffsets, float scale) itself
+    virtual void RenderLineStrip(int numverts, char* packedoffsets, float scale)
+        __asm__("cGraphicsMan_RenderLineStrip__FPv");
     virtual void RenderSpline(const t4Matrix& BezMat, const tARGB& col, int NumPoints)
         __asm__("cGraphicsMan_RenderSpline");                  // slot 75: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderSpline
     virtual cGridMesh* CreateGridMesh(int width, int height, int memtype) = 0;                           // slot 76: [R] cPS2GraphicsMan_CreateGridMesh
@@ -315,7 +318,8 @@ public:
     // slot 94: [O] reference parameters as On Tour; [R] cGraphicsMan_DeformMeshMatrix
     virtual void DeformMeshMatrix(t4Matrix& mat) __asm__("cGraphicsMan_DeformMeshMatrix");
     virtual void RenderModel(const tInstanceRecord* pInstance, const tMaterialBlockRecord* material, const t4Matrix& BMat, float opacity, const t4Matrix* animmats, const t4Matrix* TexMat, int flags) = 0; // slot 95: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderModel
-    virtual void RenderModel(tInstanceRecord* obj, int animMats, int texMat, int renderFlags);           // slot 96: [R] cGraphicsMan_RenderModel
+    virtual void RenderModel(tInstanceRecord* obj, int animMats, int texMat, int renderFlags)
+        __asm__("cGraphicsMan_RenderModel");                                                             // slot 96
     virtual void GetMeshQuad(const tInstanceRecord* pInstance, int mesh, t3Vector* vert, t2Vector* uv, tARGB* rgb) = 0; // slot 97: [R] cPS2GraphicsMan_GetMeshQuad
     // slot 98: [R] cPS2GraphicsMan_SetShinyBoarder__FPvi; parameters [O]
     virtual void SetShinyBoarder(int State) __asm__("cGraphicsMan_SetShinyBoarder__FPv");

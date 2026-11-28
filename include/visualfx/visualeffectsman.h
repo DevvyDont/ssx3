@@ -66,6 +66,8 @@ __asm__("_vt$10cHeightFog = cHeightFog_vtbl");   // g++'s name for the retail vt
 struct cDetailSystem : cVisualEffect {
     cDetailSystem() __asm__("cDetailSystem_cDetailSystem__FPv");
     virtual ~cDetailSystem();
+    void addPatch() __asm__("cDetailSystem_addPatch__FPv");
+    virtual void update() __asm__("cDetailSystem_update__FPv");
 };
 __asm__("_vt$13cDetailSystem = cDetailSystem_vtbl");   // g++'s name for the retail vtable
 struct cScreenTint : cVisualEffect { virtual ~cScreenTint(); };
@@ -88,6 +90,7 @@ struct cTube : cVisualEffect {
     cTube() __asm__("cTube_cTube");
     virtual ~cTube();
     virtual void render() __asm__("cTube_render__FPv");
+    virtual void update() __asm__("cTube_update__FPv");
 };
 __asm__("_vt$5cTube = cTube_vtbl");   // g++'s name for the retail vtable
 struct cPathArrow : cVisualEffect {

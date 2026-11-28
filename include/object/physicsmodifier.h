@@ -32,6 +32,10 @@ struct cPhysicsModifier {
     virtual int getPhysicsType() __asm__("cPhysicsModifier_getPhysicsType__FPv");                               // 5
     virtual void writeToReplayFrame(cBxReplayFrame* data) __asm__("cPhysicsModifier_writeToReplayFrame");      // 6
 
+    // Inline: retail's derived ctors (cBoostModifier's) inline it; its out-of-line copy is cPhysicsModifier1 below.
+    cPhysicsModifier() { Active = 1; }
+    cPhysicsModifier(cBxReplayFrame* obj) __asm__("cPhysicsModifier_cPhysicsModifier");
+
     // Methods bound to their retail symbols by asm labels.
     void * cPhysicsModifier1() __asm__("cPhysicsModifier_cPhysicsModifier1");
 };

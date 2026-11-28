@@ -90,6 +90,7 @@ struct cFEStateAuthDNAS : public cFEStateNet {
                                     //       access seen
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateAuthDNAS(cUIEngine* pEngine, cFEStateNet* pParentState) __asm__("cFEStateAuthDNAS_cFEStateAuthDNAS");
     void* cFEStateAuthDNAS1() __asm__("cFEStateAuthDNAS_cFEStateAuthDNAS1");
     virtual ~cFEStateAuthDNAS();   // g++'s own symbol _$_16cFEStateAuthDNAS (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateAuthDNAS_onCreateScreen");
@@ -146,6 +147,9 @@ struct cFEStateAuthDNASError : public cFEStateNet {
     cUIText* mpTitle;               // 0x6E4 [U] onWidgetCreate: widget "Title"
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateAuthDNASError(cUIEngine* pEngine, cFEStateNet* pParentState, unsigned short* pustrBody,
+        unsigned short* pustrFooter, unsigned short* pustrTitle)
+        __asm__("cFEStateAuthDNASError_cFEStateAuthDNASError");
     virtual ~cFEStateAuthDNASError();   // g++'s own symbol _$_21cFEStateAuthDNASError (the retail label renamed)
     void* cFEStateAuthDNASError1() __asm__("cFEStateAuthDNASError_cFEStateAuthDNASError1");
     // onWidgetCreate stays a C function (cFEStateAuthDNASError_onWidgetCreate): declared first, it is the vtable's key

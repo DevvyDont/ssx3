@@ -565,6 +565,8 @@ public:
         __asm__("cPS2GraphicsMan_AddProjectiveTexture");
     virtual int ClipBoundBox(const t4Vector& minp, const t4Vector& maxp, const t4Matrix& mat)
         __asm__("cPS2GraphicsMan_ClipBoundBox");
+    t4Vector projectToScreen(t4Vector* point) __asm__("cPS2GraphicsMan_projectToScreen");
+    t4Vector transformByNetMatrix(t4Vector* point) __asm__("cPS2GraphicsMan_transformByNetMatrix");
 };
 
 // --- layout checks

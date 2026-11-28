@@ -79,6 +79,9 @@ struct cCTVolume {
     void** mVtbl;               // 0x24 [R] cCTObject_vtbl, then D_0045C3A0 (cCTVolume_cCTVolume)
     // --- cCTVolume
     int Type;                   // 0x28 [O] eCTVolumeType; [R] the subclass ctors store it (ellipse 0, box 1)
+
+    // Methods bound to their retail symbols by asm labels.
+    t4Vector getBoundaryPointClosestTo(t4Vector* pos, float step) __asm__("cCTVolume_getBoundaryPointClosestTo");
 };
 
 CHECK_OFFSET(cCTVolume, Pos, 0x00);

@@ -115,6 +115,7 @@ struct cBoostNode : public cInstanceNode {
     // vtable out of the units defining the other overrides
     virtual void update() __asm__("cBoostNode_update");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cBoostNode_writeToReplayFrame");
+    virtual void signal(int msg, float) __asm__("cBoostNode_signal");
 };
 
 CHECK_OFFSET(cBoostNode, unk_01C, 0x1C);

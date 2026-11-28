@@ -48,7 +48,8 @@ struct cMatrixChaseAlgorithm : public cLookAtChaseAlgorithm {
     //   CamTargetPos: [U] sq/lqc2 in the update functions
     //   Target: [U] setTarget cChaseAlgorithm_setTarget; 15 functions read it
     // --- cMatrixChaseAlgorithm
-    virtual float getRestDrop();                                                    // 13 ([R] cMatrixChaseAlgorithm_vtbl: cMatrixChaseAlgorithm_getRestDrop__FPv)
+    // 13 ([R] cMatrixChaseAlgorithm_vtbl)
+    virtual float getRestDrop() __asm__("cMatrixChaseAlgorithm_getRestDrop__FPv");
     float LastAngle;                // 0x390 [O] (On Tour 0x380); [R] = 0 (sw zero); [U] cMatrixChaseAlgorithm_update update (lwc1/swc1)
     char unk_394[0xC];              // 0x394 padding to the 16-byte class alignment (alloc 0x3A0)
 
@@ -79,7 +80,8 @@ struct cRelativeChaseAlgorithm : public cLookAtChaseAlgorithm {
     //   CamTargetPos: [U] sq/lqc2 in the update functions
     //   Target: [U] setTarget cChaseAlgorithm_setTarget; 15 functions read it
     // --- cRelativeChaseAlgorithm
-    virtual float getRestDrop();                                                    // 13 ([R] cRelativeChaseAlgorithm_vtbl: cRelativeChaseAlgorithm_getRestDrop__FPv)
+    // 13 ([R] cRelativeChaseAlgorithm_vtbl)
+    virtual float getRestDrop() __asm__("cRelativeChaseAlgorithm_getRestDrop__FPv");
     float Angle;                    // 0x390 [O] (On Tour 0x380); [R] = angle (swc1); [U] cRelativeChaseAlgorithm_update (lwc1)
     int Initialized;                // 0x394 [O] bool (a word in retail); [R] = 0; [U] cRelativeChaseAlgorithm_update tests and sets it
     char unk_398[0x8];              // 0x398 alignment gap before the 16-byte-aligned t4Vector
@@ -117,7 +119,7 @@ struct cSplineCamAlgorithm : public cLookAtChaseAlgorithm {
     //   CamTargetPos: [U] sq/lqc2 in the update functions
     //   Target: [U] setTarget cChaseAlgorithm_setTarget; 15 functions read it
     // --- cSplineCamAlgorithm
-    virtual float getRestDrop();                                                    // 13 ([R] cSplineCamAlgorithm_vtbl: cSplineCamAlgorithm_getRestDrop__FPv)
+    virtual float getRestDrop() __asm__("cSplineCamAlgorithm_getRestDrop__FPv");    // 13 ([R] cSplineCamAlgorithm_vtbl)
     cCubicSplineInterpolant XOfT;   // 0x390 [O] cCubicSplineInterpolant (On Tour 0x380); [R] the ctor constructs it
                                     //       (this+0x390), update evaluates it, the dtor destroys it
     cCubicSplineInterpolant YOfT;   // 0x39C [O] cCubicSplineInterpolant; [R] ditto (this+0x39C)
@@ -168,7 +170,8 @@ __asm__("_vt$19cSplineCamAlgorithm = cSplineCamAlgorithm_vtbl");   // g++'s name
 // getRaceCamFinalPhaseData cManualChaseAlgorithm_getRaceCamFinalPhaseData__FPvT0 (7), getRestDrop cManualChaseAlgorithm_getRestDrop__FPv (13); the other slots are the base's.
 struct cManualChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
-    virtual float getRestDrop();                                                    // 13 ([R] cManualChaseAlgorithm_vtbl: cManualChaseAlgorithm_getRestDrop__FPv)
+    // 13 ([R] cManualChaseAlgorithm_vtbl)
+    virtual float getRestDrop() __asm__("cManualChaseAlgorithm_getRestDrop__FPv");
 
     cManualChaseAlgorithm() __asm__("cManualChaseAlgorithm_cManualChaseAlgorithm");
     virtual ~cManualChaseAlgorithm();   // g++'s own symbol _$_21cManualChaseAlgorithm (the retail label renamed)
@@ -193,7 +196,7 @@ __asm__("_vt$21cManualChaseAlgorithm = cManualChaseAlgorithm_vtbl");   // g++'s 
 // [P] the preview's _vt$19cIdleChaseAlgorithm matches retail cIdleChaseAlgorithm_vtbl (builds/x/v2/vtables_v2.tsv).
 struct cIdleChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
-    virtual float getRestDrop();                                                    // 13 ([R] cIdleChaseAlgorithm_vtbl: cIdleChaseAlgorithm_getRestDrop__FPv)
+    virtual float getRestDrop() __asm__("cIdleChaseAlgorithm_getRestDrop__FPv");    // 13 ([R] cIdleChaseAlgorithm_vtbl)
 
     cIdleChaseAlgorithm() __asm__("cIdleChaseAlgorithm_cIdleChaseAlgorithm");
     virtual ~cIdleChaseAlgorithm();   // g++'s own symbol _$_19cIdleChaseAlgorithm (the retail label renamed)
@@ -220,7 +223,7 @@ __asm__("_vt$19cIdleChaseAlgorithm = cIdleChaseAlgorithm_vtbl");   // g++'s name
 // [P] the preview's _vt$19cLazyChaseAlgorithm matches retail cLazyChaseAlgorithm_vtbl.
 struct cLazyChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
-    virtual float getRestDrop();                                                    // 13 ([R] cLazyChaseAlgorithm_vtbl: cLazyChaseAlgorithm_getRestDrop__FPv)
+    virtual float getRestDrop() __asm__("cLazyChaseAlgorithm_getRestDrop__FPv");    // 13 ([R] cLazyChaseAlgorithm_vtbl)
 
     cLazyChaseAlgorithm() __asm__("cLazyChaseAlgorithm_cLazyChaseAlgorithm");
     virtual ~cLazyChaseAlgorithm();   // g++'s own symbol _$_19cLazyChaseAlgorithm (the retail label renamed)
@@ -247,7 +250,8 @@ __asm__("_vt$19cLazyChaseAlgorithm = cLazyChaseAlgorithm_vtbl");   // g++'s name
 // [P] the preview's _vt$23cLookBackChaseAlgorithm matches retail cLookBackChaseAlgorithm_vtbl.
 struct cLookBackChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
-    virtual float getRestDrop();                                                    // 13 ([R] cLookBackChaseAlgorithm_vtbl: cLookBackChaseAlgorithm_getRestDrop__FPv)
+    // 13 ([R] cLookBackChaseAlgorithm_vtbl)
+    virtual float getRestDrop() __asm__("cLookBackChaseAlgorithm_getRestDrop__FPv");
 
     cLookBackChaseAlgorithm() __asm__("cLookBackChaseAlgorithm_cLookBackChaseAlgorithm");
     virtual ~cLookBackChaseAlgorithm();   // g++'s own symbol _$_23cLookBackChaseAlgorithm (the retail label renamed)
@@ -276,7 +280,8 @@ __asm__("_vt$23cLookBackChaseAlgorithm = cLookBackChaseAlgorithm_vtbl");   // g+
 // __sti__all_in_one_camera_cpp). Both mid ctors store type 9 in retail AND in On Tour (EA copy-paste).
 struct cMidRightChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
-    virtual float getRestDrop();                                                    // 13 ([R] cMidRightChaseAlgorithm_vtbl: cMidRightChaseAlgorithm_getRestDrop)
+    // 13 ([R] cMidRightChaseAlgorithm_vtbl)
+    virtual float getRestDrop() __asm__("cMidRightChaseAlgorithm_getRestDrop");
 
     cMidRightChaseAlgorithm() __asm__("cMidRightChaseAlgorithm_cMidRightChaseAlgorithm");
     virtual ~cMidRightChaseAlgorithm();   // g++'s own symbol _$_23cMidRightChaseAlgorithm (the retail label renamed)
@@ -303,7 +308,7 @@ __asm__("_vt$23cMidRightChaseAlgorithm = cMidRightChaseAlgorithm_vtbl");   // g+
 // _vt$22cMidLeftChaseAlgorithm update and On Tour's cMidLeftChaseAlgorithm::update (+kLateralShift_MIDSIDE).
 struct cMidLeftChaseAlgorithm : public cLookAtChaseAlgorithm {
     // no fields of its own
-    virtual float getRestDrop();                                                    // 13 ([R] cMidLeftChaseAlgorithm_vtbl: cMidLeftChaseAlgorithm_getRestDrop)
+    virtual float getRestDrop() __asm__("cMidLeftChaseAlgorithm_getRestDrop");   // 13 ([R] cMidLeftChaseAlgorithm_vtbl)
 
     cMidLeftChaseAlgorithm() __asm__("cMidLeftChaseAlgorithm_cMidLeftChaseAlgorithm");
     virtual ~cMidLeftChaseAlgorithm();   // g++'s own symbol _$_22cMidLeftChaseAlgorithm (the retail label renamed)

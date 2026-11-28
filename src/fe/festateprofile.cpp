@@ -102,8 +102,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* self, int a1);
-extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
-extern void* cFEStateProfileLoad_vtbl[];
 extern int cFEStateProfileLoad_mScreenAction;
 
 /**
@@ -117,26 +115,23 @@ extern int cFEStateProfileLoad_mScreenAction;
  * @param pEngine     the UI engine
  * @param iType     what the screen is for (On Tour iType, kept in mScreenAction)
  * @param flags  bit mask of the controller that is active
- * @return @p self
  */
-extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(cFEStateProfileLoad* self, int pEngine, int iType, unsigned char flags)
+cFEStateProfileLoad::cFEStateProfileLoad(cUIEngine* pEngine, int iType, unsigned char flags) : cFEMemCard(pEngine, 0)
 {
-    cFEMemCard_cFEMemCard2(self, pEngine, 0);
-    self->mHashName = 35;
-    VPTR_OF(cListNode, self) = cFEStateProfileLoad_vtbl;
+    mHashName = 35;
     cFEStateProfileLoad_mScreenAction = iType;
-    self->mPlayerIdx = 0;
-    self->mIsOn = 0;
-    self->mIsHidden = 0;
-    self->mTypeOfQuit = 0;
-    self->mCtrlBits = flags;
-    self->miCntrlID = 0;
+    mPlayerIdx = 0;
+    mIsOn = 0;
+    mIsHidden = 0;
+    mTypeOfQuit = 0;
+    mCtrlBits = flags;
+    miCntrlID = 0;
     for (int i = 0; i < 3; i++) {
         if (flags & 1) {
             break;
         }
         flags >>= 1;
-        self->miCntrlID += 1;
+        miCntrlID += 1;
     }
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -145,14 +140,13 @@ extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(cFEStateProfileLoad* se
         n = 2;
     }
     for (int j = 0; j < n; j++) {
-        if (cBENewPlayerInterface_getPlayerCtrlID(pi, j) == self->miCntrlID) {
-            self->mPlayerIdx = j;
+        if (cBENewPlayerInterface_getPlayerCtrlID(pi, j) == miCntrlID) {
+            mPlayerIdx = j;
             break;
         }
     }
-    int idx = *(signed char*)&self->mPlayerIdx;
-    self->mUserNum = idx;
-    return ((void*)self);
+    int idx = *(signed char*)&mPlayerIdx;
+    mUserNum = idx;
 }
 #endif
 

@@ -1367,10 +1367,10 @@ extern char gUISoundNull[4];
 
 struct sVE_9970 { short delta; short index; int (*fn)(void*, ...); };
 
-static inline int inputIs_9970(void* in, int slot)
+static inline int inputIs_9970(const void* in, int slot)
 {
-    sVE_9970* vt = *(sVE_9970**)((char*)in + 8);
-    return vt[slot].fn(vthis(in, vt[slot]));
+    sVE_9970* vt = *(sVE_9970**)((const char*)in + 8);
+    return vt[slot].fn(vthis((void*)in, vt[slot]));
 }
 
 static inline void focusNotify_9970(char* self, int what)
@@ -1405,77 +1405,77 @@ static inline int isClear_9970(int flags)
  * @param in  the input (On Tour const cUIInput* pInput)
  * @return true when the input was used, else false (On Tour returns bool)
  */
-extern "C" bool cUIListBox_onInput(cUIListBox* self, cUIInput* in)
+bool cUIListBox::onInput(const cUIInput* in)
 {
-    if (self->mNumEntries == 0)
+    if (mNumEntries == 0)
         return false;
     int result = 0;
     char* listener = gUISoundNull;
-    cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)self)));
+    cUIEngine* owner = (cUIEngine*)((char*)cUIThing_getEngine(((char*)this)));
     if ((char*)owner->mpSound != 0) {
         listener = (char*)owner->mpSound;
     }
     int moveResult;
-    if ((inputIs_9970(in, 19) && isClear_9970(self->mAttr))
-        || (inputIs_9970(in, 18) && (self->mAttr & 1))) {
-        int cur = self->mCurrentEntry;
+    if ((inputIs_9970(in, 19) && isClear_9970(mAttr))
+        || (inputIs_9970(in, 18) && (mAttr & 1))) {
+        int cur = mCurrentEntry;
         if (cur != 0) {
-            self->mCurrentEntry = cur - 1;
-            focusNotify_9970(((char*)self), 9);
+            mCurrentEntry = cur - 1;
+            focusNotify_9970(((char*)this), 9);
         } else {
-            int wrapBits = self->mAttr >> 7;
+            int wrapBits = mAttr >> 7;
             if (wrapBits & 1) {
-                self->mCurrentEntry = self->mNumEntries - 1;
-                focusNotify_9970(((char*)self), 9);
+                mCurrentEntry = mNumEntries - 1;
+                focusNotify_9970(((char*)this), 9);
             }
         }
-        if (isClear_9970(self->mAttr))
-            moveResult = focusMove_9970(((char*)self), 0);
+        if (isClear_9970(mAttr))
+            moveResult = focusMove_9970(((char*)this), 0);
         else
-            moveResult = focusMove_9970(((char*)self), 3);
+            moveResult = focusMove_9970(((char*)this), 3);
         if (moveResult & 0x100) {
-            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
-            if (ev != cUIScreen::kNoFrame && self->mpScreen != 0) {
-                cUIScreen_playFrame(self->mpScreen, ev, 1);
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)this, 8);
+            if (ev != cUIScreen::kNoFrame && mpScreen != 0) {
+                cUIScreen_playFrame(mpScreen, ev, 1);
             }
         }
         if (moveResult & 1) {
             result = 1;
         } else if (moveResult & 0x10) {
-            result = cUIThing_getSound(((char*)self), 0);
+            result = cUIThing_getSound(((char*)this), 0);
         }
         if (listener != 0) {
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
             vt[2].fn(vthis(listener, vt[2]), result);
         }
         return true;
-    } else if ((inputIs_9970(in, 20) && isClear_9970(self->mAttr))
-               || (inputIs_9970(in, 17) && (self->mAttr & 1))) {
-        int next = self->mCurrentEntry + 1;
-        if (next < self->mNumEntries) {
-            self->mCurrentEntry = next;
-            focusNotify_9970(((char*)self), 9);
+    } else if ((inputIs_9970(in, 20) && isClear_9970(mAttr))
+               || (inputIs_9970(in, 17) && (mAttr & 1))) {
+        int next = mCurrentEntry + 1;
+        if (next < mNumEntries) {
+            mCurrentEntry = next;
+            focusNotify_9970(((char*)this), 9);
         } else {
-            int wrapBits = self->mAttr >> 7;
+            int wrapBits = mAttr >> 7;
             if (wrapBits & 1) {
-                self->mCurrentEntry = 0;
-                focusNotify_9970(((char*)self), 9);
+                mCurrentEntry = 0;
+                focusNotify_9970(((char*)this), 9);
             }
         }
-        if (isClear_9970(self->mAttr))
-            moveResult = focusMove_9970(((char*)self), 1);
+        if (isClear_9970(mAttr))
+            moveResult = focusMove_9970(((char*)this), 1);
         else
-            moveResult = focusMove_9970(((char*)self), 2);
+            moveResult = focusMove_9970(((char*)this), 2);
         if (moveResult & 0x100) {
-            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
-            if (ev != cUIScreen::kNoFrame && self->mpScreen != 0) {
-                cUIScreen_playFrame(self->mpScreen, ev, 1);
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)this, 9);
+            if (ev != cUIScreen::kNoFrame && mpScreen != 0) {
+                cUIScreen_playFrame(mpScreen, ev, 1);
             }
         }
         if (moveResult & 1) {
             result = 1;
         } else if (moveResult & 0x10) {
-            result = cUIThing_getSound(((char*)self), 0);
+            result = cUIThing_getSound(((char*)this), 0);
         }
         if (listener != 0) {
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
@@ -1483,18 +1483,18 @@ extern "C" bool cUIListBox_onInput(cUIListBox* self, cUIInput* in)
         }
         return true;
     } else if (inputIs_9970(in, 6)) {
-        focusNotify_9970(((char*)self), 6);
-        moveResult = focusMove_9970(((char*)self), 4);
+        focusNotify_9970(((char*)this), 6);
+        moveResult = focusMove_9970(((char*)this), 4);
         if (moveResult & 0x100) {
-            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 3);
+            unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)this, 3);
             if (ev != cUIScreen::kNoFrame) {
-                cUIScreen_playFrame(self->mpScreen, ev, 1);
+                cUIScreen_playFrame(mpScreen, ev, 1);
             }
         }
         if (moveResult & 1) {
-            result = cUIThing_getSound(((char*)self), 1);
+            result = cUIThing_getSound(((char*)this), 1);
         } else if (moveResult & 0x10) {
-            result = cUIThing_getSound(((char*)self), 0);
+            result = cUIThing_getSound(((char*)this), 0);
         }
         if (listener != 0) {
             sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;

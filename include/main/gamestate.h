@@ -133,6 +133,7 @@ struct cGFTrackStartState : public cGameState {
     int mCheckTransportEnd;         // 0x1C [O] bool; [R] ctor 0; [U] gainFocus sets it, update tests and clears it
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFTrackStartState();   // g++'s own symbol _$_18cGFTrackStartState (the retail label renamed)
     cGFTrackStartState() __asm__("cGFTrackStartState_cGFTrackStartState");
     virtual void preloadInit() __asm__("cGFTrackStartState_preloadInit");
     virtual void preloadUpdate() __asm__("cGFTrackStartState_preloadUpdate");
@@ -216,6 +217,7 @@ struct cGFEventStartState : public cGameState {
     };
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFEventStartState();   // g++'s own symbol _$_18cGFEventStartState (the retail label renamed)
     cGFEventStartState() __asm__("cGFEventStartState_cGFEventStartState");
     virtual void gainFocus(int mode) __asm__("cGFEventStartState_gainFocus");
     virtual void update() __asm__("cGFEventStartState_update");
@@ -249,6 +251,7 @@ struct cGFPreEventState : public cGameState {
     //     (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFPreEventState();   // g++'s own symbol _$_16cGFPreEventState (the retail label renamed)
     cGFPreEventState() __asm__("cGFPreEventState_cGFPreEventState");
     virtual void gainFocus(int startupFlag) __asm__("cGFPreEventState_gainFocus");
     virtual void update() __asm__("cGFPreEventState_update");
@@ -276,6 +279,7 @@ struct cGFGateState : public cGameState {
     //   the vptr 0x0C: [R] cGameState_vtbl, then cGFGateState_vtbl (ctor); cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFGateState();   // g++'s own symbol _$_12cGFGateState (the retail label renamed)
     cGFGateState() __asm__("cGFGateState_cGFGateState");
     virtual void gainFocus(int startupFlag) __asm__("cGFGateState_gainFocus");
     void runScript(int hashID) __asm__("cGFGateState_runScript");
@@ -300,6 +304,7 @@ struct cGFRidingState : public cGameState {
     //   the vptr 0x0C: [R] cGameState_vtbl, then cGFRidingState_vtbl (ctor); cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFRidingState();   // g++'s own symbol _$_14cGFRidingState (the retail label renamed)
     cGFRidingState() __asm__("cGFRidingState_cGFRidingState");
     void* writeToReplayFrame() __asm__("cGFRidingState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFRidingState_readFromReplayFrame__FPv");
@@ -332,6 +337,7 @@ struct cGFFinishlineState : public cGameState {
                                     //      frame
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFFinishlineState();   // g++'s own symbol _$_18cGFFinishlineState (the retail label renamed)
     cGFFinishlineState() __asm__("cGFFinishlineState_cGFFinishlineState");
     virtual void gainFocus(int startupFlag) __asm__("cGFFinishlineState_gainFocus");
     virtual void loseFocus() __asm__("cGFFinishlineState_loseFocus");
@@ -358,6 +364,7 @@ struct cGFEndState : public cGameState {
     //   the vptr 0x0C: [R] cGameState_vtbl, then cGFEndState_vtbl (ctor); cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFEndState();   // g++'s own symbol _$_11cGFEndState (the retail label renamed)
     cGFEndState() __asm__("cGFEndState_cGFEndState");
     virtual void loseFocus() __asm__("cGFEndState_loseFocus__FPv");
     void* writeToReplayFrame() __asm__("cGFEndState_writeToReplayFrame__FPv");
@@ -383,6 +390,7 @@ struct cGFPostEventState : public cGameState {
     //     (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFPostEventState();   // g++'s own symbol _$_17cGFPostEventState (the retail label renamed)
     cGFPostEventState() __asm__("cGFPostEventState_cGFPostEventState");
     virtual void gainFocus(int startupFlag) __asm__("cGFPostEventState_gainFocus");
     virtual void update() __asm__("cGFPostEventState_update");
@@ -408,6 +416,7 @@ struct cGFEndWaitState : public cGameState {
     //     cGameState_vtbl (cGFEndWaitState__cGFEndWaitState, the dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFEndWaitState();   // g++'s own symbol _$_15cGFEndWaitState (the retail label renamed)
     void* writeToReplayFrame() __asm__("cGFEndWaitState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFEndWaitState_readFromReplayFrame__FPv");
 };
@@ -429,6 +438,7 @@ struct cGFTransportWaitState : public cGameState {
     //     cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFTransportWaitState();   // g++'s own symbol _$_21cGFTransportWaitState (the retail label renamed)
     cGFTransportWaitState() __asm__("cGFTransportWaitState_cGFTransportWaitState");
     void* writeToReplayFrame() __asm__("cGFTransportWaitState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFTransportWaitState_readFromReplayFrame__FPv");
@@ -461,6 +471,7 @@ struct cGFSectionLoadState : public cGameState {
     enum eSubState { kSectionLoad_WaitSection = 0, kSectionLoad_WaitTransport = 1, kSectionLoad_Done = 2 };
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFSectionLoadState();   // g++'s own symbol _$_19cGFSectionLoadState (the retail label renamed)
     cGFSectionLoadState() __asm__("cGFSectionLoadState_cGFSectionLoadState");
     virtual void gainFocus(int startupFlag) __asm__("cGFSectionLoadState_gainFocus");
     virtual void update() __asm__("cGFSectionLoadState_update");
@@ -487,6 +498,7 @@ struct cGFPodiumState : public cGameState {
     //   the vptr 0x0C: [R] cGameState_vtbl, then cGFPodiumState_vtbl (ctor); cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFPodiumState();   // g++'s own symbol _$_14cGFPodiumState (the retail label renamed)
     cGFPodiumState() __asm__("cGFPodiumState_cGFPodiumState");
     virtual void update() __asm__("cGFPodiumState_update");
     void* writeToReplayFrame() __asm__("cGFPodiumState_writeToReplayFrame__FPv");
@@ -525,6 +537,7 @@ struct cGFNextHeatState : public cGameState {
                                     //      replay frame
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFNextHeatState();   // g++'s own symbol _$_16cGFNextHeatState (the retail label renamed)
     cGFNextHeatState() __asm__("cGFNextHeatState_cGFNextHeatState");
     virtual void gainFocus(int startupFlag) __asm__("cGFNextHeatState_gainFocus");
     virtual void update() __asm__("cGFNextHeatState_update");
@@ -581,6 +594,7 @@ struct cGFUserSelectState : public cGameState {
                                     //      retail access
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFUserSelectState();   // g++'s own symbol _$_18cGFUserSelectState (the retail label renamed)
     cGFUserSelectState() __asm__("cGFUserSelectState_cGFUserSelectState");
     virtual void gainFocus(int mode) __asm__("cGFUserSelectState_gainFocus");
     virtual void update() __asm__("cGFUserSelectState_update");
@@ -612,6 +626,7 @@ struct cGFSessionTeleportState : public cGameState {
     //     cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFSessionTeleportState();   // g++'s own symbol _$_23cGFSessionTeleportState (the retail label renamed)
     cGFSessionTeleportState() __asm__("cGFSessionTeleportState_cGFSessionTeleportState");
     virtual void gainFocus(int startupFlag) __asm__("cGFSessionTeleportState_gainFocus");
     void* writeToReplayFrame() __asm__("cGFSessionTeleportState_writeToReplayFrame__FPv");
@@ -636,6 +651,7 @@ struct cGFReplayStartState : public cGameState {
     //     (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cGFReplayStartState();   // g++'s own symbol _$_19cGFReplayStartState (the retail label renamed)
     cGFReplayStartState() __asm__("cGFReplayStartState_cGFReplayStartState");
     virtual void update() __asm__("cGFReplayStartState_update__FPv");
 };

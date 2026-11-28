@@ -379,20 +379,19 @@ extern "C" tRect cMenuItem_textPreRender_impl(cMenuItem* item, const char* left,
  * two are given. Finally the height grows by 12 and the width becomes max(width, 100) + 32. The x scale ratio Scale.x /
  * BaseScale.x is computed but never used. The unit's callers declare it with a hidden return pointer first.
  *
- * @param item  the menu item whose menu system's font measures the texts
  * @param left  text drawn at the left edge, or 0
  * @param center  text drawn centred, or 0
  * @param right  text drawn at the right edge, or 0
  * @return the row's rect (x, y, w, h)
  */
-extern "C" tRect cMenuItem_textPreRender_impl(cMenuItem* item, const char* left, const char* center, const char* right)
+tRect cMenuItem::textPreRender(const char* left, const char* center, const char* right)
 {
     tRect rect;
     t2Vector sc;
     float zero = 0.0f;
     rect.Y = zero;
     rect.X = zero;
-    cFont* font = font_2CA4C8(item);
+    cFont* font = font_2CA4C8(this);
     float lineHeight = (float)font->MaxCharHeight * font->BaseScale[1];
     float sx = font->Scale[0] / font->BaseScale[0];
     float sy = font->Scale[1] / font->BaseScale[1];
@@ -400,14 +399,15 @@ extern "C" tRect cMenuItem_textPreRender_impl(cMenuItem* item, const char* left,
     sc.y = sy;
     rect.H = lineHeight * sy;
     if (left && center && right) {
-        rect.W = width_2CA4C8(item, center) + MAXF_2CA4C8(width_2CA4C8(item, left), width_2CA4C8(item, right)) * 2.0f + 32.0f;
+        rect.W = width_2CA4C8(this, center) + MAXF_2CA4C8(width_2CA4C8(this, left), width_2CA4C8(this, right)) * 2.0f +
+                 32.0f;
     } else {
-        float w = widthOr0_2CA4C8(item, left);
+        float w = widthOr0_2CA4C8(this, left);
         if (center) {
-            w += width_2CA4C8(item, center);
+            w += width_2CA4C8(this, center);
         }
         if (right) {
-            w += width_2CA4C8(item, right);
+            w += width_2CA4C8(this, right);
         }
         rect.W = w;
         if ((left && (center || right)) || (center && right)) {
@@ -2951,11 +2951,11 @@ INCLUDE_ASM("util/menu", cSpaceMenuItem_preRender);
  *
  * @return the rectangle {0, 0, 0, size}
  */
-extern "C" tRect cSpaceMenuItem_preRender(cSpaceMenuItem* self)
+tRect cSpaceMenuItem::preRender()
 {
     tRect rect;
     rect.X = rect.Y = rect.W = 0.0f;
-    rect.H = (float)self->Space;
+    rect.H = (float)Space;
     return rect;
 }
 #endif

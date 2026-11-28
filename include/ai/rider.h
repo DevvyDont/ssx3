@@ -901,6 +901,7 @@ struct cRider : public cRiderState, public cBeing {
     void updateHandlerFX() __asm__("cRider_updateHandlerFX");
     void updateLOD() __asm__("cRider_updateLOD");
     void* renderAttachedEmitterFX() __asm__("cRider_renderAttachedEmitterFX__FPv");
+    t4Vector GetNISEndPosition() __asm__("cRider_GetNISEndPosition");
 };
 
 CHECK_OFFSET(cRiderState, CheckID, 0xD8);

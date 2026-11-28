@@ -99,6 +99,9 @@ struct cFEStateProfileLoad : public cFEMemCard {
     enum { kQuitToPrevious = 0, kQuitToHub = 1, kQuitToTitle = 2 };
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateProfileLoad(cUIEngine* pEngine, int iType, unsigned char flags)
+        __asm__("cFEStateProfileLoad_cFEStateProfileLoad");
+    cFEStateProfileLoad() __asm__("cFEStateProfileLoad_cFEStateProfileLoad1");
     void displayOn() __asm__("cFEStateProfileLoad_displayOn");
     void displayOff() __asm__("cFEStateProfileLoad_displayOff");
     void startSave() __asm__("cFEStateProfileLoad_startSave");

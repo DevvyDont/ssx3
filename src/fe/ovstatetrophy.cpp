@@ -1959,8 +1959,6 @@ void cOVState::PRIVATEMESSAGE_createKeyboard(int textObj, int password, int misc
 INCLUDE_ASM("fe/ovstatetrophy", cOVState_PROFILE_cOVState_PROFILE);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern char cOVState_PROFILE_vtbl[];
-extern "C" void cFEMemCard_cFEMemCard2(void* self, int a, int b);
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int i);
 /**
  * Constructs the in-game profile (load/save) overlay for the controller that opened it.
@@ -1976,18 +1974,16 @@ extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int i);
  * @param pEngine  the UI engine
  * @param ucActiveControl  bit mask of the active controller (On Tour ucActiveControl)
  * @param parentOverlay  the overlay to return to (On Tour ov, kept in mParentOV)
- * @return @p self
  */
-extern "C" cOVState_PROFILE* cOVState_PROFILE_cOVState_PROFILE(cOVState_PROFILE* self, int pEngine, unsigned char ucActiveControl, int parentOverlay)
+cOVState_PROFILE::cOVState_PROFILE(cUIEngine* pEngine, unsigned char ucActiveControl, int parentOverlay)
+    : cFEMemCard(pEngine, 0)
 {
     int idx = 0;
-    cFEMemCard_cFEMemCard2((self), pEngine, 0);
-    self->mHashName = 36;
-    VPTR_OF(cListNode, self) = (void**)cOVState_PROFILE_vtbl;
-    self->mParentOV = parentOverlay;
-    self->mPlayerIdx = 0;
-    self->mIsOn = 0;
-    self->mIsHidden = 0;
+    mHashName = 36;
+    mParentOV = parentOverlay;
+    mPlayerIdx = 0;
+    mIsOn = 0;
+    mIsHidden = 0;
     int i;
     for (i = 1; i < 9; i++) {
         ucActiveControl >>= i;
@@ -2002,11 +1998,10 @@ extern "C" cOVState_PROFILE* cOVState_PROFILE_cOVState_PROFILE(cOVState_PROFILE*
     if (cBENewRaceInterface_newRace.cGamePath == kGAMEPATH_MULTIPLAYER) lim = 2;
     for (int n = 0; n < lim; n++) {
         if (cBENewPlayerInterface_getPlayerCtrlID(iface, n) == idx) {
-            self->mPlayerIdx = n;
+            mPlayerIdx = n;
             break;
         }
     }
-    return (self);
 }
 #endif
 

@@ -33,24 +33,24 @@ extern char str_Bitmap0001[];
  * Sets bit 3 of "Menu0000"'s menu attributes (tAttrMenu mDisableDirSound). "Bitmap0000" and then "Bitmap0001"
  * are stored at 0x58 (On Tour mpDolbyIcon) and hidden, so 0x58 ends up holding "Bitmap0001".
  */
-extern "C" void cFEStateCredits_onCreateScreen(cFEStateCredits* self)
+void cFEStateCredits::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_26credits), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_26credits), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIMenu* menu = (cUIMenu*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000)));
+    cUIMenu* menu = (cUIMenu*)((char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu0000)));
     if (((char*)menu) != 0)
         *(int*)&menu->mAttrMenu |= 8;
-    cUIThing* bitmap = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000));
-    self->mpDolbyIcon = (cUIIcon*)bitmap;
+    cUIThing* bitmap = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Bitmap0000));
+    mpDolbyIcon = (cUIIcon*)bitmap;
     if (((char*)bitmap) != 0) {
         bitmap->setVisible(0);
     }
-    bitmap = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0001));
-    self->mpDolbyIcon = (cUIIcon*)bitmap;
+    bitmap = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Bitmap0001));
+    mpDolbyIcon = (cUIIcon*)bitmap;
     if (((char*)bitmap) != 0) {
         bitmap->setVisible(0);
     }

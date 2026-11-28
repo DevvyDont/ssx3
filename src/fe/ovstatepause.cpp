@@ -2289,8 +2289,6 @@ extern "C" void cOVState_CHALLENGE_PREEVENT_onWidgetEvent(cUIState* self, int wi
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_cOVState_SAVEREPLAY);
 #ifdef SKIP_ASM
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2, int a3);
-extern void* cOVState_SAVEREPLAY_vtbl[];
 
 /**
  * Constructs the save-replay memory-card overlay.
@@ -2301,14 +2299,10 @@ extern void* cOVState_SAVEREPLAY_vtbl[];
  *
  * @param engine  the UI engine (On Tour pEngine)
  * @param ovStateId  the overlay id, 18 (On Tour tOVStateEnum eOVState)
- * @return @p self
  */
-extern "C" void* cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(cOVState_SAVEREPLAY* self, int engine, int ovStateId)
+cOVState_SAVEREPLAY::cOVState_SAVEREPLAY(cUIEngine* engine, int ovStateId) : cFEMemCard(engine, 1, ovStateId)
 {
-    cFEMemCard_cFEMemCard(self, engine, 1, ovStateId);
-    VPTR_OF(cListNode, self) = cOVState_SAVEREPLAY_vtbl;
-    self->mIsHidden = 0;
-    return ((void*)self);
+    mIsHidden = 0;
 }
 #endif
 
@@ -2826,8 +2820,6 @@ void cOVState_SAVEREPLAY::onPopupEvent(cUIState* popup, unsigned int key)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS);
 #ifdef SKIP_ASM
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2, int a3);
-extern void* cOVState_SAVEOPTIONS_vtbl[];
 
 /**
  * Constructs the save-records memory-card overlay.
@@ -2838,14 +2830,10 @@ extern void* cOVState_SAVEOPTIONS_vtbl[];
  *
  * @param engine  the UI engine (On Tour pEngine)
  * @param ovStateId  the overlay id, 19 (On Tour tOVStateEnum eOVState)
- * @return @p self
  */
-extern "C" void* cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(cOVState_SAVEOPTIONS* self, int engine, int ovStateId)
+cOVState_SAVEOPTIONS::cOVState_SAVEOPTIONS(cUIEngine* engine, int ovStateId) : cFEMemCard(engine, 2, ovStateId)
 {
-    cFEMemCard_cFEMemCard(self, engine, 2, ovStateId);
-    VPTR_OF(cListNode, self) = cOVState_SAVEOPTIONS_vtbl;
-    self->mIsHidden = 0;
-    return ((void*)self);
+    mIsHidden = 0;
 }
 #endif
 

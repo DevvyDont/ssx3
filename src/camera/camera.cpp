@@ -2041,16 +2041,15 @@ static inline void RotAxis_15F9B8(t4Matrix* m, const t4Vector& axis, float angle
  * Returns the free camera's pose: t4mat_Identity translated to Position, turned by -Pitch about the y axis and by
  * Heading about the z axis, converted with tPose_tPose.
  *
- * @param src  the algorithm (a cBasicCameraAlgorithm)
  * @return the pose (position and rotation quaternion), through the hidden return slot
  */
-extern "C" tPose cBasicCameraAlgorithm_getPose(cBasicCameraAlgorithm* src)
+tPose cBasicCameraAlgorithm::getPose()
 {
     t4Matrix poseMatrix;
     vu0CopyMtx_15F9B8(&poseMatrix, &t4mat_Identity_15F9B8);
-    vu0TransMtx_15F9B8(&poseMatrix, *(&src->Position));
-    RotAxis_15F9B8(&poseMatrix, t4vect_YAxis, -src->Pitch);
-    RotAxis_15F9B8(&poseMatrix, t4vect_ZAxis, src->Heading);
+    vu0TransMtx_15F9B8(&poseMatrix, *(&Position));
+    RotAxis_15F9B8(&poseMatrix, t4vect_YAxis, -Pitch);
+    RotAxis_15F9B8(&poseMatrix, t4vect_ZAxis, Heading);
     return tPose_tPose_15F9B8(&poseMatrix);
 }
 #endif
@@ -2170,7 +2169,7 @@ static inline float ffloor_0015FD50(float x)
  * along the side vector by speed * strafe * -25.
  */
 // PORT: g++ `>?` / `<?` (max/min) operators.
-extern "C" void cManualCameraAlgorithm_update(cBasicCameraAlgorithm* self)
+void cManualCameraAlgorithm::update()
 {
     int input = (int)SSXApp->Game->ViewMan->PlayerCamera[0]->ManualController->Input;
     float speed = cInput_getValue(input, 52);
@@ -2179,18 +2178,18 @@ extern "C" void cManualCameraAlgorithm_update(cBasicCameraAlgorithm* self)
     float mf = cInput_getValue(input, 50);
     float ms = cInput_getValue(input, 51);
     float rs = speed >? 2.0f;
-    float pitch = fcClamp_0015FD50(self->Pitch + rs * (ry * 0.6283185482025146f) * 0.01666666753590107f,
+    float pitch = fcClamp_0015FD50(Pitch + rs * (ry * 0.6283185482025146f) * 0.01666666753590107f,
                                    -1.5707963705062866f, 1.5707963705062866f);
-    float yaw = self->Heading + rs * (rx * 0.6283185482025146f) * 0.01666666753590107f;
+    float yaw = Heading + rs * (rx * 0.6283185482025146f) * 0.01666666753590107f;
     yaw -= ffloor_0015FD50(yaw * 0.15915493667125702f) * 6.2831854820251465f;
     t4VectorSum fwd(fCos(pitch) * fCos(yaw), fCos(pitch) * fSin(yaw),
                       fSin(pitch), 0.0f);
     t4VectorSum right(fSin(yaw), -fCos(yaw), 0.0f, 0.0f);
-    t4VectorSum pos = fcAdd_0015FD50(t4VectorSum(self->Position), fcScale_0015FD50(fwd, speed * (mf * 25.0f)));
+    t4VectorSum pos = fcAdd_0015FD50(t4VectorSum(Position), fcScale_0015FD50(fwd, speed * (mf * 25.0f)));
     pos += fcScale_0015FD50(right, speed * (ms * -25.0f));
-    self->Pitch = pitch;
-    self->Heading = yaw;
-    self->Position = pos;
+    Pitch = pitch;
+    Heading = yaw;
+    Position = pos;
 }
 #endif
 
@@ -2504,9 +2503,8 @@ INCLUDE_ASM("camera/camera", cManualChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cManualChaseAlgorithm_getRestDrop(void* vself)
+float cManualChaseAlgorithm::getRestDrop()
 {
-    cManualChaseAlgorithm* self = (cManualChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -2742,9 +2740,8 @@ INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0.0f
  */
-float cMatrixChaseAlgorithm_getRestDrop(void* vself)
+float cMatrixChaseAlgorithm::getRestDrop()
 {
-    cMatrixChaseAlgorithm* self = (cMatrixChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -2990,9 +2987,8 @@ INCLUDE_ASM("camera/camera", cRelativeChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0.0f
  */
-float cRelativeChaseAlgorithm_getRestDrop(void* vself)
+float cRelativeChaseAlgorithm::getRestDrop()
 {
-    cRelativeChaseAlgorithm* self = (cRelativeChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -3242,9 +3238,8 @@ INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cSplineCamAlgorithm_getRestDrop(void* vself)
+float cSplineCamAlgorithm::getRestDrop()
 {
-    cSplineCamAlgorithm* self = (cSplineCamAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -3467,9 +3462,8 @@ INCLUDE_ASM("camera/camera", cIdleChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cIdleChaseAlgorithm_getRestDrop(void* vself)
+float cIdleChaseAlgorithm::getRestDrop()
 {
-    cIdleChaseAlgorithm* self = (cIdleChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -4242,10 +4236,9 @@ INCLUDE_ASM("camera/camera", cChaseAlgorithm_setTarget__FPvi);
  *
  * @param val  the camera target (On Tour cRiderCameraTarget *camTarget)
  */
-void cChaseAlgorithm_setTarget(void* vself, int val)
+void cChaseAlgorithm::setTarget(cRiderCameraTarget* val)
 {
-    cChaseAlgorithm* self = (cChaseAlgorithm*)vself;
-    self->Target = (cRiderCameraTarget*)val;
+    Target = val;
 }
 #endif
 
@@ -8729,15 +8722,13 @@ float cCameraAlgorithm::getDefaultView()
 INCLUDE_ASM("camera/camera", cCameraAlgorithm_getTargetPos);
 #ifdef SKIP_ASM
 /**
- * Returns t4vect_Zero: cCameraAlgorithm's default for vtable slot 6, which cChaseAlgorithm_getTargetPos overrides.
+ * Returns t4vect_Zero: cCameraAlgorithm's default for vtable slot 6, which cChaseAlgorithm::getTargetPos overrides.
  *
- * @param result  receives the vector (the hidden return slot)
- * @return @p result, the hidden return slot, holding t4vect_Zero
+ * @return t4vect_Zero (through the hidden return slot)
  */
-extern "C" t4Vector* cCameraAlgorithm_getTargetPos(t4Vector* result)
+t4Vector cCameraAlgorithm::getTargetPos()
 {
-    *result = t4vect_Zero;
-    return result;
+    return t4vect_Zero;
 }
 #endif
 
@@ -8969,15 +8960,13 @@ INCLUDE_ASM("camera/camera", cChaseAlgorithm_getTargetPos);
 /**
  * Returns the chase algorithm's target position (CamTargetPos).
  *
- * self is the hidden t4Vector return slot; the algorithm itself comes second.
+ * The result goes through the hidden t4Vector return slot (a0); the algorithm itself comes second (a1).
  *
- * @param algorithm  the cChaseAlgorithm
- * @return self, holding a copy of CamTargetPos (+0x20)
+ * @return a copy of CamTargetPos (+0x20)
  */
-extern "C" t4Vector* cChaseAlgorithm_getTargetPos(t4Vector* self, cChaseAlgorithm* algorithm)
+t4Vector cChaseAlgorithm::getTargetPos()
 {
-    *self = algorithm->CamTargetPos;
-    return self;
+    return CamTargetPos;
 }
 #endif
 
@@ -9700,9 +9689,8 @@ INCLUDE_ASM("camera/camera", cLazyChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cLazyChaseAlgorithm_getRestDrop(void* vself)
+float cLazyChaseAlgorithm::getRestDrop()
 {
-    cLazyChaseAlgorithm* self = (cLazyChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -9981,9 +9969,8 @@ INCLUDE_ASM("camera/camera", cLookBackChaseAlgorithm_getRestDrop__FPv);
  *
  * @return 0
  */
-float cLookBackChaseAlgorithm_getRestDrop(void* vself)
+float cLookBackChaseAlgorithm::getRestDrop()
 {
-    cLookBackChaseAlgorithm* self = (cLookBackChaseAlgorithm*)vself;
     return 0.0f;
 }
 #endif
@@ -10216,7 +10203,7 @@ INCLUDE_ASM("camera/camera", cMidRightChaseAlgorithm_getRestDrop);
  *
  * @return 61.688
  */
-extern "C" float cMidRightChaseAlgorithm_getRestDrop(cMidRightChaseAlgorithm* self)
+float cMidRightChaseAlgorithm::getRestDrop()
 {
     return 61.68796157836914f;
 }
@@ -10359,7 +10346,7 @@ INCLUDE_ASM("camera/camera", cMidLeftChaseAlgorithm_getRestDrop);
  *
  * @return 61.688
  */
-extern "C" float cMidLeftChaseAlgorithm_getRestDrop(cMidLeftChaseAlgorithm* self)
+float cMidLeftChaseAlgorithm::getRestDrop()
 {
     return 61.68796157836914f;
 }

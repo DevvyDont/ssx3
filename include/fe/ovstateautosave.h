@@ -71,6 +71,7 @@ struct cOVState_AUTOSAVE : public cFEMemCard {
                                     //       with it, returns when equal, else stores it and refreshes the icon / text
 
     // Methods bound to their retail symbols by asm labels.
+    cOVState_AUTOSAVE(cUIEngine* pEngine, int iParent) __asm__("cOVState_AUTOSAVE_cOVState_AUTOSAVE");
     void displayOn() __asm__("cOVState_AUTOSAVE_displayOn");
     virtual ~cOVState_AUTOSAVE();   // g++'s own symbol _$_17cOVState_AUTOSAVE (the retail label renamed)
     virtual void displayStatus() __asm__("cOVState_AUTOSAVE_displayStatus");

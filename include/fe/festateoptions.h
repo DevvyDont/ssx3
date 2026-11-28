@@ -138,6 +138,7 @@ struct cFEStateOptionsDeviceSelect : public cFEMemCard {
                                     //       clears it on back (event 6)
 
     // Methods bound to their retail symbols by asm labels.
+    cFEStateOptionsDeviceSelect() __asm__("cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect");
     void* cFEStateOptionsDeviceSelect1(int engine, int cardMode, int isSave, int isOnline)
         __asm__("cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1");
 

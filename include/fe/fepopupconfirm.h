@@ -44,7 +44,7 @@ struct cFEPopupConfirm : public cScreenPopup {
     //       meBackgroundType
     // cFEPopupConfirm's own slots ([R] cFEPopupConfirm_vtbl after cScreenPopup's 24; types [O] On Tour's class cFEPopupConfirm,
     // which derives from cScreenPopup):
-    virtual void setDefaultButton(unsigned int uiButton);                          // 25
+    virtual void setDefaultButton(unsigned int uiButton) __asm__("cFEPopupConfirm_setDefaultButton");   // 25
     virtual void setButtonText(unsigned short* ustrText, unsigned int uiButton)
         __asm__("cFEPopupConfirm_setButtonText");    // 26
     virtual void setMessage(unsigned short* ustrText)

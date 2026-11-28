@@ -37,7 +37,7 @@ struct cInstanceNode : public cSortObjNode {
     // cSortObjNode (object/objnode.h, 0x18): the vptr at 0x0C holds [R] cInstanceNode_vtbl (_vt$13cInstanceNode) in
     // cInstanceNode_cInstanceNode1 / cInstanceNode_cInstanceNode. Its new slots ([R] cInstanceNode_vtbl, 46 in all:
     // names from its entries cInstanceNode_*; types [O] On Tour's cInstanceNode / cMoveNode definitions):
-    virtual bool updateNode();                                                      // 15
+    virtual bool updateNode() __asm__("cInstanceNode_updateNode__FPv");             // 15
     virtual bool isMoveNode()
         __asm__("cInstanceNode_isMoveNode__FPv");                                                      // 16
     virtual bool isComplete()
