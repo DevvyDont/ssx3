@@ -105,6 +105,7 @@ struct cDeadFadeNode : public cInstanceNode {
     virtual void loseFocus() __asm__("cDeadFadeNode_loseFocus");
     virtual void render() __asm__("cDeadFadeNode_render");
     virtual void signal(int, float) __asm__("cDeadFadeNode_signal__FPv");
+    virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cDeadFadeNode_writeToReplayFrame__FPv");
 };
 
 CHECK_OFFSET(cDeadFadeNode, Data, 0x1C);

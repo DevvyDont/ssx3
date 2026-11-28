@@ -65,6 +65,8 @@ struct cUIPair : public cUIThing {
     virtual void render2D(float x, float y) __asm__("cUIPair_render2D");
     virtual void update(unsigned short ev) __asm__("cUIPair_update");
     virtual void* traverseRecurse(cListOperator* pOperator) __asm__("cUIPair_traverseRecurse");
+    virtual void setUIData(tUIBaseObject*) __asm__("cUIPair_setUIData__FPv");
+    virtual void* traverseFlat(cListOperator* pOperator) __asm__("cUIPair_traverseFlat");
 };
 
 CHECK_OFFSET(cUIPair, mAttrPair, 0x074);

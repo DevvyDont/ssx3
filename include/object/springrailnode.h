@@ -147,6 +147,9 @@ struct cSpringRailNode : public cFlexRailNode {
     virtual void updateMats() __asm__("cSpringRailNode_updateMats");
     virtual void updateNodes() __asm__("cSpringRailNode_updateNodes");
     virtual int getMesh(int segIndex) __asm__("cSpringRailNode_getMesh");
+    virtual void applyForce(const tIntersectInfo& node, const t4Vector& dir) __asm__("cSpringRailNode_applyForce");
+    virtual void updateIntersectInfo(tIntersectInfo& node) __asm__("cSpringRailNode_updateIntersectInfo");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cSpringRailNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cSpringRailNode, ASpring, 0x060);

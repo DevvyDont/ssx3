@@ -126,6 +126,8 @@ struct cOVState : public cUIState {
         __asm__("cOVState_PRIVATEMESSAGE_openKeyboard");
     void PRIVATEMESSAGE_createKeyboard(int textObj, int password, int miscData, int maxChars)
         __asm__("cOVState_PRIVATEMESSAGE_createKeyboard");
+    virtual void onRender2D() __asm__("cOVState_onRender2D__FPv");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event) __asm__("cOVState_onWidgetEvent");
 };
 
 CHECK_OFFSET(cOVState, mDoneTransition, 0x48);

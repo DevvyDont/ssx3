@@ -168,14 +168,11 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
 /**
  * Clears the popup's showing flag, then destroys its screens with the base cUIState_onDestroyScreen().
- *
- * @return the result of cUIState_onDestroyScreen()
  */
-void* cScreenPopup_onDestroyScreen(void* vself)
+void cScreenPopup::onDestroyScreen()
 {
-    cScreenPopup* self = (cScreenPopup*)vself;
-    self->mbShowing = 0;
-    return cUIState_onDestroyScreen(self);
+    mbShowing = 0;
+    cUIState_onDestroyScreen(this);
 }
 #endif
 
@@ -2790,7 +2787,7 @@ public:
     virtual int v21(int, int);
     virtual int v22(int, int);
     virtual int v23(int, int);
-    virtual int handleEvent(int, int);
+    virtual int handleEvent(int, void*);
 };
 
 /**
@@ -2802,9 +2799,9 @@ public:
  * @param pParam  event parameter (On Tour: pParam)
  * @return the parent state's handleEvent result
  */
-extern "C" int cScreenPopup_handleEvent(cScreenPopup* self, int msg, int pParam)
+int cScreenPopup::handleEvent(int msg, void* pParam)
 {
-    return ((cScreenPopup_handleEvent_cObj*)self->mpParentState)->handleEvent(msg, pParam);
+    return ((cScreenPopup_handleEvent_cObj*)mpParentState)->handleEvent(msg, pParam);
 }
 #endif
 
@@ -2837,13 +2834,10 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onRender2D__FPv);
 #ifdef SKIP_ASM
 /**
  * Renders the popup's 2D layer with the shared UI-screen render routine cUIState_onRender2D().
- *
- * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
-void* cScreenPopup_onRender2D(void* vself)
+void cScreenPopup::onRender2D()
 {
-    cScreenPopup* self = (cScreenPopup*)vself;
-    return cUIState_onRender2D(self);
+    cUIState_onRender2D(this);
 }
 #endif
 
@@ -5208,7 +5202,6 @@ bool cKeyboardPopup::getObjName(int key, char* out, int shifted)
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self);
-extern "C" void cUIState_onGainFocus(void* self, int a1);
 
 /**
  * Keeps the keyboard's text cursor inside the text when the keyboard regains focus.
@@ -5218,13 +5211,13 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  *
  * @param pPrevState  the state that had focus before (On Tour: pPrevState), passed on to cUIState_onGainFocus()
  */
-extern "C" void cKeyboardPopup_onGainFocus(cKeyboardPopup* self, int pPrevState)
+void cKeyboardPopup::onGainFocus(cUIState* pPrevState)
 {
-    if (self->miCursorPos == self->miMaxCharacters) {
-        self->miCursorPos = self->miCursorPos - 1;
+    if (miCursorPos == miMaxCharacters) {
+        miCursorPos = miCursorPos - 1;
     }
-    self->updateCursor();
-    cUIState_onGainFocus(self, pPrevState);
+    updateCursor();
+    cUIState::onGainFocus(pPrevState);
 }
 #endif
 

@@ -388,7 +388,6 @@ extern "C" void cFEStateCharEquip_initInventoryPreview(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
 extern "C" void cFEStateCharEquip_redrawRows(cFEStateCharEquip* self, int a1, int a2);
-extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 /**
  * Gives the equip-gear state focus: sets up its mode's widgets, the points bars and the item rows.
@@ -400,18 +399,18 @@ extern "C" void cFEState_onGainFocus(void* self, int a1);
  *
  * @param pPrevState  the state that had focus before, passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateCharEquip_onGainFocus(cFEStateCharEquip* self, int pPrevState)
+void cFEStateCharEquip::onGainFocus(cUIState* pPrevState)
 {
-    bool inStore = self->mEquipMode == cFEStateCharEquip::kEquipModeStore;
+    bool inStore = mEquipMode == cFEStateCharEquip::kEquipModeStore;
     if (inStore) {
-        self->initStorePreview();
+        initStorePreview();
     } else {
-        self->initInventoryPreview();
+        initInventoryPreview();
     }
-    self->updatePolyBar();
-    self->updatePolyEquipPreviewBar(0);
-    self->redrawRows(1, 1);
-    cFEState_onGainFocus(self, pPrevState);
+    updatePolyBar();
+    updatePolyEquipPreviewBar(0);
+    redrawRows(1, 1);
+    cFEState::onGainFocus(pPrevState);
 }
 #endif
 
@@ -424,12 +423,12 @@ extern "C" void cFERider_setVisible(cFERider* rider, int a1);
 /**
  * Clears two flags of the front-end rider record this equip screen works on when the screen loses focus.
  *
- * The record is entry @p self+0x44 (a signed char rider index) of the 0xCE0-byte records at SSXApp->RealFE +
+ * The record is entry +0x44 (a signed char rider index) of the 0xCE0-byte records at SSXApp->RealFE +
  * 0xB0 (cFERiderManager_getHuman1); cFERider_setVisible(record, 0) zeroes its words at +0xCC4 and +0xCC8.
  */
-extern "C" void cFEStateCharEquip_onLoseFocus(cFEStateCharEquip* self)
+void cFEStateCharEquip::onLoseFocus(cUIState*)
 {
-    cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum)->setVisible(0);
+    cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum)->setVisible(0);
 }
 #endif
 
@@ -937,49 +936,49 @@ static inline bool hasFlag_9F20(tBEBoltDef* item, int f)
  * @return a flag for kISSELECTABLE and kISHIGHLIGHTABLE, otherwise feedback bits (0x100 frame, 1 mSound[1], 0x10
  *           mSound[0])
  */
-extern "C" int cFEStateCharEquip_onWidgetMenu(cFEStateCharEquip* self, int pMenu, int kind, int idx)
+int cFEStateCharEquip::onWidgetMenu(cUIMenu* pMenu, unsigned int kind, unsigned int idx)
 {
     switch (kind) {
     case cUIMenu::kSCROLLUP:
     case cUIMenu::kSCROLLDOWN:
-        self->redrawRows(0, 0);
+        redrawRows(0, 0);
         return 1;
     case cUIMenu::kISSELECTABLE:
-        if (idx < self->mNumItems) {
-            return hasFlag_9F20(self->mpItems[idx], 4);
+        if ((int)idx < mNumItems) {
+            return hasFlag_9F20(mpItems[idx], 4);
         }
         return 0;
     case cUIMenu::kISHIGHLIGHTABLE:
-        if (idx == 0 || self->mNumItems == 0 || idx < self->mNumItems) return 1;
+        if (idx == 0 || mNumItems == 0 || (int)idx < mNumItems) return 1;
         return 0;
     case cUIMenu::kONNEXT: {
-        cUIMenu* selected = self->mpMenu;
+        cUIMenu* selected = mpMenu;
         int selIndex = selected->mScrollItemCurrent;
         if (selIndex < 0) return 272;
-        if (selIndex < self->mNumItems) {
-            tBEBoltDef* item = self->mpItems[selIndex];
+        if (selIndex < mNumItems) {
+            tBEBoltDef* item = mpItems[selIndex];
             if (item->flags & 0x20) return 257;
-            if (isMode_9F20(self->mEquipMode, cFEStateCharEquip::kEquipModeStore)) {
+            if (isMode_9F20(mEquipMode, cFEStateCharEquip::kEquipModeStore)) {
                 int cost = item->price;
                 if (cost > 0) cost *= 10;
-                if (cost >= self->mMoneyAvailable) break;
+                if (cost >= mMoneyAvailable) break;
                 return 257;
             } else {
-                if (D_004A18D8 >= self->mRowPoints[selIndex - selected->mScrollItemOffset] + self->mCurrentPolyCount)
+                if (D_004A18D8 >= mRowPoints[selIndex - selected->mScrollItemOffset] + mCurrentPolyCount)
                     break;
             }
         }
         return 272;
     }
     case cUIMenu::kONPREVIOUS:
-        if (self->mCurrentStackPos > 0) {
-            self->mCurrentStackPos = self->mCurrentStackPos - 1;
+        if (mCurrentStackPos > 0) {
+            mCurrentStackPos = mCurrentStackPos - 1;
             return 1;
         }
         break;
     case cUIMenu::kONOPTION:
-        if (self->mCanSwitchMode != 0) {
-            self->switchEquipMode();
+        if (mCanSwitchMode != 0) {
+            switchEquipMode();
             return 257;
         }
         return 0x100;

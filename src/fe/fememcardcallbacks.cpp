@@ -1863,7 +1863,8 @@ bool cFEMemCard::onLoseTransition()
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_triggerArrowPulse);
 #ifdef SKIP_ASM
-int GetHashValue32(char* str);
+// GetHashValue32(char*), which only reads the string
+int GetHashValue32_const(const char* str) __asm__("GetHashValue32__FPc");
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIAnimationBank_getAnimationByHashName(void* self, int hash);
 extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a, int b, int c);
@@ -1878,12 +1879,12 @@ extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a, int b, int 
  * @param objName   name of the widget to animate
  * @param animName  name of the animation to play
  */
-extern "C" void cFEMemCard_triggerArrowPulse(cFEMemCard* self, char* objName, char* animName)
+void cFEMemCard::triggerArrowPulse(const char* objName, const char* animName)
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32_const(objName));
     if (obj != 0) {
-        void* bank = &self->mpEngine->mAnimBank;
-        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
+        void* bank = &mpEngine->mAnimBank;
+        void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32_const(animName));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 3, 0, 1);
         }

@@ -29,6 +29,7 @@ struct cFEStateBonusMaterial : public cUIState {
     virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cFEStateBonusMaterial_onWidgetEvent");
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
         __asm__("cFEStateBonusMaterial_onWidgetMenu");
+    virtual void onGainFocus(cUIState*) __asm__("cFEStateBonusMaterial_onGainFocus__FPv");
 };
 
 CHECK_SIZE(cFEStateBonusMaterial, 0x48);

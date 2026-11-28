@@ -833,10 +833,10 @@ INCLUDE_ASM("object/movenode", cMoveNode_getRootTransform);
 struct sMnVEntryP_6078 {
     short delta;
     short index;
-    void* (*fn)(void*);
+    const t4Matrix* (*fn)(void*);
 };
 // Virtual call through the modifier object's vtable (slot 18); taking the object by reference matches the register allocation.
-static inline void* VCall18_6078(char*& o)
+static inline const t4Matrix* VCall18_6078(char*& o)
 {
     sMnVEntryP_6078* vt = *(sMnVEntryP_6078**)o;
     return vt[18].fn(vthis(o, vt[18]));
@@ -846,13 +846,13 @@ static inline void* VCall18_6078(char*& o)
  *
  * @return the transform matrix (On Tour const t4Matrix*)
  */
-extern "C" void* cMoveNode_getRootTransform(cMoveNode* self)
+const t4Matrix* cMoveNode::getRootTransform()
 {
-    char** modBlock = (char**)self->ModifierBlock;
+    char** modBlock = (char**)ModifierBlock;
     char* transformModifier = modBlock ? *modBlock : 0;
     if (transformModifier != 0)
         return VCall18_6078(transformModifier);
-    return (char*)&self->Instance->m_fmTransform;
+    return (const t4Matrix*)&Instance->m_fmTransform;
 }
 #endif
 
@@ -896,10 +896,10 @@ INCLUDE_ASM("object/movenode", cMoveNode_getRootTransform1);
 struct sMnVEntryP_6128 {
     short delta;
     short index;
-    void* (*fn)(void*);
+    const t4Matrix* (*fn)(void*);
 };
 // Taking the object by reference matches the target's register allocation (see cMoveNode_getRootTransform).
-static inline void* VCall_6128(char*& o, int i)
+static inline const t4Matrix* VCall_6128(char*& o, int i)
 {
     sMnVEntryP_6128* vt = *(sMnVEntryP_6128**)o;
     return vt[i].fn(vthis(o, vt[i]));
@@ -908,21 +908,21 @@ static inline void* VCall_6128(char*& o, int i)
  * Returns the transform for an instance: the root transform modifier's slot 19 or else slot 18, or the
  * object's own matrix.
  *
- * The C declaration drops the instance argument (On Tour tInstanceRecord* inst).
+ * The instance argument (On Tour tInstanceRecord* inst) is not used.
  *
  * @return the transform matrix (On Tour const t4Matrix*)
  */
 // Returns the modifier object's slot-19 value, else its slot-18 value; without one, the node's object position.
-extern "C" void* cMoveNode_getRootTransform1(cMoveNode* self)
+const t4Matrix* cMoveNode::getRootTransform1(tInstanceRecord*)
 {
-    char** modBlock = (char**)self->ModifierBlock;
+    char** modBlock = (char**)ModifierBlock;
     char* transformModifier = modBlock ? *modBlock : 0;
     if (transformModifier != 0) {
-        void* transform = VCall_6128(transformModifier, 19);
+        const t4Matrix* transform = VCall_6128(transformModifier, 19);
         if (transform != 0) return transform;
         return VCall_6128(transformModifier, 18);
     }
-    return (char*)&self->Instance->m_fmTransform;
+    return (const t4Matrix*)&Instance->m_fmTransform;
 }
 #endif
 
@@ -1541,21 +1541,21 @@ INCLUDE_ASM("object/movenode", cMoveNode_intersect);
 struct sMoveNodeVEntryA70 {
     short delta;
     short index;
-    int (*fn)(void*, int, int, int, int);
+    int (*fn)(void*, cWorldIntersectType&, tIntersectInfo*, int, int);
 };
 
 /**
  * Intersects against the node's root transform modifier (slot 21), if it has one.
  *
- * @param w  the intersection query (On Tour cWorldIntersectType&, passed as int)
- * @param intInfo  receives the hits (On Tour tIntersectInfo*, passed as int)
+ * @param w  the intersection query
+ * @param intInfo  receives the hits
  * @param num  maximum number of hits
  * @param flags  intersection flags
  * @return the number of hits, or 0 without a root transform
  */
-extern "C" int cMoveNode_intersect(cMoveNode* self, int w, int intInfo, int num, int flags)
+int cMoveNode::intersect(cWorldIntersectType& w, tIntersectInfo* intInfo, int num, int flags)
 {
-    tModifierBlock* block = self->ModifierBlock;
+    tModifierBlock* block = ModifierBlock;
     if (block == 0) {
         return 0;
     }
@@ -1641,16 +1641,15 @@ void cMoveNode_writeToReplayFrame_2(void* self, cBxReplayFrame* stream) __asm__(
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-void cMoveNode_writeToReplayFrame_2(void* vself, cBxReplayFrame* stream)
+void cMoveNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cMoveNode* self = (cMoveNode*)vself;
-    cInstanceNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->Debounce, 4);
-    stream->write((const char*)&self->Fade, 4);
-    stream->write((const char*)&self->TransferHack, 4);
-    int flag = self->ModifierBlock != 0;
+    cInstanceNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&Debounce, 4);
+    stream->write((const char*)&Fade, 4);
+    stream->write((const char*)&TransferHack, 4);
+    int flag = ModifierBlock != 0;
     stream->write((const char*)&flag, 4);
-    tModifierBlock* block = self->ModifierBlock;
+    tModifierBlock* block = ModifierBlock;
     if (block != 0) {
         tModifierBlock_writeToReplayFrame(block, stream);
     }
@@ -2173,9 +2172,9 @@ INCLUDE_ASM("object/movenode", cParentModifier_updateIntersectInfo);
  *
  * @param obj  the intersection record (On Tour tIntersectInfo& intInfo)
  */
-extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, tIntersectInfo* obj)
+void cParentModifier::updateIntersectInfo(tIntersectInfo& obj)
 {
-    tInstanceRecord* parentInst = self->ParentInst;
+    tInstanceRecord* parentInst = ParentInst;
     if (((void*)parentInst) == 0) {
         return;
     }
@@ -2183,10 +2182,10 @@ extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, tInte
     if (((void*)parentNode) == 0) {
         return;
     }
-    int saved = obj->Mesh;
-    obj->Mesh = self->Mesh;
-    parentNode->updateIntersectInfo(*obj);
-    obj->Mesh = saved;
+    int saved = obj.Mesh;
+    obj.Mesh = Mesh;
+    parentNode->updateIntersectInfo(obj);
+    obj.Mesh = saved;
 }
 #endif
 
@@ -2645,13 +2644,10 @@ INCLUDE_ASM("object/movenode", cParticleNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
  * Writes the particle node to the replay frame using the cMoveNode implementation.
- *
- * @return the result of cMoveNode_writeToReplayFrame()
  */
-void* cParticleNode_writeToReplayFrame(void* vself)
+void cParticleNode::writeToReplayFrame(cBxReplayFrame*)
 {
-    cParticleNode* self = (cParticleNode*)vself;
-    return cMoveNode_writeToReplayFrame(self);
+    cMoveNode_writeToReplayFrame(this);
 }
 #endif
 

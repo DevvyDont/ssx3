@@ -56,21 +56,22 @@ class cListNode_traverseFlat_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int onListNode(void*);
+    virtual void* onListNode(void*);
 };
 
 /**
  * Applies a list operator to this single node.
  *
- * A plain node has no children, so it just calls virtual slot 2 of @p obj (On Tour cListOperator::onListNode) with this
- * node and returns the result.
+ * A plain node has no children, so it just calls virtual slot 2 of @p pOperator (On Tour
+ * cListOperator::onListNode) with this node and returns the result.
  *
- * @param obj  the operator to apply (On Tour pOperator)
+ * @param pOperator  the operator to apply (On Tour pOperator)
  * @return the operator's result
  */
-extern "C" int cListNode_traverseFlat(cListNode* self, cListNode_traverseFlat_cVirt* obj)
+void* cListNode::traverseFlat(cListOperator* pOperator)
 {
-    return obj->onListNode(self);
+    cListNode_traverseFlat_cVirt* obj = (cListNode_traverseFlat_cVirt*)pOperator;
+    return obj->onListNode(this);
 }
 #endif
 
@@ -81,21 +82,22 @@ class cListNode_traverseRecurse_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int onListNode(void*);
+    virtual void* onListNode(void*);
 };
 
 /**
  * Applies a list operator to this node and its children; a plain node has none.
  *
- * Calls virtual slot 2 of @p obj (On Tour cListOperator::onListNode) with this node and returns the result, exactly
- * like cListNode_traverseFlat.
+ * Calls virtual slot 2 of @p pOperator (On Tour cListOperator::onListNode) with this node and returns the result,
+ * exactly like cListNode_traverseFlat.
  *
- * @param obj  the operator to apply (On Tour pOperator)
+ * @param pOperator  the operator to apply (On Tour pOperator)
  * @return the operator's result
  */
-extern "C" int cListNode_traverseRecurse(cListNode* self, cListNode_traverseRecurse_cVirt* obj)
+void* cListNode::traverseRecurse(cListOperator* pOperator)
 {
-    return obj->onListNode(self);
+    cListNode_traverseRecurse_cVirt* obj = (cListNode_traverseRecurse_cVirt*)pOperator;
+    return obj->onListNode(this);
 }
 #endif
 

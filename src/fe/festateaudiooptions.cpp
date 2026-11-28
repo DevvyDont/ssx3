@@ -579,14 +579,14 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
  * Runs the base cFEState_onGainFocus(), resets the list's first visible song (0x150) to 0, then refreshes the
  * play list, the now-playing title and artist texts (cFEStateRequestLine_updateCurrentlyPlaying()), the button texts and the help text.
  */
-extern "C" void cFEStateRequestLine_onGainFocus(cFEStateRequestLine* self)
+void cFEStateRequestLine::onGainFocus(cUIState*)
 {
-    cFEState_onGainFocus(self);
-    self->mFirstVisibleSong = 0;
-    cFEStateRequestLine_updatePlayList(self);
-    cFEStateRequestLine_updateCurrentlyPlaying(self);
-    cFEStateRequestLine_updateButtonsText(self, 0);
-    cFEStateRequestLine_updateHelpText(self, 0);
+    cFEState_onGainFocus(this);
+    mFirstVisibleSong = 0;
+    cFEStateRequestLine_updatePlayList(this);
+    cFEStateRequestLine_updateCurrentlyPlaying(this);
+    cFEStateRequestLine_updateButtonsText(this, 0);
+    cFEStateRequestLine_updateHelpText(this, 0);
 }
 #endif
 

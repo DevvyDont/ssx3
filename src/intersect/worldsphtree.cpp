@@ -5211,11 +5211,11 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cBoostNode_writeToReplayFrame(cBoostNode* self, void* stream)
+void cBoostNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cInstanceNode_writeToReplayFrame(self, stream);
+    cInstanceNode_writeToReplayFrame(this, stream);
     sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
-    vt[1].fn(vthis(stream, vt[1]), (char*)&self->Boost, 0x30);
+    vt[1].fn(vthis(stream, vt[1]), (char*)&Boost, 0x30);
 }
 #endif
 

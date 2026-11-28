@@ -158,6 +158,7 @@ struct cFEStateNetMessenger : public cFEStateNet {
     void updatePendingHints() __asm__("cFEStateNetMessenger_updatePendingHints");
     void removeStaleNames() __asm__("cFEStateNetMessenger_removeStaleNames");
     void fillRow(unsigned int index, const char* name, int rosterIndex) __asm__("cFEStateNetMessenger_fillRow");
+    virtual bool onGainTransition(int) __asm__("cFEStateNetMessenger_onGainTransition");
 };
 
 CHECK_OFFSET(cFEStateNetMessenger, mszFoundName, 0x6D0);

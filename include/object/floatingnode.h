@@ -69,6 +69,7 @@ struct cFloatingNode : public cMoveNode {
     virtual const t4Matrix* getAnimMat(int i) __asm__("cFloatingNode_getAnimMat");
     virtual void updateRootTransform() __asm__("cFloatingNode_updateRootTransform");
     virtual void makeAnimMats(const t4Matrix* mat, t4Matrix* out) __asm__("cFloatingNode_makeAnimMats");
+    virtual bool hasBoundBox() __asm__("cFloatingNode_hasBoundBox__FPv");
 };
 
 CHECK_OFFSET(cFloatingNode, ZSpring, 0x2C);

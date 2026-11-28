@@ -145,6 +145,9 @@ struct cFloatRailNode : public cFlexRailNode {
     virtual void updateMats() __asm__("cFloatRailNode_updateMats");
     virtual void updateNodes() __asm__("cFloatRailNode_updateNodes");
     virtual int getMesh(int segIndex) __asm__("cFloatRailNode_getMesh");
+    virtual void applyForce(const tIntersectInfo& node, const t4Vector& offset) __asm__("cFloatRailNode_applyForce");
+    virtual void updateIntersectInfo(tIntersectInfo& node) __asm__("cFloatRailNode_updateIntersectInfo");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFloatRailNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cFloatRailNode, LSpring, 0x060);

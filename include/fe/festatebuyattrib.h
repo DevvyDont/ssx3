@@ -45,6 +45,7 @@ struct cFEStateBuyAttrib : public cUIState {
     virtual void onGainFocus(cUIState*) __asm__("cFEStateBuyAttrib_onGainFocus");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int) __asm__("cFEStateBuyAttrib_onWidgetMenu");
     virtual void onPopupEvent(cUIState* sender, unsigned int msg) __asm__("cFEStateBuyAttrib_onPopupEvent");
+    virtual void onWidgetEvent(cUIThing* obj, unsigned int msg) __asm__("cFEStateBuyAttrib_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateBuyAttrib, mpAttribScreen, 0x048);

@@ -215,6 +215,7 @@ struct cKeyboardPopup : public cUIState {
     virtual bool onInputBegin(cUIInput* ev) __asm__("cKeyboardPopup_onInputBegin");
     virtual int handleEvent(int msg, void* pParam) __asm__("cKeyboardPopup_handleEvent");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event) __asm__("cKeyboardPopup_onWidgetEvent");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cKeyboardPopup_onGainFocus");
 };
 
 CHECK_OFFSET(cKeyboardPopup, mpBackCompact, 0x48);

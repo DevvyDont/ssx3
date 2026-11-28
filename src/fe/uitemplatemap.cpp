@@ -214,9 +214,9 @@ extern int cUITemplate_MAP_mMapState;
  * cUITemplate_MAP_setupLocationInfo() and passes the object's first word to cUITemplate_MAP_setShowInfo(). Does nothing otherwise.
  *
  * @param on  nonzero to run the setup
- * @return always 0
+ * @return always false
  */
-int cUITemplate_MAP::onGainTransition(int on)
+bool cUITemplate_MAP::onGainTransition(int on)
 {
     if (on != 0) {
         ((cUITemplate_MAP*)this)->setupMenuFocus(cUITemplate_MAP_mMapState);
@@ -224,7 +224,7 @@ int cUITemplate_MAP::onGainTransition(int on)
         cUITemplate_MAP_setupLocationInfo(this);
         ((cUITemplate_MAP*)this)->setShowInfo(*(int*)this);
     }
-    return 0;
+    return false;
 }
 #endif
 
@@ -678,11 +678,11 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onWidgetMenu);
  *
  * cOVState_TRANSPORT_onWidgetMenu and cFEStateEventSelect_onWidgetMenu forward their menu events to it.
  *
- * @param menu  the menu (unused)
+ * @param pMenu  the menu (unused)
  * @param event  the menu event
  * @return 0 for kONNEXT, kONOPTION and kONMISC, else 0x101
  */
-int cUITemplate_MAP::onWidgetMenu(int menu, int event)
+int cUITemplate_MAP::onWidgetMenu(cUIMenu* pMenu, unsigned int event)
 {
     if (event == cUIMenu::kONNEXT || event == cUIMenu::kONMISC || event == cUIMenu::kONOPTION) {
         return 0;
@@ -2877,16 +2877,16 @@ extern char str_Map_b[];
  * mpScreen and this state. It is the onCreateScreen slot (+0x24) of cOVState_TRANSPORT_vtbl, the vtable of overlay 33
  * (cOVStateManager_triggerOverlay), whose template cUITemplate_MAP_init initialises.
  */
-extern "C" void cOVState_TRANSPORT_onCreateScreen(cOVState_TRANSPORT* self)
+void cOVState_TRANSPORT::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_Map_b), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_Map_b), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
-    self->mMap.onCreateScreen(self->mpScreen, (cUIState*)self);
+    cOVState_onCreateScreen(this);
+    mMap.onCreateScreen(mpScreen, (cUIState*)this);
 }
 #endif
 
@@ -2906,8 +2906,6 @@ void cOVState_TRANSPORT::onWidgetCreate(cUIThing*)
 }
 #endif
 
-extern "C" void* cUITemplate_MAP_onGainTransition(void*);
-
 //99.29%
 INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onGainTransition__FPv);
 #ifdef SKIP_ASM
@@ -2915,15 +2913,12 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onGainTransition__FPv);
  * Transport overlay's gain-transition hook: forwards to the embedded map template (cUITemplate_MAP_onGainTransition on
  * +0x9C).
  *
- * As declared it takes only the state; the first-time flag reaches the template untouched in the second argument
- * register.
- *
+ * @param on  the first-time flag, passed on
  * @return the template's result
  */
-void* cOVState_TRANSPORT_onGainTransition(void* vself)
+bool cOVState_TRANSPORT::onGainTransition(int on)
 {
-    cOVState_TRANSPORT* self = (cOVState_TRANSPORT*)vself;
-    return cUITemplate_MAP_onGainTransition(&self->mMap);
+    return mMap.onGainTransition(on);
 }
 #endif
 
@@ -2954,10 +2949,10 @@ extern "C" void cOVState_onDestroyScreen(void* self);
  * Transport overlay's screen teardown: tears down the map template at +0x9C (cUITemplate_MAP_onDestroyScreen), then runs
  * cOVState_onDestroyScreen.
  */
-extern "C" void cOVState_TRANSPORT_onDestroyScreen(cOVState_TRANSPORT* self)
+void cOVState_TRANSPORT::onDestroyScreen()
 {
-    self->mMap.onDestroyScreen();
-    cOVState_onDestroyScreen(self);
+    mMap.onDestroyScreen();
+    cOVState_onDestroyScreen(this);
 }
 #endif
 
@@ -2996,9 +2991,9 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetMenu);
  * @param event  the menu event, passed on
  * @return 0x101 or 0
  */
-extern "C" int cOVState_TRANSPORT_onWidgetMenu(cOVState_TRANSPORT* self, int menu, int event)
+int cOVState_TRANSPORT::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
 {
-    if (self->mMap.onWidgetMenu(menu, event) != 0) {
+    if (mMap.onWidgetMenu(menu, event) != 0) {
         return 257;
     }
     return 0;
@@ -3043,10 +3038,10 @@ extern "C" void cUITemplate_MAP_onUpdate(cUITemplate_MAP* self);
 /**
  * Transport overlay's update: runs cOVState_onUpdate, then cUITemplate_MAP_onUpdate for the template at +0x9C.
  */
-extern "C" void cOVState_TRANSPORT_onUpdate(cOVState_TRANSPORT* self)
+void cOVState_TRANSPORT::onUpdate()
 {
-    cOVState_onUpdate(self);
-    self->mMap.onUpdate();
+    cOVState_onUpdate(this);
+    mMap.onUpdate();
 }
 #endif
 

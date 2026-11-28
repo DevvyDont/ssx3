@@ -71,6 +71,7 @@ struct cCounterNode : public cInstanceNode {
     // vtable out of the units defining the other overrides
     virtual void update() __asm__("cCounterNode_update");
     virtual void signal(int msg, float level) __asm__("cCounterNode_signal");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cCounterNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cCounterNode, Count, 0x1C);

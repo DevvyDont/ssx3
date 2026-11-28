@@ -37,6 +37,12 @@ struct cParticleNode : public cMoveNode {
     // Methods bound to their retail symbols by asm labels.
     void* cParticleNode1(void* bucket, void* instRecord, void* particle, void* oldNode)
         __asm__("cParticleNode_cParticleNode1");
+
+    // Methods bound to their retail symbols by asm labels.
+    // update stays a C function (cParticleNode_update): declared first, it is the vtable's key function, which keeps
+    // the vtable out of the units defining the other overrides
+    virtual void update() __asm__("cParticleNode_update");
+    virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cParticleNode_writeToReplayFrame__FPv");
 };
 
 CHECK_SIZE(cParticleNode, 0x2C);

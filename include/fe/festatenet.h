@@ -202,6 +202,7 @@ struct cFEStateNet : public cUIState {
     void swallowFirstOptionPopupEvent(void* popup, int kind) __asm__("cFEStateNet_swallowFirstOptionPopupEvent");
     void setLeavingOnline() __asm__("cFEStateNet_setLeavingOnline");
     void setUserPopupOpen(int value) __asm__("cFEStateNet_setUserPopupOpen");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEStateNet_onGainFocus");
 };
 
 CHECK_OFFSET(cFEStateNet, mHasFocus, 0x048);

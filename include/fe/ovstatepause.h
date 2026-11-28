@@ -92,6 +92,10 @@ struct cOVTemplate_PauseMenu : public cOVState {
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int event) __asm__("cOVTemplate_PauseMenu_onWidgetEvent");
     virtual void onLoseFocus(cUIState*) __asm__("cOVTemplate_PauseMenu_onLoseFocus__FPv");
     virtual bool onInputBegin(cUIInput*) __asm__("cOVTemplate_PauseMenu_onInputBegin__FPv");
+    virtual void onCreateScreen() __asm__("cOVTemplate_PauseMenu_onCreateScreen");
+    virtual void onUpdate() __asm__("cOVTemplate_PauseMenu_onUpdate");
+    virtual void onDestroyScreen() __asm__("cOVTemplate_PauseMenu_onDestroyScreen__FPv");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cOVTemplate_PauseMenu_onGainFocus");
 };
 
 CHECK_OFFSET(cOVTemplate_PauseMenu, mPauseMenuOptions, 0x9C);
@@ -127,6 +131,7 @@ struct cOVState_PAUSE_OPTIONS : public cOVState {
     virtual int onWidgetListBox(cUIListBox* pListBox, unsigned int Event)
         __asm__("cOVState_PAUSE_OPTIONS_onWidgetListBox");
     virtual int onWidgetPair(cUIPair* pPair, unsigned int Event) __asm__("cOVState_PAUSE_OPTIONS_onWidgetPair");
+    virtual void onCreateScreen() __asm__("cOVState_PAUSE_OPTIONS_onCreateScreen");
 };
 
 CHECK_SIZE(cOVState_PAUSE_OPTIONS, 0x9C);
@@ -166,6 +171,7 @@ struct cOVState_PAUSE_ONLINE_ERROR : public cOVState {
     virtual ~cOVState_PAUSE_ONLINE_ERROR();
     virtual void onUpdate() __asm__("cOVState_PAUSE_ONLINE_ERROR_onUpdate");
     virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent");
+    virtual void onCreateScreen() __asm__("cOVState_PAUSE_ONLINE_ERROR_onCreateScreen");
 };
 
 CHECK_OFFSET(cOVState_PAUSE_ONLINE_ERROR, miStartPingTick, 0x9C);

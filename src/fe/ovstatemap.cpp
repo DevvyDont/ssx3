@@ -247,7 +247,6 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onGainFocus);
 
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern char str_ConfirmMenu[];
 
 /**
@@ -257,11 +256,11 @@ extern char str_ConfirmMenu[];
  *
  * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus
  */
-extern "C" void cOVState_MAP_onGainFocus(cOVState_MAP* self, int pPrevState)
+void cOVState_MAP::onGainFocus(cUIState* pPrevState)
 {
     cUIThing* confirmMenu;
-    cUIState_onGainFocus(self, pPrevState);
-    confirmMenu = (cUIThing*)cUIScreen_getObjectByHashName(self->mpMapScreen, GetHashValue32(str_ConfirmMenu));
+    cUIState::onGainFocus(pPrevState);
+    confirmMenu = (cUIThing*)cUIScreen_getObjectByHashName(mpMapScreen, GetHashValue32(str_ConfirmMenu));
     if (confirmMenu != 0) {
         confirmMenu->setFocus(0);
         confirmMenu->setVisible(0);
@@ -1241,8 +1240,6 @@ int cOVState::onUpdate_HandleIncomingChat()
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_onWidgetEvent);
 #ifdef SKIP_ASM
-
-
 /**
  * Forwards an overlay widget event to the game's current state.
  *
@@ -1252,13 +1249,14 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_onWidgetEvent);
  * @param pWidget  the widget the event is for, passed through
  * @param Event  UI event code, passed through
  */
-extern "C" void cOVState_onWidgetEvent(cOVState* self, int pWidget, int Event)
+void cOVState::onWidgetEvent(cUIThing* pWidget, unsigned int Event)
 {
     cGame* w = SSXApp->Game;
     if (((char*)w) != 0) {
         cGameState* currentState = w->mCurrentState;
         if (((char*)currentState) != 0) {
-            sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)currentState->mVtbl;
+            sVEntry<void(void*, cUIThing*, unsigned int)>* vt =
+                (sVEntry<void(void*, cUIThing*, unsigned int)>*)currentState->mVtbl;
             vt[9].fn(vthis(currentState, vt[9]), pWidget, Event);
         }
     }

@@ -132,6 +132,7 @@ struct cFEStateNetConfig : public cFEStateNet {
         __asm__("cFEStateNetConfig_onConnectionWarningPopupEvent");
     int onNetEvent(int id, void* msgPtr) __asm__("cFEStateNetConfig_onNetEvent");
     int isOnlineState() __asm__("cFEStateNetConfig_isOnlineState__FPv");
+    void showCheckingCardPopup(int cardSlot) __asm__("cFEStateNetConfig_showCheckingCardPopup");
 };
 
 CHECK_OFFSET(cFEStateNetConfig, miSelectedSetting, 0x6D0);
@@ -222,6 +223,9 @@ struct cFEStateNetAccountMem : public cFEStateNet {
     void formatNotDetectedText() __asm__("cFEStateNetAccountMem_formatNotDetectedText");
     void formatFailedText() __asm__("cFEStateNetAccountMem_formatFailedText");
     int getErrorStep(int id) __asm__("cFEStateNetAccountMem_getErrorStep");
+    virtual int handleEvent(int msg, void* pParam) __asm__("cFEStateNetAccountMem_handleEvent");
+    virtual void onCreateScreen() __asm__("cFEStateNetAccountMem_onCreateScreen__FPv");
+    virtual bool onGainTransition(int) __asm__("cFEStateNetAccountMem_onGainTransition__FPv");
 };
 
 CHECK_OFFSET(cFEStateNetAccountMem, miResult, 0x6D0);

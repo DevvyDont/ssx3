@@ -3535,12 +3535,12 @@ struct sPartSys {
  * @param minz  receives the near distance (mProjParams[0])
  * @param maxz  receives the far distance (mProjParams[1])
  */
-extern "C" void cPS2GraphicsMan_GetViewportPerspective(cPS2GraphicsMan* self, float* fov, float* minz, float* maxz)
+void cPS2GraphicsMan::GetViewportPerspective(float& fov, float& minz, float& maxz)
 {
-    sViewportStack* viewportStack = &((&self->mViewportStack[0]))[self->mViewportDepth];
-    *fov = viewportStack->mProjParams[2];
-    *minz = viewportStack->mProjParams[0];
-    *maxz = viewportStack->mProjParams[1];
+    sViewportStack* viewportStack = &((&mViewportStack[0]))[mViewportDepth];
+    fov = viewportStack->mProjParams[2];
+    minz = viewportStack->mProjParams[0];
+    maxz = viewportStack->mProjParams[1];
 }
 #endif
 
@@ -4672,7 +4672,7 @@ static inline tGlyph* Find8808(cFont* f, int c)
  * times @p sx.
  *
  * The packet at mVifCursor (uncached) holds a DMA cnt tag, a VIF DIRECT code, PRIM 0x56 (sprite, textured, blended)
- * with RGBAQ R, G, B = color[1..3] * 204, A = color[0] * 128, Q = 1, and a REGLIST GIF tag of ST/XYZ2 pairs. Then,
+ * with RGBAQ R, G, B = @p color's R, G, B * 204, A = its A * 128, Q = 1, and a REGLIST GIF tag of ST/XYZ2 pairs. Then,
  * while mpDeferMan holds fewer than 2600 entries, a 0x80-byte entry is appended to it with the current draw state
  * (*m_pCurrentDrawState, low 5 bits of its third word from the manager's mActivePortIndex), the packet's start and
  * end and the view index mActiveViewIndex. mVifCursor moves past the packet. Slot 80 of cPS2GraphicsMan_vtbl.
@@ -4689,20 +4689,20 @@ static inline tGlyph* Find8808(cFont* f, int c)
  * @param z  the depth
  */
 // PORT: PS2-only GS packet build and VU0 inline asm; uncached (0x30000000) pointers.
-extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font, char* text, float* color,
-                              float x, float y, float sx, float sy, float su, float sv, float z)
+void cPS2GraphicsMan::DrawString3D(cFont& font, float x, float y, const char* text, float sx, float sy, float su,
+                                   float sv, const tARGB& color, float z)
 {
-    if (self->mMatricesValid == 0) {
-        self->computeMatrices();
+    if (mMatricesValid == 0) {
+        computeMatrices();
     }
-    unsigned int buf = self->mVifCursor;
+    unsigned int buf = mVifCursor;
     // ORIGINAL-PTR: the GIF packet and the defer record are written through the EE's uncached-accelerated alias
     // (address | 0x30000000, a hardware address segment)
     unsigned long* packetHead = (unsigned long*)(buf | 0x30000000);
     unsigned long* glyphOut = packetHead + 10;
     int nloop = 0;
-    if (((&self->mViewportStack[0]))[self->mViewportDepth].mProjectionType != 0) {
-        float vz = self->mScreenMatrix.row[2].z * z + self->mScreenMatrix.row[3].z;
+    if (((&mViewportStack[0]))[mViewportDepth].mProjectionType != 0) {
+        float vz = mScreenMatrix.row[2].z * z + mScreenMatrix.row[3].z;
         t4VectorInit cornerMin;
         t4VectorInit cornerMax;
         cornerMin.z = vz;
@@ -4710,17 +4710,17 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
         cornerMax.z = vz;
         cornerMax.w = 1.0f;
         for (; *text; text++) {
-            tGlyph* glyphRec = Find8808(font, (unsigned char)*text);
+            tGlyph* glyphRec = Find8808(&font, (unsigned char)*text);
             if (glyphRec) {
                 nloop++;
                 float uv0[2];
                 float uv1[2];
                 Set2_8808(uv0, glyphRec->u * su, glyphRec->v * sv);
                 Set2_8808(uv1, (glyphRec->u + glyphRec->width) * su, (glyphRec->v + glyphRec->height) * sv);
-                cornerMin.x = (x + glyphRec->xoffset * sx) * self->mScreenMatrix.row[0].x + self->mScreenMatrix.row[3].x;
-                cornerMin.y = (y + glyphRec->yoffset * sy) * self->mScreenMatrix.row[1].y + self->mScreenMatrix.row[3].y;
-                cornerMax.x = cornerMin.x + glyphRec->width * sx * self->mScreenMatrix.row[0].x;
-                cornerMax.y = cornerMin.y + glyphRec->height * sy * self->mScreenMatrix.row[1].y;
+                cornerMin.x = (x + glyphRec->xoffset * sx) * mScreenMatrix.row[0].x + mScreenMatrix.row[3].x;
+                cornerMin.y = (y + glyphRec->yoffset * sy) * mScreenMatrix.row[1].y + mScreenMatrix.row[3].y;
+                cornerMax.x = cornerMin.x + glyphRec->width * sx * mScreenMatrix.row[0].x;
+                cornerMax.y = cornerMin.y + glyphRec->height * sy * mScreenMatrix.row[1].y;
                 glyphOut[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
                 glyphOut[1] = (int)cornerMin.x | ((long)(int)cornerMin.y << 16) | ((long)(int)cornerMin.z << 32);
                 glyphOut[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
@@ -4731,7 +4731,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
         }
     } else {
         for (; *text; text++) {
-            tGlyph* glyphRec = Find8808(font, (unsigned char)*text);
+            tGlyph* glyphRec = Find8808(&font, (unsigned char)*text);
             if (glyphRec) {
                 nloop++;
                 float uv0[2];
@@ -4742,13 +4742,13 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
                 Set2_8808(size, glyphRec->width * sx * 0.5f, glyphRec->height * sy * 0.5f);
                 t4VectorRefInit pos(x + glyphRec->xoffset * sx + size[0], y + glyphRec->yoffset * sy + size[1], z,
                     1.0f);
-                t4VectorInit projCentre = MulMat7278((&self->mScreenWorld), pos);
+                t4VectorInit projCentre = MulMat7278((&mScreenWorld), pos);
                 float inv = 1.0f / projCentre.w;
                 projCentre.x *= inv;
                 projCentre.y *= inv;
-                float dx = self->mScreenMatrix.row[0].x * size[0] * inv;
+                float dx = mScreenMatrix.row[0].x * size[0] * inv;
                 projCentre.w = inv;
-                float dy = self->mScreenMatrix.row[1].y * size[1] * inv;
+                float dy = mScreenMatrix.row[1].y * size[1] * inv;
                 t4VectorInit halfExtent(dx, dy, 0.0f, 0.0f);
                 t4VectorInit cornerMin = Sub_CF0(projCentre, halfExtent);
                 t4VectorInit cornerMax = Add7278(projCentre, halfExtent);
@@ -4768,15 +4768,15 @@ extern "C" void cPS2GraphicsMan_DrawString3D(cPS2GraphicsMan* self, cFont* font,
     packetHead[4] = 0x2400000000000001UL;
     packetHead[5] = 0x10;
     packetHead[6] = 86;
-    packetHead[7] = (long)(int)(color[1] * 204.0f) | ((long)(int)(color[2] * 204.0f) << 8) |
-           ((long)(int)(color[3] * 204.0f) << 16) | ((long)(int)(color[0] * 128.0f) << 24) |
+    packetHead[7] = (long)(int)(color.R * 204.0f) | ((long)(int)(color.G * 204.0f) << 8) |
+           ((long)(int)(color.B * 204.0f) << 16) | ((long)(int)(color.A * 128.0f) << 24) |
            ((long)Bits_CF0(1.0f) << 32);
     packetHead[8] = (unsigned long)(nloop | 0x8000) | ((unsigned long)34816 << 47);
     packetHead[9] = 21074;
     unsigned int next = (unsigned int)glyphOut & 0x0FFFFFFF;
-    cPS2DeferManager* ring = self->mpDeferMan;
-    sDrawState* rs = self->m_pCurrentDrawState;
-    self->mVifCursor = next + 0x10;
+    cPS2DeferManager* ring = mpDeferMan;
+    sDrawState* rs = m_pCurrentDrawState;
+    mVifCursor = next + 0x10;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = ((int)rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
@@ -4872,7 +4872,7 @@ static inline tGlyph* Find9028(cFont* f, int c)
  * glyph's u/v times @p su and @p sv, and @p x advances by the glyph advance times @p sx.
  *
  * The packet at mVifCursor (uncached) holds a DMA cnt tag, a VIF DIRECT code, PRIM 0x56 (sprite, textured, blended)
- * with RGBAQ R, G, B = color[1..3] * 204, A = color[0] * 128, Q = 1, and a REGLIST GIF tag of ST/XYZ2 pairs. Then,
+ * with RGBAQ R, G, B = @p color's R, G, B * 204, A = its A * 128, Q = 1, and a REGLIST GIF tag of ST/XYZ2 pairs. Then,
  * while mpDeferMan holds fewer than 2600 entries, a 0x80-byte entry is appended with the current draw state (low 5 bits
  * of its third word from the manager's mActivePortIndex), the packet's start and end and the view index
  * mActiveViewIndex. mVifCursor moves past the packet. Slot 81 of cPS2GraphicsMan_vtbl.
@@ -4889,18 +4889,18 @@ static inline tGlyph* Find9028(cFont* f, int c)
  * @param z  the depth
  */
 // PORT: PS2-only GS packet build and VU0 inline asm; uncached (0x30000000) pointers.
-extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font, unsigned short* wideText, float* color,
-                              float x, float y, float sx, float sy, float su, float sv, float z)
+void cPS2GraphicsMan::DrawString3D1(cFont& font, float x, float y, const unsigned short* wideText, float sx, float sy,
+                                    float su, float sv, const tARGB& color, float z)
 {
-    if (self->mMatricesValid == 0) {
-        self->computeMatrices();
+    if (mMatricesValid == 0) {
+        computeMatrices();
     }
-    unsigned int buf = self->mVifCursor;
+    unsigned int buf = mVifCursor;
     unsigned long* packetHead = cPS2ScratchPad_claimBuffer(D_004A4474, buf, -1, 0);
     unsigned long* packetCursor = packetHead + 10;
     int nloop = 0;
-    if (((&self->mViewportStack[0]))[self->mViewportDepth].mProjectionType != 0) {
-        float vz = self->mScreenMatrix.row[2].z * z + self->mScreenMatrix.row[3].z;
+    if (((&mViewportStack[0]))[mViewportDepth].mProjectionType != 0) {
+        float vz = mScreenMatrix.row[2].z * z + mScreenMatrix.row[3].z;
         t4VectorInit topLeft;
         t4VectorInit bottomRight;
         topLeft.z = vz;
@@ -4908,17 +4908,17 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font
         bottomRight.z = vz;
         bottomRight.w = 1.0f;
         for (; *wideText; wideText++) {
-            tGlyph* glyphInfo = Find9028(font, *wideText);
+            tGlyph* glyphInfo = Find9028(&font, *wideText);
             if (glyphInfo) {
                 nloop++;
                 float uv0[2];
                 float uv1[2];
                 Set2_9028(uv0, glyphInfo->u * su, glyphInfo->v * sv);
                 Set2_9028(uv1, (glyphInfo->u + glyphInfo->width) * su, (glyphInfo->v + glyphInfo->height) * sv);
-                topLeft.x = (x + glyphInfo->xoffset * sx) * self->mScreenMatrix.row[0].x + self->mScreenMatrix.row[3].x;
-                topLeft.y = (y + glyphInfo->yoffset * sy) * self->mScreenMatrix.row[1].y + self->mScreenMatrix.row[3].y;
-                bottomRight.x = topLeft.x + glyphInfo->width * sx * self->mScreenMatrix.row[0].x;
-                bottomRight.y = topLeft.y + glyphInfo->height * sy * self->mScreenMatrix.row[1].y;
+                topLeft.x = (x + glyphInfo->xoffset * sx) * mScreenMatrix.row[0].x + mScreenMatrix.row[3].x;
+                topLeft.y = (y + glyphInfo->yoffset * sy) * mScreenMatrix.row[1].y + mScreenMatrix.row[3].y;
+                bottomRight.x = topLeft.x + glyphInfo->width * sx * mScreenMatrix.row[0].x;
+                bottomRight.y = topLeft.y + glyphInfo->height * sy * mScreenMatrix.row[1].y;
                 packetCursor[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
                 packetCursor[1] = (int)topLeft.x | ((long)(int)topLeft.y << 16) | ((long)(int)topLeft.z << 32);
                 packetCursor[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
@@ -4929,7 +4929,7 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font
         }
     } else {
         for (; *wideText; wideText++) {
-            tGlyph* glyphInfo = Find9028(font, *wideText);
+            tGlyph* glyphInfo = Find9028(&font, *wideText);
             if (glyphInfo) {
                 nloop++;
                 float uv0[2];
@@ -4939,13 +4939,13 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font
                 Set2_9028(uv1, (glyphInfo->u + glyphInfo->width) * su, (glyphInfo->v + glyphInfo->height) * sv);
                 Set2_9028(size, glyphInfo->width * sx * 0.5f, glyphInfo->height * sy * 0.5f);
                 sPtPos9028 pos(x + glyphInfo->xoffset * sx + size[0], y + glyphInfo->yoffset * sy + size[1], z, 1.0f);
-                t4VectorInit screenCentre = MulMat7278((&self->mScreenWorld), pos);
+                t4VectorInit screenCentre = MulMat7278((&mScreenWorld), pos);
                 float inv = 1.0f / screenCentre.w;
                 screenCentre.x *= inv;
                 screenCentre.y *= inv;
-                float dx = self->mScreenMatrix.row[0].x * size[0] * inv;
+                float dx = mScreenMatrix.row[0].x * size[0] * inv;
                 screenCentre.w = inv;
-                float dy = self->mScreenMatrix.row[1].y * size[1] * inv;
+                float dy = mScreenMatrix.row[1].y * size[1] * inv;
                 t4VectorInit halfExtent(dx, dy, 0.0f, 0.0f);
                 t4VectorInit topLeft = Sub_CF0(screenCentre, halfExtent);
                 t4VectorInit bottomRight = Add7278(screenCentre, halfExtent);
@@ -4965,15 +4965,15 @@ extern "C" void cPS2GraphicsMan_DrawString3D1(cPS2GraphicsMan* self, cFont* font
     packetHead[4] = 0x2400000000000001UL;
     packetHead[5] = 0x10;
     packetHead[6] = 86;
-    packetHead[7] = (long)(int)(color[1] * 204.0f) | ((long)(int)(color[2] * 204.0f) << 8) |
-           ((long)(int)(color[3] * 204.0f) << 16) | ((long)(int)(color[0] * 128.0f) << 24) |
+    packetHead[7] = (long)(int)(color.R * 204.0f) | ((long)(int)(color.G * 204.0f) << 8) |
+           ((long)(int)(color.B * 204.0f) << 16) | ((long)(int)(color.A * 128.0f) << 24) |
            ((long)Bits_CF0(1.0f) << 32);
     packetHead[8] = (unsigned long)(nloop | 0x8000) | ((unsigned long)34816 << 47);
     packetHead[9] = 21074;
     unsigned int next = cPS2ScratchPad_flushBufferTo(D_004A4474, packetCursor, 4);
-    cPS2DeferManager* ring = self->mpDeferMan;
-    sPtRenderState* rs = ((sPtRenderState*)self->m_pCurrentDrawState);
-    self->mVifCursor = next + 0x10;
+    cPS2DeferManager* ring = mpDeferMan;
+    sPtRenderState* rs = ((sPtRenderState*)m_pCurrentDrawState);
+    mVifCursor = next + 0x10;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (rs->m_bitGroups[2] & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
@@ -5257,7 +5257,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_CreateGridMesh);
 
 
 
-extern "C" cGridMesh* cPS2GridMesh_cPS2GridMesh(void* mem, void* a1, void* a2, void* a3, unsigned int flags);
+extern "C" cGridMesh* cPS2GridMesh_cPS2GridMesh(void* mem, int width, int height, cPS2GraphicsMan* graphicsMan,
+                                                unsigned int flags);
 extern const char str_cPS2GridMesh[];
 
 /**
@@ -5267,15 +5268,14 @@ extern const char str_cPS2GridMesh[];
  * @p width, @p height, the manager and @p flags). When bit 30 of @p flags is set it calls the mesh's virtual slot 2 (On
  * Tour cPSPGridMesh::IsOk) and, if that fails, deletes the mesh (slot 1 with flags 3) and returns 0.
  *
- * @param pS2GraphicsMan  the graphics manager (this)
  * @param width           the grid width
  * @param height          the grid height
  * @param flags           the memory flags (On Tour memtype)
  * @return the new mesh, or 0
  */
-extern "C" cGridMesh* cPS2GraphicsMan_CreateGridMesh(cPS2GraphicsMan* pS2GraphicsMan, void* width, void* height, unsigned int flags)
+cGridMesh* cPS2GraphicsMan::CreateGridMesh(int width, int height, int flags)
 {
-    cGridMesh* gridMesh = cPS2GridMesh_cPS2GridMesh(cMemMan_alloc(460, str_cPS2GridMesh, flags, 0), width, height, pS2GraphicsMan, flags);
+    cGridMesh* gridMesh = cPS2GridMesh_cPS2GridMesh(cMemMan_alloc(460, str_cPS2GridMesh, flags, 0), width, height, this, flags);
     if (flags & 0x40000000) {
         if (gridMesh == 0) {
             return 0;
@@ -5456,62 +5456,63 @@ static inline void SetTex2_A610(cPS2GraphicsMan* self, int t)
  * shadow set it changes the draw state for the shadow pass (alpha and Z-test fields) and skips the per-chunk material
  * flags.
  *
- * @param mdl  the model header
+ * @param mdfheader  the model header
  * @param base  the model data the header's offsets are relative to
  * @param shadow  non-zero for the shadow pass
  */
 // PORT: PS2-only DMA/VIF packet build; uncached (0x30000000) pointers held in int.
-extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* mdl, char* base, int shadow)
+void cPS2GraphicsMan::DrawCharModel(const tMdfModelHeader* mdfheader, const char* base, float, int shadow, int)
 {
+    sMdl_A610* mdl = (sMdl_A610*)mdfheader;
     if (cRenderToggles_m_DisablePlayerStrips == 0) {
-        (self->m_pCurrentDrawState)[1] = *(self->m_pCurrentDrawState);
-        (self->m_pCurrentDrawState)++;
-        ((sVEntry<void(void*, float)>*)VPTR_OF(cGraphicsMan, self))[124].fn(vthis(self, ((sVEntry<void(void*, float)>*)VPTR_OF(cGraphicsMan, self))[124]), 1.0f);
-        if (self->mMatricesValid == 0) {
-            self->computeMatrices();
+        m_pCurrentDrawState[1] = *(m_pCurrentDrawState);
+        (m_pCurrentDrawState)++;
+        ((sVEntry<void(void*, float)>*)VPTR_OF(cGraphicsMan, this))[124].fn(vthis(this, ((sVEntry<void(void*, float)>*)VPTR_OF(cGraphicsMan, this))[124]), 1.0f);
+        if (mMatricesValid == 0) {
+            computeMatrices();
         }
         int matIdx = 0;
         sChunk_A610* chunk = (sChunk_A610*)(base + mdl->chunkOfs);
-        t4Matrix* bones = ((t4Matrix*)self->mpScratchpad);
-        SetTex2_A610(self, self->mCharSpecTexID[chunk->texSlot]);
-        SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[0]), 4, 2, 3);
-        int z = MIN_A610(0x400, Depth_A610(self, bones->row[3]) + 0x10);
+        t4Matrix* bones = ((t4Matrix*)mpScratchpad);
+        SetTex2_A610(this, mCharSpecTexID[chunk->texSlot]);
+        SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[0]), 4, 2, 3);
+        int z = MIN_A610(0x400, Depth_A610(this, bones->row[3]) + 0x10);
         if (shadow) {
-            SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[0]), 20, 8, 0);
-            SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 2, 5, 7);
-            SetTest_A610(self);
-            SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 0, 2, 2);
-            SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[2]), 10, 19, z);
-            SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 23, 2, 1);
-            SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 20, 2, 0);
-            SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 12, 8, 20);
+            SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[0]), 20, 8, 0);
+            SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 2, 5, 7);
+            SetTest_A610(this);
+            SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 0, 2, 2);
+            SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[2]), 10, 19, z);
+            SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 23, 2, 1);
+            SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 20, 2, 0);
+            SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 12, 8, 20);
         }
         for (int i = 0; i < mdl->numChunks; i++) {
-            cPS2GraphicsMan_setTextureFunction_A610(self, chunk->tex, 3);
-            SetTex_A610(self, chunk->tex);
+            cPS2GraphicsMan_setTextureFunction_A610(this, chunk->tex, 3);
+            SetTex_A610(this, chunk->tex);
             if (!shadow) {
                 if (chunk->flags & 0x8000) {
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 2, 5, 5);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[0]), 20, 8, chunk->alpha);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 7, 5, 0xC);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 0, 2, 2);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[2]), 10, 19, z);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 23, 2, 1);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 20, 2, 3);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 12, 8, 92);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 2, 5, 5);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[0]), 20, 8, chunk->alpha);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 7, 5, 0xC);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 0, 2, 2);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[2]), 10, 19, z);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 23, 2, 1);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 20, 2, 3);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 12, 8, 92);
                 } else {
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 2, 5, 1);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[0]), 20, 8, 0);
-                    SetTest_A610(self);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 0, 2, 0);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[2]), 10, 19, 0);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 23, 2, 1);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 20, 2, 0);
-                    SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[1]), 12, 8, 20);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 2, 5, 1);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[0]), 20, 8, 0);
+                    SetTest_A610(this);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 0, 2, 0);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[2]), 10, 19, 0);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 23, 2, 1);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 20, 2, 0);
+                    SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[1]), 12, 8, 20);
                 }
             }
             if (chunk->flags & 1) {
-                unsigned int buf = self->mVifCursor;
+                unsigned int buf = mVifCursor;
                 unsigned long* packet = (unsigned long*)(buf | 0x30000000);
                 sMtxList_A610* list = &mdl->lists[matIdx];
                 sSub_A610* send = chunk->subs + chunk->numSubs;
@@ -5522,9 +5523,9 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
                     packet += 2;
                 }
                 unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
-                cPS2DeferManager* ring = self->mpDeferMan;
-                self->mVifCursor = next;
-                sDrawState* rs = self->m_pCurrentDrawState;
+                cPS2DeferManager* ring = mpDeferMan;
+                mVifCursor = next;
+                sDrawState* rs = m_pCurrentDrawState;
                 if (ring->mNumSubmitDMA < 2600) {
                     rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
                     int key = ring->mActiveViewIndex;
@@ -5536,9 +5537,9 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
                     ringEntry->key = key;
                     ringEntry->flag = 0;
                 }
-                self->mVifCursor += 0x10;
+                mVifCursor += 0x10;
             } else if (chunk->flags & 0x100) {
-                unsigned int buf = self->mVifCursor;
+                unsigned int buf = mVifCursor;
                 unsigned int prog = (unsigned int)D_398 >> 3;
                 unsigned long* packet = (unsigned long*)(buf | 0x30000000);
                 int nlod = mdl->numLods;
@@ -5636,9 +5637,9 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
                     }
                 }
                 unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
-                cPS2DeferManager* ring = self->mpDeferMan;
-                self->mVifCursor = next;
-                sDrawState* rs = self->m_pCurrentDrawState;
+                cPS2DeferManager* ring = mpDeferMan;
+                mVifCursor = next;
+                sDrawState* rs = m_pCurrentDrawState;
                 if (ring->mNumSubmitDMA < 2600) {
                     rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
                     int key = ring->mActiveViewIndex;
@@ -5650,14 +5651,14 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(cPS2GraphicsMan* self, sMdl_A610* 
                     ringEntry->key = key;
                     ringEntry->flag = 0;
                 }
-                self->mVifCursor += 0x10;
+                mVifCursor += 0x10;
             }
             matIdx += chunk->numSubs;
             chunk++;
         }
-        (self->m_pCurrentDrawState)--;
-        SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[0]), 6, 4, 0);
-        SetField_A610(((int)(self->m_pCurrentDrawState)->m_bitGroups[3]), 0, 30, 0);
+        (m_pCurrentDrawState)--;
+        SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[0]), 6, 4, 0);
+        SetField_A610(((int)(m_pCurrentDrawState)->m_bitGroups[3]), 0, 30, 0);
     }
 }
 #endif
@@ -5753,7 +5754,7 @@ static inline void AddMats_B548(unsigned long** pp, sMat_B548* mats, int n, int*
     *pp = q;
 }
 
-static inline void BoneHeader_B548(unsigned long** pp, float* col)
+static inline void BoneHeader_B548(unsigned long** pp, const tARGB& col)
 {
     float one = 1.0f;
     (*pp)[1] = 0;
@@ -5761,8 +5762,8 @@ static inline void BoneHeader_B548(unsigned long** pp, float* col)
     (*pp)[3] = (unsigned long)0x50000002 << 32 | 0x11000000;
     (*pp)[4] = (unsigned long)0x10000000 << 32 | 0x8001;
     (*pp)[5] = 0xE;
-    (*pp)[6] = (unsigned long)(int)(col[1] * 128.0f) | ((unsigned long)(int)(col[2] * 128.0f) << 8)
-             | ((unsigned long)(int)(col[3] * 128.0f) << 16) | ((unsigned long)(int)(col[0] * 128.0f) << 24)
+    (*pp)[6] = (unsigned long)(int)(col.R * 128.0f) | ((unsigned long)(int)(col.G * 128.0f) << 8)
+             | ((unsigned long)(int)(col.B * 128.0f) << 16) | ((unsigned long)(int)(col.A * 128.0f) << 24)
              | ((unsigned long)*(unsigned int*)&one << 32);
     (*pp)[7] = 1;
     *pp += 8;
@@ -5790,39 +5791,39 @@ static inline void QueueRecord_B548(cPS2GraphicsMan* self, unsigned int buf, uns
  * Sets the top draw state for the shadow (no textures, fixed blend and test fields) and, for each bone flagged in the
  * model, writes a header in @p col and the matrices of its tracks into the packet.
  *
- * @param model  the model header
+ * @param baseModel  the model header
  * @param base  the model data the header's offsets are relative to
  * @param col  the shadow colour
  */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
-extern "C" void cPS2GraphicsMan_DrawCharShadowModel(cPS2GraphicsMan* self, sMdl_B548* model, char* base, float* col)
+void cPS2GraphicsMan::DrawCharShadowModel(const tMdfModelHeader* baseModel, const char* base, const tARGB& col)
 {
-    unsigned int buf = self->mVifCursor;
+    unsigned int buf = mVifCursor;
     unsigned long* packet = (unsigned long*)(buf | 0x30000000);
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[0] |= 0x30;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
-            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & ~0x7C) | 4;
+    ((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[0] |= 0x30;
+    ((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1] & ~0x7C) | 4;
     int cnt = 0;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
-            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & ~0xF80) | 0x580;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[0]
-            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[0] & 0xF00FFFFF) | 0x06400000;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
-            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & 0xFE7FFFFF) | 0x01000000;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
-            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & 0xFFCFFFFF) | 0x00300000;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1]
-            = (((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[1] & 0xFFF00FFF) | 0x00014000;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->tex = -1;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->tex2 = -1;
-    sBone_B548* bone = (sBone_B548*)(base + model->bonesOffset);
-    for (int i = 0; i < model->nbones; i++, bone++) {
+    ((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1] & ~0xF80) | 0x580;
+    ((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[0]
+            = (((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[0] & 0xF00FFFFF) | 0x06400000;
+    ((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1] & 0xFE7FFFFF) | 0x01000000;
+    ((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1] & 0xFFCFFFFF) | 0x00300000;
+    ((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1]
+            = (((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[1] & 0xFFF00FFF) | 0x00014000;
+    ((sPtRS_B548*)m_pCurrentDrawState)->tex = -1;
+    ((sPtRS_B548*)m_pCurrentDrawState)->tex2 = -1;
+    sBone_B548* bone = (sBone_B548*)(base + ((sMdl_B548*)baseModel)->bonesOffset);
+    for (int i = 0; i < ((sMdl_B548*)baseModel)->nbones; i++, bone++) {
         if (bone->flags & 1) {
             packet[0] = 0x10000003;
             BoneHeader_B548(&packet, col);
-            sTrk_B548* tr = &model->tracks[cnt];
+            sTrk_B548* tr = &((sMdl_B548*)baseModel)->tracks[cnt];
             for (int j = 0; j < bone->ntracks; j++, tr++) {
-                AddMats_B548(&packet, ((sMat_B548*)self->mpScratchpad), tr->n, tr->idx);
+                AddMats_B548(&packet, ((sMat_B548*)mpScratchpad), tr->n, tr->idx);
                 packet[0] = ((unsigned long)*bone->refs[j].p << 32) | 0x50000000;
                 packet[1] = 0;
                 packet += 2;
@@ -5831,11 +5832,11 @@ extern "C" void cPS2GraphicsMan_DrawCharShadowModel(cPS2GraphicsMan* self, sMdl_
         cnt += bone->ntracks;
     }
     unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
-    self->mVifCursor = next;
-    QueueRecord_B548(self, buf, next, 1);
-    self->mVifCursor += 0x10;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[0] &= ~0x3C0;
-    ((sPtRS_B548*)self->m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
+    mVifCursor = next;
+    QueueRecord_B548(this, buf, next, 1);
+    mVifCursor += 0x10;
+    ((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[0] &= ~0x3C0;
+    ((sPtRS_B548*)m_pCurrentDrawState)->m_bitGroups[3] &= 0xC0000000;
 }
 #endif
 
@@ -5877,22 +5878,22 @@ static inline void CopyMat_BA50(void* dst, const void* src)
  * @param sscale  the shadow scale
  * @param strans  the shadow translation
  */
-extern "C" void cPS2GraphicsMan_SetShadowCharMatrices(cPS2GraphicsMan* self, void* mat, cQuad128_BA50* sscale, cQuad128_BA50* strans)
+void cPS2GraphicsMan::SetShadowCharMatrices(const t4Matrix& mat, const t4Vector& sscale, const t4Vector& strans)
 {
-    unsigned int buf = self->mVifCursor;
+    unsigned int buf = mVifCursor;
     unsigned long* packet = (unsigned long*)(buf | 0x30000000);
     packet[0] = 0x60000007;
     packet[2] = (unsigned long)0x8000 << 45;
     packet[3] = (unsigned long)55308 << 47;
     packet[1] = 0;
-    CopyMat_BA50(packet + 4, mat);
-    ((cQuad128_BA50*)packet)[6] = *sscale;
-    ((cQuad128_BA50*)packet)[7] = *strans;
+    CopyMat_BA50(packet + 4, &mat);
+    ((t4Vector*)packet)[6] = sscale;
+    ((t4Vector*)packet)[7] = strans;
     packet += 16;
-    self->mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
-    sRS_BA50* rs = (sRS_BA50*)self->m_pCurrentDrawState;
+    mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
+    sRS_BA50* rs = (sRS_BA50*)m_pCurrentDrawState;
     rs->m_bitGroups[0] = (rs->m_bitGroups[0] & ~0x3C0) | 0x1C0;
-    sRS_BA50* rs2 = (sRS_BA50*)self->m_pCurrentDrawState;
+    sRS_BA50* rs2 = (sRS_BA50*)m_pCurrentDrawState;
     rs2->m_bitGroups[3] = (rs2->m_bitGroups[3] & 0xC0000000) | (buf & 0x3FFFFFFF);
 }
 #endif
@@ -6539,8 +6540,9 @@ int cPS2GraphicsMan::AddTexture(const SHAPE* pShp, const char* textureName, int 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddTexture1);
 #ifdef SKIP_ASM
-extern "C" int cTextureMan_AddTexture(void* mgr, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
-                             int a8, int a9, int a10, int a11);
+extern "C" int cTextureMan_AddTexture(void* mgr, const char* pixels, const char* name, unsigned int width,
+                                      unsigned int height, unsigned int mipmapCount, int texelFormat, int clutFormat,
+                                      const char* clutData, int lockType, int copyMem, int bindId);
 
 /**
  * Creates a texture in the texture manager (cTextureMan_AddTexture on mTexMan) and marks its id in mTextureAdded.
@@ -6561,11 +6563,12 @@ extern "C" int cTextureMan_AddTexture(void* mgr, int a1, int a2, int a3, int a4,
  * @param bindId  the bind id
  * @return the new texture id
  */
-extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, int name, int width, int height, int mipmapCount, int texelFormat, int clutFormat,
-                              int clutData, int lockType, int copyMem, int bindId)
+int cPS2GraphicsMan::AddTexture1(const char* pixels, const char* name, unsigned int width, unsigned int height,
+                                 unsigned int mipmapCount, int texelFormat, int clutFormat, const char* clutData,
+                                 int lockType, int copyMem, int bindId)
 {
-    int i = cTextureMan_AddTexture(self->mTexMan, pixels, name, width, height, mipmapCount, texelFormat, clutFormat, clutData, lockType, copyMem, bindId);
-    self->mTextureAdded[i] = 1;
+    int i = cTextureMan_AddTexture(mTexMan, pixels, name, width, height, mipmapCount, texelFormat, clutFormat, clutData, lockType, copyMem, bindId);
+    mTextureAdded[i] = 1;
     return i;
 }
 #endif
@@ -6983,7 +6986,9 @@ void cPS2GraphicsMan::SetNewTextureData(int textureId, const SHAPE* objp, int co
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetNewTextureData1);
 #ifdef SKIP_ASM
-extern "C" void cTextureMan_SetNewTextureData(void* gm, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9);
+extern "C" void cTextureMan_SetNewTextureData(void* gm, int texId, const char* pixels, unsigned int width,
+                                              unsigned int height, unsigned int mipCount, int texelFormat,
+                                              int clutFormat, const char* clutData, int copyData);
 
 /**
  * Replaces a texture's pixels and CLUT from raw data: forwards all arguments to cTextureMan_SetNewTextureData on mTexMan.
@@ -7001,9 +7006,11 @@ extern "C" void cTextureMan_SetNewTextureData(void* gm, int a1, int a2, int a3, 
  * @param clutData  the new CLUT, or 0
  * @param copyData  nonzero to copy the data into the texture's buffers
  */
-extern "C" void cPS2GraphicsMan_SetNewTextureData1(cPS2GraphicsMan* self, int texId, int pixels, int width, int height, int mipCount, int texelFormat, int clutFormat, int clutData, int copyData)
+void cPS2GraphicsMan::SetNewTextureData1(int texId, const char* pixels, unsigned int width, unsigned int height,
+                                         unsigned int mipCount, int texelFormat, int clutFormat, const char* clutData,
+                                         int copyData)
 {
-    cTextureMan_SetNewTextureData(self->mTexMan, texId, pixels, width, height, mipCount, texelFormat, clutFormat, clutData, copyData);
+    cTextureMan_SetNewTextureData(mTexMan, texId, pixels, width, height, mipCount, texelFormat, clutFormat, clutData, copyData);
 }
 #endif
 
@@ -7110,7 +7117,6 @@ bool cPS2GraphicsMan::RestoreFrameLock()
 }
 #endif
 
-extern "C" void* cTextureMan_AddLockedFrameTexture(int);
 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_writeFrameRegPacket);
@@ -7139,7 +7145,7 @@ struct sPtGfx_D668 {
  * @param frameMask  the FBMSK bits (1 = do not write that bit)
  * @param mode  kGS_Context1 (0) or kGS_Context2 (1)
  */
-extern "C" void cPS2GraphicsMan_writeFrameRegPacket(cPS2GraphicsMan* self, ulong** pp, int frameMask, int mode)
+void cPS2GraphicsMan::writeFrameRegPacket(ulong** pp, int frameMask, int mode)
 {
     ulong* packet = *pp;
     switch (mode) {
@@ -7148,7 +7154,7 @@ extern "C" void cPS2GraphicsMan_writeFrameRegPacket(cPS2GraphicsMan* self, ulong
         packet[2] = ((ulong)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
         packet[0] = 0;
-        packet[4] = (ulong)(unsigned int)self->mCurrentFrameBufferPage | ((ulong)(unsigned int)self->mFrameBufferWidth << 16) | ((ulong)(unsigned int)self->mCurrentFBFormat << 24) | ((ulong)frameMask << 32);
+        packet[4] = (ulong)(unsigned int)mCurrentFrameBufferPage | ((ulong)(unsigned int)mFrameBufferWidth << 16) | ((ulong)(unsigned int)mCurrentFBFormat << 24) | ((ulong)frameMask << 32);
         packet[5] = 76;
         break;
     case kGS_Context2:
@@ -7156,7 +7162,7 @@ extern "C" void cPS2GraphicsMan_writeFrameRegPacket(cPS2GraphicsMan* self, ulong
         packet[2] = ((ulong)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
         packet[0] = 0;
-        packet[4] = (ulong)(unsigned int)self->mCurrentFrameBufferPage | ((ulong)(unsigned int)self->mFrameBufferWidth << 16) | ((ulong)(unsigned int)self->mCurrentFBFormat << 24) | ((ulong)frameMask << 32);
+        packet[4] = (ulong)(unsigned int)mCurrentFrameBufferPage | ((ulong)(unsigned int)mFrameBufferWidth << 16) | ((ulong)(unsigned int)mCurrentFBFormat << 24) | ((ulong)frameMask << 32);
         packet[5] = 77;
         break;
     default:
@@ -7171,32 +7177,28 @@ extern "C" void cPS2GraphicsMan_writeFrameRegPacket(cPS2GraphicsMan* self, ulong
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddLockedFrameTexture__FPv);
 #ifdef SKIP_ASM
+extern "C" int cTextureMan_AddLockedFrameTexture(cTextureMan* texMan, int width, int height, int texelFormat);
+
 /**
  * Creates a texture the frame can later be rendered into.
  *
- * Calls cTextureMan_AddLockedFrameTexture on the texture manager (mTexMan, +0x18F4), which allocates the "LockTex" texture. The C
- * declaration has only self: the width, height and texel format arrive in a1-a3 and pass through to cTextureMan_AddLockedFrameTexture
- * unchanged.
+ * Calls cTextureMan_AddLockedFrameTexture on the texture manager (mTexMan, +0x18F4), which allocates the "LockTex"
+ * texture.
  *
+ * @param width  the texture width
+ * @param height  the texture height
+ * @param texelFormat  the texel format (On Tour texeltype)
  * @return the new texture id
  */
-void* cPS2GraphicsMan_AddLockedFrameTexture(void* vself)
+int cPS2GraphicsMan::AddLockedFrameTexture(int width, int height, int texelFormat)
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return cTextureMan_AddLockedFrameTexture((int)self->mTexMan);
+    return cTextureMan_AddLockedFrameTexture(mTexMan, width, height, texelFormat);
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddProjectiveTexture);
 #ifdef SKIP_ASM
-struct sPartQ16 {
-    int w[4];
-} __attribute__((aligned(16)));
-
-struct sPartMtx {
-    float m[4][4];
-} __attribute__((aligned(16)));
 
 
 struct sPartDrawList {
@@ -7206,7 +7208,7 @@ struct sPartDrawList {
 };
 
 // PORT: PS2-only VU0 asm (lqc2/sqc2 4x4 matrix copy).
-static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
+static inline void vu0CopyMtxP(t4Matrix* dst, const t4Matrix* src)
 {
     __asm__ __volatile__(
         "lqc2      $vf1, 0x0(%0)\n"
@@ -7232,14 +7234,15 @@ static inline void vu0CopyMtxP(sPartMtx* dst, sPartMtx* src)
  * @param intensity  the intensity (mShdwIntensity)
  * @param i  the texture id (On Tour texid; mShdwTexID)
  */
-extern "C" void cPS2GraphicsMan_AddProjectiveTexture(cPS2GraphicsMan* self, sPartQ16* pos, sPartMtx* clipMat, sPartMtx* projMat, float intensity, int i)
+void cPS2GraphicsMan::AddProjectiveTexture(const t4Vector& pos, const t4Matrix& clipMat, const t4Matrix& projMat,
+                                           float intensity, int i)
 {
-    (*(sPartQ16*)&((&self->mProjTextures[0]))[self->mNumShdw].mShdwProjPos) = *pos;
-    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumShdw].mShdwClipMat), clipMat);
-    vu0CopyMtxP(&(*(sPartMtx*)&((&self->mProjTextures[0]))[self->mNumShdw].mShdwProjMat), projMat);
-    ((&self->mProjTextures[0]))[self->mNumShdw].mShdwIntensity = intensity;
-    ((&self->mProjTextures[0]))[self->mNumShdw].mShdwTexID = i;
-    self->mNumShdw++;
+    ((&mProjTextures[0]))[mNumShdw].mShdwProjPos = pos;
+    vu0CopyMtxP(&((&mProjTextures[0]))[mNumShdw].mShdwClipMat, &clipMat);
+    vu0CopyMtxP(&((&mProjTextures[0]))[mNumShdw].mShdwProjMat, &projMat);
+    ((&mProjTextures[0]))[mNumShdw].mShdwIntensity = intensity;
+    ((&mProjTextures[0]))[mNumShdw].mShdwTexID = i;
+    mNumShdw++;
 }
 #endif
 
@@ -7250,7 +7253,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_ShadowClearLockTexture);
 
 
 
-extern "C" void cTextureMan_ShadowClearLockTexture_D800(void* texset, int idx, float* color, unsigned int* buf) __asm__("cTextureMan_ShadowClearLockTexture");
+extern "C" void cTextureMan_ShadowClearLockTexture_D800(void* texset, int idx, const tARGB& color, unsigned int* buf)
+    __asm__("cTextureMan_ShadowClearLockTexture");
 
 // Release-build assert: expands to an empty do { } while (0); its loop notes keep the target's scheduling.
 #define ASSERT_D800(cond) do { } while (0)
@@ -7266,15 +7270,15 @@ extern "C" void cTextureMan_ShadowClearLockTexture_D800(void* texset, int idx, f
  */
 // PORT: uncached (0x30000000) pointers held in int.
 // Like cPS2GraphicsMan_LockFrameToTexture for the two-argument upload; the queued entry is flagged.
-extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(cPS2GraphicsMan* self, int idx, float* color)
+void cPS2GraphicsMan::ShadowClearLockTexture(int idx, const tARGB& color)
 {
-    unsigned int buf = self->mVifCursor;
+    unsigned int buf = mVifCursor;
     unsigned int packetAddr = buf | 0x30000000;
-    cTextureMan_ShadowClearLockTexture_D800(((void*)self->mTexMan), idx, color, &packetAddr);
+    cTextureMan_ShadowClearLockTexture_D800(((void*)mTexMan), idx, color, &packetAddr);
     unsigned int next = packetAddr & 0x0FFFFFFF;
-    self->mVifCursor = next;
-    cPS2DeferManager* ring = self->mpDeferMan;
-    sDrawState* rs = self->m_pCurrentDrawState;
+    mVifCursor = next;
+    cPS2DeferManager* ring = mpDeferMan;
+    sDrawState* rs = m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
@@ -7289,7 +7293,7 @@ extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(cPS2GraphicsMan* self, in
         ringEntry->mViewIndex = key;
         ringEntry->mContinuation = 1;
     }
-    self->mVifCursor += 0x10;
+    mVifCursor += 0x10;
 }
 #endif
 
@@ -7579,7 +7583,7 @@ extern char D_570[];
  */
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallmsr/cfc2); the PC port needs a C
 // version of the microprogram.
-extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* minp, void* maxp, void* mat)
+int cPS2GraphicsMan::ClipBoundBox(const t4Vector& minp, const t4Vector& maxp, const t4Matrix& mat)
 {
     int vi1Result;
     int vi2Result;
@@ -7597,7 +7601,7 @@ extern "C" int cPS2GraphicsMan_ClipBoundBox(cPS2GraphicsMan* self, void* minp, v
         "cfc2.i    %0, $vi1\n"
         "cfc2.ni   %1, $vi2\n"
         : "=r"(vi1Result), "=r"(vi2Result)
-        : "r"(minp), "r"(maxp), "r"(mat), "r"((unsigned int)D_570 >> 3));
+        : "r"(&minp), "r"(&maxp), "r"(&mat), "r"((unsigned int)D_570 >> 3));
     if (vi2Result != 0) {
         return GM_CLIPCODE_OUTSIDE;
     }
@@ -7908,7 +7912,7 @@ struct sMdl0380 {
  * @param uv  receives 4 x (u, v)
  * @param col  receives 4 x (a, r, g, b)
  */
-extern "C" void cPS2GraphicsMan_GetMeshQuad(cPS2GraphicsMan* self, tInstanceRecord* obj, int idx, float* pos, float* uv, float* col)
+void cPS2GraphicsMan::GetMeshQuad(const tInstanceRecord* obj, int idx, t3Vector* pos, t2Vector* uv, tARGB* col)
 {
     sMdl0380* mdl = (sMdl0380*)obj->m_Model;
     char* base = *(char**)(*(char**)(*(char**)(mdl->ents[idx].node + 0x20)) + 0x4);
@@ -7923,19 +7927,19 @@ extern "C" void cPS2GraphicsMan_GetMeshQuad(cPS2GraphicsMan* self, tInstanceReco
     k.z = modelScale.z * 3.0518509447574615e-05f;
     int i;
     for (i = 0; i < 4; i++) {
-        pos[i * 3 + 0] = (float)positions[0] * k.x;
-        pos[i * 3 + 1] = (float)positions[1] * k.y;
-        pos[i * 3 + 2] = (float)positions[2] * k.z;
+        pos[i].x = (float)positions[0] * k.x;
+        pos[i].y = (float)positions[1] * k.y;
+        pos[i].z = (float)positions[2] * k.z;
         positions += 3;
-        uv[i * 2 + 0] = (float)texCoords[0] * 0.000244140625f;
-        uv[i * 2 + 1] = (float)texCoords[1] * 0.000244140625f;
+        uv[i].x = (float)texCoords[0] * 0.000244140625f;
+        uv[i].y = (float)texCoords[1] * 0.000244140625f;
         texCoords += 2;
-        col[1] = (float)colours->r * 0.032258063554763794f;
-        col[2] = (float)colours->g * 0.032258063554763794f;
-        col[3] = (float)colours->b * 0.032258063554763794f;
-        col[0] = (float)colours->a;
+        col->R = (float)colours->r * 0.032258063554763794f;
+        col->G = (float)colours->g * 0.032258063554763794f;
+        col->B = (float)colours->b * 0.032258063554763794f;
+        col->A = (float)colours->a;
         colours++;
-        col += 4;
+        col++;
     }
 }
 #endif
@@ -8971,14 +8975,14 @@ extern "C" void cPS2GraphicsMan_computeMatrices(cPS2GraphicsMan* self);
  * @param n  the number of points
  */
 // PORT: uncached (0x30000000) pointers held in int; 64-bit GS words are `unsigned long`.
-extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, t4Matrix* BezMat, float* col, int n)
+void cPS2GraphicsMan::RenderSpline(const t4Matrix& BezMat, const tARGB& col, int n)
 {
-    self->m_pCurrentDrawState->m_bitGroups[0] = (((int)(self->m_pCurrentDrawState)->m_bitGroups[0]) & ~0x3C0) | 0xC0;
-    (*(int*)&self->m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
-    if (self->mMatricesValid == 0) {
-        self->computeMatrices();
+    m_pCurrentDrawState->m_bitGroups[0] = (((int)(m_pCurrentDrawState)->m_bitGroups[0]) & ~0x3C0) | 0xC0;
+    (*(int*)&m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
+    if (mMatricesValid == 0) {
+        computeMatrices();
     }
-    unsigned int buf = self->mVifCursor;
+    unsigned int buf = mVifCursor;
     unsigned long* packet = (unsigned long*)(buf | 0x30000000);
     packet[0] = 0x1000000A;
     packet[1] = 0;
@@ -8986,20 +8990,20 @@ extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, t4Matrix* Be
     packet[3] = (unsigned long)55313 << 47;
     packet[4] = ((unsigned long)0x10014000 << 32) | 1;
     packet[5] = 0xE;
-    packet[6] = (long)(int)(col[1] * 128.0f) | ((long)(int)(col[2] * 128.0f) << 8) | ((long)(int)(col[3] * 128.0f) << 16) | ((long)(int)(col[0] * 128.0f) << 24) | ((unsigned long)0x3F800000 << 32);
+    packet[6] = (long)(int)(col.R * 128.0f) | ((long)(int)(col.G * 128.0f) << 8) | ((long)(int)(col.B * 128.0f) << 16) | ((long)(int)(col.A * 128.0f) << 24) | ((unsigned long)0x3F800000 << 32);
     packet[7] = 1;
     packet[8] = (unsigned long)(n | 0x8000) | ((unsigned long)32778 << 45);
     packet[9] = 4;
-    CopyMat_1F10((t4Matrix*)(packet + 10), BezMat);
+    CopyMat_1F10((t4Matrix*)(packet + 10), &BezMat);
     packet[18] = n;
     packet[19] = 0;
     packet[20] = 0;
     packet[21] = (unsigned long)(((unsigned int)D_3BF0 >> 3) | 0x14000000) << 32;
     packet += 22;
-    self->mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
-    cPS2DeferManager* ring = self->mpDeferMan;
-    unsigned int next = self->mVifCursor;
-    sDrawState* rs = self->m_pCurrentDrawState;
+    mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
+    cPS2DeferManager* ring = mpDeferMan;
+    unsigned int next = mVifCursor;
+    sDrawState* rs = m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
@@ -9010,7 +9014,7 @@ extern "C" void cPS2GraphicsMan_RenderSpline(cPS2GraphicsMan* self, t4Matrix* Be
         ringEntry->mViewIndex = key;
         ringEntry->mContinuation = 0;
     }
-    self->mVifCursor += 0x10;
+    mVifCursor += 0x10;
 }
 #endif
 
@@ -11154,11 +11158,10 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetLensFXCallBack__FPvii);
  * @param callback  the function to call, or 0
  * @param callbackArg  the argument passed to it
  */
-void cPS2GraphicsMan_SetLensFXCallBack(void* vself, int callback, int callbackArg)
+void cPS2GraphicsMan::SetLensFXCallBack(void* callback, void* callbackArg)
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    self->mPhase2Callback = (void (*)(int))callback;
-    self->mPhase2CallbackArg = callbackArg;
+    mPhase2Callback = (void (*)(void*))callback;
+    mPhase2CallbackArg = callbackArg;
 }
 #endif
 
@@ -11208,7 +11211,7 @@ struct sMdl_66F0 {
     int blendsOffset;               // 0x34 [U] the blended-matrix table's offset (resolved into blends)
     tMdfBlendedMatrix* blends;
     sRef_66F0* refs;
-    int morphWeights;               // 0x40 [U] stored from the last argument ([O] ResolveCharModel's
+    float* morphWeights;            // 0x40 [U] stored from the last argument ([O] ResolveCharModel's
                                     //      float* morphWeights)
     short nblends;
     short nrefs;
@@ -11228,17 +11231,17 @@ struct sMdl_66F0 {
  * (cGraphicsMan_AddBlendedMatrix) and matched against the caller's list (areBlendedMatricesEqual) or appended to it,
  * and the reference table is remapped to the shared indices. cPS2GraphicsMan vtable slot 109.
  *
- * @param gfx    the graphics manager (this)
- * @param inModel      the model header (tMdfModelHeader*)
+ * @param baseInModel      the model header (tMdfModelHeader*)
  * @param base   the model data the offsets are relative to
  * @param tbl    per-part bone offsets (On Tour partBoneOffset)
  * @param count  in/out: number of entries in @p slots (On Tour numBlendedMats)
  * @param slots  the shared blended-matrix list (On Tour blendedMats)
  * @param morphWeights  stored in the model at +0x40 (On Tour: float* morphWeights)
  */
-extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0* inModel, char* base, int* tbl,
-        int* count, tMdfBlendedMatrix* slots, int morphWeights)
+void cPS2GraphicsMan::ResolveCharModel(tMdfModelHeader* baseInModel, char* base, int* tbl, int& count,
+                                       tMdfBlendedMatrix* slots, float* morphWeights)
 {
+    sMdl_66F0* inModel = (sMdl_66F0*)baseInModel;
     inModel->blends = (tMdfBlendedMatrix*)(base + inModel->blendsOffset);
     inModel->refs = (sRef_66F0*)(base + inModel->refsOffset);
     char* mats = base + inModel->matsOffset;
@@ -11271,7 +11274,7 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
                     env = (char)envDigit - '0';
             }
         }
-        bones[i].name = cGraphicsMan_GetTextureID(gfx, nameRecord);
+        bones[i].name = cGraphicsMan_GetTextureID(this, nameRecord);
         bones[i].env = env;
     }
     for (int i = 0; i < inModel->nmats; i++) {
@@ -11284,14 +11287,14 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
         (*(unsigned char**)&blendEntry->m_matrixList) = (unsigned char*)(base + (int)((unsigned char*)blendEntry->m_matrixList));
         for (int j = 0; j < blendEntry->m_iNumMatrices; j++)
             ((unsigned char*)blendEntry->m_matrixList)[j * 4 + 2] += tbl[((unsigned char*)blendEntry->m_matrixList)[j * 4 + 3]];
-        cGraphicsMan_AddBlendedMatrix(gfx, blendEntry);
+        cGraphicsMan_AddBlendedMatrix(this, blendEntry);
         for (int k = 0;; k++) {
-            if (k == *count) {
-                slots[*count].m_iNumMatrices = blendEntry->m_iNumMatrices;
-                (*(unsigned char**)&slots[*count].m_matrixList) = ((unsigned char*)blendEntry->m_matrixList);
-                slots[*count].m_iMatrixId = *count;
-                blendEntry->m_iMatrixId = *count;
-                (*count)++;
+            if (k == count) {
+                slots[count].m_iNumMatrices = blendEntry->m_iNumMatrices;
+                (*(unsigned char**)&slots[count].m_matrixList) = ((unsigned char*)blendEntry->m_matrixList);
+                slots[count].m_iMatrixId = count;
+                blendEntry->m_iMatrixId = count;
+                count++;
                 goto next;
             }
             if (areBlendedMatricesEqual(blendEntry, &slots[k], 0, 0, 0)) {
@@ -12020,14 +12023,14 @@ extern int D_004A5B84;
 extern sDrawState sDrawState_s_defaultDrawState_rs __asm__("sDrawState_s_defaultDrawState");
 
 extern "C" void cPS2GraphicsMan_computeMatrices(cPS2GraphicsMan* self);
-extern "C" void cPS2GraphicsMan_sendWakeRibbon(void* self, void* a, void* b, void* c, void* d, int i0, int i1, float f0, float f1);
+extern "C" void cPS2GraphicsMan_sendWakeRibbon(cPS2GraphicsMan* self, tBoardWakeVertex** verts, int start, int ring,
+                                               int count, int i0, int i1, float f0, float f1);
 
 /**
  * Draws a board's snow wake.
  *
  * Sets the wake render mode, clears the 0x30-byte scratch at D_004A5B84 and calls cPS2GraphicsMan_sendWakeRibbon for each pair of
- * adjacent segments (0-1, 1-2, ...), then queues the packet on the render ring. The C declares the three index
- * arguments as pointers; they are ints passed straight through.
+ * adjacent segments (0-1, 1-2, ...), then queues the packet on the render ring.
  *
  * @param verts  the wake vertices, one array per segment
  * @param numSegmentsWide  the number of segments across
@@ -12038,22 +12041,23 @@ extern "C" void cPS2GraphicsMan_sendWakeRibbon(void* self, void* a, void* b, voi
  * @param alphaDelta  the alpha change along the strip
  */
 // PORT: uncached (0x30000000) pointers held in int.
-extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* verts, int numSegmentsWide, void* startIndex, void* numIndices, void* stripLength, float alphaMultiplier, float alphaDelta)
+void cPS2GraphicsMan::RenderBoardWake(tBoardWakeVertex** verts, int numSegmentsWide, int startIndex, int numIndices,
+                                      int stripLength, float alphaMultiplier, float alphaDelta)
 {
-    self->m_pCurrentDrawState->m_bitGroups[0] = (((int)(self->m_pCurrentDrawState)->m_bitGroups[0]) & ~0x3C0) | 0xC0;
-    (*(int*)&self->m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
-    if (self->mMatricesValid == 0) {
-        self->computeMatrices();
+    m_pCurrentDrawState->m_bitGroups[0] = (((int)(m_pCurrentDrawState)->m_bitGroups[0]) & ~0x3C0) | 0xC0;
+    (*(int*)&m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
+    if (mMatricesValid == 0) {
+        computeMatrices();
     }
-    unsigned int buf = self->mVifCursor;
+    unsigned int buf = mVifCursor;
     MEM_fill((void*)D_004A5B84, 0, 0x30);
     int i;
     for (i = 0; i < numSegmentsWide - 1; i++) {
-        cPS2GraphicsMan_sendWakeRibbon(self, verts, startIndex, numIndices, stripLength, i, i + 1, alphaMultiplier, alphaDelta);
+        cPS2GraphicsMan_sendWakeRibbon(this, verts, startIndex, numIndices, stripLength, i, i + 1, alphaMultiplier, alphaDelta);
     }
-    cPS2DeferManager* ring = self->mpDeferMan;
-    unsigned int next = self->mVifCursor;
-    sDrawState* rs = self->m_pCurrentDrawState;
+    cPS2DeferManager* ring = mpDeferMan;
+    unsigned int next = mVifCursor;
+    sDrawState* rs = m_pCurrentDrawState;
     if (ring->mNumSubmitDMA < 2600) {
         rs->m_bitGroups[2] = (((int)rs->m_bitGroups[2]) & ~0x1F) | (ring->mActivePortIndex & 0x1F);
         int key = ring->mActiveViewIndex;
@@ -12064,10 +12068,10 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(cPS2GraphicsMan* self, void* ver
         ringEntry->mViewIndex = key;
         ringEntry->mContinuation = 0;
     }
-    self->mVifCursor += 0x10;
-    (*(int*)&self->m_pCurrentDrawState->m_bitGroups[0]) &= ~0x3C0;
-    (*(int*)&self->m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
-    *(self->m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs;
+    mVifCursor += 0x10;
+    (*(int*)&m_pCurrentDrawState->m_bitGroups[0]) &= ~0x3C0;
+    (*(int*)&m_pCurrentDrawState->m_bitGroups[3]) &= 0xC0000000;
+    *(m_pCurrentDrawState) = sDrawState_s_defaultDrawState_rs;
 }
 #endif
 
@@ -12251,15 +12255,15 @@ extern "C" int fptoui(float f);
  * Sets the screen clear colour: mClearColour (+0x6AE0) = the colour's r, g, b times 255 converted (fptoui) and
  * packed as 0x00BBGGRR.
  *
- * @param col  the colour as three floats in 0..1 (On Tour col)
+ * @param col  the colour (R, G, B in 0..1)
  */
-extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, const float* col)
+void cPS2GraphicsMan::SetScreenClearColour(const tRGB& col)
 {
     float k = 255.0f;
-    int packed = fptoui(col[0] * k);
-    packed |= fptoui(col[1] * k) << 8;
-    packed |= fptoui(col[2] * k) << 16;
-    self->mClearColour = packed;
+    int packed = fptoui(col.R * k);
+    packed |= fptoui(col.G * k) << 8;
+    packed |= fptoui(col.B * k) << 16;
+    mClearColour = packed;
 }
 #endif
 

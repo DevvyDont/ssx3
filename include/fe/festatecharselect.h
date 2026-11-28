@@ -46,6 +46,8 @@ struct cFEStateCharSelect : public cUIState {
     void updateWidget(signed char rider, signed char charID) __asm__("cFEStateCharSelect_updateWidget");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateCharSelect_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int event) __asm__("cFEStateCharSelect_onWidgetEvent");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEStateCharSelect_onGainFocus");
+    virtual void onRender2D() __asm__("cFEStateCharSelect_onRender2D__FPv");
 };
 
 CHECK_OFFSET(cFEStateCharSelect, mpSelectedCharWidget, 0x048);
@@ -122,6 +124,8 @@ struct cFEStateCheatCharSelect : public cFEState {
     virtual void onCreateScreen() __asm__("cFEStateCheatCharSelect_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* menu, unsigned int msg) __asm__("cFEStateCheatCharSelect_onWidgetEvent");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateCheatCharSelect_onWidgetCreate");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int msg, unsigned int value)
+        __asm__("cFEStateCheatCharSelect_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateCheatCharSelect, mpArrowPrev, 0x048);

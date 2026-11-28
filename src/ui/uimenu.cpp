@@ -342,17 +342,17 @@ extern "C" void cUIScrollBar_setValues(void* p, unsigned char a, unsigned char b
  * @param x  parent x offset
  * @param y  parent y offset
  */
-extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
+void cUIMenu::render2D(float x, float y)
 {
-    void* scrollBar = self->mpScrollBar;
+    void* scrollBar = mpScrollBar;
     if (scrollBar != 0) {
-        cUIScrollBar_setValues(scrollBar, self->mScrollItemOffset, self->mScrollItemNumVisible, self->mScrollItemNum);
+        cUIScrollBar_setValues(scrollBar, mScrollItemOffset, mScrollItemNumVisible, mScrollItemNum);
     }
-    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    cUIThing* n = (cUIThing*)cList_first((cList*)&mList);
     if (((void*)n) != 0) {
         do {
             if ((n->mAttr >> 6) & 1) {
-                n->render2D(self->mPosition.x + x, self->mPosition.y + y);
+                n->render2D(mPosition.x + x, mPosition.y + y);
             }
             n = (cUIThing*)((void*)n->mpNext);
         } while (!cListNode_isSentinel((cListNode*)n));
@@ -532,13 +532,10 @@ INCLUDE_ASM("ui/uimenu", cUIPair_setUIData__FPv);
 #ifdef SKIP_ASM
 /**
  * Sets the pair's UI data using the base cUIThing_setUIData().
- *
- * @return the result of cUIThing_setUIData()
  */
-void* cUIPair_setUIData(void* vself)
+void cUIPair::setUIData(tUIBaseObject*)
 {
-    cUIPair* self = (cUIPair*)vself;
-    return cUIThing_setUIData(self);
+    cUIThing_setUIData(this);
 }
 #endif
 
@@ -678,7 +675,7 @@ class cUIPair_traverseFlat_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int onListNode(void*);
+    virtual void* onListNode(void*);
 };
 
 /**
@@ -687,13 +684,13 @@ public:
  * Returns the operator's onListNode (vtable slot 2 of the operator, whose vtable pointer is its first word) for
  * the pair, the same as cListNode's own traverseFlat.
  *
- * @param self    the pair
- * @param obj  the list operator (On Tour: pOperator)
+ * @param pOperator  the list operator (On Tour: pOperator)
  * @return the operator's onListNode result
  */
-extern "C" int cUIPair_traverseFlat(cUIPair* self, cUIPair_traverseFlat_cVirt* obj)
+void* cUIPair::traverseFlat(cListOperator* pOperator)
 {
-    return obj->onListNode(self);
+    cUIPair_traverseFlat_cVirt* obj = (cUIPair_traverseFlat_cVirt*)pOperator;
+    return obj->onListNode(this);
 }
 #endif
 

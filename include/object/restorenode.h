@@ -44,6 +44,7 @@ struct cRestoreNode : public cInstanceNode {
     // vtable out of the units defining the other overrides
     virtual void expire(int) __asm__("cRestoreNode_expire__FPv");
     virtual void signal(int, float) __asm__("cRestoreNode_signal__FPv");
+    virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cRestoreNode_writeToReplayFrame__FPv");
 };
 
 CHECK_SIZE(cRestoreNode, 0x1C);

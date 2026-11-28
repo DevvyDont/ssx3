@@ -109,6 +109,10 @@ struct cBoostNode : public cInstanceNode {
     void applyBoost(cBeing* obj) __asm__("cBoostNode_applyBoost");
     void boostStart() __asm__("cBoostNode_boostStart__FPv");
     void boostEnd() __asm__("cBoostNode_boostEnd__FPv");
+    // update stays a C function (cBoostNode_update): declared first, it is the vtable's key function, which keeps the
+    // vtable out of the units defining the other overrides
+    virtual void update() __asm__("cBoostNode_update");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cBoostNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cBoostNode, unk_01C, 0x1C);

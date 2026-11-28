@@ -1250,43 +1250,43 @@ static inline float fabs_34CE48(float x)
  * of a
  * swing the amplitude halves; once it and the angle are near 0 the node expires (slot 34).
  */
-extern "C" void cFenceNode_update(cFenceNode* self)
+void cFenceNode::update()
 {
-    if (self->NextPropTime > 0) {
-        if (--self->NextPropTime == 0) {
-            self->makeNeighbour((tInstanceRecord*)self->NextInstance, 1);
+    if (NextPropTime > 0) {
+        if (--NextPropTime == 0) {
+            makeNeighbour((tInstanceRecord*)NextInstance, 1);
         }
     }
-    if (self->PrevPropTime > 0) {
-        if (--self->PrevPropTime == 0) {
-            self->makeNeighbour((tInstanceRecord*)self->PrevInstance, 0);
+    if (PrevPropTime > 0) {
+        if (--PrevPropTime == 0) {
+            makeNeighbour((tInstanceRecord*)PrevInstance, 0);
         }
     }
-    cFenceNodeState* state = (cFenceNodeState*)&self->FenceData; // the cFenceNodeState part (+0x1C)
-    self->Force += self->ForceStep;
-    if (self->ForceMax < 0.01f && fabs_34CE48(state->Force) < 0.01f) {
-        self->expire(1);
+    cFenceNodeState* state = (cFenceNodeState*)&FenceData; // the cFenceNodeState part (+0x1C)
+    Force += ForceStep;
+    if (ForceMax < 0.01f && fabs_34CE48(state->Force) < 0.01f) {
+        expire(1);
         return;
     }
-    if (0.0f <= self->ForceStep) {
-        if (self->Force >= self->ForceMax) {
-            float amplitude = self->ForceMax;
-            self->Force = amplitude;
+    if (0.0f <= ForceStep) {
+        if (Force >= ForceMax) {
+            float amplitude = ForceMax;
+            Force = amplitude;
             float halfAmp = amplitude * 0.5f;
-            self->ForceMax = halfAmp;
-            self->ForceStep = -halfAmp * 0.1f;
+            ForceMax = halfAmp;
+            ForceStep = -halfAmp * 0.1f;
         }
     } else {
-        float amplitude = self->ForceMax;
+        float amplitude = ForceMax;
         float na = -amplitude;
-        if (self->Force <= na) {
-            self->Force = na;
+        if (Force <= na) {
+            Force = na;
             float halfAmp = amplitude * 0.5f;
-            self->ForceMax = halfAmp;
-            self->ForceStep = halfAmp * 0.1f;
+            ForceMax = halfAmp;
+            ForceStep = halfAmp * 0.1f;
         }
     }
-    self->updateGrid();
+    updateGrid();
 }
 #endif
 

@@ -106,15 +106,12 @@ INCLUDE_ASM("object/debouncenode", cDebounceNode_signal__FPv);
 /**
  * Passes a signal to the base cMoveNode_signal(), which forwards it to the node's modifier block if it has one.
  *
- * Only @p self is declared; the signal's further arguments reach cMoveNode_signal() unchanged in their
+ * The signal's arguments are not passed on explicitly; they reach cMoveNode_signal() unchanged in their
  * registers.
- *
- * @return no meaningful value (cMoveNode_signal() returns nothing)
  */
-void* cDebounceNode_signal(void* vself)
+void cDebounceNode::signal(int, float)
 {
-    cDebounceNode* self = (cDebounceNode*)vself;
-    return cMoveNode_signal(self);
+    cMoveNode_signal(this);
 }
 #endif
 
@@ -175,11 +172,11 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cDebounceNode_writeToReplayFrame(cDebounceNode* self, cBxReplayFrame* stream)
+void cDebounceNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cMoveNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->Life, 4);
-    stream->write((const char*)&self->Type, 4);
+    cMoveNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&Life, 4);
+    stream->write((const char*)&Type, 4);
 }
 #endif
 
@@ -657,10 +654,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cConveyorNode_writeToReplayFrame(cConveyorNode* self, cBxReplayFrame* stream)
+void cConveyorNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cInstanceNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->Vel, 44);
+    cInstanceNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&Vel, 44);
 }
 #endif
 
@@ -831,10 +828,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cCounterNode_writeToReplayFrame(cCounterNode* self, cBxReplayFrame* stream)
+void cCounterNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cInstanceNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->Count, 0x8);
+    cInstanceNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&Count, 0x8);
 }
 #endif
 

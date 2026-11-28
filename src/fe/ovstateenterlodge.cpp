@@ -83,14 +83,11 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onDestroyScreen__FPv);
 #ifdef SKIP_ASM
 /**
  * Destroys the enter-lodge overlay's screens: clears the word at +0x50, then runs cOVState_onDestroyScreen().
- *
- * @return cOVState_onDestroyScreen()'s return value (On Tour's returns nothing)
  */
-void* cOVState_ENTERLODGE_onDestroyScreen(void* vself)
+void cOVState_ENTERLODGE::onDestroyScreen()
 {
-    cOVState_ENTERLODGE* self = (cOVState_ENTERLODGE*)vself;
-    self->mRestoreCutSceneMode = 0;
-    return cOVState_onDestroyScreen(self);
+    mRestoreCutSceneMode = 0;
+    cOVState_onDestroyScreen(this);
 }
 #endif
 

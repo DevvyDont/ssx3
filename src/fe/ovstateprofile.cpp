@@ -32,17 +32,17 @@ extern char str_121Profilesave_pda[];
  *
  * Adds the PDA template, numbers the slots (initGeneral) and runs cOVState_onCreateScreen.
  */
-extern "C" void cOVState_PROFILE_onCreateScreen(cOVState_PROFILE* self)
+void cOVState_PROFILE::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_121Profilesave_pda), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_121Profilesave_pda), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVStateManager_addPDATemplate();
-    self->initGeneral();
-    cOVState_onCreateScreen(self);
+    initGeneral();
+    cOVState_onCreateScreen(this);
 }
 #endif
 
@@ -251,25 +251,25 @@ extern char str_ps2sq_b[];
  *
  * @param show  nonzero hides the buttons (On Tour bHide): despite its name a true value means hidden
  */
-extern "C" void cOVState_PROFILE_hideActionButtons(cOVState_PROFILE* self, bool show)
+void cOVState_PROFILE::hideActionButtons(bool show)
 {
     bool on = true;
-    if (self->mIsOn != 0) {
+    if (mIsOn != 0) {
         on = show;
     }
-    if (self->mIsHidden != on) {
+    if (mIsHidden != on) {
         int off = !on;
-        cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
+        cUIThing* xButton = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x_b));
         if (xButton != 0) {
             xButton->setVisible(off);
         }
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(off);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_delete_text))->setVisible(off);
-        cUIThing* squareButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b));
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_x_save))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_delete_text))->setVisible(off);
+        cUIThing* squareButton = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq_b));
         if (squareButton != 0) {
             squareButton->setVisible(off);
         }
-        self->mIsHidden = on;
+        mIsHidden = on;
     }
 }
 #endif
@@ -291,11 +291,11 @@ extern char str_ps2sq_b[];
  *
  * @param on  nonzero hides the button (On Tour bHide)
  */
-extern "C" void cOVState_PROFILE_hideDeleteButton(cOVState_PROFILE* self, bool on)
+void cOVState_PROFILE::hideDeleteButton(bool on)
 {
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_delete_text))->setVisible(!on);
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(!on);
-    self->mDeleteButtonActive = !on;
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_delete_text))->setVisible(!on);
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(!on);
+    mDeleteButtonActive = !on;
 }
 #endif
 
@@ -317,11 +317,11 @@ extern char str_x_save[];
  * @param loadBlocked  unused (On Tour bLoadHide)
  * @param on  nonzero hides the button (On Tour bSaveHide)
  */
-extern "C" void cOVState_PROFILE_hideMainButton(cOVState_PROFILE* self, int loadBlocked, bool on)
+void cOVState_PROFILE::hideMainButton(bool loadBlocked, bool on)
 {
-    cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(!on);
-    self->mMainButtonActive = !on;
+    cUIThing* xButton = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x_b));
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_x_save))->setVisible(!on);
+    mMainButtonActive = !on;
     xButton->setVisible(!on);
 }
 #endif
@@ -366,11 +366,10 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_onDestroyScreen__FPv);
  * The teardown, cFEMemCard_onDestroyScreen(), calls helpers of back-end interface 5, runs three memory card manager calls
  * when its word at +0x434 is set, and frees the buffer at +0x1D4 when one is held.
  */
-void cOVState_PROFILE_onDestroyScreen(void* vself)
+void cOVState_PROFILE::onDestroyScreen()
 {
-    cOVState_PROFILE* self = (cOVState_PROFILE*)vself;
-    cFEMemCard_onDestroyScreen(self);
-    self->mpKeyboard = 0;
+    cFEMemCard_onDestroyScreen(this);
+    mpKeyboard = 0;
 }
 #endif
 
@@ -390,7 +389,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  * @param key  the menu event
  * @return 0x100 or 0x101 as above
  */
-extern "C" int cOVState_PROFILE_onWidgetMenu(cOVState_PROFILE* self, int menu, unsigned int key)
+int cOVState_PROFILE::onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
 {
     cMCOverlayManager* mgr = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
     switch (key) {
@@ -639,15 +638,15 @@ extern char str_122Autosave[];
 /**
  * Creates the autosave overlay screen ("122Autosave") and runs the common overlay set-up.
  */
-extern "C" void cOVState_AUTOSAVE_onCreateScreen(cOVState_AUTOSAVE* self)
+void cOVState_AUTOSAVE::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_122Autosave), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_122Autosave), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
 }
 #endif
 
@@ -670,25 +669,25 @@ extern "C" void cFEMemCard_onUpdate(void* self);
  */
 // cOVState_AUTOSAVE::onUpdate (On Tour name); cFEMemCard fields: 0x1A8 mIsProcessing, 0x1C0 mState,
 // 0x1DC mIsSavePressed, 0x1E4 mIsCancelPressed, 0x1F0 mIsOverwriteOK.
-extern "C" void cOVState_AUTOSAVE_onUpdate(cOVState_AUTOSAVE* self)
+void cOVState_AUTOSAVE::onUpdate()
 {
     cMCOverlayManager* pMC = (cMCOverlayManager*)cSSXApp_getMCManager(SSXApp);
-    if (self->mState == cFEMemCard::kCHECKING && !self->mIsProcessing) {
+    if (mState == cFEMemCard::kCHECKING && !mIsProcessing) {
         cMCOverlayManager_writeSetFileType(pMC, 1, 0);
-        self->mIsProcessing = 1;
-        self->mIsSavePressed = 1;
-        self->mIsOverwriteOK = 1;
-        self->mState = cFEMemCard::kSAVING;
-    } else if (self->mState == cFEMemCard::kSAVING) {
+        mIsProcessing = 1;
+        mIsSavePressed = 1;
+        mIsOverwriteOK = 1;
+        mState = cFEMemCard::kSAVING;
+    } else if (mState == cFEMemCard::kSAVING) {
         if (!pMC->mDevices[pMC->mSelectedDevice].bPluggedIn || !pMC->mDevices[pMC->mSelectedDevice].bValid
             || !pMC->mDevices[pMC->mSelectedDevice].bFormatted) {
-            self->mIsSavePressed = 0;
-            self->mIsCancelPressed = 1;
-            self->mIsProcessing = 0;
-            self->mState = cFEMemCard::kDONE;
+            mIsSavePressed = 0;
+            mIsCancelPressed = 1;
+            mIsProcessing = 0;
+            mState = cFEMemCard::kDONE;
         }
     }
-    cFEMemCard_onUpdate(self);
+    cFEMemCard_onUpdate(this);
 }
 #endif
 
@@ -836,18 +835,18 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * code): 1 exits the game, 6 pushes cFEStateTitle, 7 pushes cFEStateLodge, 0 sets up a new race (game mode 4,
  * event 0xC, the last hub into newRace.iLocationIdx, cBENewRaceInterface_bIsBamLocation = 1) and makes cPreGameLoadScreen the next module.
  */
-extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
+void cOVState_AUTOSAVE::onDestroyScreen()
 {
-    cFEMemCard_onDestroyScreen(self);
-    int parentScreen = self->mParentScreen;
+    cFEMemCard_onDestroyScreen(this);
+    int parentScreen = mParentScreen;
     if (parentScreen == 1) {
         cGame_exit(SSXApp->Game, 0);
     } else if (parentScreen == 6) {
-        void* nextState = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle_b, 0, 0), self->mpEngine);
-        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+        void* nextState = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle_b, 0, 0), mpEngine);
+        cUIStateStack_push(&mpEngine->mStateStack, nextState);
     } else if (parentScreen == 7) {
-        void* nextState = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge_b, 0, 0), self->mpEngine);
-        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+        void* nextState = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge_b, 0, 0), mpEngine);
+        cUIStateStack_push(&mpEngine->mStateStack, nextState);
     } else if (parentScreen == 0) {
         cBENewRaceInterface* race = (cBENewRaceInterface*)cBE_getInterface_Fv(cBE_getBE(), 0);
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);

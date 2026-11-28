@@ -61,20 +61,18 @@ void cFEStateEventSelect::onWidgetCreate(cUIThing*)
 }
 #endif
 
-extern "C" void* cUITemplate_MAP_onGainTransition(void*);
-
 //100%
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onGainTransition__FPv);
 #ifdef SKIP_ASM
 /**
  * Forwards the gain-transition event to the event select state's map template (+0x48).
  *
+ * @param on  the first-time flag, passed on
  * @return cUITemplate_MAP_onGainTransition()'s result
  */
-void* cFEStateEventSelect_onGainTransition(void* vself)
+bool cFEStateEventSelect::onGainTransition(int on)
 {
-    cFEStateEventSelect* self = (cFEStateEventSelect*)vself;
-    return cUITemplate_MAP_onGainTransition(&self->mMap);
+    return mMap.onGainTransition(on);
 }
 #endif
 
@@ -87,10 +85,10 @@ extern "C" void cUITemplate_MAP_onGainFocus(void* tmpl);
 /**
  * Gives focus to the event select state: runs cUIState_onGainFocus(), then the map template's (+0x48) handler.
  */
-extern "C" void cFEStateEventSelect_onGainFocus(cFEStateEventSelect* self)
+void cFEStateEventSelect::onGainFocus(cUIState*)
 {
-    cUIState_onGainFocus(self);
-    cUITemplate_MAP_onGainFocus((char*)&self->mMap);
+    cUIState_onGainFocus(this);
+    cUITemplate_MAP_onGainFocus((char*)&mMap);
 }
 #endif
 
@@ -235,20 +233,18 @@ void cFEStateEventSelect::onWidgetEvent(cUIThing* obj, unsigned int msg)
 //100%
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" int cUITemplate_MAP_onWidgetMenu(void* self, int a1, int a2);
-
 /**
  * Answers a menu event for the event-select screen with 257 when the map template accepts it, else 0.
  *
- * cUITemplate_MAP_onWidgetMenu() on the template at +0x48 rejects events 6, 8 and 9.
+ * The map template's filter (mMap.onWidgetMenu(), cUITemplate_MAP_onWidgetMenu) rejects events 6, 8 and 9.
  *
  * @param menu  the menu
  * @param event  the menu event
  * @return 257 (0x101) when cUITemplate_MAP_onWidgetMenu() returns non-zero, else 0
  */
-extern "C" int cFEStateEventSelect_onWidgetMenu(cFEStateEventSelect* self, int menu, int event)
+int cFEStateEventSelect::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
 {
-    if (cUITemplate_MAP_onWidgetMenu((char*)&self->mMap, menu, event) != 0) {
+    if (mMap.onWidgetMenu(menu, event) != 0) {
         return 257;
     }
     return 0;
@@ -272,19 +268,17 @@ extern "C" void cFEStateEventSelect_onInputBegin(cFEStateEventSelect* self)
 //100%
 INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onInputAlways);
 #ifdef SKIP_ASM
-extern "C" void cUITemplate_MAP_onInputAlways(void* self, int a1);
-// PORT: cUIState_onInputAlways__FPv is called with (self, a1) here; bind the 2-arg form to that symbol.
-void cUIState_onInputAlways_2(void* self, int a1) __asm__("cUIState_onInputAlways__FPv");
+extern "C" void cUITemplate_MAP_onInputAlways(void* self, cUIInput* pInput);
 
 /**
  * Passes the always-on input to the map template (+0x48), then to cUIState's handler.
  *
  * @param pInput  the input object
  */
-extern "C" void cFEStateEventSelect_onInputAlways(cFEStateEventSelect* self, int pInput)
+void cFEStateEventSelect::onInputAlways(cUIInput* pInput)
 {
-    cUITemplate_MAP_onInputAlways((char*)&self->mMap, pInput);
-    cUIState_onInputAlways_2(self, pInput);
+    cUITemplate_MAP_onInputAlways((char*)&mMap, pInput);
+    cUIState::onInputAlways(pInput);
 }
 #endif
 

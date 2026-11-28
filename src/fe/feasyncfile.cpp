@@ -3655,7 +3655,7 @@ void cFEStateNet::onUpdate()
 INCLUDE_ASM("fe/feasyncfile", cFEStateNet_onGainFocus);
 #ifdef SKIP_ASM
 
-extern "C" void cUIState_onGainFocus(void* self, int a1);
+extern "C" void cUIState_onGainFocus(void* self, cUIState* pPrevState);
 
 /**
  * Runs when an online front-end state gets the focus: refreshes the buddy presence and enables event processing.
@@ -3666,12 +3666,12 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  *
  * @param pPrevState  the state that had the focus (On Tour: cUIState* pPrevState)
  */
-extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int pPrevState)
+void cFEStateNet::onGainFocus(cUIState* pPrevState)
 {
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt[32].fn(vthis(self, vt[32]));
-    cUIState_onGainFocus(self, pPrevState);
-    self->mHasFocus = 1;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
+    vt[32].fn(vthis(this, vt[32]));
+    cUIState_onGainFocus(this, pPrevState);
+    mHasFocus = 1;
 }
 #endif
 
@@ -8055,7 +8055,6 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onGainFocus);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int a1);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" void cFEStateChallengePopup_setOptionListBoxes(cFEStateChallengePopup* self, int a1);
 extern "C" void cFEStateChallengePopup_setOptionsLocked(cFEStateChallengePopup* self, int a1);
@@ -8077,35 +8076,35 @@ extern char D_004412B8[];
  *
  * @param pPrevState  the state that had focus before (On Tour pPrevState)
  */
-extern "C" void cFEStateChallengePopup_onGainFocus(cFEStateChallengePopup* self, int pPrevState)
+void cFEStateChallengePopup::onGainFocus(cUIState* pPrevState)
 {
-    cFEStateNet_onGainFocus((cFEStateNet*)self, pPrevState);
+    cFEStateNet::onGainFocus(pPrevState);
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    cUIListBox_setCurrentEntryByIndex(self->mpLBRankedGame, cBENetworkInterface_networkOpt.bIsRankedGame ^ 1);
+    cUIListBox_setCurrentEntryByIndex(mpLBRankedGame, cBENetworkInterface_networkOpt.bIsRankedGame ^ 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (cBENewRaceInterface_newRace.cGameEvent) {
     case 3:
-        self->mpEventOptions = (int*)D_00441288;
+        mpEventOptions = (int*)D_00441288;
         break;
     case 1:
-        self->mpEventOptions = (int*)D_00441278;
+        mpEventOptions = (int*)D_00441278;
         break;
     case 2:
-        self->mpEventOptions = (int*)D_00441298;
+        mpEventOptions = (int*)D_00441298;
         break;
     case 5:
-        self->mpEventOptions = (int*)D_004412A8;
+        mpEventOptions = (int*)D_004412A8;
         break;
     case 4:
-        self->mpEventOptions = (int*)D_004412B8;
+        mpEventOptions = (int*)D_004412B8;
         break;
     case 0:
     default:
-        self->mpEventOptions = (int*)D_00441268;
+        mpEventOptions = (int*)D_00441268;
         break;
     }
-    self->setOptionListBoxes(cBENetworkInterface_networkOpt.bIsRankedGame);
-    self->setOptionsLocked(self->mbChallengeSent);
+    setOptionListBoxes(cBENetworkInterface_networkOpt.bIsRankedGame);
+    setOptionsLocked(mbChallengeSent);
 }
 #endif
 
@@ -8914,13 +8913,13 @@ extern char str_MenuChallenge[];
  *
  * When "staticTextSetchallenge" exists: formats "kT_240WaitingChallenge" (looked up through SSXApp->FELocale's vtable
  * entry 4) with LobbyMan_mLobbyMan->mOpponent into it, sets "TextSubmit" static (not null-checked), selects row 7 of
- * "MenuChallenge" and locks the options (cFEStateChallengePopup_setOptionsLocked(self, 1)).
+ * "MenuChallenge" and locks the options (setOptionsLocked(1)).
  */
-extern "C" void cFEStateChallengePopup_setChallengeSent(cFEStateChallengePopup* self)
+void cFEStateChallengePopup::setChallengeSent()
 {
     char buf[0x400];
-    self->mbChallengeSent = 1;
-    cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_staticTextSetchallenge));
+    mbChallengeSent = 1;
+    cUIText* text = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_staticTextSetchallenge));
     if (text != 0) {
         char* name = LobbyMan_mLobbyMan->mOpponent;
         cFELocale* locale = SSXApp->FELocale;
@@ -8928,10 +8927,10 @@ extern "C" void cFEStateChallengePopup_setChallengeSent(cFEStateChallengePopup* 
         void* obj = vthis(locale, vt[4]);
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(str_kT_240WaitingChallenge)), name);
         cUIText_setUnicodeString(text, buf);
-        cUIText* submitText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit));
+        cUIText* submitText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextSubmit));
         submitText->setStatic(1);
-        cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge)), 7);
-        self->setOptionsLocked(1);
+        cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_MenuChallenge)), 7);
+        setOptionsLocked(1);
     }
 }
 #endif
@@ -10933,34 +10932,34 @@ struct sBlk1B2070 {
 /**
  * Creates the "235chat_room" screen, fills the player list and wires the two scroll bars.
  *
- * Returns when the screen cannot be added. Otherwise plays it, fills the player list (cFEStateChatRoom_refreshPlayerList(self, 1)), shows
+ * Returns when the screen cannot be added. Otherwise plays it, fills the player list (cFEStateChatRoom_refreshPlayerList(this, 1)), shows
  * the player's own info (cFEStateChatRoom_selectPlayerByName with LobbyMan's mPersona), and gives mpTextScrollChat bit 0 of +0x74,
  * cUITextScroll_setInputMap(1), mChatColour (+0xA8) and mpSlider2 (+0xB8). mpSlider2 gets "ChatUpArrow", "ChatDownArrow",
  * "slideroutline2", the highlight names "hlu2" / "hld2" (+0x8C / +0xA5, copied when at most 24 characters) and mode
  * 2; mpSlider1 gets "UpArrow", "DownArrow", "slideroutline1" and mode 2.
  */
-extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
+void cFEStateChatRoom::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_235chat_room), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_235chat_room), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen == 0) {
         return;
     }
     cUIScreen_playFrame(screen, 0, 0);
-    self->refreshPlayerList(1);
-    self->selectPlayerByName(LobbyMan_mLobbyMan->mPersona);
-    self->mpTextScrollChat->mAttrTextScroll.mMode = 1;
-    cUITextScroll_setInputMap(self->mpTextScrollChat, 1);
-    self->mpTextScrollChat->mSelectedColour = self->mChatColour;
-    self->mpTextScrollChat->mpScrollBar = (cUIThing*)self->mpSlider2;
-    cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
-    cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
-    cUIText* hideOnEmpty = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2));
-    self->mpSlider2->mpUpArrow = (cUIThing*)uiText;
-    self->mpSlider2->mpDownArrow = (cUIThing*)downArrow;
+    refreshPlayerList(1);
+    selectPlayerByName(LobbyMan_mLobbyMan->mPersona);
+    mpTextScrollChat->mAttrTextScroll.mMode = 1;
+    cUITextScroll_setInputMap(mpTextScrollChat, 1);
+    mpTextScrollChat->mSelectedColour = mChatColour;
+    mpTextScrollChat->mpScrollBar = (cUIThing*)mpSlider2;
+    cUIText* uiText = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ChatUpArrow));
+    cUIText* downArrow = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ChatDownArrow));
+    cUIText* hideOnEmpty = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_slideroutline2));
+    mpSlider2->mpUpArrow = (cUIThing*)uiText;
+    mpSlider2->mpDownArrow = (cUIThing*)downArrow;
     {
-        cUIScrollBar* slider2 = self->mpSlider2;
+        cUIScrollBar* slider2 = mpSlider2;
         if ((unsigned int)strlen(str_hlu2) > 24) {
             slider2->mszUpAnimation[0] = 0;
         } else {
@@ -10968,7 +10967,7 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
         }
     }
     {
-        cUIScrollBar* slider2 = self->mpSlider2;
+        cUIScrollBar* slider2 = mpSlider2;
         if ((unsigned int)strlen(str_hld2) > 24) {
             slider2->mszDownAnimation[0] = 0;
         } else {
@@ -10976,15 +10975,15 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
         }
     }
     int two = 2;
-    self->mpSlider2->mpHideOnEmpty = (cUIThing*)hideOnEmpty;
-    self->mpSlider2->meHideState = two;
-    cUIText* upArrow1 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_UpArrow));
-    cUIText* downArrow1 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_DownArrow));
-    cUIText* outline1 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline1));
-    self->mpSlider1->mpUpArrow = (cUIThing*)upArrow1;
-    self->mpSlider1->mpDownArrow = (cUIThing*)downArrow1;
-    self->mpSlider1->mpHideOnEmpty = (cUIThing*)outline1;
-    self->mpSlider1->meHideState = two;
+    mpSlider2->mpHideOnEmpty = (cUIThing*)hideOnEmpty;
+    mpSlider2->meHideState = two;
+    cUIText* upArrow1 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_UpArrow));
+    cUIText* downArrow1 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_DownArrow));
+    cUIText* outline1 = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_slideroutline1));
+    mpSlider1->mpUpArrow = (cUIThing*)upArrow1;
+    mpSlider1->mpDownArrow = (cUIThing*)downArrow1;
+    mpSlider1->mpHideOnEmpty = (cUIThing*)outline1;
+    mpSlider1->meHideState = two;
 }
 #endif
 
@@ -11751,17 +11750,16 @@ bool cFEStateChatRoom::onGainTransition(int bFirstTime)
 INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cFEStateChatRoom_updateQualityIcons(cFEStateChatRoom* self);
-extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int a1);
 
 /**
  * Refreshes the connection-quality icons (cFEStateChatRoom_updateQualityIcons), then runs the cFEStateNet onGainFocus (cFEStateNet_onGainFocus).
  *
  * @param pPrevState  the state that had focus before (On Tour pPrevState)
  */
-extern "C" void cFEStateChatRoom_onGainFocus(cFEStateChatRoom* self, int pPrevState)
+void cFEStateChatRoom::onGainFocus(cUIState* pPrevState)
 {
-    self->updateQualityIcons();
-    cFEStateNet_onGainFocus((cFEStateNet*)self, pPrevState);
+    updateQualityIcons();
+    cFEStateNet::onGainFocus(pPrevState);
 }
 #endif
 
@@ -12892,16 +12890,16 @@ extern char str_kT_MEMFECheckingCardPS2[];
  *
  * @param cardSlot  slot number shown (1 or 2)
  */
-extern "C" void cFEStateNetConfig_showCheckingCardPopup(cFEStateNetConfig* self, int cardSlot)
+void cFEStateNetConfig::showCheckingCardPopup(int cardSlot)
 {
     char buf[32];
-    char* str = (char*)&self->mustrPopupText;
+    char* str = (char*)&mustrPopupText;
     usprintf(buf, str_pct_d_b, cardSlot);
     cFELocale* locale = SSXApp->FELocale;
     sVEntry<int(void* self, int hash)>* vt = (sVEntry<int(void* self, int hash)>*)VPTR_OF(cUILocaleInterface, locale);
     void* obj = vthis(locale, vt[4]);
     sprintf1(str, vt[4].fn(obj, GetHashValue32(str_kT_MEMFECheckingCardPS2)), buf);
-    cScreenPopup* popup = (cScreenPopup*)self->createPopup();
+    cScreenPopup* popup = (cScreenPopup*)createPopup();
     // stores
     popup->info.meType = 0;
     popup->info.mtMessage.pustr = (const unsigned short*)str;
@@ -12911,7 +12909,7 @@ extern "C" void cFEStateNetConfig_showCheckingCardPopup(cFEStateNetConfig* self,
     popup->info.mbReceivePrev = 0;
     popup->info.miDefaultOption = 0;
     // end
-    self->showPopup(popup);
+    showPopup(popup);
 }
 #endif
 
@@ -13067,7 +13065,7 @@ void cFEStateNetConfig::onCardErrorPopupEvent(cUIState* popup, unsigned int even
     case cUIState::kONSCREENPOPUPOPTION0:
         D_004A1B80 = 0;
         miResult = 1;
-        cFEStateNetConfig_showCheckingCardPopup(this, 1);
+        this->showCheckingCardPopup(1);
         miState = 1;
         break;
     case cUIState::kONSCREENPOPUPOPTION1:
@@ -13137,7 +13135,7 @@ void cFEStateNetConfig::loadConfigs()
     if (miNumSettings <= 0) {
         if (D_004A1B80 == 0) {
             D_004A1B80 = 1;
-            cFEStateNetConfig_showCheckingCardPopup(this, 2);
+            this->showCheckingCardPopup(2);
             miState = 1;
             miResult = miNumSettings;
             return;
@@ -13318,7 +13316,7 @@ void cFEStateNetConfig::rescanConfigs(int ignored)
     self->miResult = 1;
     cUIListBox_deleteAllEntries(((void*)self->mpLBAdapters));
     cUIListBox_deleteAllEntries(((void*)self->mpLBSettings));
-    cFEStateNetConfig_showCheckingCardPopup(this, 1);
+    this->showCheckingCardPopup(1);
     self->miState = 1;
 }
 #endif
@@ -14348,7 +14346,7 @@ public:
     virtual int v21(int, int);
     virtual int v22(int, int);
     virtual int v23(int, int);
-    virtual int handleEvent(int, int);
+    virtual int handleEvent(int, void*);
 };
 
 /**
@@ -14362,9 +14360,9 @@ public:
  * @param pParam  event parameter (On Tour: pParam)
  * @return the parent state's handleEvent result
  */
-extern "C" int cFEStateAuthDNAS_handleEvent(cFEStateAuthDNAS* self, int msg, int pParam)
+int cFEStateAuthDNAS::handleEvent(int msg, void* pParam)
 {
-    return ((cFEStateAuthDNAS_handleEvent_cObj*)self->mpParentState)->handleEvent(msg, pParam);
+    return ((cFEStateAuthDNAS_handleEvent_cObj*)mpParentState)->handleEvent(msg, pParam);
 }
 #endif
 
@@ -14575,18 +14573,15 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 
 /**
  * Creates and plays the "207DNASerror" screen.
- *
- * @return cUIScreen_playFrame's result, or 0 when the screen could not be added
  */
-extern "C" void* cFEStateAuthDNASError_onCreateScreen(cFEStateAuthDNASError* self)
+void cFEStateAuthDNASError::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)self), GetHashValue32(str_207DNASerror), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((cFEStateNet*)this), GetHashValue32(str_207DNASerror), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         screen = cUIScreen_playFrame(screen, 0, 0);
     }
-    return screen;
 }
 #endif
 
@@ -14712,7 +14707,7 @@ public:
     virtual int v21(int, int);
     virtual int v22(int, int);
     virtual int v23(int, int);
-    virtual int handleEvent(int, int);
+    virtual int handleEvent(int, void*);
 };
 
 /**
@@ -14726,9 +14721,9 @@ public:
  * @param pParam  event parameter (On Tour: pParam)
  * @return the parent state's handleEvent result
  */
-extern "C" int cFEStateAuthDNASError_handleEvent(cFEStateAuthDNASError* self, int msg, int pParam)
+int cFEStateAuthDNASError::handleEvent(int msg, void* pParam)
 {
-    return ((cFEStateAuthDNASError_handleEvent_cObj*)self->mpParentState)->handleEvent(msg, pParam);
+    return ((cFEStateAuthDNASError_handleEvent_cObj*)mpParentState)->handleEvent(msg, pParam);
 }
 #endif
 
@@ -14895,13 +14890,10 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetAccountMem_onCreateScreen__FPv);
 #ifdef SKIP_ASM
 /**
  * Creates the account popup's screen: the cFEBlankPopup handler (cFEBlankPopup_onCreateScreen) adds and plays its blank screen.
- *
- * @return cFEBlankPopup_onCreateScreen()'s result (its value is not meaningful; declared void* by the unit)
  */
-void* cFEStateNetAccountMem_onCreateScreen(void* vself)
+void cFEStateNetAccountMem::onCreateScreen()
 {
-    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
-    return cFEBlankPopup_onCreateScreen((cFEStateNet*)self);
+    cFEBlankPopup_onCreateScreen((cFEStateNet*)this);
 }
 #endif
 
@@ -16146,7 +16138,7 @@ public:
     virtual int v21(int, int);
     virtual int v22(int, int);
     virtual int v23(int, int);
-    virtual int handleEvent(int, int);
+    virtual int handleEvent(int, void*);
 };
 
 /**
@@ -16160,9 +16152,9 @@ public:
  * @param pParam  event parameter (On Tour: pParam)
  * @return the parent state's handleEvent result
  */
-extern "C" int cFEStateNetAccountMem_handleEvent(cFEStateNetAccountMem* self, int msg, int pParam)
+int cFEStateNetAccountMem::handleEvent(int msg, void* pParam)
 {
-    return ((cFEStateNetAccountMem_handleEvent_cObj*)self->mpParentState)->handleEvent(msg, pParam);
+    return ((cFEStateNetAccountMem_handleEvent_cObj*)mpParentState)->handleEvent(msg, pParam);
 }
 #endif
 
@@ -19570,7 +19562,7 @@ bool cFEStateLobbyMenu::onGainTransition(int reset)
         mbRoomChanged = 0;
         this->rebuildChannelLists();
         this->updatePlayerScrollArrows();
-        cFEStateLobbyMenu_selectChannelRoom(this, mpChannelPair[0]);
+        this->selectChannelRoom(mpChannelPair[0]);
     } else if (mbRoomChanged != 0) {
         this->rebuildChannelLists();
         int cur = miSelectedChannel;
@@ -19583,7 +19575,7 @@ bool cFEStateLobbyMenu::onGainTransition(int reset)
             cUIListBox_setCurrentEntryByIndex(list, *(unsigned char*)&miSelectedRoom);
         }
         cUIMenu_setSelectedByIndex(mpMenuRoomMenus, miSelectedChannel);
-        cFEStateLobbyMenu_selectChannelRoom(this, mpChannelPair[miSelectedChannel]);
+        this->selectChannelRoom(mpChannelPair[miSelectedChannel]);
         this->updatePlayerScrollArrows();
         cFEStateLobbyMenu_showChannelArrow_1BDC18(this, mpChannelPair[miSelectedChannel]);
     }
@@ -20270,7 +20262,7 @@ int cFEStateLobbyMenu::onWidgetMenu(cUIMenu* obj, unsigned int msg, unsigned int
     if (((void*)obj) == (void*)mpMenuRoomMenus) {
         if (msg == cUIMenu::kSCROLLCHANGE) {
             cFEStateLobbyMenu_showChannelArrow_1BDC18(this, obj->mpSelected);
-            cFEStateLobbyMenu_selectChannelRoom(this, obj->mpSelected);
+            this->selectChannelRoom(obj->mpSelected);
             return 257;
         }
         return 257;
@@ -20700,26 +20692,26 @@ extern char str_kT_231PlayersInRoom[];
  *
  * @param id  a channel pair widget, as stored in mpChannelPair
  */
-extern "C" void cFEStateLobbyMenu_selectChannelRoom(cFEStateLobbyMenu* self, cUIThing* id)
+void cFEStateLobbyMenu::selectChannelRoom(cUIThing* id)
 {
     int sel = -1;
     int i;
     for (i = 0; i < 4; i++) {
-        if (id == self->mpChannelPair[i]) {
-            cUIListBox* box = self->mpChannelList[i];
+        if (id == mpChannelPair[i]) {
+            cUIListBox* box = mpChannelList[i];
             if (box->mNumEntries != 0) {
                 sel = cUIListBox_getCurrentEntryData(box);
                 int on = LobbyMan_isRoomLocked(LobbyMan_mLobbyMan, sel);
-                self->mpChannelLock[i]->setVisible(on);
+                mpChannelLock[i]->setVisible(on);
             }
         } else {
-            self->mpChannelLock[i]->setVisible(0);
+            mpChannelLock[i]->setVisible(0);
         }
     }
     if (sel != -1) {
-        self->miRoomId = sel;
-        self->miFirstPlayer = 0;
-        cFEStateLobbyMenu_redrawPlayerList_2(self, sel);
+        miRoomId = sel;
+        miFirstPlayer = 0;
+        cFEStateLobbyMenu_redrawPlayerList_2(this, sel);
         LobbyMan_peekRoom(LobbyMan_mLobbyMan, sel);
     } else {
         char buf[80];
@@ -20727,8 +20719,8 @@ extern "C" void cFEStateLobbyMenu_selectChannelRoom(cFEStateLobbyMenu* self, cUI
         sVEntry<int(void* self, int hash)>* vt = (sVEntry<int(void* self, int hash)>*)VPTR_OF(cUILocaleInterface, feLocale);
         void* obj = vthis(feLocale, vt[4]);
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(str_kT_231PlayersInRoom)), 0);
-        cUIText_setUnicodeString(self->mpText3InRoom, buf);
-        cFEStateLobbyMenu_redrawPlayerList_2(self, -1);
+        cUIText_setUnicodeString(mpText3InRoom, buf);
+        cFEStateLobbyMenu_redrawPlayerList_2(this, -1);
         LobbyMan_peekRoom(LobbyMan_mLobbyMan, -1);
     }
 }
@@ -23275,19 +23267,18 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * Hands a popup's event on the quick-match popup to cFEStateNetQuickPlayPopup_onTimeoutPopupEvent for popup id 0x82F, else to the cFEStateNet
  * handler.
  *
- * @param pPopup  the popup state that sent the event (On Tour pPopup)
+ * @param popup  the popup state that sent the event (On Tour pPopup)
  * @param Event  the popup event (On Tour Event)
- * @return the handler's result (On Tour's onPopupEvent returns void)
  */
-extern "C" int cFEStateNetQuickPlayPopup_onPopupEvent(cFEStateNetQuickPlayPopup* self, cFEStateNetQuickPlayPopup* pPopup, int Event)
+void cFEStateNetQuickPlayPopup::onPopupEvent(cUIState* popup, unsigned int Event)
 {
+    cFEStateNetQuickPlayPopup* pPopup = (cFEStateNetQuickPlayPopup*)popup;
     int result;
     if (pPopup->miMiscData == 2095) {
-        result = self->onTimeoutPopupEvent(pPopup, Event);
+        result = onTimeoutPopupEvent(pPopup, Event);
     } else {
-        result = cFEStateNet_onPopupEvent(self, pPopup, Event);
+        result = cFEStateNet_onPopupEvent(this, pPopup, Event);
     }
-    return result;
 }
 #endif
 
@@ -23736,7 +23727,7 @@ void cFEStateNetQuickMessages::showAllMessageRows()
 {
     int i;
     for (i = 0; i < 10; i++) {
-        cFEStateNetQuickMessages_showMessageRow(this, i);
+        this->showMessageRow(i);
     }
 }
 #endif
@@ -23769,7 +23760,7 @@ extern char str_Qpct_d[];
  *
  * @param idx  the message index, 0..9
  */
-extern "C" void cFEStateNetQuickMessages_showMessageRow(cFEStateNetQuickMessages* self, int idx)
+void cFEStateNetQuickMessages::showMessageRow(int idx)
 {
     char buf[16];
     cBXString label;
@@ -23788,7 +23779,7 @@ extern "C" void cFEStateNetQuickMessages_showMessageRow(cFEStateNetQuickMessages
     } else {
         cBXString_Concat(&label, msg);
     }
-    self->setFittedText((cUIText*)((void*)self->mpMessage[idx]), label.Str);
+    setFittedText((cUIText*)((void*)mpMessage[idx]), label.Str);
     cBXString__cBXString(&label, 2);
 }
 #endif
@@ -24023,7 +24014,7 @@ void cFEStateNetQuickMessages::handleKeyboardText()
         }
         mbChanged = 1;
         iface->submit();
-        cFEStateNetQuickMessages_showMessageRow(this, idx);
+        this->showMessageRow(idx);
     }
 }
 #endif
@@ -24621,11 +24612,12 @@ static inline int isButton_3668(cObj_3668* w, char* name)
  * 0) and hides the arrows and highlight. kONMISC calls cFEStateNet_openMessenger unless mAttrState bits 1-2 are set; kONNEXT is
  * ignored. Events 9, 1, 2 and any other also go to the cFEStateNet handler (cFEStateNet_onWidgetEvent).
  *
- * @param w  the widget (On Tour pWidget); null is ignored
+ * @param pWidget  the widget (On Tour pWidget); null is ignored
  * @param msg  the widget event (On Tour Event)
  */
-extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, int msg)
+void cFEStateStats::onWidgetEvent(cUIThing* pWidget, unsigned int msg)
 {
+    cObj_3668* w = (cObj_3668*)pWidget;
     cObj_3668* shownObj;
     cObjB_3668* hiddenObj;
     if (w == 0) {
@@ -24633,40 +24625,40 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
     }
     switch (msg) {
     case cUIState::kONPREV:
-        cFEStateNet_pushState_3668(((char*)self), cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_3668(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), self->mpEngine));
+        cFEStateNet_pushState_3668(((char*)this), cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_3668(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), mpEngine));
         return;
     case cUIState::kONCHANGE:
         if (isButton_3668(w, str_EventList)) {
-            cFEStateStats_fillCourseList_3668(((char*)self));
+            cFEStateStats_fillCourseList_3668(((char*)this));
         } else if (isButton_3668(w, str_CourseList)) {
-            cFEStateStats_requestResults_3668(((char*)self), cUIListBox_getCurrentEntryData_3668(w));
-            cFEStateStats_fillResultRows_3668(((char*)self));
+            cFEStateStats_requestResults_3668(((char*)this), cUIListBox_getCurrentEntryData_3668(w));
+            cFEStateStats_fillResultRows_3668(((char*)this));
         }
     case cUIState::kONGAINFOCUS:
-        if (self->mpScreen == 0) {
+        if (mpScreen == 0) {
             return;
         }
         if (isButton_3668(w, str_Txt_Overal)) {
-            cFEStateStats_setMode_3668(((char*)self), 0);
+            cFEStateStats_setMode_3668(((char*)this), 0);
         } else if (isButton_3668(w, str_Txt_FreeStyle)) {
-            cFEStateStats_setMode_3668(((char*)self), 2);
+            cFEStateStats_setMode_3668(((char*)this), 2);
         } else if (isButton_3668(w, str_Txt_Race)) {
-            cFEStateStats_setMode_3668(((char*)self), 1);
+            cFEStateStats_setMode_3668(((char*)this), 1);
         } else if (isButton_3668(w, str_EventList)) {
             w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
-            shownObj = getObj_3668(self, str_EventRightArrow);
+            shownObj = getObj_3668(this, str_EventRightArrow);
             shownObj->setVisible(1);
-            shownObj = getObj_3668(self, str_EventLeftArrow);
+            shownObj = getObj_3668(this, str_EventLeftArrow);
             shownObj->setVisible(1);
-            shownObj = getObj_3668(self, str_event_hl);
+            shownObj = getObj_3668(this, str_event_hl);
             shownObj->setVisible(1);
         } else if (isButton_3668(w, str_CourseList)) {
             w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
-            shownObj = getObj_3668(self, str_CourseRightArrow);
+            shownObj = getObj_3668(this, str_CourseRightArrow);
             shownObj->setVisible(1);
-            shownObj = getObj_3668(self, str_CourseLeftArrow);
+            shownObj = getObj_3668(this, str_CourseLeftArrow);
             shownObj->setVisible(1);
-            shownObj = getObj_3668(self, str_course_hl);
+            shownObj = getObj_3668(this, str_course_hl);
             shownObj->setVisible(1);
         } else {
             char buf[0x20];
@@ -24675,14 +24667,14 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
                 if (isButton_3668(w, buf)) {
                     t3Vector pos;
                     t3Vector size;
-                    cObj_3668* rankHighlight = getObj_3668(self, str_rankhl);
+                    cObj_3668* rankHighlight = getObj_3668(this, str_rankhl);
                     cUIThing_getAbsPosition_3668(w, &pos);
                     w->getSize(&size);
                     pos.y = pos.y - size.y + 14.0f;
                     pos.x = pos.x + -40.0f;
                     ((cUIThing*)rankHighlight)->mPosition = pos;
                     rankHighlight->setVisible(1);
-                    cFEStateStats_placeScrollSlider_3668(((char*)self), i + self->miFirstResult, LobbyMan_getNumRankRows_3668(LobbyMan_mLobbyMan));
+                    cFEStateStats_placeScrollSlider_3668(((char*)this), i + miFirstResult, LobbyMan_getNumRankRows_3668(LobbyMan_mLobbyMan));
                     break;
                 }
             }
@@ -24690,41 +24682,41 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
         break;
     case cUIState::kONLOSEFOCUS:
         if (isButton_3668(w, str_Txt_Overal)) {
-            if (self->miMode != 0) {
+            if (miMode != 0) {
                 break;
             }
             w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
         } else if (isButton_3668(w, str_Txt_FreeStyle)) {
-            if (self->miMode != 2) {
+            if (miMode != 2) {
                 break;
             }
             w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
         } else if (isButton_3668(w, str_Txt_Race)) {
-            if (self->miMode != 1) {
+            if (miMode != 1) {
                 break;
             }
             w->setColor(cVec_3668(1.0f, 1.0f, 1.0f, 1.0f));
         } else if (isButton_3668(w, str_EventList)) {
             w->setColor(cVec_3668(1.0f, 0.0f, 0.0f, 0.0f));
-            hiddenObj = (cObjB_3668*)getObj_3668(self, str_EventRightArrow);
+            hiddenObj = (cObjB_3668*)getObj_3668(this, str_EventRightArrow);
             hiddenObj->setVisible(0);
-            hiddenObj = (cObjB_3668*)getObj_3668(self, str_EventLeftArrow);
+            hiddenObj = (cObjB_3668*)getObj_3668(this, str_EventLeftArrow);
             hiddenObj->setVisible(0);
-            hiddenObj = (cObjB_3668*)getObj_3668(self, str_event_hl);
+            hiddenObj = (cObjB_3668*)getObj_3668(this, str_event_hl);
             hiddenObj->setVisible(0);
         } else if (isButton_3668(w, str_CourseList)) {
             w->setColor(cVec_3668(1.0f, 0.0f, 0.0f, 0.0f));
-            hiddenObj = (cObjB_3668*)getObj_3668(self, str_CourseRightArrow);
+            hiddenObj = (cObjB_3668*)getObj_3668(this, str_CourseRightArrow);
             ((cObjC_3668*)hiddenObj)->setVisible(0);
-            hiddenObj = (cObjB_3668*)getObj_3668(self, str_CourseLeftArrow);
+            hiddenObj = (cObjB_3668*)getObj_3668(this, str_CourseLeftArrow);
             ((cObjC_3668*)hiddenObj)->setVisible(0);
-            hiddenObj = (cObjB_3668*)getObj_3668(self, str_course_hl);
+            hiddenObj = (cObjB_3668*)getObj_3668(this, str_course_hl);
             ((cObjC_3668*)hiddenObj)->setVisible(0);
         }
         break;
     case cUIState::kONMISC:
-        if ((self->mAttrState & 6) == 0) {
-            cFEStateNet_openMessenger_3668(((char*)self));
+        if ((mAttrState & 6) == 0) {
+            cFEStateNet_openMessenger_3668(((char*)this));
         }
         return;
     case cUIState::kONNEXT:
@@ -24732,10 +24724,10 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
     default:
         goto other;
     }
-    cFEStateNet_onWidgetEvent_3668(((char*)self), w, msg);
+    cFEStateNet_onWidgetEvent_3668(((char*)this), w, msg);
     return;
 other:
-    cFEStateNet_onWidgetEvent_3668(((char*)self), w, msg);
+    cFEStateNet_onWidgetEvent_3668(((char*)this), w, msg);
 }
 #endif
 
@@ -25225,7 +25217,7 @@ struct sVE1C4BD8 {
     int (*fn)(void*);
 };
 
-static inline int Pad1C4BD8(char* pad, int slot)
+static inline int Pad1C4BD8(cUIInput* pad, int slot)
 {
     sVE1C4BD8* vt = (sVE1C4BD8*)VPTR_OF(cUIInput, pad);
     return vt[slot].fn(vthis(pad, vt[slot]));
@@ -25240,15 +25232,15 @@ static inline int Pad1C4BD8(char* pad, int slot)
  *
  * @param pInput  the UI input (On Tour cUIInput* pInput)
  */
-extern "C" void cFEStateStats_onInputAlways(cFEStateStats* self, char* pInput)
+void cFEStateStats::onInputAlways(cUIInput* pInput)
 {
-    cUIState_onInputAlways_2(self, pInput);
+    cUIState_onInputAlways_2(this, pInput);
     if ((Pad1C4BD8(pInput, 17) || Pad1C4BD8(pInput, 18) || Pad1C4BD8(pInput, 20) || Pad1C4BD8(pInput, 19)) &&
-        self->miFocusMenu < 3) {
+        miFocusMenu < 3) {
         if (Pad1C4BD8(pInput, 17)) {
-            self->focusPrevMenu();
+            focusPrevMenu();
         } else if (Pad1C4BD8(pInput, 18)) {
-            self->focusNextMenu();
+            focusNextMenu();
         }
     }
 }

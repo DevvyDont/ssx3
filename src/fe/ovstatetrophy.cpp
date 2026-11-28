@@ -33,11 +33,11 @@ extern char str_34trophy[];
 /**
  * Builds the trophy screen ("34trophy") and plays its first frame.
  */
-extern "C" void cOVStateTrophy_onCreateScreen(cOVStateTrophy* self)
+void cOVStateTrophy::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_34trophy), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_34trophy), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }

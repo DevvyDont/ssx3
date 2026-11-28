@@ -1583,24 +1583,23 @@ extern "C" void cGraphicsMan__cGraphicsMan(cGraphicsMan* self, int flags)
 //100%
 INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_ForceActiveDrawState);
 #ifdef SKIP_ASM
-
 /**
  * Forces the whole draw state to be resent: the cached active state (+0xED8, 4 words) becomes ~mask so every field
  * differs, the cached texture ids become 0x7FFF, then virtual slot 62 applies @p mask.
  *
  * @param mask  the draw state to apply (4 words)
  */
-extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
+void cGraphicsMan::ForceActiveDrawState(const sDrawState& mask)
 {
     int i;
     unsigned int j;
     for (i = 0; i < 4; i++) {
-        self->m_activeDrawState.m_bitGroups[i] = ~mask[i];
+        m_activeDrawState.m_bitGroups[i] = ~mask.m_bitGroups[i];
     }
     for (j = 0; j < 2; j++) {
-        self->m_activeDrawState.m_textureState.m_texid[j] = 0x7FFF;
+        m_activeDrawState.m_textureState.m_texid[j] = 0x7FFF;
     }
-    self->SetActiveDrawState(*(const sDrawState*)mask);
+    SetActiveDrawState(mask);
 }
 #endif
 

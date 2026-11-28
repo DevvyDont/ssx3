@@ -18,15 +18,15 @@ extern char str_rewardslist[];
 /**
  * Creates the overlay rewards-list screen "rewardslist", then runs cOVState_onCreateScreen().
  */
-extern "C" void cOVStateRewardsList_onCreateScreen(cOVStateRewardsList* self)
+void cOVStateRewardsList::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_rewardslist), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_rewardslist), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
 }
 #endif
 

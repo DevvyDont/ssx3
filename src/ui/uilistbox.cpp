@@ -321,47 +321,47 @@ extern "C" unsigned char cUIMenu_findFirstHighlightable(void* self, int a1);
  *
  * @param on  nonzero to focus (On Tour focus)
  */
-extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
+void cUIMenu::setFocus(int on)
 {
-    ((tAttrThing*)&self->mAttr)->mFocused = on != 0;
+    ((tAttrThing*)&mAttr)->mFocused = on != 0;
     if (on) {
-        if (self->mStoredIndex != cUIMenu::kNoItem) {
-            cUIMenu_setSelectedByIndex(((char*)self), self->mStoredIndex);
+        if (mStoredIndex != cUIMenu::kNoItem) {
+            cUIMenu_setSelectedByIndex(((char*)this), mStoredIndex);
             return;
         }
-        cUIThing* cur = self->mpSelected;
+        cUIThing* cur = mpSelected;
         if (((char*)cur) == 0) {
-            unsigned char idx = cUIMenu_findFirstHighlightable(((char*)self), 0);
+            unsigned char idx = cUIMenu_findFirstHighlightable(((char*)this), 0);
             if (idx == cUIMenu::kNoItem)
                 idx = 0;
-            cUIMenu_setSelectedByIndex(((char*)self), idx);
+            cUIMenu_setSelectedByIndex(((char*)this), idx);
         } else if (((cur->mAttr >> 4) & 1) == 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 0);
             if (ev != cUIScreen::kNoFrame) {
-                void* scr = self->mpSelected->mpScreen;
+                void* scr = mpSelected->mpScreen;
                 if (scr != 0) {
                     cUIScreen_playFrame(scr, ev, 1);
                 }
             }
-            cUIThing* selected = self->mpSelected;
+            cUIThing* selected = mpSelected;
             selected->setFocus(1);
-            cUIState* owner = self->mpScreen->mpState;
-            owner->onWidgetEvent(self->mpSelected, 1);
+            cUIState* owner = mpScreen->mpState;
+            owner->onWidgetEvent(mpSelected, 1);
         }
     } else {
-        cUIThing* cur = self->mpSelected;
+        cUIThing* cur = mpSelected;
         if (((char*)cur) != 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
             if (ev != cUIScreen::kNoFrame) {
-                void* scr = self->mpSelected->mpScreen;
+                void* scr = mpSelected->mpScreen;
                 if (scr != 0) {
                     cUIScreen_playFrame(scr, ev, 1);
                 }
             }
-            cUIThing* selected = self->mpSelected;
+            cUIThing* selected = mpSelected;
             selected->setFocus(0);
-            cUIState* owner = self->mpScreen->mpState;
-            owner->onWidgetEvent(self->mpSelected, 2);
+            cUIState* owner = mpScreen->mpState;
+            owner->onWidgetEvent(mpSelected, 2);
         }
     }
 }

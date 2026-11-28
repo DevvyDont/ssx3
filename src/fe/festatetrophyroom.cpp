@@ -55,13 +55,10 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onGainFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Gives the trophy-room state focus using the base cUIState_onGainFocus().
- *
- * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateTrophyRoom_onGainFocus(void* vself)
+void cFEStateTrophyRoom::onGainFocus(cUIState*)
 {
-    cFEStateTrophyRoom* self = (cFEStateTrophyRoom*)vself;
-    return cUIState_onGainFocus(self);
+    cUIState_onGainFocus(this);
 }
 #endif
 

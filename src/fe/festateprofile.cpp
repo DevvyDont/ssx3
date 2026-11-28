@@ -208,13 +208,10 @@ INCLUDE_ASM("fe/festateprofile", cFEStateProfileLoad_onRender2D__FPv);
  * Draws the profile load screen by running cUIState_onRender2D.
  *
  * Fills slot +0x7C (onRender2D) of cFEStateProfileLoad_vtbl.
- *
- * @return cUIState_onRender2D's result
  */
-void* cFEStateProfileLoad_onRender2D(void* vself)
+void cFEStateProfileLoad::onRender2D()
 {
-    cFEStateProfileLoad* self = (cFEStateProfileLoad*)vself;
-    return cUIState_onRender2D(self);
+    cUIState_onRender2D(this);
 }
 #endif
 
@@ -291,9 +288,9 @@ struct cUIObj_EF70 {
  * kScreenActionLoad), where it is "btext3a"; then stores @p on in +0x234. Fills slot +0x12C of cFEStateProfileLoad_vtbl
  * (cFEMemCard_hideActionButtons's slot).
  *
- * @param on  1 to hide the buttons, 0 to show them
+ * @param on  true to hide the buttons, false to show them
  */
-void cFEStateProfileLoad::hideActionButtons(int on)
+void cFEStateProfileLoad::hideActionButtons(bool on)
 {
     if (mIsHidden == on)
         return;
@@ -341,14 +338,14 @@ struct cUIObj_F0B8 {
  *
  * @param on  true to hide the button
  */
-extern "C" void cFEStateProfileLoad_hideDeleteButton(cFEStateProfileLoad* self, bool on)
+void cFEStateProfileLoad::hideDeleteButton(bool on)
 {
     if (cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad) {
         int off = !on;
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5))->setVisible(off);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext5))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq))->setVisible(off);
     }
-    self->mDeleteButtonActive = !on;
+    mDeleteButtonActive = !on;
 }
 #endif
 
@@ -373,18 +370,18 @@ extern int cFEStateProfileLoad_mScreenAction;
  * @param loadBlocked  true to hide the button on the load screen
  * @param saveBlocked  true to hide the button on the other screens
  */
-extern "C" void cFEStateProfileLoad_hideMainButton(cFEStateProfileLoad* self, bool loadBlocked, bool saveBlocked)
+void cFEStateProfileLoad::hideMainButton(bool loadBlocked, bool saveBlocked)
 {
-    cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x));
+    cUIThing* xButton = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x));
     if (cFEStateProfileLoad_mScreenAction != cFEStateProfileLoad::kScreenActionLoad) {
         int showButton = !saveBlocked;
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3))->setVisible(showButton);
-        self->mMainButtonActive = showButton;
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3))->setVisible(showButton);
+        mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     } else {
         int showButton = !loadBlocked;
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a))->setVisible(showButton);
-        self->mMainButtonActive = showButton;
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3a))->setVisible(showButton);
+        mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     }
 }

@@ -13258,13 +13258,13 @@ struct sBXStrK2 {
  * @return the new event
  */
 // Clone of a two-string message (type 0xDE).
-extern "C" void* online_ChatEvent_clone(char* self)
+void* online_ChatEvent::clone()
 {
     char* eventCopy = (char*)cMemMan_alloc(0x10, str_ChatEvent, 0x20000000, 0);
     sBXStrK2 sender;
     sBXStrK2 text;
-    cBXString_cBXString1(&sender, self + 0x8);
-    cBXString_cBXString1(&text, self + 0xC);
+    cBXString_cBXString1(&sender, &mSender);
+    cBXString_cBXString1(&text, &mText);
     *(void***)(eventCopy + 0x4) = D_00481230;
     *(int*)eventCopy = 222;
     cBXString_cBXString1(eventCopy + 0x8, &sender);

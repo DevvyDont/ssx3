@@ -350,6 +350,7 @@ struct cGameLoadState : public cUIState {
     virtual void onCreateScreen() __asm__("cGameLoadState_onCreateScreen");
     virtual bool onGainTransition(int refresh) __asm__("cGameLoadState_onGainTransition");
     void showPlayerStats(char player) __asm__("cGameLoadState_showPlayerStats");
+    virtual void onWidgetCreate(cUIThing* widget) __asm__("cGameLoadState_onWidgetCreate");
 };
 
 CHECK_OFFSET(cGameLoadState, mpParentModule, 0x048);

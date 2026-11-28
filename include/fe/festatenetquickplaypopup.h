@@ -111,6 +111,7 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
     void* onNetEvent(int netEvent, void* eventData) __asm__("cFEStateNetQuickPlayPopup_onNetEvent");
     int onTimeoutPopupEvent(cFEStateNetQuickPlayPopup* popup, int event)
         __asm__("cFEStateNetQuickPlayPopup_onTimeoutPopupEvent");
+    virtual void onPopupEvent(cUIState* popup, unsigned int Event) __asm__("cFEStateNetQuickPlayPopup_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, miSearchOptions, 0x6D0);

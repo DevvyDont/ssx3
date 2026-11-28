@@ -3622,12 +3622,10 @@ public:
 
 /**
  * Updates an instance node by calling its virtual updateNode() (vtable slot 15).
- *
- * @return updateNode()'s result (On Tour's update returns nothing)
  */
-extern "C" int cInstanceNode_update(cInstanceNode* self)
+void cInstanceNode::update()
 {
-    return ((cRailVirt*)self)->updateNode();
+    ((cRailVirt*)this)->updateNode();
 }
 #endif
 
@@ -3791,10 +3789,9 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getRootTransform__FPv);
  *
  * @return pointer to the instance's matrix
  */
-void* cInstanceNode_getRootTransform(void* vself)
+const t4Matrix* cInstanceNode::getRootTransform()
 {
-    cInstanceNode* self = (cInstanceNode*)vself;
-    return (char*)&self->Instance->m_fmTransform;
+    return (const t4Matrix*)&Instance->m_fmTransform;
 }
 #endif
 
@@ -3804,14 +3801,13 @@ INCLUDE_ASM("object/railmodifier", cInstanceNode_getRootTransform1__FPv);
 /**
  * Returns an instance node's root transform for an instance: always the matrix at its own Instance +0x10.
  *
- * The instance argument of the slot is not declared and not used.
+ * The instance argument of the slot is not used.
  *
  * @return pointer to the node's instance matrix
  */
-void* cInstanceNode_getRootTransform1(void* vself)
+const t4Matrix* cInstanceNode::getRootTransform1(tInstanceRecord*)
 {
-    cInstanceNode* self = (cInstanceNode*)vself;
-    return (char*)&self->Instance->m_fmTransform;
+    return (const t4Matrix*)&Instance->m_fmTransform;
 }
 #endif
 
@@ -4666,10 +4662,9 @@ INCLUDE_ASM("object/railmodifier", cPhysicsModifier_isActive__FPv);
  *
  * @return the active flag (nonzero when active)
  */
-int cPhysicsModifier_isActive(void* vself)
+int cPhysicsModifier::isActive()
 {
-    cPhysicsModifier* self = (cPhysicsModifier*)vself;
-    return self->Active;
+    return Active;
 }
 #endif
 
@@ -6217,10 +6212,9 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_hasBoundBox__FPv);
  *
  * @return always 1
  */
-int cFloatingNode_hasBoundBox(void* vself)
+bool cFloatingNode::hasBoundBox()
 {
-    cFloatingNode* self = (cFloatingNode*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -7030,12 +7024,12 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getRootTransform1);
  *
  * @return the address of the first instance's root transform matrix
  */
-extern "C" void* cMultiSplineModifier_getRootTransform1(cMultiSplineModifier* self)
+const t4Matrix* cMultiSplineModifier::getRootTransform1(tInstanceRecord*)
 {
-    if (self->RootTransformDirty != 0) {
-        self->updateRootTransform();
+    if (RootTransformDirty != 0) {
+        updateRootTransform();
     }
-    return *(char**)self->NodeInst + 0x10;
+    return (const t4Matrix*)&NodeInst[0]->m_fmTransform;
 }
 #endif
 

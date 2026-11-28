@@ -229,18 +229,18 @@ extern cUISoundInterface gUISoundNull;
  * @param obj  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (5 accept, 6 back)
  */
-extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* obj, int msg)
+void cFEStateBuyAttrib::onWidgetEvent(cUIThing* obj, unsigned int msg)
 {
     if (obj == 0)
         return;
     switch (msg) {
     case cUIState::kONNEXT:
-        if (self->mBank >= self->mTotalCost && self->mTotalCost > 0) {
-            void* pPopup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY_b, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
-            cUIStateBuyPopup_initBuyAttributes(pPopup, 0, self->mTotalCost, self->mBank);
-            cUIStateStack_pushPopup(&self->mpEngine->mStateStack, pPopup);
+        if (mBank >= mTotalCost && mTotalCost > 0) {
+            void* pPopup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY_b, 0x100, 0), mpEngine, ((char*)this), mUserNum);
+            cUIStateBuyPopup_initBuyAttributes(pPopup, 0, mTotalCost, mBank);
+            cUIStateStack_pushPopup(&mpEngine->mStateStack, pPopup);
         } else {
-            cUISoundInterface* sound = self->mpEngine->mpSound;
+            cUISoundInterface* sound = mpEngine->mpSound;
             if (sound == 0)
                 sound = &gUISoundNull;
             if (sound != 0)
@@ -248,19 +248,19 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
         }
         break;
     case cUIState::kONPREV:
-        if (self->mBuyPrompt != 0) {
-            self->mBuyPrompt = 0;
-            cUIState_hideObjSafe(((char*)self), str_PopupGroup);
-            cUIMenu* attribMenu = self->pAttribMenu;
+        if (mBuyPrompt != 0) {
+            mBuyPrompt = 0;
+            cUIState_hideObjSafe(((char*)this), str_PopupGroup);
+            cUIMenu* attribMenu = pAttribMenu;
             attribMenu->setFocus(1);
         } else {
-            cUICustomInterface* mgr = self->mpEngine->mpCustom;
-            void* nextState = mgr->getPrevState((cUIState*)self, (int)*(void**)(obj + 0x18));
+            cUICustomInterface* mgr = mpEngine->mpCustom;
+            void* nextState = mgr->getPrevState((cUIState*)this, obj->mMiscData);
             if (nextState != 0) {
-                int frame = cUIScreen_getFrameByLabel(self->mpAttribScreen, GetHashValue32(str_TransitionOut_b));
+                int frame = cUIScreen_getFrameByLabel(mpAttribScreen, GetHashValue32(str_TransitionOut_b));
                 if (frame != cUIScreen::kNoFrame)
-                    cUIScreen_playFrame(self->mpAttribScreen, frame, 1);
-                cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
+                    cUIScreen_playFrame(mpAttribScreen, frame, 1);
+                cUIStateStack_push(&mpEngine->mStateStack, nextState);
             }
         }
         break;

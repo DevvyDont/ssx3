@@ -1393,10 +1393,10 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  the replay frame stream to write to
  */
-extern "C" void cMeshAnimNode_writeToReplayFrame(cMeshAnimNode* self, cBxReplayFrame* stream)
+void cMeshAnimNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cInstanceNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->Life, 0xC);
+    cInstanceNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&Life, 0xC);
 }
 #endif
 

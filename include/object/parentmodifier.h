@@ -45,6 +45,7 @@ struct cParentModifier : public cPositionModifier {
     virtual void update() __asm__("cParentModifier_update__FPv");
     virtual int getMesh() const __asm__("cParentModifier_getMesh__FPv");
     virtual int getTransformType() const __asm__("cParentModifier_getTransformType__FPv");
+    virtual void updateIntersectInfo(tIntersectInfo& obj) __asm__("cParentModifier_updateIntersectInfo");
 };
 
 CHECK_OFFSET(cParentModifier, Mesh, 0x90);

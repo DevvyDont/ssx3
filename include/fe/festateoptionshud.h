@@ -29,6 +29,7 @@ struct cFEStateOptionsHUD : public cUIState {
     virtual void onPopupEvent(cUIState* widget, unsigned int msg) __asm__("cFEStateOptionsHUD_onPopupEvent");
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
         __asm__("cFEStateOptionsHUD_onWidgetMenu");
+    virtual void onGainFocus(cUIState*) __asm__("cFEStateOptionsHUD_onGainFocus__FPv");
 };
 
 CHECK_SIZE(cFEStateOptionsHUD, 0x48);

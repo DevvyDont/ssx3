@@ -53,8 +53,10 @@ struct cInstanceNode : public cSortObjNode {
         __asm__("cInstanceNode_decFocusCount__FPv");                              // 22
     virtual int getFocusCount() const
         __asm__("cInstanceNode_getFocusCount__FPv");                                              // 23
-    virtual const t4Matrix* getRootTransform();                                     // 24
-    virtual const t4Matrix* getRootTransform1(tInstanceRecord* inst);               // 25 On Tour's second
+    virtual const t4Matrix* getRootTransform()
+        __asm__("cInstanceNode_getRootTransform__FPv");                                     // 24
+    virtual const t4Matrix* getRootTransform1(tInstanceRecord* inst)
+        __asm__("cInstanceNode_getRootTransform1__FPv");               // 25 On Tour's second
                                                                                     //    getRootTransform overload
     virtual bool hasAnimMats() const
         __asm__("cInstanceNode_hasAnimMats__FPv");                                               // 26
@@ -115,6 +117,7 @@ struct cInstanceNode : public cSortObjNode {
     void* runCollideScript(int collideInfo, int intersectInfo, int pBeing)
         __asm__("cInstanceNode_runCollideScript__FPviii");
     virtual unsigned int getSectionId() __asm__("cInstanceNode_getSectionId__FPv");
+    virtual void update() __asm__("cInstanceNode_update");
 };
 
 CHECK_OFFSET(cInstanceNode, Instance, 0x18);

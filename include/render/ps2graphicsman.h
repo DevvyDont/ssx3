@@ -361,8 +361,8 @@ public:
                                     //        writes cScreenTint_m_ColourR..m_FillB at +0x6CA4 + view * 0x18; cPS2GraphicsMan_queueScreenTintPass
                                     //        reads the six floats (skips the neutral 1, 1, 1 / 0, 0, 0)
     float unk_6CD4[2][7];           // 0x6CD4 [U] per-view bloom parameters (cPS2GraphicsMan_copyLightGlow, cPS2GraphicsMan_queueLightGlowPass)
-    void (*mPhase2Callback)(int);   // 0x6D0C [X] phase2Callback; [U] cPS2GraphicsMan_SetLensFXCallBack sets, cPS2GraphicsMan_runDmaKickThread calls
-    int mPhase2CallbackArg;         // 0x6D10 [X]
+    void (*mPhase2Callback)(void*); // 0x6D0C [X] phase2Callback; [U] cPS2GraphicsMan_SetLensFXCallBack sets, cPS2GraphicsMan_runDmaKickThread calls
+    void* mPhase2CallbackArg;       // 0x6D10 [X]
     int mShinyBoarder;              // 0x6D14 [P] SetShinyBoarder (cPS2GraphicsMan_SetShinyBoarder) bool
     char unk_6D18[0x8];             // 0x6D18 padding to 16
     sViewportStack mViewportStack[4]; // 0x6D20 [P] sViewportStack; [R] ctor's fifth array loop (4); [U] mViewportDepth
@@ -509,6 +509,62 @@ public:
     void sendWakeRibbon(tBxVertex** strips, int start, int ring, int count, int firstRow, int secondRow,
                         float alphaStart, float dt)
         __asm__("cPS2GraphicsMan_sendWakeRibbon");
+    virtual void SetViewportWindow1(const tRect& rect, int applyScreenOffset)
+        __asm__("cPS2GraphicsMan_SetViewportWindow1");
+    int getDisplayBufferWidth() __asm__("cPS2GraphicsMan_getDisplayBufferWidth");
+    int getNumViews() __asm__("cPS2GraphicsMan_getNumViews");
+    virtual void SetView(float rx, float ry, float rz, const t4Vector& pos) __asm__("cPS2GraphicsMan_SetView");
+    virtual void SetView1(const t4Matrix& viewMat) __asm__("cPS2GraphicsMan_SetView1");
+    virtual const t4Matrix* GetView() __asm__("cPS2GraphicsMan_GetView__FPv");
+    virtual void AppendView(const t4Matrix& mat) __asm__("cPS2GraphicsMan_AppendView");
+    virtual void TranslateView(const t4Vector& pos) __asm__("cPS2GraphicsMan_TranslateView");
+    virtual void RotateView(float angle, const t4Vector& axis) __asm__("cPS2GraphicsMan_RotateView");
+    virtual bool IsRenderReady() __asm__("cPS2GraphicsMan_IsRenderReady__FPv");
+    virtual bool IsRenderIdle() __asm__("cPS2GraphicsMan_IsRenderIdle__FPv");
+    virtual void DrawCharModel(const tMdfModelHeader* mdfheader, const char* base, float, int shadow, int)
+        __asm__("cPS2GraphicsMan_DrawCharModel");
+    void writeFrameRegPacket(unsigned long** pp, int frameMask, int mode)
+        __asm__("cPS2GraphicsMan_writeFrameRegPacket");
+    virtual void GetMeshQuad(const tInstanceRecord* obj, int idx, t3Vector* pos, t2Vector* uv, tARGB* col)
+        __asm__("cPS2GraphicsMan_GetMeshQuad");
+    virtual void RenderSpline(const t4Matrix& BezMat, const tARGB& col, int n) __asm__("cPS2GraphicsMan_RenderSpline");
+    virtual void SetLensFXCallBack(void* callback, void* callbackArg)
+        __asm__("cPS2GraphicsMan_SetLensFXCallBack__FPvii");
+    virtual void ResolveCharModel(tMdfModelHeader* baseInModel, char* base, int* tbl, int& count,
+                                  tMdfBlendedMatrix* slots, float* morphWeights)
+        __asm__("cPS2GraphicsMan_ResolveCharModel");
+    virtual void RenderBoardWake(tBoardWakeVertex** verts, int numSegmentsWide, int startIndex, int numIndices,
+                                 int stripLength, float alphaMultiplier, float alphaDelta)
+        __asm__("cPS2GraphicsMan_RenderBoardWake");
+    virtual void SetScreenClearColour(const tRGB& col) __asm__("cPS2GraphicsMan_SetScreenClearColour");
+    virtual void GetViewportPerspective(float& fov, float& minz, float& maxz)
+        __asm__("cPS2GraphicsMan_GetViewportPerspective");
+    virtual void DrawString3D(cFont& font, float x, float y, const char* text, float sx, float sy, float su, float sv,
+                              const tARGB& color, float z)
+        __asm__("cPS2GraphicsMan_DrawString3D");
+    virtual void DrawString3D1(cFont& font, float x, float y, const unsigned short* wideText, float sx, float sy,
+                               float su, float sv, const tARGB& color, float z)
+        __asm__("cPS2GraphicsMan_DrawString3D1");
+    virtual cGridMesh* CreateGridMesh(int width, int height, int flags) __asm__("cPS2GraphicsMan_CreateGridMesh");
+    virtual void DrawCharShadowModel(const tMdfModelHeader* baseModel, const char* base, const tARGB& col)
+        __asm__("cPS2GraphicsMan_DrawCharShadowModel");
+    virtual int AddTexture1(const char* pixels, const char* name, unsigned int width, unsigned int height,
+                            unsigned int mipmapCount, int texelFormat, int clutFormat, const char* clutData,
+                            int lockType, int copyMem, int bindId)
+        __asm__("cPS2GraphicsMan_AddTexture1");
+    virtual void SetNewTextureData1(int texId, const char* pixels, unsigned int width, unsigned int height,
+                                    unsigned int mipCount, int texelFormat, int clutFormat, const char* clutData,
+                                    int copyData)
+        __asm__("cPS2GraphicsMan_SetNewTextureData1");
+    virtual void ShadowClearLockTexture(int idx, const tARGB& color) __asm__("cPS2GraphicsMan_ShadowClearLockTexture");
+    virtual void SetShadowCharMatrices(const t4Matrix& mat, const t4Vector& sscale, const t4Vector& strans)
+        __asm__("cPS2GraphicsMan_SetShadowCharMatrices");
+    virtual int AddLockedFrameTexture(int, int, int) __asm__("cPS2GraphicsMan_AddLockedFrameTexture__FPv");
+    virtual void AddProjectiveTexture(const t4Vector& pos, const t4Matrix& clipMat, const t4Matrix& projMat,
+                                      float intensity, int i)
+        __asm__("cPS2GraphicsMan_AddProjectiveTexture");
+    virtual int ClipBoundBox(const t4Vector& minp, const t4Vector& maxp, const t4Matrix& mat)
+        __asm__("cPS2GraphicsMan_ClipBoundBox");
 };
 
 // --- layout checks

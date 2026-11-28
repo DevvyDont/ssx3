@@ -237,10 +237,10 @@ INCLUDE_ASM("object/objnode", cSortObjNode_writeToReplayFrame);
  *
  * @param obj  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cSortObjNode_writeToReplayFrame(cSortObjNode* self, cBxReplayFrame* obj)
+void cSortObjNode::writeToReplayFrame(cBxReplayFrame* obj)
 {
-    self->cTypeObjNode::writeToReplayFrame(obj);
-    obj->write((const char*)&self->SortIndex, 4);
+    cTypeObjNode::writeToReplayFrame(obj);
+    obj->write((const char*)&SortIndex, 4);
 }
 #endif
 

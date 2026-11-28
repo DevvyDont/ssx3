@@ -38,6 +38,9 @@ struct cObjectNode : public cMoveNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cObjectNode1() __asm__("cObjectNode_cObjectNode1");
+    // writeToReplayFrame stays a C function (cObjectNode_writeToReplayFrame): declared first, it is the vtable's key
+    // function, which keeps the vtable out of the units defining the other overrides
+    virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cObjectNode_writeToReplayFrame__FPv");
 };
 
 CHECK_SIZE(cObjectNode, 0x2C);

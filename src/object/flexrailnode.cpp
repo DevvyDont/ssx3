@@ -547,11 +547,11 @@ static inline void vu0AddFR(t4Vector& dst, t4Vector b)
  * @param node  intersect info of the hit (its Seg and T)
  * @param offset  force to apply
  */
-extern "C" void cFloatRailNode_applyForce(cFloatRailNode* self, tIntersectInfo* node, t4Vector* offset)
+void cFloatRailNode::applyForce(const tIntersectInfo& node, const t4Vector& offset)
 {
-    if (node->Seg >= 0) {
-        vu0AddFR(self->Nodes[node->Seg].Force, vu0ScaleFR(*offset, 1.0f - node->T));
-        vu0AddFR(self->Nodes[node->Seg + 1].Force, vu0ScaleFR(*offset, node->T));
+    if (node.Seg >= 0) {
+        vu0AddFR(Nodes[node.Seg].Force, vu0ScaleFR(offset, 1.0f - node.T));
+        vu0AddFR(Nodes[node.Seg + 1].Force, vu0ScaleFR(offset, node.T));
     }
 }
 #endif
@@ -571,11 +571,11 @@ INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateIntersectInfo);
  */
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-extern "C" void cFloatRailNode_updateIntersectInfo(cFloatRailNode* self, tIntersectInfo* node)
+void cFloatRailNode::updateIntersectInfo(tIntersectInfo& node)
 {
-    if (node->Seg >= 0) {
-        vu0AddFR(node->Ivel, vu0ScaleFR(self->Nodes[node->Seg].Vel, node->T));
-        vu0AddFR(node->Ivel, vu0ScaleFR(self->Nodes[node->Seg + 1].Vel, 1.0f - node->T));
+    if (node.Seg >= 0) {
+        vu0AddFR(node.Ivel, vu0ScaleFR(Nodes[node.Seg].Vel, node.T));
+        vu0AddFR(node.Ivel, vu0ScaleFR(Nodes[node.Seg + 1].Vel, 1.0f - node.T));
     }
 }
 #endif
@@ -696,11 +696,11 @@ extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cFloatRailNode_writeToReplayFrame(cFloatRailNode* self, cBxReplayFrame* stream)
+void cFloatRailNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cFlexRailNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->LSpring, 0xC);
-    stream->write((const char*)self->Nodes, self->NumNodes * 80);
+    cFlexRailNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&LSpring, 0xC);
+    stream->write((const char*)Nodes, NumNodes * 80);
 }
 #endif
 
@@ -1176,31 +1176,31 @@ static inline void vu0AddEq_A568(t4Vector& dst, t4Vector b)
  * @param node  intersect info of the hit (position, segment +0x64)
  * @param dir  force to apply
  */
-extern "C" void cSpringRailNode_applyForce(cSpringRailNode* self, tIntersectInfo* node, t4Vector* dir)
+void cSpringRailNode::applyForce(const tIntersectInfo& node, const t4Vector& dir)
 {
-    float len = vu0Len_A568(*dir);
+    float len = vu0Len_A568(dir);
     t4Vector clamped;
     if (200.0f < len) {
-        clamped = vu0Scale_A568(*dir, 200.0f / len);
+        clamped = vu0Scale_A568(dir, 200.0f / len);
     } else {
-        clamped = *dir;
+        clamped = dir;
     }
-    if (node->Seg < 0) {
+    if (node.Seg < 0) {
         return;
     }
-    t4Vector arm = vu0Sub_A568(node->Ipos, (self->Nodes)[0].P);
+    t4Vector arm = vu0Sub_A568(node.Ipos, Nodes[0].P);
     t4Vector torque = vu0Cross_A568(clamped, arm);
     float alen = vu0Len_A568(arm);
     int i;
-    for (i = 0; i < node->Seg; i++) {
-        float* k = ((float*)&self->ASpring);
+    for (i = 0; i < node.Seg; i++) {
+        float* k = ((float*)&ASpring);
         t4Vector scaled = arm;
-        float lv = vu0Len_A568(self->Nodes[i].V);
+        float lv = vu0Len_A568(Nodes[i].V);
         vu0ScaleEq_A568(scaled, lv / vu0Len_A568(scaled));
-        vu0AddEq_A568(self->Nodes[i].T, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(self->Nodes[i].V) / alen), k[2]));
+        vu0AddEq_A568(Nodes[i].T, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(Nodes[i].V) / alen), k[2]));
     }
-    float* k = ((float*)&self->ASpring);
-    vu0AddEq_A568((self->Nodes)[node->Seg].T, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(vu0Sub_A568(node->Ipos, (self->Nodes)[node->Seg].P)) / alen), k[2]));
+    float* k = ((float*)&ASpring);
+    vu0AddEq_A568(Nodes[node.Seg].T, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(vu0Sub_A568(node.Ipos, Nodes[node.Seg].P)) / alen), k[2]));
 }
 #endif
 
@@ -1264,15 +1264,15 @@ static inline void vu0AddEq_A838(t4Vector& dst, const t4Vector& b)
  *
  * @param node  intersect info of the hit
  */
-extern "C" void cSpringRailNode_updateIntersectInfo(cSpringRailNode* self, tIntersectInfo* node)
+void cSpringRailNode::updateIntersectInfo(tIntersectInfo& node)
 {
-    if (node->Seg < 0)
+    if (node.Seg < 0)
         return;
-    for (int i = 0; i <= node->Seg; i++) {
+    for (int i = 0; i <= node.Seg; i++) {
         t4Vector cross;
-        t4Vector arm = vu0Sub_A838(node->Ipos, self->Nodes[i].P);
-        vu0CrossTo_A838(cross, arm, self->Nodes[i].W);
-        vu0AddEq_A838(node->Ivel, cross);
+        t4Vector arm = vu0Sub_A838(node.Ipos, Nodes[i].P);
+        vu0CrossTo_A838(cross, arm, Nodes[i].W);
+        vu0AddEq_A838(node.Ivel, cross);
     }
 }
 #endif
@@ -1452,11 +1452,11 @@ extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cSpringRailNode_writeToReplayFrame(cSpringRailNode* self, cBxReplayFrame* stream)
+void cSpringRailNode::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    cFlexRailNode_writeToReplayFrame(self, stream);
-    stream->write((const char*)&self->ASpring, 0xC);
-    stream->write((const char*)self->Nodes, self->NumNodes * 0x60);
+    cFlexRailNode_writeToReplayFrame(this, stream);
+    stream->write((const char*)&ASpring, 0xC);
+    stream->write((const char*)Nodes, NumNodes * 0x60);
 }
 #endif
 
@@ -1637,14 +1637,11 @@ INCLUDE_ASM("object/flexrailnode", cFlagNode_writeToReplayFrame__FPv);
 /**
  * Writes the flag node's replay data using the base cInstanceNode_writeToReplayFrame().
  *
- * Only @p self is declared; the replay stream argument reaches the base function unchanged in its register.
- *
- * @return no meaningful value (cInstanceNode_writeToReplayFrame() returns nothing)
+ * The replay stream is not passed on explicitly; it reaches the base function unchanged in its register.
  */
-void* cFlagNode_writeToReplayFrame(void* vself)
+void cFlagNode::writeToReplayFrame(cBxReplayFrame*)
 {
-    cFlagNode* self = (cFlagNode*)vself;
-    return cInstanceNode_writeToReplayFrame(self);
+    cInstanceNode_writeToReplayFrame(this);
 }
 #endif
 

@@ -40,6 +40,7 @@ struct cFEStateRuleSelect : public cUIState {
     virtual int onWidgetPair(cUIPair* msg, unsigned int) __asm__("cFEStateRuleSelect_onWidgetPair");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int type, unsigned int idx)
         __asm__("cFEStateRuleSelect_onWidgetMenu");
+    virtual void onGainFocus(cUIState*) __asm__("cFEStateRuleSelect_onGainFocus__FPv");
 };
 
 CHECK_OFFSET(cFEStateRuleSelect, mpGameEventMapping, 0x048);
@@ -175,6 +176,12 @@ struct cFEStateBraggingRights : public cFEStateNet {
     void fillHelpPopup(cFEStateNetHelpPopup* popup) __asm__("cFEStateBraggingRights_fillHelpPopup");
     void onCancelChallengePopupEvent(cUIState* popup, int popupEvent)
         __asm__("cFEStateBraggingRights_onCancelChallengePopupEvent");
+    virtual void onRender2D() __asm__("cFEStateBraggingRights_onRender2D__FPv");
+    virtual int handleEvent(int msgId, void* data) __asm__("cFEStateBraggingRights_handleEvent");
+    virtual bool onGainTransition(int) __asm__("cFEStateBraggingRights_onGainTransition__FPv");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEStateBraggingRights_onGainFocus");
+    virtual void onWidgetEvent(cUIThing* w, unsigned int event) __asm__("cFEStateBraggingRights_onWidgetEvent");
+    virtual void onPopupEvent(cUIState* pPopup, unsigned int Event) __asm__("cFEStateBraggingRights_onPopupEvent");
 };
 
 CHECK_OFFSET(cFEStateBraggingRights, mMenuCtrl, 0x6D0);

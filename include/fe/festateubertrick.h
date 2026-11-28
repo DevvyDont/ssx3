@@ -45,6 +45,8 @@ struct cFEStateUberTrick : public cUIState {
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cFEStateUberTrick_onWidgetCreate");
     virtual void onPopupEvent(cUIState* item, unsigned int msg) __asm__("cFEStateUberTrick_onPopupEvent");
     virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateUberTrick_onWidgetEvent");
+    virtual void onGainFocus(cUIState* prevState) __asm__("cFEStateUberTrick_onGainFocus");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int) __asm__("cFEStateUberTrick_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateUberTrick, mbModelVisible, 0x048);

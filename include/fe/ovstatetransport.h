@@ -61,6 +61,12 @@ struct cOVState_TRANSPORT : public cOVState {
     virtual void onGainFocus(cUIState*) __asm__("cOVState_TRANSPORT_onGainFocus");
     virtual void onWidgetEvent(cUIThing*, unsigned int) __asm__("cOVState_TRANSPORT_onWidgetEvent");
     virtual void onInputAlways(cUIInput*) __asm__("cOVState_TRANSPORT_onInputAlways__FPv");
+    virtual void onCreateScreen() __asm__("cOVState_TRANSPORT_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cOVState_TRANSPORT_onDestroyScreen");
+    virtual void onUpdate() __asm__("cOVState_TRANSPORT_onUpdate");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
+        __asm__("cOVState_TRANSPORT_onWidgetMenu");
+    virtual bool onGainTransition(int) __asm__("cOVState_TRANSPORT_onGainTransition__FPv");
 };
 
 CHECK_OFFSET(cOVState_TRANSPORT, mMap, 0x9C);

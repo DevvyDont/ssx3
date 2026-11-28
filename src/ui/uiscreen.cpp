@@ -1151,14 +1151,11 @@ INCLUDE_ASM("ui/uiscreen", cUIScrollBar_setUIData__FPv);
 /**
  * Sets a scroll bar up from its screen record: only cUIThing's setUIData.
  *
- * The record (On Tour tUIBaseObject* pUIBase) is not declared here; it stays in $a1 for the call.
- *
- * @return cUIThing_setUIData's result (declared void* here)
+ * The record (On Tour tUIBaseObject* pUIBase) is not passed on explicitly; it stays in $a1 for the call.
  */
-void* cUIScrollBar_setUIData(void* vself)
+void cUIScrollBar::setUIData(tUIBaseObject*)
 {
-    cUIScrollBar* self = (cUIScrollBar*)vself;
-    return cUIThing_setUIData(self);
+    cUIThing_setUIData(this);
 }
 #endif
 

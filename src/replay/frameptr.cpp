@@ -122,7 +122,7 @@ char* cReplayFramePtr::writeRewind()
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_write);
 #ifdef SKIP_ASM
-extern "C" void MEM_copy(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, const void* src, int size);
 
 /**
  * Appends @p n bytes to the frame: copies them to WriteData, then advances WriteData and grows Size by @p n.
@@ -130,18 +130,18 @@ extern "C" void MEM_copy(void* dst, void* src, int size);
  * @param src  the bytes to write (On Tour const char* data)
  * @param n  how many (On Tour len)
  */
-extern "C" void cReplayFramePtr_write(cReplayFramePtr* self, void* src, int n)
+void cReplayFramePtr::write(const char* src, int n)
 {
-    MEM_copy(self->WriteData, src, n);
-    self->WriteData += n;
-    self->Size += n;
+    MEM_copy(WriteData, src, n);
+    WriteData += n;
+    Size += n;
 }
 #endif
 
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_read);
 #ifdef SKIP_ASM
-extern "C" void MEM_copy(void* dst, void* src, int size);
+extern "C" void MEM_copy(void* dst, const void* src, int size);
 
 /**
  * Reads the next @p n bytes of the frame into @p dst and advances ReadData.

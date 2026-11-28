@@ -1085,87 +1085,88 @@ extern "C" void* cMusicSys_GetSongTitle(void* self, int i);
  * and clear the message texts at +0x944 and +0xA48 (flags 0x20000 / 0x40000).
  *
  * @param msg  the notification code
- * @param str  the text for codes 12 and 14 (On Tour pParam)
+ * @param pParam  the text for codes 12 and 14 (On Tour pParam)
  * @return always 0
  */
 // HUD overlay message handler: flags, counters, the two message strings and the track-name hash.
-extern "C" int cOVStateHUD1P_handleEvent(cOVStateHUD1P* self, int msg, unsigned short* str)
+int cOVStateHUD1P::handleEvent(int msg, void* pParam)
 {
+    unsigned short* str = (unsigned short*)pParam;
     switch (msg) {
     case 0:
-        self->mbHideHUD = 1;
+        mbHideHUD = 1;
         break;
     case 1:
-        self->mbHideHUD = 0;
+        mbHideHUD = 0;
         break;
     case 2:
-        self->mHideHUDOV = 0;
+        mHideHUDOV = 0;
         break;
     case 3:
-        self->mHideHUDOV += 1;
+        mHideHUDOV += 1;
         break;
     case 4:
-        if (self->mHideHUDOV > 0) {
-            self->mHideHUDOV -= 1;
+        if (mHideHUDOV > 0) {
+            mHideHUDOV -= 1;
         }
         break;
     case 12:
-        self->mRenderFlags |= 0x20000;
-        self->mMessageFrame = 0.0f;
-        strcpy1((unsigned short*)(&self->mMessage[0]), str);
+        mRenderFlags |= 0x20000;
+        mMessageFrame = 0.0f;
+        strcpy1((unsigned short*)(&mMessage[0]), str);
         break;
     case 13:
-        self->mMessage[0] = 0;
-        self->mMessageFrame = 0.0f;
-        self->mRenderFlags &= ~0x20000;
+        mMessage[0] = 0;
+        mMessageFrame = 0.0f;
+        mRenderFlags &= ~0x20000;
         break;
     case 14:
-        self->mRenderFlags |= 0x40000;
-        strcpy1((unsigned short*)(&self->mNetStatusMessage[0]), str);
+        mRenderFlags |= 0x40000;
+        strcpy1((unsigned short*)(&mNetStatusMessage[0]), str);
         break;
     case 15:
-        self->mNetStatusMessage[0] = 0;
-        self->mRenderFlags &= ~0x40000;
+        mNetStatusMessage[0] = 0;
+        mRenderFlags &= ~0x40000;
         break;
     case 5: {
-        self->mRenderFlags &= ~0x10000;
+        mRenderFlags &= ~0x10000;
         char* name = (char*)cMusicSys_GetSongTitle(&cAudioInterface_bxAudio()->MusicSys, -1);
         unsigned int hash = 0xF0000000;
         if (name != 0 && *name != 0) {
-            self->mRenderFlags |= 0x10000;
+            mRenderFlags |= 0x10000;
             hash = GetHashValue32(name);
         }
-        if (!(self->mRenderFlags & 0x10000) || hash != self->mLastSongNameHashId) {
-            self->mLastSongNameHashId = (unsigned int)hash;
-            self->mBigRadioAnimFrame = -1.0f;
-            self->mBigRadioTextAnimFrame = 0.0f;
-            self->mBigRadioTextLinesNum = 0;
-            self->mBigRadioTextLineSongIndexMax = 0;
-            self->mBigRadioBkgdAnimFrame = 0.0f;
+        if (!(mRenderFlags & 0x10000) || hash != mLastSongNameHashId) {
+            mLastSongNameHashId = (unsigned int)hash;
+            mBigRadioAnimFrame = -1.0f;
+            mBigRadioTextAnimFrame = 0.0f;
+            mBigRadioTextLinesNum = 0;
+            mBigRadioTextLineSongIndexMax = 0;
+            mBigRadioBkgdAnimFrame = 0.0f;
         }
         break;
     }
     case 6:
-        self->mEventStateData = 0;
-        self->mEventStateFrame = 0.0f;
-        self->mEventStateHFX = 8;
+        mEventStateData = 0;
+        mEventStateFrame = 0.0f;
+        mEventStateHFX = 8;
         break;
     case 7:
-        self->mRenderFlags &= 0xFFBDC3FF;
-        self->mEventStateHFX = 80;
-        self->mEventStateFrame = 0.0f;
-        self->mMessageFrame = 0.0f;
-        self->mMessage[0] = 0;
-        self->mLastMissionID = 0xFFFFFFFF;
+        mRenderFlags &= 0xFFBDC3FF;
+        mEventStateHFX = 80;
+        mEventStateFrame = 0.0f;
+        mMessageFrame = 0.0f;
+        mMessage[0] = 0;
+        mLastMissionID = 0xFFFFFFFF;
         break;
     case 8:
-        self->mFlashIconTime = 0.0f;
-        self->mbFlashIcon = 1;
+        mFlashIconTime = 0.0f;
+        mbFlashIcon = 1;
         break;
     case 9:
-        self->mbFlashIcon = 0;
-        self->mFlashIconTime = 0.0f;
-        self->mFlashIconPhase = 0.0f;
+        mbFlashIcon = 0;
+        mFlashIconTime = 0.0f;
+        mFlashIconPhase = 0.0f;
         break;
     }
     return 0;

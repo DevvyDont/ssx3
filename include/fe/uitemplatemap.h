@@ -64,6 +64,7 @@ CHECK_SIZE(tMapLocation, 0x6C);
 struct cUIText;
 
 struct cUIInput;
+struct cUIMenu;
 struct cUIThing;
 
 struct cUITemplate_MAP {
@@ -122,7 +123,7 @@ struct cUITemplate_MAP {
     void setupEventUnlock() __asm__("cUITemplate_MAP_setupEventUnlock__FP15cUITemplate_MAP");
     void setupPeakUnlock() __asm__("cUITemplate_MAP_setupPeakUnlock");
     void setupScreenExit() __asm__("cUITemplate_MAP_setupScreenExit");
-    int onWidgetMenu(int menu, int event) __asm__("cUITemplate_MAP_onWidgetMenu");
+    int onWidgetMenu(cUIMenu* pMenu, unsigned int event) __asm__("cUITemplate_MAP_onWidgetMenu");
     void onUpdate() __asm__("cUITemplate_MAP_onUpdate");
     void setupLayout() __asm__("cUITemplate_MAP_setupLayout");
     void setupMenuFocus(int focus) __asm__("cUITemplate_MAP_setupMenuFocus");
@@ -137,7 +138,7 @@ struct cUITemplate_MAP {
     void setupLocationInfo() __asm__("cUITemplate_MAP_setupLocationInfo");
     void setShowInfo(int show) __asm__("cUITemplate_MAP_setShowInfo");
     void onWidgetCreate(cUIThing* menu) __asm__("cUITemplate_MAP_onWidgetCreate");
-    int onGainTransition(int on) __asm__("cUITemplate_MAP_onGainTransition");
+    bool onGainTransition(int on) __asm__("cUITemplate_MAP_onGainTransition");
     bool isMapEventCompleted(tMapLocation ev, int peak) __asm__("cUITemplate_MAP_isMapEventCompleted");
     int onInputBegin() __asm__("cUITemplate_MAP_onInputBegin__FPv");
     void onInputAlways(cUIInput* menu) __asm__("cUITemplate_MAP_onInputAlways");

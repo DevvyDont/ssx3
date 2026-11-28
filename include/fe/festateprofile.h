@@ -109,13 +109,16 @@ struct cFEStateProfileLoad : public cFEMemCard {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFEStateProfileLoad();
     virtual void onCreateScreen() __asm__("cFEStateProfileLoad_onCreateScreen");
-    virtual void hideActionButtons(int on) __asm__("cFEStateProfileLoad_hideActionButtons");
+    virtual void hideActionButtons(bool on) __asm__("cFEStateProfileLoad_hideActionButtons");
     virtual void displayStatus() __asm__("cFEStateProfileLoad_displayStatus");
     virtual void updateDone() __asm__("cFEStateProfileLoad_updateDone");
     virtual void onDestroyScreen() __asm__("cFEStateProfileLoad_onDestroyScreen__FPv");
     virtual int onWidgetMenu(cUIMenu* widget, unsigned int msg, unsigned int)
         __asm__("cFEStateProfileLoad_onWidgetMenu");
     virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cFEStateProfileLoad_onWidgetEvent");
+    virtual void onRender2D() __asm__("cFEStateProfileLoad_onRender2D__FPv");
+    virtual void hideDeleteButton(bool on) __asm__("cFEStateProfileLoad_hideDeleteButton");
+    virtual void hideMainButton(bool loadBlocked, bool saveBlocked) __asm__("cFEStateProfileLoad_hideMainButton");
 };
 
 CHECK_OFFSET(cFEStateProfileLoad, miCntrlID, 0x22C);

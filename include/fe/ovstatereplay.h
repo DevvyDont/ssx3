@@ -62,6 +62,8 @@ struct cOVState_REPLAY : public cOVState {
     virtual ~cOVState_REPLAY();
     virtual void onUpdate() __asm__("cOVState_REPLAY_onUpdate");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cOVState_REPLAY_onWidgetCreate");
+    virtual void onCreateScreen() __asm__("cOVState_REPLAY_onCreateScreen");
+    virtual bool onInputBegin(cUIInput* basePInput) __asm__("cOVState_REPLAY_onInputBegin");
 };
 
 CHECK_OFFSET(cOVState_REPLAY, mShowPopupMenu, 0x9C);

@@ -44,6 +44,7 @@ struct cFlagNode : public cInstanceNode {
     // declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cFlagNode();
     virtual void render() __asm__("cFlagNode_render__FPv");
+    virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cFlagNode_writeToReplayFrame__FPv");
 };
 
 CHECK_SIZE(cFlagNode, 0x1C);

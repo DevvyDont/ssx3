@@ -279,7 +279,6 @@ INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onGainFocus);
 
 
 extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
-extern "C" void cUIState_onGainFocus(void* self, int a1);
 
 /**
  * Gives the uber-trick screen's category menu the focus when the state gains focus.
@@ -289,19 +288,19 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  *
  * @param prevState  the state that had focus before, passed on to cUIState_onGainFocus
  */
-extern "C" void cFEStateUberTrick_onGainFocus(cFEStateUberTrick* self, int prevState)
+void cFEStateUberTrick::onGainFocus(cUIState* prevState)
 {
     cUIThing* menu;
-    cFEStateUberTrick_activateMainMenu(self);
-    menu = (cUIThing*)self->mpMainMenu;
+    cFEStateUberTrick_activateMainMenu(this);
+    menu = (cUIThing*)mpMainMenu;
     if (menu != 0) {
         menu->setFocus(1);
     }
-    menu = (cUIThing*)self->mpTrickMenu;
+    menu = (cUIThing*)mpTrickMenu;
     if (menu != 0) {
         menu->setFocus(0);
     }
-    cUIState_onGainFocus(self, prevState);
+    cUIState::onGainFocus(prevState);
 }
 #endif
 
@@ -818,9 +817,9 @@ INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetMenu);
  * @param event  the menu event
  * @return 0x100 or 0x101 as above
  */
-extern "C" int cFEStateUberTrick_onWidgetMenu(cFEStateUberTrick* self, int menu, unsigned int event)
+int cFEStateUberTrick::onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
 {
-    if (menu == (int)self->mpTrickMenu) {
+    if (menu == mpTrickMenu) {
         switch (event) {
         case cUIMenu::kONMISC:
             return 0x100;

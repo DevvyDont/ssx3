@@ -62,6 +62,7 @@ struct cFEStateMountainRoom : public cUIState {
         __asm__("cFEStateMountainRoom_onWidgetMenu");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateMountainRoom_onWidgetCreate");
     void updateMarkers() __asm__("cFEStateMountainRoom_updateMarkers");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEStateMountainRoom_onGainFocus");
 };
 
 CHECK_OFFSET(cFEStateMountainRoom, mpPassGroup, 0x048);

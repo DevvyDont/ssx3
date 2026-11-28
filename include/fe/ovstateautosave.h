@@ -76,6 +76,9 @@ struct cOVState_AUTOSAVE : public cFEMemCard {
     virtual ~cOVState_AUTOSAVE();
     virtual void displayStatus() __asm__("cOVState_AUTOSAVE_displayStatus");
     virtual void updateDone() __asm__("cOVState_AUTOSAVE_updateDone");
+    virtual void onCreateScreen() __asm__("cOVState_AUTOSAVE_onCreateScreen");
+    virtual void onUpdate() __asm__("cOVState_AUTOSAVE_onUpdate");
+    virtual void onDestroyScreen() __asm__("cOVState_AUTOSAVE_onDestroyScreen");
 };
 
 CHECK_OFFSET(cOVState_AUTOSAVE, mParentScreen, 0x22C);

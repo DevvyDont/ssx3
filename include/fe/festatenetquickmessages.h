@@ -78,6 +78,7 @@ struct cFEStateNetQuickMessages : public cFEStateNet {
     void onSaveChangesPopupEvent(cUIState* popup, int event)
         __asm__("cFEStateNetQuickMessages_onSaveChangesPopupEvent");
     int isChanged() __asm__("cFEStateNetQuickMessages_isChanged");
+    void showMessageRow(int idx) __asm__("cFEStateNetQuickMessages_showMessageRow");
 };
 
 CHECK_OFFSET(cFEStateNetQuickMessages, mbChanged, 0x6D0);

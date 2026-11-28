@@ -143,6 +143,8 @@ struct cUIMenu : public cUIGroup {
     cUIThing* getSelected() __asm__("cUIMenu_getSelected");
     unsigned char getSelectedIndex() __asm__("cUIMenu_getSelectedIndex");
     virtual void setUIData(tUIBaseObject*) __asm__("cUIMenu_setUIData");
+    virtual void setFocus(int on) __asm__("cUIMenu_setFocus");
+    virtual void render2D(float x, float y) __asm__("cUIMenu_render2D");
 };
 
 CHECK_OFFSET(cUIMenu, mAttrMenu, 0x090);

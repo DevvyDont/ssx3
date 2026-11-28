@@ -1665,15 +1665,15 @@ extern char str_overlayOptpct_d[];
  * onCreateScreen slot (+0x24) of cOVTemplate_Simple_vtbl, the vtable that also holds cOVTemplate_Simple_onWidgetMenu and cOVTemplate_Simple_onWidgetEvent; cOVState_FREESTYLE_PREEVENT_onCreateScreen
  * and cOVState_HEAT_PREEVENT_onCreateScreen call it as their base.
  */
-extern "C" void cOVTemplate_Simple_onCreateScreen(cOVTemplate_Simple* self)
+void cOVTemplate_Simple::onCreateScreen()
 {
-    cOVState_onCreateScreen(self);
-    char* list = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
+    cOVState_onCreateScreen(this);
+    char* list = (char*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_overlayMenu));
     *(int*)(list + 0x90) |= 8;
     for (int i = 0; i < 5; i++) {
         char buf[32];
         sprintf(buf, str_overlayOptpct_d, i);
-        cUIThing* optionWidget = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        cUIThing* optionWidget = (cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
         if (optionWidget != 0) {
             if (i < 1) {
                 int labelIndex = D_004A2860[i];
@@ -1766,22 +1766,22 @@ struct sObj_DlgCreate {
  * before quitting, others quit competition. Kinds 1 and 6 hide the "title_quitchallenge" object.
  */
 // Builds the generic dialog overlay: title/body texts depend on the dialog kind at 0x9C.
-extern "C" void cOVTemplate_Dialog_onCreateScreen(cOVTemplate_Dialog* self)
+void cOVTemplate_Dialog::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)self), GetHashValue32(str_87yndialog), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)this), GetHashValue32(str_87yndialog), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(((char*)self));
-    ((cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_b)))->mMiscData = 0;
-    ((cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_b)))->mMiscData = 1;
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quit));
-    switch ((unsigned int)self->mDialogType) {
+    cOVState_onCreateScreen(((char*)this));
+    ((cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_yes_b)))->mMiscData = 0;
+    ((cUIThing*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_no_b)))->mMiscData = 1;
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title_quit));
+    switch ((unsigned int)mDialogType) {
     case cOVTemplate_Dialog::kDialogQuit: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNQuitGame));
-        cUIThing* quitChallengeTitle = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
+        cUIThing* quitChallengeTitle = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title_quitchallenge));
         quitChallengeTitle->setVisible(0);
         break;
     }
@@ -1802,7 +1802,7 @@ extern "C" void cOVTemplate_Dialog_onCreateScreen(cOVTemplate_Dialog* self)
         break;
     case cOVTemplate_Dialog::kDialogSavePrompt: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNSaveBeforeQuit));
-        cUIThing* quitChallengeTitle = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
+        cUIThing* quitChallengeTitle = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title_quitchallenge));
         quitChallengeTitle->setVisible(0);
         break;
     }
@@ -2150,42 +2150,42 @@ extern char str_option_savereplay[];
  * save
  * replay option.
  */
-extern "C" void cOVState_REPLAY_onCreateScreen(cOVState_REPLAY* self)
+void cOVState_REPLAY::onCreateScreen()
 {
-    self->mHashName = GetHashValue32(str_64replay);
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)self), GetHashValue32(str_64replay), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    mHashName = GetHashValue32(str_64replay);
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)this), GetHashValue32(str_64replay), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(((char*)self));
-    self->mTimeLineHidden = 0;
-    self->mShowPopupMenu = 0;
-    cUIState_hideObjSafe(((char*)self), str_ReplayMenuPopup);
-    cUIState_hideObjSafe(((char*)self), str_showhelp);
-    if (self->mTimeLineHidden != 0) {
-        cUIState_hideObjSafe(((char*)self), str_hidetimeline);
-        cUIState_showObjSafe(((char*)self), str_showtimeline);
+    cOVState_onCreateScreen(((char*)this));
+    mTimeLineHidden = 0;
+    mShowPopupMenu = 0;
+    cUIState_hideObjSafe(((char*)this), str_ReplayMenuPopup);
+    cUIState_hideObjSafe(((char*)this), str_showhelp);
+    if (mTimeLineHidden != 0) {
+        cUIState_hideObjSafe(((char*)this), str_hidetimeline);
+        cUIState_showObjSafe(((char*)this), str_showtimeline);
     } else {
-        cUIState_showObjSafe(((char*)self), str_hidetimeline);
-        cUIState_hideObjSafe(((char*)self), str_showtimeline);
+        cUIState_showObjSafe(((char*)this), str_hidetimeline);
+        cUIState_hideObjSafe(((char*)this), str_showtimeline);
     }
-    self->mBottom_y = 245;
-    self->mMinBottom_y = 245;
-    self->mMaxBottom_y = 0x1E0;
-    self->mBottom_ydiff = 0;
-    cOVState_REPLAY_setupCameraName(((char*)self));
+    mBottom_y = 245;
+    mMinBottom_y = 245;
+    mMaxBottom_y = 0x1E0;
+    mBottom_ydiff = 0;
+    cOVState_REPLAY_setupCameraName(((char*)this));
     if (SSXApp->Game->Replay->Loaded != 0) {
-        self->mLoaded = 1;
+        mLoaded = 1;
     } else {
-        self->mLoaded = 0;
+        mLoaded = 0;
     }
-    cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+    cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ReplayMenu));
     *(int*)&obj->mAttrMenu |= 8;
-    if (self->mLoaded != 0) {
+    if (mLoaded != 0) {
         if (obj != 0) cUIMenu_setSelectedByIndex(obj, 2);
-        cUIThing* saveReplayOption = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_savereplay));
+        cUIThing* saveReplayOption = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_option_savereplay));
         if (saveReplayOption != 0) {
             saveReplayOption->setVisible(0);
             saveReplayOption->setStatic(0);

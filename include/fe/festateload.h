@@ -60,6 +60,11 @@ struct cFEStateEventSelect : public cFEState {
     virtual void onUpdate() __asm__("cFEStateEventSelect_onUpdate");
     virtual void onWidgetCreate(cUIThing*) __asm__("cFEStateEventSelect_onWidgetCreate__FPv");
     virtual void onWidgetEvent(cUIThing* obj, unsigned int msg) __asm__("cFEStateEventSelect_onWidgetEvent");
+    virtual void onGainFocus(cUIState*) __asm__("cFEStateEventSelect_onGainFocus");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
+        __asm__("cFEStateEventSelect_onWidgetMenu");
+    virtual void onInputAlways(cUIInput* pInput) __asm__("cFEStateEventSelect_onInputAlways");
+    virtual bool onGainTransition(int) __asm__("cFEStateEventSelect_onGainTransition__FPv");
 };
 
 CHECK_OFFSET(cFEStateEventSelect, mMap, 0x048);

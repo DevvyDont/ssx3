@@ -94,6 +94,7 @@ struct cConveyorNode : public cInstanceNode {
     virtual void render() __asm__("cConveyorNode_render");
     virtual void* getNodeState() __asm__("cConveyorNode_getNodeState__FPv");
     virtual void updateIntersectInfo(tIntersectInfo& hit) __asm__("cConveyorNode_updateIntersectInfo");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cConveyorNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cConveyorNode, Vel, 0x1C);

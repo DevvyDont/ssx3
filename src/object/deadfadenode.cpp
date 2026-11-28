@@ -436,14 +436,11 @@ INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_writeToReplayFrame__FPv);
 /**
  * Writes the dead-fade node's replay data using the base cInstanceNode_writeToReplayFrame().
  *
- * Only @p self is declared; the replay stream argument reaches the base function unchanged in its register.
- *
- * @return no meaningful value (cInstanceNode_writeToReplayFrame() returns nothing)
+ * The replay stream is not passed on explicitly; it reaches the base function unchanged in its register.
  */
-void* cDeadFadeNode_writeToReplayFrame(void* vself)
+void cDeadFadeNode::writeToReplayFrame(cBxReplayFrame*)
 {
-    cDeadFadeNode* self = (cDeadFadeNode*)vself;
-    return cInstanceNode_writeToReplayFrame(self);
+    cInstanceNode_writeToReplayFrame(this);
 }
 #endif
 
@@ -504,13 +501,10 @@ INCLUDE_ASM("object/deadfadenode", cHideNode_writeToReplayFrame__FPv);
  * Writes the node to a replay frame by forwarding to cInstanceNode_writeToReplayFrame.
  *
  * It fills the writeToReplayFrame slot (word 25) of the hide node vtable cHideNode_vtbl.
- *
- * @return cInstanceNode_writeToReplayFrame()'s result
  */
-void* cHideNode_writeToReplayFrame(void* vself)
+void cHideNode::writeToReplayFrame(cBxReplayFrame*)
 {
-    cHideNode* self = (cHideNode*)vself;
-    return cInstanceNode_writeToReplayFrame(self);
+    cInstanceNode_writeToReplayFrame(this);
 }
 #endif
 
@@ -571,13 +565,10 @@ INCLUDE_ASM("object/deadfadenode", cRestoreNode_writeToReplayFrame__FPv);
  * Writes the node to a replay frame by forwarding to cInstanceNode_writeToReplayFrame.
  *
  * It fills the writeToReplayFrame slot (word 25) of the restore node vtable cRestoreNode_vtbl.
- *
- * @return cInstanceNode_writeToReplayFrame()'s result
  */
-void* cRestoreNode_writeToReplayFrame(void* vself)
+void cRestoreNode::writeToReplayFrame(cBxReplayFrame*)
 {
-    cRestoreNode* self = (cRestoreNode*)vself;
-    return cInstanceNode_writeToReplayFrame(self);
+    cInstanceNode_writeToReplayFrame(this);
 }
 #endif
 

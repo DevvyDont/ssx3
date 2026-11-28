@@ -64,6 +64,7 @@ struct cUIScrollBar : public cUIThing {
     void setDownAnimationName(char* str) __asm__("cUIScrollBar_setDownAnimationName");
     int getValue() __asm__("cUIScrollBar_getValue");
     virtual void render2D(float x, float y) __asm__("cUIScrollBar_render2D");
+    virtual void setUIData(tUIBaseObject*) __asm__("cUIScrollBar_setUIData__FPv");
 };
 
 CHECK_OFFSET(cUIScrollBar, mpObjBackground, 0x074);

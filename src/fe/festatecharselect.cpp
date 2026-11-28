@@ -132,7 +132,6 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* self);
-extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern signed char D_00440F68[];
 extern char str_Menu[];
 
@@ -145,23 +144,23 @@ extern char str_Menu[];
  *
  * @param pPrevState  the state that had focus before, passed on
  */
-extern "C" void cFEStateCharSelect_onGainFocus(cFEStateCharSelect* self, int pPrevState)
+void cFEStateCharSelect::onGainFocus(cUIState* pPrevState)
 {
     int i = 0;
-    int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
+    int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
     for (; i < 10; i++) {
         if (D_00440F68[i] == id) {
-            void* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu));
+            void* menu = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu));
             if (menu != 0)
                 cUIMenu_setSelectedByIndex(menu, i);
             break;
         }
     }
-    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, D_00440F68[0], 0);
-    cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum);
+    cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, mUserNum, D_00440F68[0], 0);
+    cFERider* feRider = cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, mUserNum);
     feRider->mAnimateBoard = 0;
-    self->updateCharacter3DPos();
-    cUIState_onGainFocus(self, pPrevState);
+    updateCharacter3DPos();
+    cUIState::onGainFocus(pPrevState);
 }
 #endif
 
@@ -172,13 +171,10 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onRender2D__FPv);
 #ifdef SKIP_ASM
 /**
  * Renders the character-select state's 2D layer with the shared UI-state render routine cUIState_onRender2D().
- *
- * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
-void* cFEStateCharSelect_onRender2D(void* vself)
+void cFEStateCharSelect::onRender2D()
 {
-    cFEStateCharSelect* self = (cFEStateCharSelect*)vself;
-    return cUIState_onRender2D(self);
+    cUIState_onRender2D(this);
 }
 #endif
 
@@ -1038,7 +1034,7 @@ extern "C" void cFEStateCheatCharSelect_updateCharWidgets(cFEStateCheatCharSelec
  * @return 0x100 for kONPREVIOUS, kONOPTION and kONMISC, for kISHIGHLIGHTABLE whether @p value is below the entry
  *         count, else 0x101 (kSCROLLCHANGE refreshes the pictures first)
  */
-extern "C" int cFEStateCheatCharSelect_onWidgetMenu(cFEStateCheatCharSelect* self, int pMenu, unsigned int msg, int value)
+int cFEStateCheatCharSelect::onWidgetMenu(cUIMenu* pMenu, unsigned int msg, unsigned int value)
 {
     switch (msg) {
     case cUIMenu::kONPREVIOUS:
@@ -1046,9 +1042,9 @@ extern "C" int cFEStateCheatCharSelect_onWidgetMenu(cFEStateCheatCharSelect* sel
     case cUIMenu::kONMISC:
         return 0x100;
     case cUIMenu::kISHIGHLIGHTABLE:
-        return value < self->mNumCharacters;
+        return (int)value < mNumCharacters;
     case cUIMenu::kSCROLLCHANGE:
-        self->updateCharWidgets();
+        updateCharWidgets();
         break;
     }
     return 257;

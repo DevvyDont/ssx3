@@ -68,7 +68,6 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onGainFocus);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void cFEState_onGainFocus(void* self, int a1);
 extern char str_Option_1[];
 extern char str_Option_2[];
 extern char str_Option_3[];
@@ -93,14 +92,14 @@ static inline void showObj_001833D0(void* self, char* name, int id)
  *
  * @param pPrevState  the state that had focus before (On Tour pPrevState), passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateRiderDetail_onGainFocus(cFEStateRiderDetail* self, int pPrevState)
+void cFEStateRiderDetail::onGainFocus(cUIState* pPrevState)
 {
-    showObj_001833D0(self, str_Option_1, 5);
-    showObj_001833D0(self, str_Option_2, 6);
-    showObj_001833D0(self, str_Option_3, 7);
-    showObj_001833D0(self, str_Option_4, 8);
-    showObj_001833D0(self, str_Option_5, 9);
-    cFEState_onGainFocus(self, pPrevState);
+    showObj_001833D0(this, str_Option_1, 5);
+    showObj_001833D0(this, str_Option_2, 6);
+    showObj_001833D0(this, str_Option_3, 7);
+    showObj_001833D0(this, str_Option_4, 8);
+    showObj_001833D0(this, str_Option_5, 9);
+    cFEState::onGainFocus(pPrevState);
 }
 #endif
 
@@ -135,13 +134,10 @@ INCLUDE_ASM("fe/festateriderbio", cFEStateRiderDetail_onRender2D__FPv);
 #ifdef SKIP_ASM
 /**
  * Renders the rider-detail state's 2D layer with the shared UI-state render routine cUIState_onRender2D().
- *
- * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
-void* cFEStateRiderDetail_onRender2D(void* vself)
+void cFEStateRiderDetail::onRender2D()
 {
-    cFEStateRiderDetail* self = (cFEStateRiderDetail*)vself;
-    return cUIState_onRender2D(self);
+    cUIState_onRender2D(this);
 }
 #endif
 

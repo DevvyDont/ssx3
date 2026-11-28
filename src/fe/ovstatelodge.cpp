@@ -204,8 +204,9 @@ void cFEStateMountainRoom::onCreateScreen()
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onGainFocus);
 #ifdef SKIP_ASM
+// cFEState's focus handler, though cFEStateMountainRoom is declared as a plain cUIState
+extern "C" void cFEState_onGainFocus(void* self, cUIState* pPrevState);
 extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* self);
-extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 /**
  * Refreshes the mountain room's event widgets, then gives the state focus.
@@ -215,10 +216,10 @@ extern "C" void cFEState_onGainFocus(void* self, int a1);
  *
  * @param pPrevState  the state that had focus before (On Tour: pPrevState), passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateMountainRoom_onGainFocus(cFEStateMountainRoom* self, int pPrevState)
+void cFEStateMountainRoom::onGainFocus(cUIState* pPrevState)
 {
-    self->updateMarkers();
-    cFEState_onGainFocus(self, pPrevState);
+    updateMarkers();
+    cFEState_onGainFocus(this, pPrevState);
 }
 #endif
 
@@ -1060,20 +1061,17 @@ extern "C" void cFEStatePeakRoom_onWidgetCreate(sPeak_38F8* self, sWidget_38F8* 
 }
 #endif
 
-extern "C" void* cUIState_onGainFocus(void* self);
-
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_onGainFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Gives the peak-room state focus using the base cUIState_onGainFocus().
  *
- * @return no meaningful value (cUIState_onGainFocus() returns nothing)
+ * @param pPrevState  the state that had focus before, passed on
  */
-void* cFEStatePeakRoom_onGainFocus(void* vself)
+void cFEStatePeakRoom::onGainFocus(cUIState* pPrevState)
 {
-    cFEStatePeakRoom* self = (cFEStatePeakRoom*)vself;
-    return cUIState_onGainFocus(self);
+    cUIState::onGainFocus(pPrevState);
 }
 #endif
 

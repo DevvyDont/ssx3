@@ -88,6 +88,7 @@ struct cFEStateAudioOptions : public cFEState {
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateAudioOptions_onGainTransition");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int index)
         __asm__("cFEStateAudioOptions_onWidgetMenu");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEStateAudioOptions_onGainFocus");
 };
 
 CHECK_OFFSET(cFEStateAudioOptions, mpHelpText, 0x048);

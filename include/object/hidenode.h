@@ -45,6 +45,7 @@ struct cHideNode : public cInstanceNode {
     virtual void expire(int) __asm__("cHideNode_expire__FPv");
     virtual void signal(int, float) __asm__("cHideNode_signal__FPv");
     virtual void onCollide(const tCollideInfo*, const tIntersectInfo*, cBeing*) __asm__("cHideNode_onCollide__FPv");
+    virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cHideNode_writeToReplayFrame__FPv");
 };
 
 CHECK_SIZE(cHideNode, 0x1C);

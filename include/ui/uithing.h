@@ -150,7 +150,8 @@ struct cUIThing : public cListNode {
         __asm__("cUIThing_setChannelData");      // 12 cUIThing_setChannelData
     virtual void setChannelDataKCP(unsigned int NumChannels, short* pPtr)
         __asm__("cUIThing_setChannelDataKCP"); // 13 cUIThing_setChannelDataKCP
-    virtual cUIThing* getObjectByHashName(unsigned int hashname);         // 14 cUIThing_getObjectByHashName
+    virtual cUIThing* getObjectByHashName(unsigned int hashname)
+        __asm__("cUIThing_getObjectByHashName");         // 14 cUIThing_getObjectByHashName
     virtual bool onInput(const cUIInput* pInput)
         __asm__("cUIThing_onInput__FPv");                         // 15 cUIThing_onInput
     virtual void updateLocale()

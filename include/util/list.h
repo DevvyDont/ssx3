@@ -38,8 +38,10 @@ public:
     // 0x8: the vptr. [R] _vt$9cListNode cListNode_vtbl (ctor cListNode_cListNode, dtor cListNode__cListNode); slots
     // [R] that table, names and types [O]:
     virtual ~cListNode();                                        // 1 cListNode__cListNode
-    virtual void* traverseFlat(cListOperator* pOperator);        // 2 cListNode_traverseFlat
-    virtual void* traverseRecurse(cListOperator* pOperator);     // 3 cListNode_traverseRecurse
+    virtual void* traverseFlat(cListOperator* pOperator)
+        __asm__("cListNode_traverseFlat");        // 2 cListNode_traverseFlat
+    virtual void* traverseRecurse(cListOperator* pOperator)
+        __asm__("cListNode_traverseRecurse");     // 3 cListNode_traverseRecurse
 
     // Methods bound to their retail symbols by asm labels.
     cListNode* next() __asm__("cListNode_next");

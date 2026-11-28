@@ -74,6 +74,10 @@ struct cOVState_SAVEOPTIONS : public cFEMemCard {
     virtual void updateDone() __asm__("cOVState_SAVEOPTIONS_updateDone");
     virtual void displayStatus() __asm__("cOVState_SAVEOPTIONS_displayStatus");
     virtual void onWidgetEvent(cUIThing* msg, unsigned int type) __asm__("cOVState_SAVEOPTIONS_onWidgetEvent");
+    virtual void hideActionButtons(bool on) __asm__("cOVState_SAVEOPTIONS_hideActionButtons");
+    virtual void hideDeleteButton(bool on) __asm__("cOVState_SAVEOPTIONS_hideDeleteButton");
+    virtual void hideMainButton(bool loadBlocked, bool on) __asm__("cOVState_SAVEOPTIONS_hideMainButton");
+    virtual void onCreateScreen() __asm__("cOVState_SAVEOPTIONS_onCreateScreen");
 };
 
 CHECK_OFFSET(cOVState_SAVEOPTIONS, mIsHidden, 0x22C);

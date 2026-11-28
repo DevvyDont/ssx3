@@ -193,6 +193,10 @@ struct cFEStateCharEquip : public cFEState {
     void buySelectedItem() __asm__("cFEStateCharEquip_buySelectedItem");
     bool toggleSelectedItem() __asm__("cFEStateCharEquip_toggleSelectedItem");
     void openBuyPopup(tBEBoltDef* item) __asm__("cFEStateCharEquip_openBuyPopup");
+    virtual void onLoseFocus(cUIState*) __asm__("cFEStateCharEquip_onLoseFocus");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEStateCharEquip_onGainFocus");
+    virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int kind, unsigned int idx)
+        __asm__("cFEStateCharEquip_onWidgetMenu");
 };
 
 CHECK_OFFSET(cFEStateCharEquip, mpTitleText, 0x048);

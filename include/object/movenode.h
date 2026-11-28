@@ -167,6 +167,11 @@ struct cMoveNode : public cInstanceNode {
     virtual int incFocusCount(tInstanceRecord* pInst) __asm__("cMoveNode_incFocusCount");
     virtual int decFocusCount(tInstanceRecord* pInst) __asm__("cMoveNode_decFocusCount");
     virtual const tBoundBox* getBoundBox() const __asm__("cMoveNode_getBoundBox");
+    virtual const t4Matrix* getRootTransform() __asm__("cMoveNode_getRootTransform");
+    virtual const t4Matrix* getRootTransform1(tInstanceRecord*) __asm__("cMoveNode_getRootTransform1");
+    virtual int intersect(cWorldIntersectType& w, tIntersectInfo* intInfo, int num, int flags)
+        __asm__("cMoveNode_intersect");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMoveNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cMoveNode, ModifierBlock, 0x1C);

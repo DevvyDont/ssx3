@@ -252,7 +252,8 @@ public:
     virtual int GetTextureWidth(int texid) = 0;                                                          // slot 56: [R] cPS2GraphicsMan_GetTextureWidth
     virtual int GetTextureHeight(int texid) = 0;                                                         // slot 57: [R] cPS2GraphicsMan_GetTextureHeight
     virtual int GetTexel(unsigned int textureId, float u, float v, int filter);                          // slot 58: [R] cPS2GraphicsMan_GetTexel; O/O/O/O?
-    virtual void CreateScreenGrabTexture(tScreenGrabHandle& screenGrabHandle, unsigned int width, unsigned int height); // slot 59: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_CreateScreenGrabTexture
+    virtual void CreateScreenGrabTexture(tScreenGrabHandle& screenGrabHandle, unsigned int width, unsigned int height)
+        __asm__("cGraphicsMan_CreateScreenGrabTexture__FPvT0"); // slot 59: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_CreateScreenGrabTexture
     // slot 60: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RemoveScreenGrabTexture
     virtual void RemoveScreenGrabTexture(tScreenGrabHandle& screenGrabHandle)
         __asm__("cGraphicsMan_RemoveScreenGrabTexture__FPv");
@@ -260,7 +261,8 @@ public:
     virtual void TakeScreenGrab(const tScreenGrabHandle& screenGrabHandle) __asm__("cGraphicsMan_TakeScreenGrab__FPv");
     // slot 62: [O] reference parameters as On Tour; [R] cGraphicsMan_SetActiveDrawState__FPv; parameters [O]
     virtual void SetActiveDrawState(const sDrawState& drawstate) __asm__("cGraphicsMan_SetActiveDrawState__FPv");
-    virtual void ForceActiveDrawState(const sDrawState& drawstate);                                      // slot 63: [O] reference parameters as On Tour; [R] cGraphicsMan_ForceActiveDrawState
+    virtual void ForceActiveDrawState(const sDrawState& drawstate)
+        __asm__("cGraphicsMan_ForceActiveDrawState");                                      // slot 63: [O] reference parameters as On Tour; [R] cGraphicsMan_ForceActiveDrawState
     // slot 64: [R] cGraphicsMan_ActiveDrawState__FPv; parameters [O]
     virtual const sDrawState* ActiveDrawState() __asm__("cGraphicsMan_ActiveDrawState__FPv");
     // slot 65: [R] cGraphicsMan_SetActiveTexture__FPv; parameters [O]
@@ -280,9 +282,11 @@ public:
         __asm__("cGraphicsMan_RenderIndexedTriList");
     virtual void RenderLineStrip(int numverts, const tBxVertex* verts, int isstatic) = 0;                // slot 73: [R] cPS2GraphicsMan_RenderLineStrip; every caller passes (n, tBxVertex*, 0); [O] the PSP twin's RenderLineStrip(int, const tBxVertex*, bool isstatic), and On Tour lists this pure one first
     virtual void RenderLineStrip(int numverts, char* packedoffsets, float scale);                         // slot 74: [R] cGraphicsMan_RenderLineStrip__FPv (the base's empty body; cPS2GraphicsMan keeps it); [O] On Tour's cGraphicsMan defines RenderLineStrip(int numverts, char* packedoffsets, float scale) itself
-    virtual void RenderSpline(const t4Matrix& BezMat, const tARGB& col, int NumPoints);                  // slot 75: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderSpline
+    virtual void RenderSpline(const t4Matrix& BezMat, const tARGB& col, int NumPoints)
+        __asm__("cGraphicsMan_RenderSpline");                  // slot 75: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_RenderSpline
     virtual cGridMesh* CreateGridMesh(int width, int height, int memtype) = 0;                           // slot 76: [R] cPS2GraphicsMan_CreateGridMesh
-    virtual void DeleteGridMesh(cGridMesh* pData);                                                       // slot 77: [R] cGraphicsMan_DeleteGridMesh__FPvi; parameters [O]
+    virtual void DeleteGridMesh(cGridMesh* pData)
+        __asm__("cGraphicsMan_DeleteGridMesh__FPvi");                                                       // slot 77: [R] cGraphicsMan_DeleteGridMesh__FPvi; parameters [O]
     virtual void DrawSprite(const t4Vector& pos, const t2Vector& halfSize, const t2Vector& uv0, const t2Vector& uv1, const tARGB& colour) = 0; // slot 78: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_DrawSprite
     virtual void DrawRotatedSprite(const t4Vector& pos, const t2Vector& halfSize, const t2Vector& uv0, const t2Vector& uv1, const tARGB& colour, float rotationRads, int numPass) = 0; // slot 79: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_DrawRotatedSprite
     virtual void DrawString3D(cFont& font, float x, float y, const char* str, float xscale, float yscale, float iwidth, float iheight, const tARGB& colour, float depth) = 0; // slot 80: [O] reference parameters as On Tour; [R] cPS2GraphicsMan_DrawString3D

@@ -202,6 +202,9 @@ struct cScreenPopup : public cUIState {
     virtual void onWidgetEvent(cUIThing* id, unsigned int ev) __asm__("cScreenPopup_onWidgetEvent");
     virtual void onPopupEvent(cUIState* child, unsigned int msg) __asm__("cScreenPopup_onPopupEvent");
     void setupBackgroundType() __asm__("cScreenPopup_setupBackgroundType");
+    virtual void onDestroyScreen() __asm__("cScreenPopup_onDestroyScreen__FPv");
+    virtual int handleEvent(int msg, void* pParam) __asm__("cScreenPopup_handleEvent");
+    virtual void onRender2D() __asm__("cScreenPopup_onRender2D__FPv");
 };
 
 CHECK_OFFSET(cScreenPopup, mpBackGroundWhite, 0x48);

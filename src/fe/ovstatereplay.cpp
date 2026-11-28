@@ -94,7 +94,7 @@ extern "C" void cReplay_stopReplay(void* replay);
 extern "C" void cReplay_startAutoReplay(void* replay);
 extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void cGame_exit(void* game, int a1);
-extern "C" int cReplay_updateInput(void* replay, int a1);
+extern "C" bool cReplay_updateInput(void* replay, int debug);
 extern int cPauseState_Flags;
 extern int cPauseState_StackIdx;
 extern int cPauseState_Stack[];
@@ -162,45 +162,46 @@ static inline char* replay_20DF38() { return *(char**)(SSXApp_20DF38->game + 0x2
  * replay (+0xB4, copied from cReplay Loaded at create) Up on row 1 and Down on row 2 are swallowed, so the
  * hidden Save item is never reached.
  *
- * @param pInput  the UI input (pad port at +0x4)
- * @return 1 when handled here, 0 while the menu is open (the menu handles it), else cReplay_updateInput()'s result
+ * @param basePInput  the UI input (pad port at +0x4)
+ * @return true when handled here, false while the menu is open (the menu handles it), else cReplay_updateInput()'s result
  */
-extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* pInput)
+bool cOVState_REPLAY::onInputBegin(cUIInput* basePInput)
 {
+    cPad_20DF38* pInput = (cPad_20DF38*)basePInput;
     cSnd_20DF38* snd = &gUISoundNull;
-    if ((cSnd_20DF38*)self->mpEngine->mpSound != 0)
-        snd = (cSnd_20DF38*)self->mpEngine->mpSound;
+    if ((cSnd_20DF38*)mpEngine->mpSound != 0)
+        snd = (cSnd_20DF38*)mpEngine->mpSound;
     if (pInput->port != *(int*)(replay_20DF38() + 0x28)) {
-        return 1;
+        return true;
     }
-    if (self->mShowPopupMenu == 0 && cInput_getState(SSXApp_20DF38->pads[pInput->port], 202)) {
-        if (self->mBottom_y == self->mMaxBottom_y || self->mBottom_ydiff == 4) {
+    if (mShowPopupMenu == 0 && cInput_getState(SSXApp_20DF38->pads[pInput->port], 202)) {
+        if (mBottom_y == mMaxBottom_y || mBottom_ydiff == 4) {
             snd->play(2);
         }
-        self->mBottom_ydiff = -4;
-        return 1;
+        mBottom_ydiff = -4;
+        return true;
     }
-    if (self->mShowPopupMenu == 0 && cInput_getState(SSXApp_20DF38->pads[pInput->port], 203)) {
-        if (self->mBottom_y == self->mMinBottom_y || self->mBottom_ydiff == -4) {
+    if (mShowPopupMenu == 0 && cInput_getState(SSXApp_20DF38->pads[pInput->port], 203)) {
+        if (mBottom_y == mMinBottom_y || mBottom_ydiff == -4) {
             snd->play(2);
         }
-        self->mBottom_ydiff = 4;
-        return 1;
+        mBottom_ydiff = 4;
+        return true;
     }
-    if (pInput->isStart() && self->mShowPopupMenu == 0) {
+    if (pInput->isStart() && mShowPopupMenu == 0) {
         snd->play(6);
         int n = cPauseState_StackIdx + 1;
         cPauseState_Stack[n] = 2;
         cPauseState_Flags = D_004428F8[0];
         cPauseState_StackIdx = n;
-        self->mShowPopupMenu = 1;
-        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        mShowPopupMenu = 1;
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ReplayMenu));
         *(int*)&obj->mAttrMenu &= ~8;
-        return 1;
+        return true;
     }
-    if (self->mShowPopupMenu != 0 && pInput->isNext()) {
+    if (mShowPopupMenu != 0 && pInput->isNext()) {
         snd->play(6);
-        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ReplayMenu));
         switch (obj->mpSelected->mMiscData) {
         case 0:
             cReplay_stopReplay(replay_20DF38());
@@ -208,13 +209,13 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             break;
         case 1: {
-            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
-            unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpScreen, GetHashValue32(str_TransitionOut_b));
+            cUIStateStack_pop(&mpEngine->mStateStack, 1);
+            unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)mpScreen, GetHashValue32(str_TransitionOut_b));
             if (frame != cUIScreen::kNoFrame) {
-                cUIScreen_playFrame(self->mpScreen, frame, 1);
+                cUIScreen_playFrame(mpScreen, frame, 1);
             }
             cReplay_stopReplay(replay_20DF38());
-            if (self->mLoaded == 0) {
+            if (mLoaded == 0) {
                 cReplay_startAutoReplay(replay_20DF38());
             }
             if (*(int*)(replay_20DF38() + 0x608) != 0) {
@@ -224,47 +225,47 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
             break;
         }
         case 2:
-            self->mShowPopupMenu = 0;
+            mShowPopupMenu = 0;
             cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
             break;
         }
-        return 1;
+        return true;
     }
-    if (self->mShowPopupMenu != 0 && pInput->isPrevious()) {
+    if (mShowPopupMenu != 0 && pInput->isPrevious()) {
         snd->play(3);
         cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
-        self->mShowPopupMenu = 0;
-        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        mShowPopupMenu = 0;
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ReplayMenu));
         *(int*)&obj->mAttrMenu |= 8;
-        return 1;
+        return true;
     }
-    if (self->mShowPopupMenu == 0 && cInput_getState(SSXApp_20DF38->pads[pInput->port], 204)) {
+    if (mShowPopupMenu == 0 && cInput_getState(SSXApp_20DF38->pads[pInput->port], 204)) {
         snd->play(6);
-        self->mTimeLineHidden ^= 1;
-        if (self->mTimeLineHidden != 0) {
-            cUIState_hideObjSafe((self), str_top);
-            cUIState_hideObjSafe((self), str_hidetimeline);
-            cUIState_showObjSafe((self), str_showtimeline);
+        mTimeLineHidden ^= 1;
+        if (mTimeLineHidden != 0) {
+            cUIState_hideObjSafe((this), str_top);
+            cUIState_hideObjSafe((this), str_hidetimeline);
+            cUIState_showObjSafe((this), str_showtimeline);
         } else {
-            cUIState_showObjSafe((self), str_top);
-            cUIState_showObjSafe((self), str_hidetimeline);
-            cUIState_hideObjSafe((self), str_showtimeline);
+            cUIState_showObjSafe((this), str_top);
+            cUIState_showObjSafe((this), str_hidetimeline);
+            cUIState_hideObjSafe((this), str_showtimeline);
         }
-        return 1;
+        return true;
     }
     if (pInput->isUp()) {
-        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
-        if (((char*)obj) != 0 && self->mLoaded != 0 && obj->mScrollItemCurrent == 1) {
-            return 1;
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ReplayMenu));
+        if (((char*)obj) != 0 && mLoaded != 0 && obj->mScrollItemCurrent == 1) {
+            return true;
         }
     } else if (pInput->isDown()) {
-        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
-        if (((char*)obj) != 0 && self->mLoaded != 0 && obj->mScrollItemCurrent == 2) {
-            return 1;
+        cUIMenu* obj = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ReplayMenu));
+        if (((char*)obj) != 0 && mLoaded != 0 && obj->mScrollItemCurrent == 2) {
+            return true;
         }
     }
-    if (self->mShowPopupMenu != 0) {
-        return 0;
+    if (mShowPopupMenu != 0) {
+        return false;
     }
     return cReplay_updateInput(replay_20DF38(), 0);
 }
@@ -440,13 +441,10 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_onRender2D__FPv);
 #ifdef SKIP_ASM
 /**
  * Renders the overlay state's 2D layer with the shared UI-screen render routine cUIState_onRender2D().
- *
- * @return no meaningful value (cUIState_onRender2D() returns nothing)
  */
-void* cOVState_onRender2D(void* vself)
+void cOVState::onRender2D()
 {
-    cOVState* self = (cOVState*)vself;
-    return cUIState_onRender2D(self);
+    cUIState_onRender2D(this);
 }
 #endif
 

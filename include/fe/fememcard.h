@@ -74,15 +74,16 @@ struct cFEMemCard : public cOVState {
     virtual void updateSkip()
         __asm__("cFEMemCard_updateSkip__FPv");                                                      // 32
     virtual void updateDone();                                                      // 33
-    virtual void triggerArrowPulse(const char* strArrowName, const char* strAnimName); // 34
+    virtual void triggerArrowPulse(const char* strArrowName, const char* strAnimName)
+        __asm__("cFEMemCard_triggerArrowPulse"); // 34
     virtual void triggerDisplayState(int gotoScreenState)
         __asm__("cFEMemCard_triggerDisplayState");                          // 35
     virtual void getPopup(unsigned short* ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate,
                           int bSnowFlake)
         __asm__("cFEMemCard_getPopup");                                          // 36 (On Tour: the flags are bool)
-    virtual void hideActionButtons(int bHide);                                      // 37 (bool)
-    virtual void hideDeleteButton(int bHide);                                       // 38 (bool)
-    virtual void hideMainButton(int bLoadHide, int bSaveHide);                      // 39 (bools)
+    virtual void hideActionButtons(bool bHide);                                     // 37
+    virtual void hideDeleteButton(bool bHide);                                      // 38
+    virtual void hideMainButton(bool bLoadHide, bool bSaveHide);                    // 39
     virtual void exit()
         __asm__("cFEMemCard_exit__FPv");                                                            // 40
     virtual void cancel() __asm__("cFEMemCard_cancel");                                                          // 41

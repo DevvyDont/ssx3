@@ -3954,12 +3954,12 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetViewportWindow1);
  * Sets the viewport window from a rectangle: calls virtual slot 23 (cPS2GraphicsMan_SetViewportWindow) with
  * @p applyScreenOffset and the four floats of @p rect.
  *
- * @param rect  x, y, width and height (four floats)
+ * @param rect  x, y, width and height
  * @param applyScreenOffset  passed through as the slot's first argument
  */
-extern "C" void cPS2GraphicsMan_SetViewportWindow1(cPS2GraphicsMan* self, float* rect, int applyScreenOffset)
+void cPS2GraphicsMan::SetViewportWindow1(const tRect& rect, int applyScreenOffset)
 {
-    self->SetViewportWindow(rect[0], rect[1], rect[2], rect[3], applyScreenOffset);
+    SetViewportWindow(rect.X, rect.Y, rect.W, rect.H, applyScreenOffset);
 }
 #endif
 
@@ -4287,11 +4287,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_getDisplayBufferWidth);
  * A retail-only accessor: the preview's run of out-of-line accessors has nothing between the display-buffer and
  * frame-buffer-width ones.
  *
- * @param graphicsMan  the graphics manager
  * @return mDisplayBufferWidth
  */
-extern "C" int cPS2GraphicsMan_getDisplayBufferWidth(cPS2GraphicsMan* graphicsMan) {
-    return (graphicsMan->mDisplayBufferWidth);
+int cPS2GraphicsMan::getDisplayBufferWidth()
+{
+    return (mDisplayBufferWidth);
 }
 #endif
 //100%
@@ -4486,11 +4486,11 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_getNumViews);
  *
  * cPS2DeferManager_buildDmaChains uses the field as a loop count. A retail-only accessor (the preview's run has no counterpart).
  *
- * @param pS2GraphicsMan  the graphics manager
  * @return mNumViews
  */
-extern "C" int cPS2GraphicsMan_getNumViews(cPS2GraphicsMan* pS2GraphicsMan) {
-    return (pS2GraphicsMan->mNumViews);
+int cPS2GraphicsMan::getNumViews()
+{
+    return (mNumViews);
 }
 #endif
 
@@ -4706,31 +4706,31 @@ static inline void Translate_5750(void* vvself, void* v)
 }
 
 /**
- * Builds the view matrix in *mCurrentView from a camera position and three rotation angles.
+ * Builds the view matrix in *mCurrentView from three rotation angles and a camera position.
  *
  * Loads t4mat_Identity, swaps the Y and Z axes (elements 5 and 10 become 0, 6 and 9 become 1), then multiplies in
  * rotations by -@p rx about t4vect_XAxis, -@p ry about t4vect_ZAxis and -@p rz about t4vect_YAxis (VU0 code), and
  * finally translates by -@p pos (its w is kept). Clears mMatricesValid so the combined matrices are rebuilt.
  *
+ * @param rx  the rotation about the X axis, in radians (On Tour pitch)
+ * @param ry  the rotation applied about the Z axis after the axis swap, in radians (On Tour heading)
+ * @param rz  the rotation applied about the Y axis after the axis swap, in radians (On Tour roll)
  * @param pos  the camera position
- * @param rx  the rotation about the X axis, in radians
- * @param ry  the rotation applied about the Z axis after the axis swap, in radians
- * @param rz  the rotation applied about the Y axis after the axis swap, in radians
  */
-extern "C" void cPS2GraphicsMan_SetView(cPS2GraphicsMan* self, t4Vector* pos, float rx, float ry, float rz)
+void cPS2GraphicsMan::SetView(float rx, float ry, float rz, const t4Vector& pos)
 {
-    LoadIdentity_5750(self);
-    self->mCurrentView->row[1].y = 0.0f;
-    self->mCurrentView->row[2].y = 1.0f;
-    self->mCurrentView->row[1].z = 1.0f;
-    self->mCurrentView->row[2].z = 0.0f;
-    Rotate_5750(self, t4vect_XAxis, -rx);
-    Rotate_5750(self, t4vect_ZAxis, -ry);
-    Rotate_5750(self, t4vect_YAxis, -rz);
-    t4Vector negPos = Scale_5750(*pos, -1.0f);
+    LoadIdentity_5750(this);
+    mCurrentView->row[1].y = 0.0f;
+    mCurrentView->row[2].y = 1.0f;
+    mCurrentView->row[1].z = 1.0f;
+    mCurrentView->row[2].z = 0.0f;
+    Rotate_5750(this, t4vect_XAxis, -rx);
+    Rotate_5750(this, t4vect_ZAxis, -ry);
+    Rotate_5750(this, t4vect_YAxis, -rz);
+    t4Vector negPos = Scale_5750(pos, -1.0f);
     negPos.w = -negPos.w;
-    Translate_5750(self, &negPos);
-    self->mMatricesValid = 0;
+    Translate_5750(this, &negPos);
+    mMatricesValid = 0;
 }
 #endif
 
@@ -4743,7 +4743,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetView1);
  * @param viewMat  the view matrix to load
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void cPS2GraphicsMan_SetView1(cPS2GraphicsMan* self, void* viewMat)
+void cPS2GraphicsMan::SetView1(const t4Matrix& viewMat)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -4757,9 +4757,9 @@ extern "C" void cPS2GraphicsMan_SetView1(cPS2GraphicsMan* self, void* viewMat)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self->mCurrentView), "r"(viewMat)
+        : "r"((char*)mCurrentView), "r"(&viewMat)
         : "memory");
-    self->mMatricesValid = 0;
+    mMatricesValid = 0;
 }
 #endif
 
@@ -4773,10 +4773,9 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetView__FPv);
  *
  * @return the current view matrix
  */
-const t4Matrix* cPS2GraphicsMan_GetView(void* vself)
+const t4Matrix* cPS2GraphicsMan::GetView()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return self->mCurrentView;
+    return mCurrentView;
 }
 #endif
 
@@ -4790,7 +4789,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_AppendView);
  * @param mat  the 4x4 matrix to append (On Tour m)
  */
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
-extern "C" void cPS2GraphicsMan_AppendView(cPS2GraphicsMan* self, void* mat)
+void cPS2GraphicsMan::AppendView(const t4Matrix& mat)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -4824,9 +4823,9 @@ extern "C" void cPS2GraphicsMan_AppendView(cPS2GraphicsMan* self, void* mat)
         "sqc2      $vf15, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self->mCurrentView), "r"(mat)
+        : "r"((char*)mCurrentView), "r"(&mat)
         : "memory");
-    self->mMatricesValid = 0;
+    mMatricesValid = 0;
 }
 #endif
 
@@ -4870,7 +4869,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_TranslateView);
  */
 // PORT: PS2-only VU0 inline asm (vmula/vmadd matrix-vector product); the PC port
 // needs a C fallback.
-extern "C" void cPS2GraphicsMan_TranslateView(cPS2GraphicsMan* self, void* pos)
+void cPS2GraphicsMan::TranslateView(const t4Vector& pos)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -4886,9 +4885,9 @@ extern "C" void cPS2GraphicsMan_TranslateView(cPS2GraphicsMan* self, void* pos)
         "sqc2         $vf12, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self->mCurrentView), "r"(pos)
+        : "r"((char*)mCurrentView), "r"(&pos)
         : "memory");
-    self->mMatricesValid = 0;
+    mMatricesValid = 0;
 }
 #endif
 
@@ -4905,24 +4904,24 @@ extern "C" void fSinCos(float* s, float* c, float angle);
  * Rotates the top view matrix by @p angle about @p axis: builds the axis-angle rotation matrix (sin and cos from
  * fSinCos) and concatenates it onto the top matrix with VU0, then clears mMatricesValid.
  *
- * On Tour's RotateView(float deg, const t4Vector& axis) takes degrees and the reverse order; here the axis comes
- * first and the angle goes straight to the sincos helper.
+ * On Tour's RotateView(float deg, const t4Vector& axis) takes degrees; here the angle goes straight to the sincos
+ * helper.
  *
- * @param axis  the rotation axis (x, y, z; assumed unit length)
  * @param angle  the rotation angle
+ * @param axis  the rotation axis (x, y, z; assumed unit length)
  */
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
-extern "C" void cPS2GraphicsMan_RotateView(cPS2GraphicsMan* self, float* axis, float angle)
+void cPS2GraphicsMan::RotateView(float angle, const t4Vector& axis)
 {
     sFontRotMat rot;
     float sinA;
     float cosA;
-    char* top = (char*)self->mCurrentView;
+    char* top = (char*)mCurrentView;
     fSinCos(&sinA, &cosA, angle);
     float oneMinusCos = 1.0f - cosA;
-    float x = axis[0];
-    float y = axis[1];
-    float z = axis[2];
+    float x = axis.x;
+    float y = axis.y;
+    float z = axis.z;
     float tx = oneMinusCos * x;
     float ty = oneMinusCos * y;
     float tz = oneMinusCos * z;
@@ -4979,11 +4978,9 @@ extern "C" void cPS2GraphicsMan_RotateView(cPS2GraphicsMan* self, float* axis, f
         :
         : "r"(top), "r"(&rot)
         : "memory");
-    self->mMatricesValid = 0;
+    mMatricesValid = 0;
 }
 #endif
-
-extern "C" void* cPS2GraphicsMan_claimBuildBuffer(void* self);
 
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_CalcSortZ);
@@ -5034,18 +5031,15 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_IsRenderReady__FPv);
 /**
  * Reports whether the renderer can accept a new frame.
  *
- * Returns cPS2GraphicsMan_claimBuildBuffer().
+ * Returns claimBuildBuffer().
  *
- * @return non-zero when a frame can be drawn
+ * @return true when a frame can be drawn
  */
-void* cPS2GraphicsMan_IsRenderReady(void* vself)
+bool cPS2GraphicsMan::IsRenderReady()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return cPS2GraphicsMan_claimBuildBuffer(self);
+    return claimBuildBuffer();
 }
 #endif
-
-extern "C" void* cPS2GraphicsMan_isKickIdle(void* self);
 
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_IsRenderIdle__FPv);
@@ -5053,14 +5047,13 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_IsRenderIdle__FPv);
 /**
  * Reports whether the renderer has finished all queued work.
  *
- * Returns cPS2GraphicsMan_isKickIdle(); cGraphicsMan_FlushRenderer() polls it.
+ * Returns isKickIdle(); cGraphicsMan_FlushRenderer() polls it.
  *
- * @return non-zero when idle
+ * @return true when idle
  */
-void* cPS2GraphicsMan_IsRenderIdle(void* vself)
+bool cPS2GraphicsMan::IsRenderIdle()
 {
-    cPS2GraphicsMan* self = (cPS2GraphicsMan*)vself;
-    return cPS2GraphicsMan_isKickIdle(self);
+    return isKickIdle();
 }
 #endif
 
@@ -5210,13 +5203,13 @@ INCLUDE_ASM("render/font", cTextureMan_resetBoundTextures);
  *
  * The first two in a two-pass loop. cPS2DeferManager_buildDmaChains calls it on mTexMan before building the frame's chains.
  */
-extern "C" void cTextureMan_resetBoundTextures(cTextureMan* self)
+void cTextureMan::resetBoundTextures()
 {
     int i;
     for (i = 0; i < 2; i++) {
-        ((int*)(&self->mBoundTex[0]))[i] = -1;
+        ((int*)(&mBoundTex[0]))[i] = -1;
     }
-    self->mCLUTTex = -1;
+    mCLUTTex = -1;
 }
 #endif
 
@@ -6805,7 +6798,7 @@ INCLUDE_ASM("render/font", cTube_render__FPv);
  * Slot 3 of vtable cTube_vtbl (the "Tube" effect); cSimpleTube_vtbl overrides that slot with cSimpleTube_render, which draws the
  * tube.
  */
-void cTube_render(void* self)
+void cTube::render()
 {
 }
 #endif
@@ -6862,7 +6855,7 @@ INCLUDE_ASM("render/font", cPathArrow_update__FPv);
  *
  * Slot 2 of vtable cPathArrow_vtbl (the "PathArrow" effect).
  */
-void cPathArrow_update(void* self)
+void cPathArrow::update()
 {
 }
 #endif
@@ -6875,7 +6868,7 @@ INCLUDE_ASM("render/font", cPathArrow_render__FPv);
  *
  * Slot 3 of vtable cPathArrow_vtbl (the "PathArrow" effect).
  */
-void cPathArrow_render(void* self)
+void cPathArrow::render()
 {
 }
 #endif

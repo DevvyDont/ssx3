@@ -107,6 +107,7 @@ struct cOVState_MAP : public cOVState {
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event) __asm__("cOVState_MAP_onWidgetEvent");
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int) __asm__("cOVState_MAP_onWidgetMenu");
     virtual void onInputAlways(cUIInput* pInput) __asm__("cOVState_MAP_onInputAlways");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cOVState_MAP_onGainFocus");
 };
 
 CHECK_OFFSET(cOVState_MAP, mbSessionUnlocked, 0x9C);

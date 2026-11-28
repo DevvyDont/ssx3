@@ -79,6 +79,8 @@ struct cFEStateStats : public cFEStateNet {
     void focusNextMenu() __asm__("cFEStateStats_focusNextMenu");
     void focusPrevMenu() __asm__("cFEStateStats_focusPrevMenu");
     void formatTime(char* buf, int frames) __asm__("cFEStateStats_formatTime");
+    virtual void onInputAlways(cUIInput* pInput) __asm__("cFEStateStats_onInputAlways");
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateStats_onWidgetEvent");
 };
 
 CHECK_OFFSET(cFEStateStats, mpMenus, 0x6D0);

@@ -732,13 +732,10 @@ INCLUDE_ASM("ui/uiengine", cUIGroup_setUIData__FPv);
 #ifdef SKIP_ASM
 /**
  * Sets the group's UI data using the base cUIThing_setUIData().
- *
- * @return the result of cUIThing_setUIData()
  */
-void* cUIGroup_setUIData(void* vself)
+void cUIGroup::setUIData(tUIBaseObject*)
 {
-    cUIGroup* self = (cUIGroup*)vself;
-    return cUIThing_setUIData(self);
+    cUIThing_setUIData(this);
 }
 #endif
 
@@ -785,7 +782,6 @@ struct cList;
 struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
-extern "C" void* cUIThing_getObjectByHashName(void* self, int a1);
 
 /**
  * Finds a widget by name hash in a group: the group itself, or the first child (searched recursively) that
@@ -794,15 +790,15 @@ extern "C" void* cUIThing_getObjectByHashName(void* self, int a1);
  * @param id  the name's hash (On Tour hashname)
  * @return the widget, or 0
  */
-extern "C" void* cUIGroup_getObjectByHashName(cUIGroup* self, int id)
+cUIThing* cUIGroup::getObjectByHashName(unsigned int id)
 {
-    if (cUIThing_getObjectByHashName(self, id) != 0) {
-        return ((void*)self);
+    if (cUIThing::getObjectByHashName(id) != 0) {
+        return this;
     }
-    cUIThing* n = (cUIThing*)cList_first((cList*)&self->mList);
+    cUIThing* n = (cUIThing*)cList_first((cList*)&mList);
     if (((void*)n) != 0) {
         do {
-            void* found = n->getObjectByHashName(id);
+            cUIThing* found = n->getObjectByHashName(id);
             if (found != 0) {
                 return found;
             }
@@ -846,7 +842,7 @@ extern void* cListOperator_vtbl[];
 
 struct cUIGroup_onInput_sFunctor {
     void** vt;
-    int arg;
+    const cUIInput* arg;
 };
 
 extern "C" int cList_traverseFlat(void* list, cUIGroup_onInput_sFunctor* fn);
@@ -855,19 +851,19 @@ extern "C" int cList_traverseFlat(void* list, cUIGroup_onInput_sFunctor* fn);
  * Offers an input to a group's children until one of them uses it; a disabled group (bit 5 of its flags)
  * ignores input.
  *
- * @param pInput  the input (const cUIInput*, passed as int)
+ * @param pInput  the input
  * @return true when a child used the input, otherwise false
  */
-extern "C" bool cUIGroup_onInput(cUIGroup* self, int pInput)
+bool cUIGroup::onInput(const cUIInput* pInput)
 {
-    if ((self->mAttr >> 5) & 1) {
+    if ((mAttr >> 5) & 1) {
         return false;
     }
     cUIGroup_onInput_sFunctor inputOp;
     inputOp.vt = cListOperator_vtbl;
     inputOp.vt = cListOpOnInput_vtbl;
     inputOp.arg = pInput;
-    int handled = cList_traverseFlat((char*)&self->mList, &inputOp);
+    int handled = cList_traverseFlat((char*)&mList, &inputOp);
     inputOp.vt = cListOperator_vtbl;
     return handled != 0;
 }

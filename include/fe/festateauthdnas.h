@@ -101,6 +101,8 @@ struct cFEStateAuthDNAS : public cFEStateNet {
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int) __asm__("cFEStateAuthDNAS_onWidgetMenu");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateAuthDNAS_onWidgetCreate");
     int isOnlineState() __asm__("cFEStateAuthDNAS_isOnlineState__FPv");
+    virtual int handleEvent(int msg, void* pParam) __asm__("cFEStateAuthDNAS_handleEvent");
+    virtual bool onGainTransition(int) __asm__("cFEStateAuthDNAS_onGainTransition__FPv");
 };
 
 CHECK_OFFSET(cFEStateAuthDNAS, mpAuth, 0x6D0);
@@ -154,6 +156,8 @@ struct cFEStateAuthDNASError : public cFEStateNet {
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int)
         __asm__("cFEStateAuthDNASError_onWidgetMenu");
     int isOnlineState() __asm__("cFEStateAuthDNASError_isOnlineState__FPv");
+    virtual int handleEvent(int msg, void* pParam) __asm__("cFEStateAuthDNASError_handleEvent");
+    virtual void onCreateScreen() __asm__("cFEStateAuthDNASError_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateAuthDNASError, mpustrBody, 0x6D0);

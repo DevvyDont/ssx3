@@ -68,6 +68,7 @@ struct cFEStateOptionsController : public cFEState {
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int)
         __asm__("cFEStateOptionsController_onWidgetMenu");
     virtual int onWidgetPair(cUIPair* pair, unsigned int event) __asm__("cFEStateOptionsController_onWidgetPair");
+    virtual void onDestroyScreen() __asm__("cFEStateOptionsController_onDestroyScreen");
 };
 
 CHECK_OFFSET(cFEStateOptionsController, mTimer, 0x048);
@@ -146,11 +147,14 @@ struct cFEStateOptionsDeviceSelect : public cFEMemCard {
     virtual void onCreateScreen() __asm__("cFEStateOptionsDeviceSelect_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int event)
         __asm__("cFEStateOptionsDeviceSelect_onWidgetEvent");
-    virtual void hideActionButtons(int on) __asm__("cFEStateOptionsDeviceSelect_hideActionButtons");
+    virtual void hideActionButtons(bool on) __asm__("cFEStateOptionsDeviceSelect_hideActionButtons");
     virtual void updateDone() __asm__("cFEStateOptionsDeviceSelect_updateDone");
     virtual void displayStatus() __asm__("cFEStateOptionsDeviceSelect_displayStatus");
     virtual int onWidgetMenu(cUIMenu* widget, unsigned int msg, unsigned int)
         __asm__("cFEStateOptionsDeviceSelect_onWidgetMenu");
+    virtual void hideDeleteButton(bool on) __asm__("cFEStateOptionsDeviceSelect_hideDeleteButton");
+    virtual void hideMainButton(bool loadBlocked, bool saveBlocked)
+        __asm__("cFEStateOptionsDeviceSelect_hideMainButton");
 };
 
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsSaveScreen, 0x22C);

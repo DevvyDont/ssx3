@@ -958,48 +958,47 @@ static inline void VCall_003083A0(char* self, int slot)
  * wipeout, reset, collect and event 1-3. For a trick the event's data (+0x4) is put in the script manager's word +0x29C
  * while the handler runs.
  *
- * @param vself  the task (On Tour this)
  * @param vmsg  the event (On Tour const tWScriptEvent& event): type in the first halfword
  */
 // Same event dispatch as cWScriptProcess_dispatchProcessEvent for a running (kTaskState_Update) sub-process.
-extern "C" void cWScriptTask_dispatchTaskEvent(cWScriptTask* vself, void* vmsg)
+void cWScriptTask::dispatchTaskEvent(const struct tWScriptEvent& vmsg)
 {
-    unsigned short* msg = (unsigned short*)vmsg;
-    if (*(int*)vself != kTaskState_Update) {
+    unsigned short* msg = (unsigned short*)&vmsg;
+    if (*(int*)this != kTaskState_Update) {
         return;
     }
     switch (*msg) {
     case kWSEvent_Collide:
-        VCall_003083A0(((char*)vself), 7);
+        VCall_003083A0(((char*)this), 7);
         break;
     case kWSEvent_Jump:
-        VCall_003083A0(((char*)vself), 8);
+        VCall_003083A0(((char*)this), 8);
         break;
     case kWSEvent_Land:
-        VCall_003083A0(((char*)vself), 9);
+        VCall_003083A0(((char*)this), 9);
         break;
     case kWSEvent_Trick:
-        vself->Process->Manager->TrickDef = (tTrickNameDef*)(msg + 2);
-        VCall_003083A0(((char*)vself), 10);
-        vself->Process->Manager->TrickDef = 0;
+        Process->Manager->TrickDef = (tTrickNameDef*)(msg + 2);
+        VCall_003083A0(((char*)this), 10);
+        Process->Manager->TrickDef = 0;
         break;
     case kWSEvent_Wipeout:
-        VCall_003083A0(((char*)vself), 11);
+        VCall_003083A0(((char*)this), 11);
         break;
     case kWSEvent_Reset:
-        VCall_003083A0(((char*)vself), 12);
+        VCall_003083A0(((char*)this), 12);
         break;
     case kWSEvent_Collect:
-        VCall_003083A0(((char*)vself), 13);
+        VCall_003083A0(((char*)this), 13);
         break;
     case kWSEvent_Event1:
-        VCall_003083A0(((char*)vself), 14);
+        VCall_003083A0(((char*)this), 14);
         break;
     case kWSEvent_Event2:
-        VCall_003083A0(((char*)vself), 15);
+        VCall_003083A0(((char*)this), 15);
         break;
     case kWSEvent_Event3:
-        VCall_003083A0(((char*)vself), 16);
+        VCall_003083A0(((char*)this), 16);
         break;
     }
 }

@@ -227,6 +227,7 @@ struct cFEStateRewardGalleryPosters : public cFEStateRewardGalleryBase {
     virtual int getRewardStoreNum(const void* other) __asm__("cFEStateRewardGalleryPosters_getRewardStoreNum__FPvT0");
     virtual const char* getRewardName(const void* other) __asm__("cFEStateRewardGalleryPosters_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryPosters_getIconsFileName__FPv");
+    virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryPosters_getRewardCost");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryPosters, mpDBPosters, 0xA24);
@@ -265,6 +266,7 @@ struct cFEStateRewardGalleryTradingCards : public cFEStateRewardGalleryBase {
     virtual const char* getRewardName(const void* other)
         __asm__("cFEStateRewardGalleryTradingCards_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryTradingCards_getIconsFileName__FPv");
+    virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryTradingCards_getRewardCost");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpDBTradingCards, 0xA24);
@@ -303,6 +305,7 @@ struct cFEStateRewardGalleryConceptArts : public cFEStateRewardGalleryBase {
     virtual const char* getRewardName(const void* other)
         __asm__("cFEStateRewardGalleryConceptArts_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryConceptArts_getIconsFileName__FPv");
+    virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryConceptArts_getRewardCost");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpDBConceptArts, 0xA24);
@@ -335,6 +338,7 @@ struct cFEStateRewardGalleryVideos : public cFEStateRewardGalleryBase {
     virtual int getRewardStoreNum(const void* other) __asm__("cFEStateRewardGalleryVideos_getRewardStoreNum__FPvT0");
     virtual const char* getRewardName(const void* other) __asm__("cFEStateRewardGalleryVideos_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryVideos_getIconsFileName__FPv");
+    virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryVideos_getRewardCost");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryVideos, mpDBVideos, 0xA24);
@@ -367,6 +371,7 @@ struct cFEStateRewardGalleryToys : public cFEStateRewardGalleryBase {
     virtual int getRewardStoreNum(const void* other) __asm__("cFEStateRewardGalleryToys_getRewardStoreNum__FPvT0");
     virtual const char* getRewardName(const void* other) __asm__("cFEStateRewardGalleryToys_getRewardName__FPvT0");
     virtual const char* getIconsFileName() __asm__("cFEStateRewardGalleryToys_getIconsFileName__FPv");
+    virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryToys_getRewardCost");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryToys, mpDBToys, 0xA24);
@@ -403,6 +408,7 @@ struct cFEStateRewardGalleryCheatChars : public cFEStateRewardGalleryBase {
         __asm__("cFEStateRewardGalleryCheatChars_getRewardStoreNum__FPvT0");
     virtual const char* getRewardName(const void* other)
         __asm__("cFEStateRewardGalleryCheatChars_getRewardName__FPvT0");
+    virtual int getRewardCost(const void* pReward) __asm__("cFEStateRewardGalleryCheatChars_getRewardCost");
 };
 
 CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpDBCheatChars, 0xA24);

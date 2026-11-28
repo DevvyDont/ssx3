@@ -206,19 +206,19 @@ static inline cGameViewMan* views_PO()
  * cVoipMan_turnVoiceOn (probably voice off / on); otherwise EATalk is hidden and made static in its static colour.
  * setStatic / setUseStaticColour are vtable slots 8 / 25 (cUIThing_setStatic / cUIText_setUseStaticColour).
  */
-extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* self)
+void cOVState_PAUSE_OPTIONS::onCreateScreen()
 {
     unsigned char sel;
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_37beoptions), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_37beoptions), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(this);
     cBEOptionInterface_PO* iface = (cBEOptionInterface_PO*)cBE_getInterface_Fv(cBE_getBE(), 4);
     {
-        void* w = find_PO(self, str_0lb);
+        void* w = find_PO(this, str_0lb);
         if (w != 0) {
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNHUDFull), 0);
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNHUDMinimal), 1);
@@ -228,7 +228,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
         }
     }
     {
-        void* w = find_PO(self, str_1lb_b);
+        void* w = find_PO(this, str_1lb_b);
         if (w != 0) {
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNNear), 0x3C);
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNMid), 61);
@@ -236,14 +236,14 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
             cCamera* camera = views_PO()->PlayerCamera[0];
             if (cUIListBox_getEntryByData(w, camera->ChaseController->LatestAlgoType, &sel))
                 cUIListBox_setCurrentEntryByIndex(w, sel);
-            void* cameraLabel = find_PO(self, str_camera_select);
+            void* cameraLabel = find_PO(this, str_camera_select);
             if (cameraLabel != 0) {
                 setFormatted_PO(cameraLabel, str_kT_CMNCameraVar, 1);
             }
         }
     }
     {
-        void* w = find_PO(self, str_2lb_b);
+        void* w = find_PO(this, str_2lb_b);
         if (w != 0) {
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNNear), 0x3C);
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_OVRCMNMid), 61);
@@ -254,14 +254,14 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
                 if (cUIListBox_getEntryByData(w, camera->ChaseController->LatestAlgoType, &sel))
                     cUIListBox_setCurrentEntryByIndex(w, sel);
             }
-            void* cameraLabel = find_PO(self, str_camera_2_select);
+            void* cameraLabel = find_PO(this, str_camera_2_select);
             if (cameraLabel != 0) {
                 setFormatted_PO(cameraLabel, str_kT_CMNCameraVar, 2);
             }
         }
     }
     {
-        cUISlider* w = (cUISlider*)find_PO(self, str_4sl_b);
+        cUISlider* w = (cUISlider*)find_PO(this, str_4sl_b);
         if (w != 0) {
             w->mNumValues = 12;
             w->mValue = iface->getOptions().f0;
@@ -269,7 +269,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
         }
     }
     {
-        cUISlider* w = (cUISlider*)find_PO(self, str_5sl);
+        cUISlider* w = (cUISlider*)find_PO(this, str_5sl);
         if (w != 0) {
             w->mNumValues = 12;
             w->mValue = iface->getOptions().f8;
@@ -277,7 +277,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
         }
     }
     {
-        cUISlider* w = (cUISlider*)find_PO(self, str_6sl);
+        cUISlider* w = (cUISlider*)find_PO(this, str_6sl);
         if (w != 0) {
             w->mNumValues = 12;
             w->mValue = iface->getOptions().f4;
@@ -285,7 +285,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
         }
     }
     {
-        void* w = find_PO(self, str_7lb_b);
+        void* w = find_PO(this, str_7lb_b);
         if (w != 0) {
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOff_b), 0);
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOn_b), 1);
@@ -296,7 +296,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
         }
     }
     {
-        void* w = find_PO(self, str_8lb);
+        void* w = find_PO(this, str_8lb);
         if (w != 0) {
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOff_b), 0);
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOn_b), 1);
@@ -306,16 +306,16 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
             cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_PO().iUseArcadeSFX != 0);
         }
     }
-    cUIObj_PO* eaTalkPair = (cUIObj_PO*)find_PO(self, str_EATalkPair);
+    cUIObj_PO* eaTalkPair = (cUIObj_PO*)find_PO(this, str_EATalkPair);
     if (eaTalkPair != 0) {
         eaTalkPair->setVisible(0);
         eaTalkPair->setStatic(1);
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-        cUIObj_PO* talkPair = (cUIObj_PO*)find_PO(self, str_EATalkPair);
-        cUIObj_PO* talkItem = (cUIObj_PO*)find_PO(self, str_EATalk);
-        cUIObj_PO* talkSlider = (cUIObj_PO*)find_PO(self, str_EATalksl);
+        cUIObj_PO* talkPair = (cUIObj_PO*)find_PO(this, str_EATalkPair);
+        cUIObj_PO* talkItem = (cUIObj_PO*)find_PO(this, str_EATalk);
+        cUIObj_PO* talkSlider = (cUIObj_PO*)find_PO(this, str_EATalksl);
         if (talkPair != 0 && talkItem != 0 && talkSlider != 0) {
             talkPair->setVisible(1);
             talkPair->setStatic(0);
@@ -335,7 +335,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* se
             }
         }
     } else {
-        cUIObj_PO* eaTalk = (cUIObj_PO*)find_PO(self, str_EATalk);
+        cUIObj_PO* eaTalk = (cUIObj_PO*)find_PO(this, str_EATalk);
         if (eaTalk != 0) {
             eaTalk->setUseStaticColour(1);
             ((cUIText*)eaTalk)->mStaticColour = gStaticColour_PO;
@@ -706,20 +706,20 @@ extern char str_kT_PauseErrorCheckingServer[];
  * kT_PauseErrorCheckingServer; without one it shows Cancel. The TextError branch reads cGameComm_mGameComm before that
  * null check.
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE_ERROR* self)
+void cOVState_PAUSE_ONLINE_ERROR::onCreateScreen()
 {
-    void* eng = self->mpEngine;
-    void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_265InGameError), 0);
-    self->mpScreen = (cUIScreen*)scr;
+    void* eng = mpEngine;
+    void* scr = cUIEngine_addScreenByHashName(eng, this, GetHashValue32(str_265InGameError), 0);
+    mpScreen = (cUIScreen*)scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
     }
-    cOVState_onCreateScreen(self);
-    cUIText* subTitle = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_SubTitle));
+    cOVState_onCreateScreen(this);
+    cUIText* subTitle = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_SubTitle));
     if (subTitle != 0) {
         cUIText_setUnicodeStringByID(subTitle, GetHashValue32(str_kT_OVROnlineError));
     }
-    cUIText* errorText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextError));
+    cUIText* errorText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextError));
     if (errorText != 0) {
         errorText->setVisible(1);
         cGameComm* gameComm = cGameComm_mGameComm;
@@ -737,7 +737,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNCheatDetected));
             }
         } else if (gameComm->mCheating[1] != 0) {
-            self->mbShouldDisplayAuxInfo = 0;
+            mbShouldDisplayAuxInfo = 0;
             int peerCheating = gameComm->mCheating[1];
             if (peerCheating == one) {
                 cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
@@ -750,15 +750,15 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE
             }
         } else if (gameComm->mRemoteEndGame != 0) {
             cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNOpponentQuit));
-            self->mbShouldDisplayAuxInfo = 0;
+            mbShouldDisplayAuxInfo = 0;
         } else if (gameComm->mRemoteDisconnected != 0) {
-            self->mbShouldDisplayAuxInfo = 0;
+            mbShouldDisplayAuxInfo = 0;
             cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNOpponentQuit));
         } else {
-            self->mbShouldDisplayAuxInfo = 0;
+            mbShouldDisplayAuxInfo = 0;
             cUIText_setUnicodeStringByID(errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
         }
-        cUIText* widget = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_CancelGame));
+        cUIText* widget = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Text_CancelGame));
         if (widget != 0) {
             if (cGameComm_mGameComm->mLocalFinishedRace != 0) {
                 cUIText_setUnicodeStringByID(widget, GetHashValue32(str_kT_BTNOK_b));
@@ -768,34 +768,34 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE
             widget->setVisible(0);
             widget->mMiscData = 0;
         }
-        widget = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Cancelps2X));
+        widget = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Cancelps2X));
         if (widget != 0) {
             widget->setVisible(0);
         }
-        widget = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Continueps2X));
+        widget = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Continueps2X));
         if (widget != 0) {
             widget->setVisible(0);
         }
-        widget = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CancelButtonBack));
+        widget = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_CancelButtonBack));
         if (widget != 0) {
             widget->setVisible(0);
         }
-        widget = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ContinueButtonBack));
+        widget = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ContinueButtonBack));
         if (widget != 0) {
             widget->setVisible(0);
         }
-        self->setContinueOptionVisible(0);
+        setContinueOptionVisible(0);
     }
     if (cGameComm_mGameComm != 0) {
         cGameComm_startServerPing(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
-        self->miStartPingTick = (unsigned int)(cAppMan_TheAppMan->TimerTick);
-        self->enableCancelButton(0);
-        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo));
+        miStartPingTick = (unsigned int)(cAppMan_TheAppMan->TimerTick);
+        enableCancelButton(0);
+        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_TextInfo));
         if (infoText != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorCheckingServer));
         }
     } else {
-        self->enableCancelButton(1);
+        enableCancelButton(1);
     }
 }
 #endif
@@ -2352,39 +2352,39 @@ static inline cUIThing* getObj_DC30(cUIState* self, char* name)
  * (cPauseState_Stack[++cPauseState_StackIdx] = 2, cPauseState_Flags = cPauseState_FlagsTable[2]) and runs cOVState_onCreateScreen. The `//` note
  * above calls this a device-select overlay that pushes its menu state; it pushes the pause state.
  */
-extern "C" void cOVState_SAVEREPLAY_onCreateScreen(cOVState_SAVEREPLAY* self)
+void cOVState_SAVEREPLAY::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName_DC30(engine, ((char*)self), GetHashValue32(str_119Save_Replay), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName_DC30(engine, ((char*)this), GetHashValue32(str_119Save_Replay), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIThing* widget;
         cUIScreen_playFrame_DC30(screen, 0, 0);
-        widget = getObj_DC30(self, str_1percentage_b);
+        widget = getObj_DC30(this, str_1percentage_b);
         cUIText_setAsciiString((cUIText*)widget, str_empty_e);
-        widget = getObj_DC30(self, str_title_Save_Replay);
+        widget = getObj_DC30(this, str_title_Save_Replay);
         widget->setVisible(1);
-        widget = getObj_DC30(self, str_title_Save_Records);
+        widget = getObj_DC30(this, str_title_Save_Records);
         widget->setVisible(0);
-        widget = getObj_DC30(self, str_helptext01);
+        widget = getObj_DC30(this, str_helptext01);
         widget->setVisible(0);
-        widget = getObj_DC30(self, str_Memory_card_info);
+        widget = getObj_DC30(this, str_Memory_card_info);
         cUIText_setAsciiString((cUIText*)widget, str_empty_e);
         char name[0x20];
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
-            widget = getObj_DC30(self, name);
+            widget = getObj_DC30(this, name);
             widget->mMiscData = i - 1;
         }
     }
-    engine = (void*)self->mpEngine;
-    screen = cUIEngine_addScreenByHashName_DC30(engine, ((char*)self), GetHashValue32(str_OV_darkblue), 0);
+    engine = (void*)mpEngine;
+    screen = cUIEngine_addScreenByHashName_DC30(engine, ((char*)this), GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame_DC30(screen, 0, 0);
     }
     cPauseState_Stack[++cPauseState_StackIdx] = 2;
     cPauseState_Flags = cPauseState_FlagsTable[2];
-    cOVState_onCreateScreen_DC30(((char*)self));
+    cOVState_onCreateScreen_DC30(((char*)this));
 }
 #endif
 
@@ -2407,14 +2407,14 @@ extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
  * cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]]), runs cFEMemCard_onDestroyScreen and restarts playback with
  * cReplay_startReplay(Replay, 0, 0, 0).
  */
-extern "C" void cOVState_SAVEREPLAY_onDestroyScreen(cOVState_SAVEREPLAY* self)
+void cOVState_SAVEREPLAY::onDestroyScreen()
 {
-    if (self->mIsReplayAlloc == true) {
+    if (mIsReplayAlloc == true) {
         cReplay_purgeSave(SSXApp->Game->Replay);
-        self->mIsReplayAlloc = 0;
+        mIsReplayAlloc = 0;
     }
     cPauseState_Flags = cPauseState_FlagsTable[cPauseState_Stack[--cPauseState_StackIdx]];
-    cFEMemCard_onDestroyScreen(self);
+    cFEMemCard_onDestroyScreen(this);
     cReplay_startReplay(SSXApp->Game->Replay, 0, 0, 0);
 }
 #endif
@@ -2634,15 +2634,15 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the buttons
  */
-extern "C" void cOVState_SAVEREPLAY_hideActionButtons(cOVState_SAVEREPLAY* self, bool on)
+void cOVState_SAVEREPLAY::hideActionButtons(bool on)
 {
-    if (self->mIsHidden != on) {
+    if (mIsHidden != on) {
         int off = !on;
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b))->setVisible(off);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(off);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete))->setVisible(off);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(off);
-        self->mIsHidden = on;
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x_b))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_x_save))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_o_delete))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(off);
+        mIsHidden = on;
     }
 }
 #endif
@@ -2663,11 +2663,11 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the button
  */
-extern "C" void cOVState_SAVEREPLAY_hideDeleteButton(cOVState_SAVEREPLAY* self, bool on)
+void cOVState_SAVEREPLAY::hideDeleteButton(bool on)
 {
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete))->setVisible(!on);
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(!on);
-    self->mDeleteButtonActive = !on;
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_o_delete))->setVisible(!on);
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(!on);
+    mDeleteButtonActive = !on;
 }
 #endif
 
@@ -2688,11 +2688,11 @@ extern char str_x_save[];
  * @param loadBlocked  whether the load button should be hidden (unused: the screen has no load button)
  * @param on  true to hide the save button
  */
-extern "C" void cOVState_SAVEREPLAY_hideMainButton(cOVState_SAVEREPLAY* self, int loadBlocked, bool on)
+void cOVState_SAVEREPLAY::hideMainButton(bool loadBlocked, bool on)
 {
-    cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(!on);
-    self->mMainButtonActive = !on;
+    cUIThing* xButton = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x_b));
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_x_save))->setVisible(!on);
+    mMainButtonActive = !on;
     xButton->setVisible(!on);
 }
 #endif
@@ -2885,26 +2885,26 @@ static inline cUIEngine* engine_1FE9A8(cUIState* self)
  * gets mMiscData 0; "2memory_card_b".."4memory_card_b" are made static and hidden, as are their number labels
  * "2".."4". Adds the "OV_darkblue" backdrop and runs cOVState_onCreateScreen.
  */
-extern "C" void cOVState_SAVEOPTIONS_onCreateScreen(cOVState_SAVEOPTIONS* self)
+void cOVState_SAVEOPTIONS::onCreateScreen()
 {
-    void* scr = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(str_119Save_Replay), 0);
-    self->mpScreen = (cUIScreen*)scr;
+    void* scr = cUIEngine_addScreenByHashName(engine_1FE9A8(this), this, GetHashValue32(str_119Save_Replay), 0);
+    mpScreen = (cUIScreen*)scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
         cUIText_setAsciiString(
-            (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage_b)), str_empty_e);
-        cUIThing* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_Save_Replay));
+            (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_1percentage_b)), str_empty_e);
+        cUIThing* widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title_Save_Replay));
         widget->setVisible(0);
-        widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_Save_Records));
+        widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_title_Save_Records));
         widget->setVisible(1);
-        widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext01));
+        widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_helptext01));
         widget->setVisible(1);
         cUIText_setAsciiString(
-            (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Memory_card_info)), str_empty_e);
+            (cUIText*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Memory_card_info)), str_empty_e);
         for (int i = 1; i < 5; i++) {
             char buf[0x20];
             sprintf(buf, str_pct_dmemory_card_b, i);
-            widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+            widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
             if (i == 1) {
                 widget->mMiscData = 0;
             } else {
@@ -2912,15 +2912,15 @@ extern "C" void cOVState_SAVEOPTIONS_onCreateScreen(cOVState_SAVEOPTIONS* self)
                 widget->setVisible(0);
             }
             sprintf(buf, D_004A2138, i);
-            widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+            widget = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(buf));
             if (i >= 2)
                 widget->setVisible(0);
         }
     }
-    void* backdrop = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(str_OV_darkblue), 0);
+    void* backdrop = cUIEngine_addScreenByHashName(engine_1FE9A8(this), this, GetHashValue32(str_OV_darkblue), 0);
     if (backdrop != 0)
         cUIScreen_playFrame(backdrop, 0, 0);
-    cOVState_onCreateScreen(((char*)self));
+    cOVState_onCreateScreen(((char*)this));
 }
 #endif
 
@@ -3139,15 +3139,15 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the buttons
  */
-extern "C" void cOVState_SAVEOPTIONS_hideActionButtons(cOVState_SAVEOPTIONS* self, bool on)
+void cOVState_SAVEOPTIONS::hideActionButtons(bool on)
 {
-    if (self->mIsHidden != on) {
+    if (mIsHidden != on) {
         int off = !on;
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b))->setVisible(off);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(off);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete))->setVisible(off);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(off);
-        self->mIsHidden = on;
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x_b))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_x_save))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_o_delete))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(off);
+        mIsHidden = on;
     }
 }
 #endif
@@ -3168,11 +3168,11 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the button
  */
-extern "C" void cOVState_SAVEOPTIONS_hideDeleteButton(cOVState_SAVEOPTIONS* self, bool on)
+void cOVState_SAVEOPTIONS::hideDeleteButton(bool on)
 {
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete))->setVisible(!on);
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(!on);
-    self->mDeleteButtonActive = !on;
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_o_delete))->setVisible(!on);
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq_b))->setVisible(!on);
+    mDeleteButtonActive = !on;
 }
 #endif
 
@@ -3193,11 +3193,11 @@ extern char str_x_save[];
  * @param loadBlocked  whether the load button should be hidden (unused: the screen has no load button)
  * @param on  true to hide the save button
  */
-extern "C" void cOVState_SAVEOPTIONS_hideMainButton(cOVState_SAVEOPTIONS* self, int loadBlocked, bool on)
+void cOVState_SAVEOPTIONS::hideMainButton(bool loadBlocked, bool on)
 {
-    cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
-    cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save))->setVisible(!on);
-    self->mMainButtonActive = !on;
+    cUIThing* xButton = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x_b));
+    cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_x_save))->setVisible(!on);
+    mMainButtonActive = !on;
     xButton->setVisible(!on);
 }
 #endif
@@ -3315,38 +3315,38 @@ extern char str_down[];
 /**
  * Builds the rewards list overlay ("62reward_list" over "OV_darkblue") and sizes its menu to the rewards.
  *
- * Zeroes the reward count (mItemSize) and runs cOVState_REWARDS_checkRewardList(self, 0, -1), which probably counts
+ * Zeroes the reward count (mItemSize) and runs cOVState_REWARDS_checkRewardList(this, 0, -1), which probably counts
  * them into it. "Menu0000" loses its wrap flag (mAttr bit 0x80) and becomes scrollable when it has fewer rows than
  * rewards, else gets mDisableDirSound; the "up" / "down" arrows start hidden.
  */
-extern "C" void cOVState_REWARDS_onCreateScreen(cOVState_REWARDS* self)
+void cOVState_REWARDS::onCreateScreen()
 {
-    void* engine = self->mpEngine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_62reward_list), 0);
-    self->mpScreen = (cUIScreen*)screen;
+    void* engine = mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, this, GetHashValue32(str_62reward_list), 0);
+    mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* engine2 = self->mpEngine;
-    void* bg = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(str_OV_darkblue), 0);
+    void* engine2 = mpEngine;
+    void* bg = cUIEngine_addScreenByHashName(engine2, this, GetHashValue32(str_OV_darkblue), 0);
     if (bg != 0) {
         cUIScreen_playFrame(bg, 0, 0);
     }
-    cOVState_onCreateScreen(self);
-    self->mItemSize = 0;
-    cOVState_REWARDS_checkRewardList(self, 0, -1);
-    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000_b));
+    cOVState_onCreateScreen(this);
+    mItemSize = 0;
+    cOVState_REWARDS_checkRewardList(this, 0, -1);
+    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_Menu0000_b));
     if (menu != 0) {
         menu->mAttr &= ~0x80;
-        if (menu->mScrollItemNum < self->mItemSize) {
-            cUIMenu_setScrollableMenu(menu, self->mItemSize);
+        if (menu->mScrollItemNum < mItemSize) {
+            cUIMenu_setScrollableMenu(menu, mItemSize);
         } else {
             // mDisableDirSound (bit 3), set with a word read-modify-write as retail does
             *(int*)&menu->mAttrMenu |= 8;
         }
     }
-    cUIState_hideObjSafe(self, str_up);
-    cUIState_hideObjSafe(self, str_down);
+    cUIState_hideObjSafe(this, str_up);
+    cUIState_hideObjSafe(this, str_down);
 }
 #endif
 

@@ -702,6 +702,8 @@ struct tWPInGameData_ScreenTint : public tWPInGameData {
     virtual void readFromReplayFrame(cReplayFramePtr* frame) __asm__("tWPInGameData_ScreenTint_readFromReplayFrame");
     virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_ScreenTint_blend");
     virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_ScreenTint_isEqual");
+    virtual void writeToReplayFrame(cReplayFramePtr* baseFrame) const
+        __asm__("tWPInGameData_ScreenTint_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_ScreenTint, m_ScreenTintScaleR, 0x08);
@@ -769,6 +771,7 @@ struct tWPInGameData_Sun : public tWPInGameData {
     virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Sun_blend");
     virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Sun_isEqual");
     virtual void readFromReplayFrame(cReplayFramePtr* baseFrame) __asm__("tWPInGameData_Sun_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* baseFrame) const __asm__("tWPInGameData_Sun_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Sun, m_SunPitchOffset, 0x08);
@@ -836,6 +839,8 @@ struct tWPInGameData_Lighting : public tWPInGameData {
     virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Lighting_blend");
     virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Lighting_isEqual");
     virtual void readFromReplayFrame(cReplayFramePtr* baseFrame) __asm__("tWPInGameData_Lighting_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* baseFrame) const
+        __asm__("tWPInGameData_Lighting_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Lighting, m_LightIrradianceName, 0x08);
@@ -902,6 +907,8 @@ struct tWPInGameData_Weather : public tWPInGameData {
     virtual void blend(const tWPData* data, float blendFactor) __asm__("tWPInGameData_Weather_blend");
     virtual bool isEqual(const tWPData* data) __asm__("tWPInGameData_Weather_isEqual");
     virtual void readFromReplayFrame(cReplayFramePtr* baseFrame) __asm__("tWPInGameData_Weather_readFromReplayFrame");
+    virtual void writeToReplayFrame(cReplayFramePtr* baseFrame) const
+        __asm__("tWPInGameData_Weather_writeToReplayFrame");
 };
 
 CHECK_OFFSET(tWPInGameData_Weather, m_SnowIntensity, 0x08);

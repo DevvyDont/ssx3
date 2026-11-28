@@ -50,6 +50,7 @@ struct cOVState_REWARDS : public cOVState {
     virtual int onWidgetMenu(cUIMenu* id, unsigned int event, unsigned int index)
         __asm__("cOVState_REWARDS_onWidgetMenu");
     virtual bool onGainTransition(int) __asm__("cOVState_REWARDS_onGainTransition");
+    virtual void onCreateScreen() __asm__("cOVState_REWARDS_onCreateScreen");
 };
 
 CHECK_OFFSET(cOVState_REWARDS, mItemSize, 0x9C);

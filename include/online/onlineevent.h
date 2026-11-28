@@ -418,6 +418,9 @@ struct online_ChatEvent {
                                     //     sender, from LobbyMan_onchatmsg); clone copies it; destroyed second
     char* mText;                    // 0xC [R] cBXString: the message text (LobbyMan_postChatEvent's text argument); destroyed
                                     //     first
+
+    // Methods bound to their retail symbols by asm labels.
+    void* clone() __asm__("online_ChatEvent_clone");
 };
 
 CHECK_OFFSET(online_ChatEvent, mType, 0x0);

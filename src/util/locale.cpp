@@ -327,8 +327,8 @@ void cFELocale::unloadOV()
 //100%
 INCLUDE_ASM("util/locale", cFELocale_getStringByHash);
 #ifdef SKIP_ASM
-extern "C" const char* cLocaleFile_getStringByHash(void* file, int key);
-extern "C" void sprintf2(char* dst, const char* src);
+extern "C" unsigned short* cLocaleFile_getStringByHash(void* file, int key);
+extern "C" void sprintf2(unsigned short* dst, const char* src);
 extern char str_sp[];
 
 struct cFELocale_getStringByHash_sLocale {
@@ -349,20 +349,20 @@ struct cFELocale_getStringByHash_sLocale {
  * @param key  the string's hash (GetHashValue32 of its id)
  * @return the string, or the buffer at +0x5A
  */
-extern "C" const char* cFELocale_getStringByHash(cFELocale* self, int key)
+unsigned short* cFELocale::getStringByHash(unsigned int key)
 {
-    if (self->mDisplayMode == 0) {
+    if (mDisplayMode == 0) {
         for (signed char i = 0; i < 20; i++) {
-            signed char* localeFile = ((signed char*)self->mpLocaleFile[i]);
-            if (localeFile != 0 && *localeFile == self->mLanguage) {
-                const char* foundString = cLocaleFile_getStringByHash(localeFile, key);
+            signed char* localeFile = ((signed char*)mpLocaleFile[i]);
+            if (localeFile != 0 && *localeFile == mLanguage) {
+                unsigned short* foundString = cLocaleFile_getStringByHash(localeFile, key);
                 if (foundString != 0) {
                     return foundString;
                 }
             }
         }
     }
-    char* buf = (char*)&self->TempString;
+    unsigned short* buf = TempString;
     sprintf2(buf, str_sp);
     return buf;
 }
@@ -373,7 +373,8 @@ INCLUDE_ASM("util/locale", cFELocale_getStringByIndex);
 #ifdef SKIP_ASM
 // PORT: cLocaleFile_getStringByIndex__FPv really takes a second argument (it passes $5 through to
 // LOCALE_getstr); bind the 2-arg view to the 1-arg mangled symbol.
-void* cLocaleFile_getStringByIndex_2(void* self, void* arg) __asm__("cLocaleFile_getStringByIndex__FPv");
+unsigned short* cLocaleFile_getStringByIndex_2(void* self, unsigned int stringIndex)
+    __asm__("cLocaleFile_getStringByIndex__FPv");
 
 struct cFELocale_getStringByIndex_sArr {
     void* items[20];
@@ -388,13 +389,13 @@ struct cFELocale_getStringByIndex_sArr {
  * @param stringIndex  the string index
  * @return the string, or 0
  */
-extern "C" void* cFELocale_getStringByIndex(cFELocale* self, void* stringIndex)
+unsigned short* cFELocale::getStringByIndex(unsigned int stringIndex)
 {
-    cFELocale_getStringByIndex_sArr* arr = (cFELocale_getStringByIndex_sArr*)&self->mpLocaleFile;
+    cFELocale_getStringByIndex_sArr* arr = (cFELocale_getStringByIndex_sArr*)&mpLocaleFile;
     signed char i;
     for (i = 0; i < 20; i++) {
         if (arr->items[i] != 0) {
-            void* found = cLocaleFile_getStringByIndex_2(arr->items[i], stringIndex);
+            unsigned short* found = cLocaleFile_getStringByIndex_2(arr->items[i], stringIndex);
             if (found != 0) {
                 return found;
             }
@@ -636,7 +637,6 @@ struct cFEStateAudioOptions_onGainFocus_sVEntryP {
 };
 
 extern char gDisableColour[];
-extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 static inline void cFEStateAudioOptions_onGainFocus_call(char* o, int slot, int a)
 {
@@ -659,26 +659,26 @@ static inline void cFEStateAudioOptions_onGainFocus_callp(char* o, int slot, voi
  *
  * @param pPrevState  the state that had focus before (On Tour cUIState*)
  */
-extern "C" void cFEStateAudioOptions_onGainFocus(cFEStateAudioOptions* self, int pPrevState)
+void cFEStateAudioOptions::onGainFocus(cUIState* pPrevState)
 {
-    if (self->mCreatedRequestList == 0) {
-        cFEStateAudioOptions_onGainFocus_call((char*)self->mpRequestLineOption, 9, 1);
-        cFEStateAudioOptions_onGainFocus_call((char*)self->mpChecks[1], 9, 1);
-        cFEStateAudioOptions_onGainFocus_call((char*)self->mpEditRequestOption, 9, 1);
-        cFEStateAudioOptions_onGainFocus_call((char*)self->mpPlaylistOption, 9, 1);
-        cFEStateAudioOptions_onGainFocus_call((char*)self->mpChecks[3], 9, 1);
-        cFEStateAudioOptions_onGainFocus_call((char*)self->mpRequestLineOption, 26, 1);
-        cFEStateAudioOptions_onGainFocus_call((char*)self->mpRequestLineOption, 6, 0);
-        cFEStateAudioOptions_onGainFocus_callp((char*)self->mpChecks[1], 11, gDisableColour);
-        cFEStateAudioOptions_onGainFocus_call((char*)self->mpPlaylistOption, 26, 1);
-        cFEStateAudioOptions_onGainFocus_call((char*)self->mpPlaylistOption, 6, 0);
-        cFEStateAudioOptions_onGainFocus_callp((char*)self->mpChecks[3], 11, gDisableColour);
-        if (self->mInStore == 0) {
-            cFEStateAudioOptions_onGainFocus_call((char*)self->mpEditRequestOption, 26, 1);
-            cFEStateAudioOptions_onGainFocus_call((char*)self->mpEditRequestOption, 6, 0);
+    if (mCreatedRequestList == 0) {
+        cFEStateAudioOptions_onGainFocus_call((char*)mpRequestLineOption, 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)mpChecks[1], 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)mpEditRequestOption, 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)mpPlaylistOption, 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)mpChecks[3], 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)mpRequestLineOption, 26, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)mpRequestLineOption, 6, 0);
+        cFEStateAudioOptions_onGainFocus_callp((char*)mpChecks[1], 11, gDisableColour);
+        cFEStateAudioOptions_onGainFocus_call((char*)mpPlaylistOption, 26, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)mpPlaylistOption, 6, 0);
+        cFEStateAudioOptions_onGainFocus_callp((char*)mpChecks[3], 11, gDisableColour);
+        if (mInStore == 0) {
+            cFEStateAudioOptions_onGainFocus_call((char*)mpEditRequestOption, 26, 1);
+            cFEStateAudioOptions_onGainFocus_call((char*)mpEditRequestOption, 6, 0);
         }
     }
-    cFEState_onGainFocus(self, pPrevState);
+    cFEState::onGainFocus(pPrevState);
 }
 #endif
 

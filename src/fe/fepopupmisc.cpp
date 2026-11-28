@@ -1491,11 +1491,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardCost);
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryPosters_vtbl; zero and negative values are returned unchanged.
  *
- * @param reward  the reward record
+ * @param pReward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryPosters_getRewardCost(cFEStateRewardGalleryPosters* self, const tPosterInfo* reward)
+int cFEStateRewardGalleryPosters::getRewardCost(const void* pReward)
 {
+    const tPosterInfo* reward = (const tPosterInfo*)pReward;
     int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
@@ -1614,12 +1615,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardCost);
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryTradingCards_vtbl; zero and negative values are returned unchanged.
  *
- * @param reward  the reward record
+ * @param pReward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryTradingCards_getRewardCost(cFEStateRewardGalleryTradingCards* self,
-        const tTradingCardInfo* reward)
+int cFEStateRewardGalleryTradingCards::getRewardCost(const void* pReward)
 {
+    const tTradingCardInfo* reward = (const tTradingCardInfo*)pReward;
     int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
@@ -1738,12 +1739,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardCost);
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryConceptArts_vtbl; zero and negative values are returned unchanged.
  *
- * @param reward  the reward record
+ * @param pReward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryConceptArts_getRewardCost(cFEStateRewardGalleryConceptArts* self,
-        const tConceptArtInfo* reward)
+int cFEStateRewardGalleryConceptArts::getRewardCost(const void* pReward)
 {
+    const tConceptArtInfo* reward = (const tConceptArtInfo*)pReward;
     int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
@@ -1862,11 +1863,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardCost);
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryVideos_vtbl; zero and negative values are returned unchanged.
  *
- * @param reward  the reward record
+ * @param pReward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryVideos_getRewardCost(cFEStateRewardGalleryVideos* self, const tVideoInfo* reward)
+int cFEStateRewardGalleryVideos::getRewardCost(const void* pReward)
 {
+    const tVideoInfo* reward = (const tVideoInfo*)pReward;
     int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
@@ -1985,11 +1987,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardCost);
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryToys_vtbl; zero and negative values are returned unchanged.
  *
- * @param reward  the reward record
+ * @param pReward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryToys_getRewardCost(cFEStateRewardGalleryToys* self, const tToyInfo* reward)
+int cFEStateRewardGalleryToys::getRewardCost(const void* pReward)
 {
+    const tToyInfo* reward = (const tToyInfo*)pReward;
     int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
@@ -2108,12 +2111,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardCost);
  *
  * Vtable entry 35 (+0x11C) of cFEStateRewardGalleryCheatChars_vtbl; zero and negative values are returned unchanged.
  *
- * @param reward  the reward record
+ * @param pReward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryCheatChars_getRewardCost(cFEStateRewardGalleryCheatChars* self,
-        const tCheatCharInfo* reward)
+int cFEStateRewardGalleryCheatChars::getRewardCost(const void* pReward)
 {
+    const tCheatCharInfo* reward = (const tCheatCharInfo*)pReward;
     int value = reward->mCost;
     if (value > 0) value = value * 10;
     return value;
@@ -3633,10 +3636,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_onGainTransition__FPv);
  *
  * @return 1 (done)
  */
-int cFEStateAuthDNAS_onGainTransition(void* vself)
+bool cFEStateAuthDNAS::onGainTransition(int)
 {
-    cFEStateAuthDNAS* self = (cFEStateAuthDNAS*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -3759,10 +3761,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetAccountMem_onGainTransition__FPv);
  *
  * @return always 1 (the transition is done)
  */
-int cFEStateNetAccountMem_onGainTransition(void* vself)
+bool cFEStateNetAccountMem::onGainTransition(int)
 {
-    cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -4211,12 +4212,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_onGainTransition);
  *
  * @return 1
  */
-extern "C" int cFEStateNetMessenger_onGainTransition(cFEStateNetMessenger* self)
+bool cFEStateNetMessenger::onGainTransition(int)
 {
     // cFEStateNetMessenger_vtbl entry 32: cFEStateNetMessenger_publishPresence (publish the presence)
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, self);
-    vt[32].fn(vthis(self, vt[32]));
-    return 1;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)VPTR_OF(cListNode, this);
+    vt[32].fn(vthis(this, vt[32]));
+    return true;
 }
 #endif
 
@@ -9179,13 +9180,10 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
  * Updates the freestyle standings overlay: runs cOVState_onUpdate (vtable entry 12).
- *
- * @return cOVState_onUpdate's result
  */
-void* cOVState_HEAT_STANDINGS_onUpdate(void* vself)
+void cOVState_HEAT_STANDINGS::onUpdate()
 {
-    cOVState_HEAT_STANDINGS* self = (cOVState_HEAT_STANDINGS*)vself;
-    return cOVState_onUpdate(self);
+    cOVState_onUpdate(this);
 }
 #endif
 

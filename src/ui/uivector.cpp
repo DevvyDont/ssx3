@@ -2022,7 +2022,7 @@ class cUIGroup_traverseFlat_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int onListNode(void*);
+    virtual void* onListNode(void*);
 };
 
 /**
@@ -2031,13 +2031,13 @@ public:
  * Returns the operator's onListNode (vtable slot 2 of the operator, whose vtable pointer is its first word) for
  * the group, the same as cListNode's own traverseFlat.
  *
- * @param self    the group
- * @param obj  the list operator (On Tour: pOperator)
+ * @param pOperator  the list operator (On Tour: pOperator)
  * @return the operator's onListNode result
  */
-extern "C" int cUIGroup_traverseFlat(cUIGroup* self, cUIGroup_traverseFlat_cVirt* obj)
+void* cUIGroup::traverseFlat(cListOperator* pOperator)
 {
-    return obj->onListNode(self);
+    cUIGroup_traverseFlat_cVirt* obj = (cUIGroup_traverseFlat_cVirt*)pOperator;
+    return obj->onListNode(this);
 }
 #endif
 

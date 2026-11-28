@@ -40,6 +40,7 @@ struct cOVStateRewardsList : public cOVState {
     // destructor); declared first, it keeps the vtable out of the units defining the overrides
     virtual ~cOVStateRewardsList();
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cOVStateRewardsList_onWidgetEvent");
+    virtual void onCreateScreen() __asm__("cOVStateRewardsList_onCreateScreen");
 };
 
 CHECK_SIZE(cOVStateRewardsList, 0x9C);

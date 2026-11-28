@@ -90,6 +90,7 @@ struct cMeshAnimNode : public cInstanceNode {
     virtual void expire(int check) __asm__("cMeshAnimNode_expire");
     virtual void loseFocus() __asm__("cMeshAnimNode_loseFocus");
     virtual void render() __asm__("cMeshAnimNode_render");
+    virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMeshAnimNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cMeshAnimNode, Life, 0x01C);

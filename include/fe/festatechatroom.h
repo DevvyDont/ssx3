@@ -117,6 +117,8 @@ struct cFEStateChatRoom : public cFEStateNet {
     void* onNetEvent(int msgId, void* data) __asm__("cFEStateChatRoom_onNetEvent");
     void updateQualityIcons() __asm__("cFEStateChatRoom_updateQualityIcons");
     void highlightRow(int idx, int on) __asm__("cFEStateChatRoom_highlightRow");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEStateChatRoom_onGainFocus");
+    virtual void onCreateScreen() __asm__("cFEStateChatRoom_onCreateScreen");
 };
 
 CHECK_OFFSET(cFEStateChatRoom, mpQualityIcon, 0x6D0);

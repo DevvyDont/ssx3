@@ -76,6 +76,7 @@ struct cOVTemplate_Dialog : public cOVState {
     virtual void onWidgetCreate(cUIThing* item) __asm__("cOVTemplate_Dialog_onWidgetCreate");
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int) __asm__("cOVTemplate_Dialog_onWidgetMenu");
     virtual void onWidgetEvent(cUIThing* w, unsigned int ev) __asm__("cOVTemplate_Dialog_onWidgetEvent");
+    virtual void onCreateScreen() __asm__("cOVTemplate_Dialog_onCreateScreen");
 };
 
 CHECK_OFFSET(cOVTemplate_Dialog, mDialogType, 0x9C);
@@ -149,6 +150,7 @@ struct cOVTemplate_Simple : public cOVState {
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
         __asm__("cOVTemplate_Simple_onWidgetMenu");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int key) __asm__("cOVTemplate_Simple_onWidgetEvent");
+    virtual void onCreateScreen() __asm__("cOVTemplate_Simple_onCreateScreen");
 };
 
 CHECK_SIZE(cOVTemplate_Simple, 0x9C);

@@ -60,7 +60,6 @@ unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" cUIThing* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" char* cUIListBox_getCurrentAsciiText(void* self);
-extern "C" void cUIState_onGainFocus(void* self, int a1);
 void cFEStateMPCircuit_updateWidget(void* self);
 extern char str_ListBox[];
 
@@ -71,17 +70,17 @@ extern char str_ListBox[];
  *
  * @param pPreSt  the state that had focus before (On Tour pPreSt), passed on to cUIState_onGainFocus()
  */
-extern "C" void cFEStateMPCircuit_onGainFocus(cFEStateMPCircuit* self, int pPreSt)
+void cFEStateMPCircuit::onGainFocus(cUIState* pPreSt)
 {
-    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ListBox));
+    void* obj = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ListBox));
     if (obj != 0) {
-        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(cUIListBox_getCurrentAsciiText(obj)));
+        int frame = cUIScreen_getFrameByLabel(mpScreen, GetHashValue32(cUIListBox_getCurrentAsciiText(obj)));
         if (frame != cUIScreen::kNoFrame) {
-            cUIScreen_playFrame(self->mpScreen, frame, 1);
+            cUIScreen_playFrame(mpScreen, frame, 1);
         }
     }
-    self->updateWidget();
-    cUIState_onGainFocus(self, pPreSt);
+    updateWidget();
+    cUIState::onGainFocus(pPreSt);
 }
 #endif
 

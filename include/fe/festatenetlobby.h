@@ -125,6 +125,7 @@ struct cFEStateLobbyMenu : public cFEStateNet {
     void redrawPlayerList() __asm__("cFEStateLobbyMenu_redrawPlayerList");
     void fillPlayerRows(int page) __asm__("cFEStateLobbyMenu_fillPlayerRows");
     void updatePlayerScrollArrows() __asm__("cFEStateLobbyMenu_updatePlayerScrollArrows");
+    void selectChannelRoom(cUIThing* id) __asm__("cFEStateLobbyMenu_selectChannelRoom");
 };
 
 CHECK_OFFSET(cFEStateLobbyMenu, mpMenuPlayers, 0x6D0);

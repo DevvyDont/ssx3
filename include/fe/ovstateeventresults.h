@@ -57,6 +57,7 @@ struct cOVState_HEAT_STANDINGS : public cOVState {
     virtual int onWidgetMenu(cUIMenu* widget, unsigned int event, unsigned int)
         __asm__("cOVState_HEAT_STANDINGS_onWidgetMenu");
     virtual void onWidgetEvent(cUIThing* popup, unsigned int event) __asm__("cOVState_HEAT_STANDINGS_onWidgetEvent");
+    virtual void onUpdate() __asm__("cOVState_HEAT_STANDINGS_onUpdate__FPv");
 };
 
 CHECK_SIZE(cOVState_HEAT_STANDINGS, 0x9C);

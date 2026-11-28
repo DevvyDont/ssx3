@@ -40,6 +40,10 @@ struct cUIGroup : public cUIThing {
     virtual void update(unsigned short ev) __asm__("cUIGroup_update");
     virtual void render3D(cUIRenderContext* pRenCon) __asm__("cUIGroup_render3D");
     virtual void* traverseRecurse(cListOperator* pOperator) __asm__("cUIGroup_traverseRecurse");
+    virtual void setUIData(tUIBaseObject*) __asm__("cUIGroup_setUIData__FPv");
+    virtual void* traverseFlat(cListOperator* pOperator) __asm__("cUIGroup_traverseFlat");
+    virtual cUIThing* getObjectByHashName(unsigned int id) __asm__("cUIGroup_getObjectByHashName");
+    virtual bool onInput(const cUIInput* pInput) __asm__("cUIGroup_onInput");
 };
 
 CHECK_OFFSET(cUIGroup, mList, 0x074);

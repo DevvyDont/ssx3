@@ -98,8 +98,10 @@ public:
     virtual ~cFELocale();                                            // slot 1 cFELocale__cFELocale
     virtual void setLanguage(signed char language)
         __asm__("cFELocale_setLanguage");                  // slot 3 cFELocale_setLanguage
-    virtual unsigned short* getStringByHash(unsigned int StringID);  // slot 4 cFELocale_getStringByHash
-    virtual unsigned short* getStringByIndex(unsigned int index);    // slot 5 cFELocale_getStringByIndex
+    virtual unsigned short* getStringByHash(unsigned int StringID)
+        __asm__("cFELocale_getStringByHash");  // slot 4 cFELocale_getStringByHash
+    virtual unsigned short* getStringByIndex(unsigned int index)
+        __asm__("cFELocale_getStringByIndex");    // slot 5 cFELocale_getStringByIndex
 
     // Methods bound to their retail symbols by asm labels.
     void deleteAllFiles() __asm__("cFELocale_deleteAllFiles");

@@ -2808,19 +2808,19 @@ bool cFEInput::keyPressed() const
 //100%
 INCLUDE_ASM("fe/debugfe", cFEInput_setPadNum);
 #ifdef SKIP_ASM
-
 /**
  * Binds this front-end input to a controller pad.
  *
  * Stores @p idx (+0x4) and SSXApp's cInput for that pad (SSXApp +0xB0 + 4 * idx) in the input pointer (+0x18).
  *
- * @param idx  the pad number
+ * @param idx  the pad number (used as a byte)
  */
-extern "C" void cFEInput_setPadNum(cFEInput* self, unsigned char idx)
+void cFEInput::setPadNum(int idx)
 {
-    int controllerInput = (int)SSXApp->Inputs[idx];
-    self->mPadNum = idx;
-    self->mpInput = (cInput*)controllerInput;
+    unsigned char controllerNum = idx;
+    int controllerInput = (int)SSXApp->Inputs[controllerNum];
+    mPadNum = controllerNum;
+    mpInput = (cInput*)controllerInput;
 }
 #endif
 

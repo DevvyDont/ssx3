@@ -138,6 +138,8 @@ struct cFEStateChallengePopup : public cFEStateNet {
     void* onNetEvent(int msgId, void* data) __asm__("cFEStateChallengePopup_onNetEvent");
     void clearChallengeSent() __asm__("cFEStateChallengePopup_clearChallengeSent");
     void fillRaceTexts(cBENewRaceInterface* iface, cUIScreen* screen) __asm__("cFEStateChallengePopup_fillRaceTexts");
+    virtual void onGainFocus(cUIState* pPrevState) __asm__("cFEStateChallengePopup_onGainFocus");
+    void setChallengeSent() __asm__("cFEStateChallengePopup_setChallengeSent");
 };
 
 CHECK_OFFSET(cFEStateChallengePopup, mbChallengeSent, 0x6D0);

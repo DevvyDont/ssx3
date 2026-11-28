@@ -3606,8 +3606,8 @@ INCLUDE_ASM("main/ssxappdtor", cGameLoadState_onWidgetCreate);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void cGameLoadState_widgetCreateQP(void* self, int a1);
-extern "C" void cGameLoadState_widgetCreateMultiP(void* self, int a1);
+extern "C" void cGameLoadState_widgetCreateQP(cGameLoadState* self, cUIThing* widget);
+extern "C" void cGameLoadState_widgetCreateMultiP(cGameLoadState* self, cUIThing* widget);
 
 /**
  * Creates a widget of the match / event loading screen: cGameLoadState_widgetCreateMultiP when newRace.cGamePath is
@@ -3617,14 +3617,14 @@ extern "C" void cGameLoadState_widgetCreateMultiP(void* self, int a1);
  *
  * @param widget  the widget being created (passed on)
  */
-extern "C" void cGameLoadState_onWidgetCreate(cGameLoadState* self, int widget)
+void cGameLoadState::onWidgetCreate(cUIThing* widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     bool ok = cBENewRaceInterface_newRace.cGamePath != kGAMEPATH_MULTIPLAYER;
     if (ok) {
-        cGameLoadState_widgetCreateQP(self, widget);
+        cGameLoadState_widgetCreateQP(this, widget);
     } else {
-        cGameLoadState_widgetCreateMultiP(self, widget);
+        cGameLoadState_widgetCreateMultiP(this, widget);
     }
 }
 #endif

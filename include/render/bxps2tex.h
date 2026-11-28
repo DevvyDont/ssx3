@@ -157,6 +157,7 @@ struct cTextureMan {
         __asm__("cTextureMan_ensureContextTextures");
     void selectContextTexture(int idx, int slot, ulong** dma) __asm__("cTextureMan_selectContextTexture");
     void dropVramCopy(int idx) __asm__("cTextureMan_dropVramCopy");
+    void resetBoundTextures() __asm__("cTextureMan_resetBoundTextures");
 };
 
 CHECK_OFFSET(tTexInfo, mMemAlloc, 0x00);

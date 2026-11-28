@@ -92,6 +92,12 @@ struct cOVState_PROFILE : public cFEMemCard {
     virtual void displayStatus() __asm__("cOVState_PROFILE_displayStatus");
     virtual void updateDone() __asm__("cOVState_PROFILE_updateDone");
     virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cOVState_PROFILE_onWidgetEvent");
+    virtual void hideActionButtons(bool show) __asm__("cOVState_PROFILE_hideActionButtons");
+    virtual void hideDeleteButton(bool on) __asm__("cOVState_PROFILE_hideDeleteButton");
+    virtual void hideMainButton(bool loadBlocked, bool on) __asm__("cOVState_PROFILE_hideMainButton");
+    virtual void onCreateScreen() __asm__("cOVState_PROFILE_onCreateScreen");
+    virtual void onDestroyScreen() __asm__("cOVState_PROFILE_onDestroyScreen__FPv");
+    virtual int onWidgetMenu(cUIMenu* menu, unsigned int key, unsigned int) __asm__("cOVState_PROFILE_onWidgetMenu");
 };
 
 CHECK_OFFSET(cOVState_PROFILE, mIsOn, 0x22C);

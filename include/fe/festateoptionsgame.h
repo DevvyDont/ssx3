@@ -34,6 +34,7 @@ struct cFEStateOptionsGame : public cUIState {
     virtual int onWidgetMenu(cUIMenu* menu, unsigned int event, unsigned int)
         __asm__("cFEStateOptionsGame_onWidgetMenu");
     virtual int onWidgetPair(cUIPair* pair, unsigned int event) __asm__("cFEStateOptionsGame_onWidgetPair");
+    virtual void onGainFocus(cUIState*) __asm__("cFEStateOptionsGame_onGainFocus__FPv");
 };
 
 CHECK_OFFSET(cFEStateOptionsGame, mLanguageSlot, 0x048);

@@ -581,13 +581,10 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onGainFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Gives the game-options state focus using the base cUIState_onGainFocus().
- *
- * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateOptionsGame_onGainFocus(void* vself)
+void cFEStateOptionsGame::onGainFocus(cUIState*)
 {
-    cFEStateOptionsGame* self = (cFEStateOptionsGame*)vself;
-    return cUIState_onGainFocus(self);
+    cUIState_onGainFocus(this);
 }
 #endif
 
@@ -1168,13 +1165,10 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onGainFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Gives the sound-options state focus using the base cUIState_onGainFocus().
- *
- * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateOptionsSound_onGainFocus(void* vself)
+void cFEStateOptionsSound::onGainFocus(cUIState*)
 {
-    cFEStateOptionsSound* self = (cFEStateOptionsSound*)vself;
-    return cUIState_onGainFocus(self);
+    cUIState_onGainFocus(this);
 }
 #endif
 
@@ -1674,13 +1668,10 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onGainFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Gives the HUD options state focus using the base cUIState_onGainFocus().
- *
- * @return no meaningful value (cUIState_onGainFocus() returns nothing)
  */
-void* cFEStateOptionsHUD_onGainFocus(void* vself)
+void cFEStateOptionsHUD::onGainFocus(cUIState*)
 {
-    cFEStateOptionsHUD* self = (cFEStateOptionsHUD*)vself;
-    return cUIState_onGainFocus(self);
+    cUIState_onGainFocus(this);
 }
 #endif
 
@@ -1996,17 +1987,15 @@ void* cUIState_onDestroyScreen(void* self);
 /**
  * Sets both controllers' output channels to zero, then destroys the controller-options state's screens.
  *
- * Calls cFEStateOptionsController_vibratePad(self, pad, 0, 0) for pads 0 and 1; for a pad whose device reports state 2 that sets both
+ * Calls vibratePad(pad, 0, 0) for pads 0 and 1; for a pad whose device reports state 2 that sets both
  * of its output channels to 0, which probably stops any vibration. cUIState_onDestroyScreen() then destroys the
  * state's screen list.
- *
- * @return no meaningful value (cUIState_onDestroyScreen() returns nothing)
  */
-extern "C" void* cFEStateOptionsController_onDestroyScreen(cFEStateOptionsController* self)
+void cFEStateOptionsController::onDestroyScreen()
 {
-    self->vibratePad(0, 0.0f, 0.0f);
-    self->vibratePad(1, 0.0f, 0.0f);
-    return cUIState_onDestroyScreen(self);
+    vibratePad(0, 0.0f, 0.0f);
+    vibratePad(1, 0.0f, 0.0f);
+    cUIState_onDestroyScreen(this);
 }
 #endif
 
@@ -3071,9 +3060,9 @@ extern char str_ps2sq[];
  * (cUIThing_setVisible), then stores @p on in mIsHidden. Fills slot +0x12C of cFEStateOptionsDeviceSelect_vtbl, the
  * slot of cFEMemCard_hideActionButtons in the memory-card base vtable.
  *
- * @param on  1 to hide the buttons, 0 to show them
+ * @param on  true to hide the buttons, false to show them
  */
-void cFEStateOptionsDeviceSelect::hideActionButtons(int on)
+void cFEStateOptionsDeviceSelect::hideActionButtons(bool on)
 {
     if (mIsHidden == on)
         return;
@@ -3105,14 +3094,14 @@ extern char str_ps2sq[];
  *
  * @param on  true to hide the button
  */
-extern "C" void cFEStateOptionsDeviceSelect_hideDeleteButton(cFEStateOptionsDeviceSelect* self, bool on)
+void cFEStateOptionsDeviceSelect::hideDeleteButton(bool on)
 {
-    if (self->mIsSaveScreen != 0) {
+    if (mIsSaveScreen != 0) {
         int off = !on;
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5))->setVisible(off);
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext5))->setVisible(off);
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2sq))->setVisible(off);
     }
-    self->mDeleteButtonActive = !on;
+    mDeleteButtonActive = !on;
 }
 #endif
 
@@ -3136,18 +3125,18 @@ extern char str_ps2x[];
  * @param loadBlocked  true to hide the button on a load screen
  * @param saveBlocked  true to hide the button on a save screen
  */
-extern "C" void cFEStateOptionsDeviceSelect_hideMainButton(cFEStateOptionsDeviceSelect* self, bool loadBlocked, bool saveBlocked)
+void cFEStateOptionsDeviceSelect::hideMainButton(bool loadBlocked, bool saveBlocked)
 {
-    cUIThing* xButton = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x));
-    if (self->mIsSaveScreen != 0) {
+    cUIThing* xButton = cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_ps2x));
+    if (mIsSaveScreen != 0) {
         int showButton = !saveBlocked;
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3))->setVisible(showButton);
-        self->mMainButtonActive = showButton;
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3))->setVisible(showButton);
+        mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     } else {
         int showButton = !loadBlocked;
-        cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a))->setVisible(showButton);
-        self->mMainButtonActive = showButton;
+        cUIScreen_getObjectByHashName(mpScreen, GetHashValue32(str_btext3a))->setVisible(showButton);
+        mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     }
 }

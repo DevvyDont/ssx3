@@ -972,9 +972,9 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_getObjectByHashName);
  * @param hashname  the hash name to look for
  * @return this object when its mHashName equals @p hashname, otherwise 0
  */
-extern "C" void* cUIThing_getObjectByHashName(cUIThing* self, int hashname)
+cUIThing* cUIThing::getObjectByHashName(unsigned int hashname)
 {
-    return self->mHashName == hashname ? ((void*)self) : 0;
+    return mHashName == hashname ? this : 0;
 }
 #endif
 

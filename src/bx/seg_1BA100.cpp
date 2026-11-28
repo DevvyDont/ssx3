@@ -5941,10 +5941,10 @@ void tWPInGameData_LightGlow::writeToReplayFrame(cReplayFramePtr* frame) const
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct VEnt_F8B8 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct VEnt_F8B8 { short delta; short idx; void (*fn)(void*, const void*, int); };
 struct Stream_F8B8 { char* vt; };
 
-static inline void Wr_F8B8(Stream_F8B8* s, void* p, int n) {
+static inline void Wr_F8B8(Stream_F8B8* s, const void* p, int n) {
     VEnt_F8B8* e = (VEnt_F8B8*)(s->vt + 0x8);
     e->fn(vthis(s, *e), p, n);
 }
@@ -5955,21 +5955,23 @@ static inline void Wr_F8B8(Stream_F8B8* s, void* p, int n) {
  * For scale R/G/B and offset R/G/B in turn, writes the value and then m_wpTravelDistance (+0x0), 4 bytes each,
  * through the frame's slot 1 (write); the m_last targets are not saved.
  *
- * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ * @param baseFrame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_ScreenTint_writeToReplayFrame(tWPInGameData_ScreenTint* self, Stream_F8B8* frame) {
-    Wr_F8B8(frame, &self->m_ScreenTintScaleR, 4);
-    Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, &self->m_ScreenTintScaleG, 4);
-    Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, &self->m_ScreenTintScaleB, 4);
-    Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, &self->m_ScreenTintOffsetR, 4);
-    Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, &self->m_ScreenTintOffsetG, 4);
-    Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, &self->m_ScreenTintOffsetB, 4);
-    Wr_F8B8(frame, ((char*)self), 4);
+void tWPInGameData_ScreenTint::writeToReplayFrame(cReplayFramePtr* baseFrame) const
+{
+    Stream_F8B8* frame = (Stream_F8B8*)baseFrame;
+    Wr_F8B8(frame, &m_ScreenTintScaleR, 4);
+    Wr_F8B8(frame, ((char*)this), 4);
+    Wr_F8B8(frame, &m_ScreenTintScaleG, 4);
+    Wr_F8B8(frame, ((char*)this), 4);
+    Wr_F8B8(frame, &m_ScreenTintScaleB, 4);
+    Wr_F8B8(frame, ((char*)this), 4);
+    Wr_F8B8(frame, &m_ScreenTintOffsetR, 4);
+    Wr_F8B8(frame, ((char*)this), 4);
+    Wr_F8B8(frame, &m_ScreenTintOffsetG, 4);
+    Wr_F8B8(frame, ((char*)this), 4);
+    Wr_F8B8(frame, &m_ScreenTintOffsetB, 4);
+    Wr_F8B8(frame, ((char*)this), 4);
 }
 #endif
 
@@ -5994,10 +5996,10 @@ void tWPInGameData_SkyBox::writeToReplayFrame(cReplayFramePtr* frame) const
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct VEnt_FAA0 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct VEnt_FAA0 { short delta; short idx; void (*fn)(void*, const void*, int); };
 struct Stream_FAA0 { char* vt; };
 
-static inline void Wr_FAA0(Stream_FAA0* s, void* p, int n) {
+static inline void Wr_FAA0(Stream_FAA0* s, const void* p, int n) {
     VEnt_FAA0* e = (VEnt_FAA0*)(s->vt + 0x8);
     e->fn(vthis(s, *e), p, n);
 }
@@ -6008,27 +6010,29 @@ static inline void Wr_FAA0(Stream_FAA0* s, void* p, int n) {
  * For pitch, yaw, colour R/G/B, intensity, type, lens intensity and radius in turn, writes the value and then
  * m_wpTravelDistance (+0x0), 4 bytes each, through the frame's slot 1 (write); the m_last targets are not saved.
  *
- * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ * @param baseFrame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Sun_writeToReplayFrame(tWPInGameData_Sun* self, Stream_FAA0* frame) {
-    Wr_FAA0(frame, &self->m_SunPitchOffset, 4);
-    Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, &self->m_SunYawOffset, 4);
-    Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, &self->m_SunColorR, 4);
-    Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, &self->m_SunColorG, 4);
-    Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, &self->m_SunColorB, 4);
-    Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, &self->m_SunIntensity, 4);
-    Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, &self->m_SunType, 4);
-    Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, &self->m_LensIntensity, 4);
-    Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, &self->m_SunRadius, 4);
-    Wr_FAA0(frame, ((char*)self), 4);
+void tWPInGameData_Sun::writeToReplayFrame(cReplayFramePtr* baseFrame) const
+{
+    Stream_FAA0* frame = (Stream_FAA0*)baseFrame;
+    Wr_FAA0(frame, &m_SunPitchOffset, 4);
+    Wr_FAA0(frame, ((char*)this), 4);
+    Wr_FAA0(frame, &m_SunYawOffset, 4);
+    Wr_FAA0(frame, ((char*)this), 4);
+    Wr_FAA0(frame, &m_SunColorR, 4);
+    Wr_FAA0(frame, ((char*)this), 4);
+    Wr_FAA0(frame, &m_SunColorG, 4);
+    Wr_FAA0(frame, ((char*)this), 4);
+    Wr_FAA0(frame, &m_SunColorB, 4);
+    Wr_FAA0(frame, ((char*)this), 4);
+    Wr_FAA0(frame, &m_SunIntensity, 4);
+    Wr_FAA0(frame, ((char*)this), 4);
+    Wr_FAA0(frame, &m_SunType, 4);
+    Wr_FAA0(frame, ((char*)this), 4);
+    Wr_FAA0(frame, &m_LensIntensity, 4);
+    Wr_FAA0(frame, ((char*)this), 4);
+    Wr_FAA0(frame, &m_SunRadius, 4);
+    Wr_FAA0(frame, ((char*)this), 4);
 }
 #endif
 
@@ -6053,10 +6057,10 @@ void tWPInGameData_Surface::writeToReplayFrame(cReplayFramePtr* frame) const
 //100%
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct VEnt_FD30 { short delta; short idx; void (*fn)(void*, void*, int); };
+struct VEnt_FD30 { short delta; short idx; void (*fn)(void*, const void*, int); };
 struct Stream_FD30 { char* vt; };
 
-static inline void Wr_FD30(Stream_FD30* s, void* p, int n) {
+static inline void Wr_FD30(Stream_FD30* s, const void* p, int n) {
     VEnt_FD30* e = (VEnt_FD30*)(s->vt + 0x8);
     e->fn(vthis(s, *e), p, n);
 }
@@ -6068,21 +6072,23 @@ static inline void Wr_FD30(Stream_FD30* s, void* p, int n) {
  * (+0x48, +0x50), each followed by the 4-byte m_wpTravelDistance (+0x0), through the frame's slot 1 (write); the
  * m_last targets are not saved.
  *
- * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ * @param baseFrame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Lighting_writeToReplayFrame(tWPInGameData_Lighting* self, Stream_FD30* frame) {
-    Wr_FD30(frame, &self->m_LightIrradianceName, 8);
-    Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, &self->m_ShadowIrradianceName, 8);
-    Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, &self->m_TunnelIrradianceName, 8);
-    Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, &self->m_ObjectIrradianceName, 8);
-    Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, &self->m_AmbientLightIntensityOffset, 4);
-    Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, &self->m_RimLightIntensityOffset, 4);
-    Wr_FD30(frame, ((char*)self), 4);
+void tWPInGameData_Lighting::writeToReplayFrame(cReplayFramePtr* baseFrame) const
+{
+    Stream_FD30* frame = (Stream_FD30*)baseFrame;
+    Wr_FD30(frame, &m_LightIrradianceName, 8);
+    Wr_FD30(frame, ((char*)this), 4);
+    Wr_FD30(frame, &m_ShadowIrradianceName, 8);
+    Wr_FD30(frame, ((char*)this), 4);
+    Wr_FD30(frame, &m_TunnelIrradianceName, 8);
+    Wr_FD30(frame, ((char*)this), 4);
+    Wr_FD30(frame, &m_ObjectIrradianceName, 8);
+    Wr_FD30(frame, ((char*)this), 4);
+    Wr_FD30(frame, &m_AmbientLightIntensityOffset, 4);
+    Wr_FD30(frame, ((char*)this), 4);
+    Wr_FD30(frame, &m_RimLightIntensityOffset, 4);
+    Wr_FD30(frame, ((char*)this), 4);
 }
 #endif
 
@@ -6091,7 +6097,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cStream_FEB0 {
 public:
-    virtual int read(void* p, int n);
+    virtual int read(const void* p, int n);
     virtual int write(void* p, int n);
 };
 
@@ -6102,50 +6108,51 @@ public:
  * the frame's slot 1 (write). The local class names that slot "read" and the comment above says "Reads"; slot 1 of
  * cReplayFramePtr is write. The m_last targets are not saved.
  *
- * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
+ * @param baseFrame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-// Reads 19 words into self (at +0x8 .. +0x98), each followed by one into +0x0
+// Reads 19 words into this object (at +0x8 .. +0x98), each followed by one into +0x0
 // (the read-side twin of tWPInGameData_Weather_readFromReplayFrame).
-extern "C" void tWPInGameData_Weather_writeToReplayFrame(tWPInGameData_Weather* self, cStream_FEB0* frame)
+void tWPInGameData_Weather::writeToReplayFrame(cReplayFramePtr* baseFrame) const
 {
-    frame->read(&self->m_SnowIntensity, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_FlakeSize, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_WindIntensity, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_WindRotation, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_PlayerWindIntensity, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_Temperature, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFlurries, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowGravityMultiplier, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFluffItensity, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFluffWindIntensity, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_LightningChance, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFlakeColourA, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFlakeColourR, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFlakeColourG, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFlakeColourB, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFluffColourA, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFluffColourR, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFluffColourG, 4);
-    frame->read(((char*)self), 4);
-    frame->read(&self->m_SnowFluffColourB, 4);
-    frame->read(((char*)self), 4);
+    cStream_FEB0* frame = (cStream_FEB0*)baseFrame;
+    frame->read(&m_SnowIntensity, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_FlakeSize, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_WindIntensity, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_WindRotation, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_PlayerWindIntensity, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_Temperature, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFlurries, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowGravityMultiplier, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFluffItensity, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFluffWindIntensity, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_LightningChance, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFlakeColourA, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFlakeColourR, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFlakeColourG, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFlakeColourB, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFluffColourA, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFluffColourR, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFluffColourG, 4);
+    frame->read(((char*)this), 4);
+    frame->read(&m_SnowFluffColourB, 4);
+    frame->read(((char*)this), 4);
 }
 #endif
 

@@ -196,6 +196,7 @@ struct cSortObjNode : public cTypeObjNode {
     virtual unsigned int getSortIndex() const __asm__("cSortObjNode_getSortIndex__FPv");
     virtual bool compare(const cObjNode* obj) __asm__("cSortObjNode_compare");
     virtual bool equal(const cObjNode* obj) __asm__("cSortObjNode_equal");
+    virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cSortObjNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cSortObjNode, SortIndex, 0x14);

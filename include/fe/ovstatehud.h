@@ -278,6 +278,7 @@ struct cOVStateHUD1P : public cUIState {
     virtual void onCreateScreen() __asm__("cOVStateHUD1P_onCreateScreen");
     void renderCollectibles(char* obj, cRider* rider, int x, float animFrame)
         __asm__("cOVStateHUD1P_renderCollectibles");
+    virtual int handleEvent(int msg, void* pParam) __asm__("cOVStateHUD1P_handleEvent");
 };
 
 CHECK_OFFSET(cTextureElement, mSourceShape, 0x00);

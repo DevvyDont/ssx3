@@ -72,6 +72,7 @@ struct cFEInput : public cUIInput {
     virtual float getCamZoom() const __asm__("cFEInput_getCamZoom__FPv");
     virtual float getCamPan() const __asm__("cFEInput_getCamPan__FPv");
     virtual float getCamRotate() const __asm__("cFEInput_getCamRotate__FPv");
+    virtual void setPadNum(int idx) __asm__("cFEInput_setPadNum");
 };
 
 CHECK_OFFSET(cFEInput, mbKeyReady, 0x0C);

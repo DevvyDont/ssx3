@@ -62,8 +62,15 @@ struct cFlags : cVisualEffect { virtual ~cFlags(); };
 struct cPowerUpFXToggles : cVisualEffect { virtual ~cPowerUpFXToggles(); };
 struct cSnowfallToggles : cVisualEffect { virtual ~cSnowfallToggles(); };
 struct cSplashToggles : cVisualEffect { virtual ~cSplashToggles(); };
-struct cTube : cVisualEffect { virtual ~cTube(); };
-struct cPathArrow : cVisualEffect { virtual ~cPathArrow(); };
+struct cTube : cVisualEffect {
+    virtual ~cTube();
+    virtual void render() __asm__("cTube_render__FPv");
+};
+struct cPathArrow : cVisualEffect {
+    virtual ~cPathArrow();
+    virtual void update() __asm__("cPathArrow_update__FPv");
+    virtual void render() __asm__("cPathArrow_render__FPv");
+};
 
 struct cVisualEffectsMan {
     cRenderToggles* m_RenderToggles;        // 0x00 [O]; [R] ctor 0; PS2 ctor "RenderToggles" (cRenderToggles_vtbl)

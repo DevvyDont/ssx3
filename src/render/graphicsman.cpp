@@ -358,26 +358,26 @@ static inline t4VectorInit vu0MtxMul_A048(const t4Matrix* m, const t4VectorInit&
  * Draws a cubic spline as a strip of @p n points through virtual slot 73.
  *
  * Point i is (t^3, t^2, t, 1) * @p BezMat at t = i / (n - 1); every point gets texture coordinates (0, 0, 1) and the
- * colour @p color scaled by 128 (r, g, b from color[1..3], a from color[0]). The vertices live in a fixed 20-entry
+ * colour @p color scaled by 128 (its R, G, B and A). The vertices live in a fixed 20-entry
  * local array, so @p n above 20 overruns the stack.
  *
  * @param BezMat  the Bezier basis matrix of the curve
- * @param color  the colour as four floats a, r, g, b in 0..1
+ * @param color  the colour (A, R, G, B in 0..1)
  * @param n  the number of points (On Tour NumPoints); at most 20
  */
-extern "C" void cGraphicsMan_RenderSpline(cGraphicsMan* self, const t4Matrix* BezMat, float* color, int n)
+void cGraphicsMan::RenderSpline(const t4Matrix& BezMat, const tARGB& color, int n)
 {
     float step = 1.0f / ((float)n - 1.0f);
-    int red = (int)(color[1] * 128.0f);
-    int green = (int)(color[2] * 128.0f);
-    int blue = (int)(color[3] * 128.0f);
-    int alpha = (int)(color[0] * 128.0f);
+    int red = (int)(color.R * 128.0f);
+    int green = (int)(color.G * 128.0f);
+    int blue = (int)(color.B * 128.0f);
+    int alpha = (int)(color.A * 128.0f);
     float curveParam = 0.0f;
     t4VectorInit pos;
     tBxVertex verts[20];
     for (int i = 0; i < n; i++) {
         float curveParamSq = curveParam * curveParam;
-        pos = vu0MtxMul_A048(BezMat, t4VectorInit(curveParam * curveParamSq, curveParamSq, curveParam, 1.0f));
+        pos = vu0MtxMul_A048(&BezMat, t4VectorInit(curveParam * curveParamSq, curveParamSq, curveParam, 1.0f));
         verts[i].u = 0.0f;
         verts[i].v = 0.0f;
         verts[i].one = 1.0f;
@@ -388,11 +388,11 @@ extern "C" void cGraphicsMan_RenderSpline(cGraphicsMan* self, const t4Matrix* Be
         verts[i].p = pos;
         curveParam += step;
     }
-    self->RenderLineStrip(n, verts, 0);
+    RenderLineStrip(n, verts, 0);
 }
 #endif
 
-extern "C" void* cGarbageMan_Trash(int);
+extern "C" void* cGarbageMan_Trash(void*);
 
 //100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_DeleteGridMesh__FPvi);
@@ -403,12 +403,10 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_DeleteGridMesh__FPvi);
  * Slot 77 of cPS2GraphicsMan_vtbl, after CreateGridMesh at slot 76.
  *
  * @param gridMesh  the grid mesh object (a garbage-can node) to queue
- * @return whatever cGarbageMan_Trash leaves in v0; that callee has no return statement, so the value is meaningless
  */
-void* cGraphicsMan_DeleteGridMesh(void* vself, int gridMesh)
+void cGraphicsMan::DeleteGridMesh(cGridMesh* gridMesh)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
-    return cGarbageMan_Trash(gridMesh);
+    cGarbageMan_Trash(gridMesh);
 }
 #endif
 
@@ -416,22 +414,16 @@ void* cGraphicsMan_DeleteGridMesh(void* vself, int gridMesh)
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_CreateScreenGrabTexture__FPvT0);
 #ifdef SKIP_ASM
 /**
- * The base cGraphicsMan::CreateScreenGrabTexture: marks the handle empty (word 0 = 0, texture id = -1) and returns
- * -1.
+ * The base cGraphicsMan::CreateScreenGrabTexture: marks the handle empty (no memory, texture id kNoScreenGrab).
  *
- * On Tour's version takes (tScreenGrabHandle&, width, height); this one is declared with the handle only.
+ * The width and height (On Tour's second and third parameters) are not used.
  *
- * @param vscreenGrabHandle  the handle to reset (On Tour screenGrabHandle)
- * @return -1
+ * @param screenGrabHandle  the handle to reset
  */
-int cGraphicsMan_CreateScreenGrabTexture(void* vself, void* vscreenGrabHandle)
+void cGraphicsMan::CreateScreenGrabTexture(tScreenGrabHandle& screenGrabHandle, unsigned int, unsigned int)
 {
-    cGraphicsMan* self = (cGraphicsMan*)vself;
-    tScreenGrabHandle* screenGrabHandle = (tScreenGrabHandle*)vscreenGrabHandle;
-    int invalidId = -1;
-    *(int*)screenGrabHandle = 0;
-    screenGrabHandle->mTextureId = invalidId;
-    return invalidId;
+    screenGrabHandle.mMemory = 0;
+    screenGrabHandle.mTextureId = tScreenGrabHandle::kNoScreenGrab;
 }
 #endif
 
@@ -447,11 +439,11 @@ extern void* cGarbageMan_mCan[];
  * Stores the old list head in the node's first word and makes the node the head. The node's second word is its vtable:
  * cGarbageMan_Update later deletes it through the virtual destructor. No return statement although declared to return void*.
  *
- * @param n  the node to queue (a pointer passed as int)
+ * @param n  the node to queue
  * @return nothing defined (no return statement)
  */
-// PORT: the unit declares this (int) returning void*; the arg is a list node pointer.
-extern "C" void* cGarbageMan_Trash(int n)
+// PORT: the unit declares this returning void*; the arg is a list node pointer.
+extern "C" void* cGarbageMan_Trash(void* n)
 {
     void** node = (void**)n;
     void** head = &cGarbageMan_mCan[cGarbageMan_mCurCan];

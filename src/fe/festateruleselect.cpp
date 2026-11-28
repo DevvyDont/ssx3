@@ -320,20 +320,17 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
 }
 #endif
 
-extern "C" void* cUIState_onGainFocus(void* self);
-
 //100%
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onGainFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Gives the rule-select state focus using the base cUIState_onGainFocus().
  *
- * @return no meaningful value (cUIState_onGainFocus() returns nothing)
+ * @param pPrevState  the state that had focus before, passed on
  */
-void* cFEStateRuleSelect_onGainFocus(void* vself)
+void cFEStateRuleSelect::onGainFocus(cUIState* pPrevState)
 {
-    cFEStateRuleSelect* self = (cFEStateRuleSelect*)vself;
-    return cUIState_onGainFocus(self);
+    cUIState::onGainFocus(pPrevState);
 }
 #endif
 
