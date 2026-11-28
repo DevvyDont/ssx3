@@ -22,6 +22,9 @@
 #include "util/locale.h"
 #include "fe/buypopupinfo.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_onCreateScreen);
 #ifdef SKIP_ASM
@@ -2703,7 +2706,6 @@ extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(cFEStateVideoPlayer* se
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* __12cMoviePlayer(void* mem);
 extern "C" void cFEStateVideoPlayer_Start(cFEStateVideoPlayer* self);
 extern char str_MoviePlayer[];
 
@@ -2715,7 +2717,7 @@ extern char str_MoviePlayer[];
  */
 void cFEStateVideoPlayer::onCreateScreen()
 {
-    mpMoviePlayer = (cMoviePlayer*)__12cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
+    mpMoviePlayer = new (str_MoviePlayer, 0, 0) cMoviePlayer;
     Start();
 }
 #endif

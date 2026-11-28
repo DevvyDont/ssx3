@@ -3,6 +3,9 @@
 #include "input/inputmap.h"
 #include "input/inputparse.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 //100%
 INCLUDE_ASM("input/inputmap", cInputMap_init);
 #ifdef SKIP_ASM
@@ -98,8 +101,7 @@ extern char str_InputParser[];
  */
 void cInputMap::loadMapFile(void* mem, void* len)
 {
-    Parser = (cInputMapParser*)__15cInputMapParserPvT1((cInputMapParser*)cMemMan_alloc(0x109EC,
-            str_InputParser, 0x100, 0), mem, len);
+    Parser = new (str_InputParser, 0x100, 0) cInputMapParser(mem, len);
 }
 #endif
 

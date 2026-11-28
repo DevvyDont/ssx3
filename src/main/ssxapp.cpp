@@ -29,6 +29,8 @@
 #include "world/worldcache.h"
 #include "visualfx/lensfx.h"
 #include "fe/feasyncmanager.h"
+#include "animation/animdatabase.h"
+#include "animation/gameanimmap.h"
 
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_cSSXApp);
@@ -117,7 +119,6 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv);
 extern "C" void* SHAPE_locate(const char* name, void* list);
 extern "C" void cGraphicsMan_UploadTextures(void* gfx);
 void* cPreStartScreen_cPreStartScreen(void* p);
-extern "C" void* __15cFEAsyncManager(void* p);
 extern "C" void cFEAsyncManager_Init(void* p);
 extern "C" void* cGameModeMan_getGM();
 struct cAppMan;
@@ -173,7 +174,7 @@ void cSSXApp::init(int argc, char** argv)
     cAppMan_setNextModule((cAppMan*)this, (unsigned int)cPreStartScreen_cPreStartScreen(cMemMan_alloc(0xC,
             str_PreStartScreen, 0x100, 0)));
     GameModeMan = (cGameModeMan*)cGameModeMan_getGM();
-    void* feAsyncManager = __15cFEAsyncManager(cMemMan_alloc(1424, str_FEAsyncManager, 0, 0));
+    void* feAsyncManager = new (str_FEAsyncManager, 0, 0) cFEAsyncManager;
     *(void**)&mFEAsyncManager = feAsyncManager;
     cFEAsyncManager_Init(feAsyncManager);
 }
@@ -1011,9 +1012,7 @@ cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface_
 extern "C" void cSSXApp_activateBEOptions_self(void* self) __asm__("cSSXApp_activateBEOptions");
 extern "C" void cSSXApp_initLocale(cSSXApp* self);
 extern "C" void cRiderAnimBase_initAIAnimEventMap();
-extern "C" void* __12cGameAnimMap(void* self);
 extern "C" void cGameAnimMap_initMap(void* self);
-extern "C" void* __13cAnimDataBase(void* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cSSXAudio_BEAudioModeToAudioMode(void* self, unsigned char a1);
 extern "C" void SSXAUDIO_Init(int a);
@@ -1157,9 +1156,9 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cSSXApp_activateBEOptions_self(self);
     ((cSSXApp*)self)->initLocale();
     cRiderAnimBase_initAIAnimEventMap();
-    self->f94 = __12cGameAnimMap(cMemMan_alloc(6216, str_GameAnimMap, 0, 0));
+    self->f94 = new (str_GameAnimMap, 0, 0) cGameAnimMap;
     cGameAnimMap_initMap(self->f94);
-    self->f90 = __13cAnimDataBase(cMemMan_alloc(0x3FC, str_AnimDataBase, 0, 0));
+    self->f90 = new (str_AnimDataBase, 0, 0) cAnimDataBase;
     cBE_getInterface_Fv(cBE_getBE(), 4);
     SSXAUDIO_Init(cSSXAudio_BEAudioModeToAudioMode(cAudioInterface_bxAudio(), cBEOptionInterface_mOption_82D0.output));
     setLoaderThreadPriority();

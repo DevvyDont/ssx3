@@ -9,11 +9,13 @@
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 //100%
 INCLUDE_ASM("scripter/videngine", cVidEngine_ReadyVideo);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* __12cMoviePlayer(void* mem);
 extern "C" void tMoviePlayOptions_SetDefaults(void* self);
 extern "C" int cMoviePlayer_init(void* p, void* q);
 extern "C" void _$_12cMoviePlayer(void* p, int a1);
@@ -34,7 +36,7 @@ extern const char str_VidEnginePlayer[];
 extern "C" bool cVidEngine_ReadyVideo(void** self, int file)
 {
     if (*self != 0) return false;
-    *self = __12cMoviePlayer(cMemMan_alloc(68, str_VidEnginePlayer, 0x100, 0));
+    *self = new (str_VidEnginePlayer, 0x100, 0) cMoviePlayer;
     tMoviePlayOptions params;
     tMoviePlayOptions_SetDefaults(&params);
     //S

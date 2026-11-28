@@ -24,6 +24,9 @@
 #include "render/playerlights.h"
 #include "animation/animdatabase.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 //100%
 INCLUDE_ASM("fe/fereal", cFECustom_cFECustom);
 #ifdef SKIP_ASM
@@ -1294,7 +1297,6 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cFadeScreen_update(void* self);
-extern "C" void* __12cMoviePlayer(void* mem);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cMusicSys_PauseSong(void* p);
 extern "C" void cMusicSys_ResumeSong(void* p);
@@ -1345,7 +1347,7 @@ void cRealFE::update()
     cFadeScreen_update(((char*)this));
     if (mpMoviePlayer == 0) {
         if (cRealFE_mMovieList != 0) {
-            mpMoviePlayer = (cMoviePlayer*)__12cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
+            mpMoviePlayer = new (str_MoviePlayer, 0x100, 0) cMoviePlayer;
             cMusicSys_PauseSong(&cAudioInterface_bxAudio()->MusicSys);
             tMoviePlayOptions info;
             tMoviePlayOptions_SetDefaults(&info);
@@ -1531,8 +1533,6 @@ extern int cRealFE_mStartState;
 extern int gInLodge;
 extern void* VoipMan;
 
-// PORT: cMemMan_alloc bound as a placement operator new (gcc then treats the result as unaliased)
-void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 struct sRealFE_1A2C40 {
     char pad0[0xC];
     char* ui;   // 0xC

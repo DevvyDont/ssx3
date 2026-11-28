@@ -27,6 +27,9 @@
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_cMoveNode);
 #ifdef SKIP_ASM
@@ -597,7 +600,6 @@ void cMoveNode::addUVScroll(void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addTexFlip);
 #ifdef SKIP_ASM
 extern char str_TexFlipModifier[];
-extern "C" void* __16cTexFlipModifierPvP15tInstanceRecord(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, cTexFlipModifier* mod);
 
 /**
@@ -608,8 +610,7 @@ extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, cTexFlipModifier* 
  */
 void cMoveNode::addTexFlip(void* desc)
 {
-    addTexFlipModifier((cTexFlipModifier*)__16cTexFlipModifierPvP15tInstanceRecord(
-            cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), desc, Instance));
+    addTexFlipModifier(new (str_TexFlipModifier, 0x20000000, 0) cTexFlipModifier(desc, Instance));
 }
 #endif
 
@@ -2719,7 +2720,7 @@ void cMultiParticleMan::addParticle(int i, void* pdata, int numInst)
 {
     void** slot = (void**)&Particles[i];
     if (*slot == 0) {
-        *slot = __14cMultiParticlePvi((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), pdata, numInst);
+        *slot = new (str_MultiParticle, 0x20000000, 0) cMultiParticle(pdata, numInst);
     }
 }
 #endif

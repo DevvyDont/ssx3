@@ -8,6 +8,9 @@
 #include "world/worldcache.h"
 #include "world/patchrecord.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 //100%
 INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_init);
 #ifdef SKIP_ASM
@@ -684,8 +687,7 @@ struct sVE_7FC0 { short delta; short index; void (*fn)(void*, int); };
  */
 int cWorldCache::init(const char* name, int pNash)
 {
-    m_pWorldMemMan = (cWorldMemoryMan*)__15cWorldMemoryMan((cWorldMemoryMan*)cMemMan_alloc(316,
-            str_WORLD_MEMMAN, 0, 0));
+    m_pWorldMemMan = new (str_WORLD_MEMMAN, 0, 0) cWorldMemoryMan;
     sBXStr_7FC0 path;
     sBXStr_7FC0 full;
     sBXStr_7FC0 base;
@@ -697,8 +699,7 @@ int cWorldCache::init(const char* name, int pNash)
     cBXString__cBXString(&base, 2);
     tStreamDataHeader* hdr = mp_DataHeader;
     hdr->m_pSection = (struct tBxSection*)&hdr[1]; // the section records follow the 0x50-byte header
-    m_pSharedCacheTable = (cWorldCacheTable*)__16cWorldCacheTablePv((cWorldCacheTable*)cMemMan_alloc(232,
-            str_SharedTable, 0, 0), &mp_DataHeader->m_iTable[0]);
+    m_pSharedCacheTable = new (str_SharedTable, 0, 0) cWorldCacheTable(&mp_DataHeader->m_iTable[0]);
     m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag((int)mp_DataHeader->m_uiNumSections * 4,
             str_SectionTables, 0, 0));
     for (unsigned int i = 0; i < mp_DataHeader->m_uiNumSections; i++)

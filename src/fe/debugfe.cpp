@@ -19,6 +19,9 @@
 #include "main/ssxapp.h"
 #include "render/playerlights.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
 #ifdef SKIP_ASM
@@ -1961,7 +1964,6 @@ extern char str_part[];
 extern char str_menu[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cMemMan_free(void* ptr);
-extern "C" void* __5cFontPCci(void* self, const char* name, int a2);
 extern "C" int* FILE_loadz(const char* name, int flags);
 extern "C" int* FILE_load(const char* name, int flags);
 extern "C" void* cDebugMenuScreen_cDebugMenuScreen(void* self);
@@ -1977,7 +1979,7 @@ void cDebugFE::load()
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ps2GraphicsMan->InitTextures(0);
-    Font = (cFont*)__5cFontPCci(cMemMan_alloc(132, str_DebugFont, 0, 0), str_data_fonts_debugfnt_sfn, 0);
+    Font = new (str_DebugFont, 0, 0) cFont(str_data_fonts_debugfnt_sfn, 0);
     t2Vector sc(1.600000023841858f, 1.600000023841858f);
     // cFont keeps its t2Vectors (BaseScale, Scale) as float[2]: the same two floats.
     *(t2Vector*)&Font->BaseScale[0] = sc;

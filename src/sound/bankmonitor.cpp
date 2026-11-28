@@ -13,6 +13,9 @@
 #include "sound/streamsys.h"
 #include "sound/bankmanager.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_cBankMonitor);
 #ifdef SKIP_ASM
@@ -3840,8 +3843,7 @@ void cSpeechSys::CreateInstance(int i, int streamId, int section, int memType, i
 {
     // PORT: pointer arithmetic through int
     void** slot = (void**)(i * 4 + (int)mSpeechInstance);
-    *slot = __15cSpeechInstanceiiiiii((cSpeechInstance*)cMemMan_alloc(2308, str_SpeechInstance, 0, 0), i, streamId, section,
-            memType, loadLangHead, reserved);
+    *slot = new (str_SpeechInstance, 0, 0) cSpeechInstance(i, streamId, section, memType, loadLangHead, reserved);
 }
 #endif
 

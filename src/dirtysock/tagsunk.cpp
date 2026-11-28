@@ -1678,7 +1678,7 @@ extern "C" void* __8LobbyMan(LobbyMan* self);
  */
 extern "C" void LobbyMan_createInstance(void)
 {
-    LobbyMan_mLobbyMan = (LobbyMan*)(__8LobbyMan((LobbyMan*)cMemMan_alloc(0x300, str_LobbyMan, 0x20000000, 0)));
+    LobbyMan_mLobbyMan = new (str_LobbyMan, 0x20000000, 0) LobbyMan;
 }
 #endif
 
@@ -9260,7 +9260,7 @@ extern "C" void* __9cSetupManiii(cSetupMan* self, int a1, int a2, int a3);
  */
 extern "C" void cSetupMan_createInstance(int channel, int isHost, int ranked)
 {
-    cSetupMan_mSetupMan = __9cSetupManiii((cSetupMan*)cMemMan_alloc(300, str_cSetupMan, 0x20000000, 0), channel, isHost, ranked);
+    cSetupMan_mSetupMan = new (str_cSetupMan, 0x20000000, 0) cSetupMan(channel, isHost, ranked);
 }
 #endif
 
@@ -10633,7 +10633,7 @@ extern "C" void* __15cSharedLoginMan(cSharedLoginMan* self);
  */
 extern "C" void cSharedLoginMan_createInstance(void)
 {
-    SharedLoginMan = __15cSharedLoginMan((cSharedLoginMan*)cMemMan_alloc(8, str_cSharedLoginMan, 0x20000000, 0));
+    SharedLoginMan = new (str_cSharedLoginMan, 0x20000000, 0) cSharedLoginMan;
 }
 #endif
 
@@ -11848,7 +11848,7 @@ extern "C" void* __12cUsbKeyboard(cUsbKeyboard* self);
  */
 extern "C" void cUsbKeyboard_createInstance(void)
 {
-    Keyboard = __12cUsbKeyboard((cUsbKeyboard*)cMemMan_alloc(1124, str_cUsbKeyboard, 0x20000000, 0));
+    Keyboard = new (str_cUsbKeyboard, 0x20000000, 0) cUsbKeyboard;
 }
 #endif
 

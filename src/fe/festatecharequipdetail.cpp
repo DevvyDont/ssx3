@@ -440,6 +440,9 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetCreate);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "vtable.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 int GetHashValue32(char* str);
 
 extern const int kBolt_None_eate __asm__("kBolt_None");
@@ -3141,7 +3144,7 @@ void cFEBoltFileManager::init()
     mNumLoadThreads = 0;
     mMemUsed = 0;
     if (D_004A1968 == 0) {
-        D_004A1968 = __21cBoltFileIndexManager((cBoltFileIndexManager*)cMemMan_alloc(8004, str_BoltFileIndexManager, 0, 0));
+        D_004A1968 = new (str_BoltFileIndexManager, 0, 0) cBoltFileIndexManager;
     } else {
         D_004A1968->reset();
     }

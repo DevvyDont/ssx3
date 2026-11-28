@@ -19,11 +19,13 @@
 #include "camera/camera.h"
 #include "camera/race/racecontroller.h"
 
+// PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
+
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_addCache);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* __12cReplayCache(void* self);
 extern const char str_ReplayCache[];
 
 /**
@@ -40,7 +42,7 @@ void* cReplay::addCache()
     void** slot = (void**)&InputCache;
     for (int i = 0; i < 2; i++, slot++) {
         if (*slot == 0) {
-            return *slot = __12cReplayCache(cMemMan_alloc(0x10, str_ReplayCache, 0, 0));
+            return *slot = new (str_ReplayCache, 0, 0) cReplayCache;
         }
     }
     return 0;
