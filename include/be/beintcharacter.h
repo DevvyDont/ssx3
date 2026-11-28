@@ -65,4 +65,36 @@ CHECK_SIZE(cBECharacterInterface, 0x10);
 
 // The one character interface (On Tour: cBECharacterInterface::instance), created by cBECharacterInterface_getThis.
 
+// tBECharacterDB: one character's fixed data, a record of the table cBELibrary_characterDB. [O] On Tour struct
+// tBECharacterDB (0x88) and the static cBELibrary::characterDB; [R] retail's cBELibrary_characterDB (0x00530970) has
+// 0x88-byte records (the getters below and in be/beintnetwork index it by character * 0x88).
+struct tBECharacterDB {
+    char cName[32];                 // 0x00 [O]
+    char cShortName[16];            // 0x20 [O]; [U] cBECharacterInterface_getShortName returns it
+    char cNickName[16];             // 0x30 [O]; [U] cBECharacterInterface_getNickName returns it
+    int iWeight;                    // 0x40 [O]; [U] cBECharacterInterface_getWeight returns it
+    int bIsGoofyFoot;               // 0x44 [O]
+    int fScale;                     // 0x48 [O] (an int); [U] cBECharacterInterface_getScale returns it / 100
+    char cBloodType[16];            // 0x4C [O]; [U] cBECharacterInterface_getBloodType returns it
+    int bIsFemale;                  // 0x5C [O]
+    int iAge;                       // 0x60 [O]
+    char cHeight[16];               // 0x64 [O]; [U] cBECharacterInterface_getHeight returns it
+    char cNationality[16];          // 0x74 [O]; [U] cBECharacterInterface_getNationality returns it
+    int iVoiceID;                   // 0x84 [O]
+};
+
+CHECK_OFFSET(tBECharacterDB, cName, 0x00);
+CHECK_OFFSET(tBECharacterDB, cShortName, 0x20);
+CHECK_OFFSET(tBECharacterDB, cNickName, 0x30);
+CHECK_OFFSET(tBECharacterDB, iWeight, 0x40);
+CHECK_OFFSET(tBECharacterDB, bIsGoofyFoot, 0x44);
+CHECK_OFFSET(tBECharacterDB, fScale, 0x48);
+CHECK_OFFSET(tBECharacterDB, cBloodType, 0x4C);
+CHECK_OFFSET(tBECharacterDB, bIsFemale, 0x5C);
+CHECK_OFFSET(tBECharacterDB, iAge, 0x60);
+CHECK_OFFSET(tBECharacterDB, cHeight, 0x64);
+CHECK_OFFSET(tBECharacterDB, cNationality, 0x74);
+CHECK_OFFSET(tBECharacterDB, iVoiceID, 0x84);
+CHECK_SIZE(tBECharacterDB, 0x88);
+
 #endif /* BE_BEINTCHARACTER_H */

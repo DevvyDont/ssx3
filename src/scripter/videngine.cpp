@@ -66,7 +66,7 @@ extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void*);
 extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
 extern int cPauseState_Stack[];
-extern int D_00442918[];
+extern int cPauseState_FlagsTable[];
 
 struct sVidObj { char pad0[0x10]; int state; };
 struct sVidOwner { char pad0[0x64]; sVidObj* obj; };
@@ -77,9 +77,9 @@ struct sVidPlayer { void* p; int active; int f8; int fC; int f10; int f14; };
  *
  * Returns false without a movie player (+0x0, On Tour mpPlayer) and true when already playing (+0x4, mIsPlaying).
  * Otherwise starts the player with cMoviePlayer_asyncPlay (On Tour cMoviePlayer::asyncPlay), marks it playing and
- * pushes pause state 10: cPauseState_Stack[++cPauseState_StackIdx] = 10 and cPauseState_Flags = D_00442918 (the flags
- * table's entry 10). On Tour asserts the pause stack has room; retail does not. It then records in +0x14 whether the
- * state (+0x10) of the game's +0x64 object (the cCutSceneTransitionMan) is neither kRegularMode nor
+ * pushes pause state 10: cPauseState_Stack[++cPauseState_StackIdx] = 10 and cPauseState_Flags =
+ * cPauseState_FlagsTable[10]. On Tour asserts the pause stack has room; retail does not. It then records in +0x14
+ * whether the state (+0x10) of the game's +0x64 object (the cCutSceneTransitionMan) is neither kRegularMode nor
  * kTransitionToRegularMode, calls cCutSceneTransitionMan_ForceToRegularMode on that object, saves GrMan's virtual slot
  * 42 result in +0x10, calls GrMan's slot 40 with 0, and pauses the sound effects (cSSXAudio_PauseSFX on
  * cAudioInterface_bxAudio()).
@@ -95,7 +95,7 @@ bool cVidEngine::PlayVideo()
     int n = cPauseState_StackIdx + 1;
     mIsPlaying = 1;
     cPauseState_Stack[n] = 10;
-    cPauseState_Flags = D_00442918[0];
+    cPauseState_Flags = cPauseState_FlagsTable[10];
     cPauseState_StackIdx = n;
     sVidObj* cutSceneMan = ((sVidOwner*)SSXApp->Game)->obj;
     mRestoreCutSceneMode = 0;

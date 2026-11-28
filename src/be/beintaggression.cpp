@@ -129,14 +129,15 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_applyAggression);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" void queueAggressionMessage(int charID, int level);
-extern signed char D_005305F9[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Raises one rider's aggression toward another after a bump or punch.
  *
  * The record is cBELibrary_profileLib[profile of @p iRider1][character of @p iRider1].mRelations[character of @p iRider2]: {state, level,
  * ticks}. @p event adds 1, 2, 4 or 6 ticks and the level becomes ticks / 5. When the level rises, rider 0 notifies
- * queueAggressionMessage(other character, ticks) unless D_005305F9 is set, and the state clamps it: state 0 caps at level 2,
+ * queueAggressionMessage(other character, ticks) unless cBELibrary_raceDB.cGamePath is set, and the state clamps it:
+ * state 0 caps at level 2,
  * state 1 drops back to level 2 and moves to state 3 on reaching 4, state 2 stays within 1-3 and state 3 within 1-4
  * (ticks reset to 5 x level). The lower-bound checks can only fire for a negative old level.
  *
@@ -171,7 +172,7 @@ void cBEAggressionInterface::applyAggression(int iRider1, int iRider2, int event
     int lv = pts / 5;
     int lvl = lv;
     if (oldLvl < lvl) {
-        if (iRider1 == 0 && D_005305F9[0] == 0) {
+        if (iRider1 == 0 && cBELibrary_raceDB.cGamePath == 0) {
             queueAggressionMessage(cb, pts);
         }
         switch (st) {
@@ -295,13 +296,12 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_writeToReplayFrame);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern int D_005305E0[];
 
 struct sStreamVE_1560A0 { short delta; short index; void (*fn)(void*, void*, int); };
 
 /**
- * Writes the aggression state to a replay stream: the rider count (D_005305E0, 4 bytes), then for each rider its
- * profile's ten 3-byte relation records (one per character).
+ * Writes the aggression state to a replay stream: the rider count (cBELibrary_raceDB.iNumberRiders, 4 bytes), then
+ * for each rider its profile's ten 3-byte relation records (one per character).
  *
  * Each write goes through vtable slot 1 of @p stream (the write method, as in cBEInterface_writeToReplayFrame).
  * cBEAggressionInterface_readFromReplayFrame reads the same layout.
@@ -310,7 +310,7 @@ struct sStreamVE_1560A0 { short delta; short index; void (*fn)(void*, void*, int
  */
 void cBEAggressionInterface::writeToReplayFrame(cBxReplayFrame* stream)
 {
-    int n = D_005305E0[0];
+    int n = cBELibrary_raceDB.iNumberRiders;
     stream->write((const char*)&n, 4);
     for (int i = 0; i < n; i++)
     {

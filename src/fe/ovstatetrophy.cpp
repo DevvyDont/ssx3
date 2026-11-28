@@ -2,6 +2,7 @@
 #include "common.h"
 #include "ui/uithing.h"
 #include "be/beinterface.h"
+#include "be/beintoption.h"
 #include "render/font.h"
 #include "ui/uiengine.h"
 #include "bx/math3d.h"
@@ -460,7 +461,6 @@ extern "C" void cFont_centertext(void* font, float x, float y, const char* str);
 
 extern int cHUDRadar_showRadarFlag;
 extern char* cHUDRadar_markerTable;
-extern int D_005308D0[];
 
 // The race (SSXApp->0x84->0xC; as in seg/seg_1FBE38): rider objects at 0x28, rider count at 0x78.
 struct sRace_EDA0 {
@@ -793,7 +793,7 @@ void cHUDRadar::renderTracker(cRider* rider)
 
     if (*(int*)(course + 8) != 0) {
         int show = 1;
-        if ((D_005308D0[0] >> 9) & 1) {
+        if ((cBERules_mRules.MyRules.Flags >> 9) & 1) {
             if (SSXApp->GameModeMan->bIsTimedEvent != 0)
                 show = 0;
         }
@@ -991,7 +991,6 @@ struct sTrophyBox_FB40 {
 
 extern int cHUDRadar_showRadarFlag;
 extern char* cHUDRadar_markerTable;
-extern int D_005308D0[];
 
 // The race (SSXApp->0x84->0xC; as in seg/seg_1FBE38): rider objects at 0x28, rider count at 0x78.
 struct sRace_FB40 {
@@ -1225,7 +1224,7 @@ void cHUDRadar::renderSplitTracker(cRider* rider, int right)
         verts[i].a = 0x80;
     if (*(int*)(course + 8) != 0) {
         int show = 1;
-        if ((D_005308D0[0] >> 9) & 1) {
+        if ((cBERules_mRules.MyRules.Flags >> 9) & 1) {
             if (SSXApp->GameModeMan->bIsTimedEvent != 0)
                 show = 0;
         }

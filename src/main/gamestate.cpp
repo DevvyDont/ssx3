@@ -1789,7 +1789,7 @@ extern sApp_6BB0* SSXApp_s __asm__("SSXApp");
 extern int cPauseState_Flags;
 extern int cPauseState_StackIdx;
 extern int cPauseState_Stack[];
-extern int D_004428F4[];
+extern int cPauseState_FlagsTable[];
 
 struct sGameState_6BB0 {
     char pad0[8];
@@ -1801,8 +1801,8 @@ struct sGameState_6BB0 {
  *
  * Clears the overlay-done flag (+0x8). When cGameComm_mGameComm reports an error it only forces the cut-scene
  * transition to regular mode and calls cBE_setState(0); otherwise it also calls cOVStateManager_gotoOverlay(2) and
- * pushes pause state 1 (cPauseState_Stack[++cPauseState_StackIdx] = 1, cPauseState_Flags = D_004428F4). Slot +0x2C (gainFocus) of
- * cGFPreEventState_vtbl.
+ * pushes pause state 1 (cPauseState_Stack[++cPauseState_StackIdx] = 1, cPauseState_Flags = cPauseState_FlagsTable[1]).
+ * Slot +0x2C (gainFocus) of cGFPreEventState_vtbl.
  */
 void cGFPreEventState::gainFocus()
 {
@@ -1814,7 +1814,7 @@ void cGFPreEventState::gainFocus()
     }
     cOVStateManager_gotoOverlay(2);
     cPauseState_Stack[++cPauseState_StackIdx] = 1;
-    cPauseState_Flags = D_004428F4[0];
+    cPauseState_Flags = cPauseState_FlagsTable[1];
     cCutSceneTransitionMan_ForceToRegularMode(SSXApp_s->mgr->world);
     cBE_setState(0);
 }

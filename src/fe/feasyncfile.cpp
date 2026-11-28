@@ -8631,7 +8631,6 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_setOptionListBoxes);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_005308D0[];
 // cFEStateChallengePopup_raceSetup is 8 bytes; the byte read is its second word's low byte (+4).
 extern unsigned char cFEStateChallengePopup_raceSetup_AF098[8] __asm__("cFEStateChallengePopup_raceSetup");
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
@@ -8658,17 +8657,17 @@ void cFEStateChallengePopup::setOptionListBoxes(int all)
         return;
     }
     if (mpEventOptions[1] != 0) {
-        cUIListBox_setCurrentEntryByIndex(mpLBPowerUps, (D_005308D0[0] >> 8) & 1);
+        cUIListBox_setCurrentEntryByIndex(mpLBPowerUps, (cBERules_mRules.MyRules.Flags >> 8) & 1);
     } else {
         cUIListBox_setCurrentEntryByIndex(mpLBPowerUps, 1);
     }
     if (mpEventOptions[3] != 0) {
-        cUIListBox_setCurrentEntryByIndex(mpLBMultipliers, (D_005308D0[0] >> 6) & 1);
+        cUIListBox_setCurrentEntryByIndex(mpLBMultipliers, (cBERules_mRules.MyRules.Flags >> 6) & 1);
     } else {
         cUIListBox_setCurrentEntryByIndex(mpLBMultipliers, 1);
     }
     if (mpEventOptions[2] != 0) {
-        int pointIconsBits = D_005308D0[0] >> 7;
+        int pointIconsBits = cBERules_mRules.MyRules.Flags >> 7;
         cUIListBox_setCurrentEntryByIndex(mpLBPointIcons, pointIconsBits & 1);
     } else {
         cUIListBox_setCurrentEntryByIndex(mpLBPointIcons, 1);
@@ -9381,7 +9380,6 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern int D_005308D0[];
 extern char str_pct_d_b[];
 extern char str_True[];
 extern char str_TextTitle[];
@@ -9467,20 +9465,20 @@ void cFEStateChallengeReceivedPopup::onWidgetCreate(cUIThing* obj)
             cUIText_setAsciiString(uiText, buf);
         }
     } else if (IsHash_001B0150(widget->mHashName, str_TextPowerUpsResult)) {
-        if ((D_005308D0[0] >> 8) & 1) {
+        if ((cBERules_mRules.MyRules.Flags >> 8) & 1) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNNo));
         } else {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNYes));
         }
         cUIText_setAsciiString(uiText, str_True);
     } else if (IsHash_001B0150(widget->mHashName, str_TextMultipliersResult)) {
-        if ((D_005308D0[0] >> 6) & 1) {
+        if ((cBERules_mRules.MyRules.Flags >> 6) & 1) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNNo));
         } else {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNYes));
         }
     } else if (IsHash_001B0150(widget->mHashName, str_TextPointiconsResult)) {
-        int pointIconsBit = D_005308D0[0] >> 7;
+        int pointIconsBit = cBERules_mRules.MyRules.Flags >> 7;
         if (pointIconsBit & 1) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNNo));
         } else {
@@ -9738,7 +9736,6 @@ extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" const char* cBENewRaceInterface_getEventName(void* track);
 extern "C" const char* cBENewRaceInterface_getLocationName1(void* track);
-extern int D_005308D0[];
 extern char str_sp[];
 extern char str_pct_d_b[];
 extern char str_TextEventResult[];
@@ -9803,7 +9800,7 @@ void cFEStateChallengeReceivedPopup::fillRaceTexts(void* iface, cUIScreen* scree
         if (iface == 0) {
             cUIText_setAsciiString(uiText, str_sp);
         } else {
-            if ((D_005308D0[0] >> 8) & 1) {
+            if ((cBERules_mRules.MyRules.Flags >> 8) & 1) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNNo));
             } else {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNYes));
@@ -9815,7 +9812,7 @@ void cFEStateChallengeReceivedPopup::fillRaceTexts(void* iface, cUIScreen* scree
         if (iface == 0) {
             cUIText_setAsciiString(uiText, str_sp);
         } else {
-            if ((D_005308D0[0] >> 6) & 1) {
+            if ((cBERules_mRules.MyRules.Flags >> 6) & 1) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNNo));
             } else {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNYes));
@@ -9827,7 +9824,7 @@ void cFEStateChallengeReceivedPopup::fillRaceTexts(void* iface, cUIScreen* scree
         if (iface == 0) {
             cUIText_setAsciiString(uiText, str_sp);
         } else {
-            int pointIconsBits = D_005308D0[0] >> 7;
+            int pointIconsBits = cBERules_mRules.MyRules.Flags >> 7;
             if (pointIconsBits & 1) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNNo));
             } else {
@@ -23915,17 +23912,17 @@ extern "C" void cBEOptionInterface_resetQuickKey(void* iface, int i);
 extern "C" void cFEStateNetQuickMessages_showMessageRow(cFEStateNetQuickMessages* self, int i);
 extern char str_kT_POPUP206EmptyMessages[];
 extern char str_kT_BTNOK[];
-extern char D_00535617[];
 
 
 /**
  * Stores the quick message the player just typed into the slot being edited.
  *
  * The slot is the keyboard popup's miMiscData (mpKeyboard + 0x18); slots 10 and up are ignored. An empty entry shows
- * "kT_POPUP206EmptyMessages" with one "kT_BTNOK" option (miMiscData 0x83C) and calls cBEOptionInterface_resetQuickKey on the slot;
- * otherwise the typed text (mpKeyboard + 0x74) is copied into the 64-byte slot at D_00535617 with strcpy. Either way it
- * sets mbChanged, calls the option interface's (cBE_getInterface kind 4) virtual slot 1 through its vtable at +0xC and
- * redraws the row (cFEStateNetQuickMessages_showMessageRow).
+ * "kT_POPUP206EmptyMessages" with one "kT_BTNOK" option (miMiscData 0x83C) and calls cBEOptionInterface_resetQuickKey
+ * on the slot; otherwise the typed text (mpKeyboard + 0x74) is copied into the 64-byte slot
+ * cBEOptionInterface_mOption.szQuickMessage[idx] with strcpy. Either way it sets mbChanged, calls the option
+ * interface's (cBE_getInterface kind 4) virtual slot 1 through its vtable at +0xC and redraws the row
+ * (cFEStateNetQuickMessages_showMessageRow).
  */
 void cFEStateNetQuickMessages::handleKeyboardText()
 {
@@ -23946,7 +23943,7 @@ void cFEStateNetQuickMessages::handleKeyboardText()
             cBEOptionInterface_resetQuickKey(iface, idx);
         } else {
             char* src = mpKeyboard->mszEditString;
-            strcpy(D_00535617 + (idx << 6), src);
+            strcpy(cBEOptionInterface_mOption.szQuickMessage[idx], src);
         }
         mbChanged = 1;
         iface->submit();

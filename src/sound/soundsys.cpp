@@ -5852,7 +5852,6 @@ extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" void cMonitor_MONITOR_Create(void*, int, long, void*, int, int, int, int);
 // PORT: fptoui is libgcc's float -> unsigned conversion (__fixunssfsi).
 extern "C" int fptoui(float f);
-extern int D_005308D0[];
 extern sSndKey8 D_004A3678[];
 
 /**
@@ -5873,7 +5872,7 @@ void cSSXAudio::UpdateTimedEvent()
     }
     int ok = 0;
     if (gameModeMan->bIsTimedEvent != 0) {
-        ok = ((D_005308D0[0] >> 9) & 1) ^ 1;
+        ok = ((cBERules_mRules.MyRules.Flags >> 9) & 1) ^ 1;
     }
     if (!ok) {
         return;

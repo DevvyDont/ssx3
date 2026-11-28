@@ -109,7 +109,6 @@ typedef struct {
     sRing *ring;
 } sTty;
 extern sTty libkernl_ttyState;
-extern sRing *D_0052B8E8;      /* libkernl_ttyState.ring (own splat symbol) */
 extern int libkernl_ttyRingStorage[];       /* storage of the console ring (libkernl_initTtyRing) */
 extern sRing *libkernl_initTtyRing(int size);
 
@@ -170,8 +169,6 @@ extern int libkernl_ttyOpenFlag;
 extern int libkernl_helperThreadId;          /* helper thread id (InitThread) */
 extern int libkernl_requestSema;          /* its wake-up semaphore */
 extern int sifcmd_data[];
-extern int *D_0052BCE4;
-extern int *D_0052BCEC;
 extern int sifcmd_sregs[];
 extern volatile int D_00455188[];
 extern int fileio_initFlag;          /* fileio initialised (fileio_init) */
@@ -1342,8 +1339,8 @@ INCLUDE_ASM("seg/seg_325220", libkernl_ttyReadLine);
 /**
  * Reads console input from the ring into a buffer, up to n bytes or through the first line end, and returns the count.
  *
- * Busy-waits while the ring (D_0052B8E8) is empty, takes one byte at a time with libkernl_ringAdvanceRead, and stops after a '\n'
- * or '\r'. _read calls it.
+ * Busy-waits while the ring (libkernl_ttyState.ring) is empty, takes one byte at a time with libkernl_ringAdvanceRead,
+ * and stops after a '\n' or '\r'. _read calls it.
  *
  * @param bufAddr  the destination
  * @param n   the maximum byte count
@@ -1357,7 +1354,7 @@ int libkernl_ttyReadLine(int bufAddr, int n) {
     for (i = 0; i < n; i = j) {
         charSlot = buf + i;
         j = i + 1;
-        while (D_0052B8E8->count == 0) {
+        while (libkernl_ttyState.ring->count == 0) {
         }
         *charSlot = *libkernl_ttyState.ring->rd;
         libkernl_ringAdvanceRead(libkernl_ttyState.ring);
@@ -2111,9 +2108,9 @@ void sceSifAddCmdHandler(int cmdId, int handler, int handlerData) {
     int off = cmdId << 3;
     /* cmdId is reused for the table base (a separate local changes the code) */
     if (cmdId < 0) {
-        cmdId = (int)D_0052BCE4;
+        cmdId = sifcmd_data[3];
     } else {
-        cmdId = (int)D_0052BCEC;
+        cmdId = sifcmd_data[5];
     }
     off += cmdId;
     ((int *)off)[0] = handler;
@@ -2135,9 +2132,9 @@ void sceSifRemoveCmdHandler(int cmdId) {
     int off = cmdId << 3;
     /* cmdId is reused for the table base (a separate local changes the code) */
     if (cmdId < 0) {
-        cmdId = (int)D_0052BCE4;
+        cmdId = sifcmd_data[3];
     } else {
-        cmdId = (int)D_0052BCEC;
+        cmdId = sifcmd_data[5];
     }
     off += cmdId;
     *(int *)off = 0;

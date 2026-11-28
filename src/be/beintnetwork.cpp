@@ -132,7 +132,6 @@ struct sNetState_E2C8 {
 extern int cBENewRaceInterface_bIsBamLocation;
 extern int cBENewRaceInterface_mNextLocation;
 extern sNetHdr_E2C8 cBELibrary_raceDB;
-extern char D_005308D0[];
 extern char D_004A6F38[];
 extern char D_004A7778[];
 extern char D_004A7887[];
@@ -141,7 +140,7 @@ extern char D_004A7887[];
  * Packs one player's back-end race data into the 0xC44-byte network sync buffer.
  *
  * Copies the race settings (cBELibrary_raceDB) and the words cBENewRaceInterface_bIsBamLocation/cBENewRaceInterface_mNextLocation, all six cBELibrary_playerDB
- * records, the player's own record and character ID, the shared option pair (D_005308D0) and both players'
+ * records, the player's own record and character ID, the shared option pair (cBERules_mRules.MyRules) and both players'
  * option records, then from that character's cBELibrary_profileLib record the entries at +0x290, +0xAD0 and
  * +0xBDF and the BAGT data at +0xBE6.
  *
@@ -159,9 +158,9 @@ extern "C" void cBENetworkInterface_getSyncData(cBENetworkInterface* self, int p
     out->me = cBELibrary_playerDB[player];
     signed char characterId = cBELibrary_playerDB[player].cCharacterID;
     out->charID = characterId;
-    out->pair = *(sNetPair_E2C8*)D_005308D0;
-    out->t0 = *(sNetTrip_E2C8*)(D_005308D0 - 0x18);
-    out->t1 = *(sNetTrip_E2C8*)(D_005308D0 - 0xC);
+    out->pair = *(sNetPair_E2C8*)&cBERules_mRules.MyRules;
+    out->t0 = *(sNetTrip_E2C8*)&cBERules_mRules.Bragging[0];
+    out->t1 = *(sNetTrip_E2C8*)&cBERules_mRules.Bragging[1];
     for (int k = 0; k < 525; k++) {
         out->blob[k] = ((sNetHW_E2C8*)(D_004A6F38 + (characterId * 0xF88 + player * 0x9B50)))[k];
     }
@@ -220,7 +219,7 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 1))->discard();
     signed char characterId = in->charID;
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
-        *(sNetPair_E2C8*)D_005308D0 = in->pair;
+        *(sNetPair_E2C8*)&cBERules_mRules.MyRules = in->pair;
     ((sNetTrip_E2C8*)&cBERules_mRules)[player] = (&in->t0)[player];
     cBECharProfileDB_init(&cBELibrary_profileLib_E5C8[player][characterId], characterId, 1);
     cBEProfileLib_resetAllRelations(cBELibrary_profileLib_E5C8[player]);
@@ -272,19 +271,18 @@ struct sRiderEntry_0014E9F8 {
     int w[7];
 };
 
-extern char D_004BA348[];
 extern sRiderEntry_0014E9F8 D_00535B3C;
 
 /**
  * Prepares the back end before the online handshake exchanges sync data.
  *
- * Re-initialises profile 2's ten character records (cBEProfileLib_init(D_004BA348, 0)); on the client it copies
- * player record 0 into record 1 and profile 0 into profile 1 (the client is player 1 online). Then it swaps
- * the two players' option records (cBENetworkInterface_swapBraggingRecords), which postInitBE swaps back.
+ * Re-initialises profile 2's ten character records (cBEProfileLib_init(&cBELibrary_profileLib[2], 0)); on the client it
+ * copies player record 0 into record 1 and profile 0 into profile 1 (the client is player 1 online). Then it swaps the
+ * two players' option records (cBENetworkInterface_swapBraggingRecords), which postInitBE swaps back.
  */
 void cBENetworkInterface::preInitBE()
 {
-    cBEProfileLib_init(D_004BA348, 0);
+    cBEProfileLib_init(&cBELibrary_profileLib[2], 0);
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
     {
         sRiderEntry_0014E9F8* riderEntry = &D_00535B3C;
@@ -483,12 +481,7 @@ INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getName);
 #ifdef SKIP_ASM
 signed char cBELibrary_getCharacterID(int index);
 
-struct sNetChar_0014EE28
-{
-    char data[0x88];
-};
-
-extern sNetChar_0014EE28 cBELibrary_characterDB[];
+extern tBECharacterDB cBELibrary_characterDB[];
 
 /**
  * Returns @p rider's character record (cBELibrary_characterDB + character * 0x88), whose first field is the character's name.
@@ -514,20 +507,15 @@ struct sNetEntry8_0014EE58
     char data[8];
 };
 
-struct sNetEntry88_0014EE58
-{
-    char data[0x88];
-};
-
 extern sNetEntry8_0014EE58 D_0043FA38_0014EE58[] __asm__("D_0043FA38");
-extern sNetEntry88_0014EE58 D_00530990_0014EE58[] __asm__("D_00530990");
+extern tBECharacterDB cBELibrary_characterDB[];
 
 /**
  * Returns a rider's short character name.
  *
  * A cheat character (cheat index 10 to 29) gets its 8-byte name from the table based at D_0043FA38 (index 10 is
- * "Brodi"); any other rider gets the address of its character's 0x88-byte record in D_00530990 (probably On
- * Tour's cBELibrary::characterDB), which presumably starts with the name.
+ * "Brodi"); any other rider gets its character's cShortName (cBELibrary_characterDB, 0x88-byte
+ * records).
  *
  * @param rider  the rider whose character is used
  * @return the name
@@ -539,7 +527,7 @@ void* cBECharacterInterface::getShortName(int rider)
     if (index >= 10 && index < 30) {
         return &D_0043FA38_0014EE58[index];
     }
-    return &D_00530990_0014EE58[characterId];
+    return cBELibrary_characterDB[characterId].cShortName;
 }
 #endif
 
@@ -551,17 +539,12 @@ struct sNetEntry8_0043FA38
     char data[8];
 };
 
-struct sNetEntry88_00530990
-{
-    char data[0x88];
-};
-
 extern sNetEntry8_0043FA38 D_0043FA38[];
-extern sNetEntry88_00530990 D_00530990[];
+extern tBECharacterDB cBELibrary_characterDB[];
 
 /**
  * Returns a rider name for character @p player: the cheat character's name D_0043FA38[@p index] when @p index is
- * 10-29, else the text at +0x20 of the character's record (D_00530990 = cBELibrary_characterDB + 0x20).
+ * 10-29, else the character's cShortName (+0x20 of its cBELibrary_characterDB record).
  *
  * @param player  the character id
  * @param index  the cheat character id (0 for none)
@@ -572,7 +555,7 @@ void* cBECharacterInterface::getShortNameByCharacter(int player, int index)
     if (index >= 10 && index < 30) {
         return &D_0043FA38[index];
     }
-    return &D_00530990[player];
+    return cBELibrary_characterDB[player].cShortName;
 }
 #endif
 
@@ -582,21 +565,16 @@ INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getNickName);
 #ifdef SKIP_ASM
 signed char cBELibrary_getCharacterID(int index);
 
-struct sNetChar_0014EF00
-{
-    char data[0x88];
-};
-
-extern sNetChar_0014EF00 D_005309A0[];
+extern tBECharacterDB cBELibrary_characterDB[];
 
 /**
- * Returns the 16-byte text at +0x30 of @p rider's character record (D_005309A0 = cBELibrary_characterDB + 0x30).
+ * Returns the 16-byte text at +0x30 of @p rider's character record: its cBELibrary_characterDB cNickName.
  *
  * @param rider  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
 void* cBECharacterInterface::getNickName(int rider)
 {
-    return &D_005309A0[cBELibrary_getCharacterID(rider)];
+    return cBELibrary_characterDB[cBELibrary_getCharacterID(rider)].cNickName;
 }
 #endif

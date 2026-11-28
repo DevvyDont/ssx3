@@ -21,7 +21,7 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_28lodge[];
-extern int D_00441B14[];
+extern int gLodgeOptionUnlocked[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void* cBE_getBE();
@@ -35,7 +35,7 @@ extern "C" void cSSXAudio_SetFrontEndMusicMode(void* self, int a1);
  * Opens the lodge screen ("28lodge"), reads the user's cheat character and disables lodge option 7.
  *
  * Keeps the screen at 0x40, stores the user's cheat character id (cBENewPlayerInterface_getPlayerCheatCharID; On Tour mCheatCharID) at
- * 0x48, clears entry 7 of the option-enabled table gLodgeOptionUnlocked (written as D_00441B14[0]), switches the
+ * 0x48, clears entry 7 of the option-enabled table gLodgeOptionUnlocked, switches the
  * front-end sound-bank mode to 1, clears bToNextState (0x4C) and mbIsYesOrNo (0x54) and sets
  * mPathToSaveProfile (0x50) to 0x12.
  */
@@ -48,7 +48,7 @@ void cFEStateLodge::onCreateScreen()
         cUIScreen_playFrame(screen, 0, 0);
     }
     mCheatCharID = cBENewPlayerInterface_getPlayerCheatCharID(cBE_getInterface_Fv(cBE_getBE(), 1), mUserNum);
-    D_00441B14[0] = 0;
+    gLodgeOptionUnlocked[7] = 0;
     cSSXAudio_SetFrontEndMusicMode(cAudioInterface_bxAudio(), 1);
     bToNextState = 0;
     mPathToSaveProfile = 18;

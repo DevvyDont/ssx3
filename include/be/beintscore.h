@@ -54,7 +54,8 @@ CHECK_SIZE(tLastEventRiderStats, 0xB0);
 // cBEScoreInterface_getCurrentHighScoreName strUserName).
 struct tBEHighScore {
     unsigned int uiHighScore;        // 0x00 [O]; [U] the score (cBEScoreInterface_getHighScore / cBEScoreInterface_getCurrentHighScore return it)
-    int cCharacter;                  // 0x04 [O]; [U] the character id (cBEScoreInterface_getCurrentHighScoreCharacter indexes D_00530990 with it)
+    int cCharacter;                  // 0x04 [O]; [U] the character id (cBEScoreInterface_getCurrentHighScoreCharacter
+                                     //      indexes cBELibrary_characterDB with it)
     char strUserName[12];            // 0x08 [O] (24 bytes in On Tour); [R] the 0x14-byte entry stride; [U] cBEScoreInterface_getCurrentHighScoreName
                                      //      returns it
 };

@@ -60,10 +60,10 @@ int cBEMissionInterface::getTotalCollectForMnt(int start)
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getTotalCollectByType);
 #ifdef SKIP_ASM
 extern signed char cBELibrary_secCollectibles[];
-extern int D_005305F0[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
- * Returns the collectible total of section @p start + the race's location (cBELibrary_raceDB +0x40, D_005305F0):
+ * Returns the collectible total of section @p start + the race's location (cBELibrary_raceDB.iLocationIdx):
  * cBELibrary_secCollectibles[@p start + location].
  *
  * @param start  the offset from the race's location
@@ -71,7 +71,7 @@ extern int D_005305F0[];
  */
 int cBEMissionInterface::getTotalCollectByType(int start)
 {
-    return cBELibrary_secCollectibles[start + D_005305F0[0]];
+    return cBELibrary_secCollectibles[start + cBELibrary_raceDB.iLocationIdx];
 }
 #endif
 
@@ -100,14 +100,7 @@ int cBEMissionInterface::getTotalCollectForSection(int start)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getTotalCollectForPeak);
 #ifdef SKIP_ASM
-struct sMissionEntry_0043D950
-{
-    char pad_0x00[0x54];
-    int owner;          // 0x54
-    char pad_0x58[0xC];
-};
-
-extern sMissionEntry_0043D950 cBELibrary_locationDB[];
+extern tBELocationDB cBELibrary_locationDB[];
 extern signed char cBELibrary_secCollectibles[];
 
 /**
@@ -126,7 +119,7 @@ int cBEMissionInterface::getTotalCollectForPeak(int owner)
     {
         for (int j = 0; j < 22; j++)
         {
-            if (cBELibrary_locationDB[j].owner == owner)
+            if (cBELibrary_locationDB[j].segmentID == owner)
             {
                 sum += cBELibrary_secCollectibles[i + j];
             }
@@ -173,11 +166,11 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectByType);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern int D_005305F0[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
- * Returns how many collectibles @p rider has found in section @p idx + the race's location (D_005305F0): the count
- * (cTotalCollected) of that collect record.
+ * Returns how many collectibles @p rider has found in section @p idx + the race's location
+ * (cBELibrary_raceDB.iLocationIdx): the count (cTotalCollected) of that collect record.
  *
  * @param rider  the rider (selects profile slot and character)
  * @param idx  the offset from the race's location
@@ -187,7 +180,8 @@ int cBEMissionInterface::getCurrentCollectByType(int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    return cBELibrary_profileLib[profile][characterId].mCollectibles[idx + D_005305F0[0]].cTotalCollected;
+    return cBELibrary_profileLib[profile][characterId]
+        .mCollectibles[idx + cBELibrary_raceDB.iLocationIdx].cTotalCollected;
 }
 #endif
 
@@ -226,7 +220,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeak);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-extern sMissionEntry_0043D950 cBELibrary_locationDB[];
+extern tBELocationDB cBELibrary_locationDB[];
 
 /**
  * Counts the collectibles a rider's character has picked up across all locations of one peak.
@@ -247,7 +241,7 @@ int cBEMissionInterface::getCurrentCollectForPeak(int rider, int owner)
     {
         for (int j = 0; j < 22; j++)
         {
-            if (cBELibrary_locationDB[j].owner == owner)
+            if (cBELibrary_locationDB[j].segmentID == owner)
             {
                 sum += cBELibrary_profileLib[profile][character].mCollectibles[i + j].cTotalCollected;
             }
@@ -260,7 +254,7 @@ int cBEMissionInterface::getCurrentCollectForPeak(int rider, int owner)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeak1);
 #ifdef SKIP_ASM
-extern sMissionEntry_0043D950 cBELibrary_locationDB[];
+extern tBELocationDB cBELibrary_locationDB[];
 
 /**
  * Returns how many collectibles character @p character of profile slot @p profile has found on peak @p owner.
@@ -280,7 +274,7 @@ int cBEMissionInterface::getCurrentCollectForPeak1(int profile, int character, i
     {
         for (int j = 0; j < 22; j++)
         {
-            if (cBELibrary_locationDB[j].owner == owner)
+            if (cBELibrary_locationDB[j].segmentID == owner)
             {
                 sum += cBELibrary_profileLib[profile][character].mCollectibles[i + j].cTotalCollected;
             }
@@ -298,13 +292,7 @@ int cBELibrary_getRiderIndex(int);
 extern "C" int cBEMissionInterface_getCurrentCollectForPeak(cBEMissionInterface* self, int rider, int owner);
 extern char D_004A6CAC[];
 
-// View of cBELibrary_locationDB[].owner (offset 0x54); splat labels that address D_0043D9A4.
-struct sMissionOwnerView_00153708
-{
-    int owner;
-    char pad_0x04[0x60];
-};
-extern sMissionOwnerView_00153708 D_0043D9A4_v153708[] __asm__("D_0043D9A4");
+extern tBELocationDB cBELibrary_locationDB[];
 
 /**
  * Counts the collectibles a profile's character has found on a peak.
@@ -328,7 +316,7 @@ int cBEMissionInterface::getCurrentCollectForPeakByChar(int profile, int charact
     {
         for (int j = 0; j < 22; j++)
         {
-            if (D_0043D9A4_v153708[j].owner == owner)
+            if (cBELibrary_locationDB[j].segmentID == owner)
             {
                 char* collectEntry = D_004A6CAC + (i * 12 + (j * 12 + off));
                 char* collectBits = collectEntry + 4;
@@ -352,11 +340,11 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCollectBits);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern int D_005305F0[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Returns the address of the found-collectible bits (two words) of @p rider's collect record for section @p idx + the
- * race's location (D_005305F0).
+ * race's location (cBELibrary_raceDB.iLocationIdx).
  *
  * @param rider  the rider (selects profile slot and character)
  * @param idx  the offset from the race's location
@@ -366,7 +354,8 @@ char* cBEMissionInterface::getCollectBits(int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    tBEProfileCollectBits* currentRecord = &cBELibrary_profileLib[profile][characterId].mCollectibles[D_005305F0[0]];
+    tBEProfileCollectBits* currentRecord =
+        &cBELibrary_profileLib[profile][characterId].mCollectibles[cBELibrary_raceDB.iLocationIdx];
     return (char*)currentRecord[idx].uiCollectedBits;
 }
 #endif
@@ -376,12 +365,12 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_isBitSet);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
-extern int D_005305F0[];
+extern cBERaceDB cBELibrary_raceDB;
 extern char D_004A6CAC[];
 
 /**
  * Tells whether collectible @p bit (0-63) is marked found in @p rider's collect record for section @p idx + the race's
- * location (D_005305F0).
+ * location (cBELibrary_raceDB.iLocationIdx).
  *
  * @param rider  the rider (selects profile slot and character)
  * @param bit  the collectible's bit, 0-63
@@ -392,7 +381,7 @@ bool cBEMissionInterface::isBitSet(int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
-    int off = profile * 39760 + characterId * 3976 + D_005305F0[0] * 12;
+    int off = profile * 39760 + characterId * 3976 + cBELibrary_raceDB.iLocationIdx * 12;
     char* recordCursor = D_004A6CAC + (idx * 12 + off);
     recordCursor = recordCursor + (bit / 32) * 4;
     int mask = 1 << bit;
@@ -881,17 +870,17 @@ int cBEMissionInterface::getMissionIdx(int id)
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissions);
 #ifdef SKIP_ASM
 extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(cBEMissionInterface* self, int group);
-extern int D_005305F0[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Counts the missions on the current race's location.
  *
- * @return cBEMissionInterface_getNumberMissionsOnTrack() for the race's location (D_005305F0, iLocationIdx of
- *         the cBERaceDB copy at cBELibrary_raceDB)
+ * @return cBEMissionInterface_getNumberMissionsOnTrack() for the race's location (cBELibrary_raceDB.iLocationIdx,
+ *         the iLocationIdx of the cBERaceDB copy)
  */
 int cBEMissionInterface::getNumberMissions()
 {
-    return getNumberMissionsOnTrack(D_005305F0[0]);
+    return getNumberMissionsOnTrack(cBELibrary_raceDB.iLocationIdx);
 }
 #endif
 
@@ -948,7 +937,7 @@ int cBEMissionInterface::getNumberCompletedMissionsOnTrack(int group)
 //100%
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberMissionsOnPeak);
 #ifdef SKIP_ASM
-extern sMissionEntry_0043D950 cBELibrary_locationDB[];
+extern tBELocationDB cBELibrary_locationDB[];
 extern tBEMissionInfo cBELibrary_missionInfo[];
 
 /**
@@ -964,7 +953,7 @@ int cBEMissionInterface::getNumberMissionsOnPeak(int owner)
     {
         for (int j = 0; j < 22; j++)
         {
-            if (cBELibrary_locationDB[j].owner == owner)
+            if (cBELibrary_locationDB[j].segmentID == owner)
             {
                 if (cBELibrary_missionInfo[i].locationID == j)
                 {
@@ -1000,7 +989,7 @@ int cBEMissionInterface::getNumberCompletedMissionsOnPeak(int owner)
         {
             if (cBELibrary_missionInfo[i].locationID == j)
             {
-                if (cBELibrary_locationDB[j].owner == owner)
+                if (cBELibrary_locationDB[j].segmentID == owner)
                 {
                     if (isMissionCompleted(cBELibrary_missionInfo[i].id))
                         n++;
@@ -1018,13 +1007,7 @@ INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberCompletedMissionsOnP
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeak(cBEMissionInterface* self, int owner);
 
-// View of cBELibrary_locationDB[].owner (offset 0x54); splat labels that address D_0043D9A4.
-struct sMissionOwnerView_001544D0
-{
-    int owner;
-    char pad_0x04[0x60];
-};
-extern sMissionOwnerView_001544D0 D_0043D9A4[];
+extern tBELocationDB cBELibrary_locationDB[];
 
 /**
  * Counts the missions one profile's character has completed on a peak.
@@ -1047,7 +1030,7 @@ int cBEMissionInterface::getNumberCompletedMissionsOnPeakByChar(int profile, int
     int n = 0;
     for (int i = 0; i < 88; i++)
     {
-        if (D_0043D9A4[cBELibrary_missionInfo[i].locationID].owner == owner)
+        if (cBELibrary_locationDB[cBELibrary_missionInfo[i].locationID].segmentID == owner)
         {
             n += cBELibrary_profileLib[profile][character].mMissions[i].bIsCompleted;
         }
@@ -1060,19 +1043,19 @@ int cBEMissionInterface::getNumberCompletedMissionsOnPeakByChar(int profile, int
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionID);
 #ifdef SKIP_ASM
 extern "C" int cBEMissionInterface_getMissionIDOnTrack(cBEMissionInterface* self, int a, int group);
-extern int D_005305F0[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Returns the id of the n-th mission at the current location.
  *
- * cBEMissionInterface_getMissionIDOnTrack with the current location id from D_005305F0.
+ * cBEMissionInterface_getMissionIDOnTrack with the current location id from cBELibrary_raceDB.iLocationIdx.
  *
  * @param iIdx  the mission's index at this location (On Tour iIdx)
  * @return the mission id, 0 when there are not that many
  */
 int cBEMissionInterface::getMissionID(int iIdx)
 {
-    return getMissionIDOnTrack(iIdx, D_005305F0[0]);
+    return getMissionIDOnTrack(iIdx, cBELibrary_raceDB.iLocationIdx);
 }
 #endif
 

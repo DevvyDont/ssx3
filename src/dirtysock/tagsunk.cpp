@@ -5101,7 +5101,6 @@ extern "C" void* LobbyMan_sendPrivateMessage(LobbyMan*, int, void*);
 // LobbyMan_sendPrivateMessage is used as void here (its v0 is only a pass-through of its last call).
 void LobbyMan_sendPrivateMessage_v(void*, int, void*) __asm__("LobbyMan_sendPrivateMessage");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern int D_005308D0[];
 extern char str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct_b[];
 extern char str_challenge[];
 
@@ -5134,7 +5133,7 @@ void LobbyMan::challengePlayer(const char* name, int matchType)
     mMatchType = matchType;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     int locationID = cBENewRaceInterface_getLocationID(cBE_getInterface_Fv(cBE_getBE(), 0));
-    int flags = D_005308D0[0];
+    int flags = cBERules_mRules.MyRules.Flags;
     int event = *(signed char*)(Race_25F4C0() + 0x48);
     int track = *(signed char*)(Race_25F4C0() + 0x4A);
     int y = cBENetworkInterface_networkOpt.bIsRankedGame;

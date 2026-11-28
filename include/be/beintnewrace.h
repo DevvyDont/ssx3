@@ -309,5 +309,21 @@ CHECK_SIZE(tBEPeakDB, 0x14);
 extern tBEPathDB cBELibrary_gamePathDB[3];      // [O] cBELibrary::gamePathDB; [R] 0x0043E700
 extern tBEEventDB cBELibrary_gameEventDB[];     // [O] cBELibrary::gameEventDB (tBEEventDB[15] in On Tour); [R] 0x0043E978
 
+// tBESectionDB: one world section (a course part) of the section table. [O] On Tour struct tBESectionDB (0x18):
+// sectionID (eBESectionID), fileName[16], type (eBESectionType), and the static cBELibrary::sectionDB; [R] retail's
+// cBELibrary_sectionDB (0x0043E250) has 0x18-byte records, "ARA1" at +0x4 of record 0.
+struct tBESectionDB {
+    int sectionID;                  // 0x00 [O] eBESectionID
+    char fileName[16];              // 0x04 [O]; [U] cBENewRaceInterface_getSectionFile returns it
+    int type;                       // 0x14 [O] eBESectionType; [U] cBENewRaceInterface_getSectionType returns it
+};
+
+CHECK_OFFSET(tBESectionDB, sectionID, 0x00);
+CHECK_OFFSET(tBESectionDB, fileName, 0x04);
+CHECK_OFFSET(tBESectionDB, type, 0x14);
+CHECK_SIZE(tBESectionDB, 0x18);
+
+extern tBESectionDB cBELibrary_sectionDB[];     // [O] cBELibrary::sectionDB; [R] 0x0043E250
+
 
 #endif /* BE_BEINTNEWRACE_H */

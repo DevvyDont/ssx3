@@ -2080,7 +2080,7 @@ extern "C" char *cUIStateStack_getCurrentState_79C8(char *) __asm__("cUIStateSta
 extern "C" void cOVStateManager_triggerOverlay_79C8(int) __asm__("cOVStateManager_triggerOverlay");
 extern int cPauseState_Flags;
 extern int cPauseState_StackIdx;
-extern int D_00442924[];
+extern int cPauseState_FlagsTable[];
 extern int cPauseState_Stack[];
 
 /**
@@ -2102,7 +2102,7 @@ void cGameComm::updateDisplayError()
                 cOVStateManager_triggerOverlay_79C8(39);
                 int idx = cPauseState_StackIdx + 1;
                 cPauseState_Stack[idx] = 13;
-                cPauseState_Flags = D_00442924[0];
+                cPauseState_Flags = cPauseState_FlagsTable[13];
                 cPauseState_StackIdx = idx;
             }
         }

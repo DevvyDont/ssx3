@@ -10071,8 +10071,7 @@ extern "C" void vramHeap_freeAllBlocks(void* self)
 INCLUDE_ASM("object/railmodifier", resetTextureUseTable);
 #ifdef SKIP_ASM
 extern void* cPS2ScratchPad_freeSpace;
-extern char cPS2DeferManager_textureUseTable[];
-extern char D_0053E9FF[];
+extern char cPS2DeferManager_textureUseTable[2000 * 8]; // 2000 eight-byte entries (0x3E80 bytes)
 
 struct sRailPair66F8 {
     int a;
@@ -10107,7 +10106,8 @@ static inline unsigned int spadFree66F8()
 extern "C" void resetTextureUseTable()
 {
     cQuad128 fill = makeFill66F8(0xFFFFFFFF, 0xFFFFFFFF);
-    InvalidDCache(cPS2DeferManager_textureUseTable, D_0053E9FF);
+    InvalidDCache(cPS2DeferManager_textureUseTable,
+                  cPS2DeferManager_textureUseTable + sizeof(cPS2DeferManager_textureUseTable) - 1);
     cQuad128* spadCursor = (cQuad128*)cPS2ScratchPad_freeSpace;
     unsigned int n = spadFree66F8() >> 4;
     for (; n != 0; n--) {

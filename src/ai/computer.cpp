@@ -1,5 +1,6 @@
 #include "common.h"
 #include "be/beinterface.h"
+#include "be/beintoption.h"
 #include "path/basepath.h"
 #include "path/trackpath.h"
 #include "visualfx/splashfx.h"
@@ -182,7 +183,6 @@ struct sApp {
     char* fC0;                  // 0xC0 (ai/ai: p)
 };
 extern sApp* SSXApp_UR __asm__("SSXApp");
-extern int D_005308D0[];
 extern "C" void* cBE_getBE();
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" short cComputer_updateRiderPathDifficulty(void* self, int level, int mode);
@@ -240,7 +240,7 @@ void cComputer::updateRiderDifficulty()
     } else if (cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_RIVALPOINTS) {
         mPathDifficulty = cComputer::kPD_Hard;
     }
-    if ((D_005308D0[0] >> 2) & 1) {
+    if ((cBERules_mRules.MyRules.Flags >> 2) & 1) {
         mTrickDifficulty = 1.0f;
         mRiderDifficulty = 100.0f;
         mShouldTakeShortcuts = 1;
@@ -1454,7 +1454,6 @@ void cRider::flagEventPunchKnockdown(cRider* attacker)
 //100%
 INCLUDE_ASM("ai/computer", cRider_flagEventPathCheckpoint);
 #ifdef SKIP_ASM
-extern int D_005308D0[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1474,7 +1473,7 @@ extern "C" void cRiderMetrix_evCheckpoint(void*, int);
 void cRider::flagEventPathCheckpoint(int* checkpoint)
 {
     PrevRanking = RaceRanking;
-    if (((D_005308D0[0] >> 9) & 1) == 0)
+    if (((cBERules_mRules.MyRules.Flags >> 9) & 1) == 0)
     {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (cBENewRaceInterface_newRace.cGameEvent == kGAMEEVENT_SLOPESTYLE)

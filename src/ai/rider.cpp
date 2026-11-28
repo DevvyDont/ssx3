@@ -4,6 +4,7 @@
 #include "world/instancerecord.h"
 #include "world/patchrecord.h"
 #include "be/beinterface.h"
+#include "be/beintoption.h"
 #include "camera/race/racecontroller.h"
 #include "ui/uithing.h"
 #include "render/irradiance.h"
@@ -6290,7 +6291,6 @@ extern "C" void cRider_doFinishEvent(cRider* self);
 extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_SpeakArcadeResult(void* a, void* self, int n);
 extern "C" unsigned int fptoui(float f);
-extern int D_005308D0[];
 
 /**
  * Checks whether a human rider has finished, applying a timed event's time limit.
@@ -6314,7 +6314,7 @@ bool cRider::updateFinishTest()
                 return mFinishTime >= zeroF;
             cSSXApp* app = SSXApp;
             cGameModeMan* gameModeMan = app->GameModeMan;
-            if (gameModeMan->bIsTimedEvent != 0 && ((D_005308D0[0] >> 9) & 1) == 0) {
+            if (gameModeMan->bIsTimedEvent != 0 && ((cBERules_mRules.MyRules.Flags >> 9) & 1) == 0) {
                 int eventTicks = app->Game->AI->EventTimerTick;
                 int secs = fptoui((float)gameModeMan->uiTimeLimit * 0.01666666753590107f);
                 if (secs * 60 < eventTicks) {

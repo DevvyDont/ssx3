@@ -799,13 +799,6 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getHumanRider);
 #ifdef SKIP_ASM
 int cBENewPlayerInterface_getPlayerID(int index);
 
-struct sPlayerSlot_00146E98
-{
-    int state;          // 0x0 (0xC in sPlayerCharEntry)
-    char pad_0x04[0x18];
-};
-
-extern sPlayerSlot_00146E98 D_00534FEC[];
 
 /**
  * Finds the rider slot of the first or second human player.
@@ -822,7 +815,7 @@ int cBENewPlayerInterface::getHumanRider(int second)
     for (int i = 0; i < 6; i++)
     {
         int id = cBENewPlayerInterface_getPlayerID(i);
-        if (D_00534FEC[id].state >= 0)
+        if (cBENewPlayerInterface_tempPlayers[id].iControllerID >= 0)
         {
             if (second == 0)
                 return i;
@@ -1837,22 +1830,9 @@ extern "C" void* cBEStatInterface_getThis(void)
 //100%
 INCLUDE_ASM("be/beintplayer", cBEStatInterface_submit);
 #ifdef SKIP_ASM
-struct sCtrl7_00147FD8
-{
-    signed char b[7];
-};
-
-struct sPlayerSlot_00147FD8
-{
-    sCtrl7_00147FD8 ctrl;
-    char pad[0xF88 - 7];
-};
-
 struct sPlayerStatRow;
 extern sPlayerStatRow cBEStatInterface_currentStat[];
-extern sPlayerSlot_00147FD8 D_004A7887[];
-extern sPlayerSlot_00147FD8 D_004B13D7[];
-extern sPlayerSlot_00147FD8 D_004BAF27[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Commits the working character stats cBEStatInterface_currentStat to the profiles.
@@ -1863,9 +1843,9 @@ extern "C" void cBEStatInterface_submit(void)
 {
     for (int i = 0; i < 10; i++)
     {
-        D_004A7887[i].ctrl = ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[0][i];
-        D_004B13D7[i].ctrl = ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[1][i];
-        D_004BAF27[i].ctrl = ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[2][i];
+        cBELibrary_profileLib[0][i].statDB = ((tBEStatDB (*)[10])cBEStatInterface_currentStat)[0][i];
+        cBELibrary_profileLib[1][i].statDB = ((tBEStatDB (*)[10])cBEStatInterface_currentStat)[1][i];
+        cBELibrary_profileLib[2][i].statDB = ((tBEStatDB (*)[10])cBEStatInterface_currentStat)[2][i];
     }
 }
 #endif
@@ -1875,9 +1855,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_discard);
 #ifdef SKIP_ASM
 struct sPlayerStatRow;
 extern sPlayerStatRow cBEStatInterface_currentStat[];
-extern sPlayerSlot_00147FD8 D_004A7887[];
-extern sPlayerSlot_00147FD8 D_004B13D7[];
-extern sPlayerSlot_00147FD8 D_004BAF27[];
+extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Reloads the working character stats cBEStatInterface_currentStat from the profiles (the reverse of submit).
@@ -1886,9 +1864,9 @@ extern "C" void cBEStatInterface_discard(void)
 {
     for (int i = 0; i < 10; i++)
     {
-        ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[0][i] = D_004A7887[i].ctrl;
-        ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[1][i] = D_004B13D7[i].ctrl;
-        ((sCtrl7_00147FD8 (*)[10])cBEStatInterface_currentStat)[2][i] = D_004BAF27[i].ctrl;
+        ((tBEStatDB (*)[10])cBEStatInterface_currentStat)[0][i] = cBELibrary_profileLib[0][i].statDB;
+        ((tBEStatDB (*)[10])cBEStatInterface_currentStat)[1][i] = cBELibrary_profileLib[1][i].statDB;
+        ((tBEStatDB (*)[10])cBEStatInterface_currentStat)[2][i] = cBELibrary_profileLib[2][i].statDB;
     }
 }
 #endif

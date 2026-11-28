@@ -2,6 +2,7 @@
 #include "common.h"
 #include "ai/riderhandler.h"
 #include "be/beinterface.h"
+#include "be/beintoption.h"
 #include "intersect/bxnash.h"
 #include "animation/rideranimbase.h"
 #include "world/instancerecord.h"
@@ -5651,7 +5652,6 @@ extern "C" void cRider_flagEventBumpKnockdown(void*, void*);
 extern "C" void cRider_flagEventPunch(void*, void*);
 extern "C" void cRider_flagEventBump(void*, void*);
 extern float kHighSpeedCollideThresh_7E70 __asm__("kHighSpeedCollideThresh");
-extern int D_005308D0_7E70[] __asm__("D_005308D0");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_7E70(const t4Vector& a, const t4Vector& b)
@@ -5843,7 +5843,7 @@ void cRider::doOpponentCollision(cRider* other, t4Vector* n, int flag, float spe
     info.Direct = Norm_7E70(*(&mVelocity));
     info.Reflect = *n;
     info.Vel = clampedSpeed;
-    if ((D_005308D0_7E70[0] >> 5) & 1)
+    if ((cBERules_mRules.MyRules.Flags >> 5) & 1)
         absSpd = 599.9739990234375f;
     if (absSpd > 599.9739990234375f) {
         float dz = Dot_7E70(Get_7E70((char*)&RiderRoot), *n);

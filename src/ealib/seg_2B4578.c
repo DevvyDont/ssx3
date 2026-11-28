@@ -1649,18 +1649,18 @@ extern void SNDREAL_exithandler(void);
 extern void SYNCTASK_add_5478(void *, int, int) __asm__("SYNCTASK_add");
 extern void REAL_addexit_5478(void *) __asm__("REAL_addexit");
 extern int systaskadded_C464[] __asm__("systaskadded");
-extern void (*D_0050A9B0_A9B0[])() __asm__("D_0050A9B0");
 
 /**
  * Hooks the EA sound system into the game's frame and timer services.
  *
- * Stores SNDREAL_abortmsg in the options-tail hook D_0050A9B0, registers SNDREAL_systemtask once as a SYNCTASK (SYNCTASK_add
- * with 0, 1; systaskadded remembers it) and passes SNDREAL_exithandler to REAL_addexit. Called by cPS2SoundManager_Init.
+ * Stores SNDREAL_abortmsg in the options-tail hook sndgs.sso.vec.abortmsg, registers SNDREAL_systemtask once as a
+ * SYNCTASK (SYNCTASK_add with 0, 1; systaskadded remembers it) and passes SNDREAL_exithandler to REAL_addexit. Called
+ * by cPS2SoundManager_Init.
  *
  * @return 0
  */
 int System_VectorToReal5(void) {
-    D_0050A9B0_A9B0[0] = SNDREAL_abortmsg;
+    sndgs.sso.vec.abortmsg = SNDREAL_abortmsg;
     if (systaskadded_C464[0] == 0) {
         SYNCTASK_add_5478(SNDREAL_systemtask, 0, 1);
         systaskadded_C464[0] = 1;
@@ -2762,18 +2762,17 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_getstreamptr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int sndss[];
-extern unsigned char D_0050A92E_6A38[] __asm__("D_0050A92E");
 
 /**
  * Returns the stream for a stream slot number.
  *
- * Looks the slot up in sndss; the count is the halfword D_0050A92E.
+ * Looks the slot up in sndss; the count is sndgs.sso.set.maxstreams.
  *
  * @param slotNum  the slot number (low byte of a stream handle)
  * @return the stream, or 0 when out of range
  */
 int SNDSTRMI_getstreamptr(int slotNum) {
-    if (slotNum >= D_0050A92E_6A38[0] || slotNum < 0) {
+    if (slotNum >= sndgs.sso.set.maxstreams || slotNum < 0) {
         return 0;
     }
     return sndss[slotNum];
@@ -3239,7 +3238,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_numcreated);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int sndss_7410[] __asm__("sndss");
-extern unsigned char D_0050A92E_7410[] __asm__("D_0050A92E");
 
 /**
  * Counts the streams that exist.
@@ -3252,7 +3250,7 @@ int SNDSTRMI_numcreated(void) {
     int n = 0;
     int i;
 
-    for (i = 0; i < D_0050A92E_7410[0]; i++) {
+    for (i = 0; i < sndgs.sso.set.maxstreams; i++) {
         if (sndss_7410[i] != 0) {
             n++;
         }
@@ -3472,7 +3470,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_destroy);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern void (*D_0050AAD4)(void);        /* sndgs.f1EC */
 
 extern struct SNDSTREAMCHANNEL *sndss_7838[32] __asm__("sndss");
 extern int SNDSTRMI_numcreated(void);
@@ -3487,9 +3484,10 @@ int SNDSTRM_destroy_7838(int) __asm__("SNDSTRM_destroy");
 /**
  * Destroys a stream: purges it, frees its packet player and file queue.
  *
- * Purges with SNDSTRM_purge; the last stream unregisters the service (iSNDserverremoveclient) and clears the shutdown hook
- * D_0050AAD4. Destroys the packet player (SNDPKTPLAY_destroy), frees the slot and destroys the file STREAM unless it was
- * borrowed (+0x11). Used by SNDSTRMI_destroyall and the movie player's audio object (RCMP_AV_AUDIO__AV_AUDIO).
+ * Purges with SNDSTRM_purge; the last stream unregisters the service (iSNDserverremoveclient) and clears the shutdown
+ * hook sndgs.streamrestore. Destroys the packet player (SNDPKTPLAY_destroy), frees the slot and destroys the file
+ * STREAM unless it was borrowed (+0x11). Used by SNDSTRMI_destroyall and the movie player's audio object
+ * (RCMP_AV_AUDIO__AV_AUDIO).
  *
  * @param streamHandle  the stream handle
  * @return 0, or -8 for an unknown stream
@@ -3502,7 +3500,7 @@ int SNDSTRM_destroy_7838(int streamHandle) {
     SNDSTRM_purge(streamHandle);
     if (SNDSTRMI_numcreated() == 1) {
         iSNDserverremoveclient_7838(SNDSTRMI_service_7838);
-        D_0050AAD4 = 0;
+        sndgs.streamrestore = 0;
     }
     SNDPKTPLAY_destroy(stream->packetinstancehandle);
     w = stream->streamhandle;
@@ -4241,13 +4239,11 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDFX_getBus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050AAE0_8218[] __asm__("D_0050AAE0");
-extern char D_0050AAF4_8218[] __asm__("D_0050AAF4");
-extern char D_0050AB08_8218[] __asm__("D_0050AB08");
 
 /**
  * Returns the effect bus record for a bus number and render kind.
  *
- * Kind 8 selects the table D_0050AB08, 4 D_0050AAE0 and 0x100 D_0050AAF4 (0x14-byte records, the buses at +0x220,
+ * Kind 8 selects the table sndgs.unk_220, 4 D_0050AAE0 and 0x100 sndgs.unk_20C (0x14-byte records, the buses at +0x220,
  * +0x1F8 and +0x20C of the sound driver state sndgs); other kinds give 0.
  *
  * @param busIndex  the bus number
@@ -4257,11 +4253,11 @@ extern char D_0050AB08_8218[] __asm__("D_0050AB08");
 void *SNDFX_getBus(int busIndex, int renderMode) {
     switch (renderMode & 0x71C) {
     case 8:
-        return (busIndex * 20) + D_0050AB08_8218;
+        return (busIndex * 20) + sndgs.unk_220;
     case 4:
         return (busIndex * 20) + D_0050AAE0_8218;
     case 0x100:
-        return (busIndex * 20) + D_0050AAF4_8218;
+        return (busIndex * 20) + sndgs.unk_20C;
     }
     return 0;
 }
@@ -5002,7 +4998,6 @@ struct sA120 {
 extern struct sA120 sndms;
 extern struct sA120Voice D_0050A820[];  /* sndms.f700 */
 extern SNDMIDISTATE sndms_8DE8 __asm__("sndms");
-extern SNDMIDIPARTIAL D_0050A820_8DE8[] __asm__("D_0050A820"); /* sndms.smp */
 extern int SNDseqstop_8DE8(int) __asm__("SNDseqstop");
 extern int f_85F0_8DE8(int, int) __asm__("SNDvol");
 
@@ -5041,7 +5036,7 @@ int SNDI_midiupdatefade_impl(int id) {
         return 1;
     }
     i = 23;
-    voiceSlot = D_0050A820_8DE8;
+    voiceSlot = sndms_8DE8.smp;
     do {
         if (voiceSlot->seqindex == id && voiceSlot->shandle >= 0) {
             f_85F0_8DE8(voiceSlot->shandle,
@@ -10947,15 +10942,14 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_saveScratchpad);
 // Saves seven DMA channel registers (0x1000D010..D420) into the block, then calls SNDDRV_dmaFromScratchpad.
 struct G_09B8 { char p[0x1AAE]; unsigned short rate; char p2[0x1B1C - 0x1AB0]; int save[7]; int h; };
 extern struct G_09B8 SNDDRV_state_09B8 __asm__("SNDDRV_state");
-extern int D_0050A94C_09B8[] __asm__("D_0050A94C");
-extern void SNDDRV_dmaFromScratchpad_09B8(int, int, int, int) __asm__("SNDDRV_dmaFromScratchpad");
+extern void SNDDRV_dmaFromScratchpad_09B8(void *, int, int, int) __asm__("SNDDRV_dmaFromScratchpad");
 /**
  * Saves the scratchpad DMA registers and copies the scratchpad area the DTS encoder will use out to main memory.
  *
  * Keeps the seven registers 0x1000D010, D080, D020 (channel 8) and D410, D430, D480, D420 (channel 9) in +0x1B1C of the
- * IOP sound state SNDDRV_state, then has SNDDRV_dmaFromScratchpad copy (+0x1AAE >> 4) quadwords from D_0050A94C to the save buffer
- * +0x1B38, waiting for it. The sound thread SNDDRV_thread calls it before encoding when +0x1AAE is set; SNDDRV_restoreScratchpad
- * undoes it.
+ * IOP sound state SNDDRV_state, then has SNDDRV_dmaFromScratchpad copy (+0x1AAE >> 4) quadwords from
+ * sndgs.sso.set.fastramaddr to the save buffer +0x1B38, waiting for it. The sound thread SNDDRV_thread calls it before
+ * encoding when +0x1AAE is set; SNDDRV_restoreScratchpad undoes it.
  */
 void SNDDRV_saveScratchpad(void) {
     SNDDRV_state_09B8.save[0] = *(volatile int *)0x1000D010;
@@ -10965,7 +10959,7 @@ void SNDDRV_saveScratchpad(void) {
     SNDDRV_state_09B8.save[4] = *(volatile int *)0x1000D430;
     SNDDRV_state_09B8.save[5] = *(volatile int *)0x1000D480;
     SNDDRV_state_09B8.save[6] = *(volatile int *)0x1000D420;
-    SNDDRV_dmaFromScratchpad_09B8(D_0050A94C_09B8[0], SNDDRV_state_09B8.h, SNDDRV_state_09B8.rate >> 4, 0x10000);
+    SNDDRV_dmaFromScratchpad_09B8(sndgs.sso.set.fastramaddr, SNDDRV_state_09B8.h, SNDDRV_state_09B8.rate >> 4, 0x10000);
 }
 #endif
 
@@ -10973,20 +10967,20 @@ void SNDDRV_saveScratchpad(void) {
 INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_restoreScratchpad);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void SNDDRV_dmaToScratchpad_0A60(int, int, unsigned int, int) __asm__("SNDDRV_dmaToScratchpad");
-extern int D_0050A94C_0A60[] __asm__("D_0050A94C");
+extern void SNDDRV_dmaToScratchpad_0A60(int, void *, unsigned int, int) __asm__("SNDDRV_dmaToScratchpad");
 extern char SNDDRV_state_0A60[] __asm__("SNDDRV_state");
 
 /**
  * Copies the saved scratchpad area back and restores the scratchpad DMA registers SNDDRV_saveScratchpad saved.
  *
- * SNDDRV_dmaToScratchpad copies (+0x1AAE >> 4) quadwords from the save buffer +0x1B38 of SNDDRV_state back to D_0050A94C, waiting
- * for it; then the seven channel 8 / 9 registers are rewritten from +0x1B1C. Called by the sound thread SNDDRV_thread
- * after encoding.
+ * SNDDRV_dmaToScratchpad copies (+0x1AAE >> 4) quadwords from the save buffer +0x1B38 of SNDDRV_state back to
+ * sndgs.sso.set.fastramaddr, waiting for it; then the seven channel 8 / 9 registers are rewritten from +0x1B1C. Called
+ * by the sound thread SNDDRV_thread after encoding.
  */
 void SNDDRV_restoreScratchpad(void) {
     char *soundState = SNDDRV_state_0A60;
-    SNDDRV_dmaToScratchpad_0A60(*(int *)(soundState + 0x1B38), D_0050A94C_0A60[0], *(unsigned short *)(soundState + 0x1AAE) >> 4, 0x10000);
+    SNDDRV_dmaToScratchpad_0A60(*(int *)(soundState + 0x1B38), sndgs.sso.set.fastramaddr,
+                                *(unsigned short *)(soundState + 0x1AAE) >> 4, 0x10000);
     *(volatile int *)0x1000D010 = *(int *)(soundState + 0x1B1C);
     *(volatile int *)0x1000D080 = *(int *)(soundState + 0x1B20);
     *(volatile int *)0x1000D020 = *(int *)(soundState + 0x1B24);
@@ -12983,14 +12977,13 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDDRV_setupIopEffect);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_0B10_3450(int, void *, int) __asm__("SNDDRV_callIopRpc");
 extern int f_72F8_3450(void *, int) __asm__("SNDI_getb");
-extern char D_0050AAF4_3450[] __asm__("D_0050AAF4");
 struct G_3450 { char pad[0xF]; char c; void *fn; };
 extern char str_FX_3450[] __asm__("str_FX");
 extern char f_C878_3450[] __asm__("SNDMIXI_sendFxToIop");
 
 extern struct G_3450 sndmix_3450[] __asm__("sndmix");
 /**
- * Sets up the IOP effect for the kind-0x100 bus (D_0050AAF4, its type passed in).
+ * Sets up the IOP effect for the kind-0x100 bus (sndgs.unk_20C, its type passed in).
  *
  * With +0x42 of sndgs set it installs SNDMIXI_sendFxToIop as the IOP effect callback (sndmix). Type 1 (a custom
  * effect) sends the effect data from the bus record's +0x04 with RPC function 2 (SNDDRV_callIopRpc), its length read from
@@ -13000,7 +12993,7 @@ extern struct G_3450 sndmix_3450[] __asm__("sndmix");
  * @param busType  the bus type (1 = custom effect data)
  */
 void SNDDRV_setupIopEffect(int busType) {
-    char *busRecord = D_0050AAF4_3450;
+    char *busRecord = sndgs.unk_20C;
     char *driverState = busRecord - 0x20C;
     char *effectData;
     if (*(unsigned char *)(driverState + 0x42) != 0) {
@@ -15878,7 +15871,6 @@ extern struct SNDPACKETSTATE sndpps;
 INCLUDE_ASM("ealib/seg_2B4578", SNDPKTPLAY_create);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned char D_0050A92E;
 int SNDPLATFORM_packetplaycreate_6620(int, char *) __asm__("SNDPLATFORM_packetplaycreate");
 
 /**
@@ -15903,7 +15895,7 @@ int SNDPKTPLAY_create(void (*preleasefunc)(int, int), void (*pframesfunc)(int, i
     int i;
 
     SNDSYS_entercritical();
-    for (i = 0; i < D_0050A92E; i++) {
+    for (i = 0; i < sndgs.sso.set.maxstreams; i++) {
         if (sndpps.ppc[i] == 0) {
             packetinstancehandle = i;
             goto found;
@@ -17611,7 +17603,6 @@ void MIX_setClipFilter(int voice, int level) {
 INCLUDE_ASM("ealib/seg_2B4578", MIX_sethighpass);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned short D_0050A912_8C30[] __asm__("D_0050A912");
 extern void *SNDMEMI_alloc_8C30(int) __asm__("SNDMEMI_alloc");
 extern void SNDMEMI_free_8C30(void *) __asm__("SNDMEMI_free");
 extern void SFILTER_createHPFFIR8_8C30(void *) __asm__("SFILTER_createHPFFIR8");
@@ -17646,7 +17637,7 @@ void MIX_sethighpass(int voice, int cutoff) {
             SFILTER_add_8C30(&voiceState->filterhead, (char*)voiceState->phps);
         }
         sp[0] = cutoff << 8;
-        sp[1] = D_0050A912_8C30[0] << 8;
+        sp[1] = sndgs.sso.set.outputrate << 8;
         SFILTER_modifyHPFFIR8_8C30((char*)voiceState->phps, sp);
         return;
     }

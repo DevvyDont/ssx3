@@ -71,7 +71,6 @@ typedef struct {
 } sMcDirEntry;
 extern sMcFileCmd libmc_fileCmd;
 extern sMcDirEntry libmc_fileInfoEntry;  /* entry sent with RPC 14 */
-extern char D_00527220[];       /* libmc_fileInfoEntry.name (its own splat symbol) */
 extern int libmc_callbackRecvBuffer[];        /* uncached receive buffer for the read / getInfo callbacks */
 extern char libmc_chdirRecvBuffer[];       /* receive buffer for RPC 12 (libmc_onChdirDone) */
 extern int libmc_rpcResult[];        /* RPC result buffer */
@@ -81,8 +80,6 @@ extern int libusbkb_rpcSema;            /* semaphore serialising the keyboard RP
 extern unsigned char libusbkb_sendBuffer[]; /* RPC send buffer (16 bytes) */
 extern unsigned char libusbkb_recvBuffer[]; /* RPC receive buffer */
 extern char str_sceUsbKbRead_sceSifCallRpc_pct_d[];
-extern unsigned char D_00529101[]; /* libusbkb_sendBuffer[1] (own splat symbol) */
-extern unsigned char D_00529141[]; /* libusbkb_recvBuffer[1] (own splat symbol) */
 
 /* key repeat state and 4-entry key ring of one keyboard (sKbPort + 0x10) */
 typedef struct {
@@ -121,9 +118,7 @@ typedef struct {
     int thread;
 } sUsbKb;
 extern sUsbKb libusbkb_state;
-extern sKbPort *D_00529004; /* libusbkb_state.port (own splat symbol) */
 extern sKbData D_00529008;  /* libusbkb_state.prev (own splat symbol) */
-extern void *D_00529098;    /* libusbkb_state.out (own splat symbol) */
 extern int D_0052909C;      /* libusbkb_state.thread (own splat symbol) */
 extern sKbPort D_005291D0[];
 
@@ -259,12 +254,6 @@ typedef struct {
     unsigned char f2[6];
 } sSysConfig;
 extern sSysConfig libscf_configOverride;
-extern unsigned char D_004533FA[]; /* libscf_configOverride.f2[0..5] */
-extern unsigned char D_004533FB[];
-extern unsigned char D_004533FC[];
-extern unsigned char D_004533FD[];
-extern unsigned char D_004533FE[];
-extern unsigned char D_004533FF[];
 
 /* other shared tables and buffers */
 extern int libdma_channelRegTable[];        /* DMA channel register block addresses, 10 channels */
@@ -10464,12 +10453,12 @@ extern void FlushCache(int);
  * Starts renaming a file on a memory card (call 14 with the rename flag, asynchronous).
  *
  * An empty or null old name, or a null new name, releases the lock and fails with -210. Sets mode 16 in libmc_fileCmd,
- * copies the old name (at most 1023 characters) and the new name into D_00527220 (32 bytes; byte 31 cleared), the name
- * field of the 64-byte record at libmc_fileInfoEntry that the buffer points at, and flushes the cache. Fails with -100 when the
- * library is not bound (libmc_client.server is 0) and -200 when another call still holds the lock semaphore libmc_lockSema
- * (PollSema). On success it records 19 as the pending call (libmc_pendingCall) and keeps the lock until sceMcSync sees the
- * call finish; when sceSifCallRpc fails it releases the lock. (19 rather than the call number). No caller in the
- * source.
+ * copies the old name (at most 1023 characters) and the new name into libmc_fileInfoEntry.name (32 bytes; byte 31
+ * cleared), the name field of the 64-byte record at libmc_fileInfoEntry that the buffer points at, and flushes the
+ * cache. Fails with -100 when the library is not bound (libmc_client.server is 0) and -200 when another call still
+ * holds the lock semaphore libmc_lockSema (PollSema). On success it records 19 as the pending call (libmc_pendingCall)
+ * and keeps the lock until sceMcSync sees the call finish; when sceSifCallRpc fails it releases the lock. (19 rather
+ * than the call number). No caller in the source.
  *
  * @param cardPort  the memory-card port
  * @param cardSlot  the slot
@@ -10493,8 +10482,8 @@ int sceMcRename(int cardPort, int cardSlot, char *oldPath, char *newName) {
     libmc_fileCmd.mode = 16;
     strncpy(libmc_fileCmd.name, oldPath, 0x3FF);
     libmc_fileCmd.name[0x3FF] = 0;
-    strncpy(D_00527220, newName, 0x20);
-    infoRecord = D_00527220 - 0x20;
+    strncpy(libmc_fileInfoEntry.name, newName, 0x20);
+    infoRecord = libmc_fileInfoEntry.info;
     infoRecord[0x3F] = 0;
     libmc_fileCmd.buffer = (int)infoRecord;
     FlushCache(0);
@@ -11071,10 +11060,11 @@ extern void GetOsdConfigParam(unsigned *);
 /**
  * Returns the console's language setting.
  *
- * On a T10000 development kit (libscf_isT10000) it returns the override byte D_004533FC that func_0040BA48 sets.
- * Otherwise it reads the OSD configuration (GetOsdConfigParam): Consoles whose OSD configuration has version 0 (bits
- * 13..15) give the Japanese-language flag (bit 4)., newer ones the language field (bits 16..20). Quirk: it calls
- * GetOsdConfigParam once more at the start, unused. cPS2ConsoleConfig_cPS2ConsoleConfig keeps 0..7 as its language.
+ * On a T10000 development kit (libscf_isT10000) it returns the override byte libscf_configOverride.f2[2] that
+ * func_0040BA48 sets. Otherwise it reads the OSD configuration (GetOsdConfigParam): Consoles whose OSD configuration
+ * has version 0 (bits 13..15) give the Japanese-language flag (bit 4)., newer ones the language field (bits 16..20).
+ * Quirk: it calls GetOsdConfigParam once more at the start, unused. cPS2ConsoleConfig_cPS2ConsoleConfig keeps 0..7 as
+ * its language.
  *
  * @return the language number
  */
@@ -11083,7 +11073,7 @@ int sceScfGetLanguage(void) {
     int language;
     GetOsdConfigParam(buf);
     if (libscf_isT10000()) {
-        language = D_004533FC[0];
+        language = libscf_configOverride.f2[2];
     } else {
         GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0)
@@ -11120,15 +11110,15 @@ extern void GetOsdConfigParam(unsigned *);
 /**
  * Returns the console's screen aspect setting.
  *
- * On a T10000 development kit (libscf_isT10000) it returns the override byte D_004533FA that func_0040BA48 sets.
- * Otherwise it returns the screen-type field of the OSD configuration (bits 1..2).
+ * On a T10000 development kit (libscf_isT10000) it returns the override byte libscf_configOverride.f2[0] that
+ * func_0040BA48 sets. Otherwise it returns the screen-type field of the OSD configuration (bits 1..2).
  *
  * @return the aspect setting (0..2)
  */
 int sceScfGetAspect(void) {
     unsigned buf[1];
     if (libscf_isT10000())
-        return D_004533FA[0];
+        return libscf_configOverride.f2[0];
     GetOsdConfigParam(buf);
     return (buf[0] >> 1) & 3;
 }
@@ -11142,15 +11132,16 @@ extern void GetOsdConfigParam(unsigned *);
 /**
  * Returns the console's S/PDIF (digital audio output) setting.
  *
- * On a T10000 development kit (libscf_isT10000) it returns the override byte D_004533FD that func_0040BA48 sets.
- * Otherwise it returns bit 0 of the OSD configuration. cPS2ConsoleConfig_cPS2ConsoleConfig treats 0 as enabled.
+ * On a T10000 development kit (libscf_isT10000) it returns the override byte libscf_configOverride.f2[3] that
+ * func_0040BA48 sets. Otherwise it returns bit 0 of the OSD configuration. cPS2ConsoleConfig_cPS2ConsoleConfig treats 0
+ * as enabled.
  *
  * @return the S/PDIF setting (0 on, 1 off)
  */
 int sceScfGetSpdif(void) {
     unsigned buf[1];
     if (libscf_isT10000())
-        return D_004533FD[0];
+        return libscf_configOverride.f2[3];
     GetOsdConfigParam(buf);
     return buf[0] & 1;
 }
@@ -11192,9 +11183,10 @@ extern int GetOsdConfigParam2(unsigned *, int, int);
 /**
  * Returns the console's date format setting.
  *
- * On a T10000 development kit (libscf_isT10000) it returns the override byte D_004533FB that func_0040BA48 sets. Consoles
- * whose OSD configuration has version 0 (bits 13..15) give 0. Newer ones read the second byte of the extra OSD
- * configuration (GetOsdConfigParam2) and return its bits 6..7. cPS2ConsoleConfig_cPS2ConsoleConfig keeps 0..2.
+ * On a T10000 development kit (libscf_isT10000) it returns the override byte libscf_configOverride.f2[1] that
+ * func_0040BA48 sets. Consoles whose OSD configuration has version 0 (bits 13..15) give 0. Newer ones read the second
+ * byte of the extra OSD configuration (GetOsdConfigParam2) and return its bits 6..7.
+ * cPS2ConsoleConfig_cPS2ConsoleConfig keeps 0..2.
  *
  * @return the date format (0..2)
  */
@@ -11203,7 +11195,7 @@ int sceScfGetDateFormat(void) {
     unsigned char config2Byte;
     int dateFormat;
     if (libscf_isT10000()) {
-        dateFormat = D_004533FB[0];
+        dateFormat = libscf_configOverride.f2[1];
     } else {
         GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) {
@@ -11227,9 +11219,9 @@ extern int GetOsdConfigParam2(unsigned *, int, int);
 /**
  * Returns whether the console's summer time (daylight saving) setting is on.
  *
- * On a T10000 development kit (libscf_isT10000) it returns the override byte D_004533FE that func_0040BA48 sets. Consoles
- * whose OSD configuration has version 0 (bits 13..15) give 0. Newer ones return bit 4 of the extra OSD configuration
- * byte (GetOsdConfigParam2).
+ * On a T10000 development kit (libscf_isT10000) it returns the override byte libscf_configOverride.f2[4] that
+ * func_0040BA48 sets. Consoles whose OSD configuration has version 0 (bits 13..15) give 0. Newer ones return bit 4 of
+ * the extra OSD configuration byte (GetOsdConfigParam2).
  *
  * @return 1 when summer time is on, else 0
  */
@@ -11238,7 +11230,7 @@ int sceScfGetSummerTime(void) {
     unsigned char config2Byte;
     int summerTime;
     if (libscf_isT10000()) {
-        summerTime = D_004533FE[0];
+        summerTime = libscf_configOverride.f2[4];
     } else {
         GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) {
@@ -11262,9 +11254,9 @@ extern int GetOsdConfigParam2(unsigned *, int, int);
 /**
  * Returns the console's time notation setting (24- or 12-hour clock).
  *
- * On a T10000 development kit (libscf_isT10000) it returns the override byte D_004533FF that func_0040BA48 sets. Consoles
- * whose OSD configuration has version 0 (bits 13..15) give 0. Newer ones return bit 5 of the extra OSD configuration
- * byte (GetOsdConfigParam2). cPS2ConsoleConfig_cPS2ConsoleConfig keeps 0 or 1.
+ * On a T10000 development kit (libscf_isT10000) it returns the override byte libscf_configOverride.f2[5] that
+ * func_0040BA48 sets. Consoles whose OSD configuration has version 0 (bits 13..15) give 0. Newer ones return bit 5 of
+ * the extra OSD configuration byte (GetOsdConfigParam2). cPS2ConsoleConfig_cPS2ConsoleConfig keeps 0 or 1.
  *
  * @return the time notation (0 or 1)
  */
@@ -11273,7 +11265,7 @@ int sceScfGetTimeNotation(void) {
     unsigned char config2Byte;
     int timeNotation;
     if (libscf_isT10000()) {
-        timeNotation = D_004533FF[0];
+        timeNotation = libscf_configOverride.f2[5];
     } else {
         GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) {
@@ -11906,9 +11898,9 @@ int sceUsbKbSetRepeat(int kbIndex, int repeatDelay, int repeatRate) {
         return errCode;
     if (repeatRate < 0)
         return -12;
-    D_00529004[kbIndex].rep.rate = repeatRate;
-    D_00529004[kbIndex].rep.delay = repeatDelay;
-    D_00529004[kbIndex].rep.count = 0;
+    libusbkb_state.port[kbIndex].rep.rate = repeatRate;
+    libusbkb_state.port[kbIndex].rep.delay = repeatDelay;
+    libusbkb_state.port[kbIndex].rep.count = 0;
     return 0;
 }
 #endif
@@ -12046,7 +12038,7 @@ struct S40C928 { int n; int m; unsigned char d[1]; };
  * @return 0
  */
 int libusbkb_onGetInfoResult(void) {
-    struct S40C928 *infoOut = (struct S40C928 *)D_00529098;
+    struct S40C928 *infoOut = (struct S40C928 *)libusbkb_state.out;
     unsigned char *recvBytes = libusbkb_recvBuffer;
     int i = 0;
     int n = recvBytes[0];
@@ -12232,7 +12224,7 @@ INCLUDE_ASM("seg/seg_2FE810", libusbkb_onGetLocationResult);
  */
 int libusbkb_onGetLocationResult(void) {
     unsigned char *recvBytes = libusbkb_recvBuffer;
-    unsigned char *locationOut = D_00529098;
+    unsigned char *locationOut = libusbkb_state.out;
     int i;
     if (recvBytes[6])
         return -1;
@@ -12255,7 +12247,7 @@ INCLUDE_ASM("seg/seg_2FE810", libusbkb_onSetLedStatusResult);
  * @return 0 when they match, else -1
  */
 int libusbkb_onSetLedStatusResult(void) {
-    return D_00529141[0] == D_00529101[0] ? 0 : -1;
+    return libusbkb_recvBuffer[1] == libusbkb_sendBuffer[1] ? 0 : -1;
 }
 #endif
 
@@ -12270,7 +12262,7 @@ INCLUDE_ASM("seg/seg_2FE810", libusbkb_onSetLedModeResult);
  * @return 0 when they match, else -1
  */
 int libusbkb_onSetLedModeResult(void) {
-    return D_00529141[0] == D_00529101[0] ? 0 : -1;
+    return libusbkb_recvBuffer[1] == libusbkb_sendBuffer[1] ? 0 : -1;
 }
 #endif
 
@@ -12309,7 +12301,7 @@ INCLUDE_ASM("seg/seg_2FE810", libusbkb_clearKeyRing);
  * @return 0
  */
 int libusbkb_clearKeyRing(int i) {
-    sKbRepeat *repeat = &D_00529004[i].rep;
+    sKbRepeat *repeat = &libusbkb_state.port[i].rep;
     repeat->n = 0;
     repeat->wr = 0;
     repeat->rd = 0;
@@ -12329,7 +12321,7 @@ INCLUDE_ASM("seg/seg_2FE810", libusbkb_pushKey);
  * @return 0, or -1 when the ring is full
  */
 int libusbkb_pushKey(int kbIndex, unsigned short keyCode) {
-    sKbRepeat *repeat = &D_00529004[kbIndex].rep;
+    sKbRepeat *repeat = &libusbkb_state.port[kbIndex].rep;
     if (repeat->n >= 4)
         return -1;
     repeat->ring[repeat->wr++] = keyCode;
@@ -12351,7 +12343,7 @@ INCLUDE_ASM("seg/seg_2FE810", libusbkb_popKey);
  * @return 0, or -1 when the ring is empty
  */
 int libusbkb_popKey(int kbIndex, unsigned short *out) {
-    sKbRepeat *repeat = &D_00529004[kbIndex].rep;
+    sKbRepeat *repeat = &libusbkb_state.port[kbIndex].rep;
     if (repeat->n <= 0)
         return -1;
     *out = repeat->ring[repeat->rd++];
@@ -12381,7 +12373,7 @@ extern short q_0040D268(int, int, int, unsigned short) __asm__("sceUsbKbCnvRawCo
  * @return the number of codes written
  */
 int libusbkb_copyKeyCodes(int idx, unsigned char modKeys, unsigned char ledState, int n, unsigned short *src, unsigned short *dst) {
-    sKbPort *kbPort = &D_00529004[idx];
+    sKbPort *kbPort = &libusbkb_state.port[idx];
     int i;
     int keyCount = 0;
     switch (kbPort->f04) {

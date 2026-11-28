@@ -158,11 +158,15 @@ CHECK_SIZE(tBEBraggingRights, 0xC);
 // tBEMyRules: the rules that are not per player. [O] On Tour struct tBEMyRules (0x8): an anonymous union, then
 // AIHeadStartSecs; [U] cBERules_getAIStartDelaySecs reads AIHeadStartSecs (retail D_005308D4 = cBERules_mRules + 0x1C).
 struct tBEMyRules {
-    unsigned int Flags;             // 0x0 [O] anonymous union { unsigned int Flags; bits } (DWARF union @5ea5c in
+    int Flags;                      // 0x0 [O] anonymous union { unsigned int Flags; bits } (DWARF union @5ea5c in
                                     //     ssxd_dvd.prx; LSB first: UnlimitedBoost, NoUberRails, SuperAI, NoBoost,
                                     //     KOBoostOnly, NoKnockDowns, NoIconMultiplier, NoIconPoints, NoIconPowerUp,
                                     //     NoCheckPoints); [U] the ai/ai OptBit helpers test its bits (view
-                                    //     sOptView_12B498 f18). [Renamed from unk_00 by lstruct L2.]
+                                    //     sOptView_12B498 f18). [Renamed from unk_00 by lstruct L2.] int, not On
+                                    //     Tour's unsigned int: [P] retail reads the word signed, shifting it with
+                                    //     sra before the & 1 (cFEStateRuleSelect_getBEData,
+                                    //     cComputer_updateRiderDifficulty, cRider_updateFinishTest,
+                                    //     cHUDRadar_renderTracker ...), where Bragging[0].Flags gets srl (getBEData).
     int AIHeadStartSecs;            // 0x4 [O]; [U] cBERules_getAIStartDelaySecs
 };
 

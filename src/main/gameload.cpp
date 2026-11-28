@@ -1156,20 +1156,20 @@ void cMenuSys_activate(void* a, int b);
 extern int cPauseState_StackIdx;
 extern int cPauseState_Flags;
 extern int cPauseState_Stack[];
-extern int D_00442910[];
+extern int cPauseState_FlagsTable[];
 
 
 /**
  * Starts replay playback, the mirror of cGame_stopReplay.
  *
- * Pushes pause state 8 (cPauseState_Stack[++cPauseState_StackIdx] = 8) and sets cPauseState_Flags to that state's flags (D_00442910,
- * entry 8 of the table cPauseState_FlagsTable), starts the replay (+0x28) with cReplay_startReplay(replay, 0, 0, 0) and calls
+ * Pushes pause state 8 (cPauseState_Stack[++cPauseState_StackIdx] = 8) and sets cPauseState_Flags to that state's flags
+ * (cPauseState_FlagsTable[8]), starts the replay (+0x28) with cReplay_startReplay(replay, 0, 0, 0) and calls
  * cMenuSys_activate (On Tour cMenuSys::activate) with 0 on the menu system (+0xA4). The pause stack index is not checked.
  */
 void cGame::startReplay()
 {
     cPauseState_Stack[++cPauseState_StackIdx] = 8;
-    cPauseState_Flags = D_00442910[0];
+    cPauseState_Flags = cPauseState_FlagsTable[8];
     cReplay_startReplay(((void*)Replay), 0, 0, 0);
     cMenuSys_activate(((void*)MenuSys), 0);
 }

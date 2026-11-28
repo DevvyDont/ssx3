@@ -9,22 +9,7 @@ extern void* cBENewRaceInterface_vtbl[16];
 
 
 
-// padded past the 8-byte gp-relative threshold so the compiler emits
-// absolute lui/lo addressing like the target, instead of assuming small data
-struct sPad16 { char x; int pad[3]; };
-extern sPad16 D_0043D984;
-
-extern sPad16 D_0043D954;
-
 extern tBELocationDB cBELibrary_locationDB[];
-
-extern sPad16 D_0043E254;
-
-struct sRaceEntry18 {
-    char pad_0x00[0x14];
-    int field_0x14;
-};
-extern sRaceEntry18 cBELibrary_sectionDB[];
 
 extern tBEModeDB cBELibrary_gameModeDB[];
 
@@ -132,19 +117,16 @@ extern char str_dbg[];
  * Debug menu hook that points the current location at a different track file.
  *
  * For the location index in cBENewRaceInterface_newRace +0x40, strcpy's @p name into the three strings of its 0x64-byte
- * cBELibrary location record (D_0043D984, +0x10 and -0x30 from it) and into str_dbg.
+ * cBELibrary_locationDB record (fileName, bigfileName and locationName) and into str_dbg.
  *
  * @param name  the track file name (On Tour fileName)
  */
 void cBENewRaceInterface::setDebugLocationFile(const char* name)
 {
-    char* base = (char*)&D_0043D984;
     cBERaceDB* newRace = &(*(&cBENewRaceInterface_newRace));
-    strcpy(base + newRace->iLocationIdx * 100, name);
-    char* bigFileNames = base + 0x10;
-    strcpy(bigFileNames + newRace->iLocationIdx * 100, name);
-    char* locationNames = base - 0x30;
-    strcpy(locationNames + newRace->iLocationIdx * 100, name);
+    strcpy(cBELibrary_locationDB[newRace->iLocationIdx].fileName, name);
+    strcpy(cBELibrary_locationDB[newRace->iLocationIdx].bigfileName, name);
+    strcpy(cBELibrary_locationDB[newRace->iLocationIdx].locationName, name);
     strcpy(str_dbg, name);
 }
 #endif
@@ -184,14 +166,14 @@ extern "C" int cBENewRaceInterface_getLocationID()
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationName1);
 #ifdef SKIP_ASM
 /**
- * Returns the name of the race's location: +0x4 of its 0x64-byte cBELibrary_locationDB record (D_0043D954 +
- * newRace.iLocationIdx * 0x64).
+ * Returns the name of the race's location: +0x4 of its 0x64-byte cBELibrary_locationDB record (its
+ * locationName).
  *
  * @return the name
  */
 extern "C" void* cBENewRaceInterface_getLocationName1()
 {
-    return (char*)&D_0043D954 + cBENewRaceInterface_newRace.iLocationIdx * 0x64;
+    return cBELibrary_locationDB[cBENewRaceInterface_newRace.iLocationIdx].locationName;
 }
 #endif
 
@@ -239,7 +221,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationFile);
  */
 void* cBENewRaceInterface::getLocationFile(int iLocation)
 {
-    return (char*)&D_0043D984 + iLocation * 0x64;
+    return cBELibrary_locationDB[iLocation].fileName;
 }
 #endif
 
@@ -254,7 +236,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationName);
  */
 void* cBENewRaceInterface::getLocationName(int iLocation)
 {
-    return (char*)&D_0043D954 + iLocation * 0x64;
+    return cBELibrary_locationDB[iLocation].locationName;
 }
 #endif
 
@@ -347,14 +329,14 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionFile);
 /**
  * Returns the file name of a world section.
  *
- * D_0043E254 + @p iSection * 0x18: the name in the section table, whose records start 4 bytes earlier at cBELibrary_sectionDB.
+ * cBELibrary_sectionDB[@p iSection].fileName: the name in the section table (0x18-byte records, the name at +0x4).
  *
  * @param iSection  the section index (On Tour iSection)
  * @return the section's file name
  */
 void* cBENewRaceInterface::getSectionFile(int iSection)
 {
-    return (char*)&D_0043E254 + iSection * 0x18;
+    return cBELibrary_sectionDB[iSection].fileName;
 }
 #endif
 
@@ -364,14 +346,14 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionType);
 /**
  * Returns the type of a world section.
  *
- * cBELibrary_sectionDB[@p iSection].field_0x14.
+ * cBELibrary_sectionDB[@p iSection].type.
  *
  * @param iSection  the section index (On Tour iSection)
  * @return the section type (On Tour eBESectionType)
  */
 int cBENewRaceInterface::getSectionType(int iSection)
 {
-    return cBELibrary_sectionDB[iSection].field_0x14;
+    return cBELibrary_sectionDB[iSection].type;
 }
 #endif
 
@@ -570,17 +552,16 @@ bool cBENewRaceInterface::setGameEvent(int event)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getEventName);
 #ifdef SKIP_ASM
-extern sPad16 D_0043E97C;
 
 /**
- * Returns the name of the race's game event: +0x4 of its 0x54-byte cBELibrary_gameEventDB record (D_0043E97C +
- * newRace.cGameEvent * 0x54).
+ * Returns the name of the race's game event: the strEventName (+0x4) of its 0x54-byte cBELibrary_gameEventDB record
+ * (index newRace.cGameEvent).
  *
  * @return the event name
  */
 extern "C" void* cBENewRaceInterface_getEventName()
 {
-    return (char*)&D_0043E97C + cBENewRaceInterface_newRace.cGameEvent * 0x54;
+    return cBELibrary_gameEventDB[cBENewRaceInterface_newRace.cGameEvent].strEventName;
 }
 #endif
 
@@ -588,14 +569,14 @@ extern "C" void* cBENewRaceInterface_getEventName()
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getEventName1);
 #ifdef SKIP_ASM
 /**
- * Returns the name of game event @p i: +0x4 of its cBELibrary_gameEventDB record (D_0043E97C + @p i * 0x54).
+ * Returns the name of game event @p i: the strEventName (+0x4) of its cBELibrary_gameEventDB record.
  *
  * @param i  the game event
  * @return the event name
  */
 void* cBENewRaceInterface::getEventName1(int i)
 {
-    return (char*)&D_0043E97C + i * 0x54;
+    return cBELibrary_gameEventDB[i].strEventName;
 }
 #endif
 

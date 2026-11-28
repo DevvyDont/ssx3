@@ -6,6 +6,7 @@
 #include "be/beintscore.h"
 #include "be/beintnewrace.h"
 #include "be/beintreward.h"
+#include "be/beintcharacter.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cBEScoreInterface_cBEScoreInterface(void* self);
@@ -116,14 +117,14 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_processRiderStats);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 extern "C" void cBEScoreInterface_processRiderBest(int rider, int a, int b, int c);
-extern signed char D_005305F9[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Records a rider's race statistics in its character's best records, for the two human profiles only.
  *
- * Unless raceDB byte +0x49 (D_005305F9) is set, calls cBEScoreInterface_processRiderBest(@p rider, @p riderStats, -1, -1) when the rider's profile
- * (cBELibrary_getProfileIndex) is 0 or 1. The AI code passes each rider's metrix stats block (metrix + 0xFC);
- * cBEScoreInterface_processEventRiderStats passes the event stats.
+ * Unless raceDB byte +0x49 (cGamePath) is set, calls cBEScoreInterface_processRiderBest(@p rider, @p riderStats, -1,
+ * -1) when the rider's profile (cBELibrary_getProfileIndex) is 0 or 1. The AI code passes each rider's metrix stats
+ * block (metrix + 0xFC); cBEScoreInterface_processEventRiderStats passes the event stats.
  *
  * @param rider  race rider slot
  * @param riderStats  the rider stats block, passed as an int
@@ -131,7 +132,7 @@ extern signed char D_005305F9[];
 extern "C" void cBEScoreInterface_processRiderStats(int rider, int riderStats)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    if (D_005305F9[0] == 0 && profile < 2)
+    if (cBELibrary_raceDB.cGamePath == 0 && profile < 2)
     {
         cBEScoreInterface_processRiderBest(rider, riderStats, -1, -1);
     }
@@ -360,7 +361,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighScore);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern int D_005305F0[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Returns the score of one entry in the current race's high-score table.
@@ -374,7 +375,8 @@ extern int D_005305F0[];
 int cBEScoreInterface::getCurrentHighScore(int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
+    tBEHighScore* highScores =
+        cBELibrary_getHighScoreTable(cBELibrary_raceDB.iLocationIdx, cBENewRaceInterface_newRace.cGameEvent);
     if (highScores != 0)
     {
         return ((int)highScores[i].uiHighScore);
@@ -386,30 +388,27 @@ int cBEScoreInterface::getCurrentHighScore(int i)
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getCurrentHighScoreCharacter);
 #ifdef SKIP_ASM
-struct sScoreSlot_00155190
-{
-    char data[0x88];
-};
-extern sScoreSlot_00155190 D_00530990[];
+extern tBECharacterDB cBELibrary_characterDB[];
 extern void* cBEScoreInterface_noHighScoreText;
 
 /**
- * Returns the character record (D_00530990, 0x88 bytes each) of the rider who set one entry of the current race's
- * high-score table.
+ * Returns the short name (cShortName of its cBELibrary_characterDB record) of the character who set one entry of
+ * the current race's high-score table.
  *
  * The table is cBELibrary_getHighScoreTable(raceDB +0x40, newRace.cGameEvent); the entry's second word is the character ID. The lodge shows
  * the result as text next to the entry.
  *
  * @param i  entry index, 0 (best) to 4
- * @return the character record, or cBEScoreInterface_noHighScoreText when the event has no table
+ * @return the short name, or cBEScoreInterface_noHighScoreText when the event has no table
  */
 void* cBEScoreInterface::getCurrentHighScoreCharacter(int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
+    tBEHighScore* highScores =
+        cBELibrary_getHighScoreTable(cBELibrary_raceDB.iLocationIdx, cBENewRaceInterface_newRace.cGameEvent);
     if (highScores == 0)
         return cBEScoreInterface_noHighScoreText;
-    return &D_00530990[highScores[i].cCharacter];
+    return cBELibrary_characterDB[highScores[i].cCharacter].cShortName;
 }
 #endif
 
@@ -429,7 +428,8 @@ extern void* cBEScoreInterface_noHighScoreText;
 void* cBEScoreInterface::getCurrentHighScoreName(int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    tBEHighScore* highScores = cBELibrary_getHighScoreTable(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
+    tBEHighScore* highScores =
+        cBELibrary_getHighScoreTable(cBELibrary_raceDB.iLocationIdx, cBENewRaceInterface_newRace.cGameEvent);
     if (highScores != 0)
         return highScores[i].strUserName;
     return cBEScoreInterface_noHighScoreText;
@@ -803,13 +803,13 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_getNumberOfWinsOnTrack);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
-extern signed char D_005305F9[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Returns how many times a race rider's character has won an event at a location: the short at +0x2 of its score
  * record.
  *
- * Returns 0 when raceDB +0x49 (D_005305F9) is set, the rider's profile is 3 or more, or there is no record. The record
+ * Returns 0 when raceDB +0x49 (cGamePath) is set, the rider's profile is 3 or more, or there is no record. The record
  * is cBECharProfileDB_getScoreStats(character record, @p locationID, @p eventID). Nothing calls it.
  *
  * @param rider  race rider slot (On Tour iRider)
@@ -819,7 +819,7 @@ extern signed char D_005305F9[];
  */
 int cBEScoreInterface::getNumberOfWinsOnTrack(int rider, int locationID, int eventID)
 {
-    if (D_005305F9[0] != 0)
+    if (cBELibrary_raceDB.cGamePath != 0)
         return 0;
     int profile = cBELibrary_getProfileIndex(rider);
     if ((unsigned int)profile >= 3)
@@ -838,13 +838,13 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_getBestMedalOnTrack);
 int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
-extern signed char D_005305F9[];
+extern cBERaceDB cBELibrary_raceDB;
 extern cBECharProfileDB cBELibrary_profileLib[][10];
 
 /**
  * Returns the best medal a race rider's character has for an event at a location: byte 1 of its score record.
  *
- * Returns -1 when raceDB +0x49 (D_005305F9) is set, the rider's profile is 3 or more, or there is no record. The record
+ * Returns -1 when raceDB +0x49 (cGamePath) is set, the rider's profile is 3 or more, or there is no record. The record
  * is cBECharProfileDB_getScoreStats(character record, @p locationID, @p eventID).
  *
  * @param rider  race rider slot (On Tour iRider)
@@ -854,7 +854,7 @@ extern cBECharProfileDB cBELibrary_profileLib[][10];
  */
 int cBEScoreInterface::getBestMedalOnTrack(int rider, int locationID, int eventID)
 {
-    if (D_005305F9[0] != 0)
+    if (cBELibrary_raceDB.cGamePath != 0)
         return -1;
     int profile = cBELibrary_getProfileIndex(rider);
     if ((unsigned int)profile >= 3)
@@ -873,12 +873,12 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_setBestMedalOnTrack);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 extern "C" void cBECharProfileDB_updateMedalStats(void* iface, int a, int b, int c);
-extern signed char D_005305F9[];
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Stores a medal in a race rider's character's score record for an event at a location (cBECharProfileDB_updateMedalStats).
  *
- * Does nothing when raceDB +0x49 (D_005305F9) is set or the rider's profile is 3 or more. Nothing calls it.
+ * Does nothing when raceDB +0x49 (cGamePath) is set or the rider's profile is 3 or more. Nothing calls it.
  *
  * @param rider  race rider slot (On Tour iRider)
  * @param locationID  the location (On Tour iLocation)
@@ -887,7 +887,7 @@ extern signed char D_005305F9[];
  */
 void cBEScoreInterface::setBestMedalOnTrack(int rider, int locationID, int eventID, int medal)
 {
-    if (D_005305F9[0] != 0)
+    if (cBELibrary_raceDB.cGamePath != 0)
         return;
     int profile = cBELibrary_getProfileIndex(rider);
     if ((unsigned int)profile >= 3)

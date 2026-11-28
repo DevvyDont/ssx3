@@ -5,12 +5,7 @@
 
 signed char cBELibrary_getCharacterID(int index);
 
-struct sCharWeightEntry {
-    char pad_0x00[0x40];
-    int mWeight;
-    char pad_0x44[0x88 - 0x40 - 4];
-};
-extern sCharWeightEntry cBELibrary_characterDB[];
+extern tBECharacterDB cBELibrary_characterDB[];
 
 //100%
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getWeight__FPvi);
@@ -18,7 +13,7 @@ INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getWeight__FPvi);
 /**
  * Returns the weight of a rider's character.
  *
- * Looks up the rider's character id with cBELibrary_getCharacterID() and reads that character's mWeight from the
+ * Looks up the rider's character id with cBELibrary_getCharacterID() and reads that character's iWeight from the
  * character table cBELibrary_characterDB.
  *
  * @param riderIndex  rider whose character is looked up
@@ -26,7 +21,7 @@ INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getWeight__FPvi);
  */
 int cBECharacterInterface::getWeight(int riderIndex)
 {
-    return cBELibrary_characterDB[cBELibrary_getCharacterID(riderIndex)].mWeight;
+    return cBELibrary_characterDB[cBELibrary_getCharacterID(riderIndex)].iWeight;
 }
 #endif
 
@@ -34,8 +29,7 @@ int cBECharacterInterface::getWeight(int riderIndex)
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getIsGoofyFoot);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// sCharWeightEntry (declared above in the unit) has no field at 0x44 yet;
-// this view of the same table binds to cBELibrary_characterDB.
+// A view of the table cBELibrary_characterDB for the word at 0x44 (tBECharacterDB::bIsGoofyFoot).
 struct sCharWeightEntryView {
     char pad_0x00[0x40];
     int mWeight;        // 0x40
@@ -148,18 +142,16 @@ extern "C" void func_0014F100(void) {
 //100%
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getBloodType);
 #ifdef SKIP_ASM
-extern char D_005309BC[];
-
 /**
- * Returns the 16-byte text at +0x4C of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries; D_005309BC =
- * +0x4C).
+ * Returns the 16-byte text at +0x4C of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries:
+ * its cBloodType).
  *
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
 void* cBECharacterInterface::getBloodType(int riderIndex)
 {
-    return D_005309BC + cBELibrary_getCharacterID(riderIndex) * 136;
+    return cBELibrary_characterDB[cBELibrary_getCharacterID(riderIndex)].cBloodType;
 }
 #endif
 //100%
@@ -207,35 +199,31 @@ int cBECharacterInterface::getAge(int riderIndex)
 //100%
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getHeight);
 #ifdef SKIP_ASM
-extern char D_005309D4[];
-
 /**
- * Returns the 16-byte text at +0x64 of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries; D_005309D4 =
- * +0x64).
+ * Returns the 16-byte text at +0x64 of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries:
+ * its cHeight).
  *
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
 void* cBECharacterInterface::getHeight(int riderIndex)
 {
-    return D_005309D4 + cBELibrary_getCharacterID(riderIndex) * 136;
+    return cBELibrary_characterDB[cBELibrary_getCharacterID(riderIndex)].cHeight;
 }
 #endif
 //100%
 INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getNationality);
 #ifdef SKIP_ASM
-extern char D_005309E4[];
-
 /**
- * Returns the 16-byte text at +0x74 of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries; D_005309E4 =
- * +0x74).
+ * Returns the 16-byte text at +0x74 of @p riderIndex's character record (cBELibrary_characterDB, 0x88-byte entries:
+ * its cNationality).
  *
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
 void* cBECharacterInterface::getNationality(int riderIndex)
 {
-    return D_005309E4 + cBELibrary_getCharacterID(riderIndex) * 136;
+    return cBELibrary_characterDB[cBELibrary_getCharacterID(riderIndex)].cNationality;
 }
 #endif
 //100%

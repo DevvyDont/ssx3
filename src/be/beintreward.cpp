@@ -2543,7 +2543,7 @@ struct sRewardReq_1591E8
 extern sRewardReq_1591E8 gMedalsInfo_1591E8[][4][5] __asm__("gMedalsInfo");
 
 extern cBERaceDB cBELibrary_raceDB_1591E8 __asm__("cBELibrary_raceDB");
-extern signed char D_005305F9[];
+extern cBERaceDB cBELibrary_raceDB;
 
 
 /**
@@ -2557,7 +2557,7 @@ extern signed char D_005305F9[];
  * kAWARD_PEAK1_RIVALTIME_MEDAL (4), kAWARD_PEAK1_RIVALPOINTS_MEDAL (5), kAWARD_PEAK1_TIMECHALLENGE_MEDAL (6-8) or
  * kAWARD_PEAK1_POINTSCHALLENGE_MEDAL (9-11). A medal of 0 or 1 calls cBERewardInterface_awardUser for it on the first
  * result (the score record's iNumGoldOrPlat is 0); events 6-11 with kMEDAL_BRONZE or kMEDAL_SILVER call setChallengeMessagePending
- * instead, unless raceDB byte +0x49 (D_005305F9) is set.
+ * instead, unless raceDB byte +0x49 (cGamePath) is set.
  *
  * When the medal beats the stored one (cBERewardInterface_isBetterMedal), pays the full cash (cBERewardInterface_awardUserCash1), records
  * the medal (cBECharProfileDB_updateMedalStats) and gives the trophy with cBERewardInterface_awardUserTrophy if it became owned; otherwise
@@ -2622,7 +2622,7 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
     if ((unsigned int)medal < 2) {
         if (stats->iNumGoldOrPlat == 0)
             awardUser(profile, charID, bit);
-    } else if ((unsigned int)(mode - 6) < 6 && D_005305F9[0] == 0) {
+    } else if ((unsigned int)(mode - 6) < 6 && cBELibrary_raceDB.cGamePath == 0) {
         if (medal == kMEDAL_BRONZE)
             setChallengeMessagePending(group, mode, 0);
         else if (medal == kMEDAL_SILVER)
@@ -2692,7 +2692,7 @@ void cBERewardInterface::calculateUserTrackMedalRewards(int profile, int charID,
             else if (group == kPEAK_3)
                 pc->flags &= ~0x800L;
         }
-        if (D_005305F9[0] == 0)
+        if (cBELibrary_raceDB.cGamePath == 0)
             flagForeshadowGroups(group);
     }
     if (okB) {

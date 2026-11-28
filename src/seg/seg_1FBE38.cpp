@@ -1,5 +1,6 @@
 #include "common.h"
 #include "be/beinterface.h"
+#include "be/beintoption.h"
 #include "wscript/wscriptman.h"
 #include "world/instancerecord.h"
 #include "object/instancenode.h"
@@ -8855,7 +8856,6 @@ int* luno_cLunoVar_castInt(void*);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 
 extern int D_004A3DA8_61B0[2] __asm__("D_004A3DA8");
-extern int D_005308D0_61B0[] __asm__("D_005308D0");
 extern int D_004A5888_61B0 __asm__("D_004A5888");
 extern int D_004A5880_61B0 __asm__("D_004A5880");
 extern WScriptNullType D_004A5884_61B0 __asm__("D_004A5884");
@@ -8889,21 +8889,21 @@ extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, luno_cLunoCArg 
     int enabled;
     switch (vp[0]) {
     case kIconType_Multiplier: {
-        int flags = D_005308D0_61B0[0] >> 6;
+        int flags = cBERules_mRules.MyRules.Flags >> 6;
         enabled = 0;
         if ((flags & 1) == 0)
             enabled++;
         break;
     }
     case kIconType_PowerUp: {
-        int flags = D_005308D0_61B0[0] >> 8;
+        int flags = cBERules_mRules.MyRules.Flags >> 8;
         enabled = 0;
         if ((flags & 1) == 0)
             enabled++;
         break;
     }
     case kIconType_Points: {
-        int flags = D_005308D0_61B0[0] >> 7;
+        int flags = cBERules_mRules.MyRules.Flags >> 7;
         enabled = 0;
         if ((flags & 1) == 0)
             enabled++;

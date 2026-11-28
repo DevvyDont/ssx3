@@ -909,7 +909,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_initadr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int D_00450C60_CC88 __asm__("D_00450C60");
+extern int FILESYS_cdSettings[];
 extern void MUTEX_create_CC88(void *) __asm__("MUTEX_create");
 extern int FILESYS_overhead_CC88(int, int, int) __asm__("FILESYS_overhead");
 extern void MEM_fill_CC88(int, int, int) __asm__("MEM_fill");
@@ -921,7 +921,7 @@ extern void FILEDEV_init_CC88(int, int) __asm__("FILEDEV_init");
  * Zero arguments take the defaults (16 open files, 1000 directory entries, 32 file operations). Creates the mutex,
  * clears FILESYS_overhead's worth of @p mem, places the 0x30-byte operation table and the 0x110-byte handle table in
  * it, then calls FILEDEV_init(@p maxopenfiles, v), v being CDVD_initFileSystem's result for the directory entries when
- * D_00450C60 is set and 0 otherwise.
+ * FILESYS_cdSettings[2] is set and 0 otherwise.
  *
  * @param maxopenfiles  maximum open files (0: 16)
  * @param maxdirfiles  maximum directory entries (0: 1000)
@@ -942,7 +942,7 @@ int FILESYS_initadr(int maxopenfiles, int maxdirfiles, int maxfileops, int mem) 
         *(int*)&gFileDevice.oplist = mem;
         MEM_fill_CC88(((int)gFileDevice.oplist), 0, FILESYS_overhead_CC88(maxopenfiles, maxdirfiles, maxfileops));
         *(int*)&gFileDevice.handlelist = (int)gFileDevice.oplist + gFileDevice.maxfileops * 0x30;
-        if (D_00450C60_CC88 != 0) {
+        if (FILESYS_cdSettings[2] != 0) {
             alignedDir = CDVD_initFileSystem_CC88(maxdirfiles, gFileDevice.maxopen * 272 + (int)gFileDevice.handlelist);
         } else {
             alignedDir = 0;
@@ -958,13 +958,13 @@ int FILESYS_initadr(int maxopenfiles, int maxdirfiles, int maxfileops, int mem) 
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_overhead);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450C5C_CD98[] __asm__("D_00450C5C");
+extern int FILESYS_cdSettings[];
 
 /**
  * Returns how many bytes of memory the file system needs for the given limits.
  *
  * Zero arguments take the defaults (16, 1000, 32). The size is @p maxfileops * 0x30 (operations) + @p maxopenfiles * 0x110 (handles)
- * + @p maxdirfiles * (D_00450C5C + 0xC) (directory entries) + 0x40.
+ * + @p maxdirfiles * (FILESYS_cdSettings[1] + 0xC) (directory entries) + 0x40.
  *
  * @param maxopenfiles  maximum open files
  * @param maxdirfiles  maximum directory entries
@@ -975,7 +975,7 @@ int FILESYS_overhead(int maxopenfiles, int maxdirfiles, int maxfileops) {
     int x = maxopenfiles ? maxopenfiles : 0x10;
     int y = maxdirfiles ? maxdirfiles : 1000;
     int z = maxfileops ? maxfileops : 0x20;
-    int sz = D_00450C5C_CD98[0] + 0xC;
+    int sz = FILESYS_cdSettings[1] + 0xC;
     return z * 0x30 + x * 272 + y * sz + 0x40;
 }
 #endif
@@ -1131,7 +1131,6 @@ extern void MUTEX_unlock_CFC0(void *) __asm__("MUTEX_unlock");
 
 void FILESYS_priorityop_impl(struct H_CFC0 h, int prio) __asm__("FILESYS_priorityop");
 extern Sys_CFC0 gFileDevice_CFC0 __asm__("gFileDevice");
-extern char D_00519AC4_CFC0[] __asm__("D_00519AC4");
 /**
  * Changes a pending file operation's priority (+0x10) and moves it to its place in the priority-ordered queue.
  *
@@ -1170,7 +1169,7 @@ void FILESYS_priorityop_impl(struct H_CFC0 opHandle, int prio) {
         if (prev != 0) prev->next = fileOp;
         else gFileDevice_CFC0.head = fileOp;
     }
-    MUTEX_unlock_CFC0(D_00519AC4_CFC0);
+    MUTEX_unlock_CFC0(gFileDevice.mutex);
 }
 #endif
 
@@ -1224,15 +1223,6 @@ struct sAB0 {
     struct FILEOPERATION_def *opqhead;          /* queue */
     struct FILEBIG_def *bigfilelist;            /* archives (also D_00519AE4) */
     int pFileDeviceMem;             /* (also pFileDeviceMem) */
-};
-struct sAB0Lock {                   /* gFileDevice from the mutex on (D_00519AC4) */
-    int mutex[4];                   /* the mutex */
-    struct FILEOPERATION_def *exec;
-    struct FILEOPERATION_def *oplist;
-    struct HANDLE_def *handlelist;
-    struct FILEOPERATION_def *opqhead;          /* the queue (gFileDevice.opqhead) */
-    struct FILEBIG_def *bigfilelist;
-    int pFileDeviceMem;
 };
 #endif
 
@@ -1984,7 +1974,6 @@ extern void freehandle_FX(void *) __asm__("freehandle");
 extern void iFILESYS_CommandCompleteCallback_FX(int) __asm__("iFILESYS_CommandCompleteCallback");
 
 void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *c) __asm__("iFILESYS_ExecCommand");
-extern struct sAB0Lock D_00519AC4;
 extern struct sAB0 gFileDevice_DFA8 __asm__("gFileDevice");
 /**
  * Queues a file-system command and, when the device is idle, starts the next queued command.
@@ -2007,10 +1996,10 @@ void iFILESYS_ExecCommand_impl(struct FILEOPERATION_def *fileOp) {
     struct HANDLE_def *hd;
     int mode;
     int found;
-    MUTEX_lock_FX(D_00519AC4.mutex);
+    MUTEX_lock_FX(gFileDevice.mutex);
     if (fileOp != 0) {
         struct FILEOPERATION_def *prev = 0;
-        fileOp->next = D_00519AC4.opqhead;
+        fileOp->next = gFileDevice.opqhead;
         while (fileOp->next != 0 && !(fileOp->priority < fileOp->next->priority)) {
             prev = fileOp->next;
             fileOp->next = prev->next;
@@ -7606,7 +7595,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4648);
 INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_readFileEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450C5C_48D8[] __asm__("D_00450C5C");
+extern int FILESYS_cdSettings[];
 extern char *CDVD_fileTable_48D8[] __asm__("CDVD_fileTable");
 extern char *strncpy(char *, const char *, int);
 
@@ -7615,9 +7604,10 @@ int CDVD_readFileEntry_48D8(int, char *, int *, int *) __asm__("CDVD_readFileEnt
 /**
  * Reads one entry of the disc file table by its 1-based number.
  *
- * Entries sit in the table CDVD_fileTable, each D_00450C5C + 12 bytes: +4 the start sector, +8 the size, then the stored
- * name (D_00450C5C bytes, copied with strncpy). Every output pointer may be 0. FILEDEV_getsize calls it for the size of
- * an open disc file (device 1) and FILEDEV_getstartsector for its start sector.
+ * Entries sit in the table CDVD_fileTable, each FILESYS_cdSettings[1] + 12 bytes: +4 the start sector, +8 the size,
+ * then the stored name (FILESYS_cdSettings[1] bytes, copied with strncpy). Every output pointer may be 0.
+ * FILEDEV_getsize calls it for the size of an open disc file (device 1) and FILEDEV_getstartsector for its start
+ * sector.
  *
  * @param fileIndex  the 1-based entry number
  * @param nameOut  receives the stored name, or 0
@@ -7627,9 +7617,9 @@ int CDVD_readFileEntry_48D8(int, char *, int *, int *) __asm__("CDVD_readFileEnt
  */
 int CDVD_readFileEntry_48D8(int fileIndex, char *nameOut, int *sizeOut, int *sectorOut) {
     char *entry;
-    entry = CDVD_fileTable_48D8[0] + (fileIndex - 1) * (D_00450C5C_48D8[0] + 0xC);
+    entry = CDVD_fileTable_48D8[0] + (fileIndex - 1) * (FILESYS_cdSettings[1] + 0xC);
     if (nameOut != 0) {
-        strncpy(nameOut, entry + 0xC, D_00450C5C_48D8[0]);
+        strncpy(nameOut, entry + 0xC, FILESYS_cdSettings[1]);
     }
     if (sizeOut != 0) {
         *sizeOut = *(int *)(entry + 8);
@@ -7646,14 +7636,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", CDVD_findFileEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int CDVD_findFileNumber(int, int, int *);
-extern int D_00450C5C_0C5C[] __asm__("D_00450C5C");
+extern int FILESYS_cdSettings[];
 extern int CDVD_fileTable_9C78[] __asm__("CDVD_fileTable");
 
 /**
  * Returns the disc file-table entry for a path, or 0 when the table has none.
  *
- * Finds the entry number with CDVD_findFileNumber and turns it into a pointer into CDVD_fileTable (entries of D_00450C5C + 12
- * bytes).
+ * Finds the entry number with CDVD_findFileNumber and turns it into a pointer into CDVD_fileTable (entries of
+ * FILESYS_cdSettings[1] + 12 bytes).
  *
  * @param filePath  the file path
  * @return the entry (start sector at +4, size at +8, name at +0xC), or 0
@@ -7665,7 +7655,7 @@ int CDVD_findFileEntry(int filePath) {
     if (CDVD_findFileNumber(filePath, 0, &entryNumber) == 0) {
         entry = 0;
     } else {
-        entry = CDVD_fileTable_9C78[0] + (entryNumber - 1) * (D_00450C5C_0C5C[0] + 0xC);
+        entry = CDVD_fileTable_9C78[0] + (entryNumber - 1) * (FILESYS_cdSettings[1] + 0xC);
     }
     return entry;
 }
@@ -8440,14 +8430,14 @@ void THREAD_yield_impl(int ms) {
 INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_iscurrent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_00450DFC_0DFC[] __asm__("D_00450DFC");
+extern int THREAD_mainThread[];
 
 /**
  * Tells whether a thread is the calling thread.
  *
- * For a null @p thread it compares GetThreadId with the main thread's id (D_00450DFC, set by THREAD_init); -1 always
- * matches; otherwise it compares with the record's threadId. The file and stream code uses it with 0 to run the sync
- * tasks only on the main thread.
+ * For a null @p thread it compares GetThreadId with the main thread's id (THREAD_mainThread[1], set by THREAD_init); -1
+ * always matches; otherwise it compares with the record's threadId. The file and stream code uses it with 0 to run the
+ * sync tasks only on the main thread.
  *
  * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
  * @return 1 when it is the calling thread, 0 otherwise
@@ -8455,7 +8445,7 @@ extern int D_00450DFC_0DFC[] __asm__("D_00450DFC");
 int THREAD_iscurrent(THREAD *thread) {
     int cur = GetThreadId();
     if (thread == 0) {
-        return cur == D_00450DFC_0DFC[0];
+        return cur == THREAD_mainThread[1];
     }
     if (thread == (THREAD *)-1) {
         return 1;
@@ -8472,14 +8462,14 @@ extern int GetThreadId();
 extern void ReferThreadStatus(int, void *);
 extern void iReferThreadStatus(int, void *);
 extern int bInTimerSubroutine_5498[] __asm__("bInTimerSubroutine");
-extern int D_00450DFC_5498[] __asm__("D_00450DFC");
+extern int THREAD_mainThread[];
 
 /**
  * Returns a thread's current priority.
  *
- * Picks the id like THREAD_setpriority (0: main thread D_00450DFC, -1: calling thread, else the record's +4) and reads the
- * current-priority word (6) of its status (iReferThreadStatus inside the timer interrupt, else ReferThreadStatus).
- * Nothing in the build calls it.
+ * Picks the id like THREAD_setpriority (0: main thread THREAD_mainThread[1], -1: calling thread, else the record's +4)
+ * and reads the current-priority word (6) of its status (iReferThreadStatus inside the timer interrupt, else
+ * ReferThreadStatus). Nothing in the build calls it.
  *
  * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
  * @return the thread's current priority
@@ -8488,7 +8478,7 @@ int THREAD_getpriority(int *thread) {
     int sp[12];
     int threadId;
     if (thread == 0) {
-        threadId = D_00450DFC_5498[0];
+        threadId = THREAD_mainThread[1];
     } else if (thread == (int *)-1) {
         threadId = GetThreadId();
     } else {
@@ -8511,12 +8501,12 @@ extern void ChangeThreadPriority_5508(int, int) __asm__("ChangeThreadPriority");
 extern void iChangeThreadPriority_5508(int, int) __asm__("iChangeThreadPriority");
 extern int GetThreadId_5508(void) __asm__("GetThreadId");
 extern int bInTimerSubroutine_5508[] __asm__("bInTimerSubroutine");
-extern int D_00450DFC_5508[] __asm__("D_00450DFC");
+extern int THREAD_mainThread[];
 
 /**
  * Changes a thread's priority.
  *
- * Picks the id (0: main thread D_00450DFC, -1: calling thread, else the record's threadId) and calls
+ * Picks the id (0: main thread THREAD_mainThread[1], -1: calling thread, else the record's threadId) and calls
  * iChangeThreadPriority inside the timer interrupt (flag bInTimerSubroutine), ChangeThreadPriority otherwise.
  *
  * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
@@ -8527,7 +8517,7 @@ int THREAD_setpriority(THREAD *thread, int priority) {
     int var_4;
 
     if (thread == 0) {
-        var_4 = D_00450DFC_5508[0];
+        var_4 = THREAD_mainThread[1];
     } else if (thread == (THREAD *)0xFFFFFFFF) {
         var_4 = GetThreadId_5508();
     } else {

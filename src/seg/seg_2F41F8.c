@@ -2295,8 +2295,7 @@ INCLUDE_ASM("seg/seg_2F41F8", kbReader_startInfoQuery);
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb kbReader_state;
 
-extern char D_00525F88[];
-extern int sceUsbKbGetInfo(char *);
+extern int sceUsbKbGetInfo(void *);
 /**
  * Starts an asynchronous USB keyboard connection query.
  *
@@ -2306,12 +2305,10 @@ extern int sceUsbKbGetInfo(char *);
  */
 void kbReader_startInfoQuery(void) {
     int i;
-    char *kbState;
     for (i = 0; i < kbReader_state.cnt; i++) kbReader_state.prev[i] = kbReader_state.v[i];
-    if (sceUsbKbGetInfo(D_00525F88) == 0) {
-        kbState = D_00525F88 - 8;
-        *(int *)(kbState + 0x9C) = 1;
-        kbState[0xA0] = 1;
+    if (sceUsbKbGetInfo(kbReader_state.info) == 0) {
+        kbReader_state.st = 1;
+        kbReader_state.flag = 1;
     }
 }
 #endif
@@ -2465,16 +2462,13 @@ INCLUDE_ASM("seg/seg_2F41F8", kbReader_init);
    max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb kbReader_state;
 
-extern int D_00526010[];
-
 extern int kbReader_loadModules(char *, char *);
 extern int f0C028(int *) __asm__("sceUsbKbInit");
 extern void f5F08(void) __asm__("kbReader_startInfoQuery");
 extern int f5F88(void) __asm__("kbReader_finishInfoQuery");
 extern void f6358(int, int) __asm__("kbReader_defaultOnConnect");
 extern int f61C8(int) __asm__("kbReader_defaultIdleHook");
-// The keyboard state block sits 0x90 bytes below the max-connect word passed to sceUsbKbInit.
-static inline struct sKb *ctl(void) { return (struct sKb *)((char *)D_00526010 - 0x90); }
+static inline struct sKb *ctl(void) { return &kbReader_state; }
 /**
  * Starts the USB keyboard reader.
  *
@@ -2495,7 +2489,7 @@ static inline struct sKb *ctl(void) { return (struct sKb *)((char *)D_00526010 -
 int kbReader_init(char *name, char *str, struct sKbRead *ents, void (*onConnect)(int, int), int (*idleHook)(int)) {
     int i;
     if (kbReader_loadModules(name, str) < 0) return -1;
-    if (f0C028(D_00526010) == -1) return -1;
+    if (f0C028(&kbReader_state.cnt) == -1) return -1;
     if (ctl()->cnt > 8) ctl()->cnt = 8;
     ctl()->ents = ents;
     for (i = 0; i < ctl()->cnt; i++) {
@@ -2544,14 +2538,14 @@ int kbReader_shutdown(void) {
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_getMaxKeyboards);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00526010[];
+extern struct sKb kbReader_state;
 
 /**
- * Returns the number of USB keyboards the reader handles (the max-connect word D_00526010).
+ * Returns the number of USB keyboards the reader handles (the max-connect word kbReader_state.cnt).
  *
  * @return the keyboard count
  */
-int kbReader_getMaxKeyboards(void) { return D_00526010[0]; }
+int kbReader_getMaxKeyboards(void) { return kbReader_state.cnt; }
 #endif
 
 //100%
@@ -2591,13 +2585,13 @@ void kbReader_defaultOnConnect(int keyboard, int on) {
 INCLUDE_ASM("seg/seg_2F41F8", kbReader_setQueryPeriod);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int D_00526038[];
+extern struct sKb kbReader_state;
 /**
  * Sets how many reader updates pass between USB keyboard connection queries (kbReader_state +0xB8).
  *
  * @param queryPeriod  the period in updates
  */
-void kbReader_setQueryPeriod(int queryPeriod) { D_00526038[0] = queryPeriod; }
+void kbReader_setQueryPeriod(int queryPeriod) { kbReader_state.period = queryPeriod; }
 #endif
 
 //100%

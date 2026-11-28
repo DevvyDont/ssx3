@@ -89,15 +89,16 @@ long PS2_SONY_CODEC_INTERNAL_operator_new(int allocSize, long value) {
 INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_delete_array1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509434[])(void);
+extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
 /**
- * Frees a Sony codec array through the movie allocator's free function (D_00509434), passing the pointer argument on
- * unchanged.
+ * Frees a Sony codec array through the movie allocator's free function (RCMP_rcmp_sys.FreeMemFunc), passing the pointer
+ * argument on unchanged.
  *
+ * @param p  the memory to free
  * @return the free function's result
  */
-int PS2_SONY_CODEC_INTERNAL_operator_delete_array1(void) {
-    return D_00509434[0]();
+void* PS2_SONY_CODEC_INTERNAL_operator_delete_array1(void* p) {
+    return RCMP_rcmp_sys.FreeMemFunc(p);
 }
 #endif
 
@@ -105,15 +106,16 @@ int PS2_SONY_CODEC_INTERNAL_operator_delete_array1(void) {
 INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_delete1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509434[])(void);
+extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
 /**
- * Frees a Sony codec object through the movie allocator's free function (D_00509434), passing the pointer argument on
- * unchanged.
+ * Frees a Sony codec object through the movie allocator's free function (RCMP_rcmp_sys.FreeMemFunc), passing the
+ * pointer argument on unchanged.
  *
+ * @param p  the memory to free
  * @return the free function's result
  */
-int PS2_SONY_CODEC_INTERNAL_operator_delete1(void) {
-    return D_00509434[0]();
+void* PS2_SONY_CODEC_INTERNAL_operator_delete1(void* p) {
+    return RCMP_rcmp_sys.FreeMemFunc(p);
 }
 #endif
 
@@ -234,10 +236,10 @@ extern void* RCMP_CODEC_vtbl[];
 struct RCMP_CODEC {
     void** mVtbl;
 };
-extern int (*D_00509434[])(void);
+extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
 /**
- * Destroys an RCMP::CODEC: restores its vtable (RCMP_CODEC_vtbl, _vt$Q24RCMP5CODEC) and, when bit 0 of @p dtorFlags is set, frees
- * it through the movie allocator's free function (D_00509434).
+ * Destroys an RCMP::CODEC: restores its vtable (RCMP_CODEC_vtbl, _vt$Q24RCMP5CODEC) and, when bit 0 of @p dtorFlags is
+ * set, frees it through the movie allocator's free function (RCMP_rcmp_sys.FreeMemFunc).
  *
  * @param codecObj  the codec object
  * @param dtorFlags  destructor flags (bit 0: free the object)
@@ -245,7 +247,7 @@ extern int (*D_00509434[])(void);
 void RCMP_CODEC__CODEC(struct RCMP_CODEC *codecObj, int dtorFlags) {
     codecObj->mVtbl = RCMP_CODEC_vtbl;
     if (dtorFlags & 1) {
-        D_00509434[0]();
+        RCMP_rcmp_sys.FreeMemFunc(codecObj);
     }
 }
 #endif
@@ -351,15 +353,16 @@ long RCMP_DECODER_operator_new(int allocSize, long value) {
 INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_delete_array1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509434[])(void);
+extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
 /**
- * Frees an RCMP::DECODER array through the movie allocator's free function (D_00509434), passing the pointer argument
- * on unchanged.
+ * Frees an RCMP::DECODER array through the movie allocator's free function (RCMP_rcmp_sys.FreeMemFunc), passing the
+ * pointer argument on unchanged.
  *
+ * @param p  the memory to free
  * @return the free function's result
  */
-int RCMP_DECODER_operator_delete_array1(void) {
-    return D_00509434[0]();
+void* RCMP_DECODER_operator_delete_array1(void* p) {
+    return RCMP_rcmp_sys.FreeMemFunc(p);
 }
 #endif
 
@@ -367,15 +370,16 @@ int RCMP_DECODER_operator_delete_array1(void) {
 INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_delete1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int (*D_00509434[])(void);
+extern struct RCMP_RCMP_SYSTEM RCMP_rcmp_sys;
 /**
- * Frees an RCMP::DECODER through the movie allocator's free function (D_00509434), passing the pointer argument on
- * unchanged.
+ * Frees an RCMP::DECODER through the movie allocator's free function (RCMP_rcmp_sys.FreeMemFunc), passing the pointer
+ * argument on unchanged.
  *
+ * @param p  the memory to free
  * @return the free function's result
  */
-int RCMP_DECODER_operator_delete1(void) {
-    return D_00509434[0]();
+void* RCMP_DECODER_operator_delete1(void* p) {
+    return RCMP_rcmp_sys.FreeMemFunc(p);
 }
 #endif
 

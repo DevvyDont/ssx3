@@ -1,6 +1,7 @@
 #include "vtable.h"
 #include "common.h"
 #include "be/beinterface.h"
+#include "be/beintoption.h"
 #include "ui/uipair.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
@@ -203,7 +204,6 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_11my_rules[];
 extern char str_rule_help[];
 extern char str_Menu[];
-extern char cBERules_mRules[];
 extern signed char D_00441098[11];
 extern signed char D_004410A8[10];
 extern signed char D_004410B8[11];
@@ -288,7 +288,7 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     for (; n >= 0; n--)
         *disableCounter-- = 0;
     self->count = count;
-    MEM_fill(cBERules_mRules, 0, 0x20);
+    MEM_fill(&cBERules_mRules, 0, sizeof(cBERules_mRules));
     ((cFEStateRuleSelect*)self)->setupMenu(0);
     cUIThing* menu = (cUIThing*)find_19188(self, str_Menu);
     if (menu != 0) {
@@ -346,7 +346,6 @@ extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_FEOptions[];
-extern char cBERules_mRules[];
 
 
 /**
@@ -381,7 +380,7 @@ void cFEStateRuleSelect::onWidgetEvent(cUIThing* msg, unsigned int type)
         if (st) {
             cUIStateStack_push(&mpEngine->mStateStack, st);
         }
-        MEM_fill(cBERules_mRules, 0, 0x20);
+        MEM_fill(&cBERules_mRules, 0, sizeof(cBERules_mRules));
         break;
     }
     case cUIState::kONCHANGE: {
@@ -502,14 +501,14 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_updateBE);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern int cBERules_mRules_2088[] __asm__("cBERules_mRules");
-extern int D_005308D4_2088[] __asm__("D_005308D4");
 
 /**
  * Stores a custom race rule's new setting in the rule settings cBERules_mRules.
  *
- * Rule 2 stores @p ruleValue whole in D_005308D4. The others store bit 0 of @p ruleValue as one flag: rules 3, 7 and 14 in word 0 of
- * cBERules_mRules (bits 3, 4 and 5); rules 4, 8, 1, 5, 6 and 9-13 in word 6 (D_005308D0; bits 0, 1, 2, 3, 4 and 5-9).
- * Unknown rules change nothing and @p self is not used. cFEStateRuleSelect_getBEData reads the same bits back.
+ * Rule 2 stores @p ruleValue whole in cBERules_mRules.MyRules.AIHeadStartSecs. The others store bit 0 of @p ruleValue
+ * as one flag: rules 3, 7 and 14 in word 0 of cBERules_mRules (bits 3, 4 and 5); rules 4, 8, 1, 5, 6 and 9-13 in word 6
+ * (MyRules.Flags; bits 0, 1, 2, 3, 4 and 5-9). Unknown rules change nothing and @p self is not used.
+ * cFEStateRuleSelect_getBEData reads the same bits back.
  *
  * @param idx  the rule id (1-14)
  * @param ruleValue  the new value: the list box's entry data
@@ -539,7 +538,7 @@ void cFEStateRuleSelect::updateBE(int idx, int ruleValue)
         cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -5) | ((ruleValue & 1) << 2);
         break;
     case 2:
-        D_005308D4_2088[0] = ruleValue;
+        cBERules_mRules.MyRules.AIHeadStartSecs = ruleValue;
         break;
     case 6:
         cBERules_mRules_2088[6] = (cBERules_mRules_2088[6] & -17) | ((ruleValue & 1) << 4);
@@ -569,15 +568,13 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_getBEData);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned int cBERules_mRules_192240[] __asm__("cBERules_mRules");
-extern int D_005308D0[];
-extern int D_005308D4[];
 
 /**
  * Returns the current setting of a custom race rule from the rule settings cBERules_mRules.
  *
- * Rule 2 returns D_005308D4 whole. Rules 3, 7 and 14 return bits 3, 4 and 5 of cBERules_mRules's word 0; rules 4, 8, 1, 5, 6
- * and 9-13 return bits 0, 1, 2, 3, 4 and 5-9 of D_005308D0 (word 6): the bits cFEStateRuleSelect_updateBE writes. @p self is not
- * used.
+ * Rule 2 returns cBERules_mRules.MyRules.AIHeadStartSecs whole. Rules 3, 7 and 14 return bits 3, 4 and 5 of
+ * cBERules_mRules's word 0; rules 4, 8, 1, 5, 6 and 9-13 return bits 0, 1, 2, 3, 4 and 5-9 of MyRules.Flags (word 6):
+ * the bits cFEStateRuleSelect_updateBE writes. @p self is not used.
  *
  * @param rule  the rule id (1-14)
  * @return the rule's flag (0 or 1) or rule 2's value, or -1 for an unknown rule
@@ -586,35 +583,35 @@ int cFEStateRuleSelect::getBEData(int rule)
 {
     switch (rule) {
     case 4:
-        return D_005308D0[0] & 1;
+        return cBERules_mRules.MyRules.Flags & 1;
     case 3:
         return (cBERules_mRules_192240[0] >> 3) & 1;
     case 5:
-        return (D_005308D0[0] >> 3) & 1;
+        return (cBERules_mRules.MyRules.Flags >> 3) & 1;
     case 14:
         return (cBERules_mRules_192240[0] >> 5) & 1;
     case 7:
         return (cBERules_mRules_192240[0] >> 4) & 1;
     case 8:
-        return (D_005308D0[0] >> 1) & 1;
+        return (cBERules_mRules.MyRules.Flags >> 1) & 1;
     case 1:
-        return (D_005308D0[0] >> 2) & 1;
+        return (cBERules_mRules.MyRules.Flags >> 2) & 1;
     case 2:
-        return D_005308D4[0];
+        return cBERules_mRules.MyRules.AIHeadStartSecs;
     case 6:
-        return (D_005308D0[0] >> 4) & 1;
+        return (cBERules_mRules.MyRules.Flags >> 4) & 1;
     case 9:
-        return (D_005308D0[0] >> 5) & 1;
+        return (cBERules_mRules.MyRules.Flags >> 5) & 1;
     case 10:
-        return (D_005308D0[0] >> 6) & 1;
+        return (cBERules_mRules.MyRules.Flags >> 6) & 1;
     case 11: {
-        int shiftedRules = D_005308D0[0] >> 7;
+        int shiftedRules = cBERules_mRules.MyRules.Flags >> 7;
         return shiftedRules & 1;
     }
     case 12:
-        return (D_005308D0[0] >> 8) & 1;
+        return (cBERules_mRules.MyRules.Flags >> 8) & 1;
     case 13:
-        return (D_005308D0[0] >> 9) & 1;
+        return (cBERules_mRules.MyRules.Flags >> 9) & 1;
     }
     return -1;
 }
