@@ -1,5 +1,6 @@
 #ifndef RENDER_PARTICLE_H
 #define RENDER_PARTICLE_H
+#pragma interface
 
 // EA's particle emitters (EA header ../source/render/particle.h, source d:/ssx/code/source/render/particle.cpp: both
 // named by the July 2003 preview's assert strings, e.g. "(unsigned int)id < (unsigned int)m_numSubEmitters" in
@@ -42,6 +43,7 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
+#include "bx/memman.h"             // the global operator delete (cStaticEmitter's virtual dtor)
 #include "world/worldview.h"       // tBoundBox
 #include "render/ps2graphicsman.h" // sDrawState
 
@@ -192,6 +194,7 @@ CHECK_SIZE(tPackedRGBA, 0x4);
 struct tBoundBox;
 
 struct tParticleEmitter {
+    tParticleEmitter() __asm__("tParticleEmitter_tParticleEmitter__FPv");
     int NumParticles;               // 0x000 [O]; [U] init sw (num); stepContinous/calcBoundBox read it (lwc1 + cvt.s.w)
     int NumBlur;                    // 0x004 [O]; [U] init sw (numblur), BlurAlpha = 1 / NumBlur
     float EndTime;                  // 0x008 [O]; [U] the running time: setTime (t * Damp), step (+= dt * Damp),
@@ -330,10 +333,11 @@ struct cStaticEmitter {
     int mNumFlipTextures;           // 0x180 [O]; [R] setupEmitter (data +0xD0); [U] update wraps the frame at it
     float mCurrentFlipTexture;      // 0x184 [O]; [R] ctor zeroes it (sw); [U] update, render
     float mFlipTextureRate;         // 0x188 [O]; [R] setupEmitter (data +0xD4); [U] update
-    void** mVtbl;                   // 0x18C [R] ctor cStaticEmitter_cStaticEmitter and dtor cStaticEmitter__cStaticEmitter store cStaticEmitter_vtbl (1 slot: the
+    virtual ~cStaticEmitter();      // 0x18C (vptr) [R] ctor cStaticEmitter_cStaticEmitter and dtor cStaticEmitter__cStaticEmitter store cStaticEmitter_vtbl (1 slot: the
                                     //       dtor); [P] the preview's cStaticEmitter slot-1 pair touches 0x18C (On Tour
                                     //       has no virtuals here)
 
+    cStaticEmitter() __asm__("cStaticEmitter_cStaticEmitter");
     // Methods bound to their retail symbols by asm labels.
     void setPosition(long long *position) __asm__("cStaticEmitter_setPosition");
     void setupEmitter(t4Matrix* transform, tParticleData* particleData) __asm__("cStaticEmitter_setupEmitter");
@@ -354,8 +358,8 @@ CHECK_OFFSET(cStaticEmitter, BoundBox, 0x160);
 CHECK_OFFSET(cStaticEmitter, mNumFlipTextures, 0x180);
 CHECK_OFFSET(cStaticEmitter, mCurrentFlipTexture, 0x184);
 CHECK_OFFSET(cStaticEmitter, mFlipTextureRate, 0x188);
-CHECK_OFFSET(cStaticEmitter, mVtbl, 0x18C);
 CHECK_SIZE(cStaticEmitter, 0x190);
+__asm__("_vt$14cStaticEmitter = cStaticEmitter_vtbl");   // g++'s name for the retail vtable
 
 // The moving emitter base (On Tour class cBaseClass_DynamicEmitter, 0x200).
 struct cBaseClass_DynamicEmitter {

@@ -11,6 +11,7 @@
 #include "object/effectlink.h"
 #include "replay/bxreplayframe.h"
 #include "ui/uithing.h"
+extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, cBxReplayFrame* obj);
 
 struct sEffectLinkView {  // this unit's view of cEffectLink (object/effectlink.h); typed members schedule differently
     sEffectLinkView* next; // 0x0
@@ -91,20 +92,14 @@ extern void* cEffectModifier_vtbl[];
 /**
  * Constructs a cEffectModifier for an instance (On Tour cEffectModifier(tInstanceRecord* inst)).
  *
- * Clears the effect-link Next/Prev, stores cEffectModifier_vtbl and the instance (Instance, +0xC), and increments the
- * live effect count cEffectModifier_EffectCount (On Tour cEffectModifier::EffectCount).
+ * The cEffectLink part starts unlinked (Next / Prev 0); keeps the instance (Instance, +0xC) and increments the live
+ * effect count cEffectModifier_EffectCount (On Tour cEffectModifier::EffectCount).
  *
- * @param inst  the tInstanceRecord the effect is attached to (declared int)
- * @return @p self
+ * @param inst  the tInstanceRecord the effect is attached to
  */
-extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int inst)
+cEffectModifier::cEffectModifier(tInstanceRecord* inst) : Instance(inst)
 {
-    self->Next = 0;
-    self->Prev = 0;
-    VPTR_OF(cEffectLink, self) = cEffectModifier_vtbl;
-    self->Instance = (tInstanceRecord*)inst;
     cEffectModifier_EffectCount++;
-    return ((void*)self);
 }
 #endif
 
@@ -118,26 +113,21 @@ extern void* cEffectModifier_vtbl[];
 /**
  * Constructs an effect modifier from a replay frame.
  *
- * Clears the effect-link Next/Prev, installs cEffectModifier_vtbl, reads Instance through the stream's vtable entry 3
- * (instance-pointer read) and increments the live effect count cEffectModifier_EffectCount (read by cEffectModifier_getEffectCount). The particle and
- * halo replay constructors (cParticleModifier_cParticleModifier1, cHaloModifier_cHaloModifier1) start with it.
+ * The cEffectLink part starts unlinked; reads Instance through the stream's vtable entry 3 (instance-pointer read)
+ * and increments the live effect count cEffectModifier_EffectCount (read by cEffectModifier_getEffectCount). The
+ * particle and halo replay constructors start with it.
  *
  * @param obj  replay stream to read from
- * @return effectModifier
  */
-void* cEffectModifier::cEffectModifier1(cBxReplayFrame* obj)
+cEffectModifier::cEffectModifier(cBxReplayFrame* obj)
 {
-    Next = 0;
-    Prev = 0;
-    VPTR_OF(cEffectLink, this) = cEffectModifier_vtbl;
     Instance = obj->readReplayInstance();
     cEffectModifier_EffectCount++;
-    return ((void*)this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", cEffectModifier__cEffectModifier);
+INCLUDE_ASM("object/effectlink", _$_15cEffectModifier);
 #ifdef SKIP_ASM
 extern int cEffectModifier_EffectCount;
 extern void* cEffectModifier_vtbl[];
@@ -146,21 +136,12 @@ void operator_delete(int*);
 
 
 /**
- * Destroys an effect modifier: decrements the live count (cEffectModifier_EffectCount), unlinks it from its effect chain, then
- * frees it when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys an effect modifier: decrements the live count (cEffectModifier_EffectCount); the cEffectLink part then
+ * unlinks it from its effect chain.
  */
-extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags)
+cEffectModifier::~cEffectModifier()
 {
-    cEffectModifier* effectLink = self;
-    VPTR_OF(cEffectLink, effectLink) = cEffectModifier_vtbl;
     cEffectModifier_EffectCount--;
-    VPTR_OF(cEffectLink, effectLink) = cEffectLink_vtbl;
-    ((cEffectLink*)(sEffectLinkView*)&effectLink->Next)->unlink();
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -219,34 +200,29 @@ static inline void* vu0CopyMatrix003458C0(void* dst, void* src)
  * Constructs a static particle effect on an instance (On Tour cParticleModifier(tParticleData* pdata,
  * tInstanceRecord* inst)).
  *
- * Runs the cEffectModifier constructor with @p owner, stores cParticleModifier_vtbl, constructs the cStaticEmitter at
- * +0x50 and keeps the particle data. The transform (+0x10) is copied from the instance node's (Instance + 0xC)
- * virtual slot 24 matrix, or from the instance record's own matrix (Instance + 0x10) when there is no node. Then
- * cStaticEmitter_setupEmitter(+0x50, transform, @p pdata), Complete (+0x1E4) = 0 and the particle count cParticleModifier_ParticleCount is
- * incremented.
+ * Builds the cEffectModifier part on @p inst and the embedded cStaticEmitter (+0x50), and keeps the particle data.
+ * The transform (+0x10) is copied from the instance node's (Instance + 0xC) virtual slot 24 matrix, or from the
+ * instance record's own matrix (Instance + 0x10) when there is no node. Then the emitter is set up
+ * (cStaticEmitter_setupEmitter with the transform and @p pdata), Complete (+0x1E4) = 0 and the particle count
+ * cParticleModifier_ParticleCount is incremented.
  *
- * @param pdata  the tParticleData describing the emitter (declared int)
- * @param owner  the tInstanceRecord the effect is attached to (On Tour inst; declared int)
- * @return @p self
+ * @param pdata  the tParticleData describing the emitter
+ * @param inst  the tInstanceRecord the effect is attached to
  */
-extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, int pdata, int owner)
+cParticleModifier::cParticleModifier(tParticleData* pdata, tInstanceRecord* inst) : cEffectModifier(inst)
 {
-    cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
-    VPTR_OF(cEffectLink, self) = cParticleModifier_vtbl;
-    cStaticEmitter_cStaticEmitter(&self->Emitter);
-    self->ParticleData = (tParticleData*)pdata;
-    tInstanceRecord* own = self->Instance;
+    ParticleData = pdata;
+    tInstanceRecord* own = Instance;
     cInstanceNode* obj = (cInstanceNode*)(own->m_pActiveNode);
     void* transform;
     if (((void*)obj) != 0) {
-        transform = vu0CopyMatrix003458C0(&self->Transform, (void*)obj->getRootTransform());
+        transform = vu0CopyMatrix003458C0(&Transform, (void*)obj->getRootTransform());
     } else {
-        transform = vu0CopyMatrix003458C0(&self->Transform, &own->m_fmTransform);
+        transform = vu0CopyMatrix003458C0(&Transform, &own->m_fmTransform);
     }
-    cStaticEmitter_setupEmitter(&self->Emitter, transform, (int)self->ParticleData);
-    (self)->Complete = 0;
+    cStaticEmitter_setupEmitter(&Emitter, transform, (int)ParticleData);
+    Complete = 0;
     cParticleModifier_ParticleCount++;
-    return ((void*)self);
 }
 #endif
 
@@ -261,20 +237,16 @@ extern t4Matrix t4mat_Identity;
 /**
  * Constructs a particle modifier from a replay frame.
  *
- * Runs the effect-modifier replay constructor cEffectModifier_cEffectModifier1, installs cParticleModifier_vtbl, constructs the Emitter
- * (cStaticEmitter_cStaticEmitter) and reads Complete (+0x1E4). While not complete it allocates and reads the 0xD8-byte
- * ParticleData, reads Transform (0x40 bytes), sets the emitter up (cStaticEmitter_setupEmitter) and lets it read its
- * own state (cStaticEmitter_readFromReplayFrame); a completed modifier gets the identity Transform and no ParticleData.
- * Increments the particle-modifier count cParticleModifier_ParticleCount.
+ * Builds the cEffectModifier part from @p stream and the embedded Emitter, then reads Complete (+0x1E4). While not
+ * complete it allocates and reads the 0xD8-byte ParticleData, reads Transform (0x40 bytes), sets the emitter up
+ * (cStaticEmitter_setupEmitter) and lets it read its own state (cStaticEmitter_readFromReplayFrame); a completed
+ * modifier gets the identity Transform and no ParticleData. Increments the particle-modifier count
+ * cParticleModifier_ParticleCount.
  *
  * @param stream  replay stream to read from
- * @return self
  */
-void* cParticleModifier::cParticleModifier1(cBxReplayFrame* stream)
+cParticleModifier::cParticleModifier(cBxReplayFrame* stream) : cEffectModifier(stream)
 {
-    this->cEffectModifier1(stream);
-    VPTR_OF(cEffectLink, this) = cParticleModifier_vtbl;
-    cStaticEmitter_cStaticEmitter(&Emitter);
     stream->read((char*)&Complete, 4);
     if (Complete == 0) {
         void* buf = operator_new1(216);
@@ -288,35 +260,27 @@ void* cParticleModifier::cParticleModifier1(cBxReplayFrame* stream)
         ParticleData = 0;
     }
     cParticleModifier_ParticleCount++;
-    return ((void*)this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", cParticleModifier__cParticleModifier);
+INCLUDE_ASM("object/effectlink", _$_17cParticleModifier);
 #ifdef SKIP_ASM
 extern int cParticleModifier_ParticleCount;
 extern void* cParticleModifier_vtbl[];
 void operator_delete(int*);
-extern "C" void cStaticEmitter__cStaticEmitter(int* self, int flags);
-extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
+extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags) __asm__("_$_15cEffectModifier");
 
 /**
- * Destroys a particle modifier: frees its 0xD8-byte buffer (+0x1E0), decrements the live count (cParticleModifier_ParticleCount),
- * destroys the embedded static emitter (+0x50), then the cEffectModifier part.
- *
- * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ * Destroys a particle modifier: frees its 0xD8-byte buffer (+0x1E0) and decrements the live count
+ * (cParticleModifier_ParticleCount); the embedded static emitter (+0x50) and the cEffectModifier part follow.
  */
-extern "C" void cParticleModifier__cParticleModifier(cParticleModifier* self, int flags)
+cParticleModifier::~cParticleModifier()
 {
-    VPTR_OF(cEffectLink, self) = cParticleModifier_vtbl;
-    int* buf = (int*)self->ParticleData;
-    if (buf != 0) {
-        operator_delete(buf);
+    if (ParticleData != 0) {
+        delete ParticleData;
     }
     cParticleModifier_ParticleCount--;
-    cStaticEmitter__cStaticEmitter((int*)(&self->Emitter), 2);
-    cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
 #endif
 
@@ -481,7 +445,7 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b
 extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self,
                                                                                          cBxReplayFrame* stream)
 {
-    self->cEffectModifier1(stream);
+    cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     VPTR_OF(cEffectLink, self) = cDynamicParticleModifier_vtbl;
     void* data = &self->Mesh;
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
@@ -509,7 +473,7 @@ extern int cDynamicParticleModifier_DynamicParticleCount;
 extern void* cDynamicParticleModifier_vtbl[];
 void operator_delete(int*);
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
-extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
+extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags) __asm__("_$_15cEffectModifier");
 
 /**
  * Destroys a dynamic particle modifier: frees its 0xD8-byte buffer (+0x260), decrements the live count
@@ -702,26 +666,22 @@ extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int a1);
 /**
  * Constructs a halo modifier for an instance from halo make-data.
  *
- * Runs cEffectModifier_cEffectModifier, installs cHaloModifier_vtbl and copies from src: Type (+0x4) to +0x24, Mesh
- * (+0x8) to +0x28, the colour (ColourR/G/B/A at +0x10..+0x18 and +0xC) to +0x10 as (R, G, B, A), Radius (+0x1C) to
- * +0x20 and Speed (+0x20) to +0x2C; zeroes +0x30 and increments the halo count cHaloModifier_HaloCount.
+ * Builds the cEffectModifier part on @p inst and copies from @p src: Type (+0x4) to +0x24, Mesh (+0x8) to +0x28, the
+ * colour (ColourR/G/B/A at +0x10..+0x18 and +0xC) to +0x10 as (R, G, B, A), Radius (+0x1C) to +0x20 and Speed
+ * (+0x20) to +0x2C; zeroes +0x30 and increments the halo count cHaloModifier_HaloCount.
  *
- * @param src  halo make-data (tAddHaloData layout)
- * @param instRecord  instance record the halo belongs to
- * @return self
+ * @param src  halo make-data
+ * @param inst  instance record the halo belongs to
  */
-extern "C" void* cHaloModifier_cHaloModifier(cHaloModifier* self, tAddHaloData* src, int instRecord)
+cHaloModifier::cHaloModifier(tAddHaloData* src, tInstanceRecord* inst) : cEffectModifier(inst)
 {
-    cEffectModifier_cEffectModifier(self, instRecord);
-    VPTR_OF(cEffectLink, self) = cHaloModifier_vtbl;
-    self->Type = src->Type;
-    self->Mesh = src->Mesh;
-    self->Color = t4VectorXYZW(src->ColourR, src->ColourG, src->ColourB, src->ColourA);
-    self->Radius = src->Radius;
-    self->Speed = src->Speed;
-    self->Angle = 0;
+    Type = src->Type;
+    Mesh = src->Mesh;
+    Color = t4VectorXYZW(src->ColourR, src->ColourG, src->ColourB, src->ColourA);
+    Radius = src->Radius;
+    Speed = src->Speed;
+    Angle = 0;
     cHaloModifier_HaloCount++;
-    return self;
 }
 #endif
 
@@ -736,40 +696,32 @@ extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, cBxReplayF
 /**
  * Constructs a halo modifier from a replay frame.
  *
- * Runs the effect-modifier replay constructor cEffectModifier_cEffectModifier1, installs cHaloModifier_vtbl, reads the 0x30-byte halo
- * state at +0x10 through the stream's read slot (vtable entry 2) and increments the halo count cHaloModifier_HaloCount.
+ * Builds the cEffectModifier part from @p stream, reads the 0x30-byte halo state at +0x10 through the stream's read
+ * slot (vtable entry 2) and increments the halo count cHaloModifier_HaloCount.
  *
  * @param stream  replay stream to read from
- * @return self
  */
-void* cHaloModifier::cHaloModifier1(cBxReplayFrame* stream)
+cHaloModifier::cHaloModifier(cBxReplayFrame* stream) : cEffectModifier(stream)
 {
-    this->cEffectModifier1(stream);
-    VPTR_OF(cEffectLink, this) = cHaloModifier_vtbl;
     stream->read((char*)&Color, 0x30);
     cHaloModifier_HaloCount++;
-    return ((void*)this);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", cHaloModifier__cHaloModifier);
+INCLUDE_ASM("object/effectlink", _$_13cHaloModifier);
 #ifdef SKIP_ASM
 extern int cHaloModifier_HaloCount;
 extern void* cHaloModifier_vtbl[];
-extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags);
+extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags) __asm__("_$_15cEffectModifier");
 
 
 /**
- * Destroys a halo modifier: decrements the live count (cHaloModifier_HaloCount), then runs the cEffectModifier destructor.
- *
- * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ * Destroys a halo modifier: decrements the live count (cHaloModifier_HaloCount); the cEffectModifier part follows.
  */
-extern "C" void cHaloModifier__cHaloModifier(cHaloModifier* self, int flags)
+cHaloModifier::~cHaloModifier()
 {
-    VPTR_OF(cEffectLink, (self)) = cHaloModifier_vtbl;
     cHaloModifier_HaloCount--;
-    cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
 }
 #endif
 
@@ -1010,4 +962,5 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
     cInstanceNode__cInstanceNode(((char*)self), flags);
 }
 #endif
+
 

@@ -1,11 +1,12 @@
 #ifndef OBJECT_EFFECTMODIFIER_H
 #define OBJECT_EFFECTMODIFIER_H
+#pragma interface
 
 // The effect modifiers a cMoveNode chains through its tModifierBlock (EA source d:/ssx/code/source/object/
 // effectmodifier.cpp, header ../source/object/effectmodifier.h: preview asserts; retail unit object/effectlink,
 // 0x345798-0x3460A0, plus the one-line virtuals in object/railmodifier 0x360D00-0x360D28). Chain:
 //   cEffectLink (object/effectlink.h: Next, Prev, vptr) -> cEffectModifier (+ Instance; 0x10, On Tour 0x10; ctors
-//   cEffectModifier_cEffectModifier(inst) / cEffectModifier_cEffectModifier1(replay), dtor cEffectModifier__cEffectModifier, vtable cEffectModifier_vtbl;
+//   cEffectModifier_cEffectModifier(inst) / cEffectModifier_cEffectModifier1(replay), dtor _$_15cEffectModifier, vtable cEffectModifier_vtbl;
 //   live count cEffectModifier::EffectCount = cEffectModifier_EffectCount)
 //     -> cParticleModifier (0x1F0: cMemMan_alloc(0x1F0, "ParticleModifier") in cMoveNode_addParticle; ctors
 //        cParticleModifier_cParticleModifier(pdata, inst) / cParticleModifier_cParticleModifier1(replay); vtable cParticleModifier_vtbl; ParticleCount cParticleModifier_ParticleCount)
@@ -51,13 +52,16 @@ struct cEffectModifier : public cEffectLink {
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
                                     //       transform), updatePosition
 
+    cEffectModifier(tInstanceRecord* inst) __asm__("cEffectModifier_cEffectModifier");
+    cEffectModifier(cBxReplayFrame* obj) __asm__("cEffectModifier_cEffectModifier1");
+    virtual ~cEffectModifier();
     // Methods bound to their retail symbols by asm labels.
-    void* cEffectModifier1(cBxReplayFrame* obj) __asm__("cEffectModifier_cEffectModifier1");
     virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cEffectModifier_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cEffectModifier, Instance, 0x0C);
 CHECK_SIZE(cEffectModifier, 0x10);
+__asm__("_vt$15cEffectModifier = cEffectModifier_vtbl");   // g++'s name for the retail vtable
 
 // cParticleModifier: a one-shot or looping static emitter at the instance's root transform.
 struct cParticleModifier : public cEffectModifier {
@@ -67,7 +71,7 @@ struct cParticleModifier : public cEffectModifier {
     t4Matrix Transform;             // 0x010 [O]; [R] ctor copies the instance's root transform (VU0 matrix copy), the
                                     //       replay ctor reads 0x40 bytes; [U] setupEmitter's transform,
                                     //       writeToReplayFrame
-    cStaticEmitter Emitter;         // 0x050 [O]; [R] ctor cStaticEmitter_cStaticEmitter(this + 0x50), dtor cStaticEmitter__cStaticEmitter(this + 0x50,
+    cStaticEmitter Emitter;         // 0x050 [O]; [R] ctor cStaticEmitter_cStaticEmitter(this + 0x50), dtor _$_14cStaticEmitter(this + 0x50,
                                     //       2); [U] update/render/writeToReplayFrame
     tParticleData* ParticleData;    // 0x1E0 [O]; [R] ctor stores pdata (owned), the replay ctor allocates 0xD8; dtor
                                     //       deletes it; [U] writeToReplayFrame writes 0xD8 bytes
@@ -75,10 +79,10 @@ struct cParticleModifier : public cEffectModifier {
                                     //       update sets 1 once Emitter.Duration runs out, render returns while set
     char unk_1E8[0x8];              // 0x1E8 padding to the 16-byte size
 
-    // Methods bound to their retail symbols by asm labels.
-    void* cParticleModifier1(cBxReplayFrame* stream) __asm__("cParticleModifier_cParticleModifier1");
-    // retail's destructor cParticleModifier__cParticleModifier stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    cParticleModifier(tParticleData* pdata, tInstanceRecord* inst) __asm__("cParticleModifier_cParticleModifier");
+    cParticleModifier(cBxReplayFrame* stream) __asm__("cParticleModifier_cParticleModifier1");
+    // the destructor is g++'s own symbol _$_17cParticleModifier (g++ 2.95 takes no asm label on a destructor, so the
+    // retail label was renamed); declared first, as in the retail vtable's slot order
     virtual ~cParticleModifier();
     virtual void update() __asm__("cParticleModifier_update");
     virtual void render() __asm__("cParticleModifier_render");
@@ -92,9 +96,11 @@ CHECK_OFFSET(cParticleModifier, ParticleData, 0x1E0);
 CHECK_OFFSET(cParticleModifier, Complete, 0x1E4);
 CHECK_OFFSET(cParticleModifier, unk_1E8, 0x1E8);
 CHECK_SIZE(cParticleModifier, 0x1F0);
+__asm__("_vt$17cParticleModifier = cParticleModifier_vtbl");   // g++'s name for the retail vtable
 
 // cDynamicParticleModifier: a dynamic emitter that follows one mesh of the instance.
 struct t4Vector;
+struct tAddHaloData;
 
 struct cDynamicParticleModifier : public cEffectModifier {
     // cEffectModifier (object/effectmodifier.h, 0x10): the vptr at 0x08:
@@ -119,6 +125,7 @@ struct cDynamicParticleModifier : public cEffectModifier {
                                     //       deletes it; [U] setupEmitter, writeToReplayFrame
     char unk_264[0xC];              // 0x264 padding to the 16-byte size
 
+    cDynamicParticleModifier(cBxReplayFrame* stream) __asm__("cDynamicParticleModifier_cDynamicParticleModifier");
     // Methods bound to their retail symbols by asm labels.
     cDynamicParticleModifier* cDynamicParticleModifier1(tParticleData* particleDesc, int owner, int bone, t4Vector* pos)
         __asm__("cDynamicParticleModifier_cDynamicParticleModifier1");
@@ -204,10 +211,10 @@ struct cHaloModifier : public cEffectModifier {
                                     //       to 0 past +-360; render passes it
     char unk_034[0xC];              // 0x034 padding (16-byte aligned: Color is a t4Vector)
 
-    // Methods bound to their retail symbols by asm labels.
-    void* cHaloModifier1(cBxReplayFrame* stream) __asm__("cHaloModifier_cHaloModifier1");
-    // retail's destructor cHaloModifier__cHaloModifier stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
+    cHaloModifier(tAddHaloData* src, tInstanceRecord* inst) __asm__("cHaloModifier_cHaloModifier");
+    cHaloModifier(cBxReplayFrame* stream) __asm__("cHaloModifier_cHaloModifier1");
+    // the destructor is g++'s own symbol _$_13cHaloModifier (g++ 2.95 takes no asm label on a destructor, so the
+    // retail label was renamed); declared first, as in the retail vtable's slot order
     virtual ~cHaloModifier();
     virtual void update() __asm__("cHaloModifier_update");
     virtual void render() __asm__("cHaloModifier_render");
@@ -223,5 +230,6 @@ CHECK_OFFSET(cHaloModifier, Speed, 0x02C);
 CHECK_OFFSET(cHaloModifier, Angle, 0x030);
 CHECK_OFFSET(cHaloModifier, unk_034, 0x034);
 CHECK_SIZE(cHaloModifier, 0x40);
+__asm__("_vt$13cHaloModifier = cHaloModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_EFFECTMODIFIER_H */

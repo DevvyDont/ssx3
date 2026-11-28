@@ -2377,18 +2377,13 @@ extern char cStaticEmitter_vtbl[];
 void tParticleEmitter_tParticleEmitter(void*);
 
 /**
- * Constructs a static particle emitter: vtable cStaticEmitter_vtbl, the embedded tParticleEmitter at +0x10 (tParticleEmitter_tParticleEmitter),
- * m_initialized 0 and mCurrentFlipTexture 0.
- *
- * @return @p self
+ * Constructs a static particle emitter: the embedded tParticleEmitter at +0x10 (tParticleEmitter_tParticleEmitter),
+ * then m_initialized 0 and mCurrentFlipTexture 0.
  */
-extern "C" void* cStaticEmitter_cStaticEmitter(cStaticEmitter* self)
+cStaticEmitter::cStaticEmitter()
 {
-    self->mVtbl = (void**)cStaticEmitter_vtbl;
-    tParticleEmitter_tParticleEmitter((char*)&self->Emitter);
-    self->m_initialized = 0;
-    self->mCurrentFlipTexture = 0.0f;
-    return ((void*)self);
+    m_initialized = 0;
+    mCurrentFlipTexture = 0.0f;
 }
 #endif
 
@@ -2631,27 +2626,19 @@ void cStaticEmitter::setTime(float duration)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", cStaticEmitter__cStaticEmitter);
+INCLUDE_ASM("render/graphicsman", _$_14cStaticEmitter);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
 extern char cStaticEmitter_vtbl[];
 
 /**
- * Destroys a static particle emitter: restores its vtable and frees it if asked.
+ * Destroys a static particle emitter; it owns nothing, so this only frees the object when asked.
  *
- * Stores vt_00493160 (the vtable cStaticEmitter_cStaticEmitter installs) at +0x18C, after the tParticleEmitter data,
- * and calls operator_delete on @p flags bit 0. cParticleModifier__cParticleModifier destroys its embedded emitter
- * (+0x50, On Tour cParticleModifier::Emitter) with flags 2.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * ~cParticleModifier destroys its embedded emitter (+0x50, On Tour cParticleModifier::Emitter) in place.
  */
-extern "C" void cStaticEmitter__cStaticEmitter(cStaticEmitter* self, int flags)
+cStaticEmitter::~cStaticEmitter()
 {
-    self->mVtbl = (void**)cStaticEmitter_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 

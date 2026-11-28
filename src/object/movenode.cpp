@@ -26,6 +26,7 @@
 #include "object/movenode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
+#include "object/effectmodifier.h"
 
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -741,8 +742,7 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
  */
 void cMoveNode::addHalo(void* desc)
 {
-    addEffectModifier(cHaloModifier_cHaloModifier(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), desc,
-                                                    Instance));
+    addEffectModifier(new (str_HaloModifier, 0x20000000, 0) cHaloModifier((tAddHaloData*)desc, Instance));
 }
 #endif
 
@@ -3026,11 +3026,7 @@ extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* self, int flags)
     if (buf != 0) {
         cMemMan_free(buf);
     }
-    cStaticEmitter* obj = self->Emitter;
-    if (obj != 0) {
-        sMnDtorVEntry7FA0* vt = (sMnDtorVEntry7FA0*)obj->mVtbl;
-        vt[1].fn(vthis(obj, vt[1]), 3);
-    }
+    delete self->Emitter;
     if (flags & 1) {
         operator_delete((int*)self);
     }

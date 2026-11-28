@@ -1,5 +1,6 @@
 #ifndef OBJECT_EFFECTLINK_H
 #define OBJECT_EFFECTLINK_H
+#pragma interface
 
 // cEffectLink: the intrusive list node that chains a cMoveNode's effect modifiers (base of cEffectModifier ->
 // cParticleModifier, cDynamicParticleModifier, cHaloModifier; tModifierBlock embeds one by value at +0x10 as the head).
@@ -9,6 +10,7 @@
 // cEffectLink_vtbl (0x00491340, 4 slots). Local definition: src/object/effectlink.cpp `struct cEffectLink {next, prev}`.
 
 #include "layout.h"
+#include "bx/memman.h"
 
 struct cBxReplayFrame;
 
@@ -23,7 +25,8 @@ struct cEffectLink {
     cEffectLink* Prev;              // 0x04 [O]; [U] cEffectLink_add
     // 0x08: the vptr. [R] cEffectLink_vtbl (0x00491340): the dtor and tModifierBlock_tModifierBlock (+0x18) store it
     //   Slots:
-    virtual ~cEffectLink();                                     // 1  ([R] cEffectLink_vtbl; types [O])
+    cEffectLink() : Next(0), Prev(0) {}
+    virtual ~cEffectLink() { unlink(); }                        // 1  ([R] cEffectLink_vtbl; types [O])
     virtual int getType() __asm__("cEffectLink_getType__FPv");                                      // 2
     virtual void fadeEffect() __asm__("cEffectLink_fadeEffect__FPv");                                  // 3
     virtual void writeToReplayFrame(cBxReplayFrame* data) __asm__("cEffectLink_writeToReplayFrame__FPv");      // 4
@@ -33,6 +36,7 @@ struct cEffectLink {
     void unlink() __asm__("cEffectLink_unlink");
     void append(cEffectLink* other) __asm__("cEffectLink_append");
 };
+__asm__("_vt$11cEffectLink = cEffectLink_vtbl");   // g++'s name for the retail vtable
 
 CHECK_OFFSET(cEffectLink, Next, 0x00);
 CHECK_OFFSET(cEffectLink, Prev, 0x04);
