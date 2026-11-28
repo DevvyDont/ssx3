@@ -133,29 +133,17 @@ extern "C" void* cFELocale_cFELocale(cFELocale* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequip", cFELocale__cFELocale);
+INCLUDE_ASM("fe/festatecharequip", _$_9cFELocale);
 #ifdef SKIP_ASM
-extern void* cFELocale_vtbl[];
-extern void* cUILocaleInterface_vtbl[];
 extern "C" void cFELocale_deleteAllFiles(cFELocale* self);
-void operator_delete(int* p);
 
 /**
- * Destroys the front-end locale, freeing it when asked.
- *
- * Stores the cFELocale vtable cFELocale_vtbl at +0x4, deletes all its string files (cFELocale_deleteAllFiles), stores the base vtable
- * cUILocaleInterface_vtbl and calls operator_delete when bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the front-end locale: deletes all its string files (deleteAllFiles); the cUILocaleInterface part does the
+ * rest and frees it when asked.
  */
-extern "C" void cFELocale__cFELocale(cFELocale* self, int flags)
+cFELocale::~cFELocale()
 {
-    VPTR_OF(cUILocaleInterface, self) = cFELocale_vtbl;
-    self->deleteAllFiles();
-    VPTR_OF(cUILocaleInterface, self) = cUILocaleInterface_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    deleteAllFiles();
 }
 #endif
 

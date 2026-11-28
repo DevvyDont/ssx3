@@ -27,25 +27,17 @@ cObjNode* cObjNode_cObjNode(cObjNode* self, void* bucket)
 #endif
 
 //100%
-INCLUDE_ASM("object/objnode", cObjNode__cObjNode);
+INCLUDE_ASM("object/objnode", _$_8cObjNode);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_remove(void* mgr, void* node);
-void operator_delete(int*);
 
 /**
- * Destroys a scene object node: removes it from the global bucket manager, then frees it when asked to.
- *
- * Restores cObjNode's vtable at +0xC first.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a scene object node: removes it from its bucket of the global bucket manager (gBucketMan); g++ frees it when
+ * asked to.
  */
-extern "C" void cObjNode__cObjNode(cObjNode* self, int flags)
+cObjNode::~cObjNode()
 {
-    VPTR_OF(cObjNode, self) = cObjNode_vtbl;
-    cBucketMan_remove(&gBucketMan, self);
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    cBucketMan_remove(&gBucketMan, this);
 }
 #endif
 
@@ -104,27 +96,17 @@ extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* bucket, cBx
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/objnode", cTypeObjNode__cTypeObjNode);
+INCLUDE_ASM("object/objnode", _$_12cTypeObjNode);
 #ifdef SKIP_ASM
-extern "C" void cObjNode__cObjNode(cObjNode* self, int flags);
-extern void* cTypeObjNode_vtbl[];
 extern int cTypeObjNode_ObjNodeCount[];
 
-// PORT: the unit declares cTypeObjNode__cTypeObjNode(void*), but this is a deleting
-// destructor taking (self, flags); the real body is bound by asm label.
-void cTypeObjNode__cTypeObjNode_impl(void* self, int flags) __asm__("cTypeObjNode__cTypeObjNode");
-
 /**
- * Destroys a typed object node: removes it from the per-type live counts, then destroys the cObjNode base.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a typed object node: takes it off its type's live count (cTypeObjNode_ObjNodeCount); the cObjNode part does
+ * the rest and frees it when asked.
  */
-void cTypeObjNode__cTypeObjNode_impl(void* vself, int flags)
+cTypeObjNode::~cTypeObjNode()
 {
-    cTypeObjNode* self = (cTypeObjNode*)vself;
-    VPTR_OF(cObjNode, self) = cTypeObjNode_vtbl;
-    cTypeObjNode_ObjNodeCount[self->ObjNodeType]--;
-    cObjNode__cObjNode((cObjNode*)self, flags);
+    cTypeObjNode_ObjNodeCount[ObjNodeType]--;
 }
 #endif
 
@@ -195,23 +177,16 @@ extern "C" void* cSortObjNode_cSortObjNode(cSortObjNode* self, void* bucket, cBx
 #endif
 
 extern void* cSortObjNode_vtbl[];
-extern "C" void* cTypeObjNode__cTypeObjNode(void*);
 
 //99.5%
-INCLUDE_ASM("object/objnode", cSortObjNode__cSortObjNode__FPv);
+INCLUDE_ASM("object/objnode", _$_12cSortObjNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a sort object node: stores cSortObjNode's vtable at +0xC, then runs the cTypeObjNode destructor.
- *
- * The g++ delete flags in the second argument register pass through untouched to cTypeObjNode__cTypeObjNode().
- *
- * @return no meaningful value (the base destructor returns nothing)
+ * Destroys a sort object node; it owns nothing of its own, so its cTypeObjNode part does the work and frees it when
+ * asked.
  */
-void* cSortObjNode__cSortObjNode(void* vself)
+cSortObjNode::~cSortObjNode()
 {
-    cSortObjNode* self = (cSortObjNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cSortObjNode_vtbl);
-    return cTypeObjNode__cTypeObjNode(self);
 }
 #endif
 

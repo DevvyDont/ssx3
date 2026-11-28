@@ -1,5 +1,6 @@
 #ifndef OBJECT_MAGNETMODIFIER_H
 #define OBJECT_MAGNETMODIFIER_H
+#pragma interface
 
 // cMagnetModifier: the transform modifier that pulls an object towards a being (rider) inside a radius (cMoveNode::addMagnet).
 // Unnamed in retail: vtable cMagnetModifier_vtbl (27 slots), identified by the "MagnetModifier" tag and On Tour's layout.
@@ -43,9 +44,7 @@ struct cMagnetModifier : public cTransformModifier {
     char unk_A4[0xc];               // 0xA4 padding to the 0xB0 allocation
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cMagnetModifier__cMagnetModifier stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cMagnetModifier();
+    virtual ~cMagnetModifier();   // g++'s own symbol _$_15cMagnetModifier (the retail label renamed)
     virtual void update() __asm__("cMagnetModifier_update");
     virtual void updateRootTransform() __asm__("cMagnetModifier_updateRootTransform");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cMagnetModifier_writeToReplayFrame");
@@ -73,5 +72,6 @@ CHECK_OFFSET(cMagnetModifier, Transform, 0x60);
 CHECK_OFFSET(cMagnetModifier, Instance, 0xA0);
 CHECK_OFFSET(cMagnetModifier, unk_A4, 0xA4);
 CHECK_SIZE(cMagnetModifier, 0xB0);
+__asm__("_vt$15cMagnetModifier = cMagnetModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_MAGNETMODIFIER_H */

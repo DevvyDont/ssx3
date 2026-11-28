@@ -1,5 +1,6 @@
 #ifndef OBJECT_SPRINGRAILNODE_H
 #define OBJECT_SPRINGRAILNODE_H
+#pragma interface
 
 // cSpringRailNode: a flexible rail whose nodes swing on angular springs: each node (tSpringRailNode, 0x60: P, V, O, W,
 // T, InstId, Mesh) is twisted back with spring ASpring and damping ADamp; a rider's push torques
@@ -140,9 +141,7 @@ struct cSpringRailNode : public cFlexRailNode {
     // Methods bound to their retail symbols by asm labels.
     void* cSpringRailNode1(void* bucket, cBxReplayFrame* stream) __asm__("cSpringRailNode_cSpringRailNode1");
     void getPosition(tSpringRailNode* node) __asm__("cSpringRailNode_getPosition");
-    // retail's destructor cSpringRailNode__cSpringRailNode stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cSpringRailNode();
+    virtual ~cSpringRailNode();   // g++'s own symbol _$_15cSpringRailNode (the retail label renamed)
     virtual void updateBoundBox() __asm__("cSpringRailNode_updateBoundBox");
     virtual void updateMats() __asm__("cSpringRailNode_updateMats");
     virtual void updateNodes() __asm__("cSpringRailNode_updateNodes");
@@ -159,5 +158,6 @@ CHECK_OFFSET(cSpringRailNode, unk_06C, 0x06C);
 CHECK_OFFSET(cSpringRailNode, Nodes, 0x070);
 CHECK_OFFSET(cSpringRailNode, unk_074, 0x074);
 CHECK_SIZE(cSpringRailNode, 0x080);
+__asm__("_vt$15cSpringRailNode = cSpringRailNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_SPRINGRAILNODE_H */

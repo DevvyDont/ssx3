@@ -1,5 +1,6 @@
 #ifndef FE_SCREENPOPUP_H
 #define FE_SCREENPOPUP_H
+#pragma interface
 
 // cScreenPopup: the front end's generic message/confirmation popup (title, message, up to 5 options, an optional
 // text-entry box that opens a cKeyboardPopup). A cUIState; its methods are in fe/fepopup.cpp. Retail vtable
@@ -190,9 +191,7 @@ struct cScreenPopup : public cUIState {
     int getPassUpdate() __asm__("cScreenPopup_getPassUpdate");
     char* getEntryBoxText() __asm__("cScreenPopup_getEntryBoxText");
     int isShowing() __asm__("cScreenPopup_isShowing");
-    // retail's destructor cScreenPopup__cScreenPopup stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cScreenPopup();
+    virtual ~cScreenPopup();   // g++'s own symbol _$_12cScreenPopup (the retail label renamed)
     virtual void onCreateScreen() __asm__("cScreenPopup_onCreateScreen");
     virtual bool onGainTransition(int first) __asm__("cScreenPopup_onGainTransition");
     virtual void onUpdate() __asm__("cScreenPopup_onUpdate");
@@ -279,6 +278,7 @@ CHECK_OFFSET(cScreenPopup, mtUnhighlightColor, 0x33C);
 CHECK_OFFSET(cScreenPopup, mtIndicatorColor, 0x34C);
 CHECK_OFFSET(cScreenPopup, mfIndicatorAlpha, 0x35C);
 CHECK_SIZE(cScreenPopup, 0x360);
+__asm__("_vt$12cScreenPopup = cScreenPopup_vtbl");   // g++'s name for the retail vtable
 CHECK_SIZE(tConfirmElement, 0xC);
 
 #endif /* FE_SCREENPOPUP_H */

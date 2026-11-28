@@ -1505,7 +1505,7 @@ extern "C" int cListOpSetFocus_onListNode(cListOpSetFocus* self, cListOpSetFocus
 #endif
 
 extern void* cUIIcon_vtbl[];
-extern "C" void* cUIThing__cUIThing(void*);
+extern "C" void* cUIThing__cUIThing(void*) __asm__("_$_8cUIThing");
 
 //100%
 INCLUDE_ASM("ui/uivector", cUISoundInterface__cUISoundInterface1);
@@ -1614,21 +1614,13 @@ extern "C" void* cUIIcon_cUIIcon(cUIIcon* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", cUIIcon__cUIIcon__FPv);
+INCLUDE_ASM("ui/uivector", _$_7cUIIcon);
 #ifdef SKIP_ASM
 /**
- * Destroys a UI icon: restores cUIIcon_vtbl, then runs the cUIThing destructor.
- *
- * Only @p self is declared: the destructor flags the caller passed in the second argument register reach
- * cUIThing__cUIThing() unchanged.
- *
- * @return no meaningful value (the cUIThing destructor returns nothing)
+ * Destroys an icon widget; it owns nothing of its own, so its cUIThing part does the work and frees it when asked.
  */
-void* cUIIcon__cUIIcon(void* vself)
+cUIIcon::~cUIIcon()
 {
-    cUIIcon* self = (cUIIcon*)vself;
-    VPTR_OF(cListNode, self) = cUIIcon_vtbl;
-    return cUIThing__cUIThing(self);
 }
 #endif
 
@@ -1905,7 +1897,7 @@ extern void* cListNode_vtbl[];
 extern "C" void cList_destroyList_v(void* p) __asm__("cList_destroyList");
 extern "C" void cListNode_destroyListNode(cListNode* p);
 // PORT: the unit declares cUIThing__cUIThing with one argument; the dtor chain passes the delete flag too.
-extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cUIThing");
+extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("_$_8cUIThing");
 
 /**
  * Destroys a UI group: destroys its child list (+0x74) and the list's sentinel nodes, then the cUIThing part.
@@ -2119,7 +2111,7 @@ extern void* cListNode_vtbl[];
 extern "C" void cList_destroyList_v(void* p) __asm__("cList_destroyList");
 extern "C" void cListNode_destroyListNode(cListNode* p);
 // PORT: the unit declares cUIThing__cUIThing with one argument; the dtor chain passes the delete flag too.
-extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cUIThing");
+extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("_$_8cUIThing");
 
 /**
  * Destroys a UI menu: the cUIGroup destructor's work, with cUIGroup's vtable stored.
@@ -2403,26 +2395,19 @@ extern "C" void* cUIPair_cUIPair(cUIPair* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", cUIPair__cUIPair);
+INCLUDE_ASM("ui/uivector", _$_7cUIPair);
 #ifdef SKIP_ASM
-extern void* cUIPair_vtbl[];
-extern "C" void cUIPair_destroyPair(void* self);
 // PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
-extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
+extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("_$_8cUIThing");
 
 /**
- * Destroys a UI pair: deletes its two child objects, then runs the cUIThing destructor.
- *
- * Restores cUIPair_vtbl, calls cUIPair_destroyPair() and then cUIThing__cUIThing(self, flags).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a pair widget: destroys its two halves (destroyPair); the cUIThing part does the rest and frees it when
+ * asked.
  */
-extern "C" void cUIPair__cUIPair(cUIPair* self, int flags)
+cUIPair::~cUIPair()
 {
-    VPTR_OF(cListNode, self) = cUIPair_vtbl;
-    cUIPair_destroyPair(self);
-    cUIThing__cUIThing_dtor(self, flags);
+    destroyPair();
 }
 #endif
 
@@ -2548,25 +2533,19 @@ void* cUIListBox::cUIListBox1()
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", cUIListBox__cUIListBox);
+INCLUDE_ASM("ui/uivector", _$_10cUIListBox);
 #ifdef SKIP_ASM
-extern void* cUIListBox_vtbl[];
-extern "C" void cUIListBox_deleteAllEntries(void* self);
 // PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
-extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
+extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("_$_8cUIThing");
 
 /**
- * Destroys a list box: restores cUIListBox_vtbl, clears its entries (cUIListBox_deleteAllEntries), then runs the cUIThing
- * destructor.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the cUIThing destructor)
+ * Destroys a list box: deletes all its entries (deleteAllEntries); the cUIThing part does the rest and frees it when
+ * asked.
  */
-extern "C" void cUIListBox__cUIListBox(cUIListBox* self, int flags)
+cUIListBox::~cUIListBox()
 {
-    VPTR_OF(cListNode, self) = cUIListBox_vtbl;
-    cUIListBox_deleteAllEntries(self);
-    cUIThing__cUIThing_dtor(self, flags);
+    deleteAllEntries();
 }
 #endif
 
@@ -3695,27 +3674,19 @@ void* cUIText::cUIText1()
 #endif
 
 //100%
-INCLUDE_ASM("ui/uivector", cUIText__cUIText);
+INCLUDE_ASM("ui/uivector", _$_7cUIText);
 #ifdef SKIP_ASM
-extern void* cUIText_vtbl[];
-extern "C" void cUIText_deleteText(void* self);
 // PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
-extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
+extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("_$_8cUIThing");
 
 /**
- * Destroys a UI text object: frees its string and line table, then runs the cUIThing destructor.
- *
- * Restores cUIText's vtable, calls cUIText_deleteText(), then cUIThing__cUIThing(), which frees the object when
- * asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a text widget: frees its text and line table (deleteText); the cUIThing part does the rest and frees it when
+ * asked.
  */
-extern "C" void cUIText__cUIText(cUIText* self, int flags)
+cUIText::~cUIText()
 {
-    VPTR_OF(cListNode, self) = cUIText_vtbl;
-    cUIText_deleteText(self);
-    cUIThing__cUIThing_dtor(self, flags);
+    deleteText();
 }
 #endif
 
@@ -4408,7 +4379,7 @@ extern "C" void cUITextScroll_clearBuffer(void* self);
 extern "C" void cList_destroyList_v(void* self) __asm__("cList_destroyList");
 // PORT: the unit declares cUIThing__cUIThing with one parameter; the real body is a
 // destructor taking (self, flags). Bound to the same symbol with an asm label.
-extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("cUIThing__cUIThing");
+extern "C" void* cUIThing__cUIThing_dtor(void* self, int flags) __asm__("_$_8cUIThing");
 
 /**
  * Destroys a text scroll: frees its text buffer (cUITextScroll_clearBuffer), destroys mList with its end and start nodes, then

@@ -1,5 +1,6 @@
 #ifndef FE_FESTATESTATS_H
 #define FE_FESTATESTATS_H
+#pragma interface
 
 // cFEStateStats: the online high-score / stats screen ("249Stats": overall, race and freestyle rankings per event
 // and course, ten result rows). A cFEStateNet (fe/festatenet.h, 0x6D0). EA's name from the preview's linkonce
@@ -58,9 +59,7 @@ struct cFEStateStats : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateStats1() __asm__("cFEStateStats_cFEStateStats1");
-    // retail's destructor cFEStateStats__cFEStateStats stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateStats();
+    virtual ~cFEStateStats();   // g++'s own symbol _$_13cFEStateStats (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateStats_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateStats_onWidgetCreate");
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateStats_onGainTransition");
@@ -89,5 +88,6 @@ CHECK_OFFSET(cFEStateStats, miFocusMenu, 0x6E4);
 CHECK_OFFSET(cFEStateStats, miFirstResult, 0x6E8);
 CHECK_OFFSET(cFEStateStats, mbShowTime, 0x6EC);
 CHECK_SIZE(cFEStateStats, 0x6F0);
+__asm__("_vt$13cFEStateStats = cFEStateStats_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATESTATS_H */

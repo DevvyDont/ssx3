@@ -1,5 +1,6 @@
 #ifndef OBJECT_AVASPLINEMODIFIER_H
 #define OBJECT_AVASPLINEMODIFIER_H
+#pragma interface
 
 // cAvaSplineModifier: the transform modifier that drives an avalanche prop from its instance's animation spline
 // (cMoveNode::addAvaSpline). Unnamed in retail: vtable cAvaSplineModifier_vtbl (27 slots), identified by the "AvaSplineModifier" tag
@@ -35,9 +36,7 @@ struct cAvaSplineModifier : public cTransformModifier {
     char unk_84[0xc];               // 0x84 padding to the 0x90 allocation
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cAvaSplineModifier__cAvaSplineModifier stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cAvaSplineModifier();
+    virtual ~cAvaSplineModifier();   // g++'s own symbol _$_18cAvaSplineModifier (the retail label renamed)
     virtual void update() __asm__("cAvaSplineModifier_update");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cAvaSplineModifier_writeToReplayFrame");
     virtual const tBoundBox* getBoundBox() const __asm__("cAvaSplineModifier_getBoundBox__FPv");
@@ -56,5 +55,6 @@ CHECK_OFFSET(cAvaSplineModifier, Transform, 0x40);
 CHECK_OFFSET(cAvaSplineModifier, Instance, 0x80);
 CHECK_OFFSET(cAvaSplineModifier, unk_84, 0x84);
 CHECK_SIZE(cAvaSplineModifier, 0x90);
+__asm__("_vt$18cAvaSplineModifier = cAvaSplineModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_AVASPLINEMODIFIER_H */

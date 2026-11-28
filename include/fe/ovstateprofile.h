@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEPROFILE_H
 #define FE_OVSTATEPROFILE_H
+#pragma interface
 
 // cOVState_PROFILE: the in-game profile save overlay (screen "121Profilesave_pda" on the PDA template; six "player%d"
 // slots, the name keyboard, save / delete), a cFEMemCard with mType 0. Retail code: the ctor
@@ -86,9 +87,7 @@ struct cOVState_PROFILE : public cFEMemCard {
     void displayOff() __asm__("cOVState_PROFILE_displayOff");
     void displayOn() __asm__("cOVState_PROFILE_displayOn");
     void initGeneral() __asm__("cOVState_PROFILE_initGeneral");
-    // retail's destructor cOVState_PROFILE__cOVState_PROFILE stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_PROFILE();
+    virtual ~cOVState_PROFILE();   // g++'s own symbol _$_16cOVState_PROFILE (the retail label renamed)
     virtual void displayStatus() __asm__("cOVState_PROFILE_displayStatus");
     virtual void updateDone() __asm__("cOVState_PROFILE_updateDone");
     virtual void onWidgetEvent(cUIThing* item, unsigned int event) __asm__("cOVState_PROFILE_onWidgetEvent");
@@ -106,5 +105,6 @@ CHECK_OFFSET(cOVState_PROFILE, mTitle, 0x234);
 CHECK_OFFSET(cOVState_PROFILE, unk_276, 0x276);
 CHECK_OFFSET(cOVState_PROFILE, mParentOV, 0x278);
 CHECK_SIZE(cOVState_PROFILE, 0x27C);
+__asm__("_vt$16cOVState_PROFILE = cOVState_PROFILE_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEPROFILE_H */

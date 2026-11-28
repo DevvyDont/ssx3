@@ -1,14 +1,16 @@
 #ifndef FE_FESTATERULESELECT_H
 #define FE_FESTATERULESELECT_H
+#pragma interface
 
-// cFEStateRuleSelect: the rule select screen (a cUIState); cFEReal creates it with cMemMan_alloc(156, "cFEStateRuleSelect").
-// Size 0x9C [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
+// cFEStateRuleSelect: the rule select screen (a cFEState); cFEReal creates it with cMemMan_alloc(156, "cFEStateRuleSelect").
+// Size 0x9C [R] (the retail allocation; On Tour's is the same). Derives from cFEState (fe/festate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 #include "fe/festatenet.h" // tFEStateNetMsgList (cFEStateBraggingRights's cFEStateNet base)
 
 struct cListNode;
@@ -17,7 +19,8 @@ struct cUIPair;
 struct cUIScreen;
 struct cUIState;
 
-struct cFEStateRuleSelect : public cUIState {
+struct cFEStateRuleSelect : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateRuleSelect
     char* mpGameEventMapping;        // 0x048 [O]
@@ -33,9 +36,7 @@ struct cFEStateRuleSelect : public cUIState {
     int getBEData(int rule) __asm__("cFEStateRuleSelect_getBEData");
     void checkConflictForMenu(cUIListBox* item) __asm__("cFEStateRuleSelect_checkConflictForMenu");
     void updateMenuColor() __asm__("cFEStateRuleSelect_updateMenuColor");
-    // retail's destructor cFEStateRuleSelect__cFEStateRuleSelect stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateRuleSelect();
+    virtual ~cFEStateRuleSelect();   // g++'s own symbol _$_18cFEStateRuleSelect (the retail label renamed)
     virtual void onWidgetEvent(cUIThing* msg, unsigned int type) __asm__("cFEStateRuleSelect_onWidgetEvent");
     virtual int onWidgetPair(cUIPair* msg, unsigned int) __asm__("cFEStateRuleSelect_onWidgetPair");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int type, unsigned int idx)
@@ -49,6 +50,7 @@ CHECK_OFFSET(cFEStateRuleSelect, mcArraySize, 0x050);
 CHECK_OFFSET(cFEStateRuleSelect, mcRuleConflictRefTable, 0x051);
 CHECK_OFFSET(cFEStateRuleSelect, mpMenuItemTable, 0x060);
 CHECK_SIZE(cFEStateRuleSelect, 0x9C);
+__asm__("_vt$18cFEStateRuleSelect = cFEStateRuleSelect_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cBraggingRightsMenu: one player's column of the bragging-rights screen (a cUIMenu, its group and up to eight list
@@ -163,9 +165,7 @@ struct cFEStateBraggingRights : public cFEStateNet {
     void* cFEStateBraggingRights1() __asm__("cFEStateBraggingRights_cFEStateBraggingRights1");
     void updateBE(int player, int which, int value) __asm__("cFEStateBraggingRights_updateBE");
     void updateConfirmedState() __asm__("cFEStateBraggingRights_updateConfirmedState");
-    // retail's destructor cFEStateBraggingRights__cFEStateBraggingRights stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateBraggingRights();
+    virtual ~cFEStateBraggingRights();   // g++'s own symbol _$_22cFEStateBraggingRights (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateBraggingRights_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateBraggingRights_onUpdate");
     int getBEData(int chan, int kind) __asm__("cFEStateBraggingRights_getBEData");
@@ -187,5 +187,6 @@ struct cFEStateBraggingRights : public cFEStateNet {
 CHECK_OFFSET(cFEStateBraggingRights, mMenuCtrl, 0x6D0);
 CHECK_OFFSET(cFEStateBraggingRights, mpGameEventMapping, 0x738);
 CHECK_SIZE(cFEStateBraggingRights, 0x73C);
+__asm__("_vt$22cFEStateBraggingRights = cFEStateBraggingRights_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATERULESELECT_H */

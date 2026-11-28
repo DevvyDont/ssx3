@@ -1,5 +1,6 @@
 #ifndef OBJECT_DEBOUNCENODE_H
 #define OBJECT_DEBOUNCENODE_H
+#pragma interface
 
 // cDebounceNode: a temporary node the world script puts on an instance (MakeDebounceFunc, tMakeDebounceData) to make
 // it ignore further hits for a while: it takes over the old node's modifiers (cMoveNode_transferFromOld), counts Life
@@ -83,6 +84,7 @@ struct cDebounceNode : public cMoveNode {
                                     //      loseFocus: 0 -> cDeadNode, else delete
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cDebounceNode();   // g++'s own symbol _$_13cDebounceNode (the retail label renamed)
     void* cDebounceNode1(void* bucket, void* instance, tMakeDebounceData* def, void* oldNode)
         __asm__("cDebounceNode_cDebounceNode1");
 
@@ -100,5 +102,6 @@ struct cDebounceNode : public cMoveNode {
 CHECK_OFFSET(cDebounceNode, Life, 0x2C);
 CHECK_OFFSET(cDebounceNode, Type, 0x30);
 CHECK_SIZE(cDebounceNode, 0x34);
+__asm__("_vt$13cDebounceNode = cDebounceNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_DEBOUNCENODE_H */

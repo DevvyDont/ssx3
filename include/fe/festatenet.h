@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENET_H
 #define FE_FESTATENET_H
+#pragma interface
 
 // cFEStateNet: the base of every online front-end state (the 29 classes in fe/feasyncfile.cpp: cFEStateNetMessenger,
 // cFEStateLogin, cFEStateLobbyMenu, cFEStateNetConfig, cFEStateCreateStep1/2, cFEStateStats, cFEBlankPopup, ...,
@@ -140,9 +141,7 @@ struct cFEStateNet : public cUIState {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNet1() __asm__("cFEStateNet_cFEStateNet1");
     int isProcessingEvents() __asm__("cFEStateNet_isProcessingEvents");
-    // retail's destructor cFEStateNet__cFEStateNet stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateNet();
+    virtual ~cFEStateNet();   // g++'s own symbol _$_11cFEStateNet (the retail label renamed; still a C function)
     virtual void onCreateScreen() __asm__("cFEStateNet_onCreateScreen__FPv");
     virtual void onUpdate() __asm__("cFEStateNet_onUpdate");
     virtual bool onGainTransition(int) __asm__("cFEStateNet_onGainTransition__FPv");
@@ -227,5 +226,6 @@ CHECK_OFFSET(cFEStateNet, mszTargetUser, 0x6C0);
 CHECK_OFFSET(cFEStateNet, mUserPopupOpen, 0x6C4);
 CHECK_OFFSET(cFEStateNet, mMsgList, 0x6C8);
 CHECK_SIZE(cFEStateNet, 0x6D0);
+__asm__("_vt$11cFEStateNet = cFEStateNet_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATENET_H */

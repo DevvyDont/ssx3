@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATEAUTOSAVE_H
 #define FE_OVSTATEAUTOSAVE_H
+#pragma interface
 
 // cOVState_AUTOSAVE: the in-game autosave overlay (screen "122Autosave": a pulsing "exclam" icon and the
 // "kT_MEMAutosaving" text while the profile is written). It saves at once (onUpdate starts
@@ -71,9 +72,7 @@ struct cOVState_AUTOSAVE : public cFEMemCard {
 
     // Methods bound to their retail symbols by asm labels.
     void displayOn() __asm__("cOVState_AUTOSAVE_displayOn");
-    // retail's destructor cOVState_AUTOSAVE__cOVState_AUTOSAVE stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_AUTOSAVE();
+    virtual ~cOVState_AUTOSAVE();   // g++'s own symbol _$_17cOVState_AUTOSAVE (the retail label renamed)
     virtual void displayStatus() __asm__("cOVState_AUTOSAVE_displayStatus");
     virtual void updateDone() __asm__("cOVState_AUTOSAVE_updateDone");
     virtual void onCreateScreen() __asm__("cOVState_AUTOSAVE_onCreateScreen");
@@ -84,5 +83,6 @@ struct cOVState_AUTOSAVE : public cFEMemCard {
 CHECK_OFFSET(cOVState_AUTOSAVE, mParentScreen, 0x22C);
 CHECK_OFFSET(cOVState_AUTOSAVE, mLastProcessState, 0x230);
 CHECK_SIZE(cOVState_AUTOSAVE, 0x234);
+__asm__("_vt$17cOVState_AUTOSAVE = cOVState_AUTOSAVE_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATEAUTOSAVE_H */

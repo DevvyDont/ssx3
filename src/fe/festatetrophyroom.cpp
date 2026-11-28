@@ -958,27 +958,18 @@ void* cFEMemCard::cFEMemCard2(int pEngine, int iType)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard__cFEMemCard);
+INCLUDE_ASM("fe/festatetrophyroom", _$_10cFEMemCard);
 #ifdef SKIP_ASM
 extern void* cFEMemCard_vtbl[];
-extern void* cOVState_vtbl[];
-extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys a memory-card state.
- *
- * Stores cFEMemCard's vtable cFEMemCard_vtbl, clears cFEMemCard_mInstance, stores cOVState's vtable cOVState_vtbl and runs
- * cUIState's destructor (_$_8cUIState) with @p flags. Destructor slot (+0xC) of cFEMemCard_vtbl; the destructors of
- * cFEStateMemCard, cOVState_PROFILE, cOVState_AUTOSAVE, cFEStateProfileLoad and cFEStateOptionsDeviceSelect end in it.
- *
- * @param flags  the g++ delete flags, passed on to cUIState__cUIState
+ * Destroys a memory-card screen: clears the live-screen pointer cFEMemCard_mInstance; its cOVState and cUIState parts
+ * do the rest and free it when asked. The destructors of every memory-card screen (cFEStateMemCard,
+ * cFEStateProfileLoad, cFEStateOptionsDeviceSelect and the cOVState_ save overlays) end in it.
  */
-extern "C" void cFEMemCard__cFEMemCard(cFEMemCard* self, int flags)
+cFEMemCard::~cFEMemCard()
 {
-    VPTR_OF(cListNode, self) = cFEMemCard_vtbl;
     cFEMemCard_mInstance = 0;
-    VPTR_OF(cListNode, self) = cOVState_vtbl;
-    cUIState__cUIState(self, flags);
 }
 #endif
 

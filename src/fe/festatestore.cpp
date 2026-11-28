@@ -864,26 +864,15 @@ void* cFEStateCredits::cFEStateCredits1()
 }
 #endif
 
-extern void* cFEState_vtbl[];
-extern "C" void* cUIState__cUIState(void*) __asm__("_$_8cUIState");
-
 //100%
-INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);
+INCLUDE_ASM("fe/festatestore", _$_15cFEStateCredits);
 #ifdef SKIP_ASM
 /**
- * Destroys the credits front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(): the same
- * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
- * flags reach cUIState__cUIState() untouched in the second argument register.
- *
- * @return no meaningful value (cUIState__cUIState() returns nothing)
+ * Destroys the credits screen; it owns nothing of its own, so its cFEState and cUIState parts do the work and free it
+ * when asked.
  */
-void* cFEStateCredits__cFEStateCredits(void* vself)
+cFEStateCredits::~cFEStateCredits()
 {
-    cFEStateCredits* self = (cFEStateCredits*)vself;
-    VPTR_OF(cListNode, self) = (void**)((int)(void*)cFEState_vtbl);
-    return cUIState__cUIState(self);
 }
 #endif
 

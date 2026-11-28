@@ -42,7 +42,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen__cUIScreen);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cList_destroyList_C558(void*) __asm__("cList_destroyList");
 extern "C" void cListNode_destroyListNode(void*);
-extern "C" void cUIThing__cUIThing(void* self, int flags);
+extern "C" void cUIThing__cUIThing(void* self, int flags) __asm__("_$_8cUIThing");
 extern "C" void cMemMan_free__FPv(void* p);
 void operator_delete(int*);
 extern void* cUIScreen_vtbl[];
@@ -1121,25 +1121,16 @@ cUIThing* cUIScreen::getObjectByHashName(int hash)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", cUIScrollBar__cUIScrollBar);
+INCLUDE_ASM("ui/uiscreen", _$_12cUIScrollBar);
 #ifdef SKIP_ASM
-extern "C" void cUIThing__cUIThing(void* self, int flags);
-extern void* cUIScrollBar_vtbl[];
-
 /**
- * Destroys a scroll bar: deletes mpObjBackground and mpObjKnob (deleting destructor, flags 3), then runs the cUIThing
- * destructor.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the cUIThing destructor)
+ * Destroys a scroll bar: deletes its background and knob objects (through their virtual destructors); the cUIThing part
+ * does the rest and frees it when asked.
  */
-extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
+cUIScrollBar::~cUIScrollBar()
 {
-    VPTR_OF(cListNode, self) = cUIScrollBar_vtbl;
-    cUIThing* background = self->mpObjBackground;
-    delete background;
-    cUIThing* knob = self->mpObjKnob;
-    delete knob;
-    cUIThing__cUIThing(self, flags);
+    delete mpObjBackground;
+    delete mpObjKnob;
 }
 #endif
 
@@ -1400,25 +1391,16 @@ void cUIScrollBar::setScrollVisibile(int bVisible)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", cUISlider__cUISlider);
+INCLUDE_ASM("ui/uiscreen", _$_9cUISlider);
 #ifdef SKIP_ASM
-extern "C" void cUIThing__cUIThing(void* self, int flags);
-extern void* cUISlider_vtbl[];
-
 /**
- * Destroys a slider: deletes mpObjBackground and mpObjKnob (deleting destructor, flags 3), then runs the cUIThing
- * destructor.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the cUIThing destructor)
+ * Destroys a slider: deletes its background and knob objects (through their virtual destructors); the cUIThing part
+ * does the rest and frees it when asked.
  */
-extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
+cUISlider::~cUISlider()
 {
-    VPTR_OF(cListNode, self) = cUISlider_vtbl;
-    cUIThing* background = self->mpObjBackground;
-    delete background;
-    cUIThing* knob = self->mpObjKnob;
-    delete knob;
-    cUIThing__cUIThing(self, flags);
+    delete mpObjBackground;
+    delete mpObjKnob;
 }
 #endif
 

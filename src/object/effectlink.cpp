@@ -269,7 +269,6 @@ INCLUDE_ASM("object/effectlink", _$_17cParticleModifier);
 extern int cParticleModifier_ParticleCount;
 extern void* cParticleModifier_vtbl[];
 void operator_delete(int*);
-extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags) __asm__("_$_15cEffectModifier");
 
 /**
  * Destroys a particle modifier: frees its 0xD8-byte buffer (+0x1E0) and decrements the live count
@@ -467,30 +466,25 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", cDynamicParticleModifier__cDynamicParticleModifier);
+INCLUDE_ASM("object/effectlink", _$_24cDynamicParticleModifier);
 #ifdef SKIP_ASM
 extern int cDynamicParticleModifier_DynamicParticleCount;
-extern void* cDynamicParticleModifier_vtbl[];
 void operator_delete(int*);
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void* self, int flags);
-extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags) __asm__("_$_15cEffectModifier");
 
 /**
- * Destroys a dynamic particle modifier: frees its 0xD8-byte buffer (+0x260), decrements the live count
- * (cDynamicParticleModifier_DynamicParticleCount), destroys the embedded dynamic emitter (+0x60), then the cEffectModifier part.
- *
- * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ * Destroys a dynamic particle modifier: frees its 0xD8-byte particle buffer, decrements the live count
+ * (cDynamicParticleModifier_DynamicParticleCount) and destroys the embedded dynamic emitter; the cEffectModifier part
+ * does the rest and frees it when asked.
  */
-extern "C" void cDynamicParticleModifier__cDynamicParticleModifier(cDynamicParticleModifier* self, int flags)
+cDynamicParticleModifier::~cDynamicParticleModifier()
 {
-    VPTR_OF(cEffectLink, self) = cDynamicParticleModifier_vtbl;
-    int* buf = (int*)self->ParticleData;
+    int* buf = (int*)ParticleData;
     if (buf != 0) {
         operator_delete(buf);
     }
     cDynamicParticleModifier_DynamicParticleCount--;
-    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(&self->Emitter, 2);
-    cEffectModifier__cEffectModifier((cEffectModifier*)self, flags);
+    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(&Emitter, 2);
 }
 #endif
 
@@ -713,7 +707,6 @@ INCLUDE_ASM("object/effectlink", _$_13cHaloModifier);
 #ifdef SKIP_ASM
 extern int cHaloModifier_HaloCount;
 extern void* cHaloModifier_vtbl[];
-extern "C" void cEffectModifier__cEffectModifier(cEffectModifier* self, int flags) __asm__("_$_15cEffectModifier");
 
 
 /**
@@ -903,63 +896,51 @@ void* cFlexBridgeNode::cFlexBridgeNode1(void* bucket, cBxReplayFrame* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", cFlexBridgeNode__cFlexBridgeNode);
+INCLUDE_ASM("object/effectlink", _$_15cFlexBridgeNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cMemMan_free(void* ptr);
 extern "C" void* cObjectInterface_getNash();
 extern "C" void _$_7cSpring(void* self, int flags);
-extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
-
-
-
 
 extern "C" void nash_Nash_movenode(void* world, int type, void* id, tBoundBox* box, tBoundBox* old);
 
 struct sRCtx_346568 {
-    char pad[0x10D8];
     sVEntry<void(void*, void*)>* vt;
 };
 
 /**
- * Destroys a flexible bridge node and puts its instance back into the space hash with its own bounding box.
- *
- * Frees the face, normal and vertex arrays, releases the strip mesh (graphics manager slot 77), moves the
- * instance in the Nash grid from the bridge's box to the instance's own box, destroys the spring chain and
- * runs the cInstanceNode destructor.
- *
- * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ * Destroys a flexible bridge node: frees its face, normal and vertex arrays, releases the strip mesh (GridMesh) and
+ * puts its instance back into the Nash space hash with the instance's own bounding box; its spring chain (Mesh) and its
+ * cInstanceNode part go after that, and the latter frees it when asked.
  */
-extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flags)
+cFlexBridgeNode::~cFlexBridgeNode()
 {
-    VPTR_OF(cObjNode, self) = cFlexBridgeNode_vtbl;
-    if (self->Faces != 0) {
-        cMemMan_free(self->Faces);
+    if (Faces != 0) {
+        cMemMan_free(Faces);
     }
-    if (self->FaceNorms != 0) {
-        cMemMan_free(self->FaceNorms);
+    if (FaceNorms != 0) {
+        cMemMan_free(FaceNorms);
     }
-    if (self->Verts != 0) {
-        cMemMan_free(self->Verts);
+    if (Verts != 0) {
+        cMemMan_free(Verts);
     }
-    tBoundBox* box = ((&self->BoundBox));
-    cGraphicsMan_TheGraphicsMan->DeleteGridMesh(self->GridMesh);
-    tBoundBox old = *(&self->BoundBox);
-    tInstanceRecord* inst = self->Instance;
+    tBoundBox* box = ((&BoundBox));
+    cGraphicsMan_TheGraphicsMan->DeleteGridMesh(GridMesh);
+    tBoundBox old = *(&BoundBox);
+    tInstanceRecord* inst = Instance;
     t4Vector corner;
     corner.x = inst->m_fvMin.m[0];
     corner.y = inst->m_fvMin.m[1];
     corner.z = inst->m_fvMin.m[2];
     corner.w = 1.0f;
-    *(t4Vector*)&self->BoundBox = corner;
+    *(t4Vector*)&BoundBox = corner;
     corner.x = inst->m_fvMax.m[0];
     corner.y = inst->m_fvMax.m[1];
     corner.z = inst->m_fvMax.m[2];
     corner.w = 1.0f;
-    *(&self->BoundBox.MaxPoint) = corner;
+    *(&BoundBox.MaxPoint) = corner;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, inst, box, &old);
-    _$_7cSpring(&self->Mesh, 2);
-    cInstanceNode__cInstanceNode(((char*)self), flags);
 }
 #endif
 

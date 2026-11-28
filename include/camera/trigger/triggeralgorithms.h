@@ -107,8 +107,7 @@ struct cBoundedAlgorithm : public cTriggerAlgorithm {
     char unk_84[0xC];           // 0x84 padding to the 16-byte class alignment
 
     cBoundedAlgorithm() __asm__("cBoundedAlgorithm_cBoundedAlgorithm");
-    // retail's destructor cBoundedAlgorithm__cBoundedAlgorithm stays a C function (its C does not match yet)
-    virtual ~cBoundedAlgorithm();
+    virtual ~cBoundedAlgorithm();   // g++'s own symbol _$_17cBoundedAlgorithm (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
     void setBoundAction(cCTActionBoundedCam* boundAction) __asm__("cBoundedAlgorithm_setBoundAction");
     cCTActionBoundedCam* getBoundAction() __asm__("cBoundedAlgorithm_getBoundAction");

@@ -410,22 +410,14 @@ void* cFEStateRiderBio::cFEStateRiderBio1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio__cFEStateRiderBio__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_16cFEStateRiderBio);
 #ifdef SKIP_ASM
 /**
- * Destroys the rider-bio front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(); the g++
- * delete
- * flags reach it untouched in the second argument register.
- *
- * @return meaningless (the void base destructor's leftover return register)
+ * Destroys the rider bio screen; it owns nothing of its own, so its cFEState and cUIState parts do the work and free it
+ * when asked.
  */
-void* cFEStateRiderBio__cFEStateRiderBio(void* vself)
+cFEStateRiderBio::~cFEStateRiderBio()
 {
-    cFEStateRiderBio* self = (cFEStateRiderBio*)vself;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -454,22 +446,14 @@ void* cFEStateRuleSelect::cFEStateRuleSelect1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect__cFEStateRuleSelect__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_18cFEStateRuleSelect);
 #ifdef SKIP_ASM
 /**
- * Destroys the rule-select front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(); the g++
- * delete
- * flags reach it untouched in the second argument register.
- *
- * @return meaningless (the void base destructor's leftover return register)
+ * Destroys the rule select screen; it owns nothing of its own, so its cFEState and cUIState parts do the work and free
+ * it when asked.
  */
-void* cFEStateRuleSelect__cFEStateRuleSelect(void* vself)
+cFEStateRuleSelect::~cFEStateRuleSelect()
 {
-    cFEStateRuleSelect* self = (cFEStateRuleSelect*)vself;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -529,34 +513,23 @@ void* cFEStateBraggingRights::cFEStateBraggingRights1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateBraggingRights__cFEStateBraggingRights);
+INCLUDE_ASM("fe/fepopupmisc", _$_22cFEStateBraggingRights);
 #ifdef SKIP_ASM
-extern void* cFEStateBraggingRights_vtbl[];
-// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
-
-
 /**
- * Destroys the bragging-rights front-end state: its two rule-select columns (mMenuCtrl[2], each through its virtual
- * destructor), then the base state.
- *
- * The base destructor cFEStateNet__cFEStateNet frees the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys the bragging-rights screen: destroys its two menu columns (mMenuCtrl), last first, through each one's
+ * virtual destructor (slot 1, flags 0); the cFEStateNet part does the rest and frees it when asked.
  */
-extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(cFEStateBraggingRights* self, int flags)
+cFEStateBraggingRights::~cFEStateBraggingRights()
 {
-    VPTR_OF(cListNode, self) = cFEStateBraggingRights_vtbl;
     // g++'s member-array destruction: each mMenuCtrl element's virtual destructor (entry 1, flags 0), last first
-    if (self->mMenuCtrl != 0) {
-        cBraggingRightsMenu* menu = self->mMenuCtrl + 2;
-        while (self->mMenuCtrl != menu) {
+    if (mMenuCtrl != 0) {
+        cBraggingRightsMenu* menu = mMenuCtrl + 2;
+        while (mMenuCtrl != menu) {
             menu--;
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)menu->mVtbl;
             vt[1].fn(vthis(menu, vt[1]), 0);
         }
     }
-    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -609,7 +582,7 @@ void cFEStateChatRoom::onMenuGainFocus(cUIGroup*)
 #endif
 
 extern void* cFEStateOnlineMainMenu_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1);
@@ -663,7 +636,7 @@ bool cFEStateOnlineAgreement::onLoseTransition()
 #endif
 
 extern void* cFEStateNetQuickPlayPopup_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1);
@@ -686,21 +659,14 @@ void * cFEStateNetQuickPlayPopup::cFEStateNetQuickPlayPopup1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_25cFEStateNetQuickPlayPopup);
 #ifdef SKIP_ASM
 /**
- * Destroys the quick-match popup state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
- * object when bit 0 is set.
- *
- * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
+ * Destroys the online quick-play popup; it owns nothing of its own, so its cFEStateNet part does the work and frees it
+ * when asked.
  */
-void* cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup(void* vself)
+cFEStateNetQuickPlayPopup::~cFEStateNetQuickPlayPopup()
 {
-    cFEStateNetQuickPlayPopup* self = (cFEStateNetQuickPlayPopup*)vself;
-    VPTR_OF(cListNode, self) = cFEStateNetQuickPlayPopup_vtbl;
-    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -719,7 +685,7 @@ bool cFEStateNetQuickPlayPopup::onLoseTransition()
 #endif
 
 extern void* cFEStateNetSSXWorld_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetSSXWorld_cFEStateNetSSXWorld1);
@@ -759,7 +725,7 @@ void* cFEStateNetSSXWorld__cFEStateNetSSXWorld(void* vself)
 #endif
 
 extern void* cFEStateNetQuickMessages_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages_cFEStateNetQuickMessages1);
@@ -781,21 +747,14 @@ void * cFEStateNetQuickMessages::cFEStateNetQuickMessages1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages__cFEStateNetQuickMessages__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_24cFEStateNetQuickMessages);
 #ifdef SKIP_ASM
 /**
- * Destroys the quick-messages editor state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
- * object when bit 0 is set.
- *
- * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
+ * Destroys the online quick-messages state; it owns nothing of its own, so its cFEStateNet part does the work and frees
+ * it when asked.
  */
-void* cFEStateNetQuickMessages__cFEStateNetQuickMessages(void* vself)
+cFEStateNetQuickMessages::~cFEStateNetQuickMessages()
 {
-    cFEStateNetQuickMessages* self = (cFEStateNetQuickMessages*)vself;
-    VPTR_OF(cListNode, self) = cFEStateNetQuickMessages_vtbl;
-    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -840,27 +799,18 @@ void* cFEStateLobbyMenu::cFEStateLobbyMenu1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateLobbyMenu__cFEStateLobbyMenu);
+INCLUDE_ASM("fe/fepopupmisc", _$_17cFEStateLobbyMenu);
 #ifdef SKIP_ASM
-extern void* cFEStateLobbyMenu_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
- * Destroys the lobby screen state: frees its room and channel name strings, then runs the cFEStateNet destructor.
- *
- * Restores cFEStateLobbyMenu_vtbl, destroys the cBXStrings mszRoomName (+0xB80) and mszChannelName (+0x76C) and
- * calls cFEStateNet__cFEStateNet with @p flags.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
+ * Destroys the lobby menu: destroys its room and channel name strings; the cFEStateNet part does the rest and frees it
+ * when asked.
  */
-extern "C" void cFEStateLobbyMenu__cFEStateLobbyMenu(cFEStateLobbyMenu* self, int flags)
+cFEStateLobbyMenu::~cFEStateLobbyMenu()
 {
-    VPTR_OF(cListNode, self) = cFEStateLobbyMenu_vtbl;
-    cBXString__cBXString((char*)&self->mszRoomName, 2);
-    cBXString__cBXString((char*)&self->mszChannelName, 2);
-    cFEStateNet__cFEStateNet_dtor(self, flags);
+    cBXString__cBXString((char*)&mszRoomName, 2);
+    cBXString__cBXString((char*)&mszChannelName, 2);
 }
 #endif
 
@@ -890,26 +840,19 @@ void* cFEStateNetCreateRoomPopup::cFEStateNetCreateRoomPopup1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup);
+INCLUDE_ASM("fe/fepopupmisc", _$_26cFEStateNetCreateRoomPopup);
 #ifdef SKIP_ASM
-extern void* cFEStateNetCreateRoomPopup_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
- * Destroys the create-room popup: frees its three strings (mszPassword, mszChannelName, mszRoomName), then runs the
- * cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ * Destroys the create-room popup: destroys its password, channel name and room name strings; the cFEStateNet part does
+ * the rest and frees it when asked.
  */
-extern "C" void cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup(cFEStateNetCreateRoomPopup* self, int flags)
+cFEStateNetCreateRoomPopup::~cFEStateNetCreateRoomPopup()
 {
-    VPTR_OF(cListNode, self) = cFEStateNetCreateRoomPopup_vtbl;
-    cBXString__cBXString((char*)&self->mszPassword, 2);
-    cBXString__cBXString((char*)&self->mszChannelName, 2);
-    cBXString__cBXString((char*)&self->mszRoomName, 2);
-    cFEStateNet__cFEStateNet_dtor(self, flags);
+    cBXString__cBXString((char*)&mszPassword, 2);
+    cBXString__cBXString((char*)&mszChannelName, 2);
+    cBXString__cBXString((char*)&mszRoomName, 2);
 }
 #endif
 
@@ -1424,31 +1367,18 @@ void* cFEStateRewardGalleryPosters::cFEStateRewardGalleryPosters1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters);
+INCLUDE_ASM("fe/fepopupmisc", _$_28cFEStateRewardGalleryPosters);
 #ifdef SKIP_ASM
-extern void* cFEStateRewardGalleryBase_vtbl[];
 extern void* cFEState_vtbl[];
-void cFEStateRewardGalleryBase_purgeRewards(void* self);
-extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
 extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys the posters gallery state through the gallery base and its bases.
- *
- * Stores the gallery base vtable cFEStateRewardGalleryBase_vtbl, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable cFEState_vtbl and calls the cUIState destructor cUIState__cUIState
- * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the posters gallery; it owns nothing of its own, so its gallery base part does the work (it purges the
+ * rewards and the icon textures) and its cFEState and cUIState parts free it when asked.
  */
-extern "C" void cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters(cFEStateRewardGalleryPosters* self, int flags)
+cFEStateRewardGalleryPosters::~cFEStateRewardGalleryPosters()
 {
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
-    cFEStateRewardGalleryBase_purgeRewards(self);
-    cFEStateRewardGalleryBase_purgeIcons(self);
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -1548,31 +1478,18 @@ void* cFEStateRewardGalleryTradingCards::cFEStateRewardGalleryTradingCards1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards);
+INCLUDE_ASM("fe/fepopupmisc", _$_33cFEStateRewardGalleryTradingCards);
 #ifdef SKIP_ASM
-extern void* cFEStateRewardGalleryBase_vtbl[];
 extern void* cFEState_vtbl[];
-void cFEStateRewardGalleryBase_purgeRewards(void* self);
-extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
 extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys the trading-card gallery state through the gallery base and its bases.
- *
- * Stores the gallery base vtable cFEStateRewardGalleryBase_vtbl, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable cFEState_vtbl and calls the cUIState destructor cUIState__cUIState
- * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the trading-card gallery; it owns nothing of its own, so its gallery base part does the work (it purges the
+ * rewards and the icon textures) and its cFEState and cUIState parts free it when asked.
  */
-extern "C" void cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards(cFEStateRewardGalleryTradingCards* self, int flags)
+cFEStateRewardGalleryTradingCards::~cFEStateRewardGalleryTradingCards()
 {
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
-    cFEStateRewardGalleryBase_purgeRewards(self);
-    cFEStateRewardGalleryBase_purgeIcons(self);
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -1672,31 +1589,18 @@ void* cFEStateRewardGalleryConceptArts::cFEStateRewardGalleryConceptArts1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts);
+INCLUDE_ASM("fe/fepopupmisc", _$_32cFEStateRewardGalleryConceptArts);
 #ifdef SKIP_ASM
-extern void* cFEStateRewardGalleryBase_vtbl[];
 extern void* cFEState_vtbl[];
-void cFEStateRewardGalleryBase_purgeRewards(void* self);
-extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
 extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys the concept-art gallery state through the gallery base and its bases.
- *
- * Stores the gallery base vtable cFEStateRewardGalleryBase_vtbl, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable cFEState_vtbl and calls the cUIState destructor cUIState__cUIState
- * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the concept-art gallery; it owns nothing of its own, so its gallery base part does the work (it purges the
+ * rewards and the icon textures) and its cFEState and cUIState parts free it when asked.
  */
-extern "C" void cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts(cFEStateRewardGalleryConceptArts* self, int flags)
+cFEStateRewardGalleryConceptArts::~cFEStateRewardGalleryConceptArts()
 {
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
-    cFEStateRewardGalleryBase_purgeRewards(self);
-    cFEStateRewardGalleryBase_purgeIcons(self);
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -1796,31 +1700,18 @@ void* cFEStateRewardGalleryVideos::cFEStateRewardGalleryVideos1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos);
+INCLUDE_ASM("fe/fepopupmisc", _$_27cFEStateRewardGalleryVideos);
 #ifdef SKIP_ASM
-extern void* cFEStateRewardGalleryBase_vtbl[];
 extern void* cFEState_vtbl[];
-void cFEStateRewardGalleryBase_purgeRewards(void* self);
-extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
 extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys the video gallery state through the gallery base and its bases.
- *
- * Stores the gallery base vtable cFEStateRewardGalleryBase_vtbl, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable cFEState_vtbl and calls the cUIState destructor cUIState__cUIState
- * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the video gallery; it owns nothing of its own, so its gallery base part does the work (it purges the rewards
+ * and the icon textures) and its cFEState and cUIState parts free it when asked.
  */
-extern "C" void cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos(cFEStateRewardGalleryVideos* self, int flags)
+cFEStateRewardGalleryVideos::~cFEStateRewardGalleryVideos()
 {
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
-    cFEStateRewardGalleryBase_purgeRewards(self);
-    cFEStateRewardGalleryBase_purgeIcons(self);
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -1920,31 +1811,18 @@ void* cFEStateRewardGalleryToys::cFEStateRewardGalleryToys1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys__cFEStateRewardGalleryToys);
+INCLUDE_ASM("fe/fepopupmisc", _$_25cFEStateRewardGalleryToys);
 #ifdef SKIP_ASM
-extern void* cFEStateRewardGalleryBase_vtbl[];
 extern void* cFEState_vtbl[];
-void cFEStateRewardGalleryBase_purgeRewards(void* self);
-extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
 extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys the toy gallery state through the gallery base and its bases.
- *
- * Stores the gallery base vtable cFEStateRewardGalleryBase_vtbl, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable cFEState_vtbl and calls the cUIState destructor cUIState__cUIState
- * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the toy gallery; it owns nothing of its own, so its gallery base part does the work (it purges the rewards
+ * and the icon textures) and its cFEState and cUIState parts free it when asked.
  */
-extern "C" void cFEStateRewardGalleryToys__cFEStateRewardGalleryToys(cFEStateRewardGalleryToys* self, int flags)
+cFEStateRewardGalleryToys::~cFEStateRewardGalleryToys()
 {
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
-    cFEStateRewardGalleryBase_purgeRewards(self);
-    cFEStateRewardGalleryBase_purgeIcons(self);
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -2044,31 +1922,18 @@ void* cFEStateRewardGalleryCheatChars::cFEStateRewardGalleryCheatChars1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars);
+INCLUDE_ASM("fe/fepopupmisc", _$_31cFEStateRewardGalleryCheatChars);
 #ifdef SKIP_ASM
-extern void* cFEStateRewardGalleryBase_vtbl[];
 extern void* cFEState_vtbl[];
-void cFEStateRewardGalleryBase_purgeRewards(void* self);
-extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
 // PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
 extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys the cheat-character gallery state through the gallery base and its bases.
- *
- * Stores the gallery base vtable cFEStateRewardGalleryBase_vtbl, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable cFEState_vtbl and calls the cUIState destructor cUIState__cUIState
- * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the cheat-character gallery; it owns nothing of its own, so its gallery base part does the work (it purges
+ * the rewards and the icon textures) and its cFEState and cUIState parts free it when asked.
  */
-extern "C" void cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars(cFEStateRewardGalleryCheatChars* self, int flags)
+cFEStateRewardGalleryCheatChars::~cFEStateRewardGalleryCheatChars()
 {
-    VPTR_OF(cListNode, self) = cFEStateRewardGalleryBase_vtbl;
-    cFEStateRewardGalleryBase_purgeRewards(self);
-    cFEStateRewardGalleryBase_purgeIcons(self);
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -2437,22 +2302,14 @@ void* cFEStatePeakRoom::cFEStatePeakRoom1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStatePeakRoom__cFEStatePeakRoom__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_16cFEStatePeakRoom);
 #ifdef SKIP_ASM
 /**
- * Destroys the peak-room front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(); the g++
- * delete
- * flags reach it untouched in the second argument register.
- *
- * @return meaningless (the void base destructor's leftover return register)
+ * Destroys the peak room front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the work
+ * and free it when asked.
  */
-void* cFEStatePeakRoom__cFEStatePeakRoom(void* vself)
+cFEStatePeakRoom::~cFEStatePeakRoom()
 {
-    cFEStatePeakRoom* self = (cFEStatePeakRoom*)vself;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -2478,26 +2335,15 @@ void* cFEStateTrophyRoom::cFEStateTrophyRoom1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateTrophyRoom__cFEStateTrophyRoom);
+INCLUDE_ASM("fe/fepopupmisc", _$_18cFEStateTrophyRoom);
 #ifdef SKIP_ASM
-extern void* cFEStateTrophyRoom_vtbl[];
-extern void* cFEState_vtbl[];
-extern "C" void cFEStateTrophyRoom_purgeTextures(void* self);
-// PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
-extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("_$_8cUIState");
-
 /**
- * Destroys the trophy-room front-end state: releases its five loaded images (cFEStateTrophyRoom_purgeTextures), then the base
- * states.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys the trophy-room front-end state: releases its five loaded images (purgeTextures); its cFEState and cUIState
+ * parts do the rest and free it when asked.
  */
-extern "C" void cFEStateTrophyRoom__cFEStateTrophyRoom(cFEStateTrophyRoom* self, int flags)
+cFEStateTrophyRoom::~cFEStateTrophyRoom()
 {
-    VPTR_OF(cListNode, self) = cFEStateTrophyRoom_vtbl;
-    cFEStateTrophyRoom_purgeTextures(self);
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState_dtor(self, flags);
+    purgeTextures();
 }
 #endif
 
@@ -2524,22 +2370,14 @@ void* cFEStateRewardsRoom::cFEStateRewardsRoom1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom__cFEStateRewardsRoom__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_19cFEStateRewardsRoom);
 #ifdef SKIP_ASM
 /**
- * Destroys the rewards-room front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(); the g++
- * delete
- * flags reach it untouched in the second argument register.
- *
- * @return meaningless (the void base destructor's leftover return register)
+ * Destroys the rewards room front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the work
+ * and free it when asked.
  */
-void* cFEStateRewardsRoom__cFEStateRewardsRoom(void* vself)
+cFEStateRewardsRoom::~cFEStateRewardsRoom()
 {
-    cFEStateRewardsRoom* self = (cFEStateRewardsRoom*)vself;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3037,25 +2875,17 @@ int cFEStateRequestLine::getNumOwnedSongs()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFESound__cFESound);
+INCLUDE_ASM("fe/fepopupmisc", _$_8cFESound);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* cUISoundInterface_vtbl[];
 
 /**
- * Destroys the front end's sound interface (vtable cFESound_vtbl), freeing it when asked.
- *
- * Puts back the base sound-interface vtable cUISoundInterface_vtbl and calls operator_delete when bit 0 of @p flags is set. The
- * object is built by cFESound_cFESound (fe/fereal); its play routine is cFESound_playSound.
- *
- * @param flags  g++ destructor flags; bit 0 frees the object
+ * Destroys the front end's sound interface; it owns nothing of its own, so its cUISoundInterface part does the work and
+ * g++ frees it when asked. cFESound_cFESound (fe/fereal) builds it; its play routine is cFESound_playSound.
  */
-extern "C" void cFESound__cFESound(cFESound* self, int flags)
+cFESound::~cFESound()
 {
-    *(void***)self = cUISoundInterface_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -3082,26 +2912,17 @@ void cFESound::soundShutdown()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cOVSound__cOVSound);
+INCLUDE_ASM("fe/fepopupmisc", _$_8cOVSound);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* cUISoundInterface_vtbl[];
 
 /**
- * Destroys the overlay sound interface, freeing it when asked.
- *
- * Puts back cUISoundInterface_vtbl, the base sound-interface vtable (On Tour cUISoundInterface; its own destructor cUISoundInterface__cUISoundInterface
- * stores the same table), and calls operator_delete when bit 0 of flags is set. cOVSound owns nothing to release
- * (On Tour: only mDummyVar at +0x4).
- *
- * @param flags  g++ 2.95 destructor flags; bit 0 = free the object
+ * Destroys the overlay sound interface; it owns nothing of its own (On Tour: only mDummyVar at +0x4), so its
+ * cUISoundInterface part does the work and g++ frees it when asked.
  */
-extern "C" void cOVSound__cOVSound(cOVSound* self, int flags)
+cOVSound::~cOVSound()
 {
-    *(void***)self = cUISoundInterface_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -3154,22 +2975,14 @@ void* cFEStateSelectMultiplayerMode::cFEStateSelectMultiplayerMode1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_29cFEStateSelectMultiplayerMode);
 #ifdef SKIP_ASM
 /**
- * Destroys the select-multiplayer-mode front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(); the g++
- * delete
- * flags reach it untouched in the second argument register.
- *
- * @return meaningless (the void base destructor's leftover return register)
+ * Destroys the select-multiplayer-mode menu; it owns nothing of its own, so its cFEState and cUIState parts do the work
+ * and free it when asked.
  */
-void* cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode(void* vself)
+cFEStateSelectMultiplayerMode::~cFEStateSelectMultiplayerMode()
 {
-    cFEStateSelectMultiplayerMode* self = (cFEStateSelectMultiplayerMode*)vself;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3195,22 +3008,14 @@ void* cFEStateMPCircuit::cFEStateMPCircuit1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateMPCircuit__cFEStateMPCircuit__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_17cFEStateMPCircuit);
 #ifdef SKIP_ASM
 /**
- * Destroys the multiplayer-circuit front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(); the g++
- * delete
- * flags reach it untouched in the second argument register.
- *
- * @return meaningless (the void base destructor's leftover return register)
+ * Destroys the multiplayer circuit front-end state; it owns nothing of its own, so its cFEState and cUIState parts do
+ * the work and free it when asked.
  */
-void* cFEStateMPCircuit__cFEStateMPCircuit(void* vself)
+cFEStateMPCircuit::~cFEStateMPCircuit()
 {
-    cFEStateMPCircuit* self = (cFEStateMPCircuit*)vself;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3258,7 +3063,7 @@ int cFEUseExistingAccount::isOnlineState()
 #endif
 
 extern void* cFEStateSelectPersona_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona_cFEStateSelectPersona1);
@@ -3280,21 +3085,14 @@ void * cFEStateSelectPersona::cFEStateSelectPersona1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona__cFEStateSelectPersona__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_21cFEStateSelectPersona);
 #ifdef SKIP_ASM
 /**
- * Destroys the persona-selection state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
- * object when bit 0 is set.
- *
- * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
+ * Destroys the online persona select state; it owns nothing of its own, so its cFEStateNet part does the work and frees
+ * it when asked.
  */
-void* cFEStateSelectPersona__cFEStateSelectPersona(void* vself)
+cFEStateSelectPersona::~cFEStateSelectPersona()
 {
-    cFEStateSelectPersona* self = (cFEStateSelectPersona*)vself;
-    VPTR_OF(cListNode, self) = cFEStateSelectPersona_vtbl;
-    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -3353,28 +3151,19 @@ void* cFEStateChallengePopup::cFEStateChallengePopup1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengePopup__cFEStateChallengePopup);
+INCLUDE_ASM("fe/fepopupmisc", _$_22cFEStateChallengePopup);
 #ifdef SKIP_ASM
 
-extern void* cFEStateChallengePopup_vtbl[];
-// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
- * Destroys the challenge popup: calls its parent state's slot 32, then runs the cFEStateNet destructor.
- *
- * Slot 32 is the same hook the popup's own onGainTransition calls on itself, so the parent refreshes as the popup
- * goes away.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ * Destroys the online challenge popup: tells its parent state (mpParentState, virtual slot 32) that it is going away;
+ * the cFEStateNet part does the rest and frees it when asked.
  */
-extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallengePopup* self, int flags)
+cFEStateChallengePopup::~cFEStateChallengePopup()
 {
-    VPTR_OF(cListNode, self) = cFEStateChallengePopup_vtbl;
-    cUIState* obj = self->mpParentState;
+    cUIState* obj = mpParentState;
     sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cListNode, obj);
     vt[32].fn(vthis(obj, vt[32]));
-    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -3416,27 +3205,20 @@ void* cFEStateChallengeReceivedPopup::cFEStateChallengeReceivedPopup1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup);
+INCLUDE_ASM("fe/fepopupmisc", _$_30cFEStateChallengeReceivedPopup);
 #ifdef SKIP_ASM
-extern void* cFEStateChallengeReceivedPopup_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
- * Destroys the challenge-received popup: calls its parent state's slot 32, frees the string at +0x6D0, then runs the
- * cFEStateNet destructor.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ * Destroys the challenge-received popup: tells its parent state (mpParentState, virtual slot 32) that it is going away
+ * and destroys the challenger's name (mszChallenger); the cFEStateNet part does the rest and frees it when asked.
  */
-extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(cFEStateChallengeReceivedPopup* self, int flags)
+cFEStateChallengeReceivedPopup::~cFEStateChallengeReceivedPopup()
 {
-    VPTR_OF(cListNode, self) = cFEStateChallengeReceivedPopup_vtbl;
-    cUIState* obj = self->mpParentState;
+    cUIState* obj = mpParentState;
     sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cListNode, obj);
     vt[32].fn(vthis(obj, vt[32]));
-    cBXString__cBXString((char*)&self->mszChallenger, 2);
-    cFEStateNet__cFEStateNet_dtor(self, flags);
+    cBXString__cBXString((char*)&mszChallenger, 2);
 }
 #endif
 
@@ -3455,7 +3237,7 @@ bool cFEStateChallengeReceivedPopup::onLoseTransition()
 #endif
 
 extern void* cFEStateOnlineCharacterSelect_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1);
@@ -3478,22 +3260,14 @@ void * cFEStateOnlineCharacterSelect::cFEStateOnlineCharacterSelect1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_29cFEStateOnlineCharacterSelect);
 #ifdef SKIP_ASM
 /**
- * Destroys the online character-select state: restores its vtable and runs the cFEStateNet destructor
- * (cFEStateNet__cFEStateNet).
- *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
- * object when bit 0 is set.
- *
- * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
+ * Destroys the online character select state; it owns nothing of its own, so its cFEStateNet part does the work and
+ * frees it when asked.
  */
-void* cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect(void* vself)
+cFEStateOnlineCharacterSelect::~cFEStateOnlineCharacterSelect()
 {
-    cFEStateOnlineCharacterSelect* self = (cFEStateOnlineCharacterSelect*)vself;
-    VPTR_OF(cListNode, self) = cFEStateOnlineCharacterSelect_vtbl;
-    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -3774,29 +3548,20 @@ void* cFEStateCreateStep1::cFEStateCreateStep11()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep1__cFEStateCreateStep1);
+INCLUDE_ASM("fe/fepopupmisc", _$_19cFEStateCreateStep1);
 #ifdef SKIP_ASM
 extern void* cFEStateCreateStep1_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
- * Destroys account creation step 1: frees its saved mail, confirmation and password strings, then the cFEStateNet
- * part.
- *
- * Restores cFEStateCreateStep1_vtbl, destroys the cBXStrings mszSavedMail (+0x6DC), mszSavedConfirm (+0x6D8) and
- * mszSavedPassword (+0x6D4) and calls cFEStateNet__cFEStateNet with @p flags.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
+ * Destroys the first account-creation step: destroys its saved e-mail, confirmation and password strings; the
+ * cFEStateNet part does the rest and frees it when asked.
  */
-extern "C" void cFEStateCreateStep1__cFEStateCreateStep1(cFEStateCreateStep1* self, int flags)
+cFEStateCreateStep1::~cFEStateCreateStep1()
 {
-    VPTR_OF(cListNode, self) = cFEStateCreateStep1_vtbl;
-    cBXString__cBXString((char*)&self->mszSavedMail, 2);
-    cBXString__cBXString((char*)&self->mszSavedConfirm, 2);
-    cBXString__cBXString((char*)&self->mszSavedPassword, 2);
-    cFEStateNet__cFEStateNet_dtor(self, flags);
+    cBXString__cBXString((char*)&mszSavedMail, 2);
+    cBXString__cBXString((char*)&mszSavedConfirm, 2);
+    cBXString__cBXString((char*)&mszSavedPassword, 2);
 }
 #endif
 
@@ -3817,7 +3582,7 @@ int cFEStateCreateStep1::isOnlineState()
 #endif
 
 extern void* cFEStateCreateStep2_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2_cFEStateCreateStep21);
@@ -3840,21 +3605,14 @@ void * cFEStateCreateStep2::cFEStateCreateStep21()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateStep2__cFEStateCreateStep2__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_19cFEStateCreateStep2);
 #ifdef SKIP_ASM
 /**
- * Destroys account creation step 2: restores cFEStateCreateStep2_vtbl and runs the cFEStateNet destructor.
- *
- * The C passes only @p self to cFEStateNet__cFEStateNet; the destructor flags reach it untouched in $a1 (a port must pass
- * them).
- *
- * @return cFEStateNet__cFEStateNet()'s result (not meaningful; declared void* by the unit)
+ * Destroys the second account-creation step; it owns nothing of its own, so its cFEStateNet part does the work and
+ * frees it when asked.
  */
-void* cFEStateCreateStep2__cFEStateCreateStep2(void* vself)
+cFEStateCreateStep2::~cFEStateCreateStep2()
 {
-    cFEStateCreateStep2* self = (cFEStateCreateStep2*)vself;
-    VPTR_OF(cListNode, self) = cFEStateCreateStep2_vtbl;
-    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -3875,7 +3633,7 @@ int cFEStateCreateStep2::isOnlineState()
 #endif
 
 extern void* cFEStateCreateDuplicate_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate_cFEStateCreateDuplicate1);
@@ -3897,21 +3655,14 @@ void * cFEStateCreateDuplicate::cFEStateCreateDuplicate1()
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate__cFEStateCreateDuplicate__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_23cFEStateCreateDuplicate);
 #ifdef SKIP_ASM
 /**
- * Destroys the duplicate-account state: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * The g++ destructor flags are not declared here: they stay in $a1 and reach cFEStateNet__cFEStateNet unchanged, which frees the
- * object when bit 0 is set.
- *
- * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
+ * Destroys the duplicate-account popup; it owns nothing of its own, so its cFEStateNet part does the work and frees it
+ * when asked.
  */
-void* cFEStateCreateDuplicate__cFEStateCreateDuplicate(void* vself)
+cFEStateCreateDuplicate::~cFEStateCreateDuplicate()
 {
-    cFEStateCreateDuplicate* self = (cFEStateCreateDuplicate*)vself;
-    VPTR_OF(cListNode, self) = cFEStateCreateDuplicate_vtbl;
-    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -3982,25 +3733,17 @@ int cFEStateLogin::isOnlineState()
 }
 #endif
 
-extern void* cFEStateStats_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", cFEStateStats__cFEStateStats__FPv);
+INCLUDE_ASM("fe/fepopupmisc", _$_13cFEStateStats);
 #ifdef SKIP_ASM
 /**
- * Destroys the stats screen state: restores cFEStateStats_vtbl and runs the cFEStateNet destructor.
- *
- * The C passes only @p self to cFEStateNet__cFEStateNet; the destructor flags reach it untouched in $a1 (a port must pass
- * them).
- *
- * @return cFEStateNet__cFEStateNet()'s result (not meaningful; declared void* by the unit)
+ * Destroys the online stats state; it owns nothing of its own, so its cFEStateNet part does the work and frees it when
+ * asked.
  */
-void* cFEStateStats__cFEStateStats(void* vself)
+cFEStateStats::~cFEStateStats()
 {
-    cFEStateStats* self = (cFEStateStats*)vself;
-    VPTR_OF(cListNode, self) = cFEStateStats_vtbl;
-    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -4018,7 +3761,7 @@ void cFEStateStats::onMenuGainFocus(cUIGroup*)
 #endif
 
 extern void* cFEStateNetNews_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetNews__cFEStateNetNews__FPv);
@@ -4054,7 +3797,7 @@ int cFEStateNetNews_onLoseTransition(void* self)
 #endif
 
 extern void* cFEStateRelogin_vtbl[];
-extern "C" void* cFEStateLogin__cFEStateLogin(void*);
+extern "C" void* cFEStateLogin__cFEStateLogin(void*) __asm__("_$_13cFEStateLogin");
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin_cFEStateRelogin1);

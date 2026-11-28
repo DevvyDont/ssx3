@@ -84,30 +84,22 @@ void* cMoveNode_cMoveNode_3(void* vself, void* bucket, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", cMoveNode__cMoveNode);
+INCLUDE_ASM("object/movenode", _$_9cMoveNode);
 #ifdef SKIP_ASM
-extern char cMoveNode_vtbl[];
 extern "C" void cMoveNode_restoreOverlapSystem(cMoveNode* self);
 extern "C" void tModifierBlock__tModifierBlock(void* block, int flags);
-extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 /**
- * Destroys a move node: restores the overlap system, deletes its modifier block, then runs the base destructor.
- *
- * Stores cMoveNode's vtable at +0xC, calls cMoveNode_restoreOverlapSystem(), destroys and frees the
- * ModifierBlock (+0x1C) when there is one, then calls cInstanceNode__cInstanceNode() with the same flags.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a moving node: restores its overlap system (cMoveNode::restoreOverlapSystem) and deletes its modifier block
+ * (ModifierBlock) when it has one; the cInstanceNode part does the rest and frees it when asked.
  */
-extern "C" void cMoveNode__cMoveNode(cMoveNode* self, int flags)
+cMoveNode::~cMoveNode()
 {
-    VPTR_OF(cObjNode, self) = (void**)cMoveNode_vtbl;
-    self->cMoveNode::restoreOverlapSystem();
-    tModifierBlock* block = self->ModifierBlock;
+    cMoveNode::restoreOverlapSystem();
+    tModifierBlock* block = ModifierBlock;
     if (block != 0) {
         tModifierBlock__tModifierBlock(block, 3);
     }
-    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 

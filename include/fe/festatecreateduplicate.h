@@ -1,5 +1,6 @@
 #ifndef FE_FESTATECREATEDUPLICATE_H
 #define FE_FESTATECREATEDUPLICATE_H
+#pragma interface
 
 // cFEStateCreateDuplicate: screen "212create_duplicate": the server refused a new account name (mbAccount) or persona
 // name; it lists the server's suggested names (tLobbyAccount mNameOptions) and lets the player pick one or type
@@ -70,9 +71,7 @@ struct cFEStateCreateDuplicate : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateCreateDuplicate1() __asm__("cFEStateCreateDuplicate_cFEStateCreateDuplicate1");
-    // retail's destructor cFEStateCreateDuplicate__cFEStateCreateDuplicate stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateCreateDuplicate();
+    virtual ~cFEStateCreateDuplicate();   // g++'s own symbol _$_23cFEStateCreateDuplicate (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateCreateDuplicate_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateCreateDuplicate_onWidgetEvent");
     virtual void onUpdate() __asm__("cFEStateCreateDuplicate_onUpdate__FPv");
@@ -94,5 +93,6 @@ CHECK_OFFSET(cFEStateCreateDuplicate, mbAskSave, 0x6D4);
 CHECK_OFFSET(cFEStateCreateDuplicate, mpAccount, 0x6D8);
 CHECK_OFFSET(cFEStateCreateDuplicate, unk_6DC, 0x6DC);
 CHECK_SIZE(cFEStateCreateDuplicate, 0x6E0);
+__asm__("_vt$23cFEStateCreateDuplicate = cFEStateCreateDuplicate_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATECREATEDUPLICATE_H */

@@ -110,29 +110,20 @@ extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, cUIEngine* engine
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", cScreenPopup__cScreenPopup);
+INCLUDE_ASM("fe/fepopup", _$_12cScreenPopup);
 #ifdef SKIP_ASM
-extern void* cScreenPopup_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cPopupInfo__cPopupInfo(void* self, int flags);
-extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys a screen popup: its two strings and popup info, then the cUIState base.
- *
- * Restores cScreenPopup_vtbl, destroys mszStaticText and mszInputText (cBXString destructor, flags 2) and the
- * embedded cPopupInfo (cPopupInfo__cPopupInfo, flags 2), then calls the cUIState destructor (_$_8cUIState) with
- * @p flags.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a screen popup: destroys its static and input strings (cBXString destructor) and its popup info
+ * (cPopupInfo__cPopupInfo); the cUIState part does the rest and frees it when asked.
  */
-extern "C" void cScreenPopup__cScreenPopup(cScreenPopup* self, int flags)
+cScreenPopup::~cScreenPopup()
 {
-    VPTR_OF(cListNode, self) = cScreenPopup_vtbl;
-    cBXString__cBXString(&self->mszStaticText, 2);
-    cBXString__cBXString(&self->mszInputText, 2);
-    cPopupInfo__cPopupInfo((char*)&self->info, 2);
-    cUIState__cUIState(self, flags);
+    cBXString__cBXString(&mszStaticText, 2);
+    cBXString__cBXString(&mszInputText, 2);
+    cPopupInfo__cPopupInfo((char*)&info, 2);
 }
 #endif
 
@@ -3492,31 +3483,23 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, cUIEngine* 
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopup", cKeyboardPopup__cKeyboardPopup);
+INCLUDE_ASM("fe/fepopup", _$_14cKeyboardPopup);
 #ifdef SKIP_ASM
-extern void* cKeyboardPopup_vtbl[];
 void cMemMan_free(void* ptr);
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys the on-screen keyboard: frees its pending unicode static text and its static string.
- *
- * Stores the class vtable, frees mpustrStatic when set, destroys the mszStatic cBXString and runs the
- * cUIState destructor (cUIState__cUIState), which also frees the object when the flags ask for it.
- *
- * @param flags  destructor flags, passed on to cUIState__cUIState
+ * Destroys the keyboard popup: frees its static text (mpustrStatic) when it has one and destroys mszStatic; the
+ * cUIState part does the rest and frees it when asked.
  */
-extern "C" void cKeyboardPopup__cKeyboardPopup(cKeyboardPopup* self, int flags)
+cKeyboardPopup::~cKeyboardPopup()
 {
-    VPTR_OF(cListNode, self) = cKeyboardPopup_vtbl;
-    void* ustrStatic = self->mpustrStatic;
+    void* ustrStatic = mpustrStatic;
     if (ustrStatic != 0) {
         cMemMan_free(ustrStatic);
-        self->mpustrStatic = 0;
+        mpustrStatic = 0;
     }
-    cBXString__cBXString(&self->mszStatic, 2);
-    cUIState__cUIState(self, flags);
+    cBXString__cBXString(&mszStatic, 2);
 }
 #endif
 

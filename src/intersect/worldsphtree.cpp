@@ -4955,24 +4955,16 @@ extern "C" void* cBoostNode_cBoostNode(cBoostNode* self, void* bucket, void* str
 #endif
 
 extern void* cBoostNode_vtbl[];
-extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", cBoostNode__cBoostNode__FPv);
+INCLUDE_ASM("intersect/worldsphtree", _$_10cBoostNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a boost node: restores cBoostNode's vtable, then runs the cInstanceNode destructor.
- *
- * Only @p self is declared here; the destructor flags the caller passed in the second argument register reach
- * cInstanceNode__cInstanceNode() unchanged, and it frees the object when bit 0 is set.
- *
- * @return cInstanceNode__cInstanceNode()'s result (it returns nothing meaningful)
+ * Destroys the boost-zone node; it owns nothing of its own, so its cInstanceNode part does the work and frees it when
+ * asked.
  */
-void* cBoostNode__cBoostNode(void* vself)
+cBoostNode::~cBoostNode()
 {
-    cBoostNode* self = (cBoostNode*)vself;
-    VPTR_OF(cObjNode, self) = cBoostNode_vtbl;
-    return cInstanceNode__cInstanceNode(self);
 }
 #endif
 

@@ -1,5 +1,6 @@
 #ifndef OBJECT_FLAGNODE_H
 #define OBJECT_FLAGNODE_H
+#pragma interface
 
 // cFlagNode: the node of a cloth flag instance. It owns no flag state: the ctor marks the record (flags +0x8: clears
 // bit 1, sets bit 2), builds a tFlagState from the world script's tMakeFlagData on the stack and registers the record
@@ -40,13 +41,12 @@ struct cFlagNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFlagNode1(void* bucket, tInstanceRecord* node, void* src) __asm__("cFlagNode_cFlagNode1");
-    // retail's destructor cFlagNode__cFlagNode stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFlagNode();
+    virtual ~cFlagNode();   // g++'s own symbol _$_9cFlagNode (the retail label renamed)
     virtual void render() __asm__("cFlagNode_render__FPv");
     virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cFlagNode_writeToReplayFrame__FPv");
 };
 
 CHECK_SIZE(cFlagNode, 0x1C);
+__asm__("_vt$9cFlagNode = cFlagNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_FLAGNODE_H */

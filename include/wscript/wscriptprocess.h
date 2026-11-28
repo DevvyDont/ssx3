@@ -1,5 +1,6 @@
 #ifndef WSCRIPT_WSCRIPTPROCESS_H
 #define WSCRIPT_WSCRIPTPROCESS_H
+#pragma interface
 
 // cWScriptProcess / cWScriptTask: a world-script process and its tasks. cWScriptMan_addProcess allocates a process
 // (cMemMan_alloc(0x60, "WScriptProcess")) from a world section's process definition; the constructor resolves its
@@ -16,6 +17,7 @@
 // The vtable pointers are g++ 2.95's, after the members.
 
 #include "layout.h"
+#include "bx/memman.h"
 
 struct cWScriptMan;
 struct cWScriptProcess;
@@ -43,8 +45,8 @@ struct cWScriptTask {
                                        //      (0x38)
     cWScriptProcess* Process;          // 0x3C [O]; [R] initTask; [U] the event handlers
     // 0x40: the vptr (g++ 2.95 puts it after the data). [R] cWScriptTask_vtbl's 16 slots in this order, all
-    // cWScriptTask_* (On Tour's methods of the same names). Defined as extern "C" functions; nothing here is defined.
-    virtual ~cWScriptTask();                                       // 1
+    // cWScriptTask_* (On Tour's methods of the same names). Defined as extern "C" functions, except the destructor.
+    virtual ~cWScriptTask();             // 1; g++'s own symbol _$_12cWScriptTask (the retail label renamed)
     virtual void update();                                         // 2
     virtual void dispatchTaskEvent(const struct tWScriptEvent& event) __asm__("cWScriptTask_dispatchTaskEvent"); // 3
     virtual void taskStart() __asm__("cWScriptTask_taskStart");                                      // 4
@@ -72,6 +74,7 @@ CHECK_OFFSET(cWScriptTask, TaskId, 0x04);
 CHECK_OFFSET(cWScriptTask, EventScriptCode, 0x14);
 CHECK_OFFSET(cWScriptTask, Process, 0x3C);
 CHECK_SIZE(cWScriptTask, 0x44);
+__asm__("_vt$12cWScriptTask = cWScriptTask_vtbl");   // g++'s name for the retail vtable
 
 struct cBxReplayFrame;
 struct tTrickNameDef;

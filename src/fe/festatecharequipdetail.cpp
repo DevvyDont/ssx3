@@ -259,13 +259,10 @@ extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUI
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip__cFEStateCharEquip);
+INCLUDE_ASM("fe/festatecharequipdetail", _$_17cFEStateCharEquip);
 #ifdef SKIP_ASM
 extern "C" void cFEBoltFileManager_releaseFile(cFEBoltFileManager* self, int bank, int i);
 extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(cFEStateCharEquip* self);
-extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
-extern void* cFEStateCharEquip_vtbl[];
-extern void* cFEState_vtbl[];
 
 struct sVEntryK199148 {
     short delta;
@@ -283,31 +280,26 @@ static inline void releaseK199148(int id)
 }
 
 /**
- * Destroys the equip-gear state: frees its icon file and preview textures, then runs the base destructor.
+ * Destroys the equip-gear state: frees its icon file and preview textures; its cFEState and cUIState parts do the rest
+ * and free it when asked.
  *
- * Releases the icon file (0xA64) from the FE file cache and the texture ids at 0xA68, 0xA70 and 0xA74 through
- * the graphics manager (vtable slot 50), cancels a pending large-preview load (cFEStateCharEquip_cancelLargePreviewLoad), restores the
- * base vtable cFEState_vtbl and calls the cUIState destructor cUIState__cUIState().
- *
- * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 frees the object
+ * Releases the icon file (mIconsFileIndex) from the FE file cache and the textures mIconTextureID, mPreviewTextureID
+ * and mOldPreviewTextureID through the graphics manager (vtable slot 50, RemoveTexture), and cancels a pending
+ * large-preview load (cancelLargePreviewLoad).
  */
-extern "C" void cFEStateCharEquip__cFEStateCharEquip(cFEStateCharEquip* self, int flags)
+cFEStateCharEquip::~cFEStateCharEquip()
 {
-    VPTR_OF(cListNode, self) = cFEStateCharEquip_vtbl;
-    if (self->mIconsFileIndex >= 0) {
-        ((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager)->releaseFile(self->mCharID,
-                      self->mIconsFileIndex);
-        self->mIconsFileIndex = -1;
+    if (mIconsFileIndex >= 0) {
+        ((cFEBoltFileManager*)SSXApp->RealFE->mBoltFileManager)->releaseFile(mCharID, mIconsFileIndex);
+        mIconsFileIndex = -1;
     }
-    releaseK199148(self->mIconTextureID);
-    self->mIconTextureID = -1;
-    self->cancelLargePreviewLoad();
-    releaseK199148(self->mPreviewTextureID);
-    releaseK199148(self->mOldPreviewTextureID);
-    self->mPreviewTextureID = -1;
-    self->mOldPreviewTextureID = -1;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState(self, flags);
+    releaseK199148(mIconTextureID);
+    mIconTextureID = -1;
+    cancelLargePreviewLoad();
+    releaseK199148(mPreviewTextureID);
+    releaseK199148(mOldPreviewTextureID);
+    mPreviewTextureID = -1;
+    mOldPreviewTextureID = -1;
 }
 #endif
 

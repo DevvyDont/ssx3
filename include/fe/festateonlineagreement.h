@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEONLINEAGREEMENT_H
 #define FE_FESTATEONLINEAGREEMENT_H
+#pragma interface
 
 // cFEStateOnlineAgreement: the online terms-of-service screen: scrolls the 0xB2 "kT_TOS..." text lines into
 // "AgTextScroll", one per frame, and accepts / declines. A cFEStateNet state (fe/festatenet.h, 0x6D0). EA's name: the
@@ -62,9 +63,7 @@ struct cFEStateOnlineAgreement : public cFEStateNet {
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateOnlineAgreement1() __asm__("cFEStateOnlineAgreement_cFEStateOnlineAgreement1");
     void* cFEStateOnlineAgreement2() __asm__("cFEStateOnlineAgreement_cFEStateOnlineAgreement2");
-    // retail's destructor cFEStateOnlineAgreement__cFEStateOnlineAgreement stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateOnlineAgreement();
+    virtual ~cFEStateOnlineAgreement();   // g++'s own symbol _$_23cFEStateOnlineAgreement (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateOnlineAgreement_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateOnlineAgreement_onUpdate");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateOnlineAgreement_onWidgetCreate");
@@ -82,5 +81,6 @@ CHECK_OFFSET(cFEStateOnlineAgreement, mpTOSLines, 0x6D0);
 CHECK_OFFSET(cFEStateOnlineAgreement, miNumTOSLines, 0x6D4);
 CHECK_OFFSET(cFEStateOnlineAgreement, miNextTOSLine, 0x6D8);
 CHECK_SIZE(cFEStateOnlineAgreement, 0x6DC);
+__asm__("_vt$23cFEStateOnlineAgreement = cFEStateOnlineAgreement_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATEONLINEAGREEMENT_H */

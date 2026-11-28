@@ -1,5 +1,6 @@
 #ifndef FE_FESTATECHATROOM_H
 #define FE_FESTATECHATROOM_H
+#pragma interface
 
 // cFEStateChatRoom: the online chat room (screen "235chat_room"): the room's player list (6 visible rows
 // "PlayerListItem00".."05" with connection-quality icons), the selected player's stats, the chat history and the
@@ -92,6 +93,7 @@ struct cFEStateChatRoom : public cFEStateNet {
                                     //       onCreateScreen copies it to mpTextScrollChat + 0xA8 (ldl/ldr)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cFEStateChatRoom();   // g++'s own symbol _$_16cFEStateChatRoom (the retail label renamed)
     void* cFEStateChatRoom1() __asm__("cFEStateChatRoom_cFEStateChatRoom1");
     // onUpdate stays a C function (cFEStateChatRoom_onUpdate): declared first, it is the vtable's key function, which
     // keeps the vtable out of the units defining the other overrides
@@ -132,5 +134,6 @@ CHECK_OFFSET(cFEStateChatRoom, miMenuScroll, 0x704);
 CHECK_OFFSET(cFEStateChatRoom, mszPlayerName, 0x70C);
 CHECK_OFFSET(cFEStateChatRoom, mChatColour, 0x72C);
 CHECK_SIZE(cFEStateChatRoom, 0x73C);
+__asm__("_vt$16cFEStateChatRoom = cFEStateChatRoom_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATECHATROOM_H */

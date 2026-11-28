@@ -4271,23 +4271,15 @@ void cWScriptProcess::runScriptCode1()
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", cWScriptTask__cWScriptTask);
+INCLUDE_ASM("wscript/wscriptman", _$_12cWScriptTask);
 #ifdef SKIP_ASM
-extern void* cWScriptTask_vtbl[];
 void operator_delete(int* ptr);
 
 /**
- * Destroys a world script task: restores cWScriptTask's vtable at +0x40, then frees the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a world script task; it owns nothing, so there is only the object to free when asked.
  */
-// deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cWScriptTask__cWScriptTask(cWScriptTask* self, int flags)
+cWScriptTask::~cWScriptTask()
 {
-    VPTR_OF(cWScriptTask, self) = cWScriptTask_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

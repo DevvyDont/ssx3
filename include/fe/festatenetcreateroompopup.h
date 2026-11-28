@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENETCREATEROOMPOPUP_H
 #define FE_FESTATENETCREATEROOMPOPUP_H
+#pragma interface
 
 // cFEStateNetCreateRoomPopup: the lobby's "create room" popup: channel list (beginner / advanced / elite / voice),
 // room
@@ -14,7 +15,7 @@
 // Size 0x6E8: cMemMan_alloc(0x6E8, "cFEStateNetCreateRoomPopup") + cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup(mem, pEngine, pParent)
 // (cFEStateLobbyMenu's onWidgetEvent, the only site); mszPassword ends at 0x6E8. Constructors cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup
 // (cFEStateNet(pEngine, pParent), vtable cFEStateNetCreateRoomPopup_vtbl, mHashName 0x47) and the default cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1 (fe/fepopupmisc);
-// destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup (fe/fepopupmisc; slot 1: destroys the three strings). Retail vtable cFEStateNetCreateRoomPopup_vtbl (32 slots;
+// destructor _$_26cFEStateNetCreateRoomPopup (fe/fepopupmisc; slot 1: destroys the three strings). Retail vtable cFEStateNetCreateRoomPopup_vtbl (32 slots;
 // vtables.tsv lists 24: 4 onCreateScreen cFEStateNetCreateRoomPopup_onCreateScreen, 10 cFEStateNetCreateRoomPopup_onLoseTransition, 12 onUpdate
 // cFEStateNetCreateRoomPopup_onUpdate, 18 onWidgetCreate cFEStateNetCreateRoomPopup_onWidgetCreate, 19 onWidgetEvent cFEStateNetCreateRoomPopup_onWidgetEvent, 21 cFEStateNetCreateRoomPopup_onWidgetPair, 25
 // cFEStateNetCreateRoomPopup_fillHelpPopup (help), 31 cFEStateNetCreateRoomPopup_onNetEvent). Methods: fe/feasyncfile 0x1BE7D8-0x1BED58.
@@ -64,14 +65,14 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
                                     //       event 9 compares the widget with it and sets mszChannelName from its
                                     //       selection (cUIListBox_getCurrentEntryData)
     char* mszRoomName;              // 0x6DC [P] getRoomName (preview 0xB8); [R] cBXString_EmptyString (both ctors), destroyed by
-                                    //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
+                                    //       _$_26cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
                                     //       keyboard id 1); cFEStateNetCreateRoomPopup_checkRoomName refuses an empty name
                                     //       ("kT_POPUP231UniqueRoom")
     char* mszChannelName;           // 0x6E0 [P] getChannelName (preview 0xBC); [R] cBXString_EmptyString, destroyed by
-                                    //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned cFEStateLobbyMenu_beginnerChannelName by onWidgetCreate and
+                                    //       _$_26cFEStateNetCreateRoomPopup; [U] cBXString assigned cFEStateLobbyMenu_beginnerChannelName by onWidgetCreate and
                                     //       one of cFEStateLobbyMenu_eliteChannelName/64/6C/68 per list entry by onWidgetEvent
     char* mszPassword;              // 0x6E4 [P] getPassword (preview 0xC0); [R] cBXString_EmptyString, destroyed by
-                                    //       cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
+                                    //       _$_26cFEStateNetCreateRoomPopup; [U] cBXString assigned from the keyboard text (event 13,
                                     //       keyboard id 2)
 
     // Methods bound to their retail symbols by asm labels.
@@ -79,8 +80,7 @@ struct cFEStateNetCreateRoomPopup : public cFEStateNet {
     char* getRoomName() __asm__("cFEStateNetCreateRoomPopup_getRoomName");
     char* getChannelName() __asm__("cFEStateNetCreateRoomPopup_getChannelName");
     char* getPassword() __asm__("cFEStateNetCreateRoomPopup_getPassword");
-    // retail's destructor cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup stays a C function (g++ 2.95 takes no
-    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_26cFEStateNetCreateRoomPopup (the retail label renamed)
     virtual ~cFEStateNetCreateRoomPopup();
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateNetCreateRoomPopup_onWidgetEvent");
     virtual bool onLoseTransition() __asm__("cFEStateNetCreateRoomPopup_onLoseTransition__FPv");
@@ -98,5 +98,6 @@ CHECK_OFFSET(cFEStateNetCreateRoomPopup, mszRoomName, 0x6DC);
 CHECK_OFFSET(cFEStateNetCreateRoomPopup, mszChannelName, 0x6E0);
 CHECK_OFFSET(cFEStateNetCreateRoomPopup, mszPassword, 0x6E4);
 CHECK_SIZE(cFEStateNetCreateRoomPopup, 0x6E8);
+__asm__("_vt$26cFEStateNetCreateRoomPopup = cFEStateNetCreateRoomPopup_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATENETCREATEROOMPOPUP_H */

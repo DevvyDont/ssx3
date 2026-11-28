@@ -1,5 +1,6 @@
 #ifndef OBJECT_DEADNODE_H
 #define OBJECT_DEADNODE_H
+#pragma interface
 
 // cDeadNode: the node of a removed (collected, destroyed or expired) instance: it marks the record (flags +0x8: clears
 // 0x60 and bit 1, sets bit 2) and sits in the dead bucket (8) as node type 6 (the unsorted type: its SortIndex comes
@@ -41,13 +42,13 @@ struct cDeadNode : public cInstanceNode {
     //   Instance: [R] the ctor marks the record's flags (+0x8) through it (lw 0x18 twice)
 
     // Methods bound to their retail symbols by asm labels.
-    // loseFocus stays a C function (cDeadNode_loseFocus): declared first, it is the vtable's key function, which keeps
-    // the vtable out of the units defining the other overrides
+    virtual ~cDeadNode();   // g++'s own symbol _$_9cDeadNode (the retail label renamed)
     virtual void loseFocus() __asm__("cDeadNode_loseFocus__FPv");
     virtual void expire(int) __asm__("cDeadNode_expire__FPv");
     virtual void signal(int, float) __asm__("cDeadNode_signal__FPv");
 };
 
 CHECK_SIZE(cDeadNode, 0x1C);
+__asm__("_vt$9cDeadNode = cDeadNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_DEADNODE_H */

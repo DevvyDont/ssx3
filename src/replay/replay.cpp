@@ -1,5 +1,6 @@
 #include "common.h"
 #include "object/objnode.h"
+#include "object/deadfadenode.h"
 #include "replay/frame.h"
 #include "vtable.h"
 #include "replay/frameptr.h"
@@ -204,15 +205,14 @@ extern "C" void* cFloatRailNode_cFloatRailNode1_RO(void* self, void* bucket, voi
 extern char str_SpringRail[];
 extern "C" void* cSpringRailNode_cSpringRailNode1_RO(void* self, void* bucket, void* stream) __asm__("cSpringRailNode_cSpringRailNode1");
 extern char str_DeadFade[];
-struct sVE_RO { short delta; short index; void (*fn)(void*, int); };
-struct sObj_RO { int pad[3]; sVE_RO* vt; };
-extern "C" sObj_RO* cDeadFadeNode_cDeadFadeNode1_RO(void* self, void* bucket, void* stream) __asm__("cDeadFadeNode_cDeadFadeNode1");
+extern "C" cDeadFadeNode* cDeadFadeNode_cDeadFadeNode1_RO(void* self, void* bucket, void* stream)
+    __asm__("cDeadFadeNode_cDeadFadeNode1");
 
 /**
  * Recreates one recorded world object of the stream's next node type in a bucket.
  *
  * ATYPE_DEAD and ATYPE_TRICKTRIGGER have no case and are not read. ATYPE_DEADFADE is constructed and then deleted at
- * once (virtual slot 1 with flags 3), which looks like a leftover.
+ * once (through its virtual destructor), which looks like a leftover.
  *
  * @param bucket  the bucket to link the object into
  * @param stream  the frame's stream, positioned at the object (On Tour cReplayFramePtr* data)
@@ -282,10 +282,9 @@ void cReplay::restoreObject(void* bucket, cBxReplayFrame* stream)
         cSpringRailNode_cSpringRailNode1_RO(cMemMan_alloc(0x80, str_SpringRail, 0x20000000, 0), bucket, stream);
         break;
     case ATYPE_DEADFADE: {
-        sObj_RO* deadFadeNode = cDeadFadeNode_cDeadFadeNode1_RO(cMemMan_alloc(0x3C, str_DeadFade, 0x20000000, 0), bucket, stream);
-        if (deadFadeNode != 0) {
-            deadFadeNode->vt[1].fn(vthis(deadFadeNode, deadFadeNode->vt[1]), 3);
-        }
+        cDeadFadeNode* deadFadeNode = cDeadFadeNode_cDeadFadeNode1_RO(cMemMan_alloc(0x3C, str_DeadFade, 0x20000000, 0),
+                                                                      bucket, stream);
+        delete deadFadeNode;
         break;
     }
     }

@@ -914,25 +914,15 @@ void* cSkyBox_cSkyBox(void* vself)
 }
 #endif
 
-extern "C" void* cObjNode__cObjNode(void*);
-
 //100%
-INCLUDE_ASM("object/modifierblock", cSkyBox__cSkyBox__FPv);
+INCLUDE_ASM("object/modifierblock", _$_7cSkyBox);
 #ifdef SKIP_ASM
 /**
- * Destroys the sky box: restores cSkyBox's vtable, then runs the cObjNode destructor.
- *
- * Only @p self is declared here; the destructor flags the caller passed in the second argument register reach
- * cObjNode__cObjNode() unchanged. That removes the node from its render bucket and frees the object when bit 0
- * is set.
- *
- * @return cObjNode__cObjNode()'s result (it returns nothing meaningful)
+ * Destroys the sky box; it owns nothing of its own, so its cObjNode part does the work (it takes the node out of its
+ * render bucket) and frees it when asked.
  */
-void* cSkyBox__cSkyBox(void* vself)
+cSkyBox::~cSkyBox()
 {
-    cSkyBox* self = (cSkyBox*)vself;
-    VPTR_OF(cObjNode, self) = cSkyBox_vtbl;
-    return cObjNode__cObjNode(self);
 }
 #endif
 

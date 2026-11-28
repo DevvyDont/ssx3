@@ -4045,25 +4045,14 @@ bool cInstanceNode::isFlexRail() const
 }
 #endif
 
-extern void* cDeadNode_vtbl[];
-extern "C" void* cInstanceNode__cInstanceNode(void*);
-
 //100%
-INCLUDE_ASM("object/railmodifier", cDeadNode__cDeadNode__FPv);
+INCLUDE_ASM("object/railmodifier", _$_9cDeadNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a dead node: stores cDeadNode's vtable at +0xC, then runs the cInstanceNode destructor.
- *
- * The g++ delete flags arrive in the second argument register, which this body leaves untouched, so they pass
- * through to cInstanceNode__cInstanceNode(), which frees the object when bit 0 is set.
- *
- * @return no meaningful value (cInstanceNode__cInstanceNode returns nothing)
+ * Destroys a dead node; it owns nothing of its own, so its cInstanceNode part does the work and frees it when asked.
  */
-void* cDeadNode__cDeadNode(void* vself)
+cDeadNode::~cDeadNode()
 {
-    cDeadNode* self = (cDeadNode*)vself;
-    VPTR_OF(cObjNode, self) = cDeadNode_vtbl;
-    return cInstanceNode__cInstanceNode(self);
 }
 #endif
 
@@ -4084,9 +4073,8 @@ INCLUDE_ASM("object/railmodifier", cDeadNode_loseFocus__FPv);
 /**
  * Does nothing: cDeadNode's loseFocus has an empty body.
  */
-void cDeadNode_loseFocus(void* vself)
+void cDeadNode::loseFocus()
 {
-    cDeadNode* self = (cDeadNode*)vself;
 }
 #endif
 
@@ -4112,22 +4100,14 @@ void cDeadFadeNode::signal(int, float)
 }
 #endif
 
-extern void* cHideNode_vtbl[];
-extern "C" void* cInstanceNode__cInstanceNode(void*);
-
 //100%
-INCLUDE_ASM("object/railmodifier", cHideNode__cHideNode__FPv);
+INCLUDE_ASM("object/railmodifier", _$_9cHideNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a hide node: reinstalls cHideNode_vtbl and runs cInstanceNode__cInstanceNode (which forwards the delete flags).
- *
- * @return cInstanceNode__cInstanceNode's result
+ * Destroys a hide node; it owns nothing of its own, so its cInstanceNode part does the work and frees it when asked.
  */
-void* cHideNode__cHideNode(void* vself)
+cHideNode::~cHideNode()
 {
-    cHideNode* self = (cHideNode*)vself;
-    VPTR_OF(cObjNode, self) = cHideNode_vtbl;
-    return cInstanceNode__cInstanceNode(self);
 }
 #endif
 
@@ -4148,9 +4128,8 @@ INCLUDE_ASM("object/railmodifier", cHideNode_loseFocus__FPv);
 /**
  * Does nothing when a hide node loses focus.
  */
-void cHideNode_loseFocus(void* vself)
+void cHideNode::loseFocus()
 {
-    cHideNode* self = (cHideNode*)vself;
 }
 #endif
 
@@ -4176,23 +4155,14 @@ void cHideNode::onCollide(const tCollideInfo*, const tIntersectInfo*, cBeing*)
 }
 #endif
 
-extern void* cRestoreNode_vtbl[];
-extern "C" void* cInstanceNode__cInstanceNode(void*);
-
 //100%
-INCLUDE_ASM("object/railmodifier", cRestoreNode__cRestoreNode__FPv);
+INCLUDE_ASM("object/railmodifier", _$_12cRestoreNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a restore node: reinstalls cRestoreNode_vtbl and runs cInstanceNode__cInstanceNode (which forwards the delete
- * flags).
- *
- * @return cInstanceNode__cInstanceNode's result
+ * Destroys a restore node; it owns nothing of its own, so its cInstanceNode part does the work and frees it when asked.
  */
-void* cRestoreNode__cRestoreNode(void* vself)
+cRestoreNode::~cRestoreNode()
 {
-    cRestoreNode* self = (cRestoreNode*)vself;
-    VPTR_OF(cObjNode, self) = cRestoreNode_vtbl;
-    return cInstanceNode__cInstanceNode(self);
 }
 #endif
 
@@ -4976,9 +4946,6 @@ void cMoveNode::updateRootTransform()
 }
 #endif
 
-extern void* cObjectNode_vtbl[];
-extern "C" void* cMoveNode__cMoveNode(void*);
-
 //100%
 INCLUDE_ASM("object/railmodifier", cMoveNode_getParentMesh);
 #ifdef SKIP_ASM
@@ -5253,18 +5220,13 @@ void cMoveNode::fadeEffectModifier()
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cObjectNode__cObjectNode__FPv);
+INCLUDE_ASM("object/railmodifier", _$_11cObjectNode);
 #ifdef SKIP_ASM
 /**
- * Destroys an object node: reinstalls cObjectNode_vtbl and runs cMoveNode__cMoveNode (which forwards the delete flags).
- *
- * @return cMoveNode__cMoveNode's result
+ * Destroys an object node; it owns nothing of its own, so its cMoveNode part does the work and frees it when asked.
  */
-void* cObjectNode__cObjectNode(void* vself)
+cObjectNode::~cObjectNode()
 {
-    cObjectNode* self = (cObjectNode*)vself;
-    VPTR_OF(cObjNode, self) = cObjectNode_vtbl;
-    return cMoveNode__cMoveNode(self);
 }
 #endif
 
@@ -5763,23 +5725,16 @@ int cAnimTeeterNode::getAnimDir()
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cBoostModifier__cBoostModifier);
+INCLUDE_ASM("object/railmodifier", _$_14cBoostModifier);
 #ifdef SKIP_ASM
-extern void* cPhysicsModifier_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a boost modifier: stores the base cPhysicsModifier vtable at +0x4, then frees the object when asked
- * to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a boost modifier; it owns nothing of its own, so its cPhysicsModifier part does the work and frees it when
+ * asked.
  */
-extern "C" void cBoostModifier__cBoostModifier(cBoostModifier* self, int flags)
+cBoostModifier::~cBoostModifier()
 {
-    VPTR_OF(cPhysicsModifier, self) = cPhysicsModifier_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -5819,24 +5774,14 @@ void cBoostModifier::boostEnd()
 }
 #endif
 
-extern void* cDebounceNode_vtbl[];
-extern "C" void* cMoveNode__cMoveNode(void*);
-
 //100%
-INCLUDE_ASM("object/railmodifier", cDebounceNode__cDebounceNode__FPv);
+INCLUDE_ASM("object/railmodifier", _$_13cDebounceNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a debounce node: stores cDebounceNode's vtable at +0xC, then runs the cMoveNode destructor.
- *
- * The g++ delete flags in the second argument register pass through untouched to cMoveNode__cMoveNode().
- *
- * @return no meaningful value (cMoveNode__cMoveNode returns nothing)
+ * Destroys a debounce node; it owns nothing of its own, so its cMoveNode part does the work and frees it when asked.
  */
-void* cDebounceNode__cDebounceNode(void* vself)
+cDebounceNode::~cDebounceNode()
 {
-    cDebounceNode* self = (cDebounceNode*)vself;
-    VPTR_OF(cObjNode, self) = cDebounceNode_vtbl;
-    return cMoveNode__cMoveNode(self);
 }
 #endif
 
@@ -5851,23 +5796,15 @@ void cDebounceNode::onCollide(const tCollideInfo*, const tIntersectInfo*, cBeing
 }
 #endif
 
-extern void* cConveyorNode_vtbl[];
-extern "C" void* cInstanceNode__cInstanceNode(void*);
-
 //100%
-INCLUDE_ASM("object/railmodifier", cConveyorNode__cConveyorNode__FPv);
+INCLUDE_ASM("object/railmodifier", _$_13cConveyorNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a conveyor node: reinstalls cConveyorNode_vtbl and runs cInstanceNode__cInstanceNode (which forwards the delete
- * flags).
- *
- * @return cInstanceNode__cInstanceNode's result
+ * Destroys the conveyor node; it owns nothing of its own, so its cInstanceNode part does the work and frees it when
+ * asked.
  */
-void* cConveyorNode__cConveyorNode(void* vself)
+cConveyorNode::~cConveyorNode()
 {
-    cConveyorNode* self = (cConveyorNode*)vself;
-    VPTR_OF(cObjNode, self) = cConveyorNode_vtbl;
-    return cInstanceNode__cInstanceNode(self);
 }
 #endif
 
@@ -5885,25 +5822,15 @@ void* cConveyorNode::getNodeState()
 }
 #endif
 
-extern void* cCounterNode_vtbl[];
-extern "C" void* cInstanceNode__cInstanceNode(void*);
-
 //100%
-INCLUDE_ASM("object/railmodifier", cCounterNode__cCounterNode__FPv);
+INCLUDE_ASM("object/railmodifier", _$_12cCounterNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a counter node: stores cCounterNode's vtable at +0xC, then runs the cInstanceNode destructor.
- *
- * The g++ delete flags in the second argument register pass through untouched to
- * cInstanceNode__cInstanceNode().
- *
- * @return no meaningful value (cInstanceNode__cInstanceNode returns nothing)
+ * Destroys the counter node; it owns nothing of its own, so its cInstanceNode part does the work and frees it when
+ * asked.
  */
-void* cCounterNode__cCounterNode(void* vself)
+cCounterNode::~cCounterNode()
 {
-    cCounterNode* self = (cCounterNode*)vself;
-    VPTR_OF(cObjNode, self) = cCounterNode_vtbl;
-    return cInstanceNode__cInstanceNode(self);
 }
 #endif
 
@@ -6036,7 +5963,6 @@ bool cFlexRailNode::isFlexRail() const
 }
 #endif
 
-
 //100%
 INCLUDE_ASM("object/railmodifier", cFloatRailNode_getMesh);
 #ifdef SKIP_ASM
@@ -6053,7 +5979,6 @@ int cFloatRailNode::getMesh(int segIndex)
     return railNodes[segIndex].Mesh;
 }
 #endif
-
 
 //100%
 INCLUDE_ASM("object/railmodifier", cSpringRailNode_getMesh);
@@ -6459,23 +6384,14 @@ const t4Matrix* cPositionModifier::getRootTransform()
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cParentModifier__cParentModifier);
+INCLUDE_ASM("object/railmodifier", _$_15cParentModifier);
 #ifdef SKIP_ASM
-extern void* cTransformModifier_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys a parent modifier: restores the cTransformModifier base vtable (cTransformModifier_vtbl) and frees the object when
- * bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a parent modifier; it owns nothing of its own, so its cPositionModifier and cTransformModifier parts do the
+ * work and free it when asked.
  */
-extern "C" void cParentModifier__cParentModifier(cParentModifier* self, int flags)
+cParentModifier::~cParentModifier()
 {
-    *(void***)self = cTransformModifier_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -6537,23 +6453,14 @@ void cParentModifier::setParent(tInstanceRecord* parentInst)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cMagnetModifier__cMagnetModifier);
+INCLUDE_ASM("object/railmodifier", _$_15cMagnetModifier);
 #ifdef SKIP_ASM
-extern void* cTransformModifier_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys a magnet modifier: restores the cTransformModifier base vtable (cTransformModifier_vtbl) and frees the object when
- * bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a magnet modifier; it owns nothing of its own, so its cTransformModifier part does the work and frees it
+ * when asked.
  */
-extern "C" void cMagnetModifier__cMagnetModifier(cMagnetModifier* self, int flags)
+cMagnetModifier::~cMagnetModifier()
 {
-    *(void***)self = cTransformModifier_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -6676,23 +6583,14 @@ const t4Matrix* cMagnetModifier::getRootTransform()
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cAvaSplineModifier__cAvaSplineModifier);
+INCLUDE_ASM("object/railmodifier", _$_18cAvaSplineModifier);
 #ifdef SKIP_ASM
-extern void* cTransformModifier_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys an avalanche spline modifier: restores the cTransformModifier base vtable (cTransformModifier_vtbl) and frees the
- * object when bit 0 of @p flags is set.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys an avalanche spline modifier; it owns nothing of its own, so its cTransformModifier part does the work and
+ * frees it when asked.
  */
-extern "C" void cAvaSplineModifier__cAvaSplineModifier(cAvaSplineModifier* self, int flags)
+cAvaSplineModifier::~cAvaSplineModifier()
 {
-    *(void***)self = cTransformModifier_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -6784,22 +6682,14 @@ const t4Matrix* cAvaSplineModifier::getRootTransform()
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cSplineModifier__cSplineModifier);
+INCLUDE_ASM("object/railmodifier", _$_15cSplineModifier);
 #ifdef SKIP_ASM
-extern void* cTransformModifier_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys a spline modifier: stores the base cTransformModifier vtable, then frees the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a spline modifier; it owns nothing of its own, so its cTransformModifier part does the work and frees it
+ * when asked.
  */
-extern "C" void cSplineModifier__cSplineModifier(cSplineModifier* self, int flags)
+cSplineModifier::~cSplineModifier()
 {
-    *(void***)self = cTransformModifier_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -7049,22 +6939,14 @@ int cMultiSplineModifier::getTransformType() const
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cRollerModifier__cRollerModifier);
+INCLUDE_ASM("object/railmodifier", _$_15cRollerModifier);
 #ifdef SKIP_ASM
-extern void* cTransformModifier_vtbl[];
-void operator_delete(int*);
-
 /**
- * Destroys a roller modifier: stores the base cTransformModifier vtable, then frees the object when asked to.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a roller modifier; it owns nothing of its own, so its cTransformModifier part does the work and frees it
+ * when asked.
  */
-extern "C" void cRollerModifier__cRollerModifier(cRollerModifier* self, int flags)
+cRollerModifier::~cRollerModifier()
 {
-    *(void***)self = cTransformModifier_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -7234,9 +7116,6 @@ int cRollerModifier::getTransformType() const
 }
 #endif
 
-extern void* cParticleNode_vtbl[];
-extern "C" void* cMoveNode__cMoveNode(void*);
-
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361D48);
 #ifdef SKIP_ASM
@@ -7252,20 +7131,13 @@ extern "C" int func_00361D48(void *object) {
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cParticleNode__cParticleNode__FPv);
+INCLUDE_ASM("object/railmodifier", _$_13cParticleNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a particle node: stores cParticleNode's vtable at +0xC, then runs the cMoveNode destructor.
- *
- * The g++ delete flags in the second argument register pass through untouched to cMoveNode__cMoveNode().
- *
- * @return no meaningful value (cMoveNode__cMoveNode returns nothing)
+ * Destroys a particle node; it owns nothing of its own, so its cMoveNode part does the work and frees it when asked.
  */
-void* cParticleNode__cParticleNode(void* vself)
+cParticleNode::~cParticleNode()
 {
-    cParticleNode* self = (cParticleNode*)vself;
-    VPTR_OF(cObjNode, self) = cParticleNode_vtbl;
-    return cMoveNode__cMoveNode(self);
 }
 #endif
 

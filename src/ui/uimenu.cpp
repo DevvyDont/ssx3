@@ -970,24 +970,16 @@ void cUIPair::update(unsigned short ev)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", cUIProgress__cUIProgress);
+INCLUDE_ASM("ui/uimenu", _$_11cUIProgress);
 #ifdef SKIP_ASM
-extern "C" void cUIThing__cUIThing(void* self, int flags);
-extern void* cUIProgress_vtbl[];
-
 /**
- * Destroys a progress bar: deletes its two child widgets, then the cUIThing base.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a progress bar: deletes its background and knob objects (through their virtual destructors); the cUIThing
+ * part does the rest and frees it when asked.
  */
-extern "C" void cUIProgress__cUIProgress(cUIProgress* self, int flags)
+cUIProgress::~cUIProgress()
 {
-    VPTR_OF(cListNode, self) = cUIProgress_vtbl;
-    cUIThing* background = self->mpObjBackground;
-    delete background;
-    cUIThing* knob = self->mpObjKnob;
-    delete knob;
-    cUIThing__cUIThing(self, flags);
+    delete mpObjBackground;
+    delete mpObjKnob;
 }
 #endif
 

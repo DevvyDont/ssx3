@@ -3781,7 +3781,7 @@ extern "C" sFontState50C0* cPS2GraphicsMan_sViewportStack_operatorE(cPS2Graphics
 }
 #endif
 
-extern "C" void* cGraphicsMan__cGraphicsMan(void* self);
+extern "C" void* cGraphicsMan__cGraphicsMan(void* self) __asm__("_$_12cGraphicsMan");
 
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan__cPS2GraphicsMan__FPv);

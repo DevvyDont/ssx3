@@ -1,5 +1,6 @@
 #ifndef OBJECT_BOOSTMODIFIER_H
 #define OBJECT_BOOSTMODIFIER_H
+#pragma interface
 
 // cBoostModifier: the physics modifier of a boost pad / speed zone (cMoveNode::addBoost): pushes a rider along Boost up
 // to MaxSpeed while it touches the instance. Size 0x50: retail cMemMan_alloc(0x50, "BoostModifier") in cMoveNode's addBoost
@@ -80,6 +81,7 @@ struct cBoostModifier : public cPhysicsModifier {
     enum { kBoostModSignal_Restart = 600 };
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cBoostModifier();   // g++'s own symbol _$_14cBoostModifier (the retail label renamed)
     void* cBoostModifier1(cBxReplayFrame* stream) __asm__("cBoostModifier_cBoostModifier1");
     virtual void update() __asm__("cBoostModifier_update");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cBoostModifier_writeToReplayFrame");
@@ -97,6 +99,7 @@ CHECK_OFFSET(cBoostModifier, unk_34, 0x34);
 CHECK_OFFSET(cBoostModifier, Instance, 0x40);
 CHECK_OFFSET(cBoostModifier, unk_44, 0x44);
 CHECK_SIZE(cBoostModifier, 0x50);
+__asm__("_vt$14cBoostModifier = cBoostModifier_vtbl");   // g++'s name for the retail vtable
 
 // cBoostModifierState (On Tour, 0x30): the boost state cBoostModifier carries at +0x10 (Boost .. Type above, written
 // out inline there); the boost-plane helper takes it whole (view sPlane_342A88: n = Boost, d = MaxSpeed, k = Drag).

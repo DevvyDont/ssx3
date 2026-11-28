@@ -3,8 +3,8 @@
 #pragma interface
 
 // This header: cFEStateCharSelect and cFEStateCheatCharSelect (below).
-// cFEStateCharSelect: the character select screen (a cUIState); cFEReal creates it with cMemMan_alloc(144, "cFEStateCharSelect").
-// Size 0x90 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
+// cFEStateCharSelect: the character select screen (a cFEState); cFEReal creates it with cMemMan_alloc(144, "cFEStateCharSelect").
+// Size 0x90 [R] (the retail allocation; On Tour's is the same). Derives from cFEState (fe/festate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
@@ -19,7 +19,8 @@ struct cUIScreen;
 struct cUIState;
 struct cUIThing;
 
-struct cFEStateCharSelect : public cUIState {
+struct cFEStateCharSelect : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateCharSelect
     cUIThing* mpSelectedCharWidget; // 0x048 [O]
@@ -36,9 +37,7 @@ struct cFEStateCharSelect : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void updateCharacter3DPos() __asm__("cFEStateCharSelect_updateCharacter3DPos");
-    // retail's destructor cFEStateCharSelect__cFEStateCharSelect stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateCharSelect();
+    virtual ~cFEStateCharSelect();   // g++'s own symbol _$_18cFEStateCharSelect (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateCharSelect_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateCharSelect_onDestroyScreen");
     virtual bool onGainTransition(int on) __asm__("cFEStateCharSelect_onGainTransition");
@@ -61,6 +60,7 @@ CHECK_OFFSET(cFEStateCharSelect, mPlayerRotation, 0x060);
 CHECK_OFFSET(cFEStateCharSelect, mCharPos, 0x070);
 CHECK_OFFSET(cFEStateCharSelect, mbDraw3D, 0x080);
 CHECK_SIZE(cFEStateCharSelect, 0x90);
+__asm__("_vt$18cFEStateCharSelect = cFEStateCharSelect_vtbl");   // g++'s name for the retail vtable
 
 // cFEStateCheatCharSelect: the cheat-character picker popup (a cFEState): six picture slots over a scrollable "6pics"
 // menu of the base character and the cheat characters the user owns for it, with the highlighted entry's name.

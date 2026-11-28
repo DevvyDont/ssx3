@@ -1,5 +1,6 @@
 #ifndef FE_FEPOPUPCONFIRM_H
 #define FE_FEPOPUPCONFIRM_H
+#pragma interface
 
 // cFEPopupConfirm: the front end's yes/no confirmation popup (a cScreenPopup with its own copies of the message and
 // button texts): message plus 0, 1 (yes), 2 (yes/no) or 3 buttons. Created by the memory-card code (fe/fememcardcallbacks,
@@ -60,6 +61,7 @@ struct cFEPopupConfirm : public cScreenPopup {
                                     //       setButtonText stores 3 for a third button and tests >= 2
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cFEPopupConfirm();   // g++'s own symbol _$_15cFEPopupConfirm (the retail label renamed)
     void * cFEPopupConfirm1() __asm__("cFEPopupConfirm_cFEPopupConfirm1");
 };
 
@@ -69,5 +71,6 @@ CHECK_OFFSET(cFEPopupConfirm, mNoText, 0xA68);
 CHECK_OFFSET(cFEPopupConfirm, mAltText, 0xB30);
 CHECK_OFFSET(cFEPopupConfirm, mNumButtons, 0xBF8);
 CHECK_SIZE(cFEPopupConfirm, 0xBFC);
+__asm__("_vt$15cFEPopupConfirm = cFEPopupConfirm_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FEPOPUPCONFIRM_H */

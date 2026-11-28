@@ -1,5 +1,6 @@
 #ifndef OBJECT_FLEXRAILNODE_H
 #define OBJECT_FLEXRAILNODE_H
+#pragma interface
 
 // cFlexRailNode: the abstract scene node of a flexible rail (a chain of up to 8 instances bent along cubic segments):
 // the base of cFloatRailNode (node type 20) and cSpringRailNode (type 21), both in object/flexrailnode. It keeps the
@@ -116,6 +117,7 @@ struct cFlexRailNode : public cInstanceNode {
     char unk_05C[0x4];           // 0x05C tail padding to the 16-byte-aligned size 0x60 (never accessed)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cFlexRailNode();   // g++'s own symbol _$_13cFlexRailNode (the retail label renamed)
     void* cFlexRailNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFlexRailNode_cFlexRailNode1");
     void updateSpaceHash() __asm__("cFlexRailNode_updateSpaceHash");
     void addSpaceHash() __asm__("cFlexRailNode_addSpaceHash");
@@ -144,5 +146,6 @@ CHECK_OFFSET(cFlexRailNode, Node, 0x054);
 CHECK_OFFSET(cFlexRailNode, Tube, 0x058);
 CHECK_OFFSET(cFlexRailNode, unk_05C, 0x05C);
 CHECK_SIZE(cFlexRailNode, 0x060);
+__asm__("_vt$13cFlexRailNode = cFlexRailNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_FLEXRAILNODE_H */

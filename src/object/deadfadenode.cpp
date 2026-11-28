@@ -231,25 +231,20 @@ void* cDeadFadeNode::cDeadFadeNode1()
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", cDeadFadeNode__cDeadFadeNode);
+INCLUDE_ASM("object/deadfadenode", _$_13cDeadFadeNode);
 #ifdef SKIP_ASM
-extern char cDeadFadeNode_vtbl[];
 void cMemMan_free(void*);
-extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 /**
- * Destroys a dead-fade node: frees its part matrices (+0x38), then runs the cInstanceNode destructor.
- *
- * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ * Destroys the dead-fade node: frees its part matrices (AnimMats) when it has them; the cInstanceNode part does the
+ * rest and frees it when asked.
  */
-extern "C" void cDeadFadeNode__cDeadFadeNode(cDeadFadeNode* self, int flags)
+cDeadFadeNode::~cDeadFadeNode()
 {
-    VPTR_OF(cObjNode, self) = (void**)cDeadFadeNode_vtbl;
-    void* partMats = self->AnimMats;
+    void* partMats = AnimMats;
     if (partMats != 0) {
         cMemMan_free(partMats);
     }
-    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 

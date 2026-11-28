@@ -1,5 +1,6 @@
 #ifndef VISUALFX_SPLASHFX_H
 #define VISUALFX_SPLASHFX_H
+#pragma interface
 
 // cSplashManager: the camera snow-splash effect of one view - snow drops (tDrop) and ice crystals (tCrystal) drawn on
 // the screen when the camera moves through falling snow or a rider's impact spray reaches it ("Camera Snow Splash
@@ -114,6 +115,7 @@ struct cSplashManager : public cObjNode {
     char unk_102C[0x4];             // 0x102C tail padding to the 16-byte-aligned size 0x1030
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cSplashManager();   // g++'s own symbol _$_14cSplashManager (the retail label renamed)
     void AddCrystal(t2Vector* basePos, int n) __asm__("cSplashManager_AddCrystal");
     void AddSplashes() __asm__("cSplashManager_AddSplashes");
     void ReportImpactLocal(t4Vector* impactPos, float speed) __asm__("cSplashManager_ReportImpactLocal");
@@ -133,5 +135,6 @@ CHECK_OFFSET(cSplashManager, mNumSplashesToAdd, 0x1024);
 CHECK_OFFSET(cSplashManager, mLastSnowfallIntensity, 0x1028);
 CHECK_OFFSET(cSplashManager, unk_102C, 0x102C);
 CHECK_SIZE(cSplashManager, 0x1030);
+__asm__("_vt$14cSplashManager = cSplashManager_vtbl");   // g++'s name for the retail vtable
 
 #endif /* VISUALFX_SPLASHFX_H */

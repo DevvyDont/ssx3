@@ -375,22 +375,18 @@ extern "C" cFEStateMemCard* cFEStateMemCard_cFEStateMemCard1(cFEStateMemCard* se
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", cFEStateMemCard__cFEStateMemCard);
+INCLUDE_ASM("fe/festateload", _$_15cFEStateMemCard);
 #ifdef SKIP_ASM
 extern void* cFEStateMemCard_vtbl[];
 extern int cFEStateMemCard_mInstance;
-extern "C" void cFEMemCard__cFEMemCard(void* self, int flags);
 
 /**
- * Destroys a memory-card state: clears cFEStateMemCard_mInstance and runs the base destructor cFEMemCard__cFEMemCard.
- *
- * @param flags  destructor flags, passed on
+ * Destroys the start-up memory-card screen: clears the live-screen pointer cFEStateMemCard_mInstance; its cFEMemCard
+ * part does the rest and frees it when asked.
  */
-extern "C" void cFEStateMemCard__cFEStateMemCard(cFEStateMemCard* self, int flags)
+cFEStateMemCard::~cFEStateMemCard()
 {
-    VPTR_OF(cListNode, self) = cFEStateMemCard_vtbl;
     cFEStateMemCard_mInstance = 0;
-    cFEMemCard__cFEMemCard(self, flags);
 }
 #endif
 

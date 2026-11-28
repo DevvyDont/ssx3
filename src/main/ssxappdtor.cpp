@@ -1981,9 +1981,8 @@ void cInput::setMap(int val)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cVisualEffectsObjNode__cVisualEffectsObjNode);
+INCLUDE_ASM("main/ssxappdtor", _$_21cVisualEffectsObjNode);
 #ifdef SKIP_ASM
-extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* cVisualEffectsObjNode_vtbl[];
 struct sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode {
     short delta;
@@ -1992,23 +1991,17 @@ struct sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode {
 };
 
 /**
- * Destroys the visual-effects object node: deletes the cVisualEffectsMan it owns, then runs the cObjNode destructor.
- *
- * Installs cVisualEffectsObjNode_vtbl at +0xC, destroys the object at +0x10 (if any) through its virtual destructor (slot 1, vptr at
- * +0x44, flags 3: destroy and free) and calls cObjNode__cObjNode with @p flags. cGame_load builds this node for
- * "VisualEffectsMan" with vtable cVisualEffectsObjNode_vtbl.
- *
- * @param flags  destructor flags, passed on to cObjNode__cObjNode
+ * Destroys the visual-effects object node: deletes the cVisualEffectsMan it owns (VisualEffectsMan, through its virtual
+ * destructor: slot 1, vptr at +0x44, flags 3) when there is one; the cObjNode part does the rest and frees it when
+ * asked.
  */
-extern "C" void cVisualEffectsObjNode__cVisualEffectsObjNode(cVisualEffectsObjNode* self, int flags)
+cVisualEffectsObjNode::~cVisualEffectsObjNode()
 {
-    VPTR_OF(cObjNode, self) = cVisualEffectsObjNode_vtbl;
-    cVisualEffectsMan* obj = self->VisualEffectsMan;
+    cVisualEffectsMan* obj = VisualEffectsMan;
     if (((void*)obj) != 0) {
         sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode* vt = (sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode*)obj->mVtbl;
         vt[1].fn(vthis(obj, vt[1]), 3);
     }
-    cObjNode__cObjNode(self, flags);
 }
 #endif
 
@@ -2712,9 +2705,8 @@ bool cGame::updateStreamFocus()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cAIVisualEffectsObjNode__cAIVisualEffectsObjNode);
+INCLUDE_ASM("main/ssxappdtor", _$_23cAIVisualEffectsObjNode);
 #ifdef SKIP_ASM
-extern "C" void cObjNode__cObjNode(void* self, int flags);
 extern void* cAIVisualEffectsObjNode_vtbl[];
 struct sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode {
     short delta;
@@ -2723,24 +2715,17 @@ struct sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode {
 };
 
 /**
- * Destroys the AI visual-effects object node: deletes the cAIVisualEffectsMan it owns, then runs the cObjNode
- * destructor.
- *
- * Installs cAIVisualEffectsObjNode_vtbl at +0xC, destroys the object at +0x10 (if any) through its virtual destructor (slot 1, vptr at
- * +0x4, flags 3: destroy and free) and calls cObjNode__cObjNode with @p flags. cGame_load builds this node for
- * "AIVisualEffectsMan" with vtable cAIVisualEffectsObjNode_vtbl.
- *
- * @param flags  destructor flags, passed on to cObjNode__cObjNode
+ * Destroys the AI visual-effects object node: deletes the cAIVisualEffectsMan it owns (AIVisualEffectsMan, through its
+ * virtual destructor: slot 1, vptr at +0x4, flags 3) when there is one; the cObjNode part does the rest and frees it
+ * when asked.
  */
-extern "C" void cAIVisualEffectsObjNode__cAIVisualEffectsObjNode(cAIVisualEffectsObjNode* self, int flags)
+cAIVisualEffectsObjNode::~cAIVisualEffectsObjNode()
 {
-    VPTR_OF(cObjNode, self) = cAIVisualEffectsObjNode_vtbl;
-    cAIVisualEffectsMan* obj = self->AIVisualEffectsMan;
+    cAIVisualEffectsMan* obj = AIVisualEffectsMan;
     if (((void*)obj) != 0) {
         sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode* vt = (sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode*)obj->mVtbl;
         vt[1].fn(vthis(obj, vt[1]), 3);
     }
-    cObjNode__cObjNode(self, flags);
 }
 #endif
 
@@ -2785,24 +2770,15 @@ void cAIVisualEffectsObjNode::render()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cSSXStatsObjNode__cSSXStatsObjNode);
+INCLUDE_ASM("main/ssxappdtor", _$_16cSSXStatsObjNode);
 #ifdef SKIP_ASM
-extern "C" void cObjNode__cObjNode(void* self, int flags);
-extern void* cSSXStatsObjNode_vtbl[];
-
 /**
- * Destroys a stats object node: frees the object it holds, then runs the cObjNode destructor.
- *
- * Stores cSSXStatsObjNode's vtable at +0xC and releases the pointer at +0x10 with operator delete (no
- * destructor runs on it).
- *
- * @param flags  g++ destructor flags, passed to cObjNode__cObjNode(); bit 0 set frees the object's memory
+ * Destroys the stats object node: frees the stats manager it holds (SSXStatsMan, with operator delete: no destructor
+ * runs on it); the cObjNode part does the rest and frees it when asked.
  */
-extern "C" void cSSXStatsObjNode__cSSXStatsObjNode(cSSXStatsObjNode* self, int flags)
+cSSXStatsObjNode::~cSSXStatsObjNode()
 {
-    VPTR_OF(cObjNode, self) = cSSXStatsObjNode_vtbl;
-    operator_delete((int*)self->SSXStatsMan);
-    cObjNode__cObjNode(self, flags);
+    operator_delete((int*)SSXStatsMan);
 }
 #endif
 

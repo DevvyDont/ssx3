@@ -1,5 +1,6 @@
 #ifndef OBJECT_ROLLERMODIFIER_H
 #define OBJECT_ROLLERMODIFIER_H
+#pragma interface
 
 // cRollerModifier: the transform modifier that turns a placed object into a rolling/tumbling rigid body (the boulders
 // and props a rider knocks loose; transform type 5). Size 0x2D0: retail cMemMan_alloc(0x2D0, "RollerModifier")
@@ -149,9 +150,7 @@ struct cRollerModifier : public cTransformModifier {
     void updateMOI() __asm__("cRollerModifier_updateMOI");
     void translateMe(const t4Vector* off) __asm__("cRollerModifier_translateMe");
     void* collide1() __asm__("cRollerModifier_collide1__FPv");
-    // retail's destructor cRollerModifier__cRollerModifier stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cRollerModifier();
+    virtual ~cRollerModifier();   // g++'s own symbol _$_15cRollerModifier (the retail label renamed)
     virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cRollerModifier_writeToReplayFrame");
     virtual void updateRootTransform() __asm__("cRollerModifier_updateRootTransform__FPv");
     virtual bool shouldRebound() __asm__("cRollerModifier_shouldRebound__FPv");
@@ -197,5 +196,6 @@ CHECK_OFFSET(cRollerModifier, unk_2A4, 0x2A4);
 CHECK_OFFSET(cRollerModifier, COMOffset, 0x2B0);
 CHECK_OFFSET(cRollerModifier, RollerHint, 0x2C0);
 CHECK_SIZE(cRollerModifier, 0x2D0);
+__asm__("_vt$15cRollerModifier = cRollerModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_ROLLERMODIFIER_H */

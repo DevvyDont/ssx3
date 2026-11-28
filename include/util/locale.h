@@ -1,5 +1,6 @@
 #ifndef UTIL_LOCALE_H
 #define UTIL_LOCALE_H
+#pragma interface
 
 // cFELocale: the game's string table (one per app: SSXApp->FELocale, which cSSXApp_initLocale creates and points at
 // the options' language). It keeps up to 20 loaded cLocaleFiles (data/locale/*.loc: the common file per language,
@@ -23,9 +24,10 @@
 //
 // Real classes: cFELocale derives from cUILocaleInterface and both declare their virtuals, so callers write
 // `SSXApp->FELocale->getStringByHash(hash)`. The vptr lands at 0x4 by g++ 2.95's own rule (after the own data of the
-// first class in the hierarchy that declares a virtual: cUILocaleInterface's four chars). Nothing here is defined as
-// a C++ member (the methods are the extern "C" functions named above), so no vtable or type_info is emitted; the
-// hand-written ctor / dtors store the vptr with VPTR_OF(cUILocaleInterface, self) (include/vtable.h).
+// first class in the hierarchy that declares a virtual: cUILocaleInterface's four chars). Only the destructors are
+// C++ members (cUILocaleInterface's inline, cFELocale's in fe/festatecharequip); the other methods are the extern "C"
+// functions named above, and #pragma interface keeps the vtables and type_info out of every unit. The hand-written
+// ctors store the vptr with VPTR_OF(cUILocaleInterface, self) (include/vtable.h).
 // Evidence tags:
 //   [R] retail's constructor cFELocale_cFELocale / destructor cFELocale__cFELocale and the allocation size;
 //   [P] the July 2003 preview (layout_xlate: the vptr at 0x4 in ~cUILocaleInterface);
@@ -33,6 +35,7 @@
 //   [O] SSX On Tour's DWARF (class cFELocale, cUILocaleInterface, struct tAttrLocale): names, types and order.
 
 #include "layout.h"
+#include "bx/memman.h"
 
 struct cLocaleFile;
 
@@ -64,7 +67,9 @@ public:
                                     //       (mLocaleTest) is set
     // 0x004: the vptr. [R] cUILocaleInterface_vtbl (0x0046D848), then cFELocale_vtbl (ctor); the dtor stores them in
     //        reverse; [P] preview ~cUILocaleInterface. Slots [R] cUILocaleInterface_vtbl, names [O]:
-    virtual ~cUILocaleInterface();                                   // slot 1 cUILocaleInterface__cUILocaleInterface
+    // inline: cFELocale's destructor inlines it (retail's out-of-line copy cUILocaleInterface__cUILocaleInterface
+    // stays a C function)
+    virtual ~cUILocaleInterface() {}                                 // slot 1
     virtual void setDisplayMode(signed char mode)
         __asm__("cUILocaleInterface_setDisplayMode");                   // slot 2 cUILocaleInterface_setDisplayMode
     virtual void setLanguage(signed char language);                  // slot 3 cUILocaleInterface_setLanguage
@@ -78,6 +83,7 @@ CHECK_OFFSET(cUILocaleInterface, mLanguage, 0x001);
 CHECK_OFFSET(cUILocaleInterface, mNumLanguages, 0x002);
 CHECK_OFFSET(cUILocaleInterface, mAttrLocale, 0x003);
 CHECK_SIZE(cUILocaleInterface, 0x8);
+__asm__("_vt$18cUILocaleInterface = cUILocaleInterface_vtbl");   // g++'s name for the retail vtable
 
 class cFELocale : public cUILocaleInterface {
 public:
@@ -95,7 +101,7 @@ public:
                                     //       it
     char unk_0BE[0x2];              // 0x0BE tail padding
     // cFELocale_vtbl (0x0046BF98) [R]; slot 2 stays cUILocaleInterface_setDisplayMode
-    virtual ~cFELocale();                                            // slot 1 cFELocale__cFELocale
+    virtual ~cFELocale();             // slot 1; g++'s own symbol _$_9cFELocale (the retail label renamed)
     virtual void setLanguage(signed char language)
         __asm__("cFELocale_setLanguage");                  // slot 3 cFELocale_setLanguage
     virtual unsigned short* getStringByHash(unsigned int StringID)
@@ -122,5 +128,6 @@ CHECK_OFFSET(cFELocale, unk_059, 0x059);
 CHECK_OFFSET(cFELocale, TempString, 0x05A);
 CHECK_OFFSET(cFELocale, unk_0BE, 0x0BE);
 CHECK_SIZE(cFELocale, 0xC0);
+__asm__("_vt$9cFELocale = cFELocale_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UTIL_LOCALE_H */

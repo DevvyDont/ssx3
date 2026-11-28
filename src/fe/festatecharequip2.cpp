@@ -2,7 +2,7 @@
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_cFEStateCharEquip);
 
-INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip__cFEStateCharEquip);
+INCLUDE_ASM("fe/festatecharequip2", _$_17cFEStateCharEquip);
 
 INCLUDE_ASM("fe/festatecharequip2", cFEStateCharEquip_onCreateScreen);
 

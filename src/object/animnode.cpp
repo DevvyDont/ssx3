@@ -611,26 +611,18 @@ void* cFloatingNode::cFloatingNode1(void* bucket, cBxReplayFrame* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/animnode", cFloatingNode__cFloatingNode);
+INCLUDE_ASM("object/animnode", _$_13cFloatingNode);
 #ifdef SKIP_ASM
-extern void* cFloatingNode_vtbl[];
-extern "C" void cFloatingNode_restoreOverlapSystem(void* self);
-extern "C" void cMoveNode__cMoveNode(void* self, int flags);
 void operator_delete(int*);
 
 /**
- * Destroys a floating node: restores its vtable, undoes its overlap-system changes and frees its buffer.
- *
- * Calls cFloatingNode_restoreOverlapSystem(), frees the block at offset 0x74, then runs cMoveNode__cMoveNode().
- *
- * @param flags  g++ destructor flags, passed to cMoveNode__cMoveNode(); bit 0 set frees the object's memory
+ * Destroys a floating node: restores its own overlap system (cFloatingNode::restoreOverlapSystem) and frees its
+ * matrices (AnimMats, with operator delete); the cMoveNode part does the rest and frees it when asked.
  */
-extern "C" void cFloatingNode__cFloatingNode(cFloatingNode* self, int flags)
+cFloatingNode::~cFloatingNode()
 {
-    VPTR_OF(cObjNode, self) = cFloatingNode_vtbl;
-    cFloatingNode_restoreOverlapSystem(self);
-    operator_delete((int*)self->AnimMats);
-    cMoveNode__cMoveNode(self, flags);
+    cFloatingNode::restoreOverlapSystem();
+    operator_delete((int*)AnimMats);
 }
 #endif
 

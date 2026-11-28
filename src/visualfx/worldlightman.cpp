@@ -3183,7 +3183,7 @@ cBoardTrail::~cBoardTrail()
 }
 #endif
 
-extern "C" void* cObjNode__cObjNode(void* self);
+extern "C" void* cObjNode__cObjNode(void* self) __asm__("_$_8cObjNode");
 
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cCutSceneTransitionMan__cCutSceneTransitionMan__FPv);

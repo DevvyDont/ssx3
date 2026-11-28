@@ -38,34 +38,28 @@ extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, 
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", cInstanceNode__cInstanceNode);
+INCLUDE_ASM("object/instancenode", _$_13cInstanceNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cInstanceNode_clearActiveNode(cInstanceNode* self, tInstanceRecord* inst);
-extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
 /**
- * Destroys an instance node: detaches it from its instance record, resets the record's flags and runs the
- * cSortObjNode destructor.
+ * Destroys an instance node: detaches it from its instance record and resets the record's flags; the cSortObjNode part
+ * does the rest and frees it when asked.
  *
- * cInstanceNode_clearActiveNode (On Tour clearActiveNode) clears the record's node pointer (+0xC) if it points here. The
- * record's flags (+0x8) keep the upper half and bits 8-9, get the upper half ORed into the lower half and get
- * bit 1 set.
- *
- * @param flags  g++ destructor flags, passed on to the cSortObjNode destructor (bit 0 frees the memory)
+ * clearActiveNode clears the record's node pointer (+0xC) if it points here. The record's flags (+0x8) keep the upper
+ * half and bits 8-9, get the upper half ORed into the lower half and get bit 1 set.
  */
-extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
+cInstanceNode::~cInstanceNode()
 {
-    VPTR_OF(cObjNode, self) = (void**)cInstanceNode_vtbl;
-    self->clearActiveNode(self->Instance);
-    self->Instance->m_iFlags &= 0xFFFF0300;
+    clearActiveNode(Instance);
+    Instance->m_iFlags &= 0xFFFF0300;
     {
-        tInstanceRecord* instance = self->Instance;
+        tInstanceRecord* instance = Instance;
         int instFlags = instance->m_iFlags;
         instance->m_iFlags = instFlags | (instFlags >> 16);
     }
-    self->Instance->m_iFlags |= 2;
-    cSortObjNode__cSortObjNode_dtor(self, flags);
+    Instance->m_iFlags |= 2;
 }
 #endif
 

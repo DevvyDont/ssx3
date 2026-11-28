@@ -1,5 +1,6 @@
 #ifndef UI_UIVECTOR_H
 #define UI_UIVECTOR_H
+#pragma interface
 
 // cUIVector: a UI object drawn as a coloured polygon / polyline (the background shapes, outlines and bars of the FE and
 // overlay screens: cScreenPopup's "whitefg" / "Big shape" ..., cKeyboardPopup's boxes). EA's source is
@@ -92,6 +93,7 @@ struct cUIVector : public cUIThing {
                                      //       ("UIVectorLine") when mFill is clear; cUIVector_render2D fills them
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cUIVector();   // g++'s own symbol _$_9cUIVector (the retail label renamed)
     void setColour(tARGB* colour) __asm__("cUIVector_setColour");
     void* cUIVector1() __asm__("cUIVector_cUIVector1");
     virtual void setChannelData(unsigned short key, float data) __asm__("cUIVector_setChannelData");
@@ -111,5 +113,6 @@ CHECK_OFFSET(cUIVector, mpVertexPositionRender, 0x084);
 CHECK_OFFSET(cUIVector, mpUV, 0x088);
 CHECK_OFFSET(cUIVector, mpVertices, 0x08C);
 CHECK_SIZE(cUIVector, 0x90);
+__asm__("_vt$9cUIVector = cUIVector_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UI_UIVECTOR_H */

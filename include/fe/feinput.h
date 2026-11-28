@@ -1,5 +1,6 @@
 #ifndef FE_FEINPUT_H
 #define FE_FEINPUT_H
+#pragma interface
 
 // cFEInput: the front end's cUIInput (ui/uiinput.h): reads the controlling pad through a cInput each frame and keeps
 // whether a key is ready, the virtual key and the ASCII key for the UI engine. Methods in fe/debugfe and
@@ -12,6 +13,7 @@
 
 #include "layout.h"
 #include "ui/uiinput.h"
+#include "bx/memman.h"
 
 struct cInput;
 
@@ -28,9 +30,7 @@ struct cFEInput : public cUIInput {
 
     // Methods bound to their retail symbols by asm labels.
     cInput* getInput() __asm__("cFEInput_getInput");
-    // retail's destructor cFEInput__cFEInput stays a C function (g++ 2.95 takes no asm label on a destructor); declared
-    // first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEInput();
+    virtual ~cFEInput();   // g++'s own symbol _$_8cFEInput (the retail label renamed)
     virtual bool isActive() __asm__("cFEInput_isActive");
     virtual int getAsciiKey() const __asm__("cFEInput_getAsciiKey");
     virtual bool keyPressed() const __asm__("cFEInput_keyPressed");
@@ -78,5 +78,6 @@ struct cFEInput : public cUIInput {
 CHECK_OFFSET(cFEInput, mbKeyReady, 0x0C);
 CHECK_OFFSET(cFEInput, mpInput, 0x18);
 CHECK_SIZE(cFEInput, 0x1C);
+__asm__("_vt$8cFEInput = cFEInput_vtbl");   // g++'s name for the retail vtable
 
 #endif

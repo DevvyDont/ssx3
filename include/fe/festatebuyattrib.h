@@ -1,14 +1,16 @@
 #ifndef FE_FESTATEBUYATTRIB_H
 #define FE_FESTATEBUYATTRIB_H
+#pragma interface
 
-// cFEStateBuyAttrib: the lodge's attribute store screen (a cUIState); cFEReal creates it with cMemMan_alloc(176, "cFEStateBuyAttrib").
-// Size 0xB0 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
+// cFEStateBuyAttrib: the lodge's attribute store screen (a cFEState); cFEReal creates it with cMemMan_alloc(176, "cFEStateBuyAttrib").
+// Size 0xB0 [R] (the retail allocation; On Tour's is the same). Derives from cFEState (fe/festate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -16,7 +18,8 @@ struct cUIMenu;
 struct cUIScreen;
 struct cUIState;
 
-struct cFEStateBuyAttrib : public cUIState {
+struct cFEStateBuyAttrib : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateBuyAttrib
     cUIScreen* mpAttribScreen;      // 0x048 [O] mpScreen (On Tour's own member hides cUIState::mpScreen)
@@ -35,9 +38,7 @@ struct cFEStateBuyAttrib : public cUIState {
     void updateTotalCost() __asm__("cFEStateBuyAttrib_updateTotalCost");
     void updateBank() __asm__("cFEStateBuyAttrib_updateBank");
     void buyExperience() __asm__("cFEStateBuyAttrib_buyExperience");
-    // retail's destructor cFEStateBuyAttrib__cFEStateBuyAttrib stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateBuyAttrib();
+    virtual ~cFEStateBuyAttrib();   // g++'s own symbol _$_17cFEStateBuyAttrib (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateBuyAttrib_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cFEStateBuyAttrib_onWidgetCreate");
     virtual bool onGainTransition(int on) __asm__("cFEStateBuyAttrib_onGainTransition");
@@ -57,5 +58,6 @@ CHECK_OFFSET(cFEStateBuyAttrib, mBank, 0x0A4);
 CHECK_OFFSET(cFEStateBuyAttrib, mBuyPrompt, 0x0A8);
 CHECK_OFFSET(cFEStateBuyAttrib, pAttribMenu, 0x0AC);
 CHECK_SIZE(cFEStateBuyAttrib, 0xB0);
+__asm__("_vt$17cFEStateBuyAttrib = cFEStateBuyAttrib_vtbl");   // g++'s name for the retail vtable
 
 #endif

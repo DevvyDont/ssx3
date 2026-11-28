@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENETQUICKPLAYPOPUP_H
 #define FE_FESTATENETQUICKPLAYPOPUP_H
+#pragma interface
 
 // cFEStateNetQuickPlayPopup: the "quick match" popup of the online main menu: five yes/no options (ranked, race, big
 // air, superpipe, slopestyle) and an OK / Cancel button that starts or aborts the match search. A cFEStateNet state
@@ -94,8 +95,7 @@ struct cFEStateNetQuickPlayPopup : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateNetQuickPlayPopup1() __asm__("cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1");
-    // retail's destructor cFEStateNetQuickPlayPopup__cFEStateNetQuickPlayPopup stays a C function (g++ 2.95 takes no
-    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_25cFEStateNetQuickPlayPopup (the retail label renamed)
     virtual ~cFEStateNetQuickPlayPopup();
     virtual void onCreateScreen() __asm__("cFEStateNetQuickPlayPopup_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* obj) __asm__("cFEStateNetQuickPlayPopup_onWidgetCreate");
@@ -136,5 +136,6 @@ CHECK_OFFSET(cFEStateNetQuickPlayPopup, mpBigAirPair, 0x728);
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, mpSuperpipePair, 0x72C);
 CHECK_OFFSET(cFEStateNetQuickPlayPopup, mpSlopestylePair, 0x730);
 CHECK_SIZE(cFEStateNetQuickPlayPopup, 0x734);
+__asm__("_vt$25cFEStateNetQuickPlayPopup = cFEStateNetQuickPlayPopup_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATENETQUICKPLAYPOPUP_H */

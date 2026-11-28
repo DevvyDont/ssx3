@@ -1,5 +1,6 @@
 #ifndef VISUALFX_SNOWFALL_H
 #define VISUALFX_SNOWFALL_H
+#pragma interface
 
 // cSnowFall: the falling snow. A scene node (cObjNode) that owns up to twelve cSnowBox flake boxes (visualfx/snowbox.h),
 // six per view (four flake boxes and two "fluff" boxes; the second view's six only with two players). update feeds
@@ -47,9 +48,7 @@ struct cSnowFall : public cObjNode {
                                         //      is the boxes' move this frame, then it is overwritten
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cSnowFall__cSnowFall stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cSnowFall();
+    virtual ~cSnowFall();   // g++'s own symbol _$_9cSnowFall (the retail label renamed)
     virtual void update() __asm__("cSnowFall_update");
     virtual void render() __asm__("cSnowFall_render");
     virtual void writeToReplayFrame(cBxReplayFrame*) __asm__("cSnowFall_writeToReplayFrame__FPv");
@@ -59,5 +58,6 @@ struct cSnowFall : public cObjNode {
 CHECK_OFFSET(cSnowFall, mSnowBoxes, 0x10);
 CHECK_OFFSET(cSnowFall, mLastCameraPosition, 0x40);
 CHECK_SIZE(cSnowFall, 0x60);
+__asm__("_vt$9cSnowFall = cSnowFall_vtbl");   // g++'s name for the retail vtable
 
 #endif /* VISUALFX_SNOWFALL_H */

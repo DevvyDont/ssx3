@@ -1,5 +1,6 @@
 #ifndef OBJECT_PARENTMODIFIER_H
 #define OBJECT_PARENTMODIFIER_H
+#pragma interface
 
 // cParentModifier: a cPositionModifier that follows another instance's mesh (cMoveNode::addParent: attach an object to a
 // parent instance's bone). Unnamed in retail: vtable cParentModifier_vtbl (27 slots; shares the position slots cPositionModifier_isRootTransformDirty..
@@ -35,9 +36,7 @@ struct cParentModifier : public cPositionModifier {
 
     // Methods bound to their retail symbols by asm labels.
     void setParent(tInstanceRecord* parentInst) __asm__("cParentModifier_setParent");
-    // retail's destructor cParentModifier__cParentModifier stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cParentModifier();
+    virtual ~cParentModifier();   // g++'s own symbol _$_15cParentModifier (the retail label renamed)
     virtual void updateRootTransform() __asm__("cParentModifier_updateRootTransform");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cParentModifier_writeToReplayFrame");
     void* cParentModifier1(tInstanceRecord* parentInstance, int meshIndex, const t4Vector* pos)
@@ -53,5 +52,6 @@ CHECK_OFFSET(cParentModifier, unk_94, 0x94);
 CHECK_OFFSET(cParentModifier, ParentInst, 0xA0);
 CHECK_OFFSET(cParentModifier, unk_A4, 0xA4);
 CHECK_SIZE(cParentModifier, 0xB0);
+__asm__("_vt$15cParentModifier = cParentModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_PARENTMODIFIER_H */

@@ -1,5 +1,6 @@
 #ifndef OBJECT_POSITIONMODIFIER_H
 #define OBJECT_POSITIONMODIFIER_H
+#pragma interface
 
 // cPositionModifier: the transform modifier that gives a placed instance a fixed offset / matrix (cMoveNode::addPosition;
 // also the base of cParentModifier). Unnamed in retail: vtable cPositionModifier_vtbl (27 slots), identified by the
@@ -39,9 +40,9 @@ struct cPositionModifier : public cTransformModifier {
                                     //      row 3 (sq 0x80); [U] getRootTransform returns +0x50
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cPositionModifier__cPositionModifier stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cPositionModifier();
+    // inline: cParentModifier's destructor inlines it (retail's out-of-line copy cPositionModifier__cPositionModifier
+    // stays a C function)
+    virtual ~cPositionModifier() {}
     virtual void updateRootTransform() __asm__("cPositionModifier_updateRootTransform");
     virtual void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cPositionModifier_writeToReplayFrame");
     virtual void update() __asm__("cPositionModifier_update__FPv");
@@ -61,5 +62,6 @@ CHECK_OFFSET(cPositionModifier, RootTransformDirty, 0x44);
 CHECK_OFFSET(cPositionModifier, unk_48, 0x48);
 CHECK_OFFSET(cPositionModifier, Transform, 0x50);
 CHECK_SIZE(cPositionModifier, 0x90);
+__asm__("_vt$17cPositionModifier = cPositionModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_POSITIONMODIFIER_H */

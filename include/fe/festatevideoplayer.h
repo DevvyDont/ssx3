@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEVIDEOPLAYER_H
 #define FE_FESTATEVIDEOPLAYER_H
+#pragma interface
 
 // cFEStateVideoPlayer: the front end's full-screen movie state (reward videos, bonus material): a cFEState with no
 // screen of its own that owns a cMoviePlayer (movie/movieplayer.h), plays the video / audio files named in it and
@@ -76,9 +77,7 @@ struct cFEStateVideoPlayer : public cFEState {
         __asm__("cFEStateVideoPlayer_setVideoSourceFiles");
     void Start() __asm__("cFEStateVideoPlayer_Start");
     void Stop() __asm__("cFEStateVideoPlayer_Stop");
-    // retail's destructor cFEStateVideoPlayer__cFEStateVideoPlayer stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateVideoPlayer();
+    virtual ~cFEStateVideoPlayer();   // g++'s own symbol _$_19cFEStateVideoPlayer (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateVideoPlayer_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateVideoPlayer_onDestroyScreen");
     virtual void onRender2D() __asm__("cFEStateVideoPlayer_onRender2D");
@@ -97,5 +96,6 @@ CHECK_OFFSET(cFEStateVideoPlayer, mUpdatedOnce, 0x274);
 CHECK_OFFSET(cFEStateVideoPlayer, mRenderOnce, 0x278);
 CHECK_OFFSET(cFEStateVideoPlayer, mStopPending, 0x27C);
 CHECK_SIZE(cFEStateVideoPlayer, 0x280);
+__asm__("_vt$19cFEStateVideoPlayer = cFEStateVideoPlayer_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATEVIDEOPLAYER_H */

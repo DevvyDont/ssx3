@@ -1,5 +1,6 @@
 #ifndef OBJECT_CONVEYORNODE_H
 #define OBJECT_CONVEYORNODE_H
+#pragma interface
 
 // cConveyorNode: a conveyor (moving walkway / lift belt) instance: it scrolls the model's texture by UVScroll per frame
 // (UV wraps to -1..1; render draws the instance with the UV offset in the matrix's position row) and, for a rider
@@ -87,6 +88,7 @@ struct cConveyorNode : public cInstanceNode {
                                     //      wraps it (lwc1/swc1), render puts it in the draw matrix's position row
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cConveyorNode();   // g++'s own symbol _$_13cConveyorNode (the retail label renamed)
     void* cConveyorNode1(void* bucket, cBxReplayFrame* stream) __asm__("cConveyorNode_cConveyorNode1");
     // update stays a C function (cConveyorNode_update): declared first, it is the vtable's key function, which keeps
     // the vtable out of the units defining the other overrides
@@ -102,5 +104,6 @@ CHECK_OFFSET(cConveyorNode, Rotate, 0x20);
 CHECK_OFFSET(cConveyorNode, UVScroll, 0x38);
 CHECK_OFFSET(cConveyorNode, UV, 0x40);
 CHECK_SIZE(cConveyorNode, 0x48);
+__asm__("_vt$13cConveyorNode = cConveyorNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_CONVEYORNODE_H */

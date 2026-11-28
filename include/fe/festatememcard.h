@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEMEMCARD_H
 #define FE_FESTATEMEMCARD_H
+#pragma interface
 
 // cFEStateMemCard: the front end's start-up memory-card screen ("06cAutoload"): it checks the cards for the settings
 // and profile files, checks the free space for missing ones and auto-loads them (a cFEMemCard with mType 2, settings).
@@ -88,9 +89,7 @@ struct cFEStateMemCard : public cFEMemCard {
     void terminateFreeSpaceCheck() __asm__("cFEStateMemCard_terminateFreeSpaceCheck");
     void exitScreen() __asm__("cFEStateMemCard_exitScreen");
     void updateFreeSpaceCheckState() __asm__("cFEStateMemCard_updateFreeSpaceCheckState");
-    // retail's destructor cFEStateMemCard__cFEStateMemCard stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateMemCard();
+    virtual ~cFEStateMemCard();   // g++'s own symbol _$_15cFEStateMemCard (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateMemCard_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateMemCard_onUpdate");
     virtual void updateDone() __asm__("cFEStateMemCard_updateDone");
@@ -106,5 +105,6 @@ CHECK_OFFSET(cFEStateMemCard, mCard1Available, 0x23C);
 CHECK_OFFSET(cFEStateMemCard, mCard1Full, 0x240);
 CHECK_OFFSET(cFEStateMemCard, mCard1Error, 0x244);
 CHECK_SIZE(cFEStateMemCard, 0x248);
+__asm__("_vt$15cFEStateMemCard = cFEStateMemCard_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATEMEMCARD_H */

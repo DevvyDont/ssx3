@@ -1,5 +1,6 @@
 #ifndef UI_UIICON_H
 #define UI_UIICON_H
+#pragma interface
 
 // cUIIcon: a UI object drawn as a textured sprite (record type 0x11). Size 0x88: cUIScreen_createObjectByStruct does
 // operator new(0x88, "UIIcon") + the cUIThing ctor cUIThing_cUIThing, stores cUIIcon_vtbl (D_00494AA8), constructs mAttrIcon
@@ -46,6 +47,7 @@ struct cUIIcon : public cUIThing {
                                      //       setTileUV (8-byte ldl/ldr copies); cUIIcon_setUIData; render2D
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cUIIcon();   // g++'s own symbol _$_7cUIIcon (the retail label renamed)
     void setTextureByHashValue(int id) __asm__("cUIIcon_setTextureByHashValue");
     void* cUIIcon1() __asm__("cUIIcon_cUIIcon1");
     int isTiled() __asm__("cUIIcon_isTiled");
@@ -67,5 +69,6 @@ CHECK_OFFSET(cUIIcon, mTextureID, 0x078);
 CHECK_OFFSET(cUIIcon, mpTextureElem, 0x07C);
 CHECK_OFFSET(cUIIcon, mTileUV, 0x080);
 CHECK_SIZE(cUIIcon, 0x88);
+__asm__("_vt$7cUIIcon = cUIIcon_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UI_UIICON_H */

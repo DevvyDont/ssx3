@@ -1,5 +1,6 @@
 #ifndef MOVIE_MCOVERLAYMANAGER_H
 #define MOVIE_MCOVERLAYMANAGER_H
+#pragma interface
 
 // cMCOverlayManager: the memory-card save/load/delete state machine behind the front end's and the overlays'
 // memory-card screens. One instance, made on demand by cMCOverlayManager_getManager__Fv
@@ -23,6 +24,7 @@
 //       [O] alone names only fields whose neighbours on both sides are placed by other evidence.
 
 #include "layout.h"
+#include "bx/memman.h"
 
 struct cMemCard;
 
@@ -230,7 +232,8 @@ struct cMCOverlayManager {
     // 0x748: the vptr. [R] _vt$17cMCOverlayManager cMCOverlayManager_vtbl (0x0047CBD8, two slots; preview 0x638):
     virtual void SetState(int state);                       // 1 cMCOverlayManager_SetState: stores mState, runs the
                                                             //   state's set-up (callers: every state change)
-    virtual ~cMCOverlayManager();                           // 2 cMCOverlayManager__cMCOverlayManager
+    virtual ~cMCOverlayManager();                           // 2; g++'s own symbol _$_17cMCOverlayManager (the
+                                                            //   retail label renamed)
 
     // Methods bound to their retail symbols by asm labels.
     cMemCard* getMemCard() __asm__("cMCOverlayManager_getMemCard");
@@ -461,5 +464,6 @@ CHECK_OFFSET(cMCOverlayManager, mCurrDeviceStateAck, 0x440);
 CHECK_OFFSET(cMCOverlayManager, mLastMountedDevice, 0x444);
 CHECK_OFFSET(cMCOverlayManager, unk_448, 0x448);
 CHECK_SIZE(cMCOverlayManager, 0x74C);
+__asm__("_vt$17cMCOverlayManager = cMCOverlayManager_vtbl");   // g++'s name for the retail vtable
 
 #endif /* MOVIE_MCOVERLAYMANAGER_H */

@@ -1,5 +1,6 @@
 #ifndef OBJECT_SKYBOX_H
 #define OBJECT_SKYBOX_H
+#pragma interface
 
 // cSkyBox: the sky dome. A scene node (cObjNode) that draws one world-section instance (the sky model of the current
 // sky section, 44..48) centred on the current view with its own draw state; cSectionMan_skySwap switches the section
@@ -42,6 +43,7 @@ struct cSkyBox : public cObjNode {
                                         //      the record's +0x8 flags and draws it (graphics slot 95, model +0x80)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cSkyBox();   // g++'s own symbol _$_7cSkyBox (the retail label renamed)
     void setSection(int id) __asm__("cSkyBox_setSection");
     int reset() __asm__("cSkyBox_reset__FPv");
 };
@@ -49,5 +51,6 @@ struct cSkyBox : public cObjNode {
 CHECK_OFFSET(cSkyBox, m_iSectionID, 0x10);
 CHECK_OFFSET(cSkyBox, m_pInstanceSky, 0x14);
 CHECK_SIZE(cSkyBox, 0x18);
+__asm__("_vt$7cSkyBox = cSkyBox_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_SKYBOX_H */

@@ -1,5 +1,6 @@
 #ifndef FE_OVSTATESAVEREPLAY_H
 #define FE_OVSTATESAVEREPLAY_H
+#pragma interface
 
 // cOVState_SAVEREPLAY: the in-game save-replay memory-card overlay (screen "119Save_Replay"; overlay id 18), a
 // cFEMemCard with mType 1 (replay). Retail code: cOVState_SAVEREPLAY_* in fe/ovstatepause (EA's
@@ -71,9 +72,7 @@ struct cOVState_SAVEREPLAY : public cFEMemCard {
     char unk_272[0x2];              // 0x272 padding to the 4-byte size
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVState_SAVEREPLAY__cOVState_SAVEREPLAY stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVState_SAVEREPLAY();
+    virtual ~cOVState_SAVEREPLAY();   // g++'s own symbol _$_19cOVState_SAVEREPLAY (the retail label renamed)
     virtual void updateDone() __asm__("cOVState_SAVEREPLAY_updateDone");
     virtual void displayStatus() __asm__("cOVState_SAVEREPLAY_displayStatus");
     virtual void onWidgetEvent(cUIThing* msg, unsigned int type) __asm__("cOVState_SAVEREPLAY_onWidgetEvent");
@@ -89,5 +88,6 @@ CHECK_OFFSET(cOVState_SAVEREPLAY, mIsHidden, 0x22C);
 CHECK_OFFSET(cOVState_SAVEREPLAY, mTitle, 0x230);
 CHECK_OFFSET(cOVState_SAVEREPLAY, unk_272, 0x272);
 CHECK_SIZE(cOVState_SAVEREPLAY, 0x274);
+__asm__("_vt$19cOVState_SAVEREPLAY = cOVState_SAVEREPLAY_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_OVSTATESAVEREPLAY_H */

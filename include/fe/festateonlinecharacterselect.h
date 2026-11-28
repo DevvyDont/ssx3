@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEONLINECHARACTERSELECT_H
 #define FE_FESTATEONLINECHARACTERSELECT_H
+#pragma interface
 
 // cFEStateOnlineCharacterSelect: screen "245online_char_select": each player of an online game picks a rider
 // ("LBChallengerSelect", 10 riders) and confirms; the screen shows the other players' picks. A cFEStateNet state
@@ -71,8 +72,7 @@ struct cFEStateOnlineCharacterSelect : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateOnlineCharacterSelect1() __asm__("cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1");
-    // retail's destructor cFEStateOnlineCharacterSelect__cFEStateOnlineCharacterSelect stays a C function (g++ 2.95
-    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_29cFEStateOnlineCharacterSelect (the retail label renamed)
     virtual ~cFEStateOnlineCharacterSelect();
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event)
         __asm__("cFEStateOnlineCharacterSelect_onPopupEvent");
@@ -101,5 +101,7 @@ CHECK_OFFSET(cFEStateOnlineCharacterSelect, miConfirmCtrl, 0x6D8);
 CHECK_OFFSET(cFEStateOnlineCharacterSelect, mbConfirmed, 0x6DC);
 CHECK_OFFSET(cFEStateOnlineCharacterSelect, miCharID, 0x6E0);
 CHECK_SIZE(cFEStateOnlineCharacterSelect, 0x6E4);
+// g++'s name for the retail vtable
+__asm__("_vt$29cFEStateOnlineCharacterSelect = cFEStateOnlineCharacterSelect_vtbl");
 
 #endif /* FE_FESTATEONLINECHARACTERSELECT_H */

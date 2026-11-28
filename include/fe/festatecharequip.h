@@ -1,5 +1,6 @@
 #ifndef FE_FESTATECHAREQUIP_H
 #define FE_FESTATECHAREQUIP_H
+#pragma interface
 
 // cFEStateCharEquip: the "equip gear" / "buy gear" screen for one rider's bolts (inventory mode equips items, store
 // mode buys them; the option button may switch between the two). It lists the items of a category stack in six rows,
@@ -167,9 +168,7 @@ struct cFEStateCharEquip : public cFEState {
     void updatePolyBar() __asm__("cFEStateCharEquip_updatePolyBar");
     void updatePolyEquipPreviewBar(int delta) __asm__("cFEStateCharEquip_updatePolyEquipPreviewBar");
     void update3DPositions() __asm__("cFEStateCharEquip_update3DPositions");
-    // retail's destructor cFEStateCharEquip__cFEStateCharEquip stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateCharEquip();
+    virtual ~cFEStateCharEquip();   // g++'s own symbol _$_17cFEStateCharEquip (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateCharEquip_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateCharEquip_onDestroyScreen");
     virtual void onUpdate() __asm__("cFEStateCharEquip_onUpdate");
@@ -253,5 +252,6 @@ CHECK_OFFSET(cFEStateCharEquip, mCameraState, 0xAE0);
 CHECK_OFFSET(cFEStateCharEquip, mCanSwitchMode, 0xAE4);
 CHECK_OFFSET(cFEStateCharEquip, unk_AE8, 0xAE8);
 CHECK_SIZE(cFEStateCharEquip, 0xAF0);
+__asm__("_vt$17cFEStateCharEquip = cFEStateCharEquip_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATECHAREQUIP_H */

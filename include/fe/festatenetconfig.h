@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENETCONFIG_H
 #define FE_FESTATENETCONFIG_H
+#pragma interface
 
 // The online network-configuration screens (EA's d:/ssx/code/source/fe/festatenetconfig.cpp: the preview's asserts
 // at lines 554 and 641 sit between retail findOnlineCharacterRow and cFEStateAuthDNAS_onCreateScreen (cFEStateNetConfig / cFEStateAuthDNAS),
@@ -99,9 +100,7 @@ struct cFEStateNetConfig : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNetConfig1() __asm__("cFEStateNetConfig_cFEStateNetConfig1");
-    // retail's destructor cFEStateNetConfig__cFEStateNetConfig stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateNetConfig();
+    virtual ~cFEStateNetConfig();   // g++'s own symbol _$_17cFEStateNetConfig (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateNetConfig_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateNetConfig_onDestroyScreen");
     virtual void onUpdate() __asm__("cFEStateNetConfig_onUpdate");
@@ -154,6 +153,7 @@ CHECK_OFFSET(cFEStateNetConfig, miResult, 0x70C);
 CHECK_OFFSET(cFEStateNetConfig, mpustrAuthError, 0x710);
 CHECK_OFFSET(cFEStateNetConfig, mustrPopupText, 0x71C);
 CHECK_SIZE(cFEStateNetConfig, 0x91C);
+__asm__("_vt$17cFEStateNetConfig = cFEStateNetConfig_vtbl");   // g++'s name for the retail vtable
 
 struct cFEStateNetAccountMem : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:

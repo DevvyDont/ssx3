@@ -1,5 +1,6 @@
 #ifndef RENDER_GRAPHICSMAN_H
 #define RENDER_GRAPHICSMAN_H
+#pragma interface
 
 // cGraphicsMan: the renderer's platform-independent base class (EA source/render/graphicsman.cpp / .h, preview
 // asserts): per-view settings (specular / sparkle / rim textures, NIS flag, snow sparkle density, draw distance, fog,
@@ -14,6 +15,7 @@
 // On Tour's cGraphicsMan has the same member order (size 0x10D0 there; retail's vptr ends it at 0x10DC).
 
 #include "layout.h"
+#include "bx/memman.h"
 
 // One weighted matrix of a blended (skinning) matrix (On Tour struct tMdfBlendedMatrixComponent, 0x4).
 // [U] cPS2GraphicsMan_ResolveCharModel rebases m_iMatrixId by the part's bone offset (w[j*4+2] += tbl[w[j*4+3]]);
@@ -187,7 +189,9 @@ public:
     // ints / pointers and its floats line up with retail's (they travel in separate registers, so On Tour's order is
     // kept); `bool` parameters are spelled int (an int argument would be converted at the call). R? marks a parameter
     // whose retail type is a unit-local view (void* / int here).
-    virtual ~cGraphicsMan();                                                                             // slot 1: [R] cGraphicsMan__cGraphicsMan / cPS2GraphicsMan__cPS2GraphicsMan
+    // slot 1: [R] cPS2GraphicsMan__cPS2GraphicsMan calls it; g++'s own symbol _$_12cGraphicsMan (the retail label
+    // renamed)
+    virtual ~cGraphicsMan();
     virtual void Init() = 0;                                                                             // slot 2: [R] cPS2GraphicsMan_Init
     virtual void Purge() = 0;                                                                            // slot 3: [R] cPS2GraphicsMan_Purge
     virtual bool SetDisplayMode1(int idx) = 0;                                                           // slot 4: [R] cPS2GraphicsMan_SetDisplayMode1
@@ -445,6 +449,7 @@ CHECK_OFFSET(cGraphicsMan, m_drawStateStack, 0xE88);
 CHECK_OFFSET(cGraphicsMan, _EffectTexMap, 0xF50);
 CHECK_OFFSET(cGraphicsMan, mCharSpecTexID, 0x10B0);
 CHECK_SIZE(cGraphicsMan, 0x10DC);
+__asm__("_vt$12cGraphicsMan = cGraphicsMan_vtbl");   // g++'s name for the retail vtable
 
 // One board trail handed to cGraphicsMan::RenderMultipleBoardTrails (On Tour struct BoardTrailInfoT, 0x14;
 // [O] RenderMultipleBoardTrails(BoardTrailInfoT* pTrails, int nTrails), retail vtable slot 89,

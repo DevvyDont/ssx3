@@ -1,5 +1,6 @@
 #ifndef FE_FESTATELOGIN_H
 #define FE_FESTATELOGIN_H
+#pragma interface
 
 // cFEStateLogin: screen "201login_type": the online login choice (use the stored account, create one
 // (cFEStateCreateStep1), use an existing one (cFEUseExistingAccount), load one from the memory card
@@ -57,9 +58,7 @@ struct cFEStateLogin : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateLogin1() __asm__("cFEStateLogin_cFEStateLogin1");
-    // retail's destructor cFEStateLogin__cFEStateLogin stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateLogin();
+    virtual ~cFEStateLogin();   // g++'s own symbol _$_13cFEStateLogin (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateLogin_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* pWidget) __asm__("cFEStateLogin_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* popup, unsigned int kind) __asm__("cFEStateLogin_onWidgetEvent");
@@ -75,5 +74,6 @@ struct cFEStateLogin : public cFEStateNet {
 
 CHECK_OFFSET(cFEStateLogin, mpustrDisconnect, 0x6D0);
 CHECK_SIZE(cFEStateLogin, 0x6D4);
+__asm__("_vt$13cFEStateLogin = cFEStateLogin_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATELOGIN_H */

@@ -718,7 +718,7 @@ extern "C" cUIThing* cUIThing_cUIThing(cUIThing* self, cUIScreen* pScreen, cUITh
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", cUIThing__cUIThing);
+INCLUDE_ASM("ui/uistatestack", _$_8cUIThing);
 #ifdef SKIP_ASM
 extern "C" void cListNode_destroyListNode(void* self);
 void operator_delete(int* ptr);
@@ -731,6 +731,7 @@ public:
     virtual ~cUIThing__cUIThing_cVirt();
 };
 
+extern "C" void cUIThing__cUIThing(cUIThing* self, int flags) __asm__("_$_8cUIThing");
 /**
  * Destroys a UI thing: deletes its animation, runs the list-node base destructor, then frees it when asked to.
  *

@@ -486,17 +486,14 @@ extern "C" void cFEStateNetMessenger_publishPresence()
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger__cFEStateNetMessenger);
+INCLUDE_ASM("fe/feasyncfile", _$_20cFEStateNetMessenger);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cBXString__cBXString(void* self, int flags);
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
-extern void* cFEStateNetMessenger_vtbl[];
 struct sOwner1A5450;
 extern "C" void cFEStateNetMessenger_clearNames(cFEStateNetMessenger* self);
-extern "C" void cFEStateNet__cFEStateNet_dtor3EA0(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
-
 
 static inline void Dealloc1A3EA0(void** p, int n)
 {
@@ -509,32 +506,22 @@ static inline void Dealloc1A3EA0(void** p, int n)
     }
 }
 
-
-
 /**
- * Destroys the online messenger screen state and its buddy-name list.
- *
- * Restores the messenger vtable, calls the parent state's virtual at vtable entry 32 (for a cFEStateNet parent
- * cFEStateNet_publishPresence, which sets the player's buddy presence through BuddyMan_setPresence), destroys every name in mNames
- * (cFEStateNetMessenger_clearNames) and frees the vector's storage (operator_delete when its capacity is one pointer, cMemMan_free
- * otherwise), destroys the cBXStrings mszShownName, mszSearchName and mszFoundName, and ends in the cFEStateNet
- * destructor cFEStateNet__cFEStateNet with @p flags.
- *
- * @param flags  g++ destructor flags, passed to the base destructor (bit 0 set frees the object)
+ * Destroys the messenger state: tells its parent state (mpParentState, virtual slot 32) that it is going away, clears
+ * and frees its name list (mNames) and destroys its shown, searched and found name strings; the cFEStateNet part does
+ * the rest and frees it when asked.
  */
-extern "C" void cFEStateNetMessenger__cFEStateNetMessenger(cFEStateNetMessenger* self, int flags)
+cFEStateNetMessenger::~cFEStateNetMessenger()
 {
-    VPTR_OF(cListNode, self) = (void**)cFEStateNetMessenger_vtbl;
-    cUIState* child = self->mpParentState;
+    cUIState* child = mpParentState;
     sVEntry<void(void*)>* vt = (sVEntry<void (void*)>*)VPTR_OF(cListNode, child);
     vt[32].fn(vthis(child, vt[32]));
-    self->clearNames();
-    tFEStringPtrVector* feStringPtrVector = &(*(&self->mNames));
-    Dealloc1A3EA0((void**)feStringPtrVector->mpStart, self->mNames.mpEndOfStorage - self->mNames.mpStart);
-    cBXString__cBXString(((char*)&self->mszShownName), 2);
-    cBXString__cBXString(((char*)&self->mszSearchName), 2);
-    cBXString__cBXString(((char*)&self->mszFoundName), 2);
-    cFEStateNet__cFEStateNet_dtor3EA0((self), flags);
+    clearNames();
+    tFEStringPtrVector* feStringPtrVector = &(*(&mNames));
+    Dealloc1A3EA0((void**)feStringPtrVector->mpStart, mNames.mpEndOfStorage - mNames.mpStart);
+    cBXString__cBXString(((char*)&mszShownName), 2);
+    cBXString__cBXString(((char*)&mszSearchName), 2);
+    cBXString__cBXString(((char*)&mszFoundName), 2);
 }
 #endif
 
@@ -2819,18 +2806,14 @@ extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(cFEState
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEStateReadMessagePopup__cFEStateReadMessagePopup);
+INCLUDE_ASM("fe/feasyncfile", _$_24cFEStateReadMessagePopup);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* func_0041610C(void* dst, void* src, int n);
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("_$_11cFEStateNet");
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
-extern void* cFEStateReadMessagePopup_vtbl[];
-
-
-
 
 static inline void Dealloc1A7848(cPrivateMessage** p, int n)
 {
@@ -2843,35 +2826,29 @@ static inline void Dealloc1A7848(cPrivateMessage** p, int n)
     }
 }
 
-
 /**
- * Destroys the private-message popup: deletes every message, frees the vector and destroys mszSender.
- *
- * Pops each cPrivateMessage from the end of mMessages and deletes it through its slot 1 (flags 3), frees the vector's
- * storage, destroys the sender string and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet) with @p flags.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ * Destroys the read-message popup: deletes every message in mMessages (through their virtual destructors, last first),
+ * frees the vector's storage and destroys the sender string (mszSender); the cFEStateNet part does the rest and frees
+ * it when asked.
  */
-extern "C" void cFEStateReadMessagePopup__cFEStateReadMessagePopup(cFEStateReadMessagePopup* self, int flags)
+cFEStateReadMessagePopup::~cFEStateReadMessagePopup()
 {
-    VPTR_OF(cListNode, self) = cFEStateReadMessagePopup_vtbl;
     for (;;) {
-        if (self->mMessages.mpStart == self->mMessages.mpFinish) break;
-        cPrivateMessage* message = self->mMessages.mpFinish[-1];
-        self->mMessages.mpFinish--;
+        if (mMessages.mpStart == mMessages.mpFinish) break;
+        cPrivateMessage* message = mMessages.mpFinish[-1];
+        mMessages.mpFinish--;
         if (message) {
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)message->mVtbl;
             vt[1].fn(vthis(message, vt[1]), 3);
         }
     }
-    tFEPrivateMessageVector* messages = &self->mMessages;
-    cPrivateMessage** first = self->mMessages.mpStart;
-    cPrivateMessage** last = self->mMessages.mpFinish;
+    tFEPrivateMessageVector* messages = &mMessages;
+    cPrivateMessage** first = mMessages.mpStart;
+    cPrivateMessage** last = mMessages.mpFinish;
     func_0041610C(first, last, (messages->mpFinish - last) * sizeof(cPrivateMessage*));
-    self->mMessages.mpFinish -= last - first;
-    Dealloc1A7848(messages->mpStart, self->mMessages.mpEndOfStorage - self->mMessages.mpStart);
-    cBXString__cBXString(((char*)&self->mszSender), 2);
-    cFEStateNet__cFEStateNet_dtor(self, flags);
+    mMessages.mpFinish -= last - first;
+    Dealloc1A7848(messages->mpStart, mMessages.mpEndOfStorage - mMessages.mpStart);
+    cBXString__cBXString(((char*)&mszSender), 2);
 }
 #endif
 
@@ -3497,7 +3474,7 @@ extern "C" void* cFEStateNet_cFEStateNet_impl(cFEStateNet* self, void* engine, v
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEStateNet__cFEStateNet);
+INCLUDE_ASM("fe/feasyncfile", _$_11cFEStateNet);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -3541,7 +3518,7 @@ struct sList1A85D0 {
     sNode1A85D0* first() { return node->next; }
 };
 
-extern "C" void f_1A85D0(cFEStateNet* self, int flags) __asm__("cFEStateNet__cFEStateNet");
+extern "C" void f_1A85D0(cFEStateNet* self, int flags) __asm__("_$_11cFEStateNet");
 /**
  * Destroys the cFEStateNet part of an online front-end state.
  *
@@ -6505,23 +6482,19 @@ extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount(cFEUseExistingAccou
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEUseExistingAccount__cFEUseExistingAccount);
+INCLUDE_ASM("fe/feasyncfile", _$_21cFEUseExistingAccount);
 #ifdef SKIP_ASM
-extern void* cFEUseExistingAccount_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("_$_11cFEStateNet");
 
 /**
- * Destroys the "use existing account" state: destroys mszEmail, then runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ * Destroys the "use existing account" state: destroys its e-mail string (mszEmail); the cFEStateNet part does the rest
+ * and frees it when asked.
  */
-extern "C" void cFEUseExistingAccount__cFEUseExistingAccount(cFEUseExistingAccount* self, int flags)
+cFEUseExistingAccount::~cFEUseExistingAccount()
 {
-    VPTR_OF(cListNode, self) = cFEUseExistingAccount_vtbl;
-    cBXString__cBXString((char*)&self->mszEmail, 2);
-    cFEStateNet__cFEStateNet_dtor(self, flags);
+    cBXString__cBXString((char*)&mszEmail, 2);
 }
 #endif
 
@@ -10882,23 +10855,17 @@ extern "C" cFEStateChatRoom* cFEStateChatRoom_cFEStateChatRoom(cFEStateChatRoom*
 #endif
 
 extern void* cFEStateChatRoom_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom__cFEStateChatRoom__FPv);
+INCLUDE_ASM("fe/feasyncfile", _$_16cFEStateChatRoom);
 #ifdef SKIP_ASM
 /**
- * Destroys the chat-room state: restores cFEStateChatRoom_vtbl and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * The destructor flags stay untouched in $a1 and reach cFEStateNet__cFEStateNet, which frees the object when bit 0 is set.
- *
- * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
+ * Destroys the online chat room state; it owns nothing of its own, so its cFEStateNet part does the work and frees it
+ * when asked.
  */
-void* cFEStateChatRoom__cFEStateChatRoom(void* vself)
+cFEStateChatRoom::~cFEStateChatRoom()
 {
-    cFEStateChatRoom* self = (cFEStateChatRoom*)vself;
-    VPTR_OF(cListNode, self) = cFEStateChatRoom_vtbl;
-    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -12359,47 +12326,41 @@ extern "C" void* cFEStateNetConfig_cFEStateNetConfig(cFEStateNetConfig* mem, cUI
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig__cFEStateNetConfig);
+INCLUDE_ASM("fe/feasyncfile", _$_17cFEStateNetConfig);
 #ifdef SKIP_ASM
-extern void* cFEStateNetConfig_vtbl[];
 void cMemMan_free(void* p);
 extern "C" void cMemCard_DeleteInstance(void* p);
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("_$_11cFEStateNet");
 // cFEStateNetConfig_memCard is declared earlier in the unit (cFEVObj_001B3F78*, see cFEStateNetConfig_cFEStateNetConfig)
 
 /**
- * Destroys the network-configuration screen state: frees its heap texts and the network configuration object.
- *
- * Restores cFEStateNetConfig_vtbl, frees the three mpustrAuthError texts and mpustrPopupText (cMemMan_free) and
- * deletes cFEStateNetConfig_memCard with cMemCard_DeleteInstance, then runs the cFEStateNet destructor (cFEStateNet__cFEStateNet) with @p flags.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory (handled by the base destructor)
+ * Destroys the network configuration state: frees its three authentication error texts and its popup text, and deletes
+ * the shared memory-card instance (cFEStateNetConfig_memCard); the cFEStateNet part does the rest and frees it when
+ * asked.
  */
-extern "C" void cFEStateNetConfig__cFEStateNetConfig(cFEStateNetConfig* self, int flags)
+cFEStateNetConfig::~cFEStateNetConfig()
 {
-    VPTR_OF(cListNode, self) = cFEStateNetConfig_vtbl;
-    if (self->mpustrAuthError[0] != 0) {
-        cMemMan_free(self->mpustrAuthError[0]);
-        self->mpustrAuthError[0] = 0;
+    if (mpustrAuthError[0] != 0) {
+        cMemMan_free(mpustrAuthError[0]);
+        mpustrAuthError[0] = 0;
     }
-    if (self->mpustrAuthError[1] != 0) {
-        cMemMan_free(self->mpustrAuthError[1]);
-        self->mpustrAuthError[1] = 0;
+    if (mpustrAuthError[1] != 0) {
+        cMemMan_free(mpustrAuthError[1]);
+        mpustrAuthError[1] = 0;
     }
-    if (self->mpustrAuthError[2] != 0) {
-        cMemMan_free(self->mpustrAuthError[2]);
-        self->mpustrAuthError[2] = 0;
+    if (mpustrAuthError[2] != 0) {
+        cMemMan_free(mpustrAuthError[2]);
+        mpustrAuthError[2] = 0;
     }
-    if (self->mpustrPopupText != 0) {
-        cMemMan_free(self->mpustrPopupText);
-        self->mpustrPopupText = 0;
+    if (mpustrPopupText != 0) {
+        cMemMan_free(mpustrPopupText);
+        mpustrPopupText = 0;
     }
     if (cFEStateNetConfig_memCard != 0) {
         cMemCard_DeleteInstance(cFEStateNetConfig_memCard);
         cFEStateNetConfig_memCard = 0;
     }
-    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -14154,37 +14115,30 @@ extern "C" cFEStateAuthDNAS* cFEStateAuthDNAS_cFEStateAuthDNAS(cFEStateAuthDNAS*
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS__cFEStateAuthDNAS);
+INCLUDE_ASM("fe/feasyncfile", _$_16cFEStateAuthDNAS);
 #ifdef SKIP_ASM
-extern void* cFEStateAuthDNAS_vtbl[];
 void cMemMan_free(void* p);
 extern "C" void DNASMan_freeBuffers(void* p);
 extern "C" void DNASMan__DNASMan(void* p, int flags);
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("_$_11cFEStateNet");
 
 /**
- * Destroys the DNAS authentication state: shuts down and deletes the DNAS object and frees mpustrText.
- *
- * The DNAS object (mpAuth) is shut down with DNASMan_freeBuffers and deleted through DNASMan__DNASMan(.., 3); then the
- * cFEStateNet destructor (cFEStateNet__cFEStateNet) runs with @p flags.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ * Destroys the DNAS authentication state: frees its DNAS buffers and deletes the DNAS manager (mpAuth) when it has one,
+ * and frees its text (mpustrText); the cFEStateNet part does the rest and frees it when asked.
  */
-extern "C" void cFEStateAuthDNAS__cFEStateAuthDNAS(cFEStateAuthDNAS* self, int flags)
+cFEStateAuthDNAS::~cFEStateAuthDNAS()
 {
-    VPTR_OF(cListNode, self) = cFEStateAuthDNAS_vtbl;
-    if (self->mpAuth != 0) {
-        DNASMan_freeBuffers(self->mpAuth);
-        if (self->mpAuth != 0) {
-            DNASMan__DNASMan(self->mpAuth, 3);
+    if (mpAuth != 0) {
+        DNASMan_freeBuffers(mpAuth);
+        if (mpAuth != 0) {
+            DNASMan__DNASMan(mpAuth, 3);
         }
     }
-    if (self->mpustrText != 0) {
-        cMemMan_free(self->mpustrText);
-        self->mpustrText = 0;
+    if (mpustrText != 0) {
+        cMemMan_free(mpustrText);
+        mpustrText = 0;
     }
-    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -14543,23 +14497,17 @@ extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError(cFEStateAuthDNASErr
 #endif
 
 extern void* cFEStateAuthDNASError_vtbl[];
-extern "C" void* cFEStateNet__cFEStateNet(void*);
+extern "C" void* cFEStateNet__cFEStateNet(void*) __asm__("_$_11cFEStateNet");
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError__cFEStateAuthDNASError__FPv);
+INCLUDE_ASM("fe/feasyncfile", _$_21cFEStateAuthDNASError);
 #ifdef SKIP_ASM
 /**
- * Destroys the DNAS error popup: restores its vtable and runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * The destructor flags stay untouched in $a1 and reach cFEStateNet__cFEStateNet, which frees the object when bit 0 is set.
- *
- * @return cFEStateNet__cFEStateNet()'s result (declared void* here)
+ * Destroys the DNAS authentication error state; it owns nothing of its own, so its cFEStateNet part does the work and
+ * frees it when asked.
  */
-void* cFEStateAuthDNASError__cFEStateAuthDNASError(void* vself)
+cFEStateAuthDNASError::~cFEStateAuthDNASError()
 {
-    cFEStateAuthDNASError* self = (cFEStateAuthDNASError*)vself;
-    VPTR_OF(cListNode, self) = cFEStateAuthDNASError_vtbl;
-    return cFEStateNet__cFEStateNet(self);
 }
 #endif
 
@@ -14864,7 +14812,7 @@ extern void* cFEStateNetAccountMem_vtbl[];
 extern void* cFEBlankPopup_vtbl[];
 extern "C" void cSharedLoginMan_destroyInstance();
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
+extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("_$_11cFEStateNet");
 
 /**
  * Destroys the online-account memory-card popup: deletes the card object, then runs the base destructors.
@@ -21227,26 +21175,20 @@ extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* self, cUIEngine* pEn
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEStateLogin__cFEStateLogin);
+INCLUDE_ASM("fe/feasyncfile", _$_13cFEStateLogin);
 #ifdef SKIP_ASM
-extern void* cFEStateLogin_vtbl[];
 void cMemMan_free(void* p);
-// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
- * Destroys the login state: frees mpustrDisconnect, then runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ * Destroys the online login state: frees its disconnect message (mpustrDisconnect) when it has one; the cFEStateNet
+ * part does the rest and frees it when asked.
  */
-extern "C" void cFEStateLogin__cFEStateLogin(cFEStateLogin* self, int flags)
+cFEStateLogin::~cFEStateLogin()
 {
-    VPTR_OF(cListNode, self) = cFEStateLogin_vtbl;
-    if (self->mpustrDisconnect != 0) {
-        cMemMan_free(self->mpustrDisconnect);
-        self->mpustrDisconnect = 0;
+    if (mpustrDisconnect != 0) {
+        cMemMan_free(mpustrDisconnect);
+        mpustrDisconnect = 0;
     }
-    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 
@@ -22500,26 +22442,20 @@ void cFEStateOnlineAgreement::buildTOSLines()
 #endif
 
 //100%
-INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement__cFEStateOnlineAgreement);
+INCLUDE_ASM("fe/feasyncfile", _$_23cFEStateOnlineAgreement);
 #ifdef SKIP_ASM
-extern void* cFEStateOnlineAgreement_vtbl[];
 void cMemMan_free(void* p);
-// PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
-extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
 /**
- * Destroys the terms-of-service state: frees mpTOSLines, then runs the cFEStateNet destructor (cFEStateNet__cFEStateNet).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
+ * Destroys the online terms-of-service state: frees its text lines (mpTOSLines) when it has them; the cFEStateNet part
+ * does the rest and frees it when asked.
  */
-extern "C" void cFEStateOnlineAgreement__cFEStateOnlineAgreement(cFEStateOnlineAgreement* self, int flags)
+cFEStateOnlineAgreement::~cFEStateOnlineAgreement()
 {
-    VPTR_OF(cListNode, self) = cFEStateOnlineAgreement_vtbl;
-    if (self->mpTOSLines != 0) {
-        cMemMan_free(self->mpTOSLines);
-        self->mpTOSLines = 0;
+    if (mpTOSLines != 0) {
+        cMemMan_free(mpTOSLines);
+        mpTOSLines = 0;
     }
-    cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
 

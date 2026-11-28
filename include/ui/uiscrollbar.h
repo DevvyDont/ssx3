@@ -1,5 +1,6 @@
 #ifndef UI_UISCROLLBAR_H
 #define UI_UISCROLLBAR_H
+#pragma interface
 
 // cUIScrollBar: a scroll bar (record type 0x21): background, knob, up/down arrows and an object hidden when the list
 // is empty; cUITextScroll points at one (mpScrollBar). Size 0xCC: cUIScreen_createObjectByStruct does
@@ -52,6 +53,7 @@ struct cUIScrollBar : public cUIThing {
     int mPage;                       // 0x0C8 [O]; [R] = 0; [U] cUIScrollBar_setValues (sw)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cUIScrollBar();   // g++'s own symbol _$_12cUIScrollBar (the retail label renamed)
     void setScrollVisibile(int bVisible) __asm__("cUIScrollBar_setScrollVisibile");
     void* cUIScrollBar1() __asm__("cUIScrollBar_cUIScrollBar1");
     void setBackgroundObject(cUIThing* background) __asm__("cUIScrollBar_setBackgroundObject");
@@ -80,5 +82,6 @@ CHECK_OFFSET(cUIScrollBar, mValue, 0x0C0);
 CHECK_OFFSET(cUIScrollBar, mNumValues, 0x0C4);
 CHECK_OFFSET(cUIScrollBar, mPage, 0x0C8);
 CHECK_SIZE(cUIScrollBar, 0xCC);
+__asm__("_vt$12cUIScrollBar = cUIScrollBar_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UI_UISCROLLBAR_H */

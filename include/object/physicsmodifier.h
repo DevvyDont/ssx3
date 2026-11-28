@@ -1,5 +1,6 @@
 #ifndef OBJECT_PHYSICSMODIFIER_H
 #define OBJECT_PHYSICSMODIFIER_H
+#pragma interface
 
 // cPhysicsModifier: the base of the physics modifiers a cMoveNode can own (tModifierBlock::Physics; in SSX 3 only
 // cBoostModifier). Size 0x8: On Tour 0x8; the vptr follows the class's only data member (g++ 2.95 puts it after the data of
@@ -9,6 +10,7 @@
 // getPhysicsType (one-line defaults in src/object/railmodifier.cpp); vtable 0x004913B8 (6 slots). EA's source unknown.
 
 #include "layout.h"
+#include "bx/memman.h"
 
 struct cBxReplayFrame;
 
@@ -21,7 +23,9 @@ struct cPhysicsModifier {
                                     //      cPhysicsModifier_cPhysicsModifier reads 4 bytes here; [U] isActive (lw 0x0)
     // 0x04: the vptr. [R] cPhysicsModifier_vtbl (0x004913B8); cBoostModifier ctors store cBoostModifier_vtbl
     //   (0x00490898). Slots:
-    virtual ~cPhysicsModifier();                                // 1  ([R] cPhysicsModifier_vtbl; types [O])
+    // inline: cBoostModifier's destructor inlines it (retail's out-of-line copy cPhysicsModifier__cPhysicsModifier
+    // stays a C function)
+    virtual ~cPhysicsModifier() {}                              // 1  ([R] cPhysicsModifier_vtbl; types [O])
     virtual void update() __asm__("cPhysicsModifier_update__FPv");                                      // 2
     virtual void signal(int signal, float arg) __asm__("cPhysicsModifier_signal__FPv");                 // 3
     virtual int isActive() __asm__("cPhysicsModifier_isActive__FPv");                     // 4
@@ -34,5 +38,6 @@ struct cPhysicsModifier {
 
 CHECK_OFFSET(cPhysicsModifier, Active, 0x00);
 CHECK_SIZE(cPhysicsModifier, 0x8);
+__asm__("_vt$16cPhysicsModifier = cPhysicsModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_PHYSICSMODIFIER_H */

@@ -78,7 +78,7 @@ INCLUDE_ASM("main/ssxapp2", cInput_setPad);
 
 INCLUDE_ASM("main/ssxapp2", cInput_setMap);
 
-INCLUDE_ASM("main/ssxapp2", cVisualEffectsObjNode__cVisualEffectsObjNode);
+INCLUDE_ASM("main/ssxapp2", _$_21cVisualEffectsObjNode);
 
 INCLUDE_ASM("main/ssxapp2", cVisualEffectsObjNode_update);
 
@@ -134,13 +134,13 @@ INCLUDE_ASM("main/ssxapp2", cMCOverlayManager_Callbackpdate);
 
 INCLUDE_ASM("main/ssxapp2", cGameComm_stopSyncInput);
 
-INCLUDE_ASM("main/ssxapp2", cAIVisualEffectsObjNode__cAIVisualEffectsObjNode);
+INCLUDE_ASM("main/ssxapp2", _$_23cAIVisualEffectsObjNode);
 
 INCLUDE_ASM("main/ssxapp2", cAIVisualEffectsObjNode_update);
 
 INCLUDE_ASM("main/ssxapp2", cAIVisualEffectsObjNode_render);
 
-INCLUDE_ASM("main/ssxapp2", cSSXStatsObjNode__cSSXStatsObjNode);
+INCLUDE_ASM("main/ssxapp2", _$_16cSSXStatsObjNode);
 
 INCLUDE_ASM("main/ssxapp2", cSSXStatsObjNode_update);
 

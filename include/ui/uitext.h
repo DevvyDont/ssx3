@@ -1,5 +1,6 @@
 #ifndef UI_UITEXT_H
 #define UI_UITEXT_H
+#pragma interface
 
 // cUIText: a text object on a UI screen (object type 0x17: getType, cUIText_getType, returns 0x17).
 // cUIScreen_createObjectByStruct allocates it with `cMemMan_alloc(0xBC, "UIText", ...)` and runs its constructor
@@ -88,6 +89,7 @@ struct cUIText : public cUIThing {
     unsigned short mLineSize;        // 0x0BA [O]; [R] = 0; [U] = mNumLines when there are 2+ lines (cUIText_setUnicodeStringPrivate)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cUIText();   // g++'s own symbol _$_7cUIText (the retail label renamed)
     void render2D(float x, float y) __asm__("cUIText_render2D");
     void deleteText() __asm__("cUIText_deleteText");
     int getAsciiString() __asm__("cUIText_getAsciiString");
@@ -126,5 +128,6 @@ CHECK_OFFSET(cUIText, mpString, 0x0B4);
 CHECK_OFFSET(cUIText, mStringSize, 0x0B8);
 CHECK_OFFSET(cUIText, mLineSize, 0x0BA);
 CHECK_SIZE(cUIText, 0xBC);
+__asm__("_vt$7cUIText = cUIText_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UI_UITEXT_H */

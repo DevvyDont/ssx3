@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEAUTHDNAS_H
 #define FE_FESTATEAUTHDNAS_H
+#pragma interface
 
 // The DNAS authentication popups of the network configuration (EA's d:/ssx/code/source/fe/festatenetconfig.cpp: the
 // preview's assert at line 641 sits in cFEStateAuthDNAS's onCreateScreen, retail cFEStateAuthDNAS_onCreateScreen, and
@@ -90,9 +91,7 @@ struct cFEStateAuthDNAS : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateAuthDNAS1() __asm__("cFEStateAuthDNAS_cFEStateAuthDNAS1");
-    // retail's destructor cFEStateAuthDNAS__cFEStateAuthDNAS stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateAuthDNAS();
+    virtual ~cFEStateAuthDNAS();   // g++'s own symbol _$_16cFEStateAuthDNAS (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateAuthDNAS_onCreateScreen");
     virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateAuthDNAS_onInputBegin");
     virtual void onUpdate() __asm__("cFEStateAuthDNAS_onUpdate");
@@ -116,6 +115,7 @@ CHECK_OFFSET(cFEStateAuthDNAS, unk_6F4, 0x6F4);
 CHECK_OFFSET(cFEStateAuthDNAS, unk_6F8, 0x6F8);
 CHECK_OFFSET(cFEStateAuthDNAS, mpustrText, 0x6FC);
 CHECK_SIZE(cFEStateAuthDNAS, 0x700);
+__asm__("_vt$16cFEStateAuthDNAS = cFEStateAuthDNAS_vtbl");   // g++'s name for the retail vtable
 
 struct cFEStateAuthDNASError : public cFEStateNet {
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
@@ -146,6 +146,7 @@ struct cFEStateAuthDNASError : public cFEStateNet {
     cUIText* mpTitle;               // 0x6E4 [U] onWidgetCreate: widget "Title"
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cFEStateAuthDNASError();   // g++'s own symbol _$_21cFEStateAuthDNASError (the retail label renamed)
     void* cFEStateAuthDNASError1() __asm__("cFEStateAuthDNASError_cFEStateAuthDNASError1");
     // onWidgetCreate stays a C function (cFEStateAuthDNASError_onWidgetCreate): declared first, it is the vtable's key
     // function, which keeps the vtable out of the units defining the other overrides
@@ -167,5 +168,6 @@ CHECK_OFFSET(cFEStateAuthDNASError, mpFooter, 0x6DC);
 CHECK_OFFSET(cFEStateAuthDNASError, mpBody, 0x6E0);
 CHECK_OFFSET(cFEStateAuthDNASError, mpTitle, 0x6E4);
 CHECK_SIZE(cFEStateAuthDNASError, 0x6E8);
+__asm__("_vt$21cFEStateAuthDNASError = cFEStateAuthDNASError_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATEAUTHDNAS_H */

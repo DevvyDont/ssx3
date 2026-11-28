@@ -1,5 +1,6 @@
 #ifndef OBJECT_HIDENODE_H
 #define OBJECT_HIDENODE_H
+#pragma interface
 
 // cHideNode: the node the world script's HideInstanceFunc puts on an instance to hide it: it only marks the record
 // (flags +0x8: clears 0x60 and bit 1, sets bit 2) and ignores everything else (expire, loseFocus, signal and
@@ -38,9 +39,8 @@ struct cHideNode : public cInstanceNode {
     //   Instance: [R] the ctor marks the record's flags (+0x8) through it (lw 0x18 twice)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cHideNode();   // g++'s own symbol _$_9cHideNode (the retail label renamed)
     void* cHideNode1() __asm__("cHideNode_cHideNode1");
-    // loseFocus stays a C function (cHideNode_loseFocus): declared first, it is the vtable's key function, which keeps
-    // the vtable out of the units defining the other overrides
     virtual void loseFocus() __asm__("cHideNode_loseFocus__FPv");
     virtual void expire(int) __asm__("cHideNode_expire__FPv");
     virtual void signal(int, float) __asm__("cHideNode_signal__FPv");
@@ -49,5 +49,6 @@ struct cHideNode : public cInstanceNode {
 };
 
 CHECK_SIZE(cHideNode, 0x1C);
+__asm__("_vt$9cHideNode = cHideNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_HIDENODE_H */

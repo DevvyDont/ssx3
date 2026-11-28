@@ -1,5 +1,6 @@
 #ifndef OBJECT_MULTISPLINEMODIFIER_H
 #define OBJECT_MULTISPLINEMODIFIER_H
+#pragma interface
 
 // cMultiSplineModifier: the transform modifier that runs a train of N instances along one spline (transform type 2;
 // chair lifts, conveyor cars): one tMultiNode (0x60) per model and one spawned tInstanceRecord per car.
@@ -8,7 +9,7 @@
 // EA's source: in d:/ssx/code/source/object/splinemodifier.cpp (its methods sit in that unit). Constructors
 // cMultiSplineModifier_cMultiSplineModifier (tAddMultiSplineData) and _cMultiSplineModifier1 (replay frame: reads 0x34
 // bytes into +0x4, the cSpline, the Instance pointer, then NumModels instance ids); destructor
-// cMultiSplineModifier__cMultiSplineModifier (frees AnimMats/Nodes, releases NodeInst[i]); vtable 0x0048F168 (27 slots).
+// _$_20cMultiSplineModifier (frees AnimMats/Nodes, releases NodeInst[i]); vtable 0x0048F168 (27 slots).
 // A FLAT layout: cTransformModifier (0x0: vptr) + cMultiSplineModifierState (0x4-0x38, the replay block) + own fields.
 // State member order is On Tour's; retail bools are 4 bytes and tARGB is 4-byte aligned (ui/uithing.h), which packs
 // the 0x40-byte On Tour state into 0x34 bytes. Own fields keep On Tour's order, 0x18 lower.
@@ -128,9 +129,7 @@ struct cMultiSplineModifier : public cTransformModifier {
     int incFocusCount() __asm__("cMultiSplineModifier_incFocusCount__FPv");
     int decFocusCount() __asm__("cMultiSplineModifier_decFocusCount__FPv");
     void* updateNodes() __asm__("cMultiSplineModifier_updateNodes");
-    // retail's destructor cMultiSplineModifier__cMultiSplineModifier stays a C function (g++ 2.95 takes no asm label on
-    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cMultiSplineModifier();
+    virtual ~cMultiSplineModifier();   // g++'s own symbol _$_20cMultiSplineModifier (the retail label renamed)
     virtual void update() __asm__("cMultiSplineModifier_update");
     virtual void updateOverlapSystem() __asm__("cMultiSplineModifier_updateOverlapSystem");
     virtual void render() __asm__("cMultiSplineModifier_render");
@@ -162,5 +161,6 @@ CHECK_OFFSET(cMultiSplineModifier, Instance, 0x40);
 CHECK_OFFSET(cMultiSplineModifier, NodeInst, 0x44);
 CHECK_OFFSET(cMultiSplineModifier, Spline, 0x48);
 CHECK_SIZE(cMultiSplineModifier, 0x58);
+__asm__("_vt$20cMultiSplineModifier = cMultiSplineModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_MULTISPLINEMODIFIER_H */

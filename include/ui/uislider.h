@@ -1,5 +1,6 @@
 #ifndef UI_UISLIDER_H
 #define UI_UISLIDER_H
+#pragma interface
 
 // cUISlider: a slider widget (record type 0x16): a knob moved along a background by value / number of values, stepped
 // by input. Size 0x90: cUIScreen_createObjectByStruct does operator new(0x90, "UISlider") + the cUIThing ctor
@@ -7,7 +8,7 @@
 // rec+0x24 (mpObjBackground) and rec+0x28 (mpObjKnob). Default ctors cUISlider_cUISlider1 / cUISlider_cUISlider (ui/uivector).
 // Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below. EA source: ../source/ui/uislider.h
 // (preview assert path); retail keeps its methods in ui/uiscreen (0x39DF28-0x39E288).
-// Methods: vtable cUISlider_vtbl slots 0 ~cUISlider (cUISlider__cUISlider), 9 setUIData (cUISlider_setUIData), 14 onInput
+// Methods: vtable cUISlider_vtbl slots 0 ~cUISlider (_$_9cUISlider), 9 setUIData (cUISlider_setUIData), 14 onInput
 // (cUISlider_onInput), 16 render2D (cUISlider_render2D), 21 getType (cUISlider_getType); accessors cUISlider_getValue..cUISlider_setKnobObject.
 // Class name: the preview's cUISlider::getType (builds/x/v2/name_map_v2.tsv, cUISlider_getType) and On Tour.
 //
@@ -36,6 +37,7 @@ struct cUISlider : public cUIThing {
                                      //       the dtor deletes it; render2D moves it
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cUISlider();   // g++'s own symbol _$_9cUISlider (the retail label renamed)
     void* cUISlider1() __asm__("cUISlider_cUISlider1");
     int getValue() __asm__("cUISlider_getValue");
     void setValue(int value) __asm__("cUISlider_setValue");
@@ -55,5 +57,6 @@ CHECK_OFFSET(cUISlider, mSliderObj, 0x084);
 CHECK_OFFSET(cUISlider, mpObjBackground, 0x088);
 CHECK_OFFSET(cUISlider, mpObjKnob, 0x08C);
 CHECK_SIZE(cUISlider, 0x90);
+__asm__("_vt$9cUISlider = cUISlider_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UI_UISLIDER_H */

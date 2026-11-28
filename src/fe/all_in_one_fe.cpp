@@ -719,32 +719,24 @@ extern "C" void *cOVStateHUD1P_cOVStateHUD1P1(cOVStateHUD1P* state) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P__cOVStateHUD1P);
+INCLUDE_ASM("fe/all_in_one_fe", _$_13cOVStateHUD1P);
 #ifdef SKIP_ASM
 extern "C" void cHUDRadar__cHUDRadar(void *, int);
 extern "C" void cUIState__cUIState(void *, int) __asm__("_$_8cUIState");
-extern char cOVStateHUD1P_vtbl[];
 
 /**
- * Destroys the one-player HUD overlay state: its two HUD elements, then the cUIState base.
- *
- * Restores cOVStateHUD1P_vtbl, destroys the two 0x8C-byte elements at +0x48 last to first (each through
- * cHUDRadar__cHUDRadar() on its part at +8, with flags 2 so nothing is freed), then calls the cUIState destructor
- * cUIState__cUIState(). cHUDRadar__cHUDRadar drops the shared instance count cHUDRadar_instanceCount and clears the textures-loaded
- * flag cHUDRadar_texturesLoadedFlag when the last element goes.
- *
- * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 set frees the object
+ * Destroys the one-player HUD overlay: destroys the radar of each of its two rider panels (mRiderInfo, last first); the
+ * cUIState part does the rest and frees it when asked.
  */
-extern "C" void cOVStateHUD1P__cOVStateHUD1P(cOVStateHUD1P* self, int flags) {
-    VPTR_OF(cListNode, self) = (void**)cOVStateHUD1P_vtbl;
-    if ((char*)&self->mRiderInfo[0] != 0) {
-        char *element = (char*)&self->mRiderInfo[0] + 0x118;
-        while ((char*)&self->mRiderInfo[0] != element) {
+cOVStateHUD1P::~cOVStateHUD1P()
+{
+    if ((char*)&mRiderInfo[0] != 0) {
+        char *element = (char*)&mRiderInfo[0] + 0x118;
+        while ((char*)&mRiderInfo[0] != element) {
             element -= 0x8C;
             cHUDRadar__cHUDRadar(element + 8, 2);
         }
     }
-    cUIState__cUIState(((void*)self), flags);
 }
 #endif
 
@@ -932,8 +924,6 @@ void * cOVState::PEAKCHAL_RESULTS_cOVState_PEAKCHAL_RESULTS(int engine, int over
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", _$_22cOVState_RACE_FINISHOV);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
 extern char cOVState_vtbl[];
 
 /**
@@ -990,8 +980,6 @@ extern "C" void *cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV(cOVState_RACE_FIN
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", _$_29cOVState_BASSSP_QUAL_FINISHOV);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
 extern char cOVState_vtbl[];
 
 /**
@@ -1048,8 +1036,6 @@ extern "C" void *cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV(cOV
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", _$_29cOVState_TOURNAMENT_STANDINGS);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
 extern char cOVState_vtbl[];
 
 /**
@@ -1170,8 +1156,6 @@ extern "C" void *cOVStateHiScoreList_cOVStateHiScoreList(cOVStateHiScoreList* ov
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", _$_19cOVStateHiScoreList);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
 extern char cOVState_vtbl[];
 
 /**
@@ -2923,22 +2907,14 @@ extern "C" void* cFEStateLodge_cFEStateLodge1(cFEStateLodge* self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodge__cFEStateLodge);
+INCLUDE_ASM("fe/all_in_one_fe", _$_13cFEStateLodge);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
-extern char cFEState_vtbl[];
-
 /**
- * Destroys the lodge front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(): the same
- * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
- * flags reach cUIState__cUIState() untouched in the second argument register.
+ * Destroys the lodge front-end state; it owns nothing of its own, so its cFEState and cUIState parts do the work and
+ * free it when asked.
  */
-extern "C" void cFEStateLodge__cFEStateLodge(cFEStateLodge* self) {
-    VPTR_OF(cListNode, self) = (void**)cFEState_vtbl;
-    cUIState__cUIState_a(self);
+cFEStateLodge::~cFEStateLodge()
+{
 }
 #endif
 
@@ -2965,22 +2941,14 @@ extern "C" void* cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail1(cFEStateLodg
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail);
+INCLUDE_ASM("fe/all_in_one_fe", _$_24cFEStateLodgeRiderDetail);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
-extern char cFEState_vtbl[];
-
 /**
- * Destroys the lodge rider-detail front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(): the same
- * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
- * flags reach cUIState__cUIState() untouched in the second argument register.
+ * Destroys the lodge rider-detail state; it owns nothing of its own, so its cFEState and cUIState parts do the work and
+ * free it when asked.
  */
-extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(cFEStateLodgeRiderDetail* self) {
-    VPTR_OF(cListNode, self) = (void**)cFEState_vtbl;
-    cUIState__cUIState_a(self);
+cFEStateLodgeRiderDetail::~cFEStateLodgeRiderDetail()
+{
 }
 #endif
 
@@ -3006,22 +2974,14 @@ extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib1(cFEStateBuyAttrib* self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", cFEStateBuyAttrib__cFEStateBuyAttrib);
+INCLUDE_ASM("fe/all_in_one_fe", _$_17cFEStateBuyAttrib);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
-extern char cFEState_vtbl[];
-
 /**
- * Destroys the buy-attribute front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(): the same
- * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
- * flags reach cUIState__cUIState() untouched in the second argument register.
+ * Destroys the lodge's attribute store screen; it owns nothing of its own, so its cFEState and cUIState parts do the
+ * work and free it when asked.
  */
-extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(cFEStateBuyAttrib* self) {
-    VPTR_OF(cListNode, self) = (void**)cFEState_vtbl;
-    cUIState__cUIState_a(self);
+cFEStateBuyAttrib::~cFEStateBuyAttrib()
+{
 }
 #endif
 
@@ -3048,30 +3008,20 @@ extern "C" void *cFEStateCareerStats_cFEStateCareerStats1(cFEStateCareerStats* s
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", cFEStateCareerStats__cFEStateCareerStats);
+INCLUDE_ASM("fe/all_in_one_fe", _$_19cFEStateCareerStats);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
-extern char cFEState_vtbl[];
-
 /**
- * Destroys the career-stats front-end state through the cFEState and cUIState destructors.
- *
- * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(): the same
- * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
- * flags reach cUIState__cUIState() untouched in the second argument register.
+ * Destroys the career stats screen; it owns nothing of its own, so its cFEState and cUIState parts do the work and free
+ * it when asked.
  */
-extern "C" void cFEStateCareerStats__cFEStateCareerStats(cFEStateCareerStats* self) {
-    VPTR_OF(cListNode, self) = (void**)cFEState_vtbl;
-    cUIState__cUIState_a(self);
+cFEStateCareerStats::~cFEStateCareerStats()
+{
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", _$_19cOVState_ENTERLODGE);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
 extern char cOVState_vtbl[];
 
 /**
@@ -3196,8 +3146,6 @@ extern "C" void *cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START(cOVStat
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", _$_27cOVState_BIGCHALLENGE_START);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
 extern char cOVState_vtbl[];
 
 /**
@@ -3286,8 +3234,6 @@ void * cOVState_BIGCHALLENGE_FAIL::cOVState_BIGCHALLENGE_FAIL_2(int engine, int 
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", _$_26cOVState_BIGCHALLENGE_FAIL);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cUIState__cUIState_a(void *) __asm__("_$_8cUIState");
 extern char cOVState_vtbl[];
 
 /**
@@ -4438,23 +4384,16 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onMenuGainFocus(void) {
 }
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", cOVState_PROFILE__cOVState_PROFILE);
+INCLUDE_ASM("fe/all_in_one_fe", _$_16cOVState_PROFILE);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cFEMemCard__cFEMemCard_x(void*) __asm__("cFEMemCard__cFEMemCard");
 extern char cOVState_PROFILE_vtbl[];
+
 /**
- * Destroys the profile overlay state through the memory-card base destructor cFEMemCard__cFEMemCard().
- *
- * Stores cOVState_PROFILE_vtbl, then calls cFEMemCard__cFEMemCard(), which clears the memory-card callbacks' state
- * pointer cFEMemCard_mInstance and runs the cUIState destructor. Only @p self is declared: the destructor flags reach
- * cFEMemCard__cFEMemCard() unchanged in the second argument register.
- *
- * @return no meaningful value (cFEMemCard__cFEMemCard() returns nothing)
+ * Destroys the in-game profile save overlay; it owns nothing of its own, so its cFEMemCard part does the work and frees
+ * it when asked.
  */
-extern "C" void* cOVState_PROFILE__cOVState_PROFILE(cOVState_PROFILE* self) {
-    VPTR_OF(cListNode, self) = (void**)cOVState_PROFILE_vtbl;
-    return cFEMemCard__cFEMemCard_x(self);
+cOVState_PROFILE::~cOVState_PROFILE()
+{
 }
 #endif
 
@@ -4710,23 +4649,16 @@ void * cOVState::CHALLENGE_PREEVENT_cOVState_CHALLENGE_PREEVENT(int engine, int 
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", cOVState_SAVEREPLAY__cOVState_SAVEREPLAY);
+INCLUDE_ASM("fe/all_in_one_fe", _$_19cOVState_SAVEREPLAY);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cFEMemCard__cFEMemCard_x(void*) __asm__("cFEMemCard__cFEMemCard");
 extern char cOVState_SAVEREPLAY_vtbl[];
+
 /**
- * Destroys the memory-card save overlay with vtable cOVState_SAVEREPLAY_vtbl (overlay id 18).
- *
- * Stores cOVState_SAVEREPLAY_vtbl and runs the cFEMemCard destructor cFEMemCard__cFEMemCard with the delete flags still in the second argument
- * register. It is the destructor slot (+0xC) of cOVState_SAVEREPLAY_vtbl. Its onCreateScreen opens the "119Save_Replay" screen;
- * cOVState_SAVEREPLAY_cOVState_SAVEREPLAY is the constructor cOVStateManager_triggerOverlay calls for id 18.
- *
- * @return what the base destructor returns
+ * Destroys the in-game save-replay overlay; it owns nothing of its own, so its cFEMemCard part does the work and frees
+ * it when asked.
  */
-extern "C" void* cOVState_SAVEREPLAY__cOVState_SAVEREPLAY(cOVState_SAVEREPLAY* self) {
-    VPTR_OF(cListNode, self) = (void**)cOVState_SAVEREPLAY_vtbl;
-    return cFEMemCard__cFEMemCard_x(self);
+cOVState_SAVEREPLAY::~cOVState_SAVEREPLAY()
+{
 }
 #endif
 
@@ -4753,23 +4685,16 @@ extern "C" void *cOVState_SAVEREPLAY_cOVState_SAVEREPLAY1(cOVState_SAVEREPLAY* o
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS);
+INCLUDE_ASM("fe/all_in_one_fe", _$_20cOVState_SAVEOPTIONS);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cFEMemCard__cFEMemCard_x(void*) __asm__("cFEMemCard__cFEMemCard");
 extern char cOVState_SAVEOPTIONS_vtbl[];
+
 /**
- * Destroys the memory-card save overlay with vtable cOVState_SAVEOPTIONS_vtbl (overlay id 19).
- *
- * Stores cOVState_SAVEOPTIONS_vtbl and runs the cFEMemCard destructor cFEMemCard__cFEMemCard with the delete flags still in the second argument
- * register. It is the destructor slot (+0xC) of cOVState_SAVEOPTIONS_vtbl. Its onCreateScreen opens the "119Save_Replay" screen;
- * cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS is the constructor cOVStateManager_triggerOverlay calls for id 19.
- *
- * @return what the base destructor returns
+ * Destroys the in-game save-records (settings) overlay; it owns nothing of its own, so its cFEMemCard part does the
+ * work and frees it when asked.
  */
-extern "C" void* cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS(cOVState_SAVEOPTIONS* self) {
-    VPTR_OF(cListNode, self) = (void**)cOVState_SAVEOPTIONS_vtbl;
-    return cFEMemCard__cFEMemCard_x(self);
+cOVState_SAVEOPTIONS::~cOVState_SAVEOPTIONS()
+{
 }
 #endif
 
@@ -4867,8 +4792,6 @@ extern "C" void *cOVStateRewardsList_cOVStateRewardsList(cOVStateRewardsList* ov
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", _$_19cOVStateRewardsList);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_x(void*) __asm__("_$_8cUIState");
 extern char cOVState_vtbl[];
 /**
  * Destroys the rewards-list overlay state; it owns nothing of its own, so its cOVState and cUIState parts do the work
@@ -4882,8 +4805,6 @@ cOVStateRewardsList::~cOVStateRewardsList()
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", _$_16cOVState_REWARDS);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cUIState__cUIState_x(void*) __asm__("_$_8cUIState");
 extern char cOVState_vtbl[];
 /**
  * Destroys the rewards overlay state; it owns nothing of its own, so its cOVState and cUIState parts do the work and
@@ -4932,23 +4853,16 @@ extern "C" void *cOVState_REWARDS_cOVState_REWARDS(cOVState_REWARDS* ovState, in
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", cOVState_AUTOSAVE__cOVState_AUTOSAVE);
+INCLUDE_ASM("fe/all_in_one_fe", _$_17cOVState_AUTOSAVE);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cFEMemCard__cFEMemCard_x(void*) __asm__("cFEMemCard__cFEMemCard");
 extern char cOVState_AUTOSAVE_vtbl[];
+
 /**
- * Destroys the autosave overlay state through the memory-card base destructor cFEMemCard__cFEMemCard().
- *
- * Stores cOVState_AUTOSAVE_vtbl, then calls cFEMemCard__cFEMemCard(), which clears the memory-card callbacks' state
- * pointer cFEMemCard_mInstance and runs the cUIState destructor. Only @p self is declared: the destructor flags reach
- * cFEMemCard__cFEMemCard() unchanged in the second argument register.
- *
- * @return no meaningful value (cFEMemCard__cFEMemCard() returns nothing)
+ * Destroys the in-game autosave overlay; it owns nothing of its own, so its cFEMemCard part does the work and frees it
+ * when asked.
  */
-extern "C" void* cOVState_AUTOSAVE__cOVState_AUTOSAVE(cOVState_AUTOSAVE* self) {
-    VPTR_OF(cListNode, self) = (void**)cOVState_AUTOSAVE_vtbl;
-    return cFEMemCard__cFEMemCard_x(self);
+cOVState_AUTOSAVE::~cOVState_AUTOSAVE()
+{
 }
 #endif
 

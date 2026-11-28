@@ -20,7 +20,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateRuleSelect__cFEStateRuleSelect);
 
 INCLUDE_ASM("fe/fepopup3", cBraggingRightsMenu__cBraggingRightsMenu);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateBraggingRights__cFEStateBraggingRights);
+INCLUDE_ASM("fe/fepopup3", _$_22cFEStateBraggingRights);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateBraggingRights_onMenuGainFocus);
 
@@ -38,9 +38,9 @@ INCLUDE_ASM("fe/fepopup3", cFEStateNetSSXWorld__cFEStateNetSSXWorld);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetQuickMessages__cFEStateNetQuickMessages);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateLobbyMenu__cFEStateLobbyMenu);
+INCLUDE_ASM("fe/fepopup3", _$_17cFEStateLobbyMenu);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup);
+INCLUDE_ASM("fe/fepopup3", _$_26cFEStateNetCreateRoomPopup);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetCreateRoomPopup_onLoseTransition);
 
@@ -68,7 +68,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_getRewardStoreNum);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryBase_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters);
+INCLUDE_ASM("fe/fepopup3", _$_28cFEStateRewardGalleryPosters);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryPosters_getReward);
 
@@ -78,7 +78,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryPosters_getRewardStoreNum);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryPosters_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards);
+INCLUDE_ASM("fe/fepopup3", _$_33cFEStateRewardGalleryTradingCards);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryTradingCards_getReward);
 
@@ -88,7 +88,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryTradingCards_getRewardStoreNum);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryTradingCards_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts);
+INCLUDE_ASM("fe/fepopup3", _$_32cFEStateRewardGalleryConceptArts);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryConceptArts_getReward);
 
@@ -98,7 +98,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryConceptArts_getRewardStoreNum);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryConceptArts_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos);
+INCLUDE_ASM("fe/fepopup3", _$_27cFEStateRewardGalleryVideos);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryVideos_getReward);
 
@@ -108,7 +108,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryVideos_getRewardStoreNum);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryVideos_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryToys__cFEStateRewardGalleryToys);
+INCLUDE_ASM("fe/fepopup3", _$_25cFEStateRewardGalleryToys);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryToys_getReward);
 
@@ -118,7 +118,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryToys_getRewardStoreNum);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryToys_getRewardName);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars);
+INCLUDE_ASM("fe/fepopup3", _$_31cFEStateRewardGalleryCheatChars);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardGalleryCheatChars_getReward);
 
@@ -134,7 +134,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateVideoPlayer_onLoseTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStatePeakRoom__cFEStatePeakRoom);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateTrophyRoom__cFEStateTrophyRoom);
+INCLUDE_ASM("fe/fepopup3", _$_18cFEStateTrophyRoom);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRewardsRoom__cFEStateRewardsRoom);
 
@@ -158,13 +158,13 @@ INCLUDE_ASM("fe/fepopup3", cFEStateAudioOptions__cFEStateAudioOptions);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRequestLine__cFEStateRequestLine);
 
-INCLUDE_ASM("fe/fepopup3", cFESound__cFESound);
+INCLUDE_ASM("fe/fepopup3", _$_8cFESound);
 
 INCLUDE_ASM("fe/fepopup3", cFESound_soundInitialize);
 
 INCLUDE_ASM("fe/fepopup3", cFESound_soundShutdown);
 
-INCLUDE_ASM("fe/fepopup3", cOVSound__cOVSound);
+INCLUDE_ASM("fe/fepopup3", _$_8cOVSound);
 
 INCLUDE_ASM("fe/fepopup3", cOVSound_soundInitialize);
 
@@ -182,11 +182,11 @@ INCLUDE_ASM("fe/fepopup3", cFEStateSelectPersona_isOnlineState);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateSelectPersona_publishPresence);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateChallengePopup__cFEStateChallengePopup);
+INCLUDE_ASM("fe/fepopup3", _$_22cFEStateChallengePopup);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateChallengePopup_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup);
+INCLUDE_ASM("fe/fepopup3", _$_30cFEStateChallengeReceivedPopup);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateChallengeReceivedPopup_onLoseTransition);
 
@@ -214,7 +214,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateNetAccountMem_onGainTransition);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateNetAccountMem_onLoseTransition);
 
-INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep1__cFEStateCreateStep1);
+INCLUDE_ASM("fe/fepopup3", _$_19cFEStateCreateStep1);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateCreateStep1_isOnlineState);
 

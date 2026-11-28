@@ -1,12 +1,13 @@
 #ifndef FE_FESTATEREWARDS_H
 #define FE_FESTATEREWARDS_H
+#pragma interface
 
-// cFEStateRewardGalleryBase: the reward gallery and store screens' shared state (a cUIState): a grid of reward icons
+// cFEStateRewardGalleryBase: the reward gallery and store screens' shared state (a cFEState): a grid of reward icons
 // (up to 4 rows of 8 visible; On Tour 8 rows of 4) with a hilighter, page and cost texts and up/down arrows. Methods in fe/festaterewards.
 // Subclasses add their reward lists from 0xA24: cFEStateRewardGalleryPosters, TradingCards, ConceptArts, Toys,
 // Videos and CheatChars (cFEReal creates them: cMemMan_alloc(2772, "cFEStateRewardGalleryPosters"), ...).
 //
-// Size 0xA24 (the subclasses' first own field; On Tour 0xA24). Derives from cUIState (ui/uistate.h); its own members at
+// Size 0xA24 (the subclasses' first own field; On Tour 0xA24). Derives from cFEState (fe/festate.h); its own members at
 // their retail offsets. Member names are EA's, from SSX On Tour's PSP DWARF (cListNode, cUIState,
 // cFEStateRewardGalleryBase); every retail use falls where On Tour's order puts it (the cUIState part as in
 // fe/keyboardpopup.h: retail's bools are words, which keeps the same offsets there). Evidence tags:
@@ -16,6 +17,7 @@
 
 struct cTextureElement;
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -34,7 +36,8 @@ struct tIconInfo {
 
 struct SHAPEFILE;
 
-struct cFEStateRewardGalleryBase : public cUIState {
+struct cFEStateRewardGalleryBase : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [U] the subclasses' constructors install their vtables
     // cFEStateRewardGalleryBase's notes on cUIState's fields:
@@ -42,6 +45,14 @@ struct cFEStateRewardGalleryBase : public cUIState {
     //   mpScreen: [U] the gallery screen
     //   mUserNum: [U] the controlling player
     // --- cFEStateRewardGalleryBase
+    // inline: the six galleries' destructors inline it (retail's out-of-line copy
+    // cFEStateRewardGalleryBase__cFEStateRewardGalleryBase stays a C function). The qualified call is the base's own
+    // purgeRewards, the one a destructor runs.
+    virtual ~cFEStateRewardGalleryBase()
+    {
+        cFEStateRewardGalleryBase::purgeRewards();
+        purgeIcons();
+    }
     // cFEStateRewardGalleryBase's own slots ([R] cFEStateRewardGalleryBase_vtbl; types and order [O] On Tour's class,
     // whose extra getIconID(const char*) is retail's non-virtual cFEStateRewardGalleryBase_getIconID):
     virtual const char* getIconsFileName();                                         // 25
@@ -169,6 +180,7 @@ CHECK_OFFSET(cFEStateRewardGalleryBase, mpArrowDown, 0x920);
 CHECK_OFFSET(cFEStateRewardGalleryBase, mpIcons, 0x924);
 CHECK_OFFSET(cFEStateRewardGalleryBase, mpIconBacks, 0x9A4);
 CHECK_SIZE(cFEStateRewardGalleryBase, 0xA24);
+__asm__("_vt$25cFEStateRewardGalleryBase = cFEStateRewardGalleryBase_vtbl");   // g++'s name for the retail vtable
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -218,8 +230,7 @@ struct cFEStateRewardGalleryPosters : public cFEStateRewardGalleryBase {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateRewardGalleryPosters1() __asm__("cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1");
-    // retail's destructor cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters stays a C function (g++ 2.95 takes
-    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_28cFEStateRewardGalleryPosters (the retail label renamed)
     virtual ~cFEStateRewardGalleryPosters();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryPosters_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryPosters_purgeRewards");
@@ -233,6 +244,7 @@ struct cFEStateRewardGalleryPosters : public cFEStateRewardGalleryBase {
 CHECK_OFFSET(cFEStateRewardGalleryPosters, mpDBPosters, 0xA24);
 CHECK_OFFSET(cFEStateRewardGalleryPosters, mpPosters, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryPosters, 0xAD4);
+__asm__("_vt$28cFEStateRewardGalleryPosters = cFEStateRewardGalleryPosters_vtbl");   // g++'s name for the retail vtable
 
 // cFEStateRewardGalleryTradingCards: size 0xBF8 (see above).
 struct cFEStateRewardGalleryTradingCards : public cFEStateRewardGalleryBase {
@@ -254,9 +266,7 @@ struct cFEStateRewardGalleryTradingCards : public cFEStateRewardGalleryBase {
         __asm__("cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1");
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards stays a C function (g++
-    // 2.95 takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the
-    // overrides
+    // g++'s own symbol _$_33cFEStateRewardGalleryTradingCards (the retail label renamed)
     virtual ~cFEStateRewardGalleryTradingCards();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryTradingCards_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryTradingCards_purgeRewards");
@@ -272,6 +282,8 @@ struct cFEStateRewardGalleryTradingCards : public cFEStateRewardGalleryBase {
 CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpDBTradingCards, 0xA24);
 CHECK_OFFSET(cFEStateRewardGalleryTradingCards, mpTradingCards, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryTradingCards, 0xBF8);
+// g++'s name for the retail vtable
+__asm__("_vt$33cFEStateRewardGalleryTradingCards = cFEStateRewardGalleryTradingCards_vtbl");
 
 // cFEStateRewardGalleryConceptArts: size 0xBB8 (see above).
 struct cFEStateRewardGalleryConceptArts : public cFEStateRewardGalleryBase {
@@ -293,9 +305,7 @@ struct cFEStateRewardGalleryConceptArts : public cFEStateRewardGalleryBase {
         __asm__("cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1");
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts stays a C function (g++
-    // 2.95 takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the
-    // overrides
+    // g++'s own symbol _$_32cFEStateRewardGalleryConceptArts (the retail label renamed)
     virtual ~cFEStateRewardGalleryConceptArts();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryConceptArts_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryConceptArts_purgeRewards");
@@ -311,6 +321,8 @@ struct cFEStateRewardGalleryConceptArts : public cFEStateRewardGalleryBase {
 CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpDBConceptArts, 0xA24);
 CHECK_OFFSET(cFEStateRewardGalleryConceptArts, mpConceptArts, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryConceptArts, 0xBB8);
+// g++'s name for the retail vtable
+__asm__("_vt$32cFEStateRewardGalleryConceptArts = cFEStateRewardGalleryConceptArts_vtbl");
 
 // cFEStateRewardGalleryVideos: size 0xA30 (see above).
 struct cFEStateRewardGalleryVideos : public cFEStateRewardGalleryBase {
@@ -329,8 +341,7 @@ struct cFEStateRewardGalleryVideos : public cFEStateRewardGalleryBase {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateRewardGalleryVideos1() __asm__("cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1");
-    // retail's destructor cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos stays a C function (g++ 2.95 takes
-    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_27cFEStateRewardGalleryVideos (the retail label renamed)
     virtual ~cFEStateRewardGalleryVideos();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryVideos_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryVideos_purgeRewards");
@@ -344,6 +355,7 @@ struct cFEStateRewardGalleryVideos : public cFEStateRewardGalleryBase {
 CHECK_OFFSET(cFEStateRewardGalleryVideos, mpDBVideos, 0xA24);
 CHECK_OFFSET(cFEStateRewardGalleryVideos, mpVideos, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryVideos, 0xA30);
+__asm__("_vt$27cFEStateRewardGalleryVideos = cFEStateRewardGalleryVideos_vtbl");   // g++'s name for the retail vtable
 
 // cFEStateRewardGalleryToys: size 0xA98 (see above).
 struct cFEStateRewardGalleryToys : public cFEStateRewardGalleryBase {
@@ -362,8 +374,7 @@ struct cFEStateRewardGalleryToys : public cFEStateRewardGalleryBase {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateRewardGalleryToys1() __asm__("cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1");
-    // retail's destructor cFEStateRewardGalleryToys__cFEStateRewardGalleryToys stays a C function (g++ 2.95 takes no
-    // asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_25cFEStateRewardGalleryToys (the retail label renamed)
     virtual ~cFEStateRewardGalleryToys();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryToys_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryToys_purgeRewards");
@@ -377,6 +388,7 @@ struct cFEStateRewardGalleryToys : public cFEStateRewardGalleryBase {
 CHECK_OFFSET(cFEStateRewardGalleryToys, mpDBToys, 0xA24);
 CHECK_OFFSET(cFEStateRewardGalleryToys, mpToys, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryToys, 0xA98);
+__asm__("_vt$25cFEStateRewardGalleryToys = cFEStateRewardGalleryToys_vtbl");   // g++'s name for the retail vtable
 
 // cFEStateRewardGalleryCheatChars: size 0xA98 (see above).
 struct cFEStateRewardGalleryCheatChars : public cFEStateRewardGalleryBase {
@@ -398,8 +410,7 @@ struct cFEStateRewardGalleryCheatChars : public cFEStateRewardGalleryBase {
         __asm__("cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1");
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars stays a C function (g++ 2.95
-    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_31cFEStateRewardGalleryCheatChars (the retail label renamed)
     virtual ~cFEStateRewardGalleryCheatChars();
     virtual void allocRewards() __asm__("cFEStateRewardGalleryCheatChars_allocRewards");
     virtual void purgeRewards() __asm__("cFEStateRewardGalleryCheatChars_purgeRewards");
@@ -414,5 +425,7 @@ struct cFEStateRewardGalleryCheatChars : public cFEStateRewardGalleryBase {
 CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpDBCheatChars, 0xA24);
 CHECK_OFFSET(cFEStateRewardGalleryCheatChars, mpCheatChars, 0xA28);
 CHECK_SIZE(cFEStateRewardGalleryCheatChars, 0xA98);
+// g++'s name for the retail vtable
+__asm__("_vt$31cFEStateRewardGalleryCheatChars = cFEStateRewardGalleryCheatChars_vtbl");
 
 #endif /* FE_FESTATEREWARDS_H */

@@ -1,5 +1,6 @@
 #ifndef OBJECT_BOOSTNODE_H
 #define OBJECT_BOOSTNODE_H
+#pragma interface
 
 // cBoostNode: a boost (or drag) zone on an instance: update counts Time down and (for Type 1 always, otherwise once
 // Time has run out) calls, for every being whose intersect test (being slot 3) hits the instance, applyDrag (Drag < 0:
@@ -103,6 +104,7 @@ struct cBoostNode : public cInstanceNode {
     enum { kBoostSignal_Restart = 1 };
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cBoostNode();   // g++'s own symbol _$_10cBoostNode (the retail label renamed)
     cBoostNode* cBoostNode1(void* bucket, int nodeType, void* instance, tMakeBoostData* def)
         __asm__("cBoostNode_cBoostNode1");
     void applyDrag(cBeing* obj) __asm__("cBoostNode_applyDrag");
@@ -124,6 +126,7 @@ CHECK_OFFSET(cBoostNode, Time, 0x3C);
 CHECK_OFFSET(cBoostNode, Type, 0x40);
 CHECK_OFFSET(cBoostNode, unk_044, 0x44);
 CHECK_SIZE(cBoostNode, 0x50);
+__asm__("_vt$10cBoostNode = cBoostNode_vtbl");   // g++'s name for the retail vtable
 
 // cBoostNodeState (On Tour, 0x30): the boost state cBoostNode carries at +0x20 (Boost .. Type above, written out
 // inline there); cBoostNode_applyBoost reads it as one (view sParams_341818, inside sSph_341818 at 0x20).

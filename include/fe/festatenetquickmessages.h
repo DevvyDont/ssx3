@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENETQUICKMESSAGES_H
 #define FE_FESTATENETQUICKMESSAGES_H
+#pragma interface
 
 // cFEStateNetQuickMessages: screen "206QuickMessages": edits the ten online quick-chat messages ("Q1: ..".."Q10: ..",
 // stored by the option interface, cBE_getInterface(.., 4), at D_00535617 + 0x40 * i) and offers to save them. A
@@ -60,9 +61,7 @@ struct cFEStateNetQuickMessages : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateNetQuickMessages1() __asm__("cFEStateNetQuickMessages_cFEStateNetQuickMessages1");
-    // retail's destructor cFEStateNetQuickMessages__cFEStateNetQuickMessages stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateNetQuickMessages();
+    virtual ~cFEStateNetQuickMessages();   // g++'s own symbol _$_24cFEStateNetQuickMessages (the retail label renamed)
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateNetQuickMessages_onPopupEvent");
     virtual void onCreateScreen() __asm__("cFEStateNetQuickMessages_onCreateScreen");
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateNetQuickMessages_onGainTransition");
@@ -84,5 +83,6 @@ struct cFEStateNetQuickMessages : public cFEStateNet {
 CHECK_OFFSET(cFEStateNetQuickMessages, mbChanged, 0x6D0);
 CHECK_OFFSET(cFEStateNetQuickMessages, mpMessage, 0x6D4);
 CHECK_SIZE(cFEStateNetQuickMessages, 0x6FC);
+__asm__("_vt$24cFEStateNetQuickMessages = cFEStateNetQuickMessages_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATENETQUICKMESSAGES_H */

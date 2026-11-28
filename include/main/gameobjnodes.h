@@ -1,5 +1,6 @@
 #ifndef MAIN_GAMEOBJNODES_H
 #define MAIN_GAMEOBJNODES_H
+#pragma interface
 
 // The three scene-node wrappers cGame_load puts around its per-frame managers (cGame::AIVisualEffectsMan,
 // VisualEffectsMan and SSXStatsMan, main/game.h +0x50 / +0x54 / +0x58): each is a bare cObjNode plus a pointer to the
@@ -47,15 +48,14 @@ struct cAIVisualEffectsObjNode : public cObjNode {
                                                 //      slot 1 (flags 3) when non-null
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cAIVisualEffectsObjNode__cAIVisualEffectsObjNode stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cAIVisualEffectsObjNode();
+    virtual ~cAIVisualEffectsObjNode();   // g++'s own symbol _$_23cAIVisualEffectsObjNode (the retail label renamed)
     virtual void update() __asm__("cAIVisualEffectsObjNode_update");
     virtual void render() __asm__("cAIVisualEffectsObjNode_render");
 };
 
 CHECK_OFFSET(cAIVisualEffectsObjNode, AIVisualEffectsMan, 0x10);
 CHECK_SIZE(cAIVisualEffectsObjNode, 0x14);
+__asm__("_vt$23cAIVisualEffectsObjNode = cAIVisualEffectsObjNode_vtbl");   // g++'s name for the retail vtable
 
 struct cVisualEffectsObjNode : public cObjNode {
     // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
@@ -66,15 +66,14 @@ struct cVisualEffectsObjNode : public cObjNode {
                                                 //      slot 1 (flags 3) when non-null
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cVisualEffectsObjNode__cVisualEffectsObjNode stays a C function (g++ 2.95 takes no asm label
-    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cVisualEffectsObjNode();
+    virtual ~cVisualEffectsObjNode();   // g++'s own symbol _$_21cVisualEffectsObjNode (the retail label renamed)
     virtual void update() __asm__("cVisualEffectsObjNode_update");
     virtual void render() __asm__("cVisualEffectsObjNode_render");
 };
 
 CHECK_OFFSET(cVisualEffectsObjNode, VisualEffectsMan, 0x10);
 CHECK_SIZE(cVisualEffectsObjNode, 0x14);
+__asm__("_vt$21cVisualEffectsObjNode = cVisualEffectsObjNode_vtbl");   // g++'s name for the retail vtable
 
 struct cSSXStatsObjNode : public cObjNode {
     // cObjNode (object/objnode.h, 0x10): the vptr at 0x0C:
@@ -85,14 +84,13 @@ struct cSSXStatsObjNode : public cObjNode {
                                                 //      render pass it to cSSXStatsMan_update / cSSXStatsMan_render
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cSSXStatsObjNode__cSSXStatsObjNode stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cSSXStatsObjNode();
+    virtual ~cSSXStatsObjNode();   // g++'s own symbol _$_16cSSXStatsObjNode (the retail label renamed)
     virtual void update() __asm__("cSSXStatsObjNode_update");
     virtual void render() __asm__("cSSXStatsObjNode_render");
 };
 
 CHECK_OFFSET(cSSXStatsObjNode, SSXStatsMan, 0x10);
 CHECK_SIZE(cSSXStatsObjNode, 0x14);
+__asm__("_vt$16cSSXStatsObjNode = cSSXStatsObjNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* MAIN_GAMEOBJNODES_H */

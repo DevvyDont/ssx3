@@ -1,5 +1,6 @@
 #ifndef OBJECT_FLOATRAILNODE_H
 #define OBJECT_FLOATRAILNODE_H
+#pragma interface
 
 // cFloatRailNode: a flexible rail whose nodes float on linear springs: each node (tFloatRailNode, 0x50: Force, Vel,
 // Pos, OPos, InstId, Mesh) is pulled back to its rest position with spring LSpring and damping LDamp; a rider's push is
@@ -138,9 +139,7 @@ struct cFloatRailNode : public cFlexRailNode {
     // Methods bound to their retail symbols by asm labels.
     void* cFloatRailNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFloatRailNode_cFloatRailNode1");
     void getPosition(tFloatRailNode* node) __asm__("cFloatRailNode_getPosition");
-    // retail's destructor cFloatRailNode__cFloatRailNode stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFloatRailNode();
+    virtual ~cFloatRailNode();   // g++'s own symbol _$_14cFloatRailNode (the retail label renamed)
     virtual void updateBoundBox() __asm__("cFloatRailNode_updateBoundBox");
     virtual void updateMats() __asm__("cFloatRailNode_updateMats");
     virtual void updateNodes() __asm__("cFloatRailNode_updateNodes");
@@ -157,5 +156,6 @@ CHECK_OFFSET(cFloatRailNode, unk_06C, 0x06C);
 CHECK_OFFSET(cFloatRailNode, Nodes, 0x070);
 CHECK_OFFSET(cFloatRailNode, unk_074, 0x074);
 CHECK_SIZE(cFloatRailNode, 0x080);
+__asm__("_vt$14cFloatRailNode = cFloatRailNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_FLOATRAILNODE_H */

@@ -1,5 +1,6 @@
 #ifndef OBJECT_COUNTERNODE_H
 #define OBJECT_COUNTERNODE_H
+#pragma interface
 
 // cCounterNode: a world-script counter on an instance: it starts at StartCount and counts down on signals - 502 always,
 // 500 once per level 1..10 (Counted keeps a bit per level seen), 501 only in order (level 1, or a level whose
@@ -66,6 +67,7 @@ struct cCounterNode : public cInstanceNode {
                                     //      one bit per level 1..10 (lw/sw)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cCounterNode();   // g++'s own symbol _$_12cCounterNode (the retail label renamed)
     void* cCounterNode1(void* bucket, void* inst, tMakeCounterData* counterData) __asm__("cCounterNode_cCounterNode1");
     // update stays a C function (cCounterNode_update): declared first, it is the vtable's key function, which keeps the
     // vtable out of the units defining the other overrides
@@ -77,5 +79,6 @@ struct cCounterNode : public cInstanceNode {
 CHECK_OFFSET(cCounterNode, Count, 0x1C);
 CHECK_OFFSET(cCounterNode, Counted, 0x20);
 CHECK_SIZE(cCounterNode, 0x24);
+__asm__("_vt$12cCounterNode = cCounterNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_COUNTERNODE_H */

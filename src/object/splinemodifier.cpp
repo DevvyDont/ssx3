@@ -746,55 +746,34 @@ cMultiSplineModifier* cMultiSplineModifier::cMultiSplineModifier1(cBxReplayFrame
 #endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier__cMultiSplineModifier);
+INCLUDE_ASM("object/splinemodifier", _$_20cMultiSplineModifier);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-void operator_delete(int*);
 void* cObjectInterface_getInstanceMan();
 void cInstanceMan_freeInstance(void* man, void* inst);
-extern "C" void cMultiSplineModifier_restoreOverlapSystem(cMultiSplineModifier* self);
-extern void* cMultiSplineModifier_vtbl[];
-extern void* cTransformModifier_vtbl[];
-
-struct cMultiSplineModifier_A250 {
-    void** vtable;          // 0x0
-    int count;              // 0x4
-    char pad_0x8[0x30];
-    void* nodes;            // 0x38
-    void* data;             // 0x3C
-    int field_0x40;
-    void** insts;           // 0x44
-};
 
 /**
- * Destroys a multi-spline modifier: takes its copies out of the overlap octree and frees its arrays and
- * instance records.
+ * Destroys a multi-spline modifier: takes its copies out of the overlap octree and frees its arrays and instance
+ * records.
  *
- * cMultiSplineModifier_restoreOverlapSystem removes copies 1 to n-1 from the Nash octree; AnimMats (+0x38) and Nodes (+0x3C) are freed,
- * each copy's record goes back on the instance manager's free list (cInstanceMan_freeInstance, probably On Tour
- * freeInstance), NodeInst (+0x44) is freed and the base cTransformModifier vtable (cTransformModifier_vtbl) is restored.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * restoreOverlapSystem removes copies 1 to n-1 from the Nash octree; AnimMats and Nodes are freed, each copy's record
+ * goes back on the instance manager's free list (cInstanceMan_freeInstance, probably On Tour freeInstance) and NodeInst
+ * is freed; the cTransformModifier part does the rest and frees it when asked.
  */
-extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier* self, int flags)
+cMultiSplineModifier::~cMultiSplineModifier()
 {
-    VPTR_AT(self, 0) = cMultiSplineModifier_vtbl;
-    self->restoreOverlapSystem();
-    if (self->AnimMats != 0) {
-        cMemMan_free(self->AnimMats);
+    restoreOverlapSystem();
+    if (AnimMats != 0) {
+        cMemMan_free(AnimMats);
     }
-    if (self->Nodes != 0) {
-        cMemMan_free(self->Nodes);
+    if (Nodes != 0) {
+        cMemMan_free(Nodes);
     }
-    for (int i = 0; i < self->NumModels; i++) {
-        cInstanceMan_freeInstance(cObjectInterface_getInstanceMan(), (void**)self->NodeInst[i]);
+    for (int i = 0; i < NumModels; i++) {
+        cInstanceMan_freeInstance(cObjectInterface_getInstanceMan(), (void**)NodeInst[i]);
     }
-    if ((void**)self->NodeInst != 0) {
-        cMemMan_free((void**)self->NodeInst);
-    }
-    VPTR_AT(self, 0) = cTransformModifier_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
+    if ((void**)NodeInst != 0) {
+        cMemMan_free((void**)NodeInst);
     }
 }
 #endif

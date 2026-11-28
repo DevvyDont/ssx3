@@ -1785,38 +1785,29 @@ extern "C" cUIVector_cUIVector_s* cUIVector_cUIVector(cUIVector* self, int pScre
 #endif
 
 //100%
-INCLUDE_ASM("ui/uitext", cUIVector__cUIVector);
+INCLUDE_ASM("ui/uitext", _$_9cUIVector);
 #ifdef SKIP_ASM
-extern "C" void cUIThing__cUIThing(void* self, int flags);
-extern void* cUIVector_vtbl[];
-
 /**
- * Destroys a UI vector: frees its vertex arrays, then runs the cUIThing destructor.
- *
- * Restores cUIVector_vtbl, frees mpVertexColour, mpVertexPosition, mpVertexPositionRender, mpUV and mpVertices
- * where set, then calls cUIThing__cUIThing(self, flags).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a vector widget: frees its vertex colour, position, render-position, UV and vertex arrays when it has them;
+ * the cUIThing part does the rest and frees it when asked.
  */
-extern "C" void cUIVector__cUIVector(cUIVector* self, int flags)
+cUIVector::~cUIVector()
 {
-    VPTR_OF(cListNode, self) = cUIVector_vtbl;
-    if (self->mpVertexColour != 0) {
-        cMemMan_free(self->mpVertexColour);
+    if (mpVertexColour != 0) {
+        cMemMan_free(mpVertexColour);
     }
-    if (self->mpVertexPosition != 0) {
-        cMemMan_free(self->mpVertexPosition);
+    if (mpVertexPosition != 0) {
+        cMemMan_free(mpVertexPosition);
     }
-    if (self->mpVertexPositionRender != 0) {
-        cMemMan_free(self->mpVertexPositionRender);
+    if (mpVertexPositionRender != 0) {
+        cMemMan_free(mpVertexPositionRender);
     }
-    if (self->mpUV != 0) {
-        cMemMan_free(self->mpUV);
+    if (mpUV != 0) {
+        cMemMan_free(mpUV);
     }
-    if (self->mpVertices != 0) {
-        cMemMan_free(self->mpVertices);
+    if (mpVertices != 0) {
+        cMemMan_free(mpVertices);
     }
-    cUIThing__cUIThing(self, flags);
 }
 #endif
 

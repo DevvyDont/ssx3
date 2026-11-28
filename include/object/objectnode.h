@@ -1,5 +1,6 @@
 #ifndef OBJECT_OBJECTNODE_H
 #define OBJECT_OBJECTNODE_H
+#pragma interface
 
 // cObjectNode: the scene node of a plain placed object (node type 17): a cMoveNode that adds no members and only
 // overrides its destructor and writeToReplayFrame (which forwards to cMoveNode_writeToReplayFrame). Built by the
@@ -37,6 +38,7 @@ struct cObjectNode : public cMoveNode {
     //   Instance: [U] cObjectNode_cObjectNode updates the record's flags word (+0x8) through it (view sMoveFlags_6DB0)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cObjectNode();   // g++'s own symbol _$_11cObjectNode (the retail label renamed)
     void* cObjectNode1() __asm__("cObjectNode_cObjectNode1");
     // writeToReplayFrame stays a C function (cObjectNode_writeToReplayFrame): declared first, it is the vtable's key
     // function, which keeps the vtable out of the units defining the other overrides
@@ -44,5 +46,6 @@ struct cObjectNode : public cMoveNode {
 };
 
 CHECK_SIZE(cObjectNode, 0x2C);
+__asm__("_vt$11cObjectNode = cObjectNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_OBJECTNODE_H */

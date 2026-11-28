@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENETLOBBY_H
 #define FE_FESTATENETLOBBY_H
+#pragma interface
 
 // cFEStateLobbyMenu: the online lobby screen (four room channels - beginner, voice, advanced, expert - each a list
 // box of rooms, and the list of players in the selected room). A cFEStateNet (fe/festatenet.h, 0x6D0). EA's name
@@ -96,9 +97,7 @@ struct cFEStateLobbyMenu : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateLobbyMenu1() __asm__("cFEStateLobbyMenu_cFEStateLobbyMenu1");
-    // retail's destructor cFEStateLobbyMenu__cFEStateLobbyMenu stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateLobbyMenu();
+    virtual ~cFEStateLobbyMenu();   // g++'s own symbol _$_17cFEStateLobbyMenu (the retail label renamed)
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateLobbyMenu_onPopupEvent");
     virtual void onCreateScreen() __asm__("cFEStateLobbyMenu_onCreateScreen");
     virtual bool onGainTransition(int reset) __asm__("cFEStateLobbyMenu_onGainTransition");
@@ -151,5 +150,6 @@ CHECK_OFFSET(cFEStateLobbyMenu, miNumPlayers, 0x77C);
 CHECK_OFFSET(cFEStateLobbyMenu, mustrPopupText, 0x780);
 CHECK_OFFSET(cFEStateLobbyMenu, mszRoomName, 0xB80);
 CHECK_SIZE(cFEStateLobbyMenu, 0xB84);
+__asm__("_vt$17cFEStateLobbyMenu = cFEStateLobbyMenu_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATENETLOBBY_H */

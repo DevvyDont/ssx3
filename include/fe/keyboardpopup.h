@@ -1,5 +1,6 @@
 #ifndef FE_KEYBOARDPOPUP_H
 #define FE_KEYBOARDPOPUP_H
+#pragma interface
 
 // cKeyboardPopup: the front end's on-screen keyboard (84 keys in 6 rows of 14, screen "Fullkeyboard"), opened by a
 // cScreenPopup's text box and by the profile/lodge/trophy screens. A cUIState; its methods are in fe/fepopup.cpp.
@@ -205,9 +206,7 @@ struct cKeyboardPopup : public cUIState {
     int isAcceptText() __asm__("cKeyboardPopup_isAcceptText");
     void cursorRight() __asm__("cKeyboardPopup_cursorRight");
     void cursorLeft() __asm__("cKeyboardPopup_cursorLeft");
-    // retail's destructor cKeyboardPopup__cKeyboardPopup stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cKeyboardPopup();
+    virtual ~cKeyboardPopup();   // g++'s own symbol _$_14cKeyboardPopup (the retail label renamed)
     virtual void onCreateScreen() __asm__("cKeyboardPopup_onCreateScreen");
     virtual void onUpdate() __asm__("cKeyboardPopup_onUpdate");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cKeyboardPopup_onWidgetCreate");
@@ -255,5 +254,6 @@ CHECK_OFFSET(cKeyboardPopup, mbReferEventsToParent, 0x438);
 CHECK_OFFSET(cKeyboardPopup, meType, 0x43C);
 CHECK_OFFSET(cKeyboardPopup, mbCallParentsUpdate, 0x440);
 CHECK_SIZE(cKeyboardPopup, 0x444);
+__asm__("_vt$14cKeyboardPopup = cKeyboardPopup_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_KEYBOARDPOPUP_H */

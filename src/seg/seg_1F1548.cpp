@@ -2148,20 +2148,15 @@ extern "C" void* cSplashManager_cSplashManager(cSplashManager* splashManager, vo
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", cSplashManager__cSplashManager);
+INCLUDE_ASM("seg/seg_1F1548", _$_14cSplashManager);
 #ifdef SKIP_ASM
-extern "C" void cObjNode__cObjNode(void *);
 extern char cSplashManager_vtbl[];
 
 /**
- * Destroys a splash manager: restores its vtable (+0xC), then runs the cObjNode destructor.
- *
- * The g++ delete flags arrive in the second argument register, which this body leaves untouched, so
- * cObjNode__cObjNode() receives them and frees the object when bit 0 is set.
+ * Destroys a splash manager; it owns nothing of its own, so its cObjNode part does the work and frees it when asked.
  */
-extern "C" void cSplashManager__cSplashManager(cSplashManager* self) {
-    VPTR_OF(cObjNode, self) = (void**)cSplashManager_vtbl;
-    cObjNode__cObjNode(self);
+cSplashManager::~cSplashManager()
+{
 }
 #endif
 

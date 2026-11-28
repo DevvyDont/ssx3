@@ -1,5 +1,6 @@
 #ifndef UI_UIENGINE_H
 #define UI_UIENGINE_H
+#pragma interface
 
 // cUIEngine: EA's front-end UI engine (one per front end: cFEReal's, the in-game overlay's). It holds the UI data
 // file, the interfaces the game plugs in (custom, font, input, locale, sound), the stack of cUIState screens, and the
@@ -79,7 +80,9 @@ public:
     // cFECustom ctors cFECustom_vtbl. Slots [R] that table, names and return types [O]; parameters from the
     // cFECustom implementations (fe/fereal), which take and every caller passes an int state argument (On Tour:
     // void* pData):
-    virtual ~cUICustomInterface();                                      // slot 1
+    // slot 1; inline and empty: cFECustom's destructor inlines it (retail's out-of-line copy
+    // cUICustomInterface__cUICustomInterface stays a C function)
+    virtual ~cUICustomInterface() {}
     virtual void onUpdate()
         __asm__("cUICustomInterface_onUpdate__FPv");                                            // slot 2
     virtual bool onScreenEvent(cUIScreen* pScreen, unsigned int Event)
@@ -92,6 +95,7 @@ public:
 
 CHECK_OFFSET(cUICustomInterface, mpEngine, 0x000);
 CHECK_SIZE(cUICustomInterface, 0x8);
+__asm__("_vt$18cUICustomInterface = cUICustomInterface_vtbl");   // g++'s name for the retail vtable
 
 // cUISoundInterface: the UI engine's sound hook (cUIEngine::mpSound above): the states play their UI sounds through
 // its slot 2 (playSound). The front end's cFESound and the overlays' cOVSound derive from it (fe/fesound.h, 0x8 each);
@@ -104,12 +108,15 @@ class cUISoundInterface {
 public:
     // 0x000: the vptr only ([O] On Tour size 0x4). [R] cUISoundInterface_vtbl (cUISoundInterface_cUISoundInterface;
     // the cFESound / cOVSound dtors restore it); cFESound_cFESound stores cFESound_vtbl. Slots [R], names [O]:
-    virtual ~cUISoundInterface();      // slot 1
+    // slot 1; inline and empty: cFESound's and cOVSound's destructors inline it (retail's out-of-line copy
+    // cUISoundInterface__cUISoundInterface stays a C function)
+    virtual ~cUISoundInterface() {}
     virtual void playSound(int e) __asm__("cUISoundInterface_playSound__FPv");     // slot 2
     virtual void soundInitialize() __asm__("cUISoundInterface_soundInitialize__FPv");    // slot 3
     virtual void soundShutdown() __asm__("cUISoundInterface_soundShutdown__FPv");      // slot 4
 };
 
 CHECK_SIZE(cUISoundInterface, 0x4);
+__asm__("_vt$17cUISoundInterface = cUISoundInterface_vtbl");   // g++'s name for the retail vtable
 
 #endif

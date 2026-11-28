@@ -1,5 +1,6 @@
 #ifndef FE_FESTATETROPHYROOM_H
 #define FE_FESTATETROPHYROOM_H
+#pragma interface
 
 // cFEStateTrophyRoom: the lodge's trophy room ("127trophyroom"): one peak trophy and its four challenge rows, with a
 // big picture of the trophy or the earned medal (loaded through the FE file cache at RealFE + 0x1A70) and the
@@ -76,9 +77,7 @@ struct cFEStateTrophyRoom : public cFEState {
     void loadTextures() __asm__("cFEStateTrophyRoom_loadTextures");
     void updateTexturesLoad() __asm__("cFEStateTrophyRoom_updateTexturesLoad");
     void purgeTextures() __asm__("cFEStateTrophyRoom_purgeTextures");
-    // retail's destructor cFEStateTrophyRoom__cFEStateTrophyRoom stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateTrophyRoom();
+    virtual ~cFEStateTrophyRoom();   // g++'s own symbol _$_18cFEStateTrophyRoom (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateTrophyRoom_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateTrophyRoom_onWidgetCreate");
     virtual void onUpdate() __asm__("cFEStateTrophyRoom_onUpdate");
@@ -99,5 +98,6 @@ CHECK_OFFSET(cFEStateTrophyRoom, mTextureFileIndex, 0x074);
 CHECK_OFFSET(cFEStateTrophyRoom, mpMedalStats, 0x088);
 CHECK_OFFSET(cFEStateTrophyRoom, mCurSelection, 0x09C);
 CHECK_SIZE(cFEStateTrophyRoom, 0xA0);
+__asm__("_vt$18cFEStateTrophyRoom = cFEStateTrophyRoom_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATETROPHYROOM_H */

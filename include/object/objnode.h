@@ -1,5 +1,6 @@
 #ifndef OBJECT_OBJNODE_H
 #define OBJECT_OBJNODE_H
+#pragma interface
 
 // cObjNode: the root of every scene node - a member of one cBucketMan bucket list (gBucketMan; the buckets are
 // updated/rendered in order) with the base set of virtuals (update, apply, render, renderModel, compare, equal,
@@ -27,6 +28,7 @@
 //   [O] SSX On Tour's DWARF (cObjNode: Next, Prev).
 
 #include "layout.h"
+#include "bx/memman.h"
 
 struct t4Matrix;
 struct cBxReplayFrame;
@@ -42,7 +44,7 @@ struct cObjNode {
     // 0x0C: the vptr. [R] cObjNode_vtbl (0x00491F00) in every ctor and the dtor; each derived ctor stores its own;
     // [P] 0xC; [U] cSortObjNode_compare/equal call slot 8 (lw 0xC, then 0x40/0x44 of the table). Slots [R]
     // cObjNode_vtbl (13; names from its entries cObjNode_*), types [O] (On Tour's cObjNode definitions):
-    virtual ~cObjNode();                                            // 1
+    virtual ~cObjNode();   // 1; g++'s own symbol _$_8cObjNode (the retail label renamed)
     virtual void update() __asm__("cObjNode_update__FPv");                                          // 2
     virtual void apply() __asm__("cObjNode_apply__FPv");                                           // 3
     virtual void render() __asm__("cObjNode_render__FPv");                                          // 4
@@ -65,6 +67,7 @@ CHECK_OFFSET(cObjNode, unk_00, 0x00);
 CHECK_OFFSET(cObjNode, Next, 0x04);
 CHECK_OFFSET(cObjNode, Prev, 0x08);
 CHECK_SIZE(cObjNode, 0x10);
+__asm__("_vt$8cObjNode = cObjNode_vtbl");   // g++'s name for the retail vtable
 
 // ---- cTypeObjNode ----
 
@@ -137,6 +140,7 @@ struct cTypeObjNode : public cObjNode {
                                     //      | 1, & 1, & 0xFFFE)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cTypeObjNode();   // g++'s own symbol _$_12cTypeObjNode (the retail label renamed)
     void* cTypeObjNode1(void* bucket, int type) __asm__("cTypeObjNode_cTypeObjNode1");
     short getType() __asm__("cTypeObjNode_getType");
     void setRootTransformDirty() __asm__("cTypeObjNode_setRootTransformDirty");
@@ -151,6 +155,7 @@ struct cTypeObjNode : public cObjNode {
 CHECK_OFFSET(cTypeObjNode, ObjNodeType, 0x10);
 CHECK_OFFSET(cTypeObjNode, Flags, 0x12);
 CHECK_SIZE(cTypeObjNode, 0x14);
+__asm__("_vt$12cTypeObjNode = cTypeObjNode_vtbl");   // g++'s name for the retail vtable
 
 // ---- cSortObjNode ----
 
@@ -190,6 +195,7 @@ struct cSortObjNode : public cTypeObjNode {
                                     //      SortIndex (sltu: unsigned), equal: ==
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cSortObjNode();   // g++'s own symbol _$_12cSortObjNode (the retail label renamed)
     void* cSortObjNode1(void* bucket, int type) __asm__("cSortObjNode_cSortObjNode1");
     // getSortIndex stays a C function (cSortObjNode_getSortIndex): declared first, it is the vtable's key function,
     // which keeps the vtable out of the units defining the other overrides
@@ -201,5 +207,6 @@ struct cSortObjNode : public cTypeObjNode {
 
 CHECK_OFFSET(cSortObjNode, SortIndex, 0x14);
 CHECK_SIZE(cSortObjNode, 0x18);
+__asm__("_vt$12cSortObjNode = cSortObjNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_OBJNODE_H */

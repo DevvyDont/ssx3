@@ -1,5 +1,6 @@
 #ifndef FE_FESOUND_H
 #define FE_FESOUND_H
+#pragma interface
 
 // cFESound / cOVSound: the front end's and the in-game overlays' UI sound interfaces (cUISoundInterface subclasses
 // the UI engine calls through cUIEngine::mpSound, ui/uiengine.h): playSound(int e) maps a UI sound event to a sound,
@@ -19,6 +20,7 @@
 
 #include "layout.h"
 #include "ui/uiengine.h"
+#include "bx/memman.h"
 
 
 struct cFESound : public cUISoundInterface {
@@ -29,9 +31,7 @@ struct cFESound : public cUISoundInterface {
                                      //       other access
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFESound__cFESound stays a C function (g++ 2.95 takes no asm label on a destructor); declared
-    // first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFESound();
+    virtual ~cFESound();   // g++'s own symbol _$_8cFESound (the retail label renamed)
     virtual void soundInitialize() __asm__("cFESound_soundInitialize__FPv");
     virtual void soundShutdown() __asm__("cFESound_soundShutdown__FPv");
     virtual void playSound(int sel) __asm__("cFESound_playSound");
@@ -39,6 +39,7 @@ struct cFESound : public cUISoundInterface {
 
 CHECK_OFFSET(cFESound, mDummyVar, 0x004);
 CHECK_SIZE(cFESound, 0x8);
+__asm__("_vt$8cFESound = cFESound_vtbl");   // g++'s name for the retail vtable
 
 struct cOVSound : public cUISoundInterface {
     // cUISoundInterface (ui/uiengine.h): the vptr at 0x000; [R] cOVSound_cOVSound stores cOVSound_vtbl after
@@ -48,9 +49,7 @@ struct cOVSound : public cUISoundInterface {
                                      //       other access
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cOVSound__cOVSound stays a C function (g++ 2.95 takes no asm label on a destructor); declared
-    // first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVSound();
+    virtual ~cOVSound();   // g++'s own symbol _$_8cOVSound (the retail label renamed)
     virtual void soundInitialize() __asm__("cOVSound_soundInitialize__FPv");
     virtual void soundShutdown() __asm__("cOVSound_soundShutdown__FPv");
     virtual void playSound(int sel) __asm__("cOVSound_playSound");
@@ -58,5 +57,6 @@ struct cOVSound : public cUISoundInterface {
 
 CHECK_OFFSET(cOVSound, mDummyVar, 0x004);
 CHECK_SIZE(cOVSound, 0x8);
+__asm__("_vt$8cOVSound = cOVSound_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESOUND_H */

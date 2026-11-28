@@ -1,5 +1,6 @@
 #ifndef FE_FEMEMCARD_H
 #define FE_FEMEMCARD_H
+#pragma interface
 
 // cFEMemCard: the memory-card screen base (load / save / delete / format flow on top of cMCOverlayManager). The FE and
 // overlay save screens derive from it: cFEStateMemCard, cFEStateProfileLoad, cFEStateOptionsDeviceSelect,
@@ -217,6 +218,7 @@ struct cFEMemCard : public cOVState {
     enum { kNoNextDevice = -1, kNextDevice = 1 };
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cFEMemCard();   // g++'s own symbol _$_10cFEMemCard (the retail label renamed)
     void exitSave() __asm__("cFEMemCard_exitSave__FPv");
     void SetLoadPressed(int on) __asm__("cFEMemCard_SetLoadPressed");
     int checkNextAvailableDevice(cMCOverlayManager* list, int idx, int back)
@@ -275,6 +277,7 @@ CHECK_OFFSET(cFEMemCard, mDeleteButtonActive, 0x220);
 CHECK_OFFSET(cFEMemCard, mMainButtonActive, 0x224);
 CHECK_OFFSET(cFEMemCard, mBufferState, 0x228);
 CHECK_SIZE(cFEMemCard, 0x22C);
+__asm__("_vt$10cFEMemCard = cFEMemCard_vtbl");   // g++'s name for the retail vtable
 
 // cFEMemCard::mInstance (D_004A2028), the live memory-card screen ([O] static cFEMemCard* mInstance), set by
 // cFEMemCard_initFEMemCard

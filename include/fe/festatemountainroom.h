@@ -1,14 +1,16 @@
 #ifndef FE_FESTATEMOUNTAINROOM_H
 #define FE_FESTATEMOUNTAINROOM_H
+#pragma interface
 
-// cFEStateMountainRoom: the lodge's mountain room screen (a cUIState); cFEReal creates it with cMemMan_alloc(200, "cFEStateMountainRoom").
-// Size 0xC8 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
+// cFEStateMountainRoom: the lodge's mountain room screen (a cFEState); cFEReal creates it with cMemMan_alloc(200, "cFEStateMountainRoom").
+// Size 0xC8 [R] (the retail allocation; On Tour's is the same). Derives from cFEState (fe/festate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cTextureElement;
@@ -20,7 +22,8 @@ struct cUIState;
 struct cUIText;
 struct tPeakPassInfo;
 
-struct cFEStateMountainRoom : public cUIState {
+struct cFEStateMountainRoom : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateMountainRoom
     cUIGroup* mpPassGroup;                     // 0x048 [O]
@@ -51,9 +54,7 @@ struct cFEStateMountainRoom : public cUIState {
     void loadPeakPass() __asm__("cFEStateMountainRoom_loadPeakPass");
     void updateTextureLoad() __asm__("cFEStateMountainRoom_updateTextureLoad");
     void showPassFront() __asm__("cFEStateMountainRoom_showPassFront");
-    // retail's destructor cFEStateMountainRoom__cFEStateMountainRoom stays a C function (g++ 2.95 takes no asm label on
-    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateMountainRoom();
+    virtual ~cFEStateMountainRoom();   // g++'s own symbol _$_20cFEStateMountainRoom (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateMountainRoom_onCreateScreen");
     virtual bool onInputBegin(cUIInput* widget) __asm__("cFEStateMountainRoom_onInputBegin");
     virtual void onWidgetEvent(cUIThing* w, unsigned int msg) __asm__("cFEStateMountainRoom_onWidgetEvent");
@@ -84,5 +85,6 @@ CHECK_OFFSET(cFEStateMountainRoom, mTextureFileIndex, 0x0BC);
 CHECK_OFFSET(cFEStateMountainRoom, mpPeakPassInfo, 0x0C0);
 CHECK_OFFSET(cFEStateMountainRoom, mFrontTextureID, 0x0C4);
 CHECK_SIZE(cFEStateMountainRoom, 0xC8);
+__asm__("_vt$20cFEStateMountainRoom = cFEStateMountainRoom_vtbl");   // g++'s name for the retail vtable
 
 #endif

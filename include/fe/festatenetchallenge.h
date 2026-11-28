@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENETCHALLENGE_H
 #define FE_FESTATENETCHALLENGE_H
+#pragma interface
 
 // The online challenge popups (EA's d:/ssx/code/source/fe/festatenetchallenge.cpp: the preview's assert sits in
 // cFEStateChallengePopup's onWidgetEvent, retail cFEStateChallengePopup_onWidgetEvent; cFEStateChallengeReceivedPopup's
@@ -118,9 +119,7 @@ struct cFEStateChallengePopup : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateChallengePopup1() __asm__("cFEStateChallengePopup_cFEStateChallengePopup1");
-    // retail's destructor cFEStateChallengePopup__cFEStateChallengePopup stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateChallengePopup();
+    virtual ~cFEStateChallengePopup();   // g++'s own symbol _$_22cFEStateChallengePopup (the retail label renamed)
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateChallengePopup_onPopupEvent");
     virtual void onCreateScreen() __asm__("cFEStateChallengePopup_onCreateScreen");
     virtual bool onLoseTransition() __asm__("cFEStateChallengePopup_onLoseTransition__FPv");
@@ -151,6 +150,7 @@ CHECK_OFFSET(cFEStateChallengePopup, mpLBPowerUps, 0x6E4);
 CHECK_OFFSET(cFEStateChallengePopup, mpLBMultipliers, 0x6E8);
 CHECK_OFFSET(cFEStateChallengePopup, mpLBPointIcons, 0x6EC);
 CHECK_SIZE(cFEStateChallengePopup, 0x6F0);
+__asm__("_vt$22cFEStateChallengePopup = cFEStateChallengePopup_vtbl");   // g++'s name for the retail vtable
 
 struct cUIScreen;
 
@@ -189,8 +189,7 @@ struct cFEStateChallengeReceivedPopup : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateChallengeReceivedPopup1() __asm__("cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1");
-    // retail's destructor cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup stays a C function (g++ 2.95
-    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_30cFEStateChallengeReceivedPopup (the retail label renamed)
     virtual ~cFEStateChallengeReceivedPopup();
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateChallengeReceivedPopup_onGainTransition");
     virtual void onCreateScreen() __asm__("cFEStateChallengeReceivedPopup_onCreateScreen");
@@ -214,5 +213,7 @@ struct cFEStateChallengeReceivedPopup : public cFEStateNet {
 CHECK_OFFSET(cFEStateChallengeReceivedPopup, mszChallenger, 0x6D0);
 CHECK_OFFSET(cFEStateChallengeReceivedPopup, mbAccepted, 0x6D4);
 CHECK_SIZE(cFEStateChallengeReceivedPopup, 0x6D8);
+// g++'s name for the retail vtable
+__asm__("_vt$30cFEStateChallengeReceivedPopup = cFEStateChallengeReceivedPopup_vtbl");
 
 #endif /* FE_FESTATENETCHALLENGE_H */

@@ -1,5 +1,6 @@
 #ifndef OBJECT_FENCENODE_H
 #define OBJECT_FENCENODE_H
+#pragma interface
 
 // cFenceNode: the scene node of a fence instance that a rider hit: it swings (a damped force oscillating between
 // +-ForceMax), bends an 8x2 grid mesh (top and bottom rows of 8 points) and pushes the neighbouring fence instances
@@ -115,9 +116,7 @@ struct cFenceNode : public cInstanceNode {
     void updateGrid() __asm__("cFenceNode_updateGrid");
     void setupFence() __asm__("cFenceNode_setupFence");
     void setForce(float force) __asm__("cFenceNode_setForce");
-    // retail's destructor cFenceNode__cFenceNode stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFenceNode();
+    virtual ~cFenceNode();   // g++'s own symbol _$_10cFenceNode (the retail label renamed)
     virtual void render() __asm__("cFenceNode_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFenceNode_writeToReplayFrame");
     virtual void onCollide(const tCollideInfo* obj, const tIntersectInfo*, cBeing*) __asm__("cFenceNode_onCollide");
@@ -135,5 +134,6 @@ CHECK_OFFSET(cFenceNode, Verts, 0x044);
 CHECK_OFFSET(cFenceNode, NextInstance, 0x104);
 CHECK_OFFSET(cFenceNode, PrevInstance, 0x108);
 CHECK_SIZE(cFenceNode, 0x10C);
+__asm__("_vt$10cFenceNode = cFenceNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_FENCENODE_H */

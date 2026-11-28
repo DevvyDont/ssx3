@@ -1,21 +1,24 @@
 #ifndef FE_FESTATECAREERSTATS_H
 #define FE_FESTATECAREERSTATS_H
+#pragma interface
 
-// cFEStateCareerStats: the career stats screen (a cUIState); cFEReal creates it with cMemMan_alloc(0x78, "cFEStateCareerStats").
-// Size 0x78 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
+// cFEStateCareerStats: the career stats screen (a cFEState); cFEReal creates it with cMemMan_alloc(0x78, "cFEStateCareerStats").
+// Size 0x78 [R] (the retail allocation; On Tour's is the same). Derives from cFEState (fe/festate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIScreen;
 struct cUIState;
 
-struct cFEStateCareerStats : public cUIState {
+struct cFEStateCareerStats : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateCareerStats
     int mStatsState;                 // 0x048 [O]
@@ -51,9 +54,7 @@ struct cFEStateCareerStats : public cUIState {
     void setupRidersBest() __asm__("cFEStateCareerStats_setupRidersBest");
     int getOwnedMedalByith(unsigned int mask, int n, int count) __asm__("cFEStateCareerStats_getOwnedMedalByith");
     void initTotalEventMedal() __asm__("cFEStateCareerStats_initTotalEventMedal");
-    // retail's destructor cFEStateCareerStats__cFEStateCareerStats stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateCareerStats();
+    virtual ~cFEStateCareerStats();   // g++'s own symbol _$_19cFEStateCareerStats (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateCareerStats_onCreateScreen");
     virtual bool onGainTransition(int on) __asm__("cFEStateCareerStats_onGainTransition");
     virtual void onGainFocus(cUIState*) __asm__("cFEStateCareerStats_onGainFocus");
@@ -76,5 +77,6 @@ CHECK_OFFSET(cFEStateCareerStats, mTotalOwnedFSEvent, 0x06C);
 CHECK_OFFSET(cFEStateCareerStats, mbitOwnedFSMedal, 0x070);
 CHECK_OFFSET(cFEStateCareerStats, mbitOpenedFS, 0x074);
 CHECK_SIZE(cFEStateCareerStats, 0x78);
+__asm__("_vt$19cFEStateCareerStats = cFEStateCareerStats_vtbl");   // g++'s name for the retail vtable
 
 #endif

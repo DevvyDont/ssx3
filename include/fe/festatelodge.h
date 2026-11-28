@@ -1,21 +1,24 @@
 #ifndef FE_FESTATELODGE_H
 #define FE_FESTATELODGE_H
+#pragma interface
 
-// cFEStateLodge: a front-end state (a cUIState), 6 methods; allocated with cMemMan_alloc(88, "cFEStateLodge").
-// Size 0x58 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
+// cFEStateLodge: a front-end state (a cFEState), 6 methods; allocated with cMemMan_alloc(88, "cFEStateLodge").
+// Size 0x58 [R] (the retail allocation; On Tour's is the same). Derives from cFEState (fe/festate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIScreen;
 struct cUIState;
 
-struct cFEStateLodge : public cUIState {
+struct cFEStateLodge : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateLodge
     int mCheatCharID;               // 0x048 [O]
@@ -29,9 +32,7 @@ struct cFEStateLodge : public cUIState {
     enum { kPathQuit = 6, kPathSaveProgress = 0x10, kPathSaveBeforeQuit = 0x11 };
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEStateLodge__cFEStateLodge stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateLodge();
+    virtual ~cFEStateLodge();   // g++'s own symbol _$_13cFEStateLodge (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateLodge_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* w) __asm__("cFEStateLodge_onWidgetCreate");
     virtual void onPopupEvent(cUIState* msg, unsigned int id) __asm__("cFEStateLodge_onPopupEvent");
@@ -44,5 +45,6 @@ CHECK_OFFSET(cFEStateLodge, bToNextState, 0x04C);
 CHECK_OFFSET(cFEStateLodge, mPathToSaveProfile, 0x050);
 CHECK_OFFSET(cFEStateLodge, mbIsYesOrNo, 0x054);
 CHECK_SIZE(cFEStateLodge, 0x58);
+__asm__("_vt$13cFEStateLodge = cFEStateLodge_vtbl");   // g++'s name for the retail vtable
 
 #endif

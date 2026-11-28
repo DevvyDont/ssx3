@@ -1,5 +1,6 @@
 #ifndef OBJECT_RESTORENODE_H
 #define OBJECT_RESTORENODE_H
+#pragma interface
 
 // cRestoreNode: the node that brings a removed instance back: it marks the record (flags +0x8: clears 0x60 and bit 1,
 // sets bit 2) and otherwise does nothing (expire and signal are empty). Made by makeDead (dead-data Type 3, from the
@@ -39,6 +40,7 @@ struct cRestoreNode : public cInstanceNode {
     //   Instance: [R] the ctor marks the record's flags (+0x8) through it (lw 0x18 twice)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cRestoreNode();   // g++'s own symbol _$_12cRestoreNode (the retail label renamed)
     void* cRestoreNode1() __asm__("cRestoreNode_cRestoreNode1");
     // expire stays a C function (cRestoreNode_expire): declared first, it is the vtable's key function, which keeps the
     // vtable out of the units defining the other overrides
@@ -48,5 +50,6 @@ struct cRestoreNode : public cInstanceNode {
 };
 
 CHECK_SIZE(cRestoreNode, 0x1C);
+__asm__("_vt$12cRestoreNode = cRestoreNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_RESTORENODE_H */

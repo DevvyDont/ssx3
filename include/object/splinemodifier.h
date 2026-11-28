@@ -1,5 +1,6 @@
 #ifndef OBJECT_SPLINEMODIFIER_H
 #define OBJECT_SPLINEMODIFIER_H
+#pragma interface
 
 // cSplineModifier: the transform modifier that moves a placed instance along a world spline (transform type 1;
 // lifts, gondolas, moving props). Size 0xF0: retail cMemMan_alloc(0xF0, "SplineModifier") in cMoveNode's addSpline
@@ -137,9 +138,7 @@ struct cSplineModifier : public cTransformModifier {
     char unk_E8[0x8];               // 0xE8 padding to the 0xF0 allocation
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cSplineModifier__cSplineModifier stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cSplineModifier();
+    virtual ~cSplineModifier();   // g++'s own symbol _$_15cSplineModifier (the retail label renamed)
     virtual void update() __asm__("cSplineModifier_update");
     virtual void updateRootTransform() __asm__("cSplineModifier_updateRootTransform");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cSplineModifier_writeToReplayFrame");
@@ -178,5 +177,6 @@ CHECK_OFFSET(cSplineModifier, Y2, 0xD4);
 CHECK_OFFSET(cSplineModifier, Spline, 0xD8);
 CHECK_OFFSET(cSplineModifier, unk_E8, 0xE8);
 CHECK_SIZE(cSplineModifier, 0xF0);
+__asm__("_vt$15cSplineModifier = cSplineModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_SPLINEMODIFIER_H */

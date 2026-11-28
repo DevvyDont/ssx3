@@ -4856,7 +4856,7 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
 extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
 extern "C" void cScriptObject_DeInitScriptObject(void* self);
 extern "C" void cScriptObject__cScriptObject(void* self, int flags);
-extern "C" void cObjNode__cObjNode(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags) __asm__("_$_8cObjNode");
 
 /**
  * Destroys a transition manager: ends the transition and releases its held texture.
@@ -6099,30 +6099,24 @@ extern "C" void* cSnowFall_cSnowFall(cSnowFall* self, void* bucket)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", cSnowFall__cSnowFall);
+INCLUDE_ASM("visualfx/boardwakefx", _$_9cSnowFall);
 #ifdef SKIP_ASM
-extern void* cSnowFall_vtbl[];
 extern "C" void cMemMan_validate(void);
 extern "C" void _$_8cSnowBox(cSnowBox* self, int flags);
-extern "C" void cObjNode__cObjNode(void* self, int flags);
 
 /**
- * Destroys the falling snow: deletes its twelve snow boxes and runs the cObjNode destructor.
- *
- * @param self   the snowfall node
- * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
+ * Destroys the falling snow: deletes its twelve snow boxes (checking the heap before and after); the cObjNode part does
+ * the rest and frees it when asked.
  */
-extern "C" void cSnowFall__cSnowFall(cSnowFall* self, int flags)
+cSnowFall::~cSnowFall()
 {
-    VPTR_OF(cObjNode, self) = cSnowFall_vtbl;
     cMemMan_validate();
     int i;
     for (i = 0; i < 12; i++) {
-        int* snowBox = ((int*)self->mSnowBoxes[i]);
+        int* snowBox = ((int*)mSnowBoxes[i]);
         delete (cSnowBox*)snowBox;
     }
     cMemMan_validate();
-    cObjNode__cObjNode(self, flags);
 }
 #endif
 

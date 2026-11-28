@@ -273,9 +273,7 @@ struct cOVStateHUD1P : public cUIState {
         __asm__("cOVStateHUD1P_renderMultiText");
     void renderMultiText1(cFont* font, tHUDDef* defs, int idx, const unsigned short* str, int flags, float* rect)
         __asm__("cOVStateHUD1P_renderMultiText1");
-    // retail's destructor cOVStateHUD1P__cOVStateHUD1P stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cOVStateHUD1P();
+    virtual ~cOVStateHUD1P();   // g++'s own symbol _$_13cOVStateHUD1P (the retail label renamed)
     virtual void onCreateScreen() __asm__("cOVStateHUD1P_onCreateScreen");
     void renderCollectibles(char* obj, cRider* rider, int x, float animFrame)
         __asm__("cOVStateHUD1P_renderCollectibles");
@@ -398,6 +396,7 @@ CHECK_OFFSET(cOVStateHUD1P, mNetStatusMessage, 0xA48);
 CHECK_OFFSET(cOVStateHUD1P, mSkipMessage, 0xB48);
 CHECK_OFFSET(cOVStateHUD1P, mNISSkipMessageFrame, 0xC94);
 CHECK_SIZE(cOVStateHUD1P, 0xC98);
+__asm__("_vt$13cOVStateHUD1P = cOVStateHUD1P_vtbl");   // g++'s name for the retail vtable
 
 
 // ---------------------------------------------------------------------------------------------------------------------

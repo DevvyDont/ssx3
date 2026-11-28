@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEREADMESSAGEPOPUP_H
 #define FE_FESTATEREADMESSAGEPOPUP_H
+#pragma interface
 
 // cFEStateReadMessagePopup: screen "282ReadPrivateMessage": the private-message conversation with one player (the
 // messages BuddyMan received from mszSender plus the ones sent from here) and the keyboard to reply. A cFEStateNet
@@ -92,9 +93,7 @@ struct cFEStateReadMessagePopup : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateReadMessagePopup1() __asm__("cFEStateReadMessagePopup_cFEStateReadMessagePopup1");
-    // retail's destructor cFEStateReadMessagePopup__cFEStateReadMessagePopup stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateReadMessagePopup();
+    virtual ~cFEStateReadMessagePopup();   // g++'s own symbol _$_24cFEStateReadMessagePopup (the retail label renamed)
     virtual int onWidgetMenu(cUIMenu*pMenu, unsigned int Event, unsigned int index)
         __asm__("cFEStateReadMessagePopup_onWidgetMenu");
     virtual void onCreateScreen() __asm__("cFEStateReadMessagePopup_onCreateScreen");
@@ -116,5 +115,6 @@ CHECK_OFFSET(cFEStateReadMessagePopup, mMessages, 0x6D8);
 CHECK_OFFSET(cFEStateReadMessagePopup, mbResetScroll, 0x6E8);
 CHECK_OFFSET(cFEStateReadMessagePopup, mTextColour, 0x6EC);
 CHECK_SIZE(cFEStateReadMessagePopup, 0x6FC);
+__asm__("_vt$24cFEStateReadMessagePopup = cFEStateReadMessagePopup_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATEREADMESSAGEPOPUP_H */

@@ -1,14 +1,16 @@
 #ifndef FE_FESTATEUBERTRICK_H
 #define FE_FESTATEUBERTRICK_H
+#pragma interface
 
-// cFEStateUberTrick: the store's uber trick screen (a cUIState). Methods in fe/festatestore and fe/festateriderbio.
-// Size 0x60 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
+// cFEStateUberTrick: the store's uber trick screen (a cFEState). Methods in fe/festatestore and fe/festateriderbio.
+// Size 0x60 [R] (the retail allocation; On Tour's is the same). Derives from cFEState (fe/festate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cTextureElement;
@@ -17,7 +19,8 @@ struct cUIMenu;
 struct cUIScreen;
 struct cUIState;
 
-struct cFEStateUberTrick : public cUIState {
+struct cFEStateUberTrick : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateUberTrick
     int mbModelVisible;             // 0x048 [O] bool
@@ -35,9 +38,7 @@ struct cFEStateUberTrick : public cUIState {
     void trickVisible(int on) __asm__("cFEStateUberTrick_trickVisible");
     void updateTrickMenu() __asm__("cFEStateUberTrick_updateTrickMenu");
     void updateTrickMenuEntry() __asm__("cFEStateUberTrick_updateTrickMenuEntry");
-    // retail's destructor cFEStateUberTrick__cFEStateUberTrick stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateUberTrick();
+    virtual ~cFEStateUberTrick();   // g++'s own symbol _$_17cFEStateUberTrick (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateUberTrick_onCreateScreen");
     virtual void onDestroyScreen() __asm__("cFEStateUberTrick_onDestroyScreen");
     virtual bool onGainTransition(int on) __asm__("cFEStateUberTrick_onGainTransition");
@@ -56,5 +57,6 @@ CHECK_OFFSET(cFEStateUberTrick, mpCheckmark, 0x054);
 CHECK_OFFSET(cFEStateUberTrick, mpCheckbox, 0x058);
 CHECK_OFFSET(cFEStateUberTrick, mpDollarSign, 0x05C);
 CHECK_SIZE(cFEStateUberTrick, 0x60);
+__asm__("_vt$17cFEStateUberTrick = cFEStateUberTrick_vtbl");   // g++'s name for the retail vtable
 
 #endif

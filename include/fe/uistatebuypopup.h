@@ -1,5 +1,6 @@
 #ifndef FE_UISTATEBUYPOPUP_H
 #define FE_UISTATEBUYPOPUP_H
+#pragma interface
 
 // cUIStateBuyPopup: the "buy this item?" popup of the shops and the message center (screen "139buy_popup": item
 // type / name, question, cost or remaining credits, yes / no). EA's name from the preview's linkonce sections
@@ -11,13 +12,13 @@
 // Size 0x70: cMemMan_alloc(0x70, "cUIStateBuyPopup" / "UITRICKBUY") + cUIStateBuyPopup_cUIStateBuyPopup(mem, pEngine, pParent,
 // userNum) at all 5 sites (fe/messagecenter, fe/festatecharequipdetail, fe/festatebuyattrib, fe/festatestore).
 // Constructors cUIStateBuyPopup_cUIStateBuyPopup (cUIState(pEngine, pParent) cUIState_cUIState1, vtable, mInfo.clear() twice, mUserNum,
-// mHashName 7, mCtrlBits) and the default cUIStateBuyPopup_cUIStateBuyPopup1; destructor cUIStateBuyPopup__cUIStateBuyPopup (stores
+// mHashName 7, mCtrlBits) and the default cUIStateBuyPopup_cUIStateBuyPopup1; destructor _$_16cUIStateBuyPopup (stores
 // cFEState_vtbl, then cUIState's cUIState__cUIState). Retail vtable cUIStateBuyPopup_vtbl = D_0046CB08 (24 slots: 1 dtor,
 // 4 onCreateScreen, 6 cFEState_onGainFocus, 18 onWidgetCreate, 19 onWidgetEvent, 20 onWidgetMenu).
 // Bases: cFEState (no members; On Tour size 0x48: its vtable cFEState_vtbl is the one ~20 FE destructors restore, and
 // slot 6 is cFEState_onGainFocus), then cUIState (ui/uistate.h) and cListNode, written out flat below.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags:
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets. Evidence tags:
 //   [O] On Tour's DWARF (cUIState / cUIStateBuyPopup);
 //   [P] the July 2003 preview's inline accessors (cUIState: see ui/uistate.h; isAccept lw 0x68 at the preview's
 //       offset, tools/layout_xlate.py: preview 0x58/0x5C = retail 0x5C/0x60);
@@ -26,6 +27,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 #include "fe/buypopupinfo.h"
 
 struct cListNode;
@@ -33,7 +35,8 @@ struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cUIStateBuyPopup : public cUIState {
+struct cUIStateBuyPopup : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cUIStateBuyPopup_vtbl D_0046CB08, stored by cUIStateBuyPopup_cUIStateBuyPopup /
     //       cUIStateBuyPopup_cUIStateBuyPopup1; the destructor stores cFEState's cFEState_vtbl
@@ -62,9 +65,7 @@ struct cUIStateBuyPopup : public cUIState {
     void initBuyAttributes(int pAttrName, int cost, int money) __asm__("cUIStateBuyPopup_initBuyAttributes");
     void * cUIStateBuyPopup1() __asm__("cUIStateBuyPopup_cUIStateBuyPopup1");
     int isAccept() __asm__("cUIStateBuyPopup_isAccept");
-    // retail's destructor cUIStateBuyPopup__cUIStateBuyPopup stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cUIStateBuyPopup();
+    virtual ~cUIStateBuyPopup();   // g++'s own symbol _$_16cUIStateBuyPopup (the retail label renamed)
     virtual void onCreateScreen() __asm__("cUIStateBuyPopup_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* widget) __asm__("cUIStateBuyPopup_onWidgetCreate");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int key, unsigned int) __asm__("cUIStateBuyPopup_onWidgetMenu");
@@ -74,5 +75,6 @@ struct cUIStateBuyPopup : public cUIState {
 CHECK_OFFSET(cUIStateBuyPopup, mInfo, 0x048);
 CHECK_OFFSET(cUIStateBuyPopup, mbAccept, 0x06C);
 CHECK_SIZE(cUIStateBuyPopup, 0x70);
+__asm__("_vt$16cUIStateBuyPopup = cUIStateBuyPopup_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_UISTATEBUYPOPUP_H */

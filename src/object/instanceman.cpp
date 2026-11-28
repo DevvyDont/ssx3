@@ -952,25 +952,16 @@ extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, 
 #endif
 
 extern void* cMeshAnimNode_vtbl[];
-extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
-INCLUDE_ASM("object/instanceman", cMeshAnimNode__cMeshAnimNode__FPv);
+INCLUDE_ASM("object/instanceman", _$_13cMeshAnimNode);
 #ifdef SKIP_ASM
 /**
- * Destroys a mesh animation node: stores cMeshAnimNode's vtable at +0xC, then runs the cInstanceNode
- * destructor.
- *
- * The g++ delete flags in the second argument register pass through untouched to
- * cInstanceNode__cInstanceNode().
- *
- * @return no meaningful value (cInstanceNode__cInstanceNode returns nothing)
+ * Destroys a mesh-animation node; it owns nothing of its own, so its cInstanceNode part does the work and frees it when
+ * asked.
  */
-void* cMeshAnimNode__cMeshAnimNode(void* vself)
+cMeshAnimNode::~cMeshAnimNode()
 {
-    cMeshAnimNode* self = (cMeshAnimNode*)vself;
-    VPTR_OF(cObjNode, self) = (void**)((int)(void*)cMeshAnimNode_vtbl);
-    return cInstanceNode__cInstanceNode(self);
 }
 #endif
 

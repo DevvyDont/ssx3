@@ -397,34 +397,27 @@ extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cBx
 #endif
 
 //100%
-INCLUDE_ASM("object/multiparticle", cRailManNode__cRailManNode);
+INCLUDE_ASM("object/multiparticle", _$_12cRailManNode);
 #ifdef SKIP_ASM
 extern void* cRailManNode_ActiveNode;
-extern void* cRailManNode_vtbl[];
 extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
-// PORT: cSortObjNode__cSortObjNode__FPv is the ObjNode deleting dtor; it takes (self, flags).
-extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
 /**
- * Destroys the rail manager node: re-enables every rail it disabled and clears the active-node pointer.
+ * Destroys the rail manager node: re-enables every rail it disabled and clears the active-node pointer; the
+ * cSortObjNode part does the rest and frees it when asked.
  *
- * cRailManNode_enableRail (On Tour enableRail) puts each used slot's spline segments back into the Nash rail-space
- * octree and frees the slot; then cRailManNode_ActiveNode (On Tour ActiveNode) is cleared and the cSortObjNode destructor
- * runs.
- *
- * @param flags  g++ destructor flags, passed on to the cSortObjNode destructor (bit 0 frees the memory)
+ * enableRail (On Tour enableRail) puts each used slot's spline segments back into the Nash rail-space octree and frees
+ * the slot; then cRailManNode_ActiveNode (On Tour ActiveNode) is cleared.
  */
-extern "C" void cRailManNode__cRailManNode(cRailManNode* self, int flags)
+cRailManNode::~cRailManNode()
 {
     int i;
-    VPTR_OF(cObjNode, self) = cRailManNode_vtbl;
     for (i = 0; i < 0x80; i++) {
-        if (self->RailInfo[i].RailRID != tResourceID::Invalid()) {
-            self->enableRail(i);
+        if (RailInfo[i].RailRID != tResourceID::Invalid()) {
+            enableRail(i);
         }
     }
     cRailManNode_ActiveNode = 0;
-    cSortObjNode__cSortObjNode_dtor(self, flags);
 }
 #endif
 

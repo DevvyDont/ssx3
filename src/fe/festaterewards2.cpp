@@ -50,7 +50,7 @@ INCLUDE_ASM("fe/festaterewards2", cFEMemCard_cFEMemCard);
 
 INCLUDE_ASM("fe/festaterewards2", cFEMemCard_cFEMemCard2);
 
-INCLUDE_ASM("fe/festaterewards2", cFEMemCard__cFEMemCard);
+INCLUDE_ASM("fe/festaterewards2", _$_10cFEMemCard);
 
 INCLUDE_ASM("fe/festaterewards2", cFEMemCard_onWidgetMenu);
 

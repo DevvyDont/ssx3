@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENETCREATE_H
 #define FE_FESTATENETCREATE_H
+#pragma interface
 
 // The online account-creation screens (EA's d:/ssx/code/source/fe/festatenetcreate.cpp: the preview's assert at line
 // 1102 sits in cFEStateCreateStep2's onPopupEvent, retail cFEStateCreateStep2_onPopupEvent; Step1's code comes right before it in
@@ -82,9 +83,7 @@ struct cFEStateCreateStep1 : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateCreateStep11() __asm__("cFEStateCreateStep1_cFEStateCreateStep11");
-    // retail's destructor cFEStateCreateStep1__cFEStateCreateStep1 stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateCreateStep1();
+    virtual ~cFEStateCreateStep1();   // g++'s own symbol _$_19cFEStateCreateStep1 (the retail label renamed)
     virtual void onPopupEvent(cUIState*pPopup, unsigned int Event) __asm__("cFEStateCreateStep1_onPopupEvent");
     virtual void onCreateScreen() __asm__("cFEStateCreateStep1_onCreateScreen");
     virtual bool onGainTransition(int bFirstTime) __asm__("cFEStateCreateStep1_onGainTransition");
@@ -126,6 +125,7 @@ CHECK_OFFSET(cFEStateCreateStep1, mbSaveAccount, 0x6E8);
 CHECK_OFFSET(cFEStateCreateStep1, mbEditAccount, 0x6EC);
 CHECK_OFFSET(cFEStateCreateStep1, mpStaticContinue, 0x6F0);
 CHECK_SIZE(cFEStateCreateStep1, 0x6F4);
+__asm__("_vt$19cFEStateCreateStep1 = cFEStateCreateStep1_vtbl");   // g++'s name for the retail vtable
 
 struct cFEStateNetHelpPopup;
 struct cScreenPopup;
@@ -159,9 +159,7 @@ struct cFEStateCreateStep2 : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateCreateStep21() __asm__("cFEStateCreateStep2_cFEStateCreateStep21");
-    // retail's destructor cFEStateCreateStep2__cFEStateCreateStep2 stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateCreateStep2();
+    virtual ~cFEStateCreateStep2();   // g++'s own symbol _$_19cFEStateCreateStep2 (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateCreateStep2_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* box) __asm__("cFEStateCreateStep2_onWidgetCreate");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEStateCreateStep2_onWidgetEvent");
@@ -201,5 +199,6 @@ CHECK_OFFSET(cFEStateCreateStep2, mbScreenReady, 0x6D4);
 CHECK_OFFSET(cFEStateCreateStep2, mbSaveAccount, 0x6D8);
 CHECK_OFFSET(cFEStateCreateStep2, unk_6DC, 0x6DC);
 CHECK_SIZE(cFEStateCreateStep2, 0x6E0);
+__asm__("_vt$19cFEStateCreateStep2 = cFEStateCreateStep2_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATENETCREATE_H */

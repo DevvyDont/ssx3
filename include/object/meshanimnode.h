@@ -1,5 +1,6 @@
 #ifndef OBJECT_MESHANIMNODE_H
 #define OBJECT_MESHANIMNODE_H
+#pragma interface
 
 // cMeshAnimNode: an instance that breaks apart: each of its model's meshes (at most 24) flies off as debris with its
 // own rotation (Qrot), spin axis / angle step (Axis / Angle) and position / velocity (Pos / Vel), under gravity scaled
@@ -83,6 +84,7 @@ struct cMeshAnimNode : public cInstanceNode {
     char unk_6B8[0x8];              // 0x6B8 tail padding to the 16-byte alignment (no access)
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cMeshAnimNode();   // g++'s own symbol _$_13cMeshAnimNode (the retail label renamed)
     void init() __asm__("cMeshAnimNode_init");
     // update stays a C function (cMeshAnimNode_update): declared first, it is the vtable's key function, which keeps
     // the vtable out of the units defining the other overrides
@@ -108,5 +110,6 @@ CHECK_OFFSET(cMeshAnimNode, Type, 0x6B0);
 CHECK_OFFSET(cMeshAnimNode, Drag, 0x6B4);
 CHECK_OFFSET(cMeshAnimNode, unk_6B8, 0x6B8);
 CHECK_SIZE(cMeshAnimNode, 0x6C0);
+__asm__("_vt$13cMeshAnimNode = cMeshAnimNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_MESHANIMNODE_H */

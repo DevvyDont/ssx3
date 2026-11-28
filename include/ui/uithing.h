@@ -130,7 +130,7 @@ struct cUIThing : public cListNode {
     // parameters are words: cUIThing_setActive(cUIThing*, int)), pointers where On Tour passes references. Slot 22 is
     // getType: pure here ([R] cUIThing_vtbl[22] = __pure_virtual; On Tour's DWARF drops pure entries), and every
     // subclass vtable fills it with its own <class>_getType ([O] each subclass declares virtual char getType()).
-    virtual ~cUIThing();                                                  // 1  cUIThing__cUIThing
+    virtual ~cUIThing();          // 1  g++'s own symbol _$_8cUIThing (the retail label renamed; still a C function)
     virtual void setActive(int a)
         __asm__("cUIThing_setActive");                                        // 4  cUIThing_setActive
     virtual void setCached(int a)

@@ -130,9 +130,7 @@ struct cDynamicParticleModifier : public cEffectModifier {
     cDynamicParticleModifier* cDynamicParticleModifier1(tParticleData* particleDesc, int owner, int bone, t4Vector* pos)
         __asm__("cDynamicParticleModifier_cDynamicParticleModifier1");
     void updatePosition() __asm__("cDynamicParticleModifier_updatePosition");
-    // retail's destructor cDynamicParticleModifier__cDynamicParticleModifier stays a C function (g++ 2.95 takes no asm
-    // label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cDynamicParticleModifier();
+    virtual ~cDynamicParticleModifier();   // g++'s own symbol _$_24cDynamicParticleModifier (the retail label renamed)
     virtual void update() __asm__("cDynamicParticleModifier_update");
     virtual void fadeEffect() __asm__("cDynamicParticleModifier_fadeEffect__FPv");
     virtual void render() __asm__("cDynamicParticleModifier_render");
@@ -152,6 +150,7 @@ CHECK_OFFSET(cDynamicParticleModifier, Emitter, 0x60);
 CHECK_OFFSET(cDynamicParticleModifier, ParticleData, 0x260);
 CHECK_OFFSET(cDynamicParticleModifier, unk_264, 0x264);
 CHECK_SIZE(cDynamicParticleModifier, 0x270);
+__asm__("_vt$24cDynamicParticleModifier = cDynamicParticleModifier_vtbl");   // g++'s name for the retail vtable
 
 
 // World-script data that adds a halo modifier (On Tour tAddHaloData, 0x28; same offsets). [O] On Tour's

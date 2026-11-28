@@ -1,5 +1,6 @@
 #ifndef OBJECT_INSTANCENODE_H
 #define OBJECT_INSTANCENODE_H
+#pragma interface
 
 // cInstanceNode: the scene node of one placed world instance (a tInstanceRecord). It sits in a cBucketMan bucket
 // list and is the base of cMoveNode (-> cFloatingNode, cAnimNode, cDebounceNode, ...), cFlexRailNode and
@@ -105,6 +106,7 @@ struct cInstanceNode : public cSortObjNode {
                                  //       its record arg; [U] record flags at +0x8, root transform at +0x10, model at +0x80
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cInstanceNode();   // g++'s own symbol _$_13cInstanceNode (the retail label renamed)
     void* cInstanceNode1(void* bucket, int type, cInstanceNode* node) __asm__("cInstanceNode_cInstanceNode1");
     void setActiveNode(tInstanceRecord* inst) __asm__("cInstanceNode_setActiveNode");
     void clearActiveNode(tInstanceRecord* inst) __asm__("cInstanceNode_clearActiveNode");
@@ -125,5 +127,6 @@ CHECK_OFFSET(cInstanceNode, Instance, 0x18);
 // cMemMan_alloc(0x1C, "DeadNode") in cInstanceNode_makeThisDead, debouncenode.cpp and wscriptman.cpp; [U] cMoveNode's first own
 // field (ModifierBlock, On Tour 0x18) is at 0x1C in cMoveNode_cMoveNode.
 CHECK_SIZE(cInstanceNode, 0x1C);
+__asm__("_vt$13cInstanceNode = cInstanceNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_INSTANCENODE_H */

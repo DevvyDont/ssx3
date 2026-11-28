@@ -1,5 +1,6 @@
 #ifndef UI_UIPROGRESS_H
 #define UI_UIPROGRESS_H
+#pragma interface
 
 // cUIProgress: a progress bar (record type 0x19): a background object and a knob moved along it by value / number of
 // values. Size 0x88: cUIScreen_createObjectByStruct does operator new(0x88, "UIProgress") + the cUIThing ctor
@@ -31,6 +32,7 @@ struct cUIProgress : public cUIThing {
     int mBackWidth;                  // 0x084 [O]; [R] = 0; [U] cUIProgress_setUIData (sw); cUIProgress_setValue
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cUIProgress();   // g++'s own symbol _$_11cUIProgress (the retail label renamed)
     void setValue(int pos) __asm__("cUIProgress_setValue");
     void* cUIProgress1() __asm__("cUIProgress_cUIProgress1");
     void setBackgroundObject(cUIThing* background) __asm__("cUIProgress_setBackgroundObject");
@@ -48,5 +50,6 @@ CHECK_OFFSET(cUIProgress, mValue, 0x07C);
 CHECK_OFFSET(cUIProgress, mNumValues, 0x080);
 CHECK_OFFSET(cUIProgress, mBackWidth, 0x084);
 CHECK_SIZE(cUIProgress, 0x88);
+__asm__("_vt$11cUIProgress = cUIProgress_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UI_UIPROGRESS_H */

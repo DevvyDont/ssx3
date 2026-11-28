@@ -2195,36 +2195,28 @@ extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewRewa
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward__cFEStatePreviewReward);
+INCLUDE_ASM("fe/festaterewards", _$_21cFEStatePreviewReward);
 #ifdef SKIP_ASM
 
-extern void* cFEStatePreviewReward_vtbl[];
-extern void* cFEState_vtbl[];
 extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
-extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys a reward preview: frees its texture and releases its file slot (cFEBoltFileManager_releaseFile), then the base
- * state.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a reward preview: frees its texture and releases its file slot (cFEBoltFileManager_releaseFile); its
+ * cFEState and cUIState parts do the rest and free it when asked.
  */
-extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(cFEStatePreviewReward* self, int flags)
+cFEStatePreviewReward::~cFEStatePreviewReward()
 {
-    VPTR_OF(cListNode, self) = cFEStatePreviewReward_vtbl;
-    int id = self->mTextureID;
+    int id = mTextureID;
     if (id >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         ps2GraphicsMan->RemoveTexture(id);
     }
-    int slot = self->mTextureFileIndex;
+    int slot = mTextureFileIndex;
     if (slot >= 0) {
-        cFEBoltFileManager_releaseFile(SSXApp->RealFE->mBoltFileManager, self->mCharID, slot);
+        cFEBoltFileManager_releaseFile(SSXApp->RealFE->mBoltFileManager, mCharID, slot);
     }
-    self->mTextureFileIndex = -1;
-    self->mTextureID = -1;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState(self, flags);
+    mTextureFileIndex = -1;
+    mTextureID = -1;
 }
 #endif
 
@@ -2678,27 +2670,18 @@ extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(cFEStateVideoPlayer* vs
 #endif
 
 //100%
-INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer__cFEStateVideoPlayer);
+INCLUDE_ASM("fe/festaterewards", _$_19cFEStateVideoPlayer);
 #ifdef SKIP_ASM
 extern "C" void _$_12cMoviePlayer(void* p, int a1);
-extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 extern void* cFEStateVideoPlayer_vtbl[];
-extern void* cFEState_vtbl[];
 
 /**
- * Destroys the video player state: deletes its movie player, then runs the cUIState destructor.
- *
- * Vtable slot 1 of cFEStateVideoPlayer_vtbl. Reinstalls cFEStateVideoPlayer_vtbl, deletes the movie player (+0x248) with cMoviePlayer::~cMoviePlayer(player, 3)
- * when there is one, installs cFEState's vtable cFEState_vtbl and calls cUIState__cUIState() with @p flags.
- *
- * @param flags  g++ destructor flags, passed on to cUIState__cUIState (bit 0 frees the object's memory)
+ * Destroys the video player state: deletes its movie player (mpMoviePlayer) when there is one; its cFEState and
+ * cUIState parts do the rest and free it when asked.
  */
-extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(cFEStateVideoPlayer* self, int flags)
+cFEStateVideoPlayer::~cFEStateVideoPlayer()
 {
-    VPTR_OF(cListNode, self) = cFEStateVideoPlayer_vtbl;
-    delete self->mpMoviePlayer;
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState(self, flags);
+    delete mpMoviePlayer;
 }
 #endif
 

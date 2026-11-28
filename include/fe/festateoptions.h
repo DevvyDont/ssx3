@@ -142,8 +142,7 @@ struct cFEStateOptionsDeviceSelect : public cFEMemCard {
         __asm__("cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1");
 
     // Methods bound to their retail symbols by asm labels.
-    // retail's destructor cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect stays a C function (g++ 2.95 takes
-    // no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_27cFEStateOptionsDeviceSelect (the retail label renamed)
     virtual ~cFEStateOptionsDeviceSelect();
     virtual void onCreateScreen() __asm__("cFEStateOptionsDeviceSelect_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* widget, unsigned int event)
@@ -163,6 +162,7 @@ CHECK_OFFSET(cFEStateOptionsDeviceSelect, mbOnline, 0x230);
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mIsHidden, 0x234);
 CHECK_OFFSET(cFEStateOptionsDeviceSelect, mbChoseToSave, 0x238);
 CHECK_SIZE(cFEStateOptionsDeviceSelect, 0x23C);
+__asm__("_vt$27cFEStateOptionsDeviceSelect = cFEStateOptionsDeviceSelect_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cFEStateOptions: the front end's options menu ("18options", state id 0x18): entries "1" ... "8" open the game, sound,

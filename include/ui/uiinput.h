@@ -1,5 +1,6 @@
 #ifndef UI_UIINPUT_H
 #define UI_UIINPUT_H
+#pragma interface
 
 // cUIInput: the UI engine's input interface (EA's UI library; cUIEngine::mpInput). The base class keeps the last key
 // and the controlling pad; the game's front end derives cFEInput (fe/feinput.h), which reads the pad. Most of the
@@ -19,7 +20,9 @@ struct cUIInput {
     char unk_5[0x3];                // 0x5 padding
     // 0x8: the vptr. [U] the destructor restores cUIInput's vtable. Slots: [R] cUIInput_vtbl's 46 entries; [O] On Tour's
     //   virtuals, same names and order (setPadNum takes an int in retail: cUIInput_setPadNum__FPvi).
-    virtual ~cUIInput();                                        // 1
+    // 1; inline and empty: cFEInput's destructor inlines it (retail's out-of-line copy cUIInput__cUIInput stays a
+    // C function)
+    virtual ~cUIInput() {}
     virtual bool getState(char state) const __asm__("cUIInput_getState__FPv");                    // 2
     virtual bool isStart() const __asm__("cUIInput_isStart__FPv");                               // 3
     virtual bool isSelect() const __asm__("cUIInput_isSelect__FPv");                              // 4
@@ -69,5 +72,6 @@ struct cUIInput {
 
 CHECK_OFFSET(cUIInput, mPadNum, 0x4);
 CHECK_SIZE(cUIInput, 0xC);
+__asm__("_vt$8cUIInput = cUIInput_vtbl");   // g++'s name for the retail vtable
 
 #endif

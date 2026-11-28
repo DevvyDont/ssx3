@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENETMESSENGER_H
 #define FE_FESTATENETMESSENGER_H
+#pragma interface
 
 // cFEStateNetMessenger: the online messenger (buddy list) screen, a cFEStateNet. It finds users by name, keeps the
 // buddy names it shows in a vector and opens the read-message / challenge popups from it. EA source
@@ -113,9 +114,7 @@ struct cFEStateNetMessenger : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateNetMessenger1() __asm__("cFEStateNetMessenger_cFEStateNetMessenger1");
-    // retail's destructor cFEStateNetMessenger__cFEStateNetMessenger stays a C function (g++ 2.95 takes no asm label on
-    // a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateNetMessenger();
+    virtual ~cFEStateNetMessenger();   // g++'s own symbol _$_20cFEStateNetMessenger (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateNetMessenger_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateNetMessenger_onUpdate");
     virtual bool onInputBegin(cUIInput* obj) __asm__("cFEStateNetMessenger_onInputBegin");
@@ -170,5 +169,6 @@ CHECK_OFFSET(cFEStateNetMessenger, mNames, 0x6E4);
 CHECK_OFFSET(cFEStateNetMessenger, miScrollOffset, 0x6F4);
 CHECK_OFFSET(cFEStateNetMessenger, miSelectedIndex, 0x6F8);
 CHECK_SIZE(cFEStateNetMessenger, 0x6FC);
+__asm__("_vt$20cFEStateNetMessenger = cFEStateNetMessenger_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATENETMESSENGER_H */

@@ -1,5 +1,6 @@
 #ifndef FE_FESTATENETACCOUNT_H
 #define FE_FESTATENETACCOUNT_H
+#pragma interface
 
 // The online account screens (EA's d:/ssx/code/source/fe/festatenetaccount.cpp: the preview's assert at line 852
 // sits in retail cFEStateSelectPersona_onDeletePersonaPopupEvent, a cFEStateSelectPersona popup handler; cFEUseExistingAccount's code comes right
@@ -86,9 +87,7 @@ struct cFEUseExistingAccount : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEUseExistingAccount1() __asm__("cFEUseExistingAccount_cFEUseExistingAccount1");
-    // retail's destructor cFEUseExistingAccount__cFEUseExistingAccount stays a C function (g++ 2.95 takes no asm label
-    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEUseExistingAccount();
+    virtual ~cFEUseExistingAccount();   // g++'s own symbol _$_21cFEUseExistingAccount (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEUseExistingAccount_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int msg) __asm__("cFEUseExistingAccount_onWidgetEvent");
     virtual void onUpdate() __asm__("cFEUseExistingAccount_onUpdate__FPv");
@@ -116,6 +115,7 @@ CHECK_OFFSET(cFEUseExistingAccount, miRequest, 0x6D8);
 CHECK_OFFSET(cFEUseExistingAccount, mszEmail, 0x6DC);
 CHECK_OFFSET(cFEUseExistingAccount, mpTextForgotPassword, 0x6E0);
 CHECK_SIZE(cFEUseExistingAccount, 0x6E4);
+__asm__("_vt$21cFEUseExistingAccount = cFEUseExistingAccount_vtbl");   // g++'s name for the retail vtable
 
 struct cFEStateNetHelpPopup;
 
@@ -147,9 +147,7 @@ struct cFEStateSelectPersona : public cFEStateNet {
 
     // Methods bound to their retail symbols by asm labels.
     void * cFEStateSelectPersona1() __asm__("cFEStateSelectPersona_cFEStateSelectPersona1");
-    // retail's destructor cFEStateSelectPersona__cFEStateSelectPersona stays a C function (g++ 2.95 takes no asm label
-    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateSelectPersona();
+    virtual ~cFEStateSelectPersona();   // g++'s own symbol _$_21cFEStateSelectPersona (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateSelectPersona_onCreateScreen");
     virtual void onUpdate() __asm__("cFEStateSelectPersona_onUpdate__FPv");
     virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event) __asm__("cFEStateSelectPersona_onWidgetEvent");
@@ -168,5 +166,6 @@ struct cFEStateSelectPersona : public cFEStateNet {
 CHECK_OFFSET(cFEStateSelectPersona, mbExistingPersona, 0x6D0);
 CHECK_OFFSET(cFEStateSelectPersona, miDeletePersona, 0x6D4);
 CHECK_SIZE(cFEStateSelectPersona, 0x6D8);
+__asm__("_vt$21cFEStateSelectPersona = cFEStateSelectPersona_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATENETACCOUNT_H */

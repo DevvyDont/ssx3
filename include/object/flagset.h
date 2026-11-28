@@ -1,5 +1,6 @@
 #ifndef OBJECT_FLAGSET_H
 #define OBJECT_FLAGSET_H
+#pragma interface
 
 // cFlagSet: one set of cloth flags that share a model and wind parameters: up to 60 instances (tInstanceRecord) drawn
 // with one grid mesh whose vertices updateGrid animates from the set's sine-wave parameters (tFlagState) and the
@@ -166,9 +167,7 @@ struct cFlagManager : public cObjNode {
     void AddFlag(cFlagNode* node, void* desc) __asm__("cFlagManager_AddFlag");
     void RemoveFlag(tInstanceRecord* instRecord) __asm__("cFlagManager_RemoveFlag");
     float GetWindFactor() __asm__("cFlagManager_GetWindFactor");
-    // retail's destructor cFlagManager__cFlagManager stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFlagManager();
+    virtual ~cFlagManager();   // g++'s own symbol _$_12cFlagManager (the retail label renamed)
     virtual void update() __asm__("cFlagManager_update");
     virtual void render() __asm__("cFlagManager_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFlagManager_writeToReplayFrame");
@@ -181,5 +180,6 @@ CHECK_OFFSET(cFlagManager, mWindDelta, 0x018);
 CHECK_OFFSET(cFlagManager, mWindTime, 0x01C);
 CHECK_OFFSET(cFlagManager, mFlagSets, 0x020);
 CHECK_SIZE(cFlagManager, 0x1718);
+__asm__("_vt$12cFlagManager = cFlagManager_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_FLAGSET_H */

@@ -1,5 +1,6 @@
 #ifndef OBJECT_DEADFADENODE_H
 #define OBJECT_DEADFADENODE_H
+#pragma interface
 
 // cDeadFadeNode: a dying instance that fades out and sinks while keeping the pose it had when it died: the ctor saves
 // one matrix per model mesh (AnimMats: the old node's animation matrices, or the mesh hierarchy under its root
@@ -98,9 +99,7 @@ struct cDeadFadeNode : public cInstanceNode {
 
     // Methods bound to their retail symbols by asm labels.
     void* cDeadFadeNode1() __asm__("cDeadFadeNode_cDeadFadeNode1");
-    // retail's destructor cDeadFadeNode__cDeadFadeNode stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cDeadFadeNode();
+    virtual ~cDeadFadeNode();   // g++'s own symbol _$_13cDeadFadeNode (the retail label renamed)
     virtual void update() __asm__("cDeadFadeNode_update");
     virtual void loseFocus() __asm__("cDeadFadeNode_loseFocus");
     virtual void render() __asm__("cDeadFadeNode_render");
@@ -115,5 +114,6 @@ CHECK_OFFSET(cDeadFadeNode, Dist, 0x30);
 CHECK_OFFSET(cDeadFadeNode, DistRate, 0x34);
 CHECK_OFFSET(cDeadFadeNode, AnimMats, 0x38);
 CHECK_SIZE(cDeadFadeNode, 0x3C);
+__asm__("_vt$13cDeadFadeNode = cDeadFadeNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_DEADFADENODE_H */

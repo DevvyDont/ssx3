@@ -122,35 +122,27 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom__cFEStateMountainRoom);
+INCLUDE_ASM("fe/ovstatelodge", _$_20cFEStateMountainRoom);
 #ifdef SKIP_ASM
 
-extern void* cFEStateMountainRoom_vtbl[];
-extern void* cFEState_vtbl[];
 extern "C" void cFEBoltFileManager_releaseFile(void* self, int bank, int i);
-extern "C" void cUIState__cUIState(void* self, int flags) __asm__("_$_8cUIState");
 
 /**
- * Destroys the mountain room: releases a pending pass-image load and frees the pass texture, then the base
- * state.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys the mountain room: releases a pending pass-image load and frees the pass texture; its cFEState and cUIState
+ * parts do the rest and free it when asked.
  */
-extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom* self, int flags)
+cFEStateMountainRoom::~cFEStateMountainRoom()
 {
-    VPTR_OF(cListNode, self) = cFEStateMountainRoom_vtbl;
-    int slot = self->mTextureFileIndex;
+    int slot = mTextureFileIndex;
     if (slot >= 0) {
-        cFEBoltFileManager_releaseFile(SSXApp->RealFE->mBoltFileManager, self->mCharID, slot);
-        self->mTextureFileIndex = -1;
+        cFEBoltFileManager_releaseFile(SSXApp->RealFE->mBoltFileManager, mCharID, slot);
+        mTextureFileIndex = -1;
     }
-    int id = self->mFrontTextureID;
+    int id = mFrontTextureID;
     if (id >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         ps2GraphicsMan->RemoveTexture(id);
     }
-    VPTR_OF(cListNode, self) = cFEState_vtbl;
-    cUIState__cUIState(self, flags);
 }
 #endif
 

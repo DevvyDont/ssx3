@@ -1,5 +1,6 @@
 #ifndef UI_UIPAIR_H
 #define UI_UIPAIR_H
+#pragma interface
 
 // cUIPair: a UI object that pairs a label ("entry") with a widget (record type 0x15; menus use it for option rows).
 // Size 0x80: cUIScreen_createObjectByStruct does operator new(0x80, "UIPair") + the cUIThing ctor cUIThing_cUIThing, stores
@@ -53,6 +54,7 @@ struct cUIPair : public cUIThing {
                                      //       [U] cUIPair_getWidget getWidget (lw), cUIPair_setWidget setWidget; the same methods
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cUIPair();   // g++'s own symbol _$_7cUIPair (the retail label renamed)
     void destroyPair() __asm__("cUIPair_destroyPair");
     void* cUIPair1() __asm__("cUIPair_cUIPair1");
     cUIThing* getEntry() __asm__("cUIPair_getEntry");
@@ -74,5 +76,6 @@ CHECK_OFFSET(cUIPair, unk_076, 0x076);
 CHECK_OFFSET(cUIPair, mpEntry, 0x078);
 CHECK_OFFSET(cUIPair, mpWidget, 0x07C);
 CHECK_SIZE(cUIPair, 0x80);
+__asm__("_vt$7cUIPair = cUIPair_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UI_UIPAIR_H */

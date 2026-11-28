@@ -224,30 +224,21 @@ void* cFloatRailNode::cFloatRailNode1(void* bucket, cBxReplayFrame* stream)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flexrailnode", cFloatRailNode__cFloatRailNode);
+INCLUDE_ASM("object/flexrailnode", _$_14cFloatRailNode);
 #ifdef SKIP_ASM
-extern char cFloatRailNode_vtbl[];
 void cMemMan_free(void*);
-extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self);
-extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 
 /**
- * Destroys a float rail.
- *
- * Reinstalls cFloatRailNode_vtbl, removes the rail from the space hash (cFlexRailNode_remSpaceHash), frees the node array (+0x70) and runs
- * the flex-rail destructor cFlexRailNode__cFlexRailNode with flags.
- *
- * @param flags  destructor flags
+ * Destroys a floating rail node: takes it out of the space hash (remSpaceHash) and frees its rail nodes (Nodes); the
+ * cFlexRailNode part does the rest and frees it when asked.
  */
-extern "C" void cFloatRailNode__cFloatRailNode(cFloatRailNode* self, int flags)
+cFloatRailNode::~cFloatRailNode()
 {
-    VPTR_OF(cObjNode, self) = (void**)cFloatRailNode_vtbl;
-    self->remSpaceHash();
-    void* railNodes = self->Nodes;
+    remSpaceHash();
+    void* railNodes = Nodes;
     if (railNodes != 0) {
         cMemMan_free(railNodes);
     }
-    cFlexRailNode__cFlexRailNode(self, flags);
 }
 #endif
 
@@ -832,30 +823,21 @@ void* cSpringRailNode::cSpringRailNode1(void* bucket, cBxReplayFrame* stream)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flexrailnode", cSpringRailNode__cSpringRailNode);
+INCLUDE_ASM("object/flexrailnode", _$_15cSpringRailNode);
 #ifdef SKIP_ASM
-extern char cSpringRailNode_vtbl[];
 void cMemMan_free(void*);
-extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self);
-extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 
 /**
- * Destroys a spring rail.
- *
- * Reinstalls cSpringRailNode_vtbl, removes the rail from the space hash (cFlexRailNode_remSpaceHash), frees the node array (+0x70) and runs
- * cFlexRailNode__cFlexRailNode with flags.
- *
- * @param flags  destructor flags
+ * Destroys a spring rail node: takes it out of the space hash (remSpaceHash) and frees its rail nodes (Nodes); the
+ * cFlexRailNode part does the rest and frees it when asked.
  */
-extern "C" void cSpringRailNode__cSpringRailNode(cSpringRailNode* self, int flags)
+cSpringRailNode::~cSpringRailNode()
 {
-    VPTR_OF(cObjNode, self) = (void**)cSpringRailNode_vtbl;
-    self->remSpaceHash();
-    void* railNodes = self->Nodes;
+    remSpaceHash();
+    void* railNodes = Nodes;
     if (railNodes != 0) {
         cMemMan_free(railNodes);
     }
-    cFlexRailNode__cFlexRailNode(self, flags);
 }
 #endif
 
@@ -1606,26 +1588,18 @@ extern "C" void* cFlagNode_cFlagNode(cFlagNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", cFlagNode__cFlagNode);
+INCLUDE_ASM("object/flexrailnode", _$_9cFlagNode);
 #ifdef SKIP_ASM
-extern char cFlagNode_vtbl[];
 extern "C" void* cObjectInterface_getFlagManager(void);
 extern "C" void cFlagManager_RemoveFlag(void* set, void* arg);
-extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 /**
- * Destroys a flag node and removes its object from the game's flag manager.
- *
- * Restores cFlagNode's vtable, asks the flag manager (cFlagManager_RemoveFlag) to remove the object at offset 0x18 from
- * the first active flag set holding it, then runs cInstanceNode__cInstanceNode().
- *
- * @param flags  g++ destructor flags, passed to cInstanceNode__cInstanceNode(); bit 0 set frees the object's memory
+ * Destroys a flag node: removes its flag from the flag manager (cFlagManager_RemoveFlag); the cInstanceNode part does
+ * the rest and frees it when asked.
  */
-extern "C" void cFlagNode__cFlagNode(cFlagNode* self, int flags)
+cFlagNode::~cFlagNode()
 {
-    VPTR_OF(cObjNode, self) = (void**)cFlagNode_vtbl;
-    cFlagManager_RemoveFlag(cObjectInterface_getFlagManager(), self->Instance);
-    cInstanceNode__cInstanceNode(self, flags);
+    cFlagManager_RemoveFlag(cObjectInterface_getFlagManager(), Instance);
 }
 #endif
 

@@ -3949,25 +3949,18 @@ extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self)
 #endif
 
 //100%
-INCLUDE_ASM("movie/movieplayer", cMCOverlayManager__cMCOverlayManager);
+INCLUDE_ASM("movie/movieplayer", _$_17cMCOverlayManager);
 #ifdef SKIP_ASM
 extern int cMCOverlayManager_mSaveInProgress;
-extern void* cMCOverlayManager_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys the memory-card overlay manager: restores its vtable, clears the save-in-progress flag, frees on
- * request.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys the memory-card overlay manager: clears the save-in-progress flag (cMCOverlayManager_mSaveInProgress) and
+ * frees the object when asked.
  */
-extern "C" void cMCOverlayManager__cMCOverlayManager(cMCOverlayManager* self, int flags)
+cMCOverlayManager::~cMCOverlayManager()
 {
-    VPTR_OF(cMCOverlayManager, self) = cMCOverlayManager_vtbl;
     cMCOverlayManager_mSaveInProgress = 0;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

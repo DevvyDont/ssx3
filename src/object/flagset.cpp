@@ -608,31 +608,23 @@ extern "C" cFlagManager* cFlagManager_cFlagManager(cFlagManager* self, void* buc
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", cFlagManager__cFlagManager);
+INCLUDE_ASM("object/flagset", _$_12cFlagManager);
 #ifdef SKIP_ASM
-extern "C" void cObjNode__cObjNode(void* self, int flags);
-extern void* cFlagManager_vtbl[];
-
-
-
 /**
- * Destroys the flag manager: destroys its 15 flag sets, then the cObjNode base.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys the flag manager: destroys its 15 flag sets, last to first, through each set's virtual destructor (slot 1,
+ * flags 0); the cObjNode part does the rest and frees it when asked.
  */
-extern "C" void cFlagManager__cFlagManager(cFlagManager* self, int flags)
+cFlagManager::~cFlagManager()
 {
-    VPTR_OF(cObjNode, self) = cFlagManager_vtbl;
     // The array destructor: each set's virtual destructor (slot 1), last to first.
-    if (&self->mFlagSets[0] != 0) {
-        cFlagSet* flagSet = &self->mFlagSets[15];
-        while (&self->mFlagSets[0] != flagSet) {
+    if (&mFlagSets[0] != 0) {
+        cFlagSet* flagSet = &mFlagSets[15];
+        while (&mFlagSets[0] != flagSet) {
             flagSet--;
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)flagSet->mVtbl;
             vt[1].fn(vthis(flagSet, vt[1]), 0);
         }
     }
-    cObjNode__cObjNode((self), flags);
 }
 #endif
 
@@ -1045,24 +1037,20 @@ extern "C" cFenceNode* cFenceNode_cFenceNode2_ctor(cFenceNode* self, int bucket,
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", cFenceNode__cFenceNode);
+INCLUDE_ASM("object/flagset", _$_10cFenceNode);
 #ifdef SKIP_ASM
 extern void* cFenceNode_vtbl[];
-extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 /**
- * Destroys a swinging fence node: releases its grid mesh (renderer slot 77), then the cInstanceNode base.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a fence node: deletes its grid mesh (GridMesh) through the graphics manager when it has one; the
+ * cInstanceNode part does the rest and frees it when asked.
  */
-extern "C" void cFenceNode__cFenceNode(cFenceNode* self, int flags)
+cFenceNode::~cFenceNode()
 {
-    VPTR_OF(cObjNode, self) = cFenceNode_vtbl;
-    cGridMesh* gridMesh = self->GridMesh;
+    cGridMesh* gridMesh = GridMesh;
     if (gridMesh != 0) {
         cGraphicsMan_TheGraphicsMan->DeleteGridMesh(gridMesh);
     }
-    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 
@@ -1730,7 +1718,7 @@ INCLUDE_ASM("object/flagset", cAnimNode__cAnimNode);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
-extern "C" void cMoveNode__cMoveNode(void* self, int flags);
+extern "C" void cMoveNode__cMoveNode(void* self, int flags) __asm__("_$_9cMoveNode");
 extern void* cAnimNode_vtbl[];
 
 /**

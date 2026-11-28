@@ -69,7 +69,7 @@ void cBucketMan::init(int n)
 INCLUDE_ASM("object/bucketman", cBucketMan_purge);
 #ifdef SKIP_ASM
 extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index);
-extern "C" void cObjNode__cObjNode(void* self, int flags);
+extern "C" void cObjNode__cObjNode(void* self, int flags) __asm__("_$_8cObjNode");
 void cMemMan_free(void*);
 
 /**
@@ -464,7 +464,6 @@ void cBucketMan::purgeBucket1(int index, int key)
     }
 }
 #endif
-
 
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_setsortflag);

@@ -1559,24 +1559,15 @@ extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan__cGraphicsMan);
+INCLUDE_ASM("render/ps2graphicsman", _$_12cGraphicsMan);
 #ifdef SKIP_ASM
-extern void* cGraphicsMan_vtbl[];
-void operator_delete(int* ptr);
-
 /**
- * Destroys the base graphics manager: stores cGraphicsMan_vtbl, clears cGraphicsMan_TheGraphicsMan and frees the
- * object when @p flags bit 0 is set.
- *
- * @param flags  destructor flags; bit 0 frees the object
+ * Destroys the base graphics manager: clears the instance pointer cGraphicsMan_TheGraphicsMan and frees the object when
+ * asked.
  */
-extern "C" void cGraphicsMan__cGraphicsMan(cGraphicsMan* self, int flags)
+cGraphicsMan::~cGraphicsMan()
 {
-    VPTR_OF(cGraphicsMan, self) = cGraphicsMan_vtbl;
     cGraphicsMan_TheGraphicsMan = 0;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 

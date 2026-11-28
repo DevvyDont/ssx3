@@ -1,5 +1,6 @@
 #ifndef OBJECT_FLOATINGNODE_H
 #define OBJECT_FLOATINGNODE_H
+#pragma interface
 
 // cFloatingNode: a cMoveNode that bobs and tilts on a spring (floating props on water: buoys, logs); its state is a
 // damped vertical spring (Z*) plus two tilt springs (O*/W*/T* about X and Y). EA's source:
@@ -55,9 +56,7 @@ struct cFloatingNode : public cMoveNode {
     void* cFloatingNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFloatingNode_cFloatingNode1");
     void initInfo() __asm__("cFloatingNode_initInfo__FP13cFloatingNode");
     void purgeInfo() __asm__("cFloatingNode_purgeInfo");
-    // retail's destructor cFloatingNode__cFloatingNode stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFloatingNode();
+    virtual ~cFloatingNode();   // g++'s own symbol _$_13cFloatingNode (the retail label renamed)
     virtual void updateOverlapSystem() __asm__("cFloatingNode_updateOverlapSystem");
     virtual void restoreOverlapSystem() __asm__("cFloatingNode_restoreOverlapSystem");
     virtual bool updateNode() __asm__("cFloatingNode_updateNode");
@@ -93,6 +92,7 @@ CHECK_OFFSET(cFloatingNode, TY, 0x70);
 CHECK_OFFSET(cFloatingNode, AnimMats, 0x74);
 CHECK_OFFSET(cFloatingNode, Info, 0x78);
 CHECK_SIZE(cFloatingNode, 0x7C);
+__asm__("_vt$13cFloatingNode = cFloatingNode_vtbl");   // g++'s name for the retail vtable
 
 // cFloatingNodeState (On Tour, 0x48): the spring state cFloatingNode carries at +0x2C (ZSpring .. TY above, written
 // out inline there). The tilt helpers take &self->ZSpring as one (views sFloatTilt_34F930 / sFloatTilt_F120:

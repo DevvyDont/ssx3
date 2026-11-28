@@ -1,5 +1,6 @@
 #ifndef UI_UILISTBOX_H
 #define UI_UILISTBOX_H
+#pragma interface
 
 // cUIListBox: a list of up to 32 text entries (ASCII, Unicode or string-table id, each with a user data pointer), one of
 // them current (record type 0x12). Size 0x31C: cUIScreen_createObjectByStruct does operator new(0x31C, "UIListBox"...)
@@ -8,7 +9,7 @@
 // 0x74) <- cListNode, written out flat below. EA source: d:/ssx/code/source/ui/uilistbox.cpp (preview assert path);
 // retail keeps its methods in ui/uiengine (0x399768-0x3993F8), ui/uilistbox (0x39A3F8-0x39A928) and its inline
 // accessors in ui/uivector (0x3A5658-0x3A57B8).
-// Methods: vtable cUIListBox_vtbl slots 0 ~cUIListBox (cUIListBox__cUIListBox), 9 setUIData (cUIListBox_setUIData), 14 onInput
+// Methods: vtable cUIListBox_vtbl slots 0 ~cUIListBox (_$_10cUIListBox), 9 setUIData (cUIListBox_setUIData), 14 onInput
 // (cUIListBox_onInput), 15 updateLocale (cUIListBox_updateLocale), 16 render2D (cUIListBox_render2D), 21 getType (cUIListBox_getType),
 // 22 setShadow (cUIListBox_setShadow), 23 setUseStaticColour (cUIListBox_setUseStaticColour); cUIListBox_addEntryByAsciiString,
 // cUIListBox_addEntryByUnicodeString, cUIListBox_addEntryByStringID, cUIListBox_deleteAllEntries (clear; the dtor calls it),
@@ -95,6 +96,7 @@ struct cUIListBox : public cUIThing {
     char unk_31A[0x2];               // 0x31A padding
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cUIListBox();   // g++'s own symbol _$_10cUIListBox (the retail label renamed)
     int getFont() __asm__("cUIListBox_getFont");
     void setUnicodePrivate(unsigned char idx, unsigned short* str) __asm__("cUIListBox_setUnicodePrivate");
     unsigned char addEntryByAsciiString(const char* text, int data) __asm__("cUIListBox_addEntryByAsciiString");
@@ -130,5 +132,6 @@ CHECK_OFFSET(cUIListBox, mNumEntries, 0x318);
 CHECK_OFFSET(cUIListBox, mCurrentEntry, 0x319);
 CHECK_OFFSET(cUIListBox, unk_31A, 0x31A);
 CHECK_SIZE(cUIListBox, 0x31C);
+__asm__("_vt$10cUIListBox = cUIListBox_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UI_UILISTBOX_H */

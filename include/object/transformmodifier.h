@@ -1,5 +1,6 @@
 #ifndef OBJECT_TRANSFORMMODIFIER_H
 #define OBJECT_TRANSFORMMODIFIER_H
+#pragma interface
 
 // cTransformModifier: the abstract base of every root-transform modifier a cMoveNode can own (tModifierBlock::
 // RootTransform): cSplineModifier, cMultiSplineModifier, cPositionModifier (-> cParentModifier), cMagnetModifier,
@@ -14,6 +15,7 @@
 // railmodifier.cpp 0x360B00..0x360C08; slot order = On Tour's declaration order).
 
 #include "layout.h"
+#include "bx/memman.h"
 
 struct tCollideInfo;
 struct tIntersectInfo;
@@ -36,7 +38,9 @@ struct cTransformModifier {
     // 0x00: the vptr. [R] cTransformModifier__cTransformModifier (dtor) stores cTransformModifier_vtbl; derived ctors
     // store their own. Slots [R] cTransformModifier_vtbl (27; names from its entries), types [O] On Tour's class
     // cTransformModifier (same order; its second getRootTransform overload is retail's getRootTransform1):
-    virtual ~cTransformModifier();                                                  // 1
+    // inline: every derived destructor inlines it (retail's out-of-line copy cTransformModifier__cTransformModifier
+    // stays a C function)
+    virtual ~cTransformModifier() {}                                                // 1
     virtual void update()
         __asm__("cTransformModifier_update__FPv");                                                          // 2
     virtual void updateRootTransform()
@@ -92,5 +96,6 @@ struct cTransformModifier {
 };
 
 CHECK_SIZE(cTransformModifier, 0x4);
+__asm__("_vt$18cTransformModifier = cTransformModifier_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_TRANSFORMMODIFIER_H */

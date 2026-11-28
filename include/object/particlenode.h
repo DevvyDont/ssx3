@@ -1,5 +1,6 @@
 #ifndef OBJECT_PARTICLENODE_H
 #define OBJECT_PARTICLENODE_H
+#pragma interface
 
 // cParticleNode: the scene node of a placed instance that only carries particle effects. It is a cMoveNode that adds
 // no members and deletes itself once its last effect modifier has gone (update). Size 0x2C: cMemMan_alloc(0x2C,
@@ -35,6 +36,7 @@ struct cParticleNode : public cMoveNode {
     //       head) is empty
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cParticleNode();   // g++'s own symbol _$_13cParticleNode (the retail label renamed)
     void* cParticleNode1(void* bucket, void* instRecord, void* particle, void* oldNode)
         __asm__("cParticleNode_cParticleNode1");
 
@@ -46,5 +48,6 @@ struct cParticleNode : public cMoveNode {
 };
 
 CHECK_SIZE(cParticleNode, 0x2C);
+__asm__("_vt$13cParticleNode = cParticleNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_PARTICLENODE_H */

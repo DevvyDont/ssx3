@@ -1,5 +1,6 @@
 #ifndef FE_FECUSTOM_H
 #define FE_FECUSTOM_H
+#pragma interface
 
 // cFECustom: the front end's custom interface to the UI engine (the engine's mpCustom, *(cUIEngine*)): builds the next
 // / previous FE state for a state id and choice (getNextState / getPrevState), answers the "whitefade" screen event,
@@ -25,6 +26,7 @@
 
 #include "layout.h"
 #include "ui/uiengine.h"
+#include "bx/memman.h"
 
 struct cFEStateTransition;
 
@@ -48,9 +50,7 @@ struct cFECustom : public cUICustomInterface {
     unsigned char getPlayerCtrlMask(int index) __asm__("cFECustom_getPlayerCtrlMask");
     void * cFECustom1() __asm__("cFECustom_cFECustom1");
     void setProfileLaunchScreen(int launchScreen) __asm__("cFECustom_setProfileLaunchScreen");
-    // retail's destructor cFECustom__cFECustom stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFECustom();
+    virtual ~cFECustom();   // g++'s own symbol _$_9cFECustom (the retail label renamed)
     virtual bool onScreenEvent(cUIScreen* screen, unsigned int hash) __asm__("cFECustom_onScreenEvent");
 };
 
@@ -59,5 +59,6 @@ CHECK_OFFSET(cFECustom, unk_00A, 0x00A);
 CHECK_OFFSET(cFECustom, mProfileLaunchScreen, 0x00C);
 CHECK_OFFSET(cFECustom, mpTransitionState, 0x010);
 CHECK_SIZE(cFECustom, 0x14);
+__asm__("_vt$9cFECustom = cFECustom_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FECUSTOM_H */

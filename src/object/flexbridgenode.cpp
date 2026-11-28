@@ -1199,34 +1199,26 @@ void* cFlexRailNode::cFlexRailNode1(void* bucket, cBxReplayFrame* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", cFlexRailNode__cFlexRailNode);
+INCLUDE_ASM("object/flexbridgenode", _$_13cFlexRailNode);
 #ifdef SKIP_ASM
 
 void cMemMan_free(void*);
-extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
-extern char cFlexRailNode_vtbl[];
 
 /**
- * Destroys the flex-rail base of a float or spring rail.
- *
- * Reinstalls cFlexRailNode_vtbl, frees the segment matrices (+0x50), destroys the Tube object (+0x58, its vtable entry 1 with
- * flags 3) and runs cInstanceNode__cInstanceNode with flags.
- *
- * @param flags  destructor flags passed on to cInstanceNode__cInstanceNode
+ * Destroys a flexible rail node: frees its matrices (Mats) and deletes its tube (Tube, through its virtual destructor)
+ * when it has them; the cInstanceNode part does the rest and frees it when asked.
  */
-extern "C" void cFlexRailNode__cFlexRailNode(cFlexRailNode* self, int flags)
+cFlexRailNode::~cFlexRailNode()
 {
-    VPTR_OF(cObjNode, self) = (void**)cFlexRailNode_vtbl;
-    void* buf = self->Mats;
+    void* buf = Mats;
     if (buf != 0) {
         cMemMan_free(buf);
     }
-    void* obj = self->Tube;
+    void* obj = Tube;
     if (obj != 0) {
         sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)obj;
         vt[1].fn(vthis(obj, vt[1]), 3);
     }
-    cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
 

@@ -1,5 +1,6 @@
 #ifndef FE_FESTATEPROFILE_H
 #define FE_FESTATEPROFILE_H
+#pragma interface
 
 // cFEStateProfileLoad: the front end's profile load / save / create screen ("93profile_load": six profile slot rows,
 // the card panel, the name keyboard, save / delete), a cFEMemCard with mType 0. What it is opened for is the class
@@ -33,6 +34,7 @@
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 #include "fe/fememcard.h"
 #include "fe/ovstate.h"
 
@@ -105,9 +107,7 @@ struct cFEStateProfileLoad : public cFEMemCard {
     void initLoadScreen() __asm__("cFEStateProfileLoad_initLoadScreen");
     void initSaveScreen() __asm__("cFEStateProfileLoad_initSaveScreen");
     void setQuitPath(int action) __asm__("cFEStateProfileLoad_setQuitPath");
-    // retail's destructor cFEStateProfileLoad__cFEStateProfileLoad stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateProfileLoad();
+    virtual ~cFEStateProfileLoad();   // g++'s own symbol _$_19cFEStateProfileLoad (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateProfileLoad_onCreateScreen");
     virtual void hideActionButtons(bool on) __asm__("cFEStateProfileLoad_hideActionButtons");
     virtual void displayStatus() __asm__("cFEStateProfileLoad_displayStatus");
@@ -128,6 +128,7 @@ CHECK_OFFSET(cFEStateProfileLoad, mTitle, 0x238);
 CHECK_OFFSET(cFEStateProfileLoad, unk_27A, 0x27A);
 CHECK_OFFSET(cFEStateProfileLoad, mTypeOfQuit, 0x27C);
 CHECK_SIZE(cFEStateProfileLoad, 0x280);
+__asm__("_vt$19cFEStateProfileLoad = cFEStateProfileLoad_vtbl");   // g++'s name for the retail vtable
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -144,10 +145,11 @@ CHECK_SIZE(cFEStateProfileLoad, 0x280);
 // runs cUIState_cUIState(this, pEngine) (its C definition declares only this), stores cFEStateProfileSelect_vtbl
 // (0x0046C158, 24 slots: 1 dtor, 4 onCreateScreen, 6 cFEState_onGainFocus, 11 cFEState_onLoseFocus, 19 onWidgetEvent)
 // and mHashName 8; the dtor stores cFEState_vtbl and runs cUIState__cUIState.
-// Derives from cUIState (ui/uistate.h). Evidence tags: [R] retail's ctors / dtor; [U] how retail code uses the field;
+// Derives from cFEState (fe/festate.h). Evidence tags: [R] retail's ctors / dtor; [U] how retail code uses the field;
 // [O] SSX On Tour's DWARF (class cFEStateProfileSelect, cUIState): names, types and order.
 
-struct cFEStateProfileSelect : public cUIState {
+struct cFEStateProfileSelect : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateProfileSelect_vtbl (ctors), cFEState_vtbl (dtor)
     // cFEStateProfileSelect's notes on cUIState's fields:
@@ -157,13 +159,12 @@ struct cFEStateProfileSelect : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateProfileSelect1() __asm__("cFEStateProfileSelect_cFEStateProfileSelect1");
-    // retail's destructor cFEStateProfileSelect__cFEStateProfileSelect stays a C function (g++ 2.95 takes no asm label
-    // on a destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFEStateProfileSelect();
+    virtual ~cFEStateProfileSelect();   // g++'s own symbol _$_21cFEStateProfileSelect (the retail label renamed)
     virtual void onCreateScreen() __asm__("cFEStateProfileSelect_onCreateScreen");
     virtual void onWidgetEvent(cUIThing* menu, unsigned int msg) __asm__("cFEStateProfileSelect_onWidgetEvent");
 };
 
 CHECK_SIZE(cFEStateProfileSelect, 0x48);
+__asm__("_vt$21cFEStateProfileSelect = cFEStateProfileSelect_vtbl");   // g++'s name for the retail vtable
 
 #endif /* FE_FESTATEPROFILE_H */

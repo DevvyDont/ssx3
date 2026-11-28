@@ -1,5 +1,6 @@
 #ifndef OBJECT_MOVENODE_H
 #define OBJECT_MOVENODE_H
+#pragma interface
 
 // cMoveNode: the scene node of a placed instance that can move or carry modifiers (tModifierBlock: root-transform,
 // UV-scroll, tex-flip, physics, effect and rail modifiers); base of cFloatingNode, cAnimNode, cParticleNode,
@@ -107,6 +108,7 @@ struct cMoveNode : public cInstanceNode {
     int TransferHack;               // 0x28 [O] bool (4 bytes); [U] render tests it (lw); [R] replay ctor
 
     // Methods bound to their retail symbols by asm labels.
+    virtual ~cMoveNode();   // g++'s own symbol _$_9cMoveNode (the retail label renamed)
     void* cMoveNode1(void* bucket, int type, void* instRecord) __asm__("cMoveNode_cMoveNode1");
     void addModifierBlock() __asm__("cMoveNode_addModifierBlock__FP9cMoveNode");
     void addTransformModifier(cTransformModifier* mod) __asm__("cMoveNode_addTransformModifier");
@@ -179,5 +181,6 @@ CHECK_OFFSET(cMoveNode, Debounce, 0x20);
 CHECK_OFFSET(cMoveNode, Fade, 0x24);
 CHECK_OFFSET(cMoveNode, TransferHack, 0x28);
 CHECK_SIZE(cMoveNode, 0x2C);
+__asm__("_vt$9cMoveNode = cMoveNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_MOVENODE_H */

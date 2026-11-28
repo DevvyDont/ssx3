@@ -1,5 +1,6 @@
 #ifndef FE_FESTATESELECTMP_H
 #define FE_FESTATESELECTMP_H
+#pragma interface
 
 // cFEStateSelectMultiplayerMode: the front end's "select multiplayer mode" menu ("86sel_multi", state id 22): two
 // entries (misc data 0 / 1) whose pick asks the custom interface (cFECustom, the engine's first word) for the next /
@@ -16,19 +17,21 @@
 // 1 dtor, 4 onCreateScreen, 6 cFEState_onGainFocus, 11 cFEState_onLoseFocus, 18 onWidgetCreate, 19 onWidgetEvent); the
 // dtor stores cFEState_vtbl and runs cUIState__cUIState.
 //
-// Derives from cUIState (ui/uistate.h); its own members at their retail offsets. Evidence tags: [R] retail's
+// Derives from cFEState (fe/festate.h); its own members at their retail offsets. Evidence tags: [R] retail's
 // constructors / destructor / allocation; [U] how retail code uses the field (the C bodies
 // named above and the asm); [O] SSX On Tour's DWARF (builds/x/ontour_kor/dwarf/types.h): names, types and order.
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
 struct cUIState;
 struct cUIScreen;
 
-struct cFEStateSelectMultiplayerMode : public cUIState {
+struct cFEStateSelectMultiplayerMode : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48): the vptr at 0x008:
     //   [R] cFEStateSelectMultiplayerMode_vtbl (ctors), cFEState_vtbl (dtor)
     // cFEStateSelectMultiplayerMode's notes on cUIState's fields:
@@ -38,8 +41,7 @@ struct cFEStateSelectMultiplayerMode : public cUIState {
 
     // Methods bound to their retail symbols by asm labels.
     void* cFEStateSelectMultiplayerMode1() __asm__("cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1");
-    // retail's destructor cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode stays a C function (g++ 2.95
-    // takes no asm label on a destructor); declared first, it keeps the vtable out of the units defining the overrides
+    // g++'s own symbol _$_29cFEStateSelectMultiplayerMode (the retail label renamed)
     virtual ~cFEStateSelectMultiplayerMode();
     virtual void onCreateScreen() __asm__("cFEStateSelectMultiplayerMode_onCreateScreen");
     virtual void onWidgetCreate(cUIThing* item) __asm__("cFEStateSelectMultiplayerMode_onWidgetCreate");
@@ -47,5 +49,7 @@ struct cFEStateSelectMultiplayerMode : public cUIState {
 };
 
 CHECK_SIZE(cFEStateSelectMultiplayerMode, 0x48);
+// g++'s name for the retail vtable
+__asm__("_vt$29cFEStateSelectMultiplayerMode = cFEStateSelectMultiplayerMode_vtbl");
 
 #endif /* FE_FESTATESELECTMP_H */

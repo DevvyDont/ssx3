@@ -1,5 +1,6 @@
 #ifndef OBJECT_RAILMANNODE_H
 #define OBJECT_RAILMANNODE_H
+#pragma interface
 
 // cRailManNode: the rail manager scene node - one live instance (static ActiveNode = cRailManNode_ActiveNode) keeping up to 128
 // switched-off rails: the world script's RailFunc calls addRail(rid, add) (cRailManNode_addRail), which creates the node on
@@ -65,13 +66,12 @@ struct cRailManNode : public cSortObjNode {
     void* cRailManNode1(void* bucket) __asm__("cRailManNode_cRailManNode1");
     void disableRail(int idx) __asm__("cRailManNode_disableRail");
     void enableRail(int idx) __asm__("cRailManNode_enableRail");
-    // retail's destructor cRailManNode__cRailManNode stays a C function (g++ 2.95 takes no asm label on a destructor);
-    // declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cRailManNode();
+    virtual ~cRailManNode();   // g++'s own symbol _$_12cRailManNode (the retail label renamed)
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cRailManNode_writeToReplayFrame");
 };
 
 CHECK_OFFSET(cRailManNode, RailInfo, 0x018);
 CHECK_SIZE(cRailManNode, 0x218);
+__asm__("_vt$12cRailManNode = cRailManNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_RAILMANNODE_H */

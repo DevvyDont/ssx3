@@ -1,5 +1,6 @@
 #ifndef OBJECT_FLEXBRIDGENODE_H
 #define OBJECT_FLEXBRIDGENODE_H
+#pragma interface
 
 // cFlexBridgeNode: the scene node of a flexible rope bridge: a row of spring nodes (cSpring Mesh, one tSpringNode per
 // plank column) that riders push down and twist (applyForce), drawn as a Width x 2 grid mesh (cGridMesh: two rows of
@@ -176,9 +177,7 @@ struct cFlexBridgeNode : public cInstanceNode {
     // Methods bound to their retail symbols by asm labels.
     void* cFlexBridgeNode1(void* bucket, cBxReplayFrame* stream) __asm__("cFlexBridgeNode_cFlexBridgeNode1");
     void updateGrid() __asm__("cFlexBridgeNode_updateGrid");
-    // retail's destructor cFlexBridgeNode__cFlexBridgeNode stays a C function (g++ 2.95 takes no asm label on a
-    // destructor); declared first, it keeps the vtable out of the units defining the overrides
-    virtual ~cFlexBridgeNode();
+    virtual ~cFlexBridgeNode();   // g++'s own symbol _$_15cFlexBridgeNode (the retail label renamed)
     virtual void update() __asm__("cFlexBridgeNode_update");
     virtual void render() __asm__("cFlexBridgeNode_render");
     virtual void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cFlexBridgeNode_writeToReplayFrame");
@@ -206,5 +205,6 @@ CHECK_OFFSET(cFlexBridgeNode, Faces, 0x084);
 CHECK_OFFSET(cFlexBridgeNode, unk_088, 0x088);
 CHECK_OFFSET(cFlexBridgeNode, BoundBox, 0x090);
 CHECK_SIZE(cFlexBridgeNode, 0x0B0);
+__asm__("_vt$15cFlexBridgeNode = cFlexBridgeNode_vtbl");   // g++'s name for the retail vtable
 
 #endif /* OBJECT_FLEXBRIDGENODE_H */

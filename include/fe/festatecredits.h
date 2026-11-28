@@ -1,16 +1,18 @@
 #ifndef FE_FESTATECREDITS_H
 #define FE_FESTATECREDITS_H
+#pragma interface
 
-// cFEStateCredits: the credits screen (a cUIState): a scrolling text widget (mpTextScroll) with the Dolby icon, moved
+// cFEStateCredits: the credits screen (a cFEState): a scrolling text widget (mpTextScroll) with the Dolby icon, moved
 // by mPixelDelta per frame. Methods in fe/festatecredits: constructors, onCreateScreen, onGainFocus, onUpdate,
 // onRender2D, onInputBegin.
-// Size 0x68 [R] (the retail allocation; On Tour's is the same). Derives from cUIState (ui/uistate.h); member names,
+// Size 0x68 [R] (the retail allocation; On Tour's is the same). Derives from cFEState (fe/festate.h); member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
 // falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
 // the comment).
 
 #include "layout.h"
 #include "ui/uistate.h"
+#include "fe/festate.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -20,7 +22,8 @@ struct cUIState;
 struct cUITextScroll;
 struct cUIThing;
 
-struct cFEStateCredits : public cUIState {
+struct cFEStateCredits : public cFEState {
+    // cFEState (fe/festate.h, no data of its own; [R] the destructor stores cFEState_vtbl), on top of
     // cUIState (ui/uistate.h, 0x48)
     // --- cFEStateCredits
     cUIThing* mpWidget;             // 0x048 [O]
@@ -43,6 +46,7 @@ struct cFEStateCredits : public cUIState {
     virtual bool onInputBegin(cUIInput* pInput) __asm__("cFEStateCredits_onInputBegin");
     virtual int onWidgetMenu(cUIMenu* pMenu, unsigned int Event, unsigned int) __asm__("cFEStateCredits_onWidgetMenu");
     virtual void onWidgetEvent(cUIThing* item, unsigned int msg) __asm__("cFEStateCredits_onWidgetEvent");
+    virtual ~cFEStateCredits();   // g++'s own symbol _$_15cFEStateCredits (the retail label renamed)
 };
 
 CHECK_OFFSET(cFEStateCredits, mpWidget, 0x048);
@@ -54,5 +58,6 @@ CHECK_OFFSET(cFEStateCredits, mpTextScroll, 0x05C);
 CHECK_OFFSET(cFEStateCredits, mPixelOffset, 0x060);
 CHECK_OFFSET(cFEStateCredits, mPixelDelta, 0x064);
 CHECK_SIZE(cFEStateCredits, 0x68);
+__asm__("_vt$15cFEStateCredits = cFEStateCredits_vtbl");   // g++'s name for the retail vtable
 
 #endif

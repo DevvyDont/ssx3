@@ -2116,24 +2116,14 @@ cBoundedAlgorithm::cBoundedAlgorithm()
 #endif
 
 //99.5%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm__cBoundedAlgorithm__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_17cBoundedAlgorithm);
 #ifdef SKIP_ASM
-extern void* cBoundedAlgorithm_vtbl[];
-extern "C" void* cTriggerAlgorithm__cTriggerAlgorithm(void*) __asm__("_$_17cTriggerAlgorithm");
-
 /**
- * Destroys a bounded trigger camera: re-installs its vtable cBoundedAlgorithm_vtbl and chains to the trigger algorithm destructor.
- *
- * Stores cBoundedAlgorithm_vtbl at +0x10 and calls cTriggerAlgorithm__cTriggerAlgorithm, which puts back the base vtable and frees the object when bit 0
- * of the g++ destructor flags (passed through in $a1, not declared here) is set.
- *
- * @return cTriggerAlgorithm__cTriggerAlgorithm's result (the destructor returns nothing)
+ * Destroys a bounded trigger camera (it owns nothing; the action it is bound to belongs to the trigger); the trigger
+ * algorithm part frees it when asked.
  */
-void* cBoundedAlgorithm__cBoundedAlgorithm(void* vself)
+cBoundedAlgorithm::~cBoundedAlgorithm()
 {
-    cBoundedAlgorithm* self = (cBoundedAlgorithm*)vself;
-    VPTR_OF(cCameraAlgorithm, self) = (void**)cBoundedAlgorithm_vtbl;
-    return cTriggerAlgorithm__cTriggerAlgorithm(self);
 }
 #endif
 
@@ -3245,7 +3235,6 @@ extern "C" void cScriptAlgorithm__cScriptAlgorithm(cScriptAlgorithm* self, int f
 }
 #endif
 
-
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptAlgorithm_getTargetPos);
 #ifdef SKIP_ASM
@@ -3753,7 +3742,6 @@ cDEFAULT_2ChaseAlgorithm::cDEFAULT_2ChaseAlgorithm()
 }
 #endif
 
-
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cDEFAULT_2ChaseAlgorithm);
 #ifdef SKIP_ASM
@@ -3902,7 +3890,6 @@ cDEFAULT_3ChaseAlgorithm::cDEFAULT_3ChaseAlgorithm()
 }
 #endif
 
-
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cDEFAULT_3ChaseAlgorithm);
 #ifdef SKIP_ASM
@@ -4048,7 +4035,6 @@ cDEFAULT_4ChaseAlgorithm::cDEFAULT_4ChaseAlgorithm()
     AlgorithmType = CAMERA_ALGORITHM_CHASE_DEFAULT_4;
 }
 #endif
-
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cDEFAULT_4ChaseAlgorithm);
@@ -4255,7 +4241,6 @@ cDirectionChaseAlgorithm::cDirectionChaseAlgorithm(int n)
     Angle = (float)n * 0.7853981852531433f;
 }
 #endif
-
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cDirectionChaseAlgorithm);
@@ -4528,7 +4513,6 @@ cSPOKEChaseAlgorithm::cSPOKEChaseAlgorithm()
     AlgorithmType = CAMERA_ALGORITHM_CHASE_SPOKE;
 }
 #endif
-
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_20cSPOKEChaseAlgorithm);
@@ -5102,7 +5086,6 @@ cSUPERPIPEChaseAlgorithm::cSUPERPIPEChaseAlgorithm(t4Vector* point1, t4Vector* p
 }
 #endif
 
-
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_24cSUPERPIPEChaseAlgorithm);
 #ifdef SKIP_ASM
@@ -5646,7 +5629,6 @@ cPOST_RACE_1ChaseAlgorithm::cPOST_RACE_1ChaseAlgorithm(cRiderCameraTarget* src)
         *(&StartDir) = t4vect_XAxis_v1789E8;
 }
 #endif
-
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", _$_26cPOST_RACE_1ChaseAlgorithm);
