@@ -564,18 +564,13 @@ extern "C" void __sti__all_in_one_ui_cpp_impl(int initialize, int priority)
 //100%
 INCLUDE_ASM("ui/uivector", cUIAnimation_cUIAnimation1);
 #ifdef SKIP_ASM
-extern void* cUIAnimation_vtbl[];
 /**
- * Constructs a cUIAnimation with no data: stores cUIAnimation_vtbl in its vptr (+0x10) and returns it.
+ * Constructs a cUIAnimation with no data: only its vptr is set.
  *
- * Unlike cUIAnimation_cUIAnimation it sets no animation header or channels. Nothing in retail calls it.
- *
- * @return the object
+ * Unlike cUIAnimation(tUIAnimation*) it sets no animation header or channels. Nothing in retail calls it.
  */
-void* cUIAnimation::cUIAnimation1()
+cUIAnimation::cUIAnimation()
 {
-    mVtbl = cUIAnimation_vtbl;
-    return ((void*)this);
 }
 #endif
 //100%
@@ -1436,18 +1431,17 @@ INCLUDE_ASM("ui/uivector", cListOpOnInput_onListNode);
 /**
  * Offers the operator's controller input to one list node.
  *
- * Calls the node's onInput (vtable slot 15) with the input kept at offset 4 of the operator.
+ * Calls the node's onInput with the operator's input (mpInput).
  *
- * @param obj  list node (a UI thing) to try
- * @return @p obj when it handled the input, 0 otherwise
+ * @param pNode  list node (a UI thing) to try
+ * @return @p pNode when it handled the input, 0 otherwise
  */
-extern "C" void* cListOpOnInput_onListNode(cList* self, cListNode* obj)
+void* cListOpOnInput::onListNode(cListNode* pNode)
 {
-    sVEntry<int(void*, void*)>* vt = (sVEntry<int(void*, void*)>*)VPTR_OF(cListNode, obj);
-    if (vt[15].fn(vthis(obj, vt[15]), self->mStart.mpNext) == 0) {
+    if (!static_cast<cUIThing*>(pNode)->onInput(mpInput)) {
         return 0;
     }
-    return ((void*)obj);
+    return pNode;
 }
 #endif
 
@@ -1476,30 +1470,17 @@ extern "C" void cListOpSetFocus__cListOpSetFocus(cListOpSetFocus* self, int flag
 //100%
 INCLUDE_ASM("ui/uivector", cListOpSetFocus_onListNode);
 #ifdef SKIP_ASM
-class cListOpSetFocus_onListNode_cVirt {
-public:
-    char pad[0x8];
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void v03();
-    virtual void v04();
-    virtual void v05();
-    virtual void v06();
-    virtual void setFocus(int);
-};
-
 /**
  * List operator callback that sets the focus state of one UI node.
  *
- * Calls the node's setFocus (slot 7) with the operator's value (+0x4).
+ * Calls the node's setFocus with the operator's state (mbState).
  *
- * @param obj  the node visited
+ * @param pNode  the node visited (a UI thing)
  * @return 0, so the traversal continues to every node
  */
-extern "C" int cListOpSetFocus_onListNode(cListOpSetFocus* self, cListOpSetFocus_onListNode_cVirt* obj)
+void* cListOpSetFocus::onListNode(cListNode* pNode)
 {
-    obj->setFocus(self->mbState);
+    static_cast<cUIThing*>(pNode)->setFocus(mbState);
     return 0;
 }
 #endif
@@ -2010,57 +1991,38 @@ extern "C" void cUIGroup_addToEnd(int group) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIGroup_traverseFlat);
 #ifdef SKIP_ASM
-class cUIGroup_traverseFlat_cVirt {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void* onListNode(void*);
-};
-
 /**
  * Applies a list operator to the group itself, without visiting its children.
  *
- * Returns the operator's onListNode (vtable slot 2 of the operator, whose vtable pointer is its first word) for
- * the group, the same as cListNode's own traverseFlat.
+ * Returns the operator's onListNode for the group, the same as cListNode's own traverseFlat.
  *
  * @param pOperator  the list operator (On Tour: pOperator)
  * @return the operator's onListNode result
  */
 void* cUIGroup::traverseFlat(cListOperator* pOperator)
 {
-    cUIGroup_traverseFlat_cVirt* obj = (cUIGroup_traverseFlat_cVirt*)pOperator;
-    return obj->onListNode(this);
+    return pOperator->onListNode(this);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ui/uivector", cUIGroup_traverseRecurse);
 #ifdef SKIP_ASM
-class cUIGroup_traverseRecurse_cFunctor {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual int onListNode(void*);
-};
-
-extern "C" void* cList_traverseRecurse(void* list, cUIGroup_traverseRecurse_cFunctor* fn);
-
 /**
  * Runs a list operator on a UI group and then, recursively, on its children.
  *
- * Stops at the group itself when the operator's callback (slot 2) returns nonzero; otherwise traverses the
- * child list (+0x74) with cList_traverseRecurse().
+ * Stops at the group itself when the operator's onListNode returns nonzero; otherwise traverses the child list
+ * (mList) with cList::traverseRecurse.
  *
  * @param pOperator  the list operator (On Tour cListOperator*)
  * @return the node the operator stopped at, or 0 if none
  */
 void* cUIGroup::traverseRecurse(cListOperator* pOperator)
 {
-    cUIGroup_traverseRecurse_cFunctor* fn = (cUIGroup_traverseRecurse_cFunctor*)pOperator;
-    if (fn->onListNode(this) != 0) {
+    if (pOperator->onListNode(this) != 0) {
         return ((void*)this);
     }
-    return cList_traverseRecurse((char*)&mList, fn);
+    return mList.traverseRecurse(pOperator);
 }
 #endif
 
@@ -3468,7 +3430,7 @@ void* cUIScreen::cUIScreen1()
 {
     mpNext = (cListNode*)this;
     mpPrev = (cListNode*)this;
-    mVtbl = cUIScreen_vtbl;
+    VPTR_OF(cListNode, this) = cUIScreen_vtbl;
     tAttrScreen_tAttrScreen(&mAttrScreen);
     cList_cList(&mThreads);
     cUIThing_cUIThing(&mRootGroup, 0, 0);
@@ -3502,7 +3464,7 @@ extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, cUIState* pState)
     self->mpPrev = (cListNode*)self;
     self->mpBuffer = 0;
     self->mpScreenHeader = 0;
-    self->mVtbl = cUIScreen_vtbl;
+    VPTR_OF(cListNode, self) = cUIScreen_vtbl;
     tAttrScreen_tAttrScreen(&self->mAttrScreen);
     cList_cList(&self->mThreads);
     self->mpKeyframeBlock = 0;

@@ -1,5 +1,6 @@
 #ifndef BX_APPMAN_H
 #define BX_APPMAN_H
+#pragma interface
 
 // cAppMan: EA's application manager (bx/appman, bx/execman): the active and loading app modules, the execution manager,
 // the frame timer (Hz, period, tick, game rate, frame rate and its damping, the 30 fps lock) and the load timer and
@@ -18,13 +19,21 @@ struct cExecutionMan;
 // FE, ...). Size 4: [O] On Tour class cAppModule (size 0x4, no data members: load / purge / loseFocus / gainFocus /
 // update / render are virtual); [R] vtable cAppModule_vtbl (0x0046D970, 7 slots, slot 1 cAppModule__cAppModule) is
 // stored at 0x0 by the dtor and by every module dtor chaining to the base (builds/x/vtables/vtables.tsv storers).
+// The vptr is the class's only word (0x0). The destructor is inline: every module's destructor inlines it (each stores
+// cAppModule_vtbl itself); its out-of-line copy cAppModule__cAppModule (slot 1, main/all_in_one_main) is a C
+// function. The virtuals are in retail's slot order (On Tour's declaration order).
 struct cAppModule {
-    void** mVtbl;                   // 0x0 [O] the vptr (the class's only word); [R] cAppModule__cAppModule stores
-                                    //      cAppModule_vtbl here
+    virtual ~cAppModule() {}                                        // 1 inline (copy: cAppModule__cAppModule)
+    virtual void load() = 0;                                        // 2
+    virtual void purge() __asm__("cAppModule_purge");               // 3
+    virtual bool loseFocus() = 0;                                   // 4
+    virtual void gainFocus() __asm__("cAppModule_gainFocus");       // 5
+    virtual void update() = 0;                                      // 6
+    virtual bool render() = 0;                                      // 7
 };
 
-CHECK_OFFSET(cAppModule, mVtbl, 0x0);
 CHECK_SIZE(cAppModule, 0x4);
+__asm__("_vt$10cAppModule = cAppModule_vtbl");   // g++'s name for the retail vtable
 
 struct cAppMan {
     cAppModule* ActiveModule;       // 0x000 [O]

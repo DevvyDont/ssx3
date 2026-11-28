@@ -1,5 +1,6 @@
 #ifndef UI_UITHING_H
 #define UI_UITHING_H
+#pragma interface
 
 // cUIThing: the base of every object on a UI screen (cUIGroup, cUIText, cUIIcon, cUIMenu, cUIPair, cUIListBox,
 // cUIProgress, cUIScroll, cUISlider, cUITextScroll, cUIVector). cUIScreen_createObjectByStruct builds each kind by
@@ -130,7 +131,7 @@ struct cUIThing : public cListNode {
     // parameters are words: cUIThing_setActive(cUIThing*, int)), pointers where On Tour passes references. Slot 22 is
     // getType: pure here ([R] cUIThing_vtbl[22] = __pure_virtual; On Tour's DWARF drops pure entries), and every
     // subclass vtable fills it with its own <class>_getType ([O] each subclass declares virtual char getType()).
-    virtual ~cUIThing();          // 1  g++'s own symbol _$_8cUIThing (the retail label renamed; still a C function)
+    virtual ~cUIThing();          // 1  g++'s own symbol _$_8cUIThing (the retail label renamed)
     virtual void setActive(int a)
         __asm__("cUIThing_setActive");                                        // 4  cUIThing_setActive
     virtual void setCached(int a)
@@ -227,5 +228,6 @@ CHECK_OFFSET(cUIThing, mpScreen, 0x05C);
 CHECK_OFFSET(cUIThing, mSize, 0x060);
 CHECK_OFFSET(cUIThing, mSound, 0x06C);
 CHECK_SIZE(cUIThing, 0x74);
+__asm__("_vt$8cUIThing = cUIThing_vtbl");   // g++'s name for the retail vtable
 
 #endif /* UI_UITHING_H */

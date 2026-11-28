@@ -720,36 +720,12 @@ extern "C" cUIThing* cUIThing_cUIThing(cUIThing* self, cUIScreen* pScreen, cUITh
 //100%
 INCLUDE_ASM("ui/uistatestack", _$_8cUIThing);
 #ifdef SKIP_ASM
-extern "C" void cListNode_destroyListNode(void* self);
-void operator_delete(int* ptr);
-extern void* cListNode_vtbl[];
-
-class cUIThing__cUIThing_cVirt {
-public:
-    char pad[0x10];
-    // vptr at 0x10; slot N at vtable offset N*8
-    virtual ~cUIThing__cUIThing_cVirt();
-};
-
-extern "C" void cUIThing__cUIThing(cUIThing* self, int flags) __asm__("_$_8cUIThing");
 /**
- * Destroys a UI thing: deletes its animation, runs the list-node base destructor, then frees it when asked to.
- *
- * Stores cUIThing's vtable, deletes mpAnim through its virtual destructor when there is one, then stores the
- * base vtable (cListNode_vtbl) and calls cListNode_destroyListNode() on the object.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ * Destroys a UI thing: deletes its animation (mpAnim, when there is one); the cListNode base then unlinks it.
  */
-extern "C" void cUIThing__cUIThing(cUIThing* self, int flags)
+cUIThing::~cUIThing()
 {
-    VPTR_OF(cListNode, self) = (void**)cUIThing_vtbl;
-    cUIThing__cUIThing_cVirt* anim = (cUIThing__cUIThing_cVirt*)self->mpAnim;
-    delete anim;
-    VPTR_OF(cListNode, self) = cListNode_vtbl;
-    cListNode_destroyListNode(self);
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
+    delete mpAnim;
 }
 #endif
 
@@ -785,17 +761,15 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_deleteAnimation);
 #ifdef SKIP_ASM
 
 /**
- * Deletes the UI thing's animation through its virtual destructor (flags 3) and clears mpAnim.
+ * Deletes the UI thing's animation (mpAnim) and clears mpAnim.
  *
  * Does nothing when there is no animation.
  */
 void cUIThing::deleteAnimation()
 {
-    cUIAnimation* obj = mpAnim;
-    if (obj != 0) {
-        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
-        vt[1].fn(vthis(obj, vt[1]), 3);
-        mpAnim = (cUIAnimation*)0;
+    if (mpAnim != 0) {
+        delete mpAnim;
+        mpAnim = 0;
     }
 }
 #endif

@@ -1255,9 +1255,7 @@ void cOVState::onWidgetEvent(cUIThing* pWidget, unsigned int Event)
     if (((char*)w) != 0) {
         cGameState* currentState = w->mCurrentState;
         if (((char*)currentState) != 0) {
-            sVEntry<void(void*, cUIThing*, unsigned int)>* vt =
-                (sVEntry<void(void*, cUIThing*, unsigned int)>*)currentState->mVtbl;
-            vt[9].fn(vthis(currentState, vt[9]), pWidget, Event);
+            currentState->onWidgetEvent(pWidget, Event);
         }
     }
 }

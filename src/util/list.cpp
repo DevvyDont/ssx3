@@ -52,52 +52,34 @@ void cListNode::removeFromList()
 //100%
 INCLUDE_ASM("util/list", cListNode_traverseFlat);
 #ifdef SKIP_ASM
-class cListNode_traverseFlat_cVirt {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void* onListNode(void*);
-};
-
 /**
  * Applies a list operator to this single node.
  *
- * A plain node has no children, so it just calls virtual slot 2 of @p pOperator (On Tour
- * cListOperator::onListNode) with this node and returns the result.
+ * A plain node has no children, so it just returns the operator's onListNode for this node.
  *
  * @param pOperator  the operator to apply (On Tour pOperator)
  * @return the operator's result
  */
 void* cListNode::traverseFlat(cListOperator* pOperator)
 {
-    cListNode_traverseFlat_cVirt* obj = (cListNode_traverseFlat_cVirt*)pOperator;
-    return obj->onListNode(this);
+    return pOperator->onListNode(this);
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/list", cListNode_traverseRecurse);
 #ifdef SKIP_ASM
-class cListNode_traverseRecurse_cVirt {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void* onListNode(void*);
-};
-
 /**
  * Applies a list operator to this node and its children; a plain node has none.
  *
- * Calls virtual slot 2 of @p pOperator (On Tour cListOperator::onListNode) with this node and returns the result,
- * exactly like cListNode_traverseFlat.
+ * Returns the operator's onListNode for this node, exactly like cListNode::traverseFlat.
  *
  * @param pOperator  the operator to apply (On Tour pOperator)
  * @return the operator's result
  */
 void* cListNode::traverseRecurse(cListOperator* pOperator)
 {
-    cListNode_traverseRecurse_cVirt* obj = (cListNode_traverseRecurse_cVirt*)pOperator;
-    return obj->onListNode(this);
+    return pOperator->onListNode(this);
 }
 #endif
 
@@ -270,26 +252,18 @@ void cList::clear()
 //100%
 INCLUDE_ASM("util/list", cList_destroyList);
 #ifdef SKIP_ASM
-class cList_destroyList_cVirt {
-public:
-    void* mpPrev;                  // 0x0
-    cList_destroyList_cVirt* mpNext;   // 0x4
-    // vptr at 0x8; slot 1: the virtual destructor
-    virtual ~cList_destroyList_cVirt();
-};
-
 /**
  * Deletes every node in the list through its virtual destructor, then resets the list to empty.
  *
- * Walks from the head (+0x4) along the next links up to the self-linked end node, calling each node's
- * deleting destructor (slot 1, flags 3), then relinks the empty list (cList_clear). The null check on each
+ * Walks from the head (+0x4) along the next links up to the self-linked end node, deleting each node
+ * (its virtual destructor), then relinks the empty list (cList_clear). The null check on each
  * node comes after its next link has been read.
  */
 void cList::destroyList()
 {
-    cList_destroyList_cVirt* n = (cList_destroyList_cVirt*)mStart.mpNext;
+    cListNode* n = mStart.mpNext;
     while (n->mpNext != n) {
-        cList_destroyList_cVirt* nextNode = n->mpNext;
+        cListNode* nextNode = n->mpNext;
         delete n;
         n = nextNode;
     }
@@ -322,29 +296,20 @@ int cList::size()
 //100%
 INCLUDE_ASM("util/list", cList_traverseFlat);
 #ifdef SKIP_ASM
-class cList_traverseFlat_cVirt {
-public:
-    void* mpPrev;                  // 0x0
-    cList_traverseFlat_cVirt* mpNext;   // 0x4
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void* traverseFlat(void*);
-};
-
 /**
  * Applies an operator to each node of the list, without visiting sub-lists, until one returns nonzero.
  *
  * Walks the nodes from the one at +0x4 along their link to the sentinel (a node linked to itself), reading the next
- * link first, and calls each node's slot 2 with the operator.
+ * link first, and calls each node's traverseFlat with the operator.
  *
  * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
  * @return the first non-null node result, or 0
  */
 void* cList::traverseFlat(cListOperator* pOperator)
 {
-    cList_traverseFlat_cVirt* n = (cList_traverseFlat_cVirt*)mStart.mpNext;
+    cListNode* n = mStart.mpNext;
     while (n->mpNext != n) {
-        cList_traverseFlat_cVirt* nextNode = n->mpNext;
+        cListNode* nextNode = n->mpNext;
         void* result = n->traverseFlat(pOperator);
         if (result != 0) {
             return result;
@@ -358,29 +323,19 @@ void* cList::traverseFlat(cListOperator* pOperator)
 //100%
 INCLUDE_ASM("util/list", cList_traverseRecurse);
 #ifdef SKIP_ASM
-class cList_traverseRecurse_cVirt {
-public:
-    void* mpPrev;                  // 0x0
-    cList_traverseRecurse_cVirt* mpNext;   // 0x4
-    // vptr at 0x8; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void v02();
-    virtual void* traverseRecurse(void*);
-};
-
 /**
  * Applies an operator to each node of the list and its sub-lists, until one returns nonzero.
  *
- * The same walk as cList_traverseFlat, calling each node's slot 3 (the recursive form) instead.
+ * The same walk as cList_traverseFlat, calling each node's traverseRecurse (the recursive form) instead.
  *
  * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
  * @return the first non-null node result, or 0
  */
 void* cList::traverseRecurse(cListOperator* pOperator)
 {
-    cList_traverseRecurse_cVirt* n = (cList_traverseRecurse_cVirt*)mStart.mpNext;
+    cListNode* n = mStart.mpNext;
     while (n->mpNext != n) {
-        cList_traverseRecurse_cVirt* nextNode = n->mpNext;
+        cListNode* nextNode = n->mpNext;
         void* result = n->traverseRecurse(pOperator);
         if (result != 0) {
             return result;

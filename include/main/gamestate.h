@@ -1,5 +1,6 @@
 #ifndef MAIN_GAMESTATE_H
 #define MAIN_GAMESTATE_H
+#pragma interface
 
 // cGameState: the base of the game-flow states (cGF*State: track start, section load, user select, event start,
 // riding, gate, finish line, next heat, pre / post event, podium, end, transport wait, session teleport, replay start)
@@ -28,7 +29,7 @@
 // Size 0x20: [R] cGame_cGame builds the next state (cGFSectionLoadState) at cGame + 0x178 = 0x158 + 0x20, and the
 // constructor writes up to 0x1C. Same size and offsets as On Tour's class cGFTrackStartState (0x20).
 // Base cGameState (On Tour size 0x10): its data at 0x0-0x8 and its vptr at 0xC (g++ 2.95 puts the vptr after the
-// data of the class that declares the virtuals); written out inline below.
+// data of the class that declares the virtuals); its C++ base class.
 // EA's source: d:/ssx/code/source/main/gamestate.cpp (preview strings); retail methods: unit main/gamestate
 // 0x00234EF8-0x00235A18, the dtor (0x00243F20) in unit main/ssxappdtor.
 //
@@ -37,10 +38,13 @@
 // 9 cGameState_onWidgetEvent__FPv (inherited). writeToReplayFrame / readFromReplayFrame are not in it (non-virtual
 // in retail, or called directly).
 //
-// FLAT layouts, like main/game.h. Member names, order and types are EA's, from SSX On Tour's PSP DWARF ([O] class
-// cGFTrackStartState and cGameState). Enums and bools are words. Evidence tags: [R] retail constructors /
-// destructors and the derived classes' layout; [P] the July 2003 preview (layout_xlate cGameState: the vptr 0x8 -> 0xC
-// in the paired destructor); [U] how retail code uses the field; [O] On Tour's DWARF.
+// Real polymorphic classes (`#pragma interface`: no unit emits their vtables; the equate after each class binds g++'s
+// name to the retail table): every state derives from cGameState, its overrides are virtual in cGameState's slot
+// order, and each state's notes on the inherited fields are kept as comments. Member names, order and types are
+// EA's, from SSX On Tour's PSP DWARF ([O] class cGFTrackStartState and cGameState). Enums and bools are words.
+// Evidence tags: [R] retail constructors / destructors and the derived classes' layout; [P] the July 2003 preview
+// (layout_xlate cGameState: the vptr 0x8 -> 0xC in the paired destructor); [U] how retail code uses the field; [O] On
+// Tour's DWARF.
 
 #include "layout.h"
 
@@ -57,6 +61,9 @@ enum eGFState {
 
 struct cBxReplayFrame;
 
+struct cGame;
+struct cUIThing;
+
 struct cGameState {
     int mNextState;                 // 0x00 [O] eGFState; [U] gotoNextState passes it to cGame_setState (with
                                     //      mStartupFlag) when non-zero; writeToReplayFrame / readFromReplayFrame copy
@@ -64,19 +71,28 @@ struct cGameState {
     int mStartupFlag;               // 0x04 [O]; [U] gotoNextState passes it; derived ctors zero it
     int mOverlayDone;               // 0x08 [O] bool; [U] derived states: cGFPreEventState / cGFPostEventState /
                                     //      cGFUserSelectState gainFocus clear it, their update tests it
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl (inline ctor in cGame_cGame; the dtor
-                                    //      cGameState__cGameState); [P] (preview 0x8)
+    // 0x0C: the vptr ([R] cGameState_vtbl, stored by the inline constructor and the destructor; [P] the preview's
+    // 0x8). Slots [R] cGameState_vtbl, names and types [O] (On Tour class cGameState):
+    virtual ~cGameState() {}        // 1 inline ([R] the states' destructors store cGameState_vtbl and delete; retail's
+                                    //   out-of-line copy cGameState__cGameState stays a C function)
+    virtual void preloadInit() __asm__("cGameState_preloadInit__FPv");                                     // 2
+    virtual void preloadUpdate() __asm__("cGameState_preloadUpdate__FPv");                                 // 3
+    virtual void preloadCancel() __asm__("cGameState_preloadCancel__FPv");                                 // 4
+    virtual void gainFocus(int startupFlag) __asm__("cGameState_gainFocus__FPv");                          // 5
+    virtual void update() __asm__("cGameState_update__FPv");                                               // 6
+    virtual void loseFocus() __asm__("cGameState_loseFocus__FPv");                                         // 7
+    virtual bool isPreloadComplete() __asm__("cGameState_isPreloadComplete__FPv");                         // 8
+    virtual void onWidgetEvent(cUIThing* pWidget, unsigned int Event) __asm__("cGameState_onWidgetEvent__FPv"); // 9
+
+    // [R] EA's inline constructor (inlined in every state's constructor and in cGame_cGame): mNextState 0, the vptr,
+    // and the class static mpGame cleared.
+    cGameState() : mNextState(0) { mpGame = 0; }
+    // [O] the class static (cGame*): the game that runs the states; gotoNextState / preloadNextState call
+    // cGame_setState / cGame_setPreloadState on it.
+    static cGame* mpGame __asm__("cGameState_mpGame");
 
     // Methods bound to their retail symbols by asm labels.
     void gotoNextState() __asm__("cGameState_gotoNextState");
-    void preloadInit() __asm__("cGameState_preloadInit__FPv");
-    void preloadUpdate() __asm__("cGameState_preloadUpdate__FPv");
-    void preloadCancel() __asm__("cGameState_preloadCancel__FPv");
-    void gainFocus() __asm__("cGameState_gainFocus__FPv");
-    void update() __asm__("cGameState_update__FPv");
-    void loseFocus() __asm__("cGameState_loseFocus__FPv");
-    int isPreloadComplete() __asm__("cGameState_isPreloadComplete__FPv");
-    void onWidgetEvent() __asm__("cGameState_onWidgetEvent__FPv");
     void writeToReplayFrame(cBxReplayFrame* obj) __asm__("cGameState_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* obj) __asm__("cGameState_readFromReplayFrame");
 };
@@ -84,20 +100,20 @@ struct cGameState {
 CHECK_OFFSET(cGameState, mNextState, 0x00);
 CHECK_OFFSET(cGameState, mStartupFlag, 0x04);
 CHECK_OFFSET(cGameState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGameState, mVtbl, 0x0C);
 CHECK_SIZE(cGameState, 0x10);
+__asm__("_vt$10cGameState = cGameState_vtbl");   // g++'s name for the retail vtable
 
 struct cBxReplayFrame;
 
-struct cGFTrackStartState {
+struct cGFTrackStartState : public cGameState {
     // --- cGameState (inline in the ctor: mNextState = 0, vptr = cGameState_vtbl, cGameState::mpGame = 0)
-    int mNextState;                 // 0x00 [O] eGFState; [R] the ctor stores 0 (cGameState) then 4; [U] gainFocus
-                                    //      stores the next state with mStartupFlag (inline gotoNextState)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0; [U] gainFocus stores it with mNextState
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] the ctor stores cGameState_vtbl, then cGFTrackStartState_vtbl; the dtor
-                                    //      cGFTrackStartState__cGFTrackStartState (unit main/ssxappdtor) stores it
-                                    //       again
+    //   mNextState 0x00: [O] eGFState; [R] the ctor stores 0 (cGameState) then 4; [U] gainFocus
+    //     stores the next state with mStartupFlag (inline gotoNextState)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0; [U] gainFocus stores it with mNextState
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] the ctor stores cGameState_vtbl, then cGFTrackStartState_vtbl; the dtor
+    //     cGFTrackStartState__cGFTrackStartState (unit main/ssxappdtor) stores it
+    //     again
     // --- cGFTrackStartState
     int mPreLoadState;              // 0x10 [O]; [R] ctor 5; [U] preloadInit / preloadUpdate / preloadCancel set it,
                                     //      isPreloadComplete and preloadUpdate test it; written to / read from the
@@ -117,29 +133,27 @@ struct cGFTrackStartState {
     int mCheckTransportEnd;         // 0x1C [O] bool; [R] ctor 0; [U] gainFocus sets it, update tests and clears it
 
     // Methods bound to their retail symbols by asm labels.
-    void preloadInit() __asm__("cGFTrackStartState_preloadInit");
-    void preloadUpdate() __asm__("cGFTrackStartState_preloadUpdate");
-    void preloadCancel() __asm__("cGFTrackStartState_preloadCancel");
-    bool isPreloadComplete() __asm__("cGFTrackStartState_isPreloadComplete");
-    void gainFocus() __asm__("cGFTrackStartState_gainFocus");
-    void update() __asm__("cGFTrackStartState_update");
-    void loseFocus() __asm__("cGFTrackStartState_loseFocus");
+    cGFTrackStartState() __asm__("cGFTrackStartState_cGFTrackStartState");
+    virtual void preloadInit() __asm__("cGFTrackStartState_preloadInit");
+    virtual void preloadUpdate() __asm__("cGFTrackStartState_preloadUpdate");
+    virtual void preloadCancel() __asm__("cGFTrackStartState_preloadCancel");
+    virtual bool isPreloadComplete() __asm__("cGFTrackStartState_isPreloadComplete");
+    virtual void gainFocus(int startupFlag) __asm__("cGFTrackStartState_gainFocus");
+    virtual void update() __asm__("cGFTrackStartState_update");
+    virtual void loseFocus() __asm__("cGFTrackStartState_loseFocus");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFTrackStartState_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFTrackStartState_readFromReplayFrame");
 };
 
-CHECK_OFFSET(cGFTrackStartState, mNextState, 0x00);
-CHECK_OFFSET(cGFTrackStartState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFTrackStartState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFTrackStartState, mVtbl, 0x0C);
 CHECK_OFFSET(cGFTrackStartState, mPreLoadState, 0x10);
 CHECK_OFFSET(cGFTrackStartState, mPlayFirstTimeBCVideo, 0x14);
 CHECK_OFFSET(cGFTrackStartState, mPreLoadTicks, 0x18);
 CHECK_OFFSET(cGFTrackStartState, mCheckTransportEnd, 0x1C);
 CHECK_SIZE(cGFTrackStartState, 0x20);
+__asm__("_vt$18cGFTrackStartState = cGFTrackStartState_vtbl");   // g++'s name for the retail vtable
 
 // ------------------------------------------------------------------------------------------------------------------
-// The other game-flow states. All derive from cGameState (0x10, above; written out inline in each struct) and live in
+// The other game-flow states. All derive from cGameState (0x10, above; its C++ base class) and live in
 // cGame's mStates (main/game.h, 0xB0-0x1FB), built in place by cGame_cGame in eGFState order (On Tour's enum; retail's
 // state ids are the same: cGame_updateState / cGame_readFromReplayFrame map ids 1-16 to these offsets):
 //   0x0B0 cGFEventStartState (1)   0x0D0 cGFPreEventState (2)   0x0E0 cGFGateState (3)       0x0F0 cGFRidingState (4)
@@ -173,14 +187,14 @@ CHECK_SIZE(cGFTrackStartState, 0x20);
 // Vtable cGFEventStartState_vtbl (0x0047D530): 1 dtor (0x00243E20), 5 gainFocus, 6 update, 7 loseFocus.
 struct cBxReplayFrame;
 
-struct cGFEventStartState {
+struct cGFEventStartState : public cGameState {
     // --- cGameState (inline in the ctor: mNextState = 0, vptr = cGameState_vtbl, cGameState::mpGame = 0)
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 (cGameState) then 2 (kGFSM_PreEvent); [U] update
-                                    //      goes on with it (cGameState_gotoNextState); in the replay frame
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; [R] ctor 0; [U] written to / read from the replay frame
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFEventStartState_vtbl (ctor); the dtor
-                                    //      cGFEventStartState__cGFEventStartState stores cGameState_vtbl
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 (cGameState) then 2 (kGFSM_PreEvent); [U] update
+    //     goes on with it (cGameState_gotoNextState); in the replay frame
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; [R] ctor 0; [U] written to / read from the replay frame
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFEventStartState_vtbl (ctor); the dtor
+    //     cGFEventStartState__cGFEventStartState stores cGameState_vtbl
     // --- cGFEventStartState
     int mPurgeCPURiders;            // 0x10 [O] bool; [R] ctor 0; [U] update sets it after cAI_prepareToPurgeComputer-
                                     //      Riders / -Actors (game modes 4-6) and clears it once the riders and actors
@@ -202,23 +216,21 @@ struct cGFEventStartState {
     };
 
     // Methods bound to their retail symbols by asm labels.
-    void gainFocus(int mode) __asm__("cGFEventStartState_gainFocus");
-    void update() __asm__("cGFEventStartState_update");
-    void loseFocus() __asm__("cGFEventStartState_loseFocus");
+    cGFEventStartState() __asm__("cGFEventStartState_cGFEventStartState");
+    virtual void gainFocus(int mode) __asm__("cGFEventStartState_gainFocus");
+    virtual void update() __asm__("cGFEventStartState_update");
+    virtual void loseFocus() __asm__("cGFEventStartState_loseFocus");
     void ReadyEvent() __asm__("cGFEventStartState_ReadyEvent");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFEventStartState_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFEventStartState_readFromReplayFrame");
 };
 
-CHECK_OFFSET(cGFEventStartState, mNextState, 0x00);
-CHECK_OFFSET(cGFEventStartState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFEventStartState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFEventStartState, mVtbl, 0x0C);
 CHECK_OFFSET(cGFEventStartState, mPurgeCPURiders, 0x10);
 CHECK_OFFSET(cGFEventStartState, mHasTransitionNIS, 0x14);
 CHECK_OFFSET(cGFEventStartState, mPauseOnLoad, 0x18);
 CHECK_OFFSET(cGFEventStartState, mSubState, 0x1C);
 CHECK_SIZE(cGFEventStartState, 0x20);
+__asm__("_vt$18cGFEventStartState = cGFEventStartState_vtbl");   // g++'s name for the retail vtable
 
 // cGFPreEventState (kGFSM_PreEvent, 2): opens the pre-event overlay (cOVStateManager_gotoOverlay(2)) under pause state
 // 1 and waits until the overlay sets mOverlayDone (unless the online session has failed); loseFocus pops the pause
@@ -226,30 +238,28 @@ CHECK_SIZE(cGFEventStartState, 0x20);
 // Size 0x10, no fields of its own: [R] cGame + 0xD0 .. 0xE0 (cGFGateState); [O] 0x10.
 // Ctor cGFPreEventState_cGFPreEventState (main/ssxappdtor 0x002440C0; mNextState 3 = kGFSM_Gate). Vtable
 // cGFPreEventState_vtbl (0x0047D270): 1 dtor (0x00244090), 5 gainFocus, 6 update, 7 loseFocus.
-struct cGFPreEventState {
+struct cGFPreEventState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 3 (kGFSM_Gate); [U] update goes on with it
-                                    //      (cGameState_gotoNextState)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; [U] gainFocus clears it, update waits for it to be 1 (the
-                                    //      overlay sets Game->mCurrentState's word 0x8)
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFPreEventState_vtbl (ctor); cGameState_vtbl
-                                    //      (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 3 (kGFSM_Gate); [U] update goes on with it
+    //     (cGameState_gotoNextState)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; [U] gainFocus clears it, update waits for it to be 1 (the
+    //     overlay sets Game->mCurrentState's word 0x8)
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFPreEventState_vtbl (ctor); cGameState_vtbl
+    //     (dtor)
 
     // Methods bound to their retail symbols by asm labels.
-    void gainFocus() __asm__("cGFPreEventState_gainFocus");
-    void update() __asm__("cGFPreEventState_update");
-    void loseFocus() __asm__("cGFPreEventState_loseFocus");
+    cGFPreEventState() __asm__("cGFPreEventState_cGFPreEventState");
+    virtual void gainFocus(int startupFlag) __asm__("cGFPreEventState_gainFocus");
+    virtual void update() __asm__("cGFPreEventState_update");
+    virtual void loseFocus() __asm__("cGFPreEventState_loseFocus");
     void ResetGameState() __asm__("cGFPreEventState_ResetGameState");
     void* writeToReplayFrame() __asm__("cGFPreEventState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFPreEventState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFPreEventState, mNextState, 0x00);
-CHECK_OFFSET(cGFPreEventState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFPreEventState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFPreEventState, mVtbl, 0x0C);
 CHECK_SIZE(cGFPreEventState, 0x10);
+__asm__("_vt$16cGFPreEventState = cGFPreEventState_vtbl");   // g++'s name for the retail vtable
 
 // cGFGateState (kGFSM_Gate, 3): the start-gate countdown. gainFocus resets the replay for the race, puts the AI in
 // state 4 and runs the location's "StartlightBegin" world script (runScript); update announces each second and at
@@ -257,50 +267,46 @@ CHECK_SIZE(cGFPreEventState, 0x10);
 // Size 0x10, no fields of its own: [R] cGame + 0xE0 .. 0xF0 (cGFRidingState); [O] 0x10.
 // Ctor cGFGateState_cGFGateState (main/ssxappdtor 0x00243E80; mNextState 4 = kGFSM_Riding). Vtable cGFGateState_vtbl
 // (0x0047D4D8): 1 dtor (0x00243E50), 5 gainFocus, 6 update; runScript is non-virtual.
-struct cGFGateState {
+struct cGFGateState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 4 (kGFSM_Riding); [U] gainFocus / update go
-                                    //      on with it (cGameState_gotoNextState)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFGateState_vtbl (ctor); cGameState_vtbl (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 4 (kGFSM_Riding); [U] gainFocus / update go
+    //     on with it (cGameState_gotoNextState)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFGateState_vtbl (ctor); cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
-    void gainFocus() __asm__("cGFGateState_gainFocus");
+    cGFGateState() __asm__("cGFGateState_cGFGateState");
+    virtual void gainFocus(int startupFlag) __asm__("cGFGateState_gainFocus");
     void runScript(int hashID) __asm__("cGFGateState_runScript");
-    void update() __asm__("cGFGateState_update");
+    virtual void update() __asm__("cGFGateState_update");
     void* writeToReplayFrame() __asm__("cGFGateState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFGateState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFGateState, mNextState, 0x00);
-CHECK_OFFSET(cGFGateState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFGateState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFGateState, mVtbl, 0x0C);
 CHECK_SIZE(cGFGateState, 0x10);
+__asm__("_vt$12cGFGateState = cGFGateState_vtbl");   // g++'s name for the retail vtable
 
 // cGFRidingState (kGFSM_Riding, 4): the race itself. gainFocus lets the AI riders go (AI state 5), hands the back end
 // its racing state and purges the UI's normal states unless a replay plays; the default update / loseFocus.
 // Size 0x10, no fields of its own: [R] cGame + 0xF0 .. 0x100 (cGFFinishlineState); [O] 0x10.
 // Ctor cGFRidingState_cGFRidingState (main/ssxappdtor 0x00243EE8; mNextState 5 = kGFSM_Finishline). Vtable
 // cGFRidingState_vtbl (0x0047D480): 1 dtor (0x00243EB8), 5 gainFocus.
-struct cGFRidingState {
+struct cGFRidingState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 5 (kGFSM_Finishline)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFRidingState_vtbl (ctor); cGameState_vtbl (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 5 (kGFSM_Finishline)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFRidingState_vtbl (ctor); cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    cGFRidingState() __asm__("cGFRidingState_cGFRidingState");
     void* writeToReplayFrame() __asm__("cGFRidingState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFRidingState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFRidingState, mNextState, 0x00);
-CHECK_OFFSET(cGFRidingState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFRidingState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFRidingState, mVtbl, 0x0C);
 CHECK_SIZE(cGFRidingState, 0x10);
+__asm__("_vt$14cGFRidingState = cGFRidingState_vtbl");   // g++'s name for the retail vtable
 
 // cGFFinishlineState (kGFSM_Finishline, 5): after the finish line. gainFocus ends the replay recording, clears the UI
 // states and the NIS list and starts a 180-frame delay; update counts it down, shows the finish overlay and plays the
@@ -310,15 +316,15 @@ CHECK_SIZE(cGFRidingState, 0x10);
 // Vtable cGFFinishlineState_vtbl (0x0047D5E0): 1 dtor (0x00243D88), 5 gainFocus, 6 update, 7 loseFocus.
 struct cBxReplayFrame;
 
-struct cGFFinishlineState {
+struct cGFFinishlineState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 7 (kGFSM_PostEvent); [U] update stores 12
-                                    //      (kGFSM_Podium) on one path and goes on (cGameState_gotoNextState),
-                                    //      loseFocus stores 7; in the replay frame
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFFinishlineState_vtbl (ctor); cGameState_vtbl
-                                    //      (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 7 (kGFSM_PostEvent); [U] update stores 12
+    //     (kGFSM_Podium) on one path and goes on (cGameState_gotoNextState),
+    //     loseFocus stores 7; in the replay frame
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFFinishlineState_vtbl (ctor); cGameState_vtbl
+    //     (dtor)
     // --- cGFFinishlineState
     int mSubState;                  // 0x10 [O]; [R] ctor 2; [U] gainFocus 0, update's switch (sets 1 and 2),
                                     //      loseFocus 2; in the replay frame
@@ -326,44 +332,40 @@ struct cGFFinishlineState {
                                     //      frame
 
     // Methods bound to their retail symbols by asm labels.
-    void gainFocus() __asm__("cGFFinishlineState_gainFocus");
-    void loseFocus() __asm__("cGFFinishlineState_loseFocus");
+    cGFFinishlineState() __asm__("cGFFinishlineState_cGFFinishlineState");
+    virtual void gainFocus(int startupFlag) __asm__("cGFFinishlineState_gainFocus");
+    virtual void loseFocus() __asm__("cGFFinishlineState_loseFocus");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFFinishlineState_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFFinishlineState_readFromReplayFrame");
-    void update() __asm__("cGFFinishlineState_update");
+    virtual void update() __asm__("cGFFinishlineState_update");
 };
 
-CHECK_OFFSET(cGFFinishlineState, mNextState, 0x00);
-CHECK_OFFSET(cGFFinishlineState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFFinishlineState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFFinishlineState, mVtbl, 0x0C);
 CHECK_OFFSET(cGFFinishlineState, mSubState, 0x10);
 CHECK_OFFSET(cGFFinishlineState, mShowEventResultsDelay, 0x14);
 CHECK_SIZE(cGFFinishlineState, 0x18);
+__asm__("_vt$18cGFFinishlineState = cGFFinishlineState_vtbl");   // g++'s name for the retail vtable
 
 // cGFEndState (kGFSM_End, 6): gainFocus asks the game for kGFSM_TrackStart (cGame_setState(mpGame, 10, 0, 0)); its
 // loseFocus is empty.
 // Size 0x10, no fields of its own: [R] cGame + 0x118 .. 0x128 (cGFPostEventState); [O] 0x10.
 // Ctor cGFEndState_cGFEndState (main/ssxappdtor 0x00243D20; mNextState 8 = kGFSM_EndWait). Vtable cGFEndState_vtbl
 // (0x0047D690): 1 dtor (0x00243CF0), 5 gainFocus, 7 loseFocus__FPv.
-struct cGFEndState {
+struct cGFEndState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 8 (kGFSM_EndWait)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFEndState_vtbl (ctor); cGameState_vtbl (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 8 (kGFSM_EndWait)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFEndState_vtbl (ctor); cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
-    void loseFocus() __asm__("cGFEndState_loseFocus__FPv");
+    cGFEndState() __asm__("cGFEndState_cGFEndState");
+    virtual void loseFocus() __asm__("cGFEndState_loseFocus__FPv");
     void* writeToReplayFrame() __asm__("cGFEndState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFEndState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFEndState, mNextState, 0x00);
-CHECK_OFFSET(cGFEndState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFEndState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFEndState, mVtbl, 0x0C);
 CHECK_SIZE(cGFEndState, 0x10);
+__asm__("_vt$11cGFEndState = cGFEndState_vtbl");   // g++'s name for the retail vtable
 
 // cGFPostEventState (kGFSM_PostEvent, 7): gainFocus resets the riders' first-time flags when cGamePath is 0, clears
 // the NIS list and mOverlayDone and opens overlay 7; update waits for the overlay to set mOverlayDone, then asks the
@@ -372,26 +374,24 @@ CHECK_SIZE(cGFEndState, 0x10);
 // Size 0x10, no fields of its own: [R] cGame + 0x128 .. 0x138 (cGFEndWaitState); [O] 0x10.
 // Ctor cGFPostEventState_cGFPostEventState (main/ssxappdtor 0x00244128; mNextState 8 = kGFSM_EndWait). Vtable
 // cGFPostEventState_vtbl (0x0047D218): 1 dtor (0x002440F8), 5 gainFocus, 6 update, 7 loseFocus.
-struct cGFPostEventState {
+struct cGFPostEventState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 8 (kGFSM_EndWait)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; [U] gainFocus clears it, update waits for it to be 1
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFPostEventState_vtbl (ctor); cGameState_vtbl
-                                    //      (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 8 (kGFSM_EndWait)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; [U] gainFocus clears it, update waits for it to be 1
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFPostEventState_vtbl (ctor); cGameState_vtbl
+    //     (dtor)
 
     // Methods bound to their retail symbols by asm labels.
-    void gainFocus() __asm__("cGFPostEventState_gainFocus");
-    void update() __asm__("cGFPostEventState_update");
+    cGFPostEventState() __asm__("cGFPostEventState_cGFPostEventState");
+    virtual void gainFocus(int startupFlag) __asm__("cGFPostEventState_gainFocus");
+    virtual void update() __asm__("cGFPostEventState_update");
     void* writeToReplayFrame() __asm__("cGFPostEventState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFPostEventState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFPostEventState, mNextState, 0x00);
-CHECK_OFFSET(cGFPostEventState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFPostEventState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFPostEventState, mVtbl, 0x0C);
 CHECK_SIZE(cGFPostEventState, 0x10);
+__asm__("_vt$17cGFPostEventState = cGFPostEventState_vtbl");   // g++'s name for the retail vtable
 
 // cGFEndWaitState (kGFSM_EndWait, 8): overrides nothing but the destructor (On Tour: only the replay methods).
 // Size 0x10, no fields of its own: [R] cGame + 0x138 .. 0x148 (cGFTransportWaitState); [O] 0x10.
@@ -399,48 +399,43 @@ CHECK_SIZE(cGFPostEventState, 0x10);
 // cGFEndWaitState_vtbl). Its vtable, cGFEndWaitState_vtbl (9 slots: 1 cGFEndWaitState__cGFEndWaitState = the
 // destructor (main/ssxappdtor), 2-9 cGameState_*__FPv), was unnamed (D_0047D638) until 2026-11-20;
 // cGame_updateState / cGame_readFromReplayFrame map id 8 to cGame + 0x138.
-struct cGFEndWaitState {
+struct cGFEndWaitState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] cGame_cGame 0 then 11 (kGFSM_SectionLoad)
-    int mStartupFlag;               // 0x04 [O]; [R] cGame_cGame 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFEndWaitState_vtbl (cGame_cGame);
-                                    //      cGameState_vtbl (cGFEndWaitState__cGFEndWaitState, the dtor)
+    //   mNextState 0x00: [O] eGFState; [R] cGame_cGame 0 then 11 (kGFSM_SectionLoad)
+    //   mStartupFlag 0x04: [O]; [R] cGame_cGame 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFEndWaitState_vtbl (cGame_cGame);
+    //     cGameState_vtbl (cGFEndWaitState__cGFEndWaitState, the dtor)
 
     // Methods bound to their retail symbols by asm labels.
     void* writeToReplayFrame() __asm__("cGFEndWaitState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFEndWaitState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFEndWaitState, mNextState, 0x00);
-CHECK_OFFSET(cGFEndWaitState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFEndWaitState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFEndWaitState, mVtbl, 0x0C);
 CHECK_SIZE(cGFEndWaitState, 0x10);
+__asm__("_vt$15cGFEndWaitState = cGFEndWaitState_vtbl");   // g++'s name for the retail vtable
 
 // cGFTransportWaitState (kGFSM_TransportWait, 9): waits for a transport; loseFocus calls the AI's virtual slot 5
 // with 3.
 // Size 0x10, no fields of its own: [R] cGame + 0x148 .. 0x158 (cGFTrackStartState); [O] 0x10.
 // Ctor cGFTransportWaitState_cGFTransportWaitState (main/ssxappdtor 0x00243DE8; mNextState 10 = kGFSM_TrackStart).
 // Vtable cGFTransportWaitState_vtbl (0x0047D588): 1 dtor (0x00243DB8), 7 loseFocus.
-struct cGFTransportWaitState {
+struct cGFTransportWaitState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 10 (kGFSM_TrackStart)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFTransportWaitState_vtbl (ctor);
-                                    //      cGameState_vtbl (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 10 (kGFSM_TrackStart)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFTransportWaitState_vtbl (ctor);
+    //     cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
+    cGFTransportWaitState() __asm__("cGFTransportWaitState_cGFTransportWaitState");
     void* writeToReplayFrame() __asm__("cGFTransportWaitState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFTransportWaitState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFTransportWaitState, mNextState, 0x00);
-CHECK_OFFSET(cGFTransportWaitState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFTransportWaitState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFTransportWaitState, mVtbl, 0x0C);
 CHECK_SIZE(cGFTransportWaitState, 0x10);
+__asm__("_vt$21cGFTransportWaitState = cGFTransportWaitState_vtbl");   // g++'s name for the retail vtable
 
 // cGFSectionLoadState (kGFSM_SectionLoad, 11): loads the next location's world section during a transport. gainFocus
 // resets the back end state and the replay (and the riders' first-time flags when cGamePath is 0); update waits for
@@ -450,13 +445,13 @@ CHECK_SIZE(cGFTransportWaitState, 0x10);
 // Ctor cGFSectionLoadState_cGFSectionLoadState (main/gamestate 0x00236868; mNextState 10 = kGFSM_TrackStart; it does
 // not set mSubState). Vtable cGFSectionLoadState_vtbl (0x0047D2C8): 1 dtor (0x00244060), 5 gainFocus, 6 update,
 // 7 loseFocus__FPv (empty).
-struct cGFSectionLoadState {
+struct cGFSectionLoadState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 10 (kGFSM_TrackStart)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFSectionLoadState_vtbl (ctor); cGameState_vtbl
-                                    //      (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 10 (kGFSM_TrackStart)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFSectionLoadState_vtbl (ctor); cGameState_vtbl
+    //     (dtor)
     // --- cGFSectionLoadState
     int mSubState;                  // 0x10 [O]; [U] gainFocus 0, update's switch (0 wait for the section, 1 wait for
                                     //      the focus / transition, 2 done); not in the replay frame
@@ -466,44 +461,40 @@ struct cGFSectionLoadState {
     enum eSubState { kSectionLoad_WaitSection = 0, kSectionLoad_WaitTransport = 1, kSectionLoad_Done = 2 };
 
     // Methods bound to their retail symbols by asm labels.
-    void gainFocus() __asm__("cGFSectionLoadState_gainFocus");
-    void update() __asm__("cGFSectionLoadState_update");
-    void loseFocus() __asm__("cGFSectionLoadState_loseFocus__FPv");
+    cGFSectionLoadState() __asm__("cGFSectionLoadState_cGFSectionLoadState");
+    virtual void gainFocus(int startupFlag) __asm__("cGFSectionLoadState_gainFocus");
+    virtual void update() __asm__("cGFSectionLoadState_update");
+    virtual void loseFocus() __asm__("cGFSectionLoadState_loseFocus__FPv");
     void* writeToReplayFrame() __asm__("cGFSectionLoadState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFSectionLoadState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFSectionLoadState, mNextState, 0x00);
-CHECK_OFFSET(cGFSectionLoadState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFSectionLoadState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFSectionLoadState, mVtbl, 0x0C);
 CHECK_OFFSET(cGFSectionLoadState, mSubState, 0x10);
 CHECK_SIZE(cGFSectionLoadState, 0x14);
+__asm__("_vt$19cGFSectionLoadState = cGFSectionLoadState_vtbl");   // g++'s name for the retail vtable
 
 // cGFPodiumState (kGFSM_Podium, 12): gainFocus turns the AI's computer actors on, update waits for NIS list 0 to end
 // and moves on, loseFocus turns the actors off.
 // Size 0x10, no fields of its own: [R] cGame + 0x18C .. 0x19C (cGFNextHeatState); [O] 0x10.
 // Ctor cGFPodiumState_cGFPodiumState (main/ssxappdtor 0x00244190; mNextState 7 = kGFSM_PostEvent). Vtable
 // cGFPodiumState_vtbl (0x0047D1C0): 1 dtor (0x00244160), 5 gainFocus, 6 update, 7 loseFocus.
-struct cGFPodiumState {
+struct cGFPodiumState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 7 (kGFSM_PostEvent); [U] update goes on with
-                                    //      it (cGameState_gotoNextState)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFPodiumState_vtbl (ctor); cGameState_vtbl (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 7 (kGFSM_PostEvent); [U] update goes on with
+    //     it (cGameState_gotoNextState)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFPodiumState_vtbl (ctor); cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
-    void update() __asm__("cGFPodiumState_update");
+    cGFPodiumState() __asm__("cGFPodiumState_cGFPodiumState");
+    virtual void update() __asm__("cGFPodiumState_update");
     void* writeToReplayFrame() __asm__("cGFPodiumState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFPodiumState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFPodiumState, mNextState, 0x00);
-CHECK_OFFSET(cGFPodiumState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFPodiumState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFPodiumState, mVtbl, 0x0C);
 CHECK_SIZE(cGFPodiumState, 0x10);
+__asm__("_vt$14cGFPodiumState = cGFPodiumState_vtbl");   // g++'s name for the retail vtable
 
 // cGFNextHeatState (kGFSM_NextHeat, 13): sets up the next heat of an event. gainFocus restarts the heat and the game,
 // re-picks the computer riders and queues the start sequence (plays the transport sequence in race mode); update
@@ -511,15 +502,15 @@ CHECK_SIZE(cGFPodiumState, 0x10);
 // Size 0x1C: [R] cGame + 0x19C .. 0x1B8 (cGFUserSelectState); the ctor (main/ssxappdtor 0x00243F80) writes up to 0x18.
 //   [O] 0x1C, same offsets.
 // Vtable cGFNextHeatState_vtbl (0x0047D3D0): 1 dtor (0x00243F50), 5 gainFocus, 6 update, 7 loseFocus.
-struct cGFNextHeatState {
+struct cGFNextHeatState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 1 (kGFSM_EventStart); [U] update goes on
-                                    //      with it (cGameState_gotoNextState); in the replay frame
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 3 (the only state whose ctor does not store 0; passed on to
-                                    //      the next state by gotoNextState)
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFNextHeatState_vtbl (ctor); cGameState_vtbl
-                                    //      (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 1 (kGFSM_EventStart); [U] update goes on
+    //     with it (cGameState_gotoNextState); in the replay frame
+    //   mStartupFlag 0x04: [O]; [R] ctor 3 (the only state whose ctor does not store 0; passed on to
+    //     the next state by gotoNextState)
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFNextHeatState_vtbl (ctor); cGameState_vtbl
+    //     (dtor)
     // --- cGFNextHeatState (On Tour's names have no m prefix)
     // CurrentNextHeatState's steps. [O] On Tour's enum cGFNextHeatState::eNextHeatStatus for 0 .. 2, names and values;
     // retail's update also has a fourth step, 3 (NH_DONE, name ours), that goes on to the next game state.
@@ -534,20 +525,18 @@ struct cGFNextHeatState {
                                     //      replay frame
 
     // Methods bound to their retail symbols by asm labels.
-    void gainFocus() __asm__("cGFNextHeatState_gainFocus");
-    void update() __asm__("cGFNextHeatState_update");
+    cGFNextHeatState() __asm__("cGFNextHeatState_cGFNextHeatState");
+    virtual void gainFocus(int startupFlag) __asm__("cGFNextHeatState_gainFocus");
+    virtual void update() __asm__("cGFNextHeatState_update");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFNextHeatState_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFNextHeatState_readFromReplayFrame");
 };
 
-CHECK_OFFSET(cGFNextHeatState, mNextState, 0x00);
-CHECK_OFFSET(cGFNextHeatState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFNextHeatState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFNextHeatState, mVtbl, 0x0C);
 CHECK_OFFSET(cGFNextHeatState, CurrentNextHeatState, 0x10);
 CHECK_OFFSET(cGFNextHeatState, WaitTicks, 0x14);
 CHECK_OFFSET(cGFNextHeatState, PlayTransport, 0x18);
 CHECK_SIZE(cGFNextHeatState, 0x1C);
+__asm__("_vt$16cGFNextHeatState = cGFNextHeatState_vtbl");   // g++'s name for the retail vtable
 
 // cGFUserSelectState (kGFSM_UserSelect, 14): the user picks where to go next (lodge session menu or transport map).
 // gainFocus plays the NIS for its mode (the startup flag), update opens the session overlay or the map, then either
@@ -560,15 +549,15 @@ CHECK_SIZE(cGFNextHeatState, 0x1C);
 // Ctor cGFUserSelectState_cGFUserSelectState (main/gamestate 0x00236208). Vtable cGFUserSelectState_vtbl
 // (0x0047D320): 1 dtor (0x00244028), 5 gainFocus, 6 update; setNextLocation (main/ssxappdtor 0x00244058, no callers)
 // is non-virtual.
-struct cGFUserSelectState {
+struct cGFUserSelectState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 4 (kGFSM_Riding); [U] update goes on with it
-                                    //      (cGameState_gotoNextState, lodge mode)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; [R] ctor 0; [U] gainFocus clears it (sets it for mode 1),
-                                    //      update clears / tests / sets it; in the replay frame
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFUserSelectState_vtbl (ctor); cGameState_vtbl
-                                    //      (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 4 (kGFSM_Riding); [U] update goes on with it
+    //     (cGameState_gotoNextState, lodge mode)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; [R] ctor 0; [U] gainFocus clears it (sets it for mode 1),
+    //     update clears / tests / sets it; in the replay frame
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFUserSelectState_vtbl (ctor); cGameState_vtbl
+    //     (dtor)
     // --- cGFUserSelectState
     int mCurrState;                 // 0x10 [O] eUserSelectStatus (0 US_WAITSTARTNIS, 1 US_WAITOVERLAY, 2 US_WAITLEAVE,
                                     //      3 US_WAITEND); [U] gainFocus 0, update's switch; in the replay frame
@@ -592,23 +581,21 @@ struct cGFUserSelectState {
                                     //      retail access
 
     // Methods bound to their retail symbols by asm labels.
-    void gainFocus(int mode) __asm__("cGFUserSelectState_gainFocus");
-    void update() __asm__("cGFUserSelectState_update");
+    cGFUserSelectState() __asm__("cGFUserSelectState_cGFUserSelectState");
+    virtual void gainFocus(int mode) __asm__("cGFUserSelectState_gainFocus");
+    virtual void update() __asm__("cGFUserSelectState_update");
     void writeToReplayFrame(cBxReplayFrame* stream) __asm__("cGFUserSelectState_writeToReplayFrame");
     void readFromReplayFrame(cBxReplayFrame* stream) __asm__("cGFUserSelectState_readFromReplayFrame");
     void setNextLocation(int location) __asm__("cGFUserSelectState_setNextLocation");
 };
 
-CHECK_OFFSET(cGFUserSelectState, mNextState, 0x00);
-CHECK_OFFSET(cGFUserSelectState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFUserSelectState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFUserSelectState, mVtbl, 0x0C);
 CHECK_OFFSET(cGFUserSelectState, mCurrState, 0x10);
 CHECK_OFFSET(cGFUserSelectState, mMode, 0x14);
 CHECK_OFFSET(cGFUserSelectState, mNextLocation, 0x18);
 CHECK_OFFSET(cGFUserSelectState, mWaitingForOverlay, 0x1C);
 CHECK_OFFSET(cGFUserSelectState, mShowLoadMessage, 0x20);
 CHECK_SIZE(cGFUserSelectState, 0x24);
+__asm__("_vt$18cGFUserSelectState = cGFUserSelectState_vtbl");   // g++'s name for the retail vtable
 
 // cGFSessionTeleportState (kGFSM_SessionTeleport, 15): teleports the rider for a new session (free-ride game mode 12,
 // partial restart at the mission start point, a white fade); update asks the game for kGFSM_EventStart
@@ -616,25 +603,23 @@ CHECK_SIZE(cGFUserSelectState, 0x24);
 // Size 0x10, no fields of its own: [R] cGame + 0x1DC .. 0x1EC (cGFReplayStartState); [O] 0x10.
 // Ctor cGFSessionTeleportState_cGFSessionTeleportState (main/ssxappdtor 0x00243FF0; mNextState 10 =
 // kGFSM_TrackStart). Vtable cGFSessionTeleportState_vtbl (0x0047D378): 1 dtor (0x00243FC0), 5 gainFocus, 6 update.
-struct cGFSessionTeleportState {
+struct cGFSessionTeleportState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 10 (kGFSM_TrackStart)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFSessionTeleportState_vtbl (ctor);
-                                    //      cGameState_vtbl (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 10 (kGFSM_TrackStart)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFSessionTeleportState_vtbl (ctor);
+    //     cGameState_vtbl (dtor)
 
     // Methods bound to their retail symbols by asm labels.
-    void gainFocus() __asm__("cGFSessionTeleportState_gainFocus");
+    cGFSessionTeleportState() __asm__("cGFSessionTeleportState_cGFSessionTeleportState");
+    virtual void gainFocus(int startupFlag) __asm__("cGFSessionTeleportState_gainFocus");
     void* writeToReplayFrame() __asm__("cGFSessionTeleportState_writeToReplayFrame__FPv");
     void* readFromReplayFrame() __asm__("cGFSessionTeleportState_readFromReplayFrame__FPv");
 };
 
-CHECK_OFFSET(cGFSessionTeleportState, mNextState, 0x00);
-CHECK_OFFSET(cGFSessionTeleportState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFSessionTeleportState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFSessionTeleportState, mVtbl, 0x0C);
 CHECK_SIZE(cGFSessionTeleportState, 0x10);
+__asm__("_vt$23cGFSessionTeleportState = cGFSessionTeleportState_vtbl");   // g++'s name for the retail vtable
 
 // cGFReplayStartState (kGFSM_ReplayStart, 16): starts a replay (missions, global scripts, the replay overlay 0x11);
 // loseFocus purges and sets up the missions again; update is empty.
@@ -642,22 +627,20 @@ CHECK_SIZE(cGFSessionTeleportState, 0x10);
 // Ctor cGFReplayStartState_cGFReplayStartState (main/ssxappdtor 0x002441F8; mNextState 4 = kGFSM_Riding). Vtable
 // cGFReplayStartState_vtbl (0x0047D168): 1 dtor (0x002441C8), 5 gainFocus, 6 update__FPv, 7 loseFocus. Retail has no
 // replay-frame methods for it (cGame_writeToReplayFrame / cGame_readFromReplayFrame skip it).
-struct cGFReplayStartState {
+struct cGFReplayStartState : public cGameState {
     // --- cGameState
-    int mNextState;                 // 0x00 [O] eGFState; [R] ctor 0 then 4 (kGFSM_Riding)
-    int mStartupFlag;               // 0x04 [O]; [R] ctor 0
-    int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFReplayStartState_vtbl (ctor); cGameState_vtbl
-                                    //      (dtor)
+    //   mNextState 0x00: [O] eGFState; [R] ctor 0 then 4 (kGFSM_Riding)
+    //   mStartupFlag 0x04: [O]; [R] ctor 0
+    //   mOverlayDone 0x08: [O] bool; no access in this class's methods
+    //   the vptr 0x0C: [R] cGameState_vtbl, then cGFReplayStartState_vtbl (ctor); cGameState_vtbl
+    //     (dtor)
 
     // Methods bound to their retail symbols by asm labels.
-    void update() __asm__("cGFReplayStartState_update__FPv");
+    cGFReplayStartState() __asm__("cGFReplayStartState_cGFReplayStartState");
+    virtual void update() __asm__("cGFReplayStartState_update__FPv");
 };
 
-CHECK_OFFSET(cGFReplayStartState, mNextState, 0x00);
-CHECK_OFFSET(cGFReplayStartState, mStartupFlag, 0x04);
-CHECK_OFFSET(cGFReplayStartState, mOverlayDone, 0x08);
-CHECK_OFFSET(cGFReplayStartState, mVtbl, 0x0C);
 CHECK_SIZE(cGFReplayStartState, 0x10);
+__asm__("_vt$19cGFReplayStartState = cGFReplayStartState_vtbl");   // g++'s name for the retail vtable
 
 #endif /* MAIN_GAMESTATE_H */

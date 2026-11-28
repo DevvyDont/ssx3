@@ -873,12 +873,8 @@ void cMemMan_free(void*);
 /**
  * Frees every text line (mpLineOffset[0 .. mLineSize - 1]) and the line array, then zeroes mpLineOffset, mLinesOffset
  * and mLineSize.
- *
- * On Tour's clearBuffer() takes no argument.
- *
- * @param ignored  not read (callers pass whatever is in $a1)
  */
-void cUITextScroll::clearBuffer(void* ignored)
+void cUITextScroll::clearBuffer()
 {
     if (mpLineOffset != 0) {
         unsigned short i;
@@ -1068,7 +1064,7 @@ extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll*, void*);
  */
 void cUITextScroll::setUnicodeStringWrap(void* pString)
 {
-    clearBuffer(pString);
+    clearBuffer();
     addUnicodeStringWrap(pString);
 }
 #endif

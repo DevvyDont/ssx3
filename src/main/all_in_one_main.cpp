@@ -1251,7 +1251,8 @@ void operator_delete(int*);
 extern void* cAppModule_vtbl[];
 
 /**
- * Destroys an app module base: stores the root module vtable cAppModule_vtbl at +0x0, then frees the object when asked to.
+ * Destroys an app module base: stores the root module vtable cAppModule_vtbl at +0x0, then frees the object when asked
+ * to. The out-of-line copy of cAppModule's inline destructor (bx/appman.h), so a C function.
  *
  * cAppModule_vtbl is the vtable every screen and module (cPreStartScreen, cInitLoadScreen, the front end, cSSXApp's
  * secondary vtable) falls back to; its slots are the destructor, load, purge, loseFocus, gainFocus, update and render.
@@ -1259,7 +1260,7 @@ extern void* cAppModule_vtbl[];
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cAppModule__cAppModule(cAppModule* self, int flags) {
-    self->mVtbl = cAppModule_vtbl;
+    VPTR_OF(cAppModule, self) = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1267,17 +1268,19 @@ extern "C" void cAppModule__cAppModule(cAppModule* self, int flags) {
 #endif
 
 /**
- * Does nothing: the root module's default for vtable slot 0x1C, which the load screens, the front end and cSSXApp
- * inherit.
+ * Does nothing: the root module's default purge (vtable slot 3, +0x1C), which the load screens, the front end and
+ * cSSXApp inherit.
  */
-extern "C" void cAppModule_purge(void) {
+void cAppModule::purge()
+{
 }
 
 /**
- * Does nothing: the root module's default for vtable slot 0x2C, which the load screens, the front end and cSSXApp
- * inherit.
+ * Does nothing: the root module's default gainFocus (vtable slot 5, +0x2C), which the load screens, the front end and
+ * cSSXApp inherit.
  */
-extern "C" void cAppModule_gainFocus(void) {
+void cAppModule::gainFocus()
+{
 }
 
 //100%

@@ -374,7 +374,7 @@ extern "C" char* cGame_cGame(cGame* self)
     cGFSectionLoadState_cGFSectionLoadState(&self->mSectionLoadState);
     Init_22E968(((char*)self), 396, cGFPodiumState_vtbl, 7);
     Base_22E968(((char*)self), 412);
-    self->mNextHeatState.mVtbl = (void**)cGFNextHeatState_vtbl;
+    VPTR_OF(cGameState, &self->mNextHeatState) = (void**)cGFNextHeatState_vtbl;
     self->mNextHeatState.mStartupFlag = 3;
     self->mNextHeatState.WaitTicks = 0;
     self->mNextHeatState.PlayTransport = 0;

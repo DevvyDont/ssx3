@@ -74,7 +74,7 @@ struct cUITextScroll : public cUIThing {
     void updateLocale() __asm__("cUITextScroll_updateLocale");
     bool onInput(cUIInput* input) __asm__("cUITextScroll_onInput");
     void render2D(float x, float y) __asm__("cUITextScroll_render2D");
-    void clearBuffer(void* ignored) __asm__("cUITextScroll_clearBuffer");
+    void clearBuffer() __asm__("cUITextScroll_clearBuffer");
     int allocLine() __asm__("cUITextScroll_allocLine");
     void addAsciiString(char* str) __asm__("cUITextScroll_addAsciiString");
     void addUnicodeString(unsigned short* str) __asm__("cUITextScroll_addUnicodeString");

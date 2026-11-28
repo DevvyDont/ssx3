@@ -742,21 +742,10 @@ void cUIGroup::setUIData(tUIBaseObject*)
 //100%
 INCLUDE_ASM("ui/uiengine", cUIGroup_setFocus);
 #ifdef SKIP_ASM
-extern void* cListOpSetFocus_vtbl[];
-extern void* cListOperator_vtbl[];
-
-struct cUIGroup_setFocus_sFunctor {
-    void** vt;
-    int arg;
-};
-
 struct cUIGroup_setFocus_sFlags {
     unsigned int pad0 : 4;
     unsigned int on : 1;
 };
-
-// PORT: functor object passed to cList_traverseFlat (declared later in the unit with its own functor struct).
-int cList_traverseFlat_f(void* list, cUIGroup_setFocus_sFunctor* fn) __asm__("cList_traverseFlat");
 
 /**
  * Gives or removes focus on a widget group and all of its children.
@@ -765,12 +754,10 @@ int cList_traverseFlat_f(void* list, cUIGroup_setFocus_sFunctor* fn) __asm__("cL
  */
 void cUIGroup::setFocus(int on)
 {
-    cUIGroup_setFocus_sFunctor focusOp;
-    focusOp.vt = cListOperator_vtbl;
-    focusOp.vt = cListOpSetFocus_vtbl;
-    focusOp.arg = on;
-    cList_traverseFlat_f((char*)&mList, &focusOp);
-    focusOp.vt = cListOperator_vtbl;
+    {
+        cListOpSetFocus focusOp(on);
+        mList.traverseFlat(&focusOp);
+    }
     ((cUIGroup_setFocus_sFlags*)&mAttr)->on = (on != 0);
 }
 #endif
@@ -837,16 +824,6 @@ void cUIGroup::updateLocale()
 //100%
 INCLUDE_ASM("ui/uiengine", cUIGroup_onInput);
 #ifdef SKIP_ASM
-extern void* cListOpOnInput_vtbl[];
-extern void* cListOperator_vtbl[];
-
-struct cUIGroup_onInput_sFunctor {
-    void** vt;
-    const cUIInput* arg;
-};
-
-extern "C" int cList_traverseFlat(void* list, cUIGroup_onInput_sFunctor* fn);
-
 /**
  * Offers an input to a group's children until one of them uses it; a disabled group (bit 5 of its flags)
  * ignores input.
@@ -859,13 +836,8 @@ bool cUIGroup::onInput(const cUIInput* pInput)
     if ((mAttr >> 5) & 1) {
         return false;
     }
-    cUIGroup_onInput_sFunctor inputOp;
-    inputOp.vt = cListOperator_vtbl;
-    inputOp.vt = cListOpOnInput_vtbl;
-    inputOp.arg = pInput;
-    int handled = cList_traverseFlat((char*)&mList, &inputOp);
-    inputOp.vt = cListOperator_vtbl;
-    return handled != 0;
+    cListOpOnInput inputOp(pInput);
+    return mList.traverseFlat(&inputOp) != 0;
 }
 #endif
 

@@ -6,7 +6,7 @@ INCLUDE_ASM("main/loadscreens2", cPreStartScreen_render);
 
 INCLUDE_ASM("main/loadscreens2", cPreStartScreen_loseFocus);
 
-INCLUDE_ASM("main/loadscreens2", cInitLoadScreen__cInitLoadScreen);
+INCLUDE_ASM("main/loadscreens2", _$_15cInitLoadScreen);
 
 INCLUDE_ASM("main/loadscreens2", cInitLoadScreen_load);
 
@@ -24,9 +24,9 @@ INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen_cPreGameLoadScreen);
 
 INCLUDE_ASM("main/loadscreens2", cPreFELoadScreen_cPreFELoadScreen);
 
-INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen__cPreGameLoadScreen);
+INCLUDE_ASM("main/loadscreens2", _$_18cPreGameLoadScreen);
 
-INCLUDE_ASM("main/loadscreens2", cPreFELoadScreen__cPreFELoadScreen);
+INCLUDE_ASM("main/loadscreens2", _$_16cPreFELoadScreen);
 
 INCLUDE_ASM("main/loadscreens2", cPreGameLoadScreen_loseFocus);
 

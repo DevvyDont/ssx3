@@ -234,7 +234,7 @@ struct tRGBInit : tRGB {
  * fog off, sets the graphics manager's clear colour to black (slot 15 with (0, 0, 0)) and calls cSSXAudio_StartLoadingLoop on the
  * audio object. The object itself is not used, so the C takes no arguments.
  */
-extern "C" void cFELoadScreen_gainFocus(void)
+void cFELoadScreen::gainFocus()
 {
     cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startFELoad(SSXApp);
@@ -289,7 +289,6 @@ void cFELoadScreen::purge()
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_render);
 #ifdef SKIP_ASM
 
-extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cUIEngine_render2D(void* engine);
 
 /**
@@ -306,7 +305,7 @@ bool cFELoadScreen::render()
     if (graphicsMan->IsRenderReady() == 0) {
         return false;
     }
-    if (cFadeScreen_drawFade(this) == 0) {
+    if (!drawFade()) {
         cUIEngine_render2D(mpUI);
     }
     graphicsMan = (cPS2GraphicsMan*)GrMan;
@@ -319,7 +318,6 @@ bool cFELoadScreen::render()
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_update);
 #ifdef SKIP_ASM
 extern "C" void cUIEngine_update(void*);
-void cLoadScreen_update(void*);
 
 /**
  * Per-frame update of the front-end load screen: updates its UI object (+0xC, cUIEngine_update), then runs the base
@@ -328,7 +326,7 @@ void cLoadScreen_update(void*);
 void cFELoadScreen::update()
 {
     cUIEngine_update(mpUI);
-    cLoadScreen_update(this);
+    cLoadScreen::update();
 }
 #endif
 
@@ -513,30 +511,16 @@ void* cGFEndWaitState::readFromReplayFrame()
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_cGFFinishlineState);
 #ifdef SKIP_ASM
-extern void* cGameState_vtbl[];
-extern void* cGFFinishlineState_vtbl[];
-extern cGame* cGameState_mpGame;
-
 /**
- * Constructs the finish-line game-flow state in place: base cGameState, vtable cGFFinishlineState_vtbl, next state 7.
- *
- * Runs the inlined cGameState constructor (mNextState 0, vtable cGameState_vtbl at +0xC, cGameState_mpGame cleared), then
- * stores cGFFinishlineState_vtbl, mNextState (+0x0) 7, mStartupFlag (+0x4) 0, the sub-state (+0x10) 2 and the results delay (+0x14)
- * 0. cGame_cGame() builds it at +0x100 of the game.
- *
- * @return @p self
+ * Constructs the finish-line game-flow state (after the inline cGameState constructor): mNextState kGFSM_PostEvent (the
+ * state that follows it), mStartupFlag 0, mSubState 2, mShowEventResultsDelay 0.
  */
-extern "C" void* cGFFinishlineState_cGFFinishlineState(cGFFinishlineState* self)
+cGFFinishlineState::cGFFinishlineState()
 {
-    *(int*)self = 0;
-    self->mVtbl = cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mVtbl = cGFFinishlineState_vtbl;
-    *(int*)self = 7;
-    self->mSubState = 2;
-    self->mStartupFlag = 0;
-    self->mShowEventResultsDelay = 0;
-    return ((void*)self);
+    mNextState = kGFSM_PostEvent;
+    mSubState = 2;
+    mStartupFlag = 0;
+    mShowEventResultsDelay = 0;
 }
 #endif
 
@@ -559,7 +543,7 @@ void cGameComm_stopSyncInput(void* self);
  * indicator bit 4 (cBXLoadIndicator_Show()) and, with a cGameComm_mGameComm, calls cGameComm_stopSyncInput() on it and sets its
  * mAtFinishLine to 1. gainFocus slot of vtable cGFFinishlineState_vtbl.
  */
-void cGFFinishlineState::gainFocus()
+void cGFFinishlineState::gainFocus(int)
 {
     cReplay_endReplay(*(void**)((char*)cGameState_mpGame + 0x28));
     cUIStateStack_purgeNormalStates(*(char**)((char*)cGameState_mpGame + 0x48) + 0x18);
@@ -845,32 +829,18 @@ void cGFFinishlineState::readFromReplayFrame(cBxReplayFrame* stream)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_cGFEventStartState);
 #ifdef SKIP_ASM
-extern void* cGameState_vtbl[];
-extern void* cGFEventStartState_vtbl[];
-extern cGame* cGameState_mpGame;
-
 /**
- * Constructs the event-start game-flow state in place: base cGameState, cGFEventStartState_vtbl, next state 2.
- *
- * Runs the inlined cGameState constructor (vtable cGameState_vtbl, cGameState_mpGame cleared), then stores
- * cGFEventStartState_vtbl, mNextState (+0x0) 2, the sub-state (+0x14) 0, +0x1C 4 and clears mStartupFlag (+0x4), the
- * bytes at +0x10 and +0x8. cGame_cGame() builds it at +0xB0 of the game.
- *
- * @return @p self
+ * Constructs the event-start game-flow state (after the inline cGameState constructor): mNextState kGFSM_PreEvent (the
+ * state that follows it), mStartupFlag 0, mSubState 4, mPurgeCPURiders 0, mHasTransitionNIS 0, mOverlayDone 0.
  */
-extern "C" void* cGFEventStartState_cGFEventStartState(cGFEventStartState* self)
+cGFEventStartState::cGFEventStartState()
 {
-    *(int*)self = 0;
-    self->mVtbl = cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mVtbl = cGFEventStartState_vtbl;
-    *(int*)self = 2;
-    self->mSubState = 4;
-    self->mStartupFlag = 0;
-    self->mPurgeCPURiders = 0;
-    self->mHasTransitionNIS = 0;
-    self->mOverlayDone = 0;
-    return ((void*)self);
+    mNextState = kGFSM_PreEvent;
+    mSubState = 4;
+    mStartupFlag = 0;
+    mPurgeCPURiders = 0;
+    mHasTransitionNIS = 0;
+    mOverlayDone = 0;
 }
 #endif
 

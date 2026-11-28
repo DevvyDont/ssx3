@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "main/game.h"
@@ -272,22 +273,22 @@ extern "C" void cGame__cGame(cGame* self, int flags)
 {
     void** gameStateVtbl = cGameState_vtbl;
     self->mVtbl = cAppModule_vtbl;
-    self->mReplayStartState.mVtbl = gameStateVtbl;
-    self->mSessionTeleportState.mVtbl = gameStateVtbl;
-    self->mUserSelectState.mVtbl = gameStateVtbl;
-    self->mNextHeatState.mVtbl = gameStateVtbl;
-    self->mPodiumState.mVtbl = gameStateVtbl;
-    self->mSectionLoadState.mVtbl = gameStateVtbl;
-    self->mTrackStartState.mVtbl = gameStateVtbl;
-    self->mTransportWaitState.mVtbl = gameStateVtbl;
-    self->mEndWaitState.mVtbl = gameStateVtbl;
-    self->mPostEventState.mVtbl = gameStateVtbl;
-    self->mEndState.mVtbl = gameStateVtbl;
-    self->mFinishlineState.mVtbl = gameStateVtbl;
-    self->mRidingState.mVtbl = gameStateVtbl;
-    self->mGateState.mVtbl = gameStateVtbl;
-    self->mPreEventState.mVtbl = gameStateVtbl;
-    self->mEventStartState.mVtbl = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mReplayStartState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mSessionTeleportState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mUserSelectState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mNextHeatState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mPodiumState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mSectionLoadState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mTrackStartState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mTransportWaitState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mEndWaitState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mPostEventState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mEndState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mFinishlineState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mRidingState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mGateState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mPreEventState) = gameStateVtbl;
+    VPTR_OF(cGameState, &self->mEventStartState) = gameStateVtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -309,7 +310,7 @@ extern void* cAppModule_vtbl[];
  */
 extern "C" void func_002438B0(cAppModule* self, int flags)
 {
-    self->mVtbl = cAppModule_vtbl;
+    VPTR_OF(cAppModule, self) = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

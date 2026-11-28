@@ -7,8 +7,8 @@
 //100%
 INCLUDE_ASM("ui/uianimation", cUIAnimationBank_getAnimationByHashName);
 #ifdef SKIP_ASM
-extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cUIAnimation_cUIAnimation(cUIAnimation* self, void* data);
+// PORT: cMemMan_alloc is the game's tagged operator new(size, tag, flags, d); bound by asm label.
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern const char str_UIAnim[];
 
 struct sUIAnimEntry {
@@ -33,7 +33,7 @@ extern "C" void* cUIAnimationBank_getAnimationByHashName(unsigned int** self, in
     sUIAnimEntry* entry = (sUIAnimEntry*)(*self + 1);
     for (unsigned int i = 0; i < **self; i++) {
         if (entry->hash == hash) {
-            return cUIAnimation_cUIAnimation((cUIAnimation*)cMemMan_alloc(20, str_UIAnim, 0x100, 0), entry);
+            return new (str_UIAnim, 0x100, 0) cUIAnimation((tUIAnimation*)entry);
         }
         entry = (sUIAnimEntry*)((char*)entry + entry->size);
     }
@@ -133,31 +133,26 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_cUIAnimation);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-void cUIAnimationChannel_setAnimChanData(void* self, int val);
 extern char str_UIAnimChan[];
-extern void* cUIAnimation_vtbl[];
 
 /**
  * Constructs an animation over an animation record and points one channel at each of its tracks.
  *
- * Stores the vtable (+0x10) and @p data (+0x0), and marks no frame applied (+0x8 = -1), frame 0 (+0xA) and no
- * start frame (+0xC = kNoStartFrame). When the record has tracks (count at +0x4) it array-allocates the channels
- * ("UIAnimChan") and points each at its track; tracks follow the 0x10-byte header, each sized by its u16 at
- * +0x4.
+ * Keeps @p pAnimHeader, and marks no frame applied (mLastFrameEval -1), frame 0 and no start frame
+ * (kNoStartFrame). When the record has tracks (mNumChannels) it array-allocates the channels ("UIAnimChan") and
+ * points each at its track; tracks follow the 0x10-byte header, each sized by its mByteSize.
  *
- * @param data  the animation record from the bank (On Tour pAnimHeader)
- * @return @p self
+ * @param pAnimHeader  the animation record from the bank
  */
-extern "C" void* cUIAnimation_cUIAnimation(cUIAnimation* self, void* data)
+cUIAnimation::cUIAnimation(tUIAnimation* pAnimHeader)
 {
-    self->mVtbl = cUIAnimation_vtbl;
-    *(void**)self = data;
-    self->mpAnimChannels = 0;
-    self->mLastFrameEval = -1;
-    self->mFrameNum = 0;
-    self->mScreenStartFrame = cUIAnimation::kNoStartFrame;
-    int** slot = (int**)(&self->mpAnimChannels);
-    unsigned int n = *(unsigned int*)((char*)data + 4);
+    mpAnimHeader = pAnimHeader;
+    mpAnimChannels = 0;
+    mLastFrameEval = -1;
+    mFrameNum = 0;
+    mScreenStartFrame = kNoStartFrame;
+    int** slot = (int**)(&mpAnimChannels);
+    unsigned int n = pAnimHeader->mNumChannels;
     if (n != 0) {
         int* block = (int*)operator_new_tag(n * 4 + 0x10, str_UIAnimChan, 0x100, 0);
         block[0] = n;
@@ -167,45 +162,36 @@ extern "C" void* cUIAnimation_cUIAnimation(cUIAnimation* self, void* data)
             *elem = 0;
         }
         *slot = arr;
-        char* chanData = *(char**)self + 0x10;
-        for (unsigned int i = 0; i < *(unsigned int*)(*(char**)self + 4); i++) {
+        char* chanData = (char*)(mpAnimHeader + 1);
+        for (unsigned int i = 0; i < mpAnimHeader->mNumChannels; i++) {
             // PORT: the entry pointer is passed as int
-            self->mpAnimChannels[i].setAnimChanData((int)chanData);
-            chanData += *(unsigned short*)(chanData + 4);
+            mpAnimChannels[i].setAnimChanData((int)chanData);
+            chanData += ((tUIAnimChannel*)chanData)->mByteSize;
         }
     }
-    return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", cUIAnimation__cUIAnimation);
+INCLUDE_ASM("ui/uianimation", _$_12cUIAnimation);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-void operator_delete(int* ptr);
-extern void* cUIAnimation_vtbl[];
 
 /**
- * Destroys a UI animation: frees its array (+0x4, allocated with new[]: its count lives 0x10 bytes before it) and
- * frees the object when bit 0 of @p flags is set.
+ * Destroys a UI animation: frees its channel array (mpAnimChannels, allocated with new[]: its count lives 0x10
+ * bytes before it).
  *
  * The loop that walks the array back to its start destroys nothing (the elements have no destructor).
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cUIAnimation__cUIAnimation(cUIAnimation* self, int flags)
+cUIAnimation::~cUIAnimation()
 {
-    self->mVtbl = cUIAnimation_vtbl;
-    char* base = (char*)self->mpAnimChannels;
+    char* base = (char*)mpAnimChannels;
     if (base != 0) {
         char* elemPtr = base + *(int*)(base - 0x10) * 4;
-        while ((char*)self->mpAnimChannels != elemPtr) {
+        while ((char*)mpAnimChannels != elemPtr) {
             elemPtr -= 4;
         }
-        cMemMan_free((char*)self->mpAnimChannels - 0x10);
-    }
-    if (flags & 1) {
-        operator_delete((int*)self);
+        cMemMan_free((char*)mpAnimChannels - 0x10);
     }
 }
 #endif

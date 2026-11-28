@@ -671,48 +671,23 @@ void cUIPair::setFocus(int on)
 //100%
 INCLUDE_ASM("ui/uimenu", cUIPair_traverseFlat);
 #ifdef SKIP_ASM
-class cUIPair_traverseFlat_cVirt {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual void* onListNode(void*);
-};
-
 /**
  * Applies a list operator to the pair itself, without visiting its two child objects.
  *
- * Returns the operator's onListNode (vtable slot 2 of the operator, whose vtable pointer is its first word) for
- * the pair, the same as cListNode's own traverseFlat.
+ * Returns the operator's onListNode for the pair, the same as cListNode's own traverseFlat.
  *
  * @param pOperator  the list operator (On Tour: pOperator)
  * @return the operator's onListNode result
  */
 void* cUIPair::traverseFlat(cListOperator* pOperator)
 {
-    cUIPair_traverseFlat_cVirt* obj = (cUIPair_traverseFlat_cVirt*)pOperator;
-    return obj->onListNode(this);
+    return pOperator->onListNode(this);
 }
 #endif
 
 //100%
 INCLUDE_ASM("ui/uimenu", cUIPair_traverseRecurse);
 #ifdef SKIP_ASM
-class cUIPair_traverseRecurse_cPred {
-public:
-    // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01();
-    virtual int onListNode(void*);
-};
-
-class cUIPair_traverseRecurse_cNode {
-public:
-    char pad[0x8];
-    // vptr at 0x8
-    virtual void v01();
-    virtual void v02();
-    virtual void* traverseRecurse(cUIPair_traverseRecurse_cPred*);
-};
-
 /**
  * Searches the pair and then its two widgets for the first one the operator accepts.
  *
@@ -721,17 +696,14 @@ public:
  */
 void* cUIPair::traverseRecurse(cListOperator* pOperator)
 {
-    cUIPair_traverseRecurse_cPred* pred = (cUIPair_traverseRecurse_cPred*)pOperator;
-    if (pred->onListNode(this)) {
+    if (pOperator->onListNode(this)) {
         return ((void*)this);
     }
-    cUIPair_traverseRecurse_cNode* child = (cUIPair_traverseRecurse_cNode*)mpEntry;
-    if (child != 0 && child->traverseRecurse(pred) != 0) {
+    if (mpEntry != 0 && mpEntry->traverseRecurse(pOperator) != 0) {
         return mpEntry;
     }
-    cUIPair_traverseRecurse_cNode* next = (cUIPair_traverseRecurse_cNode*)mpWidget;
-    if (next != 0) {
-        return next->traverseRecurse(pred);
+    if (mpWidget != 0) {
+        return mpWidget->traverseRecurse(pOperator);
     }
     return 0;
 }

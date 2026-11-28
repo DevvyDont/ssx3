@@ -127,10 +127,10 @@ int cAppMan::run(cExecutionMan* exec, int ac, char** av)
         callv_6D60((char*)ExecutionMan, 8, 4);
         checkHalt();
     }
-    char* next = (char*)LoadingModule;
+    cAppModule* next = LoadingModule;
     LoadingModule = 0;
-    ActiveModule = (cAppModule*)next;
-    callv_6D60(next, 0, 5);
+    ActiveModule = next;
+    next->gainFocus();
     LoadState = 0;
     cAppMan_mainLoop(this);
     callv_6D60(((char*)this), 92, 4);
@@ -174,18 +174,11 @@ int func_00319D18(void* self);
 int func_00319D18_2(int a, int b) __asm__("func_00319D18__FPv");
 
 struct sVtI_6F00 { short delta; short index; int (*fn)(void*); };
-struct sVtV1_6F00 { short delta; short index; void (*fn)(void*, int); };
 
 static inline int calli_6F00(char* o, int vtoff, int slot)
 {
     sVtI_6F00* vt = *(sVtI_6F00**)(o + vtoff);
     return vt[slot].fn(vthis(o, vt[slot]));
-}
-
-static inline void call1_6F00(char* o, int vtoff, int slot, int a)
-{
-    sVtV1_6F00* vt = *(sVtV1_6F00**)(o + vtoff);
-    vt[slot].fn(vthis(o, vt[slot]), a);
 }
 
 /**
@@ -218,20 +211,18 @@ extern "C" void cAppMan_mainLoop(void* appMan)
             }
             break;
         case cAppMan::kLoadFinished:
-            if (calli_6F00((char*)self->ActiveModule, 0, 4)) {
+            if (self->ActiveModule->loseFocus()) {
                 cAppMan_checkHalt_v(self);
-                callv_6D60((char*)self->ActiveModule, 0, 3);
+                self->ActiveModule->purge();
                 cAppMan_checkHalt_v(self);
-                char* cur = (char*)self->ActiveModule;
-                if (cur)
-                    call1_6F00(cur, 0, 1, 3);
+                delete self->ActiveModule;
                 func_00319D18_2(1, 1);
                 func_00319D10_0();
                 count = 0;
                 cAppModule* next = self->LoadingModule;
                 self->LoadingModule = 0;
                 self->ActiveModule = next;
-                callv_6D60((char*)next, 0, 5);
+                next->gainFocus();
                 cAppMan_checkHalt_v(self);
                 calli_6F00((char*)self, 92, 5);
                 self->FrameRate = 0.0f;
@@ -239,13 +230,11 @@ extern "C" void cAppMan_mainLoop(void* appMan)
             }
             break;
         case cAppMan::kLoadEnd:
-            if (calli_6F00((char*)self->ActiveModule, 0, 4)) {
+            if (self->ActiveModule->loseFocus()) {
                 cAppMan_checkHalt_v(self);
-                callv_6D60((char*)self->ActiveModule, 0, 3);
+                self->ActiveModule->purge();
                 cAppMan_checkHalt_v(self);
-                char* cur = (char*)self->ActiveModule;
-                if (cur)
-                    call1_6F00(cur, 0, 1, 3);
+                delete self->ActiveModule;
                 self->ActiveModule = 0;
                 return;
             }
@@ -266,11 +255,11 @@ extern "C" void cAppMan_mainLoop(void* appMan)
                 break;
             }
             self->Tick++;
-            callv_6D60((char*)self->ActiveModule, 0, 6);
+            self->ActiveModule->update();
             cAppMan_checkHalt_v(self);
         }
-        if ((self->mLock30Fps == true && count > 1 && calli_6F00((char*)self->ActiveModule, 0, 7))
-            || (self->mLock30Fps == 0 && count != 0 && calli_6F00((char*)self->ActiveModule, 0, 7))) {
+        if ((self->mLock30Fps == true && count > 1 && self->ActiveModule->render())
+            || (self->mLock30Fps == 0 && count != 0 && self->ActiveModule->render())) {
             cAppMan_checkHalt_v(self);
             if (0.0f < self->FrameRate) {
                 float k = self->FrameRateDamp;

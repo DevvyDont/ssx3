@@ -1,16 +1,19 @@
 #ifndef UI_UIANIMATION_H
 #define UI_UIANIMATION_H
+#pragma interface
 
 // cUIAnimation: one UI animation playing on a screen (EA's UI library): the animation header, its channels, and the
 // current / last evaluated frame, start frame and direction. Methods in ui/uianimation (constructors, start,
 // setFrameNumber, updateFrame, updateThing, isLastFrame, getNumFrames, getHashName); the UI groups, texts and menus
 // hold them (ui/uigroup.h, ui/uitext.h, ui/uimenu.h).
 //
-// Size 0x14 [R] (the retail allocation; On Tour's is the same; retail's vptr is at 0x10, after the members). A FLAT
-// layout, like main/game.h: member names, order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every
-// retail access in the methods falls on a member start.
+// Size 0x14 [R] (the retail allocation; On Tour's is the same; retail's vptr is at 0x10, after the members). A real
+// polymorphic class (`#pragma interface`: no unit emits its vtable; the equate after it binds g++'s name): member
+// names, order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods falls
+// on a member start.
 
 #include "layout.h"
+#include "bx/memman.h"
 
 struct cUIAnimationChannel;
 struct tUIAnimation;
@@ -58,8 +61,14 @@ struct cUIAnimation {
     unsigned short mScreenStartFrame;    // 0x00C [O]
     char mFrameDirection;                // 0x00E [O]
     char unk_00F[0x1];                   // 0x00F padding
-    void** mVtbl;                        // 0x010 [R] ctor = cUIAnimation_vtbl (g++ 2.95 puts the vptr after the
-                                         //       members)
+    // 0x010: the vptr ([R] cUIAnimation_vtbl, stored by the constructors and the destructor; g++ 2.95 puts it after
+    // the members). Its one slot:
+    virtual ~cUIAnimation();             // 1 g++'s own symbol _$_12cUIAnimation (the retail label renamed)
+
+    // [O] EA's constructor over an animation record ([R] cUIAnimationBank_getAnimationByHashName news one).
+    cUIAnimation(tUIAnimation* pAnimHeader) __asm__("cUIAnimation_cUIAnimation");
+    // [R] a default constructor (ui/uivector; nothing in retail calls it).
+    cUIAnimation() __asm__("cUIAnimation_cUIAnimation1");
 
     // Methods bound to their retail symbols by asm labels.
     bool isLastFrame() __asm__("cUIAnimation_isLastFrame");
@@ -67,7 +76,6 @@ struct cUIAnimation {
     void start(int mode, unsigned short FrameNum) __asm__("cUIAnimation_start");
     void updateFrame(unsigned char flags) __asm__("cUIAnimation_updateFrame");
     void updateThing(cUIThing* obj, int mode, unsigned short FrameNum) __asm__("cUIAnimation_updateThing");
-    void* cUIAnimation1() __asm__("cUIAnimation_cUIAnimation1");
     int getHashName() __asm__("cUIAnimation_getHashName");
     void setFrameNumber(short frame) __asm__("cUIAnimation_setFrameNumber");
 };
@@ -78,8 +86,8 @@ CHECK_OFFSET(cUIAnimation, mLastFrameEval, 0x008);
 CHECK_OFFSET(cUIAnimation, mFrameNum, 0x00A);
 CHECK_OFFSET(cUIAnimation, mScreenStartFrame, 0x00C);
 CHECK_OFFSET(cUIAnimation, mFrameDirection, 0x00E);
-CHECK_OFFSET(cUIAnimation, mVtbl, 0x010);
 CHECK_SIZE(cUIAnimation, 0x14);
+__asm__("_vt$12cUIAnimation = cUIAnimation_vtbl");   // g++'s name for the retail vtable
 
 
 // ---------------------------------------------------------------------------------------------------------------------

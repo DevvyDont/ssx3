@@ -1,13 +1,14 @@
 #ifndef UI_UISCREEN_H
 #define UI_UISCREEN_H
+#pragma interface
 
 // cUIScreen: one screen of UI objects loaded from a screen record, owned by a cUIState (cUIState::mScreens).
 // cUIEngine_addScreenByHashName creates it with `cMemMan_alloc(0xD4, "UIScreen", ...)` and constructs it inline
 // (the same stores as cUIScreen_cUIScreen, the cUIScreen(cUIState*) constructor): 0xD4 bytes.
 //
-// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
-// Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). _vt$9cUIScreen (cUIScreen_vtbl)
-// is cListNode's 3 slots with cUIScreen's destructor in slot 1.
+// A real class: cUIScreen : cListNode (util/list.h: mpPrev 0x0, mpNext 0x4, the vptr at 0x8), its own members at their
+// retail offsets from 0xC. _vt$9cUIScreen (cUIScreen_vtbl) is cListNode's 3 slots with cUIScreen's destructor in
+// slot 1, then onInput (4). `#pragma interface`: no unit emits the vtable; the equate after the class binds it.
 //
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIScreen), placed at retail offsets by:
 //   [P] the July 2003 preview's inline accessors; retail keeps out-of-line copies of them in the preview's order in
@@ -43,10 +44,12 @@ struct tUIKCPObjectAnimate;
 struct cUIThread;
 struct tUIKCPKeyframeJump;
 
-struct cUIScreen {
-    cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructors self-link it
-    cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] cUIState_updateScreens walks screens by it
-    void** mVtbl;                    // 0x008 [R] _vt$9cUIScreen (cUIScreen_vtbl), stored by cUIScreen_cUIScreen1/cUIScreen_cUIScreen/cUIScreen__cUIScreen
+struct cUIScreen : public cListNode {
+    // cListNode: mpPrev 0x000 and mpNext 0x004 ([R] the constructors self-link them; [U] cUIState_updateScreens walks
+    // screens by mpNext), the vptr 0x008 ([R] cUIScreen_vtbl, stored by cUIScreen_cUIScreen1 / cUIScreen_cUIScreen /
+    // the destructor). Slots [R] cUIScreen_vtbl (2-3 cListNode's traverseFlat / traverseRecurse), names [O]:
+    virtual ~cUIScreen();            // 1 cUIScreen__cUIScreen (a C function, see util/list.h)
+    virtual bool onInput(const cUIInput* pInput) __asm__("cUIScreen_onInput__FPv");   // 4
     char* mpBuffer;                  // 0x00C [O]; [R] = 0; cUIScreen_setData stores its "UIScreenData" copy of the record here;
                                      //       cUIScreen__cUIScreen frees it when mAttrScreen bit 1 (mBufferAlloc) is set
     tUIScreenHeader* mpScreenHeader; // 0x010 [P] getHashName = mpScreenHeader's first word (preview lw 0x10; retail cUIScreen_getHashName);
@@ -82,7 +85,6 @@ struct cUIScreen {
     void parseScreenFocusGain() __asm__("cUIScreen_parseScreenFocusGain");
     void parseScreenFocusLose() __asm__("cUIScreen_parseScreenFocusLose");
     cUIThing* createObjectByStruct(tUIBaseObject* rec) __asm__("cUIScreen_createObjectByStruct");
-    void* onInput() __asm__("cUIScreen_onInput__FPv");
     void update() __asm__("cUIScreen_update");
     cUIThing* getObjectByHashName(int hash) __asm__("cUIScreen_getObjectByHashName");
     void* cUIScreen1() __asm__("cUIScreen_cUIScreen1");
@@ -109,9 +111,6 @@ struct cUIScreen {
     void* playFrame(unsigned short frame, int ThreadType) __asm__("cUIScreen_playFrame");
 };
 
-CHECK_OFFSET(cUIScreen, mpPrev, 0x000);
-CHECK_OFFSET(cUIScreen, mpNext, 0x004);
-CHECK_OFFSET(cUIScreen, mVtbl, 0x008);
 CHECK_OFFSET(cUIScreen, mpBuffer, 0x00C);
 CHECK_OFFSET(cUIScreen, mpScreenHeader, 0x010);
 CHECK_OFFSET(cUIScreen, mAttrScreen, 0x014);
@@ -122,6 +121,7 @@ CHECK_OFFSET(cUIScreen, mppObjectList, 0x03C);
 CHECK_OFFSET(cUIScreen, mRootGroup, 0x040);
 CHECK_OFFSET(cUIScreen, mpState, 0x0D0);
 CHECK_SIZE(cUIScreen, 0xD4);
+__asm__("_vt$9cUIScreen = cUIScreen_vtbl");   // g++'s name for the retail vtable
 
 
 // ---------------------------------------------------------------------------------------------------------------------

@@ -58,7 +58,7 @@ extern void* cListNode_vtbl[];
  */
 extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
 {
-    self->mVtbl = cUIScreen_vtbl;
+    VPTR_OF(cListNode, self) = cUIScreen_vtbl;
     if ((void*)self->mppObjectList != 0) {
         cMemMan_free__FPv(self->mppObjectList);
     }
@@ -80,7 +80,7 @@ extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
     cListNode_destroyListNode(&self->mThreads.mEnd);
     VPTR_OF(cListNode, &self->mThreads.mStart) = cListNode_vtbl;
     cListNode_destroyListNode(&self->mThreads);
-    self->mVtbl = cListNode_vtbl;
+    VPTR_OF(cListNode, self) = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self));
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1033,21 +1033,19 @@ cUIThing* cUIScreen::createObjectByStruct(tUIBaseObject* rec)
 }
 #endif
 
-extern "C" void* cUIGroup_onInput(void*);
 
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_onInput__FPv);
 #ifdef SKIP_ASM
 /**
- * Passes controller input to the screen's root group (+0x40) through cUIGroup_onInput().
+ * Passes controller input to the screen's root group (mRootGroup).
  *
- * The input object (On Tour onInput(pInput)) passes through in its register.
- *
- * @return cUIGroup_onInput()'s result (On Tour: whether the input was handled)
+ * @param pInput  the input
+ * @return whether the input was handled
  */
-void* cUIScreen::onInput()
+bool cUIScreen::onInput(const cUIInput* pInput)
 {
-    return cUIGroup_onInput(&mRootGroup);
+    return mRootGroup.onInput(pInput);
 }
 #endif
 
@@ -1744,16 +1742,6 @@ struct cUIState_onUpdate_sVEntryI {
     short index;
     int (*fn)(void*);
 };
-struct cUIState_onUpdate_sVEntryV {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
-struct cUIState_onUpdate_sVEntryP {
-    short delta;
-    short index;
-    int (*fn)(void*, void*);
-};
 
 static inline int cUIState_onUpdate_padTest(char* pad, int slot)
 {
@@ -1766,9 +1754,9 @@ static inline int cUIState_onUpdate_padTest(char* pad, int slot)
  *
  * For controller index 0 and 1 (stored at +0x14 while running, -1 after) it refreshes the input object through its
  * virtual slot 44 and, when button 45 is down and either button 41 or button 40 with the controller enabled in the mask
- * at +0x15 is down, offers the input to virtual slot 8; if that does not consume it, each screen in the list at +0x24
- * with its enabled bit set gets it through its virtual slot 4 until one returns non-zero. Virtual slot 9
- * (cUIState_onInputAlways) is then called and the loop stops.
+ * at +0x15 is down, offers the input to onInputBegin; if that does not consume it, each screen in the list at +0x24
+ * with its enabled bit set gets it through its onInput until one uses it. onInputAlways is then called and the loop
+ * stops.
  */
 void cUIState::onUpdate()
 {
@@ -1779,21 +1767,18 @@ void cUIState::onUpdate()
         input->setPadNum((unsigned char)mCurrentCtrl);
         if (cUIState_onUpdate_padTest(((char*)input), 45)) {
             if (cUIState_onUpdate_padTest(((char*)input), 41) || (cUIState_onUpdate_padTest(((char*)input), 40) && (mask & 1))) {
-                cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)VPTR_OF(cListNode, this);
-                if (!vs[8].fn(vthis(this, vs[8]), ((char*)input))) {
+                if (!onInputBegin(input)) {
                     cUIScreen* n = (cUIScreen*)cList_first((cList*)(&mScreens));
                     if (((char*)n) != 0) {
                         do {
                             if (n->mAttrScreen & 1) {
-                                cUIState_onUpdate_sVEntryP* vn = (cUIState_onUpdate_sVEntryP*)n->mVtbl;
-                                if (vn[4].fn(vthis(n, vn[4]), ((char*)input))) break;
+                                if (n->onInput(input)) break;
                             }
                             n = (cUIScreen*)n->mpNext;
                         } while (!cListNode_isSentinel((cListNode*)n));
                     }
                 }
-                cUIState_onUpdate_sVEntryV* vs2 = (cUIState_onUpdate_sVEntryV*)VPTR_OF(cListNode, this);
-                vs2[9].fn(vthis(this, vs2[9]), ((char*)input));
+                onInputAlways(input);
                 break;
             }
         }

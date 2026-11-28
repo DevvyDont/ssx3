@@ -61,7 +61,7 @@ extern char str_StartlightBegin[];
  *
  * An online game first resets the world. Game modes 4-6 skip the gate and go straight to the next state.
  */
-void cGFGateState::gainFocus()
+void cGFGateState::gainFocus(int)
 {
     cGameState_mpGame->AI->ComputerActorsActive = 0;
     if (cGameComm_mGameComm != 0) {
@@ -297,32 +297,19 @@ void* cGFRidingState::readFromReplayFrame()
 //100%
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_cGFTrackStartState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFTrackStartState_vtbl[];
-extern cGame* cGameState_mpGame;
-
 /**
- * Constructs the track-start game state.
- *
- * The cGameState part sets mNextState (+0x0) to 0, its vtable cGameState_vtbl at +0xC and clears the static
- * cGameState_mpGame; then the class stores cGFTrackStartState_vtbl, mNextState 4, the preload state (+0x10) 5 and
- * clears mStartupFlag (+0x4), +0x14, +0x18 and +0x1C. cGame_cGame builds it at +0x158 of the game.
- *
- * @return @p self
+ * Constructs the track-start game-flow state (after the inline cGameState constructor): mNextState kGFSM_Riding (the
+ * state that follows it), mStartupFlag 0, mPreLoadState cGFTrackStartState::kPreLoad_Done, mPlayFirstTimeBCVideo 0,
+ * mPreLoadTicks 0, mCheckTransportEnd 0.
  */
-extern "C" void* cGFTrackStartState_cGFTrackStartState(cGFTrackStartState* self)
+cGFTrackStartState::cGFTrackStartState()
 {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mVtbl = (void**)cGFTrackStartState_vtbl;
-    self->mNextState = 4;
-    self->mPreLoadState = cGFTrackStartState::kPreLoad_Done;
-    self->mStartupFlag = 0;
-    self->mPlayFirstTimeBCVideo = 0;
-    self->mPreLoadTicks = 0;
-    self->mCheckTransportEnd = 0;
-    return ((void*)self);
+    mNextState = kGFSM_Riding;
+    mPreLoadState = cGFTrackStartState::kPreLoad_Done;
+    mStartupFlag = 0;
+    mPlayFirstTimeBCVideo = 0;
+    mPreLoadTicks = 0;
+    mCheckTransportEnd = 0;
 }
 #endif
 
@@ -710,7 +697,7 @@ static inline int isMode2_2355C0(cSSXScriptEngine* s)
  * Offline outside locations 14-16 the state goes to step 4; otherwise to step 1. kGAMEMODE_FREERIDE puts the AI in
  * state 3 and disables its countdown flag. A hub (kLOCATIONTYPE_HUB) is recorded as player 1's last hub.
  */
-void cGFTrackStartState::gainFocus()
+void cGFTrackStartState::gainFocus(int)
 {
     mCheckTransportEnd = 0;
     if (cSSXScriptEngine_IsInTransportSequence(ScriptEngine))
@@ -910,7 +897,7 @@ extern void* cWScriptMan_TheWScriptMan;
  * kGAMEMODE_TIMECHALLENGE and kGAMEMODE_PNTSCHALLENGE, and online games, skip straight to NH_DONE. Race mode also plays
  * the transport sequence.
  */
-void cGFNextHeatState::gainFocus()
+void cGFNextHeatState::gainFocus(int)
 {
     cBE_setState(0);
     cWScriptMan_failActiveLocalMission(cWScriptMan_TheWScriptMan);
@@ -1140,7 +1127,7 @@ extern void* cFade_TObj_vtbl[];
  * Teleports the rider for a new session: free-ride event 12, a partial restart at the mission start point, a
  * white fade.
  */
-void cGFSessionTeleportState::gainFocus()
+void cGFSessionTeleportState::gainFocus(int)
 {
     void* gm = SSXApp->GameModeMan;
     cWScriptMan_failActiveLocalMission(cWScriptMan_TheWScriptMan);
@@ -1218,31 +1205,17 @@ void* cGFSessionTeleportState::readFromReplayFrame()
 //100%
 INCLUDE_ASM("main/gamestate", cGFUserSelectState_cGFUserSelectState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFUserSelectState_vtbl[];
-extern cGame* cGameState_mpGame;
-
 /**
- * Constructs the user-select game state.
- *
- * The cGameState part sets mNextState to 0, its vtable cGameState_vtbl and clears cGameState_mpGame; then the class stores
- * cGFUserSelectState_vtbl, mNextState 4, the next location (+0x18) 23 and clears mStartupFlag (+0x4), the overlay-done
- * flag (+0x8) and +0x14. cGame_cGame builds it at +0x1B8 of the game.
- *
- * @return @p self
+ * Constructs the user-select game-flow state (after the inline cGameState constructor): mNextState kGFSM_Riding (the
+ * state that follows it), mStartupFlag 0, mNextLocation 23, mOverlayDone 0, mMode 0.
  */
-extern "C" void* cGFUserSelectState_cGFUserSelectState(cGFUserSelectState* self)
+cGFUserSelectState::cGFUserSelectState()
 {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mVtbl = (void**)cGFUserSelectState_vtbl;
-    self->mNextState = 4;
-    self->mNextLocation = 23;
-    self->mStartupFlag = 0;
-    self->mOverlayDone = 0;
-    self->mMode = 0;
-    return ((void*)self);
+    mNextState = kGFSM_Riding;
+    mNextLocation = 23;
+    mStartupFlag = 0;
+    mOverlayDone = 0;
+    mMode = 0;
 }
 #endif
 
@@ -1533,27 +1506,14 @@ void cGFUserSelectState::readFromReplayFrame(cBxReplayFrame* stream)
 //100%
 INCLUDE_ASM("main/gamestate", cGFSectionLoadState_cGFSectionLoadState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFSectionLoadState_vtbl[];
-extern cGame* cGameState_mpGame;
-
 /**
- * Constructs the section-load game state (vtable cGFSectionLoadState_vtbl).
- *
- * The cGameState part sets mNextState to 0, its vtable cGameState_vtbl and clears cGameState_mpGame; then stores cGFSectionLoadState_vtbl,
- * mNextState 10 and clears mStartupFlag (+0x4). cGame_cGame builds it at +0x178 of the game.
- *
- * @return @p self
+ * Constructs the section-load game-flow state (after the inline cGameState constructor): mNextState kGFSM_TrackStart
+ * (the state that follows it), mStartupFlag 0.
  */
-extern "C" void* cGFSectionLoadState_cGFSectionLoadState(cGFSectionLoadState* self)
+cGFSectionLoadState::cGFSectionLoadState()
 {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mVtbl = (void**)cGFSectionLoadState_vtbl;
-    self->mNextState = 10;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+    mNextState = kGFSM_TrackStart;
+    mStartupFlag = 0;
 }
 #endif
 
@@ -1582,7 +1542,7 @@ struct sRace002368A0 {
  * cBENewPlayerInterface_setIsFirstTimeWC(player interface, i, 0) for each of the race's iNumberRiders. Clears the sub-state (+0x10). Slot +0x2C
  * (gainFocus) of cGFSectionLoadState_vtbl.
  */
-void cGFSectionLoadState::gainFocus()
+void cGFSectionLoadState::gainFocus(int)
 {
     cBE_setState(0);
     cReplay_reset(cGameState_mpGame->Replay);
@@ -1804,7 +1764,7 @@ struct sGameState_6BB0 {
  * pushes pause state 1 (cPauseState_Stack[++cPauseState_StackIdx] = 1, cPauseState_Flags = cPauseState_FlagsTable[1]).
  * Slot +0x2C (gainFocus) of cGFPreEventState_vtbl.
  */
-void cGFPreEventState::gainFocus()
+void cGFPreEventState::gainFocus(int)
 {
     mOverlayDone = 0;
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mError != 0) {
@@ -1959,7 +1919,7 @@ struct sRace00236DA0 {
  * cSSXScriptEngine_ResetNISList(ScriptEngine, 0), clears the overlay-done flag (+0x8) and calls
  * cOVStateManager_gotoOverlay(7). Slot +0x2C (gainFocus) of cGFPostEventState_vtbl.
  */
-void cGFPostEventState::gainFocus()
+void cGFPostEventState::gainFocus(int)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 0) {

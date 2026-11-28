@@ -358,11 +358,13 @@ extern char cAppModule_vtbl[];
  * It is the destructor slot (+0xC) of cFadeScreen_vtbl, the vtable cFadeScreen_cFadeScreen (the fade constructor) installs
  * and whose loseFocus and update slots are cFadeScreen_loseFocus and cFadeScreen_update.
  *
+ * The out-of-line copy of cFadeScreen's implicit inline destructor (main/fadescreen.h), so a C function.
+ *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cFadeScreen__cFadeScreen(cFadeScreen* self, int flags)
 {
-    *(void**)self = cAppModule_vtbl;
+    VPTR_OF(cAppModule, self) = (void**)cAppModule_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -385,25 +387,14 @@ void cFadeScreen::allowFade()
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cPreStartScreen__cPreStartScreen);
+INCLUDE_ASM("main/ssxappdtor", _$_15cPreStartScreen);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-extern char cAppModule_vtbl[];
-
 /**
- * Destroys the pre-start screen.
- *
- * Only resets the vtable to the root module vtable cAppModule_vtbl (the base destructors have nothing else to do) and
- * frees the object with operator_delete() when bit 0 of @p flags is set.
- *
- * @param flags  the destructor flags (bit 0: free the memory)
+ * Destroys the pre-start screen: it owns nothing of its own, so the inlined cAppModule destructor only puts back the
+ * root module vtable cAppModule_vtbl, and g++ frees the object when asked.
  */
-extern "C" void cPreStartScreen__cPreStartScreen(cPreStartScreen* self, int flags)
+cPreStartScreen::~cPreStartScreen()
 {
-    *(void**)self = cAppModule_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -426,10 +417,12 @@ extern char cInitLoadScreen_vtbl[];
 /**
  * Constructs the initial load screen: installs cInitLoadScreen_vtbl and clears its two flags (+0x4 and +0x8).
  *
+ * The out-of-line copy of cInitLoadScreen's inline constructor (main/loadscreens.h), so a C function.
+ *
  * @return @p self
  */
 extern "C" void *cInitLoadScreen_cInitLoadScreen(cInitLoadScreen* self) {
-    self->mVtbl = (void**)cInitLoadScreen_vtbl;
+    VPTR_OF(cAppModule, self) = (void**)cInitLoadScreen_vtbl;
     self->progressive = 0;
     self->ending = 0;
     return ((void*)self);
@@ -462,11 +455,13 @@ extern char cAppModule_vtbl[];
  * It is the destructor slot (+0xC) of cLoadScreen_vtbl, the vtable cLoadScreen_cLoadScreen installs (loseFocus is
  * cLoadScreen_loseFocus).
  *
+ * The out-of-line copy of cLoadScreen's implicit inline destructor (main/loadscreens.h), so a C function.
+ *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cLoadScreen__cLoadScreen(cLoadScreen* self, int flags)
 {
-    *(void**)self = cAppModule_vtbl;
+    VPTR_OF(cAppModule, self) = (void**)cAppModule_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -485,60 +480,46 @@ extern char cLoadScreen_vtbl[];
  *
  * cLoadScreen_vtbl's loseFocus slot is cLoadScreen_loseFocus and its update slot is cLoadScreen_update.
  *
+ * The out-of-line copy of cLoadScreen's inline constructor (main/loadscreens.h), so a C function.
+ *
  * @return @p self
  */
 extern "C" void *cLoadScreen_cLoadScreen(cLoadScreen* self) {
     cFadeScreen_cFadeScreen(self);
     self->mpUI = 0;
-    self->mVtbl = (void**)cLoadScreen_vtbl;
+    VPTR_OF(cAppModule, self) = (void**)cLoadScreen_vtbl;
     return ((void*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cStartScreen__cStartScreen);
+INCLUDE_ASM("main/ssxappdtor", _$_12cStartScreen);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-extern char cAppModule_vtbl[];
-
 /**
- * Destroys the start screen: resets the vtable to the root module vtable cAppModule_vtbl and frees the object when asked.
+ * Destroys the start screen: it owns nothing of its own (purge frees the UI), so the inlined cLoadScreen / cFadeScreen
+ * / cAppModule destructors only put back the root module vtable cAppModule_vtbl, and g++ frees the object when asked.
  *
  * It is the destructor slot (+0xC) of cStartScreen_vtbl, whose load slot is cStartScreen_load (loads the "data/ui/su"
  * start screen).
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cStartScreen__cStartScreen(cStartScreen* self, int flags)
+cStartScreen::~cStartScreen()
 {
-    *(void**)self = cAppModule_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cGameLoadScreen__cGameLoadScreen);
+INCLUDE_ASM("main/ssxappdtor", _$_15cGameLoadScreen);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-extern char cAppModule_vtbl[];
-
 /**
- * Destroys the game load screen: resets the vtable to the root module vtable cAppModule_vtbl and frees the object when
- * asked.
+ * Destroys the game load screen: it owns nothing of its own (purge frees the UI and textures), so the inlined
+ * cLoadScreen / cFadeScreen / cAppModule destructors only put back the root module vtable cAppModule_vtbl, and g++
+ * frees the object when asked.
  *
  * It is the destructor slot (+0xC) of cGameLoadScreen_vtbl, whose load slot is cGameLoadScreen_load (loads the
  * "data/ui/gl" game load screen); cGameLoadScreen_cGameLoadScreen installs that vtable.
- *
- * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void cGameLoadScreen__cGameLoadScreen(cGameLoadScreen* self, int flags)
+cGameLoadScreen::~cGameLoadScreen()
 {
-    *(void**)self = cAppModule_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -552,12 +533,14 @@ extern char cGameLoadScreen_vtbl[];
  * Constructs the game load screen: runs the fade constructor cFadeScreen_cFadeScreen, clears the UI engine pointer
  * (+0xC), installs vtable cGameLoadScreen_vtbl and clears its two texture ids (+0x10, +0x14).
  *
+ * The out-of-line copy of cGameLoadScreen's inline constructor (main/loadscreens.h), so a C function.
+ *
  * @return @p self
  */
 extern "C" void *cGameLoadScreen_cGameLoadScreen(cGameLoadScreen* self) {
     cFadeScreen_cFadeScreen(self);
     self->mpUI = 0;
-    self->mVtbl = (void**)cGameLoadScreen_vtbl;
+    VPTR_OF(cAppModule, self) = (void**)cGameLoadScreen_vtbl;
     self->mTexID[0] = 0;
     self->mTexID[1] = 0;
     return ((void*)self);
@@ -574,31 +557,20 @@ INCLUDE_ASM("main/ssxappdtor", cGameLoadScreen_getTexttureID);
  */
 int cGameLoadScreen::getTexttureID(int index)
 {
-    return *(int *)((char *)this + (index << 2) + 0x10);
+    return mTexID[index];
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", cFELoadScreen__cFELoadScreen);
+INCLUDE_ASM("main/ssxappdtor", _$_13cFELoadScreen);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-
-extern char cAppModule_vtbl[];
-
 /**
- * Destroys a front-end load screen.
- *
- * Only resets the vtable to the root module vtable cAppModule_vtbl (the base destructors have nothing else to do) and
- * frees the object with operator_delete() when bit 0 of @p flags is set.
- *
- * @param flags  the destructor flags (bit 0: free the memory)
+ * Destroys a front-end load screen: it owns nothing of its own (purge frees the UI and textures), so the inlined
+ * cLoadScreen / cFadeScreen / cAppModule destructors only put back the root module vtable cAppModule_vtbl, and g++
+ * frees the object when asked.
  */
-extern "C" void cFELoadScreen__cFELoadScreen(cFELoadScreen* self, int flags)
+cFELoadScreen::~cFELoadScreen()
 {
-    *(void**)self = cAppModule_vtbl;
-    if (flags & 1) {
-        operator_delete(((int*)self));
-    }
 }
 #endif
 
@@ -612,12 +584,14 @@ extern char cFELoadScreen_vtbl[];
  * Constructs a front-end load screen: runs the fade constructor cFadeScreen_cFadeScreen, clears the UI engine pointer
  * (+0xC), installs cFELoadScreen_vtbl and clears its two texture ids (+0x10, +0x14).
  *
+ * The out-of-line copy of cFELoadScreen's inline constructor (main/loadscreens.h), so a C function.
+ *
  * @return @p self
  */
 extern "C" void *cFELoadScreen_cFELoadScreen(cFELoadScreen* self) {
     cFadeScreen_cFadeScreen(self);
     self->mpUI = 0;
-    self->mVtbl = (void**)cFELoadScreen_vtbl;
+    VPTR_OF(cAppModule, self) = (void**)cFELoadScreen_vtbl;
     self->mTexID[0] = 0;
     self->mTexID[1] = 0;
     return ((void*)self);
@@ -656,7 +630,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGameState__cGameState(cGameState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -705,7 +679,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_gainFocus__FPv);
  * It fills slot +0x2C of the base game-state vtable cGameState_vtbl and of the states that keep the default (the end-wait
  * and transport-wait states).
  */
-void cGameState::gainFocus()
+void cGameState::gainFocus(int)
 {
 }
 #endif
@@ -741,11 +715,11 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_isPreloadComplete__FPv);
 /**
  * Reports the base game state's preload as already complete.
  *
- * @return always 1
+ * @return always true
  */
-int cGameState::isPreloadComplete()
+bool cGameState::isPreloadComplete()
 {
-    return 0x1;
+    return true;
 }
 #endif
 
@@ -755,7 +729,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_onWidgetEvent__FPv);
 /**
  * Ignores widget events: the base game state's onWidgetEvent has an empty body.
  */
-void cGameState::onWidgetEvent()
+void cGameState::onWidgetEvent(cUIThing*, unsigned int)
 {
 }
 #endif
@@ -778,7 +752,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFEndState__cGFEndState(cGFEndState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -788,26 +762,14 @@ extern "C" void cGFEndState__cGFEndState(cGFEndState* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFEndState_cGFEndState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFEndState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the end game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then next
- * state 8 (+0x0), vtable cGFEndState_vtbl (+0xC) and startup flag 0 (+0x4).
- *
- * In On Tour's eGFState numbering 8 is kGFSM_EndWait, the state that follows the end state.
- *
- * @return @p self
+ * Constructs the end game-flow state (after the inline cGameState constructor): mNextState kGFSM_EndWait (the state
+ * that follows it), mStartupFlag 0.
  */
-extern "C" void *cGFEndState_cGFEndState(cGFEndState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mNextState = 8;
-    self->mVtbl = (void**)cGFEndState_vtbl;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+cGFEndState::cGFEndState()
+{
+    mNextState = kGFSM_EndWait;
+    mStartupFlag = 0;
 }
 #endif
 
@@ -829,7 +791,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFEndWaitState__cGFEndWaitState(cGFEndWaitState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -854,7 +816,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFFinishlineState__cGFFinishlineState(cGFFinishlineState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -878,7 +840,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFTransportWaitState__cGFTransportWaitState(cGFTransportWaitState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -888,24 +850,14 @@ extern "C" void cGFTransportWaitState__cGFTransportWaitState(cGFTransportWaitSta
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFTransportWaitState_cGFTransportWaitState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFTransportWaitState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the transport-wait game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared),
- * then next state 10 (+0x0), vtable cGFTransportWaitState_vtbl (+0xC) and startup flag 0 (+0x4).
- *
- * @return @p self
+ * Constructs the transport-wait game-flow state (after the inline cGameState constructor): mNextState kGFSM_TrackStart
+ * (the state that follows it), mStartupFlag 0.
  */
-extern "C" void *cGFTransportWaitState_cGFTransportWaitState(cGFTransportWaitState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mNextState = 10;
-    self->mVtbl = (void**)cGFTransportWaitState_vtbl;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+cGFTransportWaitState::cGFTransportWaitState()
+{
+    mNextState = kGFSM_TrackStart;
+    mStartupFlag = 0;
 }
 #endif
 
@@ -924,7 +876,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFEventStartState__cGFEventStartState(cGFEventStartState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -946,7 +898,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFGateState__cGFGateState(cGFGateState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -956,24 +908,14 @@ extern "C" void cGFGateState__cGFGateState(cGFGateState* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFGateState_cGFGateState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFGateState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the gate game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then next
- * state 4 (+0x0), cGFGateState_vtbl (+0xC) and startup flag 0 (+0x4).
- *
- * @return @p self
+ * Constructs the start-gate game-flow state (after the inline cGameState constructor): mNextState kGFSM_Riding (the
+ * state that follows it), mStartupFlag 0.
  */
-extern "C" void *cGFGateState_cGFGateState(cGFGateState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mNextState = 4;
-    self->mVtbl = (void**)cGFGateState_vtbl;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+cGFGateState::cGFGateState()
+{
+    mNextState = kGFSM_Riding;
+    mStartupFlag = 0;
 }
 #endif
 
@@ -994,7 +936,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFRidingState__cGFRidingState(cGFRidingState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1004,24 +946,14 @@ extern "C" void cGFRidingState__cGFRidingState(cGFRidingState* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFRidingState_cGFRidingState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFRidingState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the riding game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then
- * next state 5 (+0x0), vtable cGFRidingState_vtbl (+0xC) and startup flag 0 (+0x4).
- *
- * @return @p self
+ * Constructs the riding game-flow state (after the inline cGameState constructor): mNextState kGFSM_Finishline (the
+ * state that follows it), mStartupFlag 0.
  */
-extern "C" void *cGFRidingState_cGFRidingState(cGFRidingState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mNextState = 5;
-    self->mVtbl = (void**)cGFRidingState_vtbl;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+cGFRidingState::cGFRidingState()
+{
+    mNextState = kGFSM_Finishline;
+    mStartupFlag = 0;
 }
 #endif
 
@@ -1040,7 +972,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFTrackStartState__cGFTrackStartState(cGFTrackStartState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1062,7 +994,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFNextHeatState__cGFNextHeatState(cGFNextHeatState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1072,26 +1004,16 @@ extern "C" void cGFNextHeatState__cGFNextHeatState(cGFNextHeatState* self, int f
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFNextHeatState_cGFNextHeatState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFNextHeatState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the next-heat game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then
- * cGFNextHeatState_vtbl (+0xC), next state 1 (+0x0), startup flag 3 (+0x4) and two cleared fields (+0x14, +0x18).
- *
- * @return @p self
+ * Constructs the next-heat game-flow state (after the inline cGameState constructor): mNextState kGFSM_EventStart (the
+ * state that follows it), mStartupFlag 3, WaitTicks 0, PlayTransport 0.
  */
-extern "C" void *cGFNextHeatState_cGFNextHeatState(cGFNextHeatState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mVtbl = (void**)cGFNextHeatState_vtbl;
-    self->mNextState = 1;
-    self->mStartupFlag = 3;
-    self->WaitTicks = 0;
-    self->PlayTransport = 0;
-    return ((void*)self);
+cGFNextHeatState::cGFNextHeatState()
+{
+    mNextState = kGFSM_EventStart;
+    mStartupFlag = 3;
+    WaitTicks = 0;
+    PlayTransport = 0;
 }
 #endif
 
@@ -1110,7 +1032,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(cGFSessionTeleportState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1120,24 +1042,14 @@ extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(cGFSessionTelep
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFSessionTeleportState_cGFSessionTeleportState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFSessionTeleportState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the session-teleport game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame
- * cleared), then next state 10 (+0x0), cGFSessionTeleportState_vtbl (+0xC) and startup flag 0 (+0x4).
- *
- * @return @p self
+ * Constructs the session-teleport game-flow state (after the inline cGameState constructor): mNextState
+ * kGFSM_TrackStart (the state that follows it), mStartupFlag 0.
  */
-extern "C" void *cGFSessionTeleportState_cGFSessionTeleportState(cGFSessionTeleportState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mNextState = 10;
-    self->mVtbl = (void**)cGFSessionTeleportState_vtbl;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+cGFSessionTeleportState::cGFSessionTeleportState()
+{
+    mNextState = kGFSM_TrackStart;
+    mStartupFlag = 0;
 }
 #endif
 
@@ -1156,7 +1068,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFUserSelectState__cGFUserSelectState(cGFUserSelectState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1194,7 +1106,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFSectionLoadState__cGFSectionLoadState(cGFSectionLoadState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1218,7 +1130,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFPreEventState__cGFPreEventState(cGFPreEventState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1228,24 +1140,14 @@ extern "C" void cGFPreEventState__cGFPreEventState(cGFPreEventState* self, int f
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFPreEventState_cGFPreEventState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFPreEventState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the pre-event game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then
- * next state 3 (+0x0), vtable cGFPreEventState_vtbl (+0xC) and startup flag 0 (+0x4).
- *
- * @return @p self
+ * Constructs the pre-event game-flow state (after the inline cGameState constructor): mNextState kGFSM_Gate (the state
+ * that follows it), mStartupFlag 0.
  */
-extern "C" void *cGFPreEventState_cGFPreEventState(cGFPreEventState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mNextState = 3;
-    self->mVtbl = (void**)cGFPreEventState_vtbl;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+cGFPreEventState::cGFPreEventState()
+{
+    mNextState = kGFSM_Gate;
+    mStartupFlag = 0;
 }
 #endif
 
@@ -1266,7 +1168,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFPostEventState__cGFPostEventState(cGFPostEventState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1276,24 +1178,14 @@ extern "C" void cGFPostEventState__cGFPostEventState(cGFPostEventState* self, in
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFPostEventState_cGFPostEventState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFPostEventState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the post-event game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared),
- * then next state 8 (+0x0), vtable cGFPostEventState_vtbl (+0xC) and startup flag 0 (+0x4).
- *
- * @return @p self
+ * Constructs the post-event game-flow state (after the inline cGameState constructor): mNextState kGFSM_EndWait (the
+ * state that follows it), mStartupFlag 0.
  */
-extern "C" void *cGFPostEventState_cGFPostEventState(cGFPostEventState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mNextState = 8;
-    self->mVtbl = (void**)cGFPostEventState_vtbl;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+cGFPostEventState::cGFPostEventState()
+{
+    mNextState = kGFSM_EndWait;
+    mStartupFlag = 0;
 }
 #endif
 
@@ -1312,7 +1204,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFPodiumState__cGFPodiumState(cGFPodiumState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1322,24 +1214,14 @@ extern "C" void cGFPodiumState__cGFPodiumState(cGFPodiumState* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFPodiumState_cGFPodiumState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFPodiumState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the podium game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then
- * next state 7 (+0x0), cGFPodiumState_vtbl (+0xC) and startup flag 0 (+0x4).
- *
- * @return @p self
+ * Constructs the podium game-flow state (after the inline cGameState constructor): mNextState kGFSM_PostEvent (the
+ * state that follows it), mStartupFlag 0.
  */
-extern "C" void *cGFPodiumState_cGFPodiumState(cGFPodiumState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mNextState = 7;
-    self->mVtbl = (void**)cGFPodiumState_vtbl;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+cGFPodiumState::cGFPodiumState()
+{
+    mNextState = kGFSM_PostEvent;
+    mStartupFlag = 0;
 }
 #endif
 
@@ -1358,7 +1240,7 @@ extern char cGameState_vtbl[];
  */
 extern "C" void cGFReplayStartState__cGFReplayStartState(cGFReplayStartState* self, int flags)
 {
-    self->mVtbl = (void**)cGameState_vtbl;
+    VPTR_OF(cGameState, self) = (void**)cGameState_vtbl;
     if (flags & 1) {
         operator_delete(((int*)self));
     }
@@ -1368,24 +1250,14 @@ extern "C" void cGFReplayStartState__cGFReplayStartState(cGFReplayStartState* se
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFReplayStartState_cGFReplayStartState);
 #ifdef SKIP_ASM
-extern char cGameState_vtbl[];
-extern char cGFReplayStartState_vtbl[];
-extern int cGameState_mpGame;
-
 /**
- * Constructs the replay-start game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared),
- * then next state 4 (+0x0), cGFReplayStartState_vtbl (+0xC) and startup flag 0 (+0x4).
- *
- * @return @p self
+ * Constructs the replay-start game-flow state (after the inline cGameState constructor): mNextState kGFSM_Riding (the
+ * state that follows it), mStartupFlag 0.
  */
-extern "C" void *cGFReplayStartState_cGFReplayStartState(cGFReplayStartState* self) {
-    self->mNextState = 0;
-    self->mVtbl = (void**)cGameState_vtbl;
-    cGameState_mpGame = 0;
-    self->mNextState = 4;
-    self->mVtbl = (void**)cGFReplayStartState_vtbl;
-    self->mStartupFlag = 0;
-    return ((void*)self);
+cGFReplayStartState::cGFReplayStartState()
+{
+    mNextState = kGFSM_Riding;
+    mStartupFlag = 0;
 }
 #endif
 //100%

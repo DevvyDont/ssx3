@@ -1652,7 +1652,7 @@ bool cGame::loseFocus()
     if (vt[3].fn(vthis(obj, vt[3])) == 0) {
         return false;
     }
-    if (((cFadeScreen*)this)->loseFocus() == 0) {
+    if (((cFadeScreen*)this)->cFadeScreen::loseFocus() == 0) {
         return false;
     }
     GrMan->SetScreenClearColour(tRGBInit(0.0f, 0.0f, 0.0f));
@@ -1674,21 +1674,6 @@ INCLUDE_ASM("main/gameload", cGame_updateState);
 cBEInterface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGameViewMan_updateViewState(void* self);
 extern int cPauseState_Flags;
-
-// cGameState's virtuals, called through its flat header's mVtbl: 2 preloadInit, 3 preloadUpdate, 5 gainFocus(int),
-// 6 update, 7 loseFocus. The game-flow states (cGFEventStartState ...) are flat layouts that begin with cGameState's
-// fields, so `(cGameState*)&self->mEventStartState` views the same layout as its base.
-static inline void StateCall_0F40(cGameState* state, int slot)
-{
-    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)state->mVtbl;
-    vt[slot].fn(vthis(state, vt[slot]));
-}
-
-static inline void StateGainFocus_0F40(cGameState* state, int startupFlag)
-{
-    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)state->mVtbl;
-    vt[5].fn(vthis(state, vt[5]), startupFlag);
-}
 
 /**
  * Runs the game-flow state machine: updates the current state, drives a preload and switches to a requested state.
@@ -1719,7 +1704,7 @@ void cGame::updateState()
     if (cPauseState_Flags & 0x20)
         return;
     if (self->mCurrentState != 0 && (self->mCurrentStateID != kGFSM_Gate || self->mPendingStateID == 0))
-        StateCall_0F40(self->mCurrentState, 6); // update
+        self->mCurrentState->update();
     if (self->mPendingPreloadStateID != 0) {
         switch (self->mPendingPreloadStateID) {
     case kGFSM_EventStart:
@@ -1773,16 +1758,16 @@ void cGame::updateState()
         }
         self->mPreloadStateID = self->mPendingPreloadStateID;
         self->mPendingPreloadStateID = 0;
-        StateCall_0F40(self->mPreloadingState, 2); // preloadInit
+        self->mPreloadingState->preloadInit();
     }
     if (self->mPreloadingState != 0)
-        StateCall_0F40(self->mPreloadingState, 3); // preloadUpdate
+        self->mPreloadingState->preloadUpdate();
     int next = self->mPendingStateID;
     if (next == 0)
         return;
     int startupFlag = self->mPendingStateStartupFlag;
     if (self->mCurrentState != 0)
-        StateCall_0F40(self->mCurrentState, 7); // loseFocus
+        self->mCurrentState->loseFocus();
     self->mPrevStateID = self->mCurrentStateID;
     self->mPrevState = self->mCurrentState;
     switch (next) {
@@ -1859,7 +1844,7 @@ void cGame::updateState()
     }
     if (self->mCurrentState != 0) {
         cGameViewMan_updateViewState(((void*)self->ViewMan));
-        StateGainFocus_0F40(self->mCurrentState, startupFlag);
+        self->mCurrentState->gainFocus(startupFlag);
     }
 }
 #endif
@@ -1916,16 +1901,11 @@ INCLUDE_ASM("main/gameload", cGame_cancelPreloadingState);
  */
 void cGame::cancelPreloadingState()
 {
-    cGameState* obj;
-    sVEntry<void(void*)>* vt;
-
     if (mPendingPreloadStateID != 0) {
         mPendingPreloadStateID = 0;
     }
     if (mPreloadStateID != 0) {
-        obj = mPreloadingState;
-        vt = (sVEntry<void(void*)>*)obj->mVtbl;
-        vt[4].fn(vthis(obj, vt[4])); // slot 4: preloadCancel
+        mPreloadingState->preloadCancel();
         mPreloadStateID = 0;
         mPreloadingState = 0;
     }
@@ -1953,8 +1933,7 @@ int cGame::isPreloadedStateReady()
     if (((void*)preloadingState) == 0) {
         return 1;
     }
-    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)preloadingState->mVtbl;
-    return vt[8].fn(vthis(preloadingState, vt[8]));
+    return preloadingState->isPreloadComplete();
 }
 #endif
 
@@ -2403,62 +2382,50 @@ void cLoadScreen::drawSplash(int value)
 //100%
 INCLUDE_ASM("main/gameload", cLoadScreen_loseFocus);
 #ifdef SKIP_ASM
-extern "C" int cFadeScreen_loseFocus(cFadeScreen* self);
-
 /**
  * Lets a load screen lose focus only when the app's progress value (cAppMan_TheAppMan + 0x38) is exactly 100.
  *
- * Then it returns cFadeScreen_loseFocus; otherwise 0. It fills the loseFocus slot (+0x24) of cFELoadScreen_vtbl and
- * cLoadScreen_vtbl. The tree now calls this function cLoadScreen_loseFocus.
+ * Then it returns its fade's loseFocus (cFadeScreen::loseFocus); otherwise false. It fills the loseFocus slot (+0x24)
+ * of cFELoadScreen_vtbl and cLoadScreen_vtbl.
  *
- * @return cFadeScreen_loseFocus's result, or 0
+ * @return cFadeScreen::loseFocus's result, or false
  */
-int cLoadScreen::loseFocus()
+bool cLoadScreen::loseFocus()
 {
     if (cAppMan_TheAppMan->LoadTimer.loadpercent == 100.0f) {
-        return ((cFadeScreen*)this)->loseFocus();
+        return cFadeScreen::loseFocus();
     }
-    return 0;
+    return false;
 }
 #endif
-
-extern "C" void* cFadeScreen_update(cFadeScreen* self);
 
 //100%
 INCLUDE_ASM("main/gameload", cLoadScreen_update__FPv);
 #ifdef SKIP_ASM
 /**
- * Updates a load screen: calls cFadeScreen_update.
+ * Updates a load screen: runs its fade's update (cFadeScreen::update).
  *
  * It fills the update slot (+0x34) of the load-screen vtable cLoadScreen_vtbl; cFELoadScreen_update and the pre-start
  * screens' updates call it too.
- *
- * @return cFadeScreen_update's result
  */
-void* cLoadScreen::update()
+void cLoadScreen::update()
 {
-    return ((cFadeScreen*)this)->update();
+    cFadeScreen::update();
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/gameload", cFadeScreen_cFadeScreen);
 #ifdef SKIP_ASM
-extern char cFadeScreen_vtbl[];
-
 /**
  * Constructs a screen fade: vtable cFadeScreen_vtbl, fade timer (+0x4) 0.2, ending flag (+0x8) 0.
  *
  * cGame_cGame, cFE_cFE, the debug front end and the load-screen constructors call it for their fade base.
- *
- * @return @p self
  */
-extern "C" void* cFadeScreen_cFadeScreen(cFadeScreen* self)
+cFadeScreen::cFadeScreen()
 {
-    self->mVtbl = (void**)cFadeScreen_vtbl;
-    self->FadeTimer = 0.20000000298023224f;
-    self->IsEnding = 0;
-    return ((void*)self);
+    FadeTimer = 0.20000000298023224f;
+    IsEnding = 0;
 }
 #endif
 
@@ -2488,11 +2455,8 @@ INCLUDE_ASM("main/gameload", cFadeScreen_update);
  *
  * While IsEnding (+0x8) is set adds 1/60 to FadeTimer (+0x4); otherwise subtracts 1/60 and clamps at 0. The growing
  * side is not clamped here (also so in On Tour).
- *
- * @return no meaningful value (the body returns nothing)
  */
-// PORT: the unit declares this void*-returning; the body returns nothing meaningful.
-void* cFadeScreen::update()
+void cFadeScreen::update()
 {
     if (IsEnding != 0) {
         FadeTimer += 0.01666666753590107f;
@@ -2724,23 +2688,17 @@ void cLoadIndicator::render()
 }
 #endif
 
-extern void* cPreStartScreen_vtbl[];
-
 //100%
 INCLUDE_ASM("main/gameload", cPreStartScreen_cPreStartScreen__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs the pre-start screen app module: installs its vtable (cPreStartScreen_vtbl) and clears +0x4 and +0x8.
- *
- * @return @p self
+ * Constructs the pre-start screen app module: installs its vtable (cPreStartScreen_vtbl) and clears its timer
+ * (progressivetimer) and the init load screen it creates (nextscreen).
  */
-void* cPreStartScreen_cPreStartScreen(void* vself)
+cPreStartScreen::cPreStartScreen()
 {
-    cPreStartScreen* self = (cPreStartScreen*)vself;
-    self->progressivetimer = 0.0f;
-    self->mVtbl = cPreStartScreen_vtbl;
-    self->nextscreen = 0;
-    return ((void*)self);
+    progressivetimer = 0.0f;
+    nextscreen = 0;
 }
 #endif
 

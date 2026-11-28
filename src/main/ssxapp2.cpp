@@ -4,17 +4,17 @@ INCLUDE_ASM("main/ssxapp2", cSSXApp__cSSXApp);
 
 INCLUDE_ASM("main/ssxapp2", cFadeScreen__cFadeScreen);
 
-INCLUDE_ASM("main/ssxapp2", cPreStartScreen__cPreStartScreen);
+INCLUDE_ASM("main/ssxapp2", _$_15cPreStartScreen);
 
 INCLUDE_ASM("main/ssxapp2", cPreStartScreen_load);
 
 INCLUDE_ASM("main/ssxapp2", cLoadScreen__cLoadScreen);
 
-INCLUDE_ASM("main/ssxapp2", cStartScreen__cStartScreen);
+INCLUDE_ASM("main/ssxapp2", _$_12cStartScreen);
 
-INCLUDE_ASM("main/ssxapp2", cGameLoadScreen__cGameLoadScreen);
+INCLUDE_ASM("main/ssxapp2", _$_15cGameLoadScreen);
 
-INCLUDE_ASM("main/ssxapp2", cFELoadScreen__cFELoadScreen);
+INCLUDE_ASM("main/ssxapp2", _$_13cFELoadScreen);
 
 INCLUDE_ASM("main/ssxapp2", cGameState__cGameState);
 

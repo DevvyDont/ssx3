@@ -7,91 +7,115 @@
 // to end), and the two cLoadScreen screens that draw through a UI engine: cStartScreen (the splash screens) and
 // cGameLoadScreen (the in-game load). Methods in main/loadscreens_prestart, main/gameload and main/ssxappdtor.
 //
-// FLAT layouts, like main/game.h: each derived class repeats its base's part. Member names are EA's, from SSX On Tour's
-// PSP DWARF ([O]); every retail access through `this` in the classes' methods falls on a member start
-// (tools/gen/self_offsets.py), and every constructor stores its vtable at +0x0 ([R]). Sizes are the retail
-// allocations (cMemMan_alloc with the class name) and On Tour's, except cInitLoadScreen: retail keeps On Tour's two
-// bools as words (0xC, On Tour 0x8). On Tour's eStartScreenType is an int here.
+// Real C++ classes (`#pragma interface`: no unit emits their vtables or inline functions; the equate after each class
+// binds g++'s name to the retail table), derived from cAppModule (bx/appman.h) or cFadeScreen (main/fadescreen.h), with
+// their overrides virtual in cAppModule's slot order. Member names are EA's, from SSX On Tour's PSP DWARF ([O]); every
+// retail access through `this` in the classes' methods falls on a member start (tools/gen/self_offsets.py), and every
+// constructor stores its vtable at +0x0 ([R]). Sizes are the retail allocations (cMemMan_alloc with the class name) and
+// On Tour's, except cInitLoadScreen: retail keeps On Tour's two bools as words (0xC, On Tour 0x8). On Tour's
+// eStartScreenType is an int here.
+// Constructors and destructors: retail inlines cLoadScreen's, cInitLoadScreen's, cGameLoadScreen's and cFELoadScreen's
+// constructors where it builds them (cPreStartScreen_update, cPreGameLoadScreen_update, ...), so those are inline here
+// and their out-of-line copies (main/ssxappdtor) are C functions; the other constructors are out of line. Every
+// destructor stores only cAppModule_vtbl (empty bodies: g++ 2.95 then sets no vptr of its own), so the bases'
+// (cAppModule, cFadeScreen, cLoadScreen) are inline with C copies and the leaves' are g++'s own (the labels renamed).
 
 #include "layout.h"
+#include "main/fadescreen.h"
 #include "ui/uistate.h"
 
 struct cUIEngine;
 
-struct cInitLoadScreen {
-    void** mVtbl;                   // 0x00 [R] ctor = cInitLoadScreen_vtbl
+struct cInitLoadScreen : public cAppModule {
+    //   the vptr 0x00 (cAppModule's) [R] ctor = cInitLoadScreen_vtbl
     int progressive;                // 0x04 [O] (On Tour bool); [U] activateProgressiveMode sets it
     int ending;                     // 0x08 [O] (On Tour bool, +0x5 there); [U] loseFocus sets it, update reads it
 
+    // Inline (cPreStartScreen_update inlines it; copy: cInitLoadScreen_cInitLoadScreen).
+    cInitLoadScreen() { progressive = 0; ending = 0; }
+    virtual ~cInitLoadScreen();   // 1 g++'s own symbol _$_15cInitLoadScreen (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
-    void update() __asm__("cInitLoadScreen_update");
-    bool loseFocus() __asm__("cInitLoadScreen_loseFocus");
+    virtual void load() __asm__("cInitLoadScreen_load");                // 2
+    virtual bool loseFocus() __asm__("cInitLoadScreen_loseFocus");      // 4
+    virtual void update() __asm__("cInitLoadScreen_update");            // 6
+    virtual bool render() __asm__("cInitLoadScreen_render");            // 7
     void activateProgressiveMode() __asm__("cInitLoadScreen_activateProgressiveMode");
 };
 
 CHECK_OFFSET(cInitLoadScreen, ending, 0x08);
 CHECK_SIZE(cInitLoadScreen, 0xC);
+__asm__("_vt$15cInitLoadScreen = cInitLoadScreen_vtbl");   // g++'s name for the retail vtable
 
-struct cLoadScreen {
-    void** mVtbl;                   // 0x00 [R] ctor = its vtable (cLoadScreen_vtbl)
-    char unk_004[0x8];              // 0x04 On Tour's base part; no retail access
+struct cLoadScreen : public cFadeScreen {
+    //   the vptr 0x00, FadeTimer 0x04, IsEnding 0x08: cFadeScreen's; [R] ctor = its vtable (cLoadScreen_vtbl)
     cUIEngine* mpUI;                // 0x0C [O]; [R] ctor
 
+    // Inline (cStartScreen_cStartScreen and the load screens inline it; copy: cLoadScreen_cLoadScreen).
+    cLoadScreen() { mpUI = 0; }
     // Methods bound to their retail symbols by asm labels.
+    virtual bool loseFocus() __asm__("cLoadScreen_loseFocus");          // 4
+    virtual void update() __asm__("cLoadScreen_update__FPv");           // 6
     void drawSplash(int value) __asm__("cLoadScreen_drawSplash");
-    int loseFocus() __asm__("cLoadScreen_loseFocus");
-    void* update() __asm__("cLoadScreen_update__FPv");
 };
 
 CHECK_OFFSET(cLoadScreen, mpUI, 0x0C);
 CHECK_SIZE(cLoadScreen, 0x10);
+__asm__("_vt$11cLoadScreen = cLoadScreen_vtbl");   // g++'s name for the retail vtable
 
-struct cPreStartScreen {
-    void** mVtbl;                   // 0x00 [R] ctor = cPreStartScreen_vtbl
+struct cPreStartScreen : public cAppModule {
+    //   the vptr 0x00 (cAppModule's) [R] ctor = cPreStartScreen_vtbl
     float progressivetimer;         // 0x04 [O]; [U] update counts it, loseFocus
     cInitLoadScreen* nextscreen;    // 0x08 [O]; [U] update
 
+    cPreStartScreen() __asm__("cPreStartScreen_cPreStartScreen__FPv");
+    virtual ~cPreStartScreen();   // 1 g++'s own symbol _$_15cPreStartScreen (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
-    void update() __asm__("cPreStartScreen_update");
-    bool loseFocus() __asm__("cPreStartScreen_loseFocus");
-    void load() __asm__("cPreStartScreen_load__FPv");
+    virtual void load() __asm__("cPreStartScreen_load__FPv");           // 2
+    virtual bool loseFocus() __asm__("cPreStartScreen_loseFocus");      // 4
+    virtual void update() __asm__("cPreStartScreen_update");            // 6
+    virtual bool render() __asm__("cPreStartScreen_render");            // 7
 };
 
 CHECK_OFFSET(cPreStartScreen, nextscreen, 0x08);
 CHECK_SIZE(cPreStartScreen, 0xC);
+__asm__("_vt$15cPreStartScreen = cPreStartScreen_vtbl");   // g++'s name for the retail vtable
 
-struct cPreGameLoadScreen {
-    void** mVtbl;                   // 0x00 [R] ctor = cPreGameLoadScreen_vtbl
+struct cPreGameLoadScreen : public cAppModule {
+    //   the vptr 0x00 (cAppModule's) [R] ctor = cPreGameLoadScreen_vtbl
     int ending;                     // 0x04 [O] (On Tour bool); [U] loseFocus, update
 
+    cPreGameLoadScreen() __asm__("cPreGameLoadScreen_cPreGameLoadScreen__FPv");
+    virtual ~cPreGameLoadScreen();   // 1 g++'s own symbol _$_18cPreGameLoadScreen (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
-    bool loseFocus() __asm__("cPreGameLoadScreen_loseFocus");
-    void update() __asm__("cPreGameLoadScreen_update");
-    void load() __asm__("cPreGameLoadScreen_load__FPv");
+    virtual void load() __asm__("cPreGameLoadScreen_load__FPv");        // 2
+    virtual bool loseFocus() __asm__("cPreGameLoadScreen_loseFocus");   // 4
+    virtual void update() __asm__("cPreGameLoadScreen_update");         // 6
+    virtual bool render() __asm__("cPreGameLoadScreen_render");         // 7
 };
 
 CHECK_OFFSET(cPreGameLoadScreen, ending, 0x04);
 CHECK_SIZE(cPreGameLoadScreen, 0x8);
+__asm__("_vt$18cPreGameLoadScreen = cPreGameLoadScreen_vtbl");   // g++'s name for the retail vtable
 
-struct cPreFELoadScreen {
-    void** mVtbl;                   // 0x00 [R] ctor = its vtable (cPreFELoadScreen_vtbl)
+struct cPreFELoadScreen : public cAppModule {
+    //   the vptr 0x00 (cAppModule's) [R] ctor = its vtable (cPreFELoadScreen_vtbl)
     int ending;                     // 0x04 [O] (On Tour bool); [U] loseFocus, update
 
+    cPreFELoadScreen() __asm__("cPreFELoadScreen_cPreFELoadScreen__FPv");
+    virtual ~cPreFELoadScreen();   // 1 g++'s own symbol _$_16cPreFELoadScreen (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
-    bool loseFocus() __asm__("cPreFELoadScreen_loseFocus");
-    void update() __asm__("cPreFELoadScreen_update");
-    void load() __asm__("cPreFELoadScreen_load__FPv");
+    virtual void load() __asm__("cPreFELoadScreen_load__FPv");          // 2
+    virtual bool loseFocus() __asm__("cPreFELoadScreen_loseFocus");     // 4
+    virtual void update() __asm__("cPreFELoadScreen_update");           // 6
+    virtual bool render() __asm__("cPreFELoadScreen_render");           // 7
 };
 
 CHECK_OFFSET(cPreFELoadScreen, ending, 0x04);
 CHECK_SIZE(cPreFELoadScreen, 0x8);
+__asm__("_vt$16cPreFELoadScreen = cPreFELoadScreen_vtbl");   // g++'s name for the retail vtable
 
-struct cStartScreen {
-    // --- cLoadScreen
-    void** mVtbl;                   // 0x00 [R] ctor = cStartScreen_vtbl
-    char unk_004[0x8];              // 0x04 cLoadScreen's base part; no retail access
-    cUIEngine* mpUI;                // 0x0C [O]; [U] load, purge, render
-    // --- cStartScreen
+struct cStartScreen : public cLoadScreen {
+    //   the vptr 0x00 .. mpUI 0x0C: cLoadScreen's; [R] ctor = cStartScreen_vtbl; [U] load, purge, render use mpUI
     int SplashTexID;                // 0x10 [O]
     int DisplayTicks;               // 0x14 [O]; [U] gainFocus, update
     int meStartScreen_type;         // 0x18 [O] eStartScreenType; [R] ctor; [U] load
@@ -101,41 +125,43 @@ struct cStartScreen {
         eStartScreen_Legal = 0, eStartScreen_LoadCtrl = 1, eStartScreen_Progressive = 2, eStartScreen_NUMS = 3
     };
 
+    cStartScreen(int screenType) __asm__("cStartScreen_cStartScreen");
+    virtual ~cStartScreen();   // 1 g++'s own symbol _$_12cStartScreen (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
-    void load() __asm__("cStartScreen_load");
-    void gainFocus() __asm__("cStartScreen_gainFocus");
-    void update() __asm__("cStartScreen_update");
-    void purge() __asm__("cStartScreen_purge");
-    bool render() __asm__("cStartScreen_render");
-    void* loseFocus() __asm__("cStartScreen_loseFocus__FPv");
+    virtual void load() __asm__("cStartScreen_load");                   // 2
+    virtual void purge() __asm__("cStartScreen_purge");                 // 3
+    virtual bool loseFocus() __asm__("cStartScreen_loseFocus__FPv");    // 4
+    virtual void gainFocus() __asm__("cStartScreen_gainFocus");         // 5
+    virtual void update() __asm__("cStartScreen_update");               // 6
+    virtual bool render() __asm__("cStartScreen_render");               // 7
 };
 
-CHECK_OFFSET(cStartScreen, mpUI, 0x0C);
 CHECK_OFFSET(cStartScreen, SplashTexID, 0x10);
 CHECK_OFFSET(cStartScreen, meStartScreen_type, 0x18);
 CHECK_SIZE(cStartScreen, 0x1C);
+__asm__("_vt$12cStartScreen = cStartScreen_vtbl");   // g++'s name for the retail vtable
 
-struct cGameLoadScreen {
-    // --- cLoadScreen
-    void** mVtbl;                   // 0x00 [R] ctor = cGameLoadScreen_vtbl
-    char unk_004[0x8];              // 0x04 cLoadScreen's base part; no retail access
-    cUIEngine* mpUI;                // 0x0C [O]; [U] load, purge, render
-    // --- cGameLoadScreen
+struct cGameLoadScreen : public cLoadScreen {
+    //   the vptr 0x00 .. mpUI 0x0C: cLoadScreen's; [R] ctor = cGameLoadScreen_vtbl; [U] load, purge, render use mpUI
     int mTexID[2];                  // 0x10 [O]; [R] ctor
 
+    // Inline (cPreGameLoadScreen_update inlines it; copy: cGameLoadScreen_cGameLoadScreen).
+    cGameLoadScreen() { mTexID[0] = 0; mTexID[1] = 0; }
+    virtual ~cGameLoadScreen();   // 1 g++'s own symbol _$_15cGameLoadScreen (the retail label renamed)
     // Methods bound to their retail symbols by asm labels.
-    void load() __asm__("cGameLoadScreen_load");
+    virtual void load() __asm__("cGameLoadScreen_load");                // 2
+    virtual void purge() __asm__("cGameLoadScreen_purge");              // 3
+    virtual bool loseFocus() __asm__("cGameLoadScreen_loseFocus__FPv"); // 4
+    virtual void gainFocus() __asm__("cGameLoadScreen_gainFocus");      // 5
+    virtual void update() __asm__("cGameLoadScreen_update");            // 6
+    virtual bool render() __asm__("cGameLoadScreen_render");            // 7
     void loadTexture() __asm__("cGameLoadScreen_loadTexture");
-    void purge() __asm__("cGameLoadScreen_purge");
-    bool render() __asm__("cGameLoadScreen_render");
-    void update() __asm__("cGameLoadScreen_update");
-    bool loseFocus() __asm__("cGameLoadScreen_loseFocus__FPv");
     int getTexttureID(int index) __asm__("cGameLoadScreen_getTexttureID");
 };
 
-CHECK_OFFSET(cGameLoadScreen, mpUI, 0x0C);
 CHECK_OFFSET(cGameLoadScreen, mTexID, 0x10);
 CHECK_SIZE(cGameLoadScreen, 0x18);
+__asm__("_vt$15cGameLoadScreen = cGameLoadScreen_vtbl");   // g++'s name for the retail vtable
 
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -163,41 +189,37 @@ struct cUIState;
 struct cUIScreen;
 struct cFELoadScreen;
 
-struct cFELoadScreen {
-    // --- cAppModule / cFadeScreen (main/fadescreen.h, 0xC)
-    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cFELoadScreen_vtbl (ctor); cAppModule_vtbl (dtor)
-    float FadeTimer;                // 0x004 [O] cFadeScreen::FadeTimer; [R] cFadeScreen_cFadeScreen 0.2; [U] render:
-                                    //       cFadeScreen_drawFade(this)
-    int IsEnding;                   // 0x008 [O] cFadeScreen::IsEnding (bool, a word); [R] 0; [U] cLoadScreen_update /
-                                    //       loseFocus
-    // --- cLoadScreen (above, 0x10)
-    cUIEngine* mpUI;                // 0x00C [O] cLoadScreen::mpUI; [R] ctor 0; [U] load builds it (cMemMan_alloc(0x70,
-                                    //       "UIEngine"), "data/ui/fl", fonts / locale / a cFEInput) and pushes the load
-                                    //       state on its stack (+0x18); purge deletes it; render / update draw and run
-                                    //       it
+struct cFELoadScreen : public cLoadScreen {
+    //   the vptr 0x000 [R] cFadeScreen_vtbl, then cFELoadScreen_vtbl (ctor); cAppModule_vtbl (dtor)
+    //   FadeTimer 0x004 [O] cFadeScreen::FadeTimer; [R] cFadeScreen_cFadeScreen 0.2; [U] render: drawFade()
+    //   IsEnding 0x008 [O] cFadeScreen::IsEnding (bool, a word); [R] 0; [U] cLoadScreen_update / loseFocus
+    //   mpUI 0x00C [O] cLoadScreen::mpUI; [R] ctor 0; [U] load builds it (cMemMan_alloc(0x70, "UIEngine"),
+    //       "data/ui/fl", fonts / locale / a cFEInput) and pushes the load state on its stack (+0x18); purge deletes
+    //       it; render / update draw and run it
     // --- cFELoadScreen
-    int mTexID[2];                  // 0x010 [O]; [R] ctor 0, 0; [U] loadTexture (cFELoadScreen_loadTexture) fills [0] (type 1: the
-                                    //       human's "CharaPics") or [0] and [1] (type 2: both players'); purge frees
-                                    //       the non-zero ones; getTexttureID returns [index]; the load states read them
-                                    //       through mpParentModule
+    int mTexID[2];                  // 0x010 [O]; [R] ctor 0, 0; [U] loadTexture (cFELoadScreen_loadTexture) fills [0]
+                                    //       (type 1: the human's "CharaPics") or [0] and [1] (type 2: both players');
+                                    //       purge frees the non-zero ones; getTexttureID returns [index]; the load
+                                    //       states read them through mpParentModule
     int SplashTexID;                // 0x018 [O]; [U] load sets -1; purge frees it when >= 0
 
-    // Methods bound to their retail symbols by asm labels.
-    void load() __asm__("cFELoadScreen_load");
+    // Inline (cPreFELoadScreen_update inlines it; copy: cFELoadScreen_cFELoadScreen).
+    cFELoadScreen() { mTexID[0] = 0; mTexID[1] = 0; }
+    virtual ~cFELoadScreen();   // 1 g++'s own symbol _$_13cFELoadScreen (the retail label renamed)
+    // Methods bound to their retail symbols by asm labels. loseFocus (slot 4) is cLoadScreen's.
+    virtual void load() __asm__("cFELoadScreen_load");                  // 2
+    virtual void purge() __asm__("cFELoadScreen_purge");                // 3
+    virtual void gainFocus() __asm__("cFELoadScreen_gainFocus");        // 5
+    virtual void update() __asm__("cFELoadScreen_update");              // 6
+    virtual bool render() __asm__("cFELoadScreen_render");              // 7
     void loadTexture(int type) __asm__("cFELoadScreen_loadTexture");
-    void purge() __asm__("cFELoadScreen_purge");
-    bool render() __asm__("cFELoadScreen_render");
-    void update() __asm__("cFELoadScreen_update");
     int getTexttureID(int index) __asm__("cFELoadScreen_getTexttureID");
 };
 
-CHECK_OFFSET(cFELoadScreen, mVtbl, 0x000);
-CHECK_OFFSET(cFELoadScreen, FadeTimer, 0x004);
-CHECK_OFFSET(cFELoadScreen, IsEnding, 0x008);
-CHECK_OFFSET(cFELoadScreen, mpUI, 0x00C);
 CHECK_OFFSET(cFELoadScreen, mTexID, 0x010);
 CHECK_OFFSET(cFELoadScreen, SplashTexID, 0x018);
 CHECK_SIZE(cFELoadScreen, 0x1C);
+__asm__("_vt$13cFELoadScreen = cFELoadScreen_vtbl");   // g++'s name for the retail vtable
 
 // ---------------------------------------------------------------------------------------------------------------------
 // cFELoadState: cFELoadScreen's race-stats load state: "103MPStat" (two players on the online game path:

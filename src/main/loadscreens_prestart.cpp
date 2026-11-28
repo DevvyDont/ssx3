@@ -29,7 +29,7 @@ extern "C" int cPadCache_numButtons(cPadCache* pads, int port);
 extern "C" float* cPadCache_buttonValues(cPadCache* pads, int port);
 extern cPadCache* PadCache;
 extern char str_InitLoadScreen[];
-extern void* cInitLoadScreen_vtbl[];
+void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 
 
 
@@ -53,11 +53,8 @@ void cPreStartScreen::update()
         *fade = 1.0f;
     }
     if (SSXApp->LoadingModule == 0) {
-        cInitLoadScreen* loadScreen = (cInitLoadScreen*)cMemMan_alloc(0xC, str_InitLoadScreen, 0x100, 0);
+        cInitLoadScreen* loadScreen = new (str_InitLoadScreen, 0x100, 0) cInitLoadScreen;
         cAppMan* app = (cAppMan*)SSXApp;
-        loadScreen->mVtbl = cInitLoadScreen_vtbl;
-        loadScreen->progressive = 0;
-        loadScreen->ending = 0;
         nextscreen = loadScreen;
         // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
         // int, so the original converted the new module's pointer to it too
@@ -89,7 +86,7 @@ extern "C" void cLoadIndicator_render(void* a);
  *
  * @return true when a frame was drawn
  */
-extern "C" bool cPreStartScreen_render(void)
+bool cPreStartScreen::render()
 {
     if (GrMan->IsRenderReady() == 0) {
         return false;
@@ -121,25 +118,14 @@ bool cPreStartScreen::loseFocus()
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen__cInitLoadScreen);
+INCLUDE_ASM("main/loadscreens_prestart", _$_15cInitLoadScreen);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-extern void* cAppModule_vtbl[];
-
 /**
- * Destroys the start-up load screen.
- *
- * Only resets the vtable to the root module vtable cAppModule_vtbl (the base destructors have nothing else to do) and
- * frees the object with operator_delete() when bit 0 of @p flags is set.
- *
- * @param flags  the destructor flags (bit 0: free the memory)
+ * Destroys the start-up load screen: it owns nothing of its own, so the inlined cAppModule destructor only puts back
+ * the root module vtable cAppModule_vtbl, and g++ frees the object when asked.
  */
-extern "C" void cInitLoadScreen__cInitLoadScreen(cInitLoadScreen* self, int flags)
+cInitLoadScreen::~cInitLoadScreen()
 {
-    *(void***)self = cAppModule_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -151,7 +137,7 @@ extern "C" void cSSXApp_initload(void* app);
 /**
  * Runs the application's initial load for the init load screen via cSSXApp_initload(SSXApp).
  */
-extern "C" void cInitLoadScreen_load(void)
+void cInitLoadScreen::load()
 {
     cSSXApp_initload(SSXApp);
 }
@@ -162,9 +148,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cInitLoadScreen_update);
 #ifdef SKIP_ASM
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cLoadIndicator_update(void* fade);
-extern "C" void* cStartScreen_cStartScreen(cStartScreen* self, int arg);
 extern char str_StartScreen[];
 
 /**
@@ -172,9 +156,9 @@ extern char str_StartScreen[];
  *
  * Steps the indicator's phase (cLoadIndicator_update); its alpha (SSXApp's load indicator + 0x4) falls by 1/12 per
  * frame while the ending flag (+0x8) is set and rises otherwise, clamped to [0, 1]. When no next module is queued
- * (SSXApp + 0x4), creates a start screen (0x1C bytes, tag "StartScreen", cStartScreen_cStartScreen) with type 2 when the
- * progressive flag (+0x4) is set, otherwise 0, and queues it with cAppMan_setNextModule. Update slot (+0x34) of
- * cInitLoadScreen_vtbl.
+ * (SSXApp + 0x4), creates a start screen (0x1C bytes, tag "StartScreen") of type eStartScreen_Progressive when the
+ * progressive flag (+0x4) is set, otherwise eStartScreen_Legal, and queues it with cAppMan_setNextModule. Update slot
+ * (+0x34) of cInitLoadScreen_vtbl.
  */
 void cInitLoadScreen::update()
 {
@@ -195,9 +179,8 @@ void cInitLoadScreen::update()
     if (SSXApp->LoadingModule == 0) {
         // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
         // int, so the original converted the new module's pointer to it too
-        cAppMan_setNextModule((cAppMan*)SSXApp,
-            (unsigned int)cStartScreen_cStartScreen((cStartScreen*)cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0),
-                    progressive ? 2 : 0));
+        cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)new (str_StartScreen, 0x100, 0)
+            cStartScreen(progressive ? cStartScreen::eStartScreen_Progressive : cStartScreen::eStartScreen_Legal));
     }
 }
 #endif
@@ -215,7 +198,7 @@ extern "C" void cLoadIndicator_render(void* a);
  *
  * @return true when a frame was drawn
  */
-extern "C" bool cInitLoadScreen_render(void)
+bool cInitLoadScreen::render()
 {
     if (GrMan->IsRenderReady() == 0) {
         return false;
@@ -273,26 +256,17 @@ void cPreFELoadScreen::load()
 }
 #endif
 
-extern void* cPreGameLoadScreen_vtbl[];
-
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_cPreGameLoadScreen__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs a pre-game load screen: clears the word at +0x4 and stores the vtable at +0x0.
- *
- * @return @p self
+ * Constructs a pre-game load screen: stores its vtable (cPreGameLoadScreen_vtbl) and clears the ending flag (+0x4).
  */
-void* cPreGameLoadScreen_cPreGameLoadScreen(void* vself)
+cPreGameLoadScreen::cPreGameLoadScreen()
 {
-    cPreGameLoadScreen* self = (cPreGameLoadScreen*)vself;
-    self->ending = 0;
-    self->mVtbl = cPreGameLoadScreen_vtbl;
-    return ((void*)self);
+    ending = 0;
 }
 #endif
-
-extern void* cPreFELoadScreen_vtbl[];
 
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_cPreFELoadScreen__FPv);
@@ -301,61 +275,36 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_cPreFELoadScreen__FPv)
  * Constructs the pre-front-end load screen: clears the ending flag (+0x4) and stores the vtable cPreFELoadScreen_vtbl.
  *
  * cFECustom_getNextState, cGame_exit and cDebugMenuScreen_update build it when they go back to the front end.
- *
- * @return @p self
  */
-void* cPreFELoadScreen_cPreFELoadScreen(void* vself)
+cPreFELoadScreen::cPreFELoadScreen()
 {
-    cPreFELoadScreen* self = (cPreFELoadScreen*)vself;
-    self->ending = 0;
-    self->mVtbl = cPreFELoadScreen_vtbl;
-    return ((void*)self);
+    ending = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen__cPreGameLoadScreen);
+INCLUDE_ASM("main/loadscreens_prestart", _$_18cPreGameLoadScreen);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-extern void* cAppModule_vtbl[];
-
 /**
- * Destroys the pre-game load screen.
- *
- * Only resets the vtable to the root module vtable cAppModule_vtbl (the base destructors have nothing else to do) and
- * frees the object with operator_delete() when bit 0 of @p flags is set.
- *
- * @param flags  the destructor flags (bit 0: free the memory)
+ * Destroys the pre-game load screen: it owns nothing of its own, so the inlined cAppModule destructor only puts back
+ * the root module vtable cAppModule_vtbl, and g++ frees the object when asked.
  */
-extern "C" void cPreGameLoadScreen__cPreGameLoadScreen(cPreGameLoadScreen* self, int flags)
+cPreGameLoadScreen::~cPreGameLoadScreen()
 {
-    *(void***)self = cAppModule_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen__cPreFELoadScreen);
+INCLUDE_ASM("main/loadscreens_prestart", _$_16cPreFELoadScreen);
 #ifdef SKIP_ASM
-void operator_delete(int* ptr);
-extern void* cAppModule_vtbl[];
-
 /**
- * Destroys the pre-front-end load screen: restores the base module vtable cAppModule_vtbl and frees the object when bit 0
- * of @p flags is set.
+ * Destroys the pre-front-end load screen: it owns nothing of its own, so the inlined cAppModule destructor only puts
+ * back the root module vtable cAppModule_vtbl, and g++ frees the object when asked.
  *
  * Destructor slot (+0xC) of cPreFELoadScreen_vtbl.
- *
- * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cPreFELoadScreen__cPreFELoadScreen(cPreFELoadScreen* self, int flags)
+cPreFELoadScreen::~cPreFELoadScreen()
 {
-    *(void***)self = cAppModule_vtbl;
-    if (flags & 1) {
-        operator_delete((int*)self);
-    }
 }
 #endif
 
@@ -418,7 +367,7 @@ extern "C" void cLoadIndicator_render(void* a);
  *
  * @return true when a frame was drawn
  */
-extern "C" bool cPreGameLoadScreen_render(void)
+bool cPreGameLoadScreen::render()
 {
     if (GrMan->IsRenderReady() == 0) {
         return false;
@@ -443,7 +392,7 @@ extern "C" void cLoadIndicator_render(void* a);
  *
  * @return true when a frame was drawn
  */
-extern "C" bool cPreFELoadScreen_render(void)
+bool cPreFELoadScreen::render()
 {
     if (GrMan->IsRenderReady() == 0) {
         return false;
@@ -462,11 +411,8 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreGameLoadScreen_update);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cLoadIndicator_update(void* fade);
-extern "C" void* cFadeScreen_cFadeScreen_r(void* self) __asm__("cFadeScreen_cFadeScreen");
 extern char str_cGameLoadScreen[];
-extern void* cGameLoadScreen_vtbl[];
 
 /**
  * Updates the pre-game load screen: animates and fades the load indicator, then queues the game load screen.
@@ -498,15 +444,9 @@ void cPreGameLoadScreen::update()
         }
     }
     if (SSXApp->LoadingModule == 0) {
-        cGameLoadScreen* loadScreen = (cGameLoadScreen*)cMemMan_alloc(0x18, str_cGameLoadScreen, 0x100, 0);
-        cFadeScreen_cFadeScreen_r(loadScreen);
         // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
         // int, so the original held the new module as that integer too
-        endingThenModule = (unsigned int)loadScreen;
-        loadScreen->mVtbl = cGameLoadScreen_vtbl;
-        loadScreen->mpUI = 0;
-        loadScreen->mTexID[0] = 0;
-        loadScreen->mTexID[1] = 0;
+        endingThenModule = (unsigned int)new (str_cGameLoadScreen, 0x100, 0) cGameLoadScreen;
         cAppMan_setNextModule((cAppMan*)SSXApp, endingThenModule);
     }
 }
@@ -518,16 +458,8 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_update);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
-
-extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-
 extern "C" void cLoadIndicator_update(void* fade);
-
-extern "C" void* cFadeScreen_cFadeScreen_r(void* self) __asm__("cFadeScreen_cFadeScreen");
-
-
 extern char str_FELoad[];
-extern void* cFELoadScreen_vtbl[];
 
 /**
  * Updates the pre-front-end load screen: animates and fades the load indicator and queues the front-end load.
@@ -557,15 +489,9 @@ void cPreFELoadScreen::update()
         }
     }
     if (SSXApp->LoadingModule == 0) {
-        cFELoadScreen* loadScreen = (cFELoadScreen*)cMemMan_alloc(0x1C, str_FELoad, 0x100, 0);
-        cFadeScreen_cFadeScreen_r(loadScreen);
         // ORIGINAL-PTR: the retail symbol cAppMan_setNextModule__FP7cAppManUi mangles the module parameter as unsigned
         // int, so the original held the new module as that integer too
-        endingThenModule = (unsigned int)loadScreen;
-        loadScreen->mVtbl = cFELoadScreen_vtbl;
-        loadScreen->mpUI = 0;
-        loadScreen->mTexID[0] = 0;
-        loadScreen->mTexID[1] = 0;
+        endingThenModule = (unsigned int)new (str_FELoad, 0x100, 0) cFELoadScreen;
         cAppMan_setNextModule((cAppMan*)SSXApp, endingThenModule);
     }
 }
@@ -574,25 +500,19 @@ void cPreFELoadScreen::update()
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_cStartScreen);
 #ifdef SKIP_ASM
-extern "C" void cFadeScreen_cFadeScreen(void* self);
-extern void* cStartScreen_vtbl[];
 
 /**
- * Constructs a start screen of a type: builds the fade base (cFadeScreen_cFadeScreen), stores the vtable cStartScreen_vtbl, the type
- * (+0x18) and clears the UI engine pointer (+0xC).
+ * Constructs a start screen of a type: its inline cLoadScreen base builds the fade base (cFadeScreen_cFadeScreen) and
+ * clears the UI engine pointer (+0xC); then it stores the vtable cStartScreen_vtbl and the type (+0x18).
  *
  * cInitLoadScreen's update (cInitLoadScreen_update) builds it with type 2 (progressive) or 0.
  *
- * @param screenType  the start screen type (0 shows the memory card state, 2 the progressive-scan state)
- * @return @p self
+ * @param screenType  the start screen type (eStartScreenType: 0 shows the memory card state, 2 the progressive-scan
+ *                    state)
  */
-extern "C" void* cStartScreen_cStartScreen(cStartScreen* self, int screenType)
+cStartScreen::cStartScreen(int screenType)
 {
-    cFadeScreen_cFadeScreen(self);
-    *(void***)self = cStartScreen_vtbl;
-    self->meStartScreen_type = screenType;
-    self->mpUI = 0;
-    return ((void*)self);
+    meStartScreen_type = screenType;
 }
 #endif
 
@@ -689,39 +609,37 @@ void cStartScreen::gainFocus()
 }
 #endif
 
-extern "C" void* cFadeScreen_loseFocus(void* self);
 
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_loseFocus__FPv);
 #ifdef SKIP_ASM
 /**
- * Lets the start screen lose focus when its fade allows it: returns cFadeScreen_loseFocus.
+ * Lets the start screen lose focus when its fade allows it: returns its fade's loseFocus (cFadeScreen::loseFocus).
  *
  * LoseFocus slot (+0x24) of cStartScreen_vtbl.
  *
- * @return cFadeScreen_loseFocus's result
+ * @return cFadeScreen::loseFocus's result
  */
-void* cStartScreen::loseFocus()
+bool cStartScreen::loseFocus()
 {
-    return cFadeScreen_loseFocus(this);
+    return cFadeScreen::loseFocus();
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_update);
 #ifdef SKIP_ASM
-void cLoadScreen_update(void*);
 extern "C" void cUIEngine_update(void*);
 
 /**
- * Updates the start screen: runs the load-screen update (cLoadScreen_update), updates the UI engine (cUIEngine_update on +0xC)
- * and counts a display tick (+0x14).
+ * Updates the start screen: runs the load-screen update (cLoadScreen::update), updates the UI engine (cUIEngine_update
+ * on +0xC) and counts a display tick (+0x14).
  *
  * Update slot (+0x34) of cStartScreen_vtbl.
  */
 void cStartScreen::update()
 {
-    cLoadScreen_update(this);
+    cLoadScreen::update();
     cUIEngine_update(mpUI);
     (DisplayTicks)++;
 }
@@ -754,7 +672,6 @@ void cStartScreen::purge()
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_render);
 #ifdef SKIP_ASM
-extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cUIEngine_render2D(void* obj);
 
 /**
@@ -771,7 +688,7 @@ bool cStartScreen::render()
     if (GrMan->IsRenderReady() == 0) {
         return false;
     }
-    if (cFadeScreen_drawFade(this) == 0) {
+    if (!drawFade()) {
         cUIEngine_render2D(mpUI);
     }
     GrMan->DrawFrame();
@@ -1019,7 +936,7 @@ extern "C" void cSSXAudio_StartLoadingLoop(void* snd);
  * (0, 0, 0) (SetScreenClearColour, slot 15) and calls cSSXAudio_StartLoadingLoop on the audio (cAudioInterface_bxAudio). GainFocus slot
  * (+0x2C) of cGameLoadScreen_vtbl.
  */
-extern "C" void cGameLoadScreen_gainFocus(void)
+void cGameLoadScreen::gainFocus()
 {
     cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startGameLoad(SSXApp);
@@ -1088,7 +1005,6 @@ void cGameLoadScreen::purge()
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_render);
 #ifdef SKIP_ASM
-extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cUIEngine_render2D(void* obj);
 
 /**
@@ -1105,7 +1021,7 @@ bool cGameLoadScreen::render()
     if (GrMan->IsRenderReady() == 0) {
         return false;
     }
-    if (cFadeScreen_drawFade(this) == 0) {
+    if (!drawFade()) {
         cUIEngine_render2D(mpUI);
     }
     GrMan->DrawFrame();
@@ -1117,7 +1033,6 @@ bool cGameLoadScreen::render()
 INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_update);
 #ifdef SKIP_ASM
 extern "C" void cUIEngine_update(void*);
-void cLoadScreen_update(void*);
 
 /**
  * Updates the game load screen: updates the UI engine (cUIEngine_update on +0xC), then runs the load-screen update
@@ -1128,7 +1043,7 @@ void cLoadScreen_update(void*);
 void cGameLoadScreen::update()
 {
     cUIEngine_update(mpUI);
-    cLoadScreen_update(this);
+    cLoadScreen::update();
 }
 #endif
 
